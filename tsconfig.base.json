@@ -15,8 +15,11 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@cra-arc/api-interfaces": ["libs/api-interfaces/src/index.ts"]
-    }
+      "@cra-arc/api-interfaces": ["libs/api-interfaces/src/index.ts"],
+      "@cra-arc/db": ["libs/db/src/index.ts"]
+    },
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "exclude": ["node_modules", "tmp"]
 }

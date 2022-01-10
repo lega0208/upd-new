@@ -68,6 +68,29 @@
       },
       "tags": []
     },
+    "db": {
+      "root": "libs/db",
+      "sourceRoot": "libs/db/src",
+      "projectType": "library",
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/db/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/db"],
+          "options": {
+            "jestConfig": "libs/db/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": []
+    },
     "upd": {
       "projectType": "application",
       "root": "apps/upd",
@@ -133,7 +156,8 @@
           },
           "defaultConfiguration": "development",
           "options": {
-            "proxyConfig": "apps/upd/proxy.conf.json"
+            "proxyConfig": "apps/upd/proxy.conf.json",
+            "browserTarget": "upd:build:development"
           }
         },
         "extract-i18n": {

@@ -1,9 +1,12 @@
-<div style="text-align: center">
-  <h1>Welcome to upd!</h1>
-  <img
-    width="450"
-    src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png"
-    alt="Nx - Smart, Fast and Extensible Build System"
-  />
+
+<div class="container vh-100">
+  <app-header></app-header>
+  <app-sidebar></app-sidebar>
+  <h1 class="visually-hidden">Usability Performance Dashboard</h1>
+  <router-outlet></router-outlet>
+  <footer class="mt-4">
+    <div class="d-flex flex-row-reverse mt-auto pb-4">
+      <div class="col-lg-2 col-md-3 col-sm-4 col-4"><img class="img-fluid" src="./assets/img/canada-black-30mm.png" alt="Government of Canada"></div>
+    </div>
+  </footer>
 </div>
-<div>Message: {{ hello$ | async | json }}</div>

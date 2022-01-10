@@ -1,0 +1,15 @@
+
+<h2 class="h3 pt-2 pb-2" data-i18n="overview-title">Overview of CRA website</h2>
+
+<div class="tabs sticky">
+  <ul>
+    <li><a [routerLinkActive]="['active']" [routerLink]="['summary']" data-i18n="tab-summary">Summary</a></li>
+    <li><a [routerLinkActive]="['active']" [routerLink]="['webtraffic']" data-i18n="tab-webtraffic">Web traffic</a></li>
+    <li><a [routerLinkActive]="['active']" [routerLink]="['search_analytics']" data-i18n="tab-searchanalytics">Search analytics</a></li>
+    <li><a [routerLinkActive]="['active']" [routerLink]="['feedback']" data-i18n="tab-pagefeedback">Page feedback</a></li>
+    <li><a [routerLinkActive]="['active']" [routerLink]="['calldrivers']" data-i18n="tab-calldrivers">Call drivers</a></li>
+    <li><a [routerLinkActive]="['active']" [routerLink]="['uxtests']" data-i18n="tab-uxtests">UX tests</a></li>
+  </ul>
+</div>
+<app-date-selector></app-date-selector>
+<router-outlet></router-outlet>

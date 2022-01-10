@@ -43,6 +43,11 @@
     },
     "@nrwl/angular:component": {
       "style": "scss"
+    },
+    "@nrwl/nest:resource": {
+      "project": "api",
+      "type": "rest",
+      "crud": true
     }
   },
   "defaultProject": "upd"
