@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Controller, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PagesService } from './pages.service';
 import { PagesController } from './pages.controller';

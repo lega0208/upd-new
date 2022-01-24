@@ -91,6 +91,104 @@
       },
       "tags": []
     },
+    "db-update": {
+      "root": "libs/db-update",
+      "sourceRoot": "libs/db-update/src",
+      "projectType": "library",
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/db-update/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/db-update"],
+          "options": {
+            "jestConfig": "libs/db-update/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": []
+    },
+    "db-updater": {
+      "root": "apps/db-updater",
+      "sourceRoot": "apps/db-updater/src",
+      "projectType": "application",
+      "architect": {
+        "build": {
+          "builder": "@nrwl/node:build",
+          "outputs": ["{options.outputPath}"],
+          "options": {
+            "outputPath": "dist/apps/db-updater",
+            "main": "apps/db-updater/src/main.ts",
+            "tsConfig": "apps/db-updater/tsconfig.app.json",
+            "assets": ["apps/db-updater/src/assets"]
+          },
+          "configurations": {
+            "production": {
+              "optimization": true,
+              "extractLicenses": true,
+              "inspect": false,
+              "fileReplacements": [
+                {
+                  "replace": "apps/db-updater/src/environments/environment.ts",
+                  "with": "apps/db-updater/src/environments/environment.prod.ts"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@nrwl/node:execute",
+          "options": {
+            "buildTarget": "db-updater:build"
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["apps/db-updater/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/apps/db-updater"],
+          "options": {
+            "jestConfig": "apps/db-updater/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": []
+    },
+    "external-data": {
+      "root": "libs/external-data",
+      "sourceRoot": "libs/external-data/src",
+      "projectType": "library",
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/external-data/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/external-data"],
+          "options": {
+            "jestConfig": "libs/external-data/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": []
+    },
     "upd": {
       "projectType": "application",
       "root": "apps/upd",

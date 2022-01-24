@@ -27,7 +27,64 @@ export class Overall {
   visits = 0;
 
   @Prop({ type: Number })
+  visitors = 0;
+
+  @Prop({ type: Number })
   average_time_spent = 0;
+
+  @Prop({ type: Number })
+  bouncerate = 0;
+
+  @Prop({ type: Number })
+	rap_initiated = 0;
+
+  @Prop({ type: Number })
+	rap_completed = 0;
+
+  @Prop({ type: Number })
+	nav_menu_initiated = 0;
+
+  @Prop({ type: Number })
+	rap_cant_find = 0;
+
+  @Prop({ type: Number })
+	rap_login_error = 0;
+
+  @Prop({ type: Number })
+	rap_other = 0;
+
+  @Prop({ type: Number })
+	rap_sin = 0;
+
+  @Prop({ type: Number })
+	rap_info_missing = 0;
+
+  @Prop({ type: Number })
+	rap_securekey = 0;
+
+  @Prop({ type: Number })
+	rap_other_login = 0;
+
+  @Prop({ type: Number })
+	rap_gc_key = 0;
+
+  @Prop({ type: Number })
+	rap_info_wrong = 0;
+
+  @Prop({ type: Number })
+	rap_spelling = 0;
+
+  @Prop({ type: Number })
+	rap_access_code = 0;
+
+  @Prop({ type: Number })
+	rap_link_not_working = 0;
+
+  @Prop({ type: Number })
+	rap_404 = 0;
+
+  @Prop({ type: Number })
+	rap_blank_form = 0;
 }
 
 export const OverallSchema = SchemaFactory.createForClass(Overall);

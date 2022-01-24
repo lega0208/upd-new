@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import dayjs from 'dayjs';
+import dayjs from 'dayjs/esm';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 
 // need to rewrite this whole service
@@ -116,9 +116,9 @@ export class DateSelectorService {
     const currentParams = this.route.snapshot.queryParamMap;
     this.dateParams = {
       startDate:
-        currentParams.get('startDate') || this.toFormat(this.dateRange.startDate as Date, 'YYYY-MM-D'),
+        currentParams.get('startDate') || this.toFormat(this.dateRange.startDate as Date, 'YYYY-MM-DD'),
       endDate:
-        currentParams.get('endDate') || this.toFormat(this.dateRange.endDate as Date, 'YYYY-MM-D'),
+        currentParams.get('endDate') || this.toFormat(this.dateRange.endDate as Date, 'YYYY-MM-DD'),
     }
 
     this.setDateParams(this.dateParams).then(() => {
