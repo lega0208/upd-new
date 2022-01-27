@@ -9,7 +9,7 @@ import {
   SEGMENTS,
 } from './adobe-analytics';
 
-import { getGscClient, Searchconsole } from './google-search-console';
+import { getGscClient, Searchconsole, SearchAnalyticsClient } from './google-search-console';
 
 import { withRateLimit } from './utils';
 
@@ -94,7 +94,7 @@ describe('externalData', () => {
   it('should be able to get overall metrics', async () => {
     const client = new AdobeAnalyticsClient()
 
-    const results = await client.getOverallMetrics({ start: '2022-01-16', end: '2022-01-17' });
+    const results = await client.getOverallMetrics({ start: dayjs('2022-01-16').format(queryDateFormat), end: dayjs('2022-01-17').format(queryDateFormat) });
 
     console.log(results);
 
@@ -133,6 +133,73 @@ describe('Google Search Console', () => {
 
     expect(results.data.rows).toBeDefined();
   })
+
+  it('should be able to get results for GSC overall metrics for all CRA-related pages', async () => {
+    const client = new SearchAnalyticsClient();
+    const results = await client.getOverallMetrics({ start: '2022-01-16', end: '2022-01-16' });
+
+    console.log(results);
+    expect(results).toBeDefined();
+  })
+
+  it('should be able to get results for GSC search terms for all CRA-related pages', async () => {
+    const client = new SearchAnalyticsClient();
+    const results = await client.getPageMetrics({ start: '2022-01-16', end: '2022-01-16' });
+
+    console.log(results);
+    expect(results).toBeDefined();
+  })
+
+
+  it('should be able to get results for fresh data', async () => {
+    const results = await gscClient.searchanalytics.query({
+      siteUrl: 'https://www.canada.ca/',
+      requestBody: {
+        dimensions: ['date', 'query'],
+        dimensionFilterGroups: [
+          {
+            filters: [{
+              dimension: 'page',
+              operator: 'equals',
+              expression: 'https://www.canada.ca/en/services/taxes.html',
+            }]
+          }
+        ],
+        startDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
+        endDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
+        dataState: 'all',
+      }
+    });
+    console.log(results.data.rows);
+
+    expect(results.data.rows).toBeDefined();
+  })
+
+  it('should be able to get results for a regex', async () => {
+    const results = await gscClient.searchanalytics.query({
+      siteUrl: 'https://www.canada.ca/',
+      requestBody: {
+        dimensions: ['date', 'query', 'page'],
+        dimensionFilterGroups: [
+          {
+            filters: [{
+              dimension: 'page',
+              operator: 'includingRegex',
+              expression: '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
+            }]
+          }
+        ],
+        startDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
+        endDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
+        dataState: 'all',
+      }
+    });
+
+    console.log(results.data.rows);
+
+    expect(results.data.rows).toBeDefined();
+  })
+  
 })
 
 describe.skip('rate-limiting', () => {
