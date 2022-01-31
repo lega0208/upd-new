@@ -9,9 +9,16 @@ import {
   SEGMENTS,
 } from './adobe-analytics';
 
-import { getGscClient, Searchconsole, SearchAnalyticsClient } from './google-search-console';
+import {
+  getGscClient,
+  Searchconsole,
+  SearchAnalyticsClient,
+} from './google-search-console';
+import { getATClient, AirtableClient, AirTableAPI } from './airtable';
 
 import { withRateLimit } from './utils';
+import Airtable from 'airtable';
+import { AirtableBase } from 'airtable/lib/airtable_base';
 
 // need to set a bigger timout because AA is super slow :)
 jest.setTimeout(30000);
@@ -150,7 +157,6 @@ describe('Google Search Console', () => {
     expect(results).toBeDefined();
   })
 
-
   it('should be able to get results for fresh data', async () => {
     const results = await gscClient.searchanalytics.query({
       siteUrl: 'https://www.canada.ca/',
@@ -199,18 +205,52 @@ describe('Google Search Console', () => {
 
     expect(results.data.rows).toBeDefined();
   })
-  
+
 })
+
+describe('AirTable', () => {
+  let atClient: AirTableAPI;
+
+  it('should initialise the client', async () => {
+    const client = new AirtableClient();
+    const results = await client.getTasks();
+
+    console.log(results);
+  });
+
+  it('should find a task', async () => {
+    const client = new AirtableClient();
+    const results = await client.findTask('recIDdp2y3RQkzqy7');
+
+    console.log(results);
+  });
+
+  it('should grab all data from the start/end dates and call drivers bases/tables, and parse them into 1 array', async () => {
+    const client = new AirtableClient();
+    const results = await client.getCallDriver({
+      start: '2021-11-30',
+      end: '2021-12-01',
+    });
+
+    console.log(results);
+    console.log(results.length);
+  });
+});
 
 describe.skip('rate-limiting', () => {
   it('should rate-limit the function', async () => {
     const addAsync = async (a: number, b: number) => a + b;
-    const rateLimitedAdd = withRateLimit<number, Parameters<typeof addAsync>>(addAsync, 2);
+    const rateLimitedAdd = withRateLimit<number, Parameters<typeof addAsync>>(
+      addAsync,
+      2
+    );
 
     const numbersToAdd = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-    const results = await Promise.all(numbersToAdd.map((number) => rateLimitedAdd(number, 2)));
+    const results = await Promise.all(
+      numbersToAdd.map((number) => rateLimitedAdd(number, 2))
+    );
 
     expect(results).toBeDefined();
-  })
+  });
 });
