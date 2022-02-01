@@ -5,7 +5,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 
 import { getATClient, AirTableAPI, AirtableAPIBase } from './client';
 import { bases } from './base';
-import { ConsoleLogger } from '@nestjs/common';
+import { AirTableFields } from './query'
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -28,7 +28,7 @@ export class AirtableClient {
     const base: AirtableAPIBase = this.client.base(bases.TASKS_INVENTORY);
     const allResults: string[] = [];
 
-    const results = await base('Tasks')
+    const results: void = await base('Tasks')
       .select()
       .eachPage((records, fetchNextPage) => {
         records.forEach((record) => {
@@ -56,17 +56,17 @@ export class AirtableClient {
   }
 
   async getCallDriverCall(
-    element: Record<string, unknown>,
+    element: Record<AirTableFields, string>,
     dateRange: {
       start: Dayjs;
       end: Dayjs;
     }
   ): Promise<string[]> {
-    console.log(element.base);
+    //console.log(element.base);
     const allResults: string[] = [];
 
     const base: AirtableAPIBase = this.client.base(bases[`${element.base}`]);
-    const results = await base(`${element.table}`)
+    const results: void = await base(`${element.table}`)
       .select({
         filterByFormula: `AND(IS_AFTER({CALL_DATE}, DATEADD("${dateRange.start}",-1,"days")), IS_BEFORE({CALL_DATE}, DATEADD("${dateRange.end}",1,"days")))`,
         sort: [{ field: 'CALL_DATE', direction: 'asc' }],
@@ -91,13 +91,12 @@ export class AirtableClient {
     const start: Dayjs = dayjs(dateRange.start).utc(true);
     const end: Dayjs = dayjs(dateRange.end).utc(true);
     let tempDate: Dayjs = dayjs(dateRange.start).utc(true);
-    const datesBetween = [];
+    const datesBetween: Array<Record<AirTableFields, string>> = [];
 
     const year: number = start.get('year');
     if (year > 2020) {
       while (tempDate.isSameOrBefore(end)) {
         datesBetween.push({
-          date: tempDate.format('YYYY-MM-01'),
           table: tempDate.format('MMMM') + ' ' + tempDate.year(),
           base: 'DCD_' + tempDate.year() + '_Q' + tempDate.quarter(),
         });
@@ -105,8 +104,8 @@ export class AirtableClient {
         tempDate = tempDate.set('date', 1).add(1, 'month');
       }
 
-      const allResults = await Promise.all(
-        datesBetween.map(async (dates) => {
+      const allResults: Array<string[]> = await Promise.all(
+        datesBetween.map(async (dates: Record<AirTableFields, string>) => {
           return await this.getCallDriverCall(dates, { start, end });
         })
       );
@@ -114,7 +113,7 @@ export class AirtableClient {
       return allResults
         .reduce((r, a) => r.concat(a), [])
         .reduce((parsedResults, row) => {
-          const newDateData = {
+          const newData = {
             _id: row['id'],
             date: row['fields']['CALL_DATE'],
             enquiry_line: row['fields']['Enquiry_line'],
@@ -124,7 +123,7 @@ export class AirtableClient {
             impact: row['fields']['Impact'],
             calls: row['fields']['Calls'],
           };
-          return [...parsedResults, newDateData];
+          return [...parsedResults, newData];
         }, []);
     } else return;
   }
