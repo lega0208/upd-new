@@ -1,0 +1,1 @@
+export type AirTableFields = "table" | "base";

@@ -14,11 +14,9 @@ import {
   Searchconsole,
   SearchAnalyticsClient,
 } from './google-search-console';
-import { getATClient, AirtableClient, AirTableAPI } from './airtable';
+import { AirtableClient, AirTableAPI } from './airtable';
 
 import { withRateLimit } from './utils';
-import Airtable from 'airtable';
-import { AirtableBase } from 'airtable/lib/airtable_base';
 
 // need to set a bigger timout because AA is super slow :)
 jest.setTimeout(30000);
