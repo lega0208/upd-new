@@ -1,4 +1,3 @@
-import path from 'path';
 import Airtable from 'airtable';
 import { AirtableBase } from 'airtable/lib/airtable_base';
 
