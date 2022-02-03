@@ -3,6 +3,7 @@
  * https://adobedocs.github.io/analytics-2.0-apis/
  */
 
+import { Overall } from '@cra-arc/db';
 import { ReportQueryDimension } from './aa-dimensions';
 import { metricIds } from './aa-metrics';
 
@@ -61,11 +62,19 @@ export const CALCULATED_METRICS = {
   DEVICES_TABLET: 'cm300000938_5ec6041b4c546630df64a161',
 };
 
-export type ReportQueryMetricId = keyof typeof metricIds | typeof CALCULATED_METRICS[keyof typeof CALCULATED_METRICS];
+export type ReportType =
+  | 'dateRange'
+  | 'breakdown'
+  | 'segment'
+  | 'excludeItemIds';
+
+export type ReportQueryMetricId =
+  | keyof typeof metricIds
+  | typeof CALCULATED_METRICS[keyof typeof CALCULATED_METRICS];
 
 export interface ReportFilter {
   id?: string;
-  type: 'dateRange' | 'breakdown' | 'segment' | 'excludeItemIds';
+  type: ReportType;
   dimension?: ReportQueryDimension;
   itemId?: string;
   itemIds?: string[];
@@ -132,6 +141,7 @@ export interface AdobeAnalyticsReportQuery {
 
 export class AdobeAnalyticsQueryBuilder {
   private readonly query: AdobeAnalyticsReportQuery;
+  private readonly reportFilter: ReportFilter;
 
   constructor(rsid: string = process.env.AW_REPORTSUITE_ID) {
     this.query = {
@@ -139,6 +149,7 @@ export class AdobeAnalyticsQueryBuilder {
       dimension: 'variables/evar12',
       metricContainer: {
         metrics: [],
+        metricFilters: [],
       },
     };
   }
@@ -148,7 +159,11 @@ export class AdobeAnalyticsQueryBuilder {
     return this;
   }
 
-  public addMetric(metricId: ReportQueryMetricId, columnId: string, filters?: string[]): this {
+  public addMetric(
+    metricId: ReportQueryMetricId,
+    columnId: string,
+    filters?: string[]
+  ): this {
     const metric = {
       id: metricId,
       columnId,
@@ -156,6 +171,22 @@ export class AdobeAnalyticsQueryBuilder {
     };
 
     this.query.metricContainer.metrics.push(metric);
+    return this;
+  }
+
+  public addBreakdownMetricFilter(
+    dimensions: ReportQueryDimension,
+    itemId: string,
+    id: string
+  ): this {
+    let breakdown = this.reportFilter;
+    breakdown = {
+      id: id,
+      type: 'breakdown',
+      dimension: dimensions,
+      itemId: itemId,
+    };
+    this.query.metricContainer.metricFilters.push(breakdown);
     return this;
   }
 
@@ -218,7 +249,9 @@ export class AdobeAnalyticsQueryBuilder {
 
   public build(): AdobeAnalyticsReportQuery {
     if (this.query.metricContainer.metrics.length === 0) {
-      throw new Error('Tried to build a query with no metrics, a query must have at least one metric');
+      throw new Error(
+        'Tried to build a query with no metrics, a query must have at least one metric'
+      );
     }
 
     return this.query;
@@ -233,4 +266,40 @@ export const queryDateFormat = 'YYYY-MM-DDTHH:mm:ss.SSS';
 
 export function toQueryFormat(date: string): string {
   return date + 'T00:00:00.000';
+}
+
+export function getArraySeperated(arr: string[]) {
+  const newArrays = [];
+
+  for (let i = 0; i < arr['rows'].length; i++) {
+    const current_row = arr['rows'][i];
+    for (let j = 0; j < current_row.data.length; j++) {
+      const current_data = current_row.data[j];
+
+      if (newArrays[j] === undefined) {
+        newArrays[j] = [];
+      }
+
+      if (current_data === 0) {
+        continue;
+      }
+
+      newArrays[j].push({
+        data: current_data,
+        value: current_row.value,
+      });
+    }
+  }
+
+  return newArrays;
+}
+
+export function sortArrayDesc(arr) {
+  arr.forEach((e) => {
+    e.sort((a, b) => {
+      return b.data - a.data;
+    });
+  });
+
+  return arr;
 }
