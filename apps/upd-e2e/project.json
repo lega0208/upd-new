@@ -1,0 +1,28 @@
+{
+  "root": "apps/upd-e2e",
+  "sourceRoot": "apps/upd-e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nrwl/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/upd-e2e/cypress.json",
+        "devServerTarget": "upd:serve:development"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "upd:serve:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/upd-e2e/**/*.{js,ts}"]
+      }
+    }
+  },
+  "tags": [],
+  "implicitDependencies": ["upd"]
+}
