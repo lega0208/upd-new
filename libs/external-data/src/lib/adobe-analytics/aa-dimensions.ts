@@ -137,7 +137,8 @@ export const dimensions = {
   },
   'variables/entrylistvariable1': {
     title: 'Entry Clickthrough - Internal Campaign (list1)',
-    description: 'The type and title of internal campaigns displayed on page load and when clicked. To be used with Internal Campaing Impression (e41) and Internal Campaign Click (e42).',
+    description:
+      'The type and title of internal campaigns displayed on page load and when clicked. To be used with Internal Campaing Impression (e41) and Internal Campaign Click (e42).',
   },
   'variables/entrylistvariable1.1': {
     title: 'Entry Clickthrough - Internal Campaign Type (list1c)',
@@ -149,7 +150,8 @@ export const dimensions = {
   },
   'variables/entrylistvariable2': {
     title: 'Entry Form Fields (list2)',
-    description: 'The field type, name and value of all form fields submitted (text, dropdown, checkbox, date, radio buttons). To be used with Report a Problem Complete (e75),  Form Submit Click (e79) and Chat Submit Click (e82).',
+    description:
+      'The field type, name and value of all form fields submitted (text, dropdown, checkbox, date, radio buttons). To be used with Report a Problem Complete (e75),  Form Submit Click (e79) and Chat Submit Click (e82).',
   },
   'variables/entrylistvariable2.1': {
     title: 'Entry Form Fields - Field Type (list2c)',
@@ -173,7 +175,8 @@ export const dimensions = {
   },
   'variables/entryprop1': {
     title: 'Entry Local Day (p1)',
-    description: 'The local day of the week a visitor visits your site or performs a site action.\r\n',
+    description:
+      'The local day of the week a visitor visits your site or performs a site action.\r\n',
   },
   'variables/entryprop11': {
     title: 'Entry Page Title (p11)',
@@ -201,7 +204,8 @@ export const dimensions = {
   },
   'variables/entryprop16': {
     title: 'Entry Page Theme (p16)',
-    description: 'The theme and language of the page. Only applicable to Canada.ca pages.',
+    description:
+      'The theme and language of the page. Only applicable to Canada.ca pages.',
   },
   'variables/entryprop16.1': {
     title: 'Entry Page Theme - Language Combined (p16c)',
@@ -213,7 +217,8 @@ export const dimensions = {
   },
   'variables/entryprop2': {
     title: 'Entry Local Hour (p2)',
-    description: 'The local hour a visitor visits your site or performs a site action (rounded to 30 mins).\r\n',
+    description:
+      'The local hour a visitor visits your site or performs a site action (rounded to 30 mins).\r\n',
   },
   'variables/entryprop21': {
     title: 'Entry Page Issued Date (p21)',
@@ -237,7 +242,8 @@ export const dimensions = {
   },
   'variables/entryprop23': {
     title: 'Entry Page URL Folder (p23)',
-    description: 'The folder structure within the page URL (not including the hostname and filename).\r\n',
+    description:
+      'The folder structure within the page URL (not including the hostname and filename).\r\n',
   },
   'variables/entryprop24': {
     title: 'Entry Page URL Filename (p24)',
@@ -249,7 +255,8 @@ export const dimensions = {
   },
   'variables/entryprop26': {
     title: 'Entry Server Time (p26)',
-    description: 'The day and hour (EST) a visitor visits your site or performs an action (rounded to 30 mins). \r\n',
+    description:
+      'The day and hour (EST) a visitor visits your site or performs an action (rounded to 30 mins). \r\n',
   },
   'variables/entryprop26.1': {
     title: 'Entry Server Time - Day (p26c)',
@@ -265,7 +272,8 @@ export const dimensions = {
   },
   'variables/entryprop4': {
     title: 'Entry Device Type (p4)',
-    description: 'The device (mobile or desktop) that a visitor uses to visit your site.\r\n',
+    description:
+      'The device (mobile or desktop) that a visitor uses to visit your site.\r\n',
   },
   'variables/entryprop5': {
     title: 'Entry Page Language (p5)',
@@ -277,7 +285,8 @@ export const dimensions = {
   },
   'variables/entryprop50': {
     title: 'Entry Phrase - Site Search  (p50)',
-    description: 'The search phrase used on site search. To be used with Site Search (e50).\r\n',
+    description:
+      'The search phrase used on site search. To be used with Site Search (e50).\r\n',
   },
   'variables/entryprop6': {
     title: 'Entry GC Visitor Institution (p6)',
@@ -313,7 +322,8 @@ export const dimensions = {
   },
   'variables/entryprop70': {
     title: 'Entry Navigation (p70)',
-    description: 'The  link type, menu group and item selected of a navigation link. Only applicable for sites using gcweb style guides. To be used with Navigation Click (e70). \r\n',
+    description:
+      'The  link type, menu group and item selected of a navigation link. Only applicable for sites using gcweb style guides. To be used with Navigation Click (e70). \r\n',
   },
   'variables/entryprop70.1': {
     title: 'Entry Navigation - Type (p70c)',
@@ -329,7 +339,8 @@ export const dimensions = {
   },
   'variables/entryprop75': {
     title: 'Entry Library Version (p75)',
-    description: 'The specific analytics library version (environment and build date) used on a page to collect analytics data.',
+    description:
+      'The specific analytics library version (environment and build date) used on a page to collect analytics data.',
   },
   'variables/entryprop75.1': {
     title: 'Entry Library Version - Environment (p75c)',
@@ -341,14 +352,17 @@ export const dimensions = {
   },
   'variables/evar1': {
     title: 'Local Day (v1)',
-    description: 'The local day of the week a visitor visits your site or performs a site action.',
+    description:
+      'The local day of the week a visitor visits your site or performs a site action.',
   },
   'variables/evar10': {
     title: 'Previous Page - Scroll Depth (v10)',
-    description: 'The percent of the previous page a visitor scrolled before navigating to another page.\r\n',
+    description:
+      'The percent of the previous page a visitor scrolled before navigating to another page.\r\n',
   },
   'variables/evar10.1': {
-    title: 'Percentage Visible on Page Load - Previous Page Scroll Depth (v10c)',
+    title:
+      'Percentage Visible on Page Load - Previous Page Scroll Depth (v10c)',
     description: null,
   },
   'variables/evar10.2': {
@@ -357,7 +371,8 @@ export const dimensions = {
   },
   'variables/evar100': {
     title: 'Custom Tracking (v100)',
-    description: 'The custom tracking value (Institution name, variable name and value). To be used with Custom Tracking Click  (e100) and Custom Tracking Direct call (e101).\r\n',
+    description:
+      'The custom tracking value (Institution name, variable name and value). To be used with Custom Tracking Click  (e100) and Custom Tracking Direct call (e101).\r\n',
   },
   'variables/evar100.1': {
     title: 'Custom Tracking - Institution (v100c)',
@@ -377,7 +392,8 @@ export const dimensions = {
   },
   'variables/evar110': {
     title: 'TSS Visit Data - GC Task Success Survey - TSS (v110)',
-    description: 'The responses for the GC Task Success Survey. To be used with the Visit Data - Task Success Survey dimensions and metrics in order to report on sampled visit data.',
+    description:
+      'The responses for the GC Task Success Survey. To be used with the Visit Data - Task Success Survey dimensions and metrics in order to report on sampled visit data.',
   },
   'variables/evar110.1': {
     title: 'TSS Visit Data - Q0 - Screener (v110c)',
@@ -404,12 +420,15 @@ export const dimensions = {
     description: 'Question 4b of the GC Task Success Survey',
   },
   'variables/evar111': {
-    title: 'SRT Donn�es de visite - Sondage sur la r�ussite de t�ches du GC (v111)',
-    description: 'Les r�ponses du Sondage sur la r�ussite des t�ches�(SRT) du GC. � utiliser avec les dimensions et les indicateurs SRT Donn�es de visite dans le but de produire un rapport sur les donn�es de visite �chantillonn�es.',
+    title:
+      'SRT Donn�es de visite - Sondage sur la r�ussite de t�ches du GC (v111)',
+    description:
+      'Les r�ponses du Sondage sur la r�ussite des t�ches�(SRT) du GC. � utiliser avec les dimensions et les indicateurs SRT Donn�es de visite dans le but de produire un rapport sur les donn�es de visite �chantillonn�es.',
   },
   'variables/evar111.1': {
     title: 'SRT Donn�es de visite - Q0 - Pr�selection (v111c)',
-    description: 'Question Pr�selection du Sondage sur la r�ussite de t�ches du GC',
+    description:
+      'Question Pr�selection du Sondage sur la r�ussite de t�ches du GC',
   },
   'variables/evar111.2': {
     title: 'SRT Donn�es de visite - Q1 - Satisfaction (v111c)',
@@ -432,8 +451,10 @@ export const dimensions = {
     description: 'Question 4b du Sondage sur la r�ussite de t�ches du GC',
   },
   'variables/evar112': {
-    title: 'TSS Visit Data - Survey Referrer / SRT Donn�es de visite - R�f�rent du Sondage (v112)',
-    description: 'The referrer for the GC Task Success Survey. To be used with the Visit Data - Task Success Survey dimensions and metrics to report on sampled visit data.',
+    title:
+      'TSS Visit Data - Survey Referrer / SRT Donn�es de visite - R�f�rent du Sondage (v112)',
+    description:
+      'The referrer for the GC Task Success Survey. To be used with the Visit Data - Task Success Survey dimensions and metrics to report on sampled visit data.',
   },
   'variables/evar12': {
     title: 'Page URL (v12)',
@@ -453,7 +474,8 @@ export const dimensions = {
   },
   'variables/evar120': {
     title: 'TSS Survey Data - Reason of Visit� (v120)',
-    description: 'The survey responses for the \'Reason of Visit\' question in English. To be used with Offline Data - GC Task Success Survey Completed / Sondage sur la r�ussite de t�ches du GC termin� (e120).',
+    description:
+      "The survey responses for the 'Reason of Visit' question in English. To be used with Offline Data - GC Task Success Survey Completed / Sondage sur la r�ussite de t�ches du GC termin� (e120).",
   },
   'variables/evar120.1': {
     title: 'TSS Survey Data - Reason of Visit - Lead Department (v120c)',
@@ -473,7 +495,8 @@ export const dimensions = {
   },
   'variables/evar121': {
     title: 'TSS Survey Data - GC Task Success Survey (v121)',
-    description: 'The responses for the GC Task Success Survey  in English. To be used with Offline Data - GC Task Success Survey Completed / Sondage sur la r�ussite de t�ches du GC termin� (e120).',
+    description:
+      'The responses for the GC Task Success Survey  in English. To be used with Offline Data - GC Task Success Survey Completed / Sondage sur la r�ussite de t�ches du GC termin� (e120).',
   },
   'variables/evar121.1': {
     title: 'TSS Survey Data - Q0 � Screener (v121c)',
@@ -501,18 +524,22 @@ export const dimensions = {
   },
   'variables/evar122': {
     title: 'SRT Donn�es du sondage - Raison de la visite (v122)',
-    description: 'Les r�ponses � la question �Raison de la visite� du Sondage sur la r�ussite des t�ches�(SRT) du GC. � utiliser avec les dimensions et les indicateurs SRT Donn�es du sondage afin de produire un rapport sur les donn�es compl�tes du sondage.',
+    description:
+      'Les r�ponses � la question �Raison de la visite� du Sondage sur la r�ussite des t�ches�(SRT) du GC. � utiliser avec les dimensions et les indicateurs SRT Donn�es du sondage afin de produire un rapport sur les donn�es compl�tes du sondage.',
   },
   'variables/evar122.1': {
-    title: 'SRT Donn�es du sondage - Raison de la visite - d�partement principal (v122c)',
+    title:
+      'SRT Donn�es du sondage - Raison de la visite - d�partement principal (v122c)',
     description: null,
   },
   'variables/evar122.2': {
-    title: 'SRT Donn�es du sondage - Raison de la visite - th�me principal (v122c)',
+    title:
+      'SRT Donn�es du sondage - Raison de la visite - th�me principal (v122c)',
     description: null,
   },
   'variables/evar122.3': {
-    title: 'SRT Donn�es du sondage - Raison de la visite - regroupement (v122c)',
+    title:
+      'SRT Donn�es du sondage - Raison de la visite - regroupement (v122c)',
     description: null,
   },
   'variables/evar122.4': {
@@ -520,8 +547,10 @@ export const dimensions = {
     description: null,
   },
   'variables/evar123': {
-    title: 'SRT Donn�es du sondage - Sondage sur la r�ussite de t�ches du GC (v123)',
-    description: 'Les r�ponses du Sondage sur la r�ussite des t�ches�(SRT) du GC. � utiliser avec les dimensions et les indicateurs SRT Donn�es du sondages afin de produire un rapport sur les donn�es compl�tes du sondage.',
+    title:
+      'SRT Donn�es du sondage - Sondage sur la r�ussite de t�ches du GC (v123)',
+    description:
+      'Les r�ponses du Sondage sur la r�ussite des t�ches�(SRT) du GC. � utiliser avec les dimensions et les indicateurs SRT Donn�es du sondages afin de produire un rapport sur les donn�es compl�tes du sondage.',
   },
   'variables/evar123.1': {
     title: 'SRT Donn�es du sondage - Q0 - Pr�selection (v123c)',
@@ -548,8 +577,10 @@ export const dimensions = {
     description: null,
   },
   'variables/evar124': {
-    title: 'TSS Survey Data - Sampling / SRT Donn�es du sondage - �chantillonnage (v124)',
-    description: 'Advanced Sampling for Canada.ca client experience surveys measuring key performance indicators.  To be used with Offline Data - GC Task Success Survey Completed / Sondage sur la r�ussite de t�ches du GC termin� (e120).',
+    title:
+      'TSS Survey Data - Sampling / SRT Donn�es du sondage - �chantillonnage (v124)',
+    description:
+      'Advanced Sampling for Canada.ca client experience surveys measuring key performance indicators.  To be used with Offline Data - GC Task Success Survey Completed / Sondage sur la r�ussite de t�ches du GC termin� (e120).',
   },
   'variables/evar124.1': {
     title: 'TSS Survey Data/ SRT Donn�es du sondage - Invitation (v124c)',
@@ -572,7 +603,8 @@ export const dimensions = {
     description: null,
   },
   'variables/evar124.6': {
-    title: 'TSS Survey Data/ SRT Donn�es du sondage - Grouping / Regroupement (v124c)',
+    title:
+      'TSS Survey Data/ SRT Donn�es du sondage - Grouping / Regroupement (v124c)',
     description: null,
   },
   'variables/evar124.7': {
@@ -580,60 +612,75 @@ export const dimensions = {
     description: null,
   },
   'variables/evar125': {
-    title: 'TSS Survey Data - Survey Referrer / SRT Donn�es du sondage - R�f�rent du Sondage (v125)',
-    description: 'Capturing the referrer for the GC Task Success Survey. To be used with Offline Data - GC Task Success Survey Completed / Sondage sur la r�ussite de t�ches du GC termin� (e120).',
+    title:
+      'TSS Survey Data - Survey Referrer / SRT Donn�es du sondage - R�f�rent du Sondage (v125)',
+    description:
+      'Capturing the referrer for the GC Task Success Survey. To be used with Offline Data - GC Task Success Survey Completed / Sondage sur la r�ussite de t�ches du GC termin� (e120).',
   },
   'variables/evar129': {
     title: 'UTM Source/Medium � External Campaigns (7 day expiry) (v129)',
-    description: 'Combination of the utm source and medium parameters for an external campaign. To be used with External Campaign Click (e31).\r\n',
+    description:
+      'Combination of the utm source and medium parameters for an external campaign. To be used with External Campaign Click (e31).\r\n',
   },
   'variables/evar13': {
     title: 'Previous Page - Title (v13)',
     description: 'The title of the previous page viewed.',
   },
   'variables/evar130': {
-    title: 'UTM Source/Medium/Content � External Campaigns (7 day expiry) (v130)',
-    description: 'Combination of the utm source, medium and content parameters for an external campaign. To be used with External Campaign Click (e31).\r\n',
+    title:
+      'UTM Source/Medium/Content � External Campaigns (7 day expiry) (v130)',
+    description:
+      'Combination of the utm source, medium and content parameters for an external campaign. To be used with External Campaign Click (e31).\r\n',
   },
   'variables/evar131': {
     title: 'UTM Campaign � External Campaigns (7 day expiry) (v131)',
-    description: 'The utm campaign name for an external campaign from the URL parameter \'utm_campaign\' on page load. To be used with External Campaign Click (e31).',
+    description:
+      "The utm campaign name for an external campaign from the URL parameter 'utm_campaign' on page load. To be used with External Campaign Click (e31).",
   },
   'variables/evar132': {
     title: 'UTM Source � External Campaigns (7 day expiry) (v132)',
-    description: 'The utm source for an external campaign from the URL parameter \'utm_source\' on page load. To be used with External Campaign Click (e31).',
+    description:
+      "The utm source for an external campaign from the URL parameter 'utm_source' on page load. To be used with External Campaign Click (e31).",
   },
   'variables/evar133': {
     title: 'UTM Medium � External Campaigns (7 day expiry) (v133)',
-    description: 'The utm medium for an external campaign from the URL parameter \'utm_medium\' on page load. To be used with External Campaign Click (e31).',
+    description:
+      "The utm medium for an external campaign from the URL parameter 'utm_medium' on page load. To be used with External Campaign Click (e31).",
   },
   'variables/evar134': {
     title: 'UTM Term � External Campaigns (7 day expiry) (v134)',
-    description: 'The utm term for an external campaign  from the URL parameter \'utm_term\' on page load. To be used with External Campaign Click (e31).',
+    description:
+      "The utm term for an external campaign  from the URL parameter 'utm_term' on page load. To be used with External Campaign Click (e31).",
   },
   'variables/evar135': {
     title: 'UTM Content � External Campaigns (7 day expiry) (v135)',
-    description: 'The utm content for an external campaign  from the URL parameter \'utm_content\' on page load. To be used with External Campaign Click (e31).',
+    description:
+      "The utm content for an external campaign  from the URL parameter 'utm_content' on page load. To be used with External Campaign Click (e31).",
   },
   'variables/evar14': {
     title: 'Page Content Ownership (v14)',
-    description: 'The multiple content owners of a page (collecting up to 4 levels of ownership).',
+    description:
+      'The multiple content owners of a page (collecting up to 4 levels of ownership).',
   },
   'variables/evar14.1': {
     title: 'Level 1 - Page Content Ownership (v14c)',
-    description: 'Collects the first level ownership of the page content. Value is sourced from the data-gc-analytics-owner attribute. ',
+    description:
+      'Collects the first level ownership of the page content. Value is sourced from the data-gc-analytics-owner attribute. ',
   },
   'variables/evar14.2': {
     title: 'Level 2 - Page Content Ownership (v14c)',
-    description: 'Collects the second level ownership of the page content. Value is sourced from the data-gc-analytics-owner attribute.',
+    description:
+      'Collects the second level ownership of the page content. Value is sourced from the data-gc-analytics-owner attribute.',
   },
   'variables/evar14.3': {
     title: 'Level 3 - Page Content Ownership (v14c)',
-    description: 'Collects the third level ownership of the page content. Value is sourced from the data-gc-analytics-owner attribute.',
+    description:
+      'Collects the third level ownership of the page content. Value is sourced from the data-gc-analytics-owner attribute.',
   },
   'variables/evar14.4': {
     title: 'Level 4 - Page Content Ownership (v14c)',
-    description: 'Collects the fourth level ownership of the page content. Value is sourced from the data-gc-analytics-owner attribute.',
+    description:
+      'Collects the fourth level ownership of the page content. Value is sourced from the data-gc-analytics-owner attribute.',
   },
   'variables/evar15': {
     title: 'Page Creator (v15)',
@@ -641,7 +688,8 @@ export const dimensions = {
   },
   'variables/evar16': {
     title: 'Page Theme (v16)',
-    description: 'The theme and language of the page. Only applicable to Canada.ca pages. \r\n',
+    description:
+      'The theme and language of the page. Only applicable to Canada.ca pages. \r\n',
   },
   'variables/evar16.1': {
     title: 'Page Theme - Language Combined (v16c)',
@@ -653,11 +701,13 @@ export const dimensions = {
   },
   'variables/evar17': {
     title: 'Previous Page - Creator (v17)',
-    description: 'The creator of the previous page viewed. Collected on every hit.\r\n',
+    description:
+      'The creator of the previous page viewed. Collected on every hit.\r\n',
   },
   'variables/evar18': {
     title: 'Previous Page - Theme (v18)',
-    description: 'The theme of the previous page. Only applicable to Canada.ca pages.\r\n',
+    description:
+      'The theme of the previous page. Only applicable to Canada.ca pages.\r\n',
   },
   'variables/evar18.1': {
     title: 'Previous Page Theme - Language Combined (v18c)',
@@ -673,7 +723,8 @@ export const dimensions = {
   },
   'variables/evar19.1': {
     title: 'Previous Page - URL - Cleaned (v19c)',
-    description: 'The URL of the previous page viewed without the protocol (https:// or http://) and query string (?)',
+    description:
+      'The URL of the previous page viewed without the protocol (https:// or http://) and query string (?)',
   },
   'variables/evar19.2': {
     title: 'Previous Page - URL - Hostname (v19c)',
@@ -681,11 +732,13 @@ export const dimensions = {
   },
   'variables/evar2': {
     title: 'Local Hour (v2)',
-    description: 'The local hour a visitor visits your site or performs a site action (rounded to 30 mins).',
+    description:
+      'The local hour a visitor visits your site or performs a site action (rounded to 30 mins).',
   },
   'variables/evar20': {
     title: 'Error Type (v20)',
-    description: 'The error type of an error page (i.e. 403, 404, 500 etc.). To be used with Page Error (e20).',
+    description:
+      'The error type of an error page (i.e. 403, 404, 500 etc.). To be used with Page Error (e20).',
   },
   'variables/evar21': {
     title: 'Page Issued Date (v21)',
@@ -709,7 +762,8 @@ export const dimensions = {
   },
   'variables/evar23': {
     title: 'Page URL Folder (v23)',
-    description: 'The folder structure within the page URL (not including the hostname and filename).\r\n',
+    description:
+      'The folder structure within the page URL (not including the hostname and filename).\r\n',
   },
   'variables/evar24': {
     title: 'Page URL Filename (v24)',
@@ -721,7 +775,8 @@ export const dimensions = {
   },
   'variables/evar26': {
     title: 'Server Time (v26)',
-    description: 'The day and hour (EST) a visitor visits your site or performs an action (rounded to 30 mins). \r\n',
+    description:
+      'The day and hour (EST) a visitor visits your site or performs an action (rounded to 30 mins). \r\n',
   },
   'variables/evar26.1': {
     title: 'Server Tme - Day (v26c)',
@@ -733,7 +788,8 @@ export const dimensions = {
   },
   'variables/evar27': {
     title: 'Outbound/Download Link Text (v27)',
-    description: 'The text of a outbound or download link. To be used with File Download (e25), Outbound Link (e26).',
+    description:
+      'The text of a outbound or download link. To be used with File Download (e25), Outbound Link (e26).',
   },
   'variables/evar27.1': {
     title: 'Download Link - Text (v27c)',
@@ -745,43 +801,54 @@ export const dimensions = {
   },
   'variables/evar28': {
     title: 'Outbound/Download Link URL (v28)',
-    description: 'The destination url of a outbound or download link. To be used with File Download (e25) and Outbound Link (e26).',
+    description:
+      'The destination url of a outbound or download link. To be used with File Download (e25) and Outbound Link (e26).',
   },
   'variables/evar29': {
     title: 'UTM Source/Medium � External Campaigns (visit expiry) (v29)',
-    description: 'Combination of the utm source and medium parameters for an external campaign. To be used with External Campaign Click (e31).\r\n',
+    description:
+      'Combination of the utm source and medium parameters for an external campaign. To be used with External Campaign Click (e31).\r\n',
   },
   'variables/evar30': {
-    title: 'UTM Source/Medium/Content � External Campaigns (visit expiry) (v30)',
-    description: 'Combination of the utm source, medium and content parameters for an external campaign. To be used with External Campaign Click (e31).\r\n',
+    title:
+      'UTM Source/Medium/Content � External Campaigns (visit expiry) (v30)',
+    description:
+      'Combination of the utm source, medium and content parameters for an external campaign. To be used with External Campaign Click (e31).\r\n',
   },
   'variables/evar31': {
     title: 'UTM Campaign � External Campaigns (visit expiry) (v31)',
-    description: 'The utm campaign name for an external campaign from the URL parameter \'utm_campaign\' on page load. To be used with External Campaign Click (e31).',
+    description:
+      "The utm campaign name for an external campaign from the URL parameter 'utm_campaign' on page load. To be used with External Campaign Click (e31).",
   },
   'variables/evar32': {
     title: 'UTM Source � External Campaigns (visit expiry) (v32)',
-    description: 'The utm source for an external campaign from the URL parameter \'utm_source\' on page load. To be used with External Campaign Click (e31).',
+    description:
+      "The utm source for an external campaign from the URL parameter 'utm_source' on page load. To be used with External Campaign Click (e31).",
   },
   'variables/evar33': {
     title: 'UTM Medium � External Campaigns (visit expiry) (v33)',
-    description: 'The utm medium for an external campaign from the URL parameter \'utm_medium\' on page load. To be used with External Campaign Click (e31).',
+    description:
+      "The utm medium for an external campaign from the URL parameter 'utm_medium' on page load. To be used with External Campaign Click (e31).",
   },
   'variables/evar34': {
     title: 'UTM Term � External Campaigns (visit expiry) (v34)',
-    description: 'The utm term for an external campaign  from the URL parameter \'utm_term\' on page load. To be used with External Campaign Click (e31).',
+    description:
+      "The utm term for an external campaign  from the URL parameter 'utm_term' on page load. To be used with External Campaign Click (e31).",
   },
   'variables/evar35': {
     title: 'UTM Content � External Campaigns (visit expiry) (v35)',
-    description: 'The utm content for an external campaign  from the URL parameter \'utm_content\' on page load. To be used with External Campaign Click (e31).',
+    description:
+      "The utm content for an external campaign  from the URL parameter 'utm_content' on page load. To be used with External Campaign Click (e31).",
   },
   'variables/evar37': {
     title: 'Tab Title (v37)',
-    description: 'The text label of a clickable tab. To be used with Tab Open (e29).',
+    description:
+      'The text label of a clickable tab. To be used with Tab Open (e29).',
   },
   'variables/evar38': {
     title: 'Expand-Collapse Title (v38)',
-    description: 'The text label of a expand-collapse when opened. To be used with Expand-Collapse Open (e30).',
+    description:
+      'The text label of a expand-collapse when opened. To be used with Expand-Collapse Open (e30).',
   },
   'variables/evar39': {
     title: 'Page URL Query String (v39)',
@@ -789,7 +856,8 @@ export const dimensions = {
   },
   'variables/evar4': {
     title: 'Device Type (v4)',
-    description: 'The device (mobile or desktop) that a visitor uses to visit your site.',
+    description:
+      'The device (mobile or desktop) that a visitor uses to visit your site.',
   },
   'variables/evar40': {
     title: 'Previous Page - URL Query String (v40)',
@@ -797,27 +865,33 @@ export const dimensions = {
   },
   'variables/evar41': {
     title: 'Email Link Text (v41)',
-    description: 'The text of a GC email (mailto:) link with a gc.ca or canada.ca domain. To be used with Email Link Click (e27).',
+    description:
+      'The text of a GC email (mailto:) link with a gc.ca or canada.ca domain. To be used with Email Link Click (e27).',
   },
   'variables/evar42': {
     title: 'Email Link URL (v42)',
-    description: 'The destination URL of a GC email (mailto:) link with a gc.ca or canada.ca domain. To be used with Email Link Click (e27).',
+    description:
+      'The destination URL of a GC email (mailto:) link with a gc.ca or canada.ca domain. To be used with Email Link Click (e27).',
   },
   'variables/evar43': {
     title: 'Content Title - Internal Campaigns (v43)',
-    description: 'The content title of a internal campaign on click.  To be used with Internal Campaign Click (e42).',
+    description:
+      'The content title of a internal campaign on click.  To be used with Internal Campaign Click (e42).',
   },
   'variables/evar44': {
     title: 'Destination URL - Internal Campaigns (v44)',
-    description: 'The destination url of a internal campaign on click.  To be used with Internal Campaign Click (e42).',
+    description:
+      'The destination url of a internal campaign on click.  To be used with Internal Campaign Click (e42).',
   },
   'variables/evar45': {
     title: 'Type - Internal Campaigns (v45)',
-    description: 'The campaign type of a internal campaign on click. To be used with Internal Campaign Click (e42).',
+    description:
+      'The campaign type of a internal campaign on click. To be used with Internal Campaign Click (e42).',
   },
   'variables/evar46': {
     title: 'Carousel Position - Internal Campaigns (v46)',
-    description: 'The tab position of a carousel internal campaign on click. To be used with Internal Campaign Click (e42).',
+    description:
+      'The tab position of a carousel internal campaign on click. To be used with Internal Campaign Click (e42).',
   },
   'variables/evar5': {
     title: 'Page Language (v5)',
@@ -829,31 +903,38 @@ export const dimensions = {
   },
   'variables/evar50': {
     title: 'Phrase - Site Search (v50)',
-    description: 'The search phrase used on site search. To be used with Site Search (e50).',
+    description:
+      'The search phrase used on site search. To be used with Site Search (e50).',
   },
   'variables/evar51': {
     title: 'Destination Title - Site Search (v51)',
-    description: 'The destination link text of a search result on click. To be used with Site Search Result Click (e51).',
+    description:
+      'The destination link text of a search result on click. To be used with Site Search Result Click (e51).',
   },
   'variables/evar52': {
     title: 'Destination URL - Site Search (v52)',
-    description: 'The destination link url of a search result on click. To be used with Site Search Result Click (e51).',
+    description:
+      'The destination link url of a search result on click. To be used with Site Search Result Click (e51).',
   },
   'variables/evar53': {
     title: 'Link Position - Site Search (v53)',
-    description: 'The numbered position of a search result on click. To be used with Site Search Result Click (e51).',
+    description:
+      'The numbered position of a search result on click. To be used with Site Search Result Click (e51).',
   },
   'variables/evar54': {
     title: 'Destination File Type - Site Search (v54)',
-    description: 'The destination link file type of a search result on click. To be used with Site Search Result Click (e51).',
+    description:
+      'The destination link file type of a search result on click. To be used with Site Search Result Click (e51).',
   },
   'variables/evar55': {
     title: 'Refinement  Type - Site Search (v55)',
-    description: 'The status of when a visitor refines their search i.e. (changed phrase, advanced search used, original search). To be used with Site Search (e50).',
+    description:
+      'The status of when a visitor refines their search i.e. (changed phrase, advanced search used, original search). To be used with Site Search (e50).',
   },
   'variables/evar57': {
     title: 'Pop-up Name (v57)',
-    description: 'The unique name of a pop-up invitation. To be used with Pop-up Yes Click (e57) and Pop-up Impression (e58).\r\n',
+    description:
+      'The unique name of a pop-up invitation. To be used with Pop-up Yes Click (e57) and Pop-up Impression (e58).\r\n',
   },
   'variables/evar57.1': {
     title: 'Pop-up Name (v57)(clean version - classified)',
@@ -861,7 +942,8 @@ export const dimensions = {
   },
   'variables/evar59': {
     title: 'Anchor ID (v59)',
-    description: 'The # href of a anchor link on click. To be used with Anchor Click (e59)\r\n',
+    description:
+      'The # href of a anchor link on click. To be used with Anchor Click (e59)\r\n',
   },
   'variables/evar6': {
     title: 'GC Visitor Institution (v6)',
@@ -881,7 +963,8 @@ export const dimensions = {
   },
   'variables/evar61': {
     title: 'Video/Audio Type:Title (v61)',
-    description: 'The title and type of the media file played. To be used with Video/Audio � Play (e61), Video/Audio � 20% (e62), Video/Audio � 50% (e63) and Video/Audio � 80% (e64).',
+    description:
+      'The title and type of the media file played. To be used with Video/Audio � Play (e61), Video/Audio � 20% (e62), Video/Audio � 50% (e63) and Video/Audio � 80% (e64).',
   },
   'variables/evar61.1': {
     title: 'Video/Audio - Type (v61c)',
@@ -893,11 +976,13 @@ export const dimensions = {
   },
   'variables/evar62': {
     title: 'Video/Audio File Extension (v62)',
-    description: 'The file type of the media file played. To be used with Video/Audio � Play (e61), Video/Audio � 20% (e62), Video/Audio � 50% (e63) and Video/Audio � 80% (e64).',
+    description:
+      'The file type of the media file played. To be used with Video/Audio � Play (e61), Video/Audio � 20% (e62), Video/Audio � 50% (e63) and Video/Audio � 80% (e64).',
   },
   'variables/evar63': {
     title: 'Video/Audio Source URL (v63)',
-    description: 'The url source of the media file played. To be used with Video/Audio � Play (e61), Video/Audio � 20% (e62), Video/Audio � 50% (e63) and Video/Audio � 80% (e64).',
+    description:
+      'The url source of the media file played. To be used with Video/Audio � Play (e61), Video/Audio � 20% (e62), Video/Audio � 50% (e63) and Video/Audio � 80% (e64).',
   },
   'variables/evar65': {
     title: 'App Name (v65)',
@@ -913,7 +998,8 @@ export const dimensions = {
   },
   'variables/evar70': {
     title: 'Navigation (v70)',
-    description: 'The  link type, menu group and item selected of a navigation link. Only applicable for sites using gcweb style guides. To be used with Navigation Click (e70). \r\n',
+    description:
+      'The  link type, menu group and item selected of a navigation link. Only applicable for sites using gcweb style guides. To be used with Navigation Click (e70). \r\n',
   },
   'variables/evar70.1': {
     title: 'Navigation - Type (v70c)',
@@ -929,7 +1015,8 @@ export const dimensions = {
   },
   'variables/evar71': {
     title: 'Social Share Content (v71)',
-    description: 'The title of the content shared through the social share widget. To be used with Social Share Initiate (e71) and Social Share Complete (e72).',
+    description:
+      'The title of the content shared through the social share widget. To be used with Social Share Initiate (e71) and Social Share Complete (e72).',
   },
   'variables/evar71.1': {
     title: 'Social Share Content - Type (v71c)',
@@ -941,11 +1028,13 @@ export const dimensions = {
   },
   'variables/evar72': {
     title: 'Social Share/Follow - Platform (v72)',
-    description: 'The social platform selected from the social share or social follow widget. To be used with Social Follow (e74).',
+    description:
+      'The social platform selected from the social share or social follow widget. To be used with Social Follow (e74).',
   },
   'variables/evar75': {
     title: 'Library Version (v75)',
-    description: 'The specific analytics library version (environment and build date) used on a page to collect analytics data.',
+    description:
+      'The specific analytics library version (environment and build date) used on a page to collect analytics data.',
   },
   'variables/evar75.1': {
     title: 'Library Version - Environment (v75c)',
@@ -957,11 +1046,13 @@ export const dimensions = {
   },
   'variables/evar76': {
     title: 'Data Table / Filter - Phrase (v76)',
-    description: 'The typed phrase used when searching a WET data table or WET filter. To be used with Data Table / Filter - Search (e76).',
+    description:
+      'The typed phrase used when searching a WET data table or WET filter. To be used with Data Table / Filter - Search (e76).',
   },
   'variables/evar77': {
     title: 'Mandate Tracker Expand-Collapse (v77)',
-    description: 'The priority, status and commitment value of a Mandate Letter Tracker expand-collapse on click. To be used with Expand-Collapse Open (e30).\r\n',
+    description:
+      'The priority, status and commitment value of a Mandate Letter Tracker expand-collapse on click. To be used with Expand-Collapse Open (e30).\r\n',
   },
   'variables/evar77.1': {
     title: 'Priority - Mandate Tracker Expand-Collapse (v77c)',
@@ -977,11 +1068,13 @@ export const dimensions = {
   },
   'variables/evar78': {
     title: 'Content Filter Title (v78)',
-    description: 'The commitments name by status or priorities of a Mandate Letter Tracker content filter on click. To be used with Content Filter Click (e78).\r\n',
+    description:
+      'The commitments name by status or priorities of a Mandate Letter Tracker content filter on click. To be used with Content Filter Click (e78).\r\n',
   },
   'variables/evar79': {
     title: 'Form Name (v79)',
-    description: 'The unique name of a form. To be used with Report a Problem Complete (e75),  Form Submit Click (e79) and Chat Submit Click (e82).',
+    description:
+      'The unique name of a form. To be used with Report a Problem Complete (e75),  Form Submit Click (e79) and Chat Submit Click (e82).',
   },
   'variables/evar8': {
     title: 'Page Screen ID (v8)',
@@ -989,27 +1082,33 @@ export const dimensions = {
   },
   'variables/evar80': {
     title: 'What Was Wrong - Did You Find What You Were Looking For (v80)',
-    description: 'The selected option visitors submitted in the \'Did You Find What You Were Looking For?\' widget. To be used with event83, event84 and event85.\r\n',
+    description:
+      "The selected option visitors submitted in the 'Did You Find What You Were Looking For?' widget. To be used with event83, event84 and event85.\r\n",
   },
   'variables/evar86': {
     title: 'ADV Number - External Campaigns (v86)',
-    description: 'The unique adv number for campaigns purchased through the agency of record. To be used with External Campaign Click (e31).\r\n',
+    description:
+      'The unique adv number for campaigns purchased through the agency of record. To be used with External Campaign Click (e31).\r\n',
   },
   'variables/evar87': {
     title: 'Campaign Integration ID - External Campaigns (v87)',
-    description: 'The unique id for campaigns purchased through the agency of record. To be used with External Campaign Click (e31).\r\n',
+    description:
+      'The unique id for campaigns purchased through the agency of record. To be used with External Campaign Click (e31).\r\n',
   },
   'variables/evar88': {
     title: 'Source Integration ID - External Campaigns (v88)',
-    description: 'The unique source id for campaigns purchased through the agency of record. To be used with External Campaign Click (e31).\r\n',
+    description:
+      'The unique source id for campaigns purchased through the agency of record. To be used with External Campaign Click (e31).\r\n',
   },
   'variables/evar89': {
     title: 'Content Integration ID - External Campaigns (v89)',
-    description: 'The unique content id for campaigns purchased through the agency of record. To be used with External Campaign Click (e31).\r\n',
+    description:
+      'The unique content id for campaigns purchased through the agency of record. To be used with External Campaign Click (e31).\r\n',
   },
   'variables/evar9': {
     title: 'Previous Page - Load Time (v9)',
-    description: 'The time in seconds that it took the previous page to load.\r\n',
+    description:
+      'The time in seconds that it took the previous page to load.\r\n',
   },
   'variables/evar9.1': {
     title: 'Time Groupings - Previous Page Load Time (v9c)',
@@ -1017,19 +1116,23 @@ export const dimensions = {
   },
   'variables/evar90': {
     title: 'TSS Visit Data - Reason of Visit� (v90)',
-    description: 'The survey responses for the \'Reason of Visit\' question of the Task Success Survey. To be used with the Visit Data - Task Success Survey dimensions and metrics in order to report on sampled visit data.',
+    description:
+      "The survey responses for the 'Reason of Visit' question of the Task Success Survey. To be used with the Visit Data - Task Success Survey dimensions and metrics in order to report on sampled visit data.",
   },
   'variables/evar90.1': {
     title: 'TSS Visit Data - Reason of Visit - Lead Department (v90c)',
-    description: 'The department associated to the task selected as the Reason of Visit in English',
+    description:
+      'The department associated to the task selected as the Reason of Visit in English',
   },
   'variables/evar90.2': {
     title: 'TSS Visit Data - Reason of Visit - Lead Theme (v90c)',
-    description: 'The theme associated to the task selected as the Reason of Visit in English',
+    description:
+      'The theme associated to the task selected as the Reason of Visit in English',
   },
   'variables/evar90.3': {
     title: 'TSS Visit Data - Reason of Visit � Grouping (v90c)',
-    description: 'The grouping associated to the task selected as the Reason of Visit in English',
+    description:
+      'The grouping associated to the task selected as the Reason of Visit in English',
   },
   'variables/evar90.4': {
     title: 'TSS Visit Data - Reason of Visit � Task (v90c)',
@@ -1037,7 +1140,8 @@ export const dimensions = {
   },
   'variables/evar91': {
     title: 'Standardized Survey - SS (v91)',
-    description: 'To be used with Standardized Survey Completed (e91). Survey decommissioned on May 4, 2021. // � utiliser avec Sondage normalis� termin�e (e91). Sondage d�class� le 4 mai 2021.',
+    description:
+      'To be used with Standardized Survey Completed (e91). Survey decommissioned on May 4, 2021. // � utiliser avec Sondage normalis� termin�e (e91). Sondage d�class� le 4 mai 2021.',
   },
   'variables/evar91.1': {
     title: 'SS - 2. I will likely return to the website in the future',
@@ -1068,15 +1172,18 @@ export const dimensions = {
     description: null,
   },
   'variables/evar91.8': {
-    title: 'SS - 9. How likely are you to recommend this website to a friend or colleague?',
+    title:
+      'SS - 9. How likely are you to recommend this website to a friend or colleague?',
     description: null,
   },
   'variables/evar92': {
     title: 'Exit Survey - ES (v92)',
-    description: 'To be used with Exit Survey Completed (e92). Survey decommissioned on May 4, 2021. // � utiliser avec Sondage de fin de visite termin�e (e92). Sondage d�class� le 4 mai 2021.',
+    description:
+      'To be used with Exit Survey Completed (e92). Survey decommissioned on May 4, 2021. // � utiliser avec Sondage de fin de visite termin�e (e92). Sondage d�class� le 4 mai 2021.',
   },
   'variables/evar92.1': {
-    title: 'ES - 2. How easy or difficult was it to do what you needed to do online?',
+    title:
+      'ES - 2. How easy or difficult was it to do what you needed to do online?',
     description: null,
   },
   'variables/evar92.2': {
@@ -1084,15 +1191,18 @@ export const dimensions = {
     description: null,
   },
   'variables/evar92.3': {
-    title: 'ES - 4. Approximately how many minutes did it take you to do what you needed to do?',
+    title:
+      'ES - 4. Approximately how many minutes did it take you to do what you needed to do?',
     description: null,
   },
   'variables/evar92.4': {
-    title: 'ES - 5. How would you describe the amount of time it took you to do what you wanted to do?',
+    title:
+      'ES - 5. How would you describe the amount of time it took you to do what you wanted to do?',
     description: null,
   },
   'variables/evar92.5': {
-    title: 'ES - 6. How easy or difficult was the information on this website to understand?',
+    title:
+      'ES - 6. How easy or difficult was the information on this website to understand?',
     description: null,
   },
   'variables/evar92.6': {
@@ -1100,24 +1210,31 @@ export const dimensions = {
     description: null,
   },
   'variables/evar92.7': {
-    title: 'ES - 8. Overall, how satisfied were you with your experience online today?',
+    title:
+      'ES - 8. Overall, how satisfied were you with your experience online today?',
     description: null,
   },
   'variables/evar93': {
     title: 'SRT Donn�es de visite - Raison de la visite (v93)',
-    description: 'Les r�ponses � la question �Raison de la visite� du Sondage sur la r�ussite des t�ches�(SRT). � utiliser avec les dimensions et les indicateurs SRT Donn�es de visite dans le but de produire un rapport sur les donn�es de visite �chantillonn�es.',
+    description:
+      'Les r�ponses � la question �Raison de la visite� du Sondage sur la r�ussite des t�ches�(SRT). � utiliser avec les dimensions et les indicateurs SRT Donn�es de visite dans le but de produire un rapport sur les donn�es de visite �chantillonn�es.',
   },
   'variables/evar93.1': {
-    title: 'SRT Donn�es de visite - Raison de la visite - d�partement principal (v93c)',
-    description: 'Le minist�re associ� � la t�che choisie comme raison de la visite en anglais',
+    title:
+      'SRT Donn�es de visite - Raison de la visite - d�partement principal (v93c)',
+    description:
+      'Le minist�re associ� � la t�che choisie comme raison de la visite en anglais',
   },
   'variables/evar93.2': {
-    title: 'SRT Donn�es de visite - Raison de la visite - th�me principal (v93c)',
-    description: 'Le th�me associ� � la t�che choisie comme raison de la visite en anglais',
+    title:
+      'SRT Donn�es de visite - Raison de la visite - th�me principal (v93c)',
+    description:
+      'Le th�me associ� � la t�che choisie comme raison de la visite en anglais',
   },
   'variables/evar93.3': {
     title: 'SRT Donn�es de visite - Raison de la visite - regroupement (v93c)',
-    description: 'Le regroupement associ� � la t�che choisie comme raison de la visite en anglais',
+    description:
+      'Le regroupement associ� � la t�che choisie comme raison de la visite en anglais',
   },
   'variables/evar93.4': {
     title: 'SRT Donn�es de visite - Raison de la visite - t�che (v93c)',
@@ -1125,10 +1242,11 @@ export const dimensions = {
   },
   'variables/evar94': {
     title: 'Sondage normalis� - SN (v94)',
-    description: 'To be used with Standardized Survey Completed (e91). Survey decommissioned on May 4, 2021. // � utiliser avec Sondage normalis� termin�e (e91). Sondage d�class� le 4 mai 2021.',
+    description:
+      'To be used with Standardized Survey Completed (e91). Survey decommissioned on May 4, 2021. // � utiliser avec Sondage normalis� termin�e (e91). Sondage d�class� le 4 mai 2021.',
   },
   'variables/evar94.1': {
-    title: 'SN - 2. Je visiterai probablement ce site Web dans l\'avenir',
+    title: "SN - 2. Je visiterai probablement ce site Web dans l'avenir",
     description: null,
   },
   'variables/evar94.2': {
@@ -1140,7 +1258,7 @@ export const dimensions = {
     description: null,
   },
   'variables/evar94.4': {
-    title: 'SN - 5. J\'ai trouv� ce site Web attrayant',
+    title: "SN - 5. J'ai trouv� ce site Web attrayant",
     description: null,
   },
   'variables/evar94.5': {
@@ -1156,31 +1274,38 @@ export const dimensions = {
     description: null,
   },
   'variables/evar94.8': {
-    title: 'SN - 9. Est-il probable que vous recommandiez ce site Web � un coll�gue ou � un ami?',
+    title:
+      'SN - 9. Est-il probable que vous recommandiez ce site Web � un coll�gue ou � un ami?',
     description: null,
   },
   'variables/evar95': {
     title: 'Sondage de fin de visite - SF (v95)',
-    description: 'To be used with Exit Survey Completed (e92). Survey decommissioned on May 4, 2021. // � utiliser avec Sondage de fin de visite termin�e (e92). Sondage d�class� le 4 mai 2021.',
+    description:
+      'To be used with Exit Survey Completed (e92). Survey decommissioned on May 4, 2021. // � utiliser avec Sondage de fin de visite termin�e (e92). Sondage d�class� le 4 mai 2021.',
   },
   'variables/evar95.1': {
-    title: 'SF - 2. Dans quelle mesure a-t-il �t� facile ou difficile de faire ce que vous vouliez faire en...',
+    title:
+      'SF - 2. Dans quelle mesure a-t-il �t� facile ou difficile de faire ce que vous vouliez faire en...',
     description: null,
   },
   'variables/evar95.2': {
-    title: 'SF - 3. Avez-vous �t� en mesure de faire ce que vous vouliez faire en ligne?',
+    title:
+      'SF - 3. Avez-vous �t� en mesure de faire ce que vous vouliez faire en ligne?',
     description: null,
   },
   'variables/evar95.3': {
-    title: 'SF - 4. De combien de minutes, environ, avez-vous eu besoin pour faire ce que vous vouliez faire?',
+    title:
+      'SF - 4. De combien de minutes, environ, avez-vous eu besoin pour faire ce que vous vouliez faire?',
     description: null,
   },
   'variables/evar95.4': {
-    title: 'SF - 5. Comment d�cririez-vous le temps requis pour faire ce que vous vouliez faire?',
+    title:
+      'SF - 5. Comment d�cririez-vous le temps requis pour faire ce que vous vouliez faire?',
     description: null,
   },
   'variables/evar95.5': {
-    title: 'SF - 6. Dans quelle mesure a-t-il �t� facile ou difficile de comprendre l�information dans...',
+    title:
+      'SF - 6. Dans quelle mesure a-t-il �t� facile ou difficile de comprendre l�information dans...',
     description: null,
   },
   'variables/evar95.6': {
@@ -1188,40 +1313,51 @@ export const dimensions = {
     description: null,
   },
   'variables/evar95.7': {
-    title: 'SF - 8. En g�n�ral, dans quelle mesure �tes-vous satisfait de votre exp�rience en ligne...',
+    title:
+      'SF - 8. En g�n�ral, dans quelle mesure �tes-vous satisfait de votre exp�rience en ligne...',
     description: null,
   },
   'variables/evar96': {
-    title: 'TSS Visit Data - Sampling / SRT Donn�es de visite - �chantillonnage (v96)',
-    description: 'Specifies whether a survey response can be used to measure the performance of the GC, Canada.ca, a theme, an institution, a grouping, or a task. To be used with the Visit Data - Task Success Survey dimensions and metrics.',
+    title:
+      'TSS Visit Data - Sampling / SRT Donn�es de visite - �chantillonnage (v96)',
+    description:
+      'Specifies whether a survey response can be used to measure the performance of the GC, Canada.ca, a theme, an institution, a grouping, or a task. To be used with the Visit Data - Task Success Survey dimensions and metrics.',
   },
   'variables/evar96.1': {
     title: 'TSS Visit Data / SRT Donn�es de visite - Invitation (v96c)',
-    description: 'Identifies from which survey invitation a survey response came from.',
+    description:
+      'Identifies from which survey invitation a survey response came from.',
   },
   'variables/evar96.2': {
     title: 'TSS Visit Data / SRT Donn�es de visite - GC (v96c)',
-    description: 'Indicates whether a given response can be used to measure the performance of the GC (y or n).',
+    description:
+      'Indicates whether a given response can be used to measure the performance of the GC (y or n).',
   },
   'variables/evar96.3': {
     title: 'TSS Visit Data / SRT Donn�es de visite - Canada.ca (v96c)',
-    description: 'Indicates whether a given response can be used to measure the performance of Canada.ca (y or n).',
+    description:
+      'Indicates whether a given response can be used to measure the performance of Canada.ca (y or n).',
   },
   'variables/evar96.4': {
     title: 'TSS Visit Data / SRT Donn�es de visite - Theme / Th�me (v96c)',
-    description: 'Indicates whether a given response can be used to measure the performance of the theme (y or n).',
+    description:
+      'Indicates whether a given response can be used to measure the performance of the theme (y or n).',
   },
   'variables/evar96.5': {
     title: 'TSS Visit Data / SRT Donn�es de visite - Institution (v96c)',
-    description: 'Indicates whether a given response can be used to measure the performance of the institution (y or n).',
+    description:
+      'Indicates whether a given response can be used to measure the performance of the institution (y or n).',
   },
   'variables/evar96.6': {
-    title: 'TSS Visit Data / SRT Donn�es de visite - Grouping / Regroupement (v96c)',
-    description: 'Indicates whether a given response can be used to measure the performance of a grouping (y or n).',
+    title:
+      'TSS Visit Data / SRT Donn�es de visite - Grouping / Regroupement (v96c)',
+    description:
+      'Indicates whether a given response can be used to measure the performance of a grouping (y or n).',
   },
   'variables/evar96.7': {
     title: 'TSS Visit Data / SRT Donn�es de visite - Task / T�che (v96c)',
-    description: 'Indicates whether a given response can be used to measure the performance of tasks (y or n).',
+    description:
+      'Indicates whether a given response can be used to measure the performance of tasks (y or n).',
   },
   'variables/exitlink': {
     title: 'Exit Link',
@@ -1229,7 +1365,8 @@ export const dimensions = {
   },
   'variables/exitlistvariable1': {
     title: 'Exit Clickthrough - Internal Campaign (list1)',
-    description: 'The type and title of internal campaigns displayed on page load and when clicked. To be used with Internal Campaing Impression (e41) and Internal Campaign Click (e42).',
+    description:
+      'The type and title of internal campaigns displayed on page load and when clicked. To be used with Internal Campaing Impression (e41) and Internal Campaign Click (e42).',
   },
   'variables/exitlistvariable1.1': {
     title: 'Exit Clickthrough - Internal Campaign Type (list1c)',
@@ -1241,7 +1378,8 @@ export const dimensions = {
   },
   'variables/exitlistvariable2': {
     title: 'Exit Form Fields (list2)',
-    description: 'The field type, name and value of all form fields submitted (text, dropdown, checkbox, date, radio buttons). To be used with Report a Problem Complete (e75),  Form Submit Click (e79) and Chat Submit Click (e82).',
+    description:
+      'The field type, name and value of all form fields submitted (text, dropdown, checkbox, date, radio buttons). To be used with Report a Problem Complete (e75),  Form Submit Click (e79) and Chat Submit Click (e82).',
   },
   'variables/exitlistvariable2.1': {
     title: 'Exit Form Fields - Field Type (list2c)',
@@ -1261,7 +1399,8 @@ export const dimensions = {
   },
   'variables/exitprop1': {
     title: 'Exit Local Day (p1)',
-    description: 'The local day of the week a visitor visits your site or performs a site action.\r\n',
+    description:
+      'The local day of the week a visitor visits your site or performs a site action.\r\n',
   },
   'variables/exitprop11': {
     title: 'Exit Page Title (p11)',
@@ -1289,7 +1428,8 @@ export const dimensions = {
   },
   'variables/exitprop16': {
     title: 'Exit Page Theme (p16)',
-    description: 'The theme and language of the page. Only applicable to Canada.ca pages.',
+    description:
+      'The theme and language of the page. Only applicable to Canada.ca pages.',
   },
   'variables/exitprop16.1': {
     title: 'Exit Page Theme - Language Combined (p16c)',
@@ -1301,7 +1441,8 @@ export const dimensions = {
   },
   'variables/exitprop2': {
     title: 'Exit Local Hour (p2)',
-    description: 'The local hour a visitor visits your site or performs a site action (rounded to 30 mins).\r\n',
+    description:
+      'The local hour a visitor visits your site or performs a site action (rounded to 30 mins).\r\n',
   },
   'variables/exitprop21': {
     title: 'Exit Page Issued Date (p21)',
@@ -1325,7 +1466,8 @@ export const dimensions = {
   },
   'variables/exitprop23': {
     title: 'Exit Page URL Folder (p23)',
-    description: 'The folder structure within the page URL (not including the hostname and filename).\r\n',
+    description:
+      'The folder structure within the page URL (not including the hostname and filename).\r\n',
   },
   'variables/exitprop24': {
     title: 'Exit Page URL Filename (p24)',
@@ -1337,7 +1479,8 @@ export const dimensions = {
   },
   'variables/exitprop26': {
     title: 'Exit Server Time (p26)',
-    description: 'The day and hour (EST) a visitor visits your site or performs an action (rounded to 30 mins). \r\n',
+    description:
+      'The day and hour (EST) a visitor visits your site or performs an action (rounded to 30 mins). \r\n',
   },
   'variables/exitprop26.1': {
     title: 'Exit Server Time - Day (p26c)',
@@ -1353,7 +1496,8 @@ export const dimensions = {
   },
   'variables/exitprop4': {
     title: 'Exit Device Type (p4)',
-    description: 'The device (mobile or desktop) that a visitor uses to visit your site.\r\n',
+    description:
+      'The device (mobile or desktop) that a visitor uses to visit your site.\r\n',
   },
   'variables/exitprop5': {
     title: 'Exit Page Language (p5)',
@@ -1365,7 +1509,8 @@ export const dimensions = {
   },
   'variables/exitprop50': {
     title: 'Exit Phrase - Site Search  (p50)',
-    description: 'The search phrase used on site search. To be used with Site Search (e50).\r\n',
+    description:
+      'The search phrase used on site search. To be used with Site Search (e50).\r\n',
   },
   'variables/exitprop6': {
     title: 'Exit GC Visitor Institution (p6)',
@@ -1401,7 +1546,8 @@ export const dimensions = {
   },
   'variables/exitprop70': {
     title: 'Exit Navigation (p70)',
-    description: 'The  link type, menu group and item selected of a navigation link. Only applicable for sites using gcweb style guides. To be used with Navigation Click (e70). \r\n',
+    description:
+      'The  link type, menu group and item selected of a navigation link. Only applicable for sites using gcweb style guides. To be used with Navigation Click (e70). \r\n',
   },
   'variables/exitprop70.1': {
     title: 'Exit Navigation - Type (p70c)',
@@ -1417,7 +1563,8 @@ export const dimensions = {
   },
   'variables/exitprop75': {
     title: 'Exit Library Version (p75)',
-    description: 'The specific analytics library version (environment and build date) used on a page to collect analytics data.',
+    description:
+      'The specific analytics library version (environment and build date) used on a page to collect analytics data.',
   },
   'variables/exitprop75.1': {
     title: 'Exit Library Version - Environment (p75c)',
@@ -1485,7 +1632,8 @@ export const dimensions = {
   },
   'variables/listvariable1': {
     title: 'Clickthrough - Internal Campaign (list1)',
-    description: 'The type and title of internal campaigns displayed on page load and when clicked. To be used with Internal Campaing Impression (e41) and Internal Campaign Click (e42).',
+    description:
+      'The type and title of internal campaigns displayed on page load and when clicked. To be used with Internal Campaing Impression (e41) and Internal Campaign Click (e42).',
   },
   'variables/listvariable1.1': {
     title: 'Clickthrough - Internal Campaign Type (list1c)',
@@ -1497,7 +1645,8 @@ export const dimensions = {
   },
   'variables/listvariable2': {
     title: 'Form Fields (list2)',
-    description: 'The field type, name and value of all form fields submitted (text, dropdown, checkbox, date, radio buttons). To be used with Report a Problem Complete (e75),  Form Submit Click (e79) and Chat Submit Click (e82).',
+    description:
+      'The field type, name and value of all form fields submitted (text, dropdown, checkbox, date, radio buttons). To be used with Report a Problem Complete (e75),  Form Submit Click (e79) and Chat Submit Click (e82).',
   },
   'variables/listvariable2.1': {
     title: 'Form Fields - Field Type (list2c)',
@@ -1661,7 +1810,8 @@ export const dimensions = {
   },
   'variables/prop1': {
     title: 'Local Day (p1)',
-    description: 'The local day of the week a visitor visits your site or performs a site action.\r\n',
+    description:
+      'The local day of the week a visitor visits your site or performs a site action.\r\n',
   },
   'variables/prop11': {
     title: 'Page Title (p11)',
@@ -1689,7 +1839,8 @@ export const dimensions = {
   },
   'variables/prop16': {
     title: 'Page Theme (p16)',
-    description: 'The theme and language of the page. Only applicable to Canada.ca pages.',
+    description:
+      'The theme and language of the page. Only applicable to Canada.ca pages.',
   },
   'variables/prop16.1': {
     title: 'Page Theme - Language Combined (p16c)',
@@ -1701,7 +1852,8 @@ export const dimensions = {
   },
   'variables/prop2': {
     title: 'Local Hour (p2)',
-    description: 'The local hour a visitor visits your site or performs a site action (rounded to 30 mins).\r\n',
+    description:
+      'The local hour a visitor visits your site or performs a site action (rounded to 30 mins).\r\n',
   },
   'variables/prop21': {
     title: 'Page Issued Date (p21)',
@@ -1725,7 +1877,8 @@ export const dimensions = {
   },
   'variables/prop23': {
     title: 'Page URL Folder (p23)',
-    description: 'The folder structure within the page URL (not including the hostname and filename).\r\n',
+    description:
+      'The folder structure within the page URL (not including the hostname and filename).\r\n',
   },
   'variables/prop24': {
     title: 'Page URL Filename (p24)',
@@ -1737,7 +1890,8 @@ export const dimensions = {
   },
   'variables/prop26': {
     title: 'Server Time (p26)',
-    description: 'The day and hour (EST) a visitor visits your site or performs an action (rounded to 30 mins). \r\n',
+    description:
+      'The day and hour (EST) a visitor visits your site or performs an action (rounded to 30 mins). \r\n',
   },
   'variables/prop26.1': {
     title: 'Server Time - Day (p26c)',
@@ -1753,7 +1907,8 @@ export const dimensions = {
   },
   'variables/prop4': {
     title: 'Device Type (p4)',
-    description: 'The device (mobile or desktop) that a visitor uses to visit your site.\r\n',
+    description:
+      'The device (mobile or desktop) that a visitor uses to visit your site.\r\n',
   },
   'variables/prop5': {
     title: 'Page Language (p5)',
@@ -1765,7 +1920,8 @@ export const dimensions = {
   },
   'variables/prop50': {
     title: 'Phrase - Site Search  (p50)',
-    description: 'The search phrase used on site search. To be used with Site Search (e50).\r\n',
+    description:
+      'The search phrase used on site search. To be used with Site Search (e50).\r\n',
   },
   'variables/prop6': {
     title: 'GC Visitor Institution (p6)',
@@ -1801,7 +1957,8 @@ export const dimensions = {
   },
   'variables/prop70': {
     title: 'Navigation (p70)',
-    description: 'The  link type, menu group and item selected of a navigation link. Only applicable for sites using gcweb style guides. To be used with Navigation Click (e70). \r\n',
+    description:
+      'The  link type, menu group and item selected of a navigation link. Only applicable for sites using gcweb style guides. To be used with Navigation Click (e70). \r\n',
   },
   'variables/prop70.1': {
     title: 'Navigation - Type (p70c)',
@@ -1817,7 +1974,8 @@ export const dimensions = {
   },
   'variables/prop75': {
     title: 'Library Version (p75)',
-    description: 'The specific analytics library version (environment and build date) used on a page to collect analytics data.',
+    description:
+      'The specific analytics library version (environment and build date) used on a page to collect analytics data.',
   },
   'variables/prop75.1': {
     title: 'Library Version - Environment (p75c)',
@@ -2042,7 +2200,7 @@ export const dimensions = {
   'variables/visitstarttimegmt': {
     title: 'Visit Start Time UTC',
     description: null,
-  }
+  },
 };
 
 export type ReportQueryDimension = keyof typeof dimensions;

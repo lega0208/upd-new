@@ -1,25 +1,38 @@
 import dayjs from 'dayjs';
+import { AirtableClient } from './airtable';
+import { withRateLimit } from './utils';
 import {
-  AnalyticsCoreAPI,
-  getAAClient,
   AdobeAnalyticsClient,
   AdobeAnalyticsQueryBuilder,
-  AdobeAnalyticsReportQuery,
   queryDateFormat,
   SEGMENTS,
+  toQueryFormat,
 } from './adobe-analytics';
-
 import {
   getGscClient,
   Searchconsole,
   SearchAnalyticsClient,
 } from './google-search-console';
-import { AirtableClient, AirTableAPI } from './airtable';
-
-import { withRateLimit } from './utils';
 
 // need to set a bigger timout because AA is super slow :)
-jest.setTimeout(30000);
+jest.setTimeout(900000);
+
+describe('getPageMetrics', () => {
+  const client = new AdobeAnalyticsClient();
+
+  it('should be able to query the API', async () => {
+    const dateRange = {
+      start: toQueryFormat('2022-01-01'),
+      end: toQueryFormat('2022-01-02'),
+    };
+
+    const results = await client.getPageMetrics(dateRange, { settings: { limit: 25 } });
+
+    console.log(results);
+
+    expect(results).toBeDefined();
+  });
+});
 
 describe('new AA fields', () => {
   const client = new AdobeAnalyticsClient();
@@ -38,40 +51,25 @@ describe('new AA fields', () => {
 });
 
 describe('externalData', () => {
-  let aaClient: AnalyticsCoreAPI;
-  let query: AdobeAnalyticsReportQuery;
-
-  it('should initialise the client and be able to query the API', async () => {
-    aaClient = await getAAClient();
-    expect(aaClient).toBeDefined();
-  });
-
-  it('should be able to get the segments', async () => {
-    const segments = await aaClient.getMetrics(process.env.AW_REPORTSUITE_ID);
-
-    expect(segments).toBeDefined();
-  });
+  const dateRange = {
+    start: toQueryFormat('2022-01-01'),
+    end: toQueryFormat('2022-01-02'),
+  };
 
   it('should be able to initalize the query builder', async () => {
-    const queryBuilder = new AdobeAnalyticsQueryBuilder(process.env.AW_REPORTSUITE_ID);
+    const queryBuilder = new AdobeAnalyticsQueryBuilder();
     expect(queryBuilder).toBeDefined();
   });
 
   it('should be able to build a query', async () => {
-    const queryBuilder = new AdobeAnalyticsQueryBuilder(process.env.AW_REPORTSUITE_ID);
-    query = queryBuilder
+    const queryBuilder = new AdobeAnalyticsQueryBuilder();
+    const query = queryBuilder
       .addMetric('metrics/visits', '1')
       .setDimension('variables/evar12')
       .setGlobalFilters([
         {
           type: 'dateRange',
-          dateRange: `${dayjs()
-            .subtract(3, 'day')
-            .toISOString()
-            .replace(/.$/, '')}/${dayjs()
-            .subtract(2, 'day')
-            .toISOString()
-            .replace(/.$/, '')}`
+          dateRange: `${dateRange.start}/${dateRange.end}`,
         },
         {
           type: 'segment',
@@ -82,26 +80,15 @@ describe('externalData', () => {
         clause: '( CONTAINS \'www.canada.ca/en/revenue-agency/services/e-services/cra-login-services.html\' )'
         + ' OR ( CONTAINS \'www.canada.ca/en/revenue-agency/services/e-services/represent-a-client.html\' )'
       })
-      .setSettings({ limit: 500 })
+      .setSettings({ limit: 10 })
       .build();
 
-    console.log(query);
     expect(query).toBeDefined();
   });
 
-  it('should be able to get a report', async () => {
-    const report = (await aaClient.getReport(query)).body;
-
-    console.log(report);
-
-    expect(report).toBeDefined();
-  });
   it('should be able to get overall metrics', async () => {
     const client = new AdobeAnalyticsClient()
-
-    const results = await client.getOverallMetrics({ start: dayjs('2022-01-16').format(queryDateFormat), end: dayjs('2022-01-17').format(queryDateFormat) });
-
-    console.log(results);
+    const results = await client.getOverallMetrics(dateRange);
 
     expect(results).toBeDefined();
   });
@@ -134,8 +121,6 @@ describe('Google Search Console', () => {
       }
     });
 
-    console.log(results.data.rows);
-
     expect(results.data.rows).toBeDefined();
   })
 
@@ -143,7 +128,6 @@ describe('Google Search Console', () => {
     const client = new SearchAnalyticsClient();
     const results = await client.getOverallMetrics({ start: '2022-01-16', end: '2022-01-16' });
 
-    console.log(results);
     expect(results).toBeDefined();
   })
 
@@ -151,7 +135,6 @@ describe('Google Search Console', () => {
     const client = new SearchAnalyticsClient();
     const results = await client.getPageMetrics({ start: '2022-01-16', end: '2022-01-16' });
 
-    console.log(results);
     expect(results).toBeDefined();
   })
 
@@ -199,16 +182,12 @@ describe('Google Search Console', () => {
       }
     });
 
-    console.log(results.data.rows);
-
     expect(results.data.rows).toBeDefined();
   })
 
 })
 
 describe('AirTable', () => {
-  let atClient: AirTableAPI;
-
   it('should initialise the client', async () => {
     const client = new AirtableClient();
     const results = await client.getTasks();

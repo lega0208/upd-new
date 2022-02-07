@@ -2,125 +2,115 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
 export * from './client';
-export * from './query';
+export * from './querybuilder';
+export * from './queries';
 export * from './aa-dimensions';
 export * from './aa-metrics';
 
-import { Types } from 'mongoose';
-import { Overall } from '@cra-arc/db';
+import { Overall, PageMetrics } from '@cra-arc/db';
 import { AnalyticsCoreAPI, getAAClient } from './client';
-import { withTimeout } from '../utils';
-import {
-  AdobeAnalyticsQueryBuilder,
-  CALCULATED_METRICS,
-  SEGMENTS,
-} from './query';
+import { createOverallMetricsQuery, createPageMetricsQuery } from './queries';
+import { ReportSettings, ReportSearch } from './querybuilder';
 
-dayjs.extend(utc)
+dayjs.extend(utc);
+
+export type DateRange = {
+  start: string;
+  end: string;
+};
 
 export class AdobeAnalyticsClient {
   client: AnalyticsCoreAPI;
-  queryBuilder = new AdobeAnalyticsQueryBuilder();
 
   async initClient() {
     this.client = await getAAClient();
   }
 
-  async getOverallMetrics(dateRange: { start: string, end: string }): Promise<Overall[]> {
-    // todo: better way to handle dates / allow single dates
+  async getOverallMetrics(
+    dateRange: DateRange,
+    options?: ReportSettings
+  ): Promise<Partial<Overall>[]> {
     if (!this.client) {
       await this.initClient();
     }
 
-    const formattedDate = `${dateRange.start}/${dateRange.end}`;
-    console.log(formattedDate);
+    const overallMetricsQuery = createOverallMetricsQuery(dateRange, options);
 
-    // Todo: Create a "registry" of prebuilt queries somewhere?
-    //  Also modify query builder to allow for passing an array of metrics & handle columnIds automatically
-    const overallMetricsQuery = this.queryBuilder
-      .setDimension('variables/daterangeday')
-      .addMetric('metrics/visits', '2')
-      .addMetric('metrics/visitors', '3')
-      .addMetric('metrics/pageviews', '4')
-      .addMetric('metrics/averagetimespentonsite', '5') // this is probably the wrong metric
-      .addMetric('metrics/event85', '6') // dyf - Submit
-      .addMetric('metrics/event83', '7') // dyf - Yes click
-      .addMetric('metrics/event84', '8') // dyf - No click
-      .addMetric('metrics/bouncerate', '9')
-      .addMetric('metrics/event73', '10') // RAP initiated
-      .addMetric('metrics/event75', '11') // RAP completed
-      .addMetric('metrics/event69', '12') // Nav menu initiated
-      .addMetric(CALCULATED_METRICS.RAP_CANT_FIND, '13') // RAP - I can't find what I'm looking for
-      .addMetric(CALCULATED_METRICS.RAP_LOGIN_ERROR, '14') // RAP - Login error
-      .addMetric(CALCULATED_METRICS.RAP_OTHER, '15') // RAP - Other
-      .addMetric(CALCULATED_METRICS.RAP_SIN, '16')
-      .addMetric(CALCULATED_METRICS.RAP_INFO_MISSING, '17')
-      .addMetric(CALCULATED_METRICS.RAP_SECUREKEY, '18')
-      .addMetric(CALCULATED_METRICS.RAP_OTHER_LOGIN, '19')
-      .addMetric(CALCULATED_METRICS.RAP_GC_KEY, '20')
-      .addMetric(CALCULATED_METRICS.RAP_INFO_WRONG, '21')
-      .addMetric(CALCULATED_METRICS.RAP_SPELLING, '22')
-      .addMetric(CALCULATED_METRICS.RAP_ACCESS_CODE, '23')
-      .addMetric(CALCULATED_METRICS.RAP_LINK_NOT_WORKING, '24')
-      .addMetric(CALCULATED_METRICS.RAP_404, '25')
-      .addMetric(CALCULATED_METRICS.RAP_BLANK_FORM, '26')
-      .setGlobalFilters([
-        { type: 'segment', segmentId: SEGMENTS.cra, },
-        { type: 'dateRange', dateRange: formattedDate },
-      ])
-      .setSettings({
-        nonesBehavior: 'return-nones',
-        countRepeatInstances: true,
-      })
-      .build();
+    // removed timeout for now
+    const results = await this.client.getReport(overallMetricsQuery);
 
-    // todo: figure out better way to handle timeouts, retries, etc
-    const results = await withTimeout<any>(() => this.client.getReport(overallMetricsQuery), 25000)();
+    // todo: should probably handle results having more than 1 "page" (i.e. paginated results)
+    const { columnIds } = results.body.columns;
 
-    // console.log(results);
-    // console.log(results.body.rows);
+    return (
+      results.body.rows
+        // need to filter out extra day from bouncerate bug
+        .filter(({ value }) => {
+          const rowDate = dayjs(value).utc(true).toDate();
+          const startDate = dayjs(dateRange.start).utc(true).toDate();
 
-    return results.body.rows
-      // need to filter out extra day from bouncerate bug
-      .filter(({ value }) => {
-        const rowDate = dayjs(value).utc(true).toDate();
-        const startDate = dayjs(dateRange.start).utc(true).toDate();
-        return rowDate >= startDate
-      })
-      .reduce((parsedResults, row) => {
-        const date = dayjs(row.value).utc(true).toDate();
+          return rowDate >= startDate;
+        })
+        .reduce((parsedResults, row) => {
+          // reformat date to iso string and convert to Date object
+          const date = dayjs(row.value).utc(true).toDate();
 
-        const newDateData = {
-          _id: new Types.ObjectId(),
-          date,
-          visits: row.data[0],
-          visitors: row.data[1],
-          views: row.data[2],
-          average_time_spent: row.data[3], // this is probably the wrong metric
-          dyf_submit: row.data[4],
-          dyf_yes: row.data[5],
-          dyf_no: row.data[6],
-          bouncerate: row.data[7],
-          rap_initiated: row.data[8],
-          rap_completed: row.data[9],
-          nav_menu_initiated: row.data[10],
-          rap_cant_find: row.data[11],
-          rap_login_error: row.data[12],
-          rap_other: row.data[13],
-          rap_sin: row.data[14],
-          rap_info_missing: row.data[14],
-          rap_securekey: row.data[15],
-          rap_other_login: row.data[16],
-          rap_gc_key: row.data[17],
-          rap_info_wrong: row.data[18],
-          rap_spelling: row.data[19],
-          rap_access_code: row.data[20],
-          rap_link_not_working: row.data[21],
-          rap_404: row.data[22],
-          rap_blank_form: row.data[23],
-        };
+          // build up results object using columnIds as keys
+          const newDailyData = row.data.reduce(
+            (rowValues, value, index) => {
+              const columnId = columnIds[index];
+              rowValues[columnId] = value;
+              return rowValues;
+            },
+            { date } as Partial<Overall>
+          );
 
-        return [...parsedResults, newDateData];
-      }, []);
+          return [...parsedResults, newDailyData];
+        }, [] as Partial<Overall>[])
+    );
+  }
+
+  // todo: refactor to use single date instead of a range
+  async getPageMetrics(
+    dateRange: DateRange,
+    options?: { settings?: ReportSettings; search?: ReportSearch }
+  ): Promise<Partial<PageMetrics[]>> {
+    if (!this.client) {
+      await this.initClient();
+    }
+
+    const pageMetricsQuery = createPageMetricsQuery(dateRange, options);
+    const results = await this.client.getReport(pageMetricsQuery);
+
+    const { columnIds } = results.body.columns;
+
+    return results.body.rows.reduce((parsedResults, row) => {
+      // the 'Z' means the date is UTC, so no conversion required
+      const date = new Date(dateRange.start + 'Z');
+
+      // build up results object using columnIds as keys
+      const newPageMetricsData = row.data.reduce(
+        (rowValues, value, index) => {
+          const columnId = columnIds[index];
+          rowValues[columnId] = value;
+
+          return rowValues;
+        },
+        { date, url: row.value } as Partial<PageMetrics>
+      );
+
+      return [...parsedResults, newPageMetricsData];
+    }, [] as Partial<PageMetrics>[]);
+  }
+
+  async getExamplePageBreakdownMetrics(dateRange: DateRange): Promise<any[]> {
+    if (!this.client) {
+      await this.initClient();
+    }
+
+    const pageMetricsQuery = createPageMetricsQuery(dateRange);
+    const results = await this.client.getReport(pageMetricsQuery);
+
+    return results.body;
   }
 }
