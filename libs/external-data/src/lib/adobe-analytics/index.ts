@@ -9,7 +9,11 @@ export * from './aa-metrics';
 
 import { Overall, PageMetrics } from '@cra-arc/db';
 import { AnalyticsCoreAPI, getAAClient } from './client';
-import { createOverallMetricsQuery, createPageMetricsQuery } from './queries';
+import {
+  createExamplePageBreakdownMetricsQuery,
+  createOverallMetricsQuery,
+  createPageMetricsQuery,
+} from './queries';
 import { ReportSettings, ReportSearch } from './querybuilder';
 
 dayjs.extend(utc);
@@ -108,8 +112,8 @@ export class AdobeAnalyticsClient {
       await this.initClient();
     }
 
-    const pageMetricsQuery = createPageMetricsQuery(dateRange);
-    const results = await this.client.getReport(pageMetricsQuery);
+    const pageBreakdownMetricsQuery = createExamplePageBreakdownMetricsQuery(dateRange);
+    const results = await this.client.getReport(pageBreakdownMetricsQuery);
 
     return results.body;
   }
