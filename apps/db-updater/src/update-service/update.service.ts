@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { updateOverallMetrics, withRetry } from '@cra-arc/db-update';
-
+import { updateOverallMetrics } from '@cra-arc/db-update';
+import { withRetry } from '@cra-arc/external-data'
 
 @Injectable()
 export class UpdateService {
@@ -13,8 +13,9 @@ export class UpdateService {
 
     try {
       const results = await Promise.allSettled([
-        withRetry(updateOverallMetrics, 4, 1000)()
-          .catch((err) => this.logger.error('Failed to update overall metrics', err)),
+        withRetry(updateOverallMetrics, 4, 1000)().catch((err) =>
+          this.logger.error('Failed to update overall metrics', err)
+        ),
       ]);
 
       for (const result of results) {

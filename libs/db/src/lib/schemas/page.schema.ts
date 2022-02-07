@@ -11,6 +11,9 @@ export class Page {
   @Prop({ required: true, type: String })
   url = '';
 
+  @Prop({ type: [String] })
+  all_urls: string[] = [];
+
   @Prop({ required: true, type: String })
   title = '';
 
@@ -19,6 +22,12 @@ export class Page {
 
   @Prop({ type: String })
   language = '';
+
+  @Prop({ type: Date })
+  lastUpdated = new Date(0);
+
+  @Prop({ type: Date })
+  lastModified = new Date(0);
 }
 
 export const PageSchema = SchemaFactory.createForClass(Page);
