@@ -8,9 +8,8 @@ describe('OverviewCalldriversComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ OverviewCalldriversComponent ]
-    })
-    .compileComponents();
+      declarations: [OverviewCalldriversComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {

@@ -61,10 +61,13 @@ const routes: Routes = [
           { path: '', redirectTo: 'summary', pathMatch: 'full' },
           { path: 'summary', component: PageDetailsSummaryComponent },
           { path: 'webtraffic', component: PageDetailsWebtrafficComponent },
-          { path: 'search_analytics', component: PageDetailsSearchAnalyticsComponent },
+          {
+            path: 'search_analytics',
+            component: PageDetailsSearchAnalyticsComponent,
+          },
           { path: 'feedback', component: PageDetailsFeedbackComponent },
         ],
-      }
+      },
     ],
   },
   {
@@ -79,10 +82,13 @@ const routes: Routes = [
           { path: '', redirectTo: 'summary', pathMatch: 'full' },
           { path: 'summary', component: TaskDetailsSummaryComponent },
           { path: 'webtraffic', component: TaskDetailsWebtrafficComponent },
-          { path: 'search_analytics', component: TaskDetailsSearchAnalyticsComponent },
+          {
+            path: 'search_analytics',
+            component: TaskDetailsSearchAnalyticsComponent,
+          },
           { path: 'feedback', component: TaskDetailsFeedbackComponent },
         ],
-      }
+      },
     ],
   },
   {
@@ -97,10 +103,13 @@ const routes: Routes = [
           { path: '', redirectTo: 'summary', pathMatch: 'full' },
           { path: 'summary', component: ProjectDetailsSummaryComponent },
           { path: 'webtraffic', component: ProjectDetailsWebtrafficComponent },
-          { path: 'search_analytics', component: ProjectDetailsSearchAnalyticsComponent },
+          {
+            path: 'search_analytics',
+            component: ProjectDetailsSearchAnalyticsComponent,
+          },
           { path: 'feedback', component: ProjectDetailsFeedbackComponent },
         ],
-      }
+      },
     ],
   },
 
@@ -111,6 +120,6 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

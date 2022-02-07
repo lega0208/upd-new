@@ -12,7 +12,7 @@ export interface DateRange {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DateSelectorService {
   private periodSelection: 'week' | 'month' = 'month';
@@ -59,7 +59,9 @@ export class DateSelectorService {
     this.comparisonSelection = comparisonSelection;
   }
 
-  public getPeriod(periodType: 'current' | 'prior' | 'full' = 'current'): DateRange {
+  public getPeriod(
+    periodType: 'current' | 'prior' | 'full' = 'current'
+  ): DateRange {
     // let periodEnd = dayjs().startOf(this.periodSelection).subtract(1, 'day');
     // let periodStart = periodEnd.startOf(this.periodSelection);
     //
@@ -100,44 +102,43 @@ export class DateSelectorService {
   public async setDateParams(queryParams: Params) {
     this.dateParams = {
       startDate: queryParams['startDate'] || this.dateParams?.startDate,
-      endDate:  queryParams['endDate'] || this.dateParams?.endDate,
-    }
+      endDate: queryParams['endDate'] || this.dateParams?.endDate,
+    };
 
-    return this.router.navigate(
-      [],
-      {
-        relativeTo: this.route,
-        queryParams,
-        queryParamsHandling: 'merge', // remove to replace all query params by provided
-      })
+    return this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge', // remove to replace all query params by provided
+    });
   }
 
   initDates() {
     const currentParams = this.route.snapshot.queryParamMap;
     this.dateParams = {
       startDate:
-        currentParams.get('startDate') || this.toFormat(this.dateRange.startDate as Date, 'YYYY-MM-DD'),
+        currentParams.get('startDate') ||
+        this.toFormat(this.dateRange.startDate as Date, 'YYYY-MM-DD'),
       endDate:
-        currentParams.get('endDate') || this.toFormat(this.dateRange.endDate as Date, 'YYYY-MM-DD'),
-    }
+        currentParams.get('endDate') ||
+        this.toFormat(this.dateRange.endDate as Date, 'YYYY-MM-DD'),
+    };
 
     this.setDateParams(this.dateParams).then(() => {
-        this.route.queryParams.subscribe(params => {
-          if (!!params['startDate'] && !!params['endDate'])
-            return;
+      this.route.queryParams.subscribe((params) => {
+        if (!!params['startDate'] && !!params['endDate']) return;
 
-          const newParams: Params = {};
+        const newParams: Params = {};
 
-          if (!params['startDate']) {
-            newParams['startDate'] = this.dateParams?.startDate;
-          }
+        if (!params['startDate']) {
+          newParams['startDate'] = this.dateParams?.startDate;
+        }
 
-          if (!params['endDate']) {
-            newParams['endDate'] = this.dateParams?.endDate;
-          }
+        if (!params['endDate']) {
+          newParams['endDate'] = this.dateParams?.endDate;
+        }
 
-          return this.setDateParams(newParams);
-        });
+        return this.setDateParams(newParams);
       });
+    });
   }
 }

@@ -1,5 +1,3 @@
-
-
 <app-card card-title="Example chart" title-tooltip="wow! an example!" [h]="50">
   <div class="h-100">
     <ngx-charts-bar-vertical
@@ -14,7 +12,8 @@
       [xAxisLabel]="xAxisLabel"
       [yAxisLabel]="yAxisLabel"
       [roundEdges]="roundEdges"
-      (select)="onSelect($event)">
+      (select)="onSelect($event)"
+    >
     </ngx-charts-bar-vertical>
   </div>
 </app-card>

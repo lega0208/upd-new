@@ -8,9 +8,8 @@ describe('OverviewUxTestsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ OverviewUxTestsComponent ]
-    })
-    .compileComponents();
+      declarations: [OverviewUxTestsComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {

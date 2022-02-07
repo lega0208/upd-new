@@ -6,9 +6,7 @@ import { PageSchema, Page } from '@cra-arc/db';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Page.name, schema: PageSchema },
-    ])
+    MongooseModule.forFeature([{ name: Page.name, schema: PageSchema }]),
   ],
   controllers: [PagesController],
   providers: [PagesService],

@@ -7,9 +7,7 @@ import { Overall, OverallSchema } from '@cra-arc/db';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Overall.name, schema: OverallSchema },
-    ])
+    MongooseModule.forFeature([{ name: Overall.name, schema: OverallSchema }]),
   ],
   controllers: [OverallController],
   providers: [OverallService],

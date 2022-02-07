@@ -81,15 +81,15 @@ import { DataTableComponent } from './components/datatable/data-table/data-table
     DataTableComponent,
     CardComponent,
   ],
-	imports: [
-		BrowserModule,
+  imports: [
+    BrowserModule,
     HttpClientModule,
     BrowserAnimationsModule,
-		AppRoutingModule,
-		NgbPopoverModule,
+    AppRoutingModule,
+    NgbPopoverModule,
     NgxChartsModule,
-	],
+  ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

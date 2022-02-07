@@ -3,13 +3,10 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-project-details-feedback',
   templateUrl: './project-details-feedback.component.html',
-  styleUrls: ['./project-details-feedback.component.css']
+  styleUrls: ['./project-details-feedback.component.css'],
 })
 export class ProjectDetailsFeedbackComponent implements OnInit {
+  constructor() {}
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
+  ngOnInit(): void {}
 }

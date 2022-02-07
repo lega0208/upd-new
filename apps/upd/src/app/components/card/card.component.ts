@@ -6,7 +6,11 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
   template: `
     <div class="card pb-3 pt-2" [ngClass]="h !== 0 ? 'h-' + h : ''">
       <div class="card-body card-pad pt-2 h-100">
-        <h3 *ngIf="title != ''" class="card-title h6" [class.card-tooltip]="tooltip">
+        <h3
+          *ngIf="title != ''"
+          class="card-title h6"
+          [class.card-tooltip]="tooltip"
+        >
           <span [ngbPopover]="tooltip">{{ title }}</span>
         </h3>
         <ng-content></ng-content>
@@ -18,7 +22,7 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 export class CardComponent {
   @Input('card-title') title: string = '';
   @Input('title-tooltip') tooltip: string = '';
-  @Input('h') h: number = 0
+  @Input('h') h: number = 0;
 
   constructor(config: NgbPopoverConfig) {
     config.disablePopover = this.tooltip !== '';

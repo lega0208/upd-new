@@ -7,13 +7,18 @@ import { FilterQuery, Model } from 'mongoose';
 
 @Injectable()
 export class OverallService {
-  constructor(@InjectModel(Overall.name) private overallModel: Model<OverallDocument>) {}
+  constructor(
+    @InjectModel(Overall.name) private overallModel: Model<OverallDocument>
+  ) {}
 
   create(createOverallDto: CreateOverallDto) {
     return 'This action adds a new overall';
   }
 
-  async getMetrics(dateRange: { endDate?: string; startDate?: string }): Promise<Overall[]> {
+  async getMetrics(dateRange: {
+    endDate?: string;
+    startDate?: string;
+  }): Promise<Overall[]> {
     const dateQuery: FilterQuery<Date> = {};
 
     if (dateRange.startDate) {

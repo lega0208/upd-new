@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 @Component({
   selector: 'app-example-chart',
   templateUrl: './example-chart.component.html',
-  styleUrls: ['./example-chart.component.css']
+  styleUrls: ['./example-chart.component.css'],
 })
 export class ExampleChartComponent implements OnInit {
   // data
@@ -28,7 +28,7 @@ export class ExampleChartComponent implements OnInit {
     group: ScaleType.Ordinal,
     name: 'daScheme',
     selectable: true,
-    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'] // todo: set to right colours
+    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'], // todo: set to right colours
   };
 
   constructor(private apiService: ApiService) {}
@@ -44,11 +44,12 @@ export class ExampleChartComponent implements OnInit {
   }
 
   getData() {
-    this.apiService.getOverallMetrics()
-      .subscribe((data: any) => {
-        this.single = data
-          .map((document: any) => ({ name: dayjs(document.date).format('MMM D'), value: document.visits }));
-      });
+    this.apiService.getOverallMetrics().subscribe((data: any) => {
+      this.single = data.map((document: any) => ({
+        name: dayjs(document.date).format('MMM D'),
+        value: document.visits,
+      }));
+    });
   }
 
   onSelect(event: any) {

@@ -5,7 +5,8 @@ import {
   Body,
   Patch,
   Param,
-  Delete, Query,
+  Delete,
+  Query,
 } from '@nestjs/common';
 import { OverallService } from './overall.service';
 import { CreateOverallDto } from './dto/create-overall.dto';
@@ -21,7 +22,10 @@ export class OverallController {
   }
 
   @Get()
-  getMetrics(@Query('startDate') startDate: string, @Query('endDate') endDate: string) {
+  getMetrics(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string
+  ) {
     return this.overallService.getMetrics({ startDate, endDate });
   }
 

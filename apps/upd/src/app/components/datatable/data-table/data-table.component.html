@@ -1,12 +1,14 @@
 <table class="table table-striped">
   <thead>
-  <tr>
-    <th *ngFor="let key of colnames" scope="col">{{ key | titlecase }}</th>
-  </tr>
+    <tr>
+      <th *ngFor="let key of colnames" scope="col">{{ key | titlecase }}</th>
+    </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let row of data">
-    <td *ngFor="let keyval of row | keyvalue : originalOrder">{{ keyval.value }}</td>
-  </tr>
+    <tr *ngFor="let row of data">
+      <td *ngFor="let keyval of row | keyvalue: originalOrder">
+        {{ keyval.value }}
+      </td>
+    </tr>
   </tbody>
 </table>

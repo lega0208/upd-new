@@ -8,9 +8,8 @@ describe('TaskDetailsFeedbackComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TaskDetailsFeedbackComponent ]
-    })
-    .compileComponents();
+      declarations: [TaskDetailsFeedbackComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {

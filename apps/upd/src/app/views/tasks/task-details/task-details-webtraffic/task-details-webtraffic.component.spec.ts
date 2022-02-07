@@ -8,9 +8,8 @@ describe('TaskDetailsWebtrafficComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TaskDetailsWebtrafficComponent ]
-    })
-    .compileComponents();
+      declarations: [TaskDetailsWebtrafficComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
