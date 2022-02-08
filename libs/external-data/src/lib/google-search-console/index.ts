@@ -1,33 +1,23 @@
 import { getGscClient, Searchconsole } from './client';
-import { SearchAnalyticsQueryBuilder } from './query';
+import { SearchAnalyticsQueryBuilder, SearchFilter } from './query';
 
 export * from './client';
 export * from './query';
-
-import { withTimeout } from '../utils';
 
 export class SearchAnalyticsClient {
   client: Searchconsole;
   queryBuilder = new SearchAnalyticsQueryBuilder();
 
-  async initClient() {
-    this.client = await getGscClient();
+  constructor() {
+    this.client = getGscClient();
   }
 
   async getOverallMetrics(dateRange: { start: string; end: string }) {
-    // todo: better way to handle dates / allow single dates
-    if (!this.client) {
-      await this.initClient();
-    }
-
-    const formattedDate = `${dateRange.start}/${dateRange.end}`;
-    console.log(formattedDate);
-
     const overallMetricsQuery = this.queryBuilder
       .setStartDate(dateRange.start)
       .setEndDate(dateRange.end)
       .addDimensions('date')
-      .setFilter([
+      .setFilters([
         {
           dimension: 'page',
           operator: 'includingRegex',
@@ -38,29 +28,29 @@ export class SearchAnalyticsClient {
       .setDataState('final')
       .build();
 
-    console.log(overallMetricsQuery);
-
-    // todo: figure out better way to handle timeouts, retries, etc
-    const results = await withTimeout<any>(
-      () =>
-        this.client.searchanalytics.query({
-          siteUrl: 'https://www.canada.ca/',
-          requestBody: overallMetricsQuery,
-        }),
-      25000
-    )();
+    const results = await this.client.searchanalytics.query({
+      siteUrl: 'https://www.canada.ca/',
+      requestBody: overallMetricsQuery,
+    });
 
     return results.data.rows;
   }
 
-  async getPageMetrics(dateRange: { start: string; end: string }) {
-    // todo: better way to handle dates / allow single dates
-    if (!this.client) {
-      await this.initClient();
-    }
-
-    const formattedDate = `${dateRange.start}/${dateRange.end}`;
-    console.log(formattedDate);
+  async getPageMetrics(
+    dateRange: { start: string; end: string },
+    url?: string
+  ) {
+    const pageFilter: SearchFilter = url
+      ? {
+          dimension: 'page',
+          expression: `https://${url}`,
+        }
+      : {
+          dimension: 'page',
+          operator: 'includingRegex',
+          expression:
+            '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
+        };
 
     const pageMetricsQuery = this.queryBuilder
       .setStartDate(dateRange.start)
@@ -68,29 +58,17 @@ export class SearchAnalyticsClient {
       .addDimensions('query')
       .addDimensions('date')
       .addDimensions('page')
-      .setFilter([
-        {
-          dimension: 'page',
-          operator: 'includingRegex',
-          expression:
-            '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
-        },
-      ])
+      .setFilters([pageFilter])
       .setDataState('final')
       .setRowLimit(20000)
       .build();
 
     console.log(pageMetricsQuery);
 
-    // todo: figure out better way to handle timeouts, retries, etc
-    const results = await withTimeout<any>(
-      () =>
-        this.client.searchanalytics.query({
-          siteUrl: 'https://www.canada.ca/',
-          requestBody: pageMetricsQuery,
-        }),
-      25000
-    )();
+    const results = await this.client.searchanalytics.query({
+      siteUrl: 'https://www.canada.ca/',
+      requestBody: pageMetricsQuery,
+    });
 
     return results.data.rows;
   }

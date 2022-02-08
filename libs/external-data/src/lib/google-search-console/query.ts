@@ -1,13 +1,13 @@
 import {
   FilterDimension,
   FilterOperator,
-  dimension,
-  aggregationType,
-  dataState,
-  type,
+  Dimension,
+  AggregationType,
+  DataState,
+  QueryType,
 } from './gsc-property';
 
-export interface SearchFilters {
+export interface SearchFilter {
   dimension?: FilterDimension;
   operator?: FilterOperator;
   expression?: string;
@@ -16,18 +16,18 @@ export interface SearchFilters {
 export interface SearchAnalyticsReportQuery {
   startDate?: string;
   endDate?: string;
-  dimensions?: [dimension];
-  type?: type;
+  dimensions?: [Dimension];
+  type?: QueryType;
   dimensionFilterGroups?: [
     {
-      filters?: SearchFilters[];
+      filters?: SearchFilter[];
       groupType?: string;
     }
   ];
-  aggregationType?: aggregationType;
+  aggregationType?: AggregationType;
   rowLimit?: number;
   startRow?: number;
-  dataState?: dataState;
+  dataState?: DataState;
 }
 
 export class SearchAnalyticsQueryBuilder {
@@ -49,7 +49,7 @@ export class SearchAnalyticsQueryBuilder {
     return this;
   }
 
-  public addDimensions(dimensions: dimension) {
+  public addDimensions(dimensions: Dimension) {
     if (!this.query.dimensions) {
       this.query.dimensions = [dimensions];
     } else {
@@ -68,27 +68,21 @@ export class SearchAnalyticsQueryBuilder {
     return this;
   }
 
-  public setAggregationType(aggregationType: aggregationType) {
+  public setAggregationType(aggregationType: AggregationType) {
     this.query.aggregationType = aggregationType;
     return this;
   }
 
-  public setDataState(dataState: dataState) {
+  public setDataState(dataState: DataState) {
     this.query.dataState = dataState;
     return this;
   }
 
-  public setFilter(SearchFilters: SearchFilters[]) {
-    this.query.dimensionFilterGroups = [{ filters: SearchFilters }];
+  public setFilters(searchFilters: SearchFilter[]) {
+    this.query.dimensionFilterGroups = [{ filters: searchFilters }];
 
     return this;
   }
-
-  // public addDimensionFilterGroup( SearchFilters: SearchFilters[] ) {
-  //     this.query.dimensionFilterGroups = SearchDimensionFilterGroup;
-  //     SearchDimensionFilterGroup
-  //     return this;
-  // }
 
   public build(): SearchAnalyticsReportQuery {
     if (this.hasDuplicates(this.query.dimensions)) {

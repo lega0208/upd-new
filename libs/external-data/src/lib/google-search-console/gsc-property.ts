@@ -94,7 +94,7 @@ export const type = {
 
 export type FilterDimension = keyof typeof filterDimensions;
 export type FilterOperator = keyof typeof filterOperator;
-export type dimension = keyof typeof dimensions;
-export type aggregationType = keyof typeof aggregationType;
-export type dataState = keyof typeof dataState;
-export type type = keyof typeof type;
+export type Dimension = keyof typeof dimensions;
+export type AggregationType = keyof typeof aggregationType;
+export type DataState = keyof typeof dataState;
+export type QueryType = keyof typeof type;
