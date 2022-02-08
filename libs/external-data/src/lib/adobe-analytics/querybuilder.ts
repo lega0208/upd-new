@@ -294,5 +294,8 @@ export class AdobeAnalyticsQueryBuilder {
 export const queryDateFormat = 'YYYY-MM-DDTHH:mm:ss.SSS';
 
 export function toQueryFormat(date: string): string {
+  if (!/\d{4}-\d{2}-\d{2}/.test(date)) {
+    throw new Error('Expected date in format: YYYY-MM-DD');
+  }
   return date + 'T00:00:00.000';
 }
