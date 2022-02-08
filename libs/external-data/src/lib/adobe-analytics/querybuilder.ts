@@ -35,6 +35,11 @@ export const CALCULATED_METRICS = {
   RAP_LINK_NOT_WORKING: 'cm300000938_5be20584d73387096a40a7f7',
   RAP_404: 'cm300000938_5d41aeae7b5c727e37cadf5f',
   RAP_BLANK_FORM: 'cm300000938_5be205847e27304437eed321',
+  // Did you find what you were looking for?
+  FWYLF_CANT_FIND_INFO: 'cm300000938_62027221da83db49ec984fac',
+  FWYLF_OTHER: 'cm300000938_620277d665dc0c1f6cd1adbf',
+  FWYLF_HARD_TO_UNDERSTAND: 'cm300000938_620276e57af5584604585ced',
+  FWYLF_ERROR: 'cm300000938_620277b665dc0c1f6cd1adbe',
   // Provincial Data Visits
   GEO_AB: 'cm300000938_5e9dfecb8fadd45909cf1861',
   GEO_BC: 'cm300000938_5e9dfe97e952632604408cc8',
@@ -149,7 +154,7 @@ export class AdobeAnalyticsQueryBuilder {
   constructor(rsid: string = process.env.AW_REPORTSUITE_ID) {
     this.query = {
       rsid,
-      dimension: 'variables/evar12',
+      dimension: 'variables/evar22',
       metricContainer: {
         metrics: [],
       },
