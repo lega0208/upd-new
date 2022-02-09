@@ -16,7 +16,7 @@ export interface SearchFilter {
 export interface SearchAnalyticsReportQuery {
   startDate?: string;
   endDate?: string;
-  dimensions?: [Dimension];
+  dimensions?: Dimension[];
   type?: QueryType;
   dimensionFilterGroups?: [
     {
@@ -49,12 +49,17 @@ export class SearchAnalyticsQueryBuilder {
     return this;
   }
 
-  public addDimensions(dimensions: Dimension) {
-    if (!this.query.dimensions) {
-      this.query.dimensions = [dimensions];
-    } else {
-      this.query.dimensions.push(dimensions);
+  public addDimensions(dimensions: Dimension | Dimension[]) {
+    if (!Array.isArray(dimensions)) {
+      dimensions = [dimensions];
     }
+
+    if (!this.query.dimensions) {
+      this.query.dimensions = [];
+    }
+
+    this.query.dimensions.push(...dimensions);
+
     return this;
   }
 
