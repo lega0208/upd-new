@@ -87,16 +87,16 @@ export class Overall {
   @Prop({ type: Number })
   rap_blank_form = 0;
 
-  @Prop({ Type: Number })
+  @Prop({ type: Number })
   fwylf_cant_find_info = 0;
 
-  @Prop({ Type: Number })
+  @Prop({ type: Number })
   fwylf_other = 0;
 
-  @Prop({ Type: Number })
+  @Prop({ type: Number })
   fwylf_hard_to_understand = 0;
 
-  @Prop({ Type: Number })
+  @Prop({ type: Number })
   fwylf_error = 0;
 
   @Prop({ type: Number })
