@@ -33,7 +33,7 @@ export class SearchAnalyticsClient {
   private client: Searchconsole = getGscClient();
 
   async query(query) {
-    return this.client.searchanalytics.query(query)
+    return this.client.searchanalytics.query(query);
   }
 
   async getOverallMetrics(dateRange: DateRange, dataState?: DataState) {
@@ -43,7 +43,7 @@ export class SearchAnalyticsClient {
     for (const date of dates) {
       const mergedDateResults = Promise.all([
         this.getOverallTotals(date, { dataState }),
-        this.getOverallSearchTerms(date, { rowLimit: 250, dataState })
+        this.getOverallSearchTerms(date, { rowLimit: 250, dataState }),
       ]).then(([totals, searchTerms]) => ({
         ...totals,
         ...searchTerms,
@@ -57,7 +57,10 @@ export class SearchAnalyticsClient {
     return await Promise.all(promises);
   }
 
-  async getOverallTotals(date: string, options?: SearchAnalyticsQueryOptions): Promise<Partial<Overall>> {
+  async getOverallTotals(
+    date: string,
+    options?: SearchAnalyticsQueryOptions
+  ): Promise<Partial<Overall>> {
     const queryBuilder = new SearchAnalyticsQueryBuilder();
 
     const query = queryBuilder
@@ -103,7 +106,6 @@ export class SearchAnalyticsClient {
 
     const results = await this.query(query);
 
-
     if (!results.data.rows || results.data.rows?.length === 0) {
       return {};
     }
@@ -124,15 +126,17 @@ export class SearchAnalyticsClient {
     };
   }
 
-
-  async getPageMetrics(dateRange: DateRange, options?: SearchAnalyticsPageQueryOptions) {
+  async getPageMetrics(
+    dateRange: DateRange,
+    options?: SearchAnalyticsPageQueryOptions
+  ) {
     const dates = datesFromDateRange(dateRange);
     const promises = [];
 
     for (const date of dates) {
       const mergedDateResults = Promise.all([
         this.getPageTotals(date, options),
-        this.getPageSearchTerms(date, options)
+        this.getPageSearchTerms(date, options),
       ]).then(([totals, searchTerms]) => {
         const resultsWithTotals = Object.values(totals).map((total) => ({
           ...total,
@@ -149,23 +153,26 @@ export class SearchAnalyticsClient {
         const resultsWithoutTotals = pagesWithoutTotals.map((url) => {
           const pageResults = searchTerms[url];
 
-          const totals = pageResults.gsc_searchterms.reduce((results, searchTerm) => {
-            results.gsc_total_clicks += searchTerm.clicks;
-            results.gsc_total_impressions += searchTerm.impressions;
-            results.gsc_total_ctr += searchTerm.ctr;
-            results.gsc_total_position += searchTerm.position;
-            return results;
-          }, {
-            gsc_total_clicks: 0,
-            gsc_total_impressions: 0,
-            gsc_total_ctr: 0,
-            gsc_total_position: 0,
-          });
+          const totals = pageResults.gsc_searchterms.reduce(
+            (results, searchTerm) => {
+              results.gsc_total_clicks += searchTerm.clicks;
+              results.gsc_total_impressions += searchTerm.impressions;
+              results.gsc_total_ctr += searchTerm.ctr;
+              results.gsc_total_position += searchTerm.position;
+              return results;
+            },
+            {
+              gsc_total_clicks: 0,
+              gsc_total_impressions: 0,
+              gsc_total_ctr: 0,
+              gsc_total_position: 0,
+            }
+          );
 
           return {
             ...pageResults,
             ...totals,
-          }
+          };
         });
 
         return [...resultsWithTotals, ...resultsWithoutTotals];
@@ -179,7 +186,10 @@ export class SearchAnalyticsClient {
     return await Promise.all(promises);
   }
 
-  async getPageTotals(date: string, options?: SearchAnalyticsPageQueryOptions): Promise<Record<string, Partial<PageMetrics>>> {
+  async getPageTotals(
+    date: string,
+    options?: SearchAnalyticsPageQueryOptions
+  ): Promise<Record<string, Partial<PageMetrics>>> {
     const queryBuilder = new SearchAnalyticsQueryBuilder();
 
     const pageFilter: SearchFilter = !options?.url
@@ -206,20 +216,23 @@ export class SearchAnalyticsClient {
       return {};
     }
 
-    return results.data.rows.map((row) => ({
-      date: dayjs(date).utc(true).toDate(),
-      url: row['keys'][0]
-        .replace('https://', '')
-        .replace('#.+', ''),
-      gsc_total_clicks: row.clicks,
-      gsc_total_impressions: row.impressions,
-      gsc_total_ctr: row.ctr,
-      gsc_total_position: row.position,
-    }) as Partial<PageMetrics>).reduce((results, pageMetrics) => {
-      results[pageMetrics.url] = pageMetrics;
+    return results.data.rows
+      .map(
+        (row) =>
+          ({
+            date: dayjs(date).utc(true).toDate(),
+            url: row['keys'][0].replace('https://', '').replace('#.+', ''),
+            gsc_total_clicks: row.clicks,
+            gsc_total_impressions: row.impressions,
+            gsc_total_ctr: row.ctr,
+            gsc_total_position: row.position,
+          } as Partial<PageMetrics>)
+      )
+      .reduce((results, pageMetrics) => {
+        results[pageMetrics.url] = pageMetrics;
 
-      return results;
-    }, {} as Record<string, Partial<PageMetrics>>);
+        return results;
+      }, {} as Record<string, Partial<PageMetrics>>);
   }
 
   async getPageSearchTerms(
@@ -231,9 +244,9 @@ export class SearchAnalyticsClient {
     const pageFilter: SearchFilter = !options?.url
       ? craFilter
       : {
-        dimension: 'page',
-        expression: `https://${options.url}`,
-      };
+          dimension: 'page',
+          expression: `https://${options.url}`,
+        };
 
     const dimensions: Dimension[] = ['page', 'query'];
 
@@ -253,9 +266,7 @@ export class SearchAnalyticsClient {
     }
 
     return results.data.rows.reduce((results, row) => {
-      const url = row.keys[0]
-        .replace('https://', '')
-        .replace('#.+', '');
+      const url = row.keys[0].replace('https://', '').replace('#.+', '');
 
       if (!results[url]) {
         results[url] = {
@@ -278,7 +289,7 @@ export class SearchAnalyticsClient {
       });
 
       return results;
-    }, {} as Record<string, Partial<PageMetrics>>)
+    }, {} as Record<string, Partial<PageMetrics>>);
   }
 }
 
@@ -290,7 +301,6 @@ export function datesFromDateRange(dateRange: DateRange) {
 
   // doesn't include end date, which is what we want because AA date range doesn't include the end date
   while (!currentDate.isSame(endDate)) {
-
     dates.push(currentDate.format('YYYY-MM-DD'));
     currentDate = currentDate.add(1, 'day');
   }
