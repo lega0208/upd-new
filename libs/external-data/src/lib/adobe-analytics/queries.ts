@@ -6,7 +6,7 @@ import {
   ReportSettings,
   SEGMENTS,
 } from './querybuilder';
-import { DateRange } from './index';
+import { DateRange } from '../types';
 
 export const overallMetricsQueryConfig: MetricsConfig = {
   visits: 'metrics/visits',
@@ -92,18 +92,12 @@ export const createPageMetricsQuery = (
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = options.settings
-    ? {
-        nonesBehavior: 'return-nones',
-        countRepeatInstances: true,
-        limit: 25000,
-        ...options.settings,
-      }
-    : {
-        nonesBehavior: 'return-nones',
-        countRepeatInstances: true,
-        limit: 25000,
-      };
+  const querySettings = {
+    nonesBehavior: 'return-nones',
+    countRepeatInstances: true,
+    limit: 25000,
+    ...options.settings,
+  };
 
   if (options.search) {
     queryBuilder.setSearch(options.search);

@@ -1,5 +1,10 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { Overall, PageMetrics } from '@cra-arc/db';
+import { AnalyticsCoreAPI, getAAClient } from './client';
+import { createExamplePageBreakdownMetricsQuery, createOverallMetricsQuery, createPageMetricsQuery } from './queries';
+import { ReportSearch, ReportSettings } from './querybuilder';
+import { DateRange } from '../types';
 
 export * from './client';
 export * from './querybuilder';
@@ -7,21 +12,7 @@ export * from './queries';
 export * from './aa-dimensions';
 export * from './aa-metrics';
 
-import { Overall, PageMetrics } from '@cra-arc/db';
-import { AnalyticsCoreAPI, getAAClient } from './client';
-import {
-  createExamplePageBreakdownMetricsQuery,
-  createOverallMetricsQuery,
-  createPageMetricsQuery,
-} from './queries';
-import { ReportSettings, ReportSearch } from './querybuilder';
-
 dayjs.extend(utc);
-
-export type DateRange = {
-  start: string;
-  end: string;
-};
 
 export class AdobeAnalyticsClient {
   client: AnalyticsCoreAPI;
@@ -32,10 +23,15 @@ export class AdobeAnalyticsClient {
 
   async getOverallMetrics(
     dateRange: DateRange,
-    options?: ReportSettings
+    options: ReportSettings = {}
   ): Promise<Partial<Overall>[]> {
     if (!this.client) {
       await this.initClient();
+    }
+
+    options = {
+      limit: 400,
+      ...options,
     }
 
     const overallMetricsQuery = createOverallMetricsQuery(dateRange, options);
