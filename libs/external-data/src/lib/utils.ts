@@ -1,5 +1,8 @@
 // Utilities for timeouts, retries, and request throttling, etc.
 
+import { DateRange } from './types';
+import dayjs from 'dayjs';
+
 export const withTimeout = <T>(
   fn: () => Promise<T>,
   timeout
@@ -87,4 +90,19 @@ export function withRateLimit<T, U extends unknown[]>(
 
     return await waitForQueue(...args);
   };
+}
+
+// For GSC queries, because they're only done on individual dates
+export function datesFromDateRange(dateRange: DateRange) {
+  const dates = [];
+  let currentDate = dayjs(dateRange.start);
+  const endDate = dayjs(dateRange.end);
+
+  // doesn't include end date, which is what we want because AA date range doesn't include the end date
+  while (!currentDate.isSame(endDate)) {
+    dates.push(currentDate.format('YYYY-MM-DD'));
+    currentDate = currentDate.add(1, 'day');
+  }
+
+  return dates;
 }

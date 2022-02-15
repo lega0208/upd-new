@@ -6,6 +6,7 @@ import { DataState, Dimension } from './gsc-property';
 import { GscSearchTermMetrics, Overall, PageMetrics } from '@cra-arc/db';
 import { wait } from '@cra-arc/utils-common';
 import { DateRange } from '../types';
+import { datesFromDateRange } from '../utils';
 
 export * from './client';
 export * from './query';
@@ -293,17 +294,3 @@ export class SearchAnalyticsClient {
   }
 }
 
-// For GSC queries, because they're only done on individual dates
-export function datesFromDateRange(dateRange: DateRange) {
-  const dates = [];
-  let currentDate = dayjs(dateRange.start);
-  const endDate = dayjs(dateRange.end);
-
-  // doesn't include end date, which is what we want because AA date range doesn't include the end date
-  while (!currentDate.isSame(endDate)) {
-    dates.push(currentDate.format('YYYY-MM-DD'));
-    currentDate = currentDate.add(1, 'day');
-  }
-
-  return dates;
-}
