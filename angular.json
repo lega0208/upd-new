@@ -2,7 +2,6 @@
   "version": 2,
   "projects": {
     "api": "apps/api",
-    "api-interfaces": "libs/api-interfaces",
     "db": "libs/db",
     "db-update": "libs/db-update",
     "db-updater": "apps/db-updater",
