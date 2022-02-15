@@ -13,7 +13,7 @@ export interface SearchFilter {
   expression?: string;
 }
 
-export interface SearchAnalyticsReportQuery {
+export interface SearchAnalyticsReportQueryBody {
   startDate?: string;
   endDate?: string;
   dimensions?: Dimension[];
@@ -30,8 +30,13 @@ export interface SearchAnalyticsReportQuery {
   dataState?: DataState;
 }
 
+export interface SearchAnalyticsReportQuery {
+  siteUrl: string,
+  requestBody: SearchAnalyticsReportQueryBody,
+}
+
 export class SearchAnalyticsQueryBuilder {
-  private readonly query: SearchAnalyticsReportQuery;
+  private readonly query: SearchAnalyticsReportQueryBody;
 
   constructor() {
     this.query = {
@@ -90,13 +95,16 @@ export class SearchAnalyticsQueryBuilder {
   }
 
   public build(): SearchAnalyticsReportQuery {
-    if (this.hasDuplicates(this.query.dimensions)) {
+    if (this.query.dimensions && this.hasDuplicates(this.query.dimensions)) {
       throw new Error(
         'Tried to build the query but found the same value in dimension, they must be unique'
       );
     }
 
-    return this.query;
+    return {
+      siteUrl: 'https://www.canada.ca/',
+      requestBody: this.query,
+    };
   }
 
   public hasDuplicates(array) {
