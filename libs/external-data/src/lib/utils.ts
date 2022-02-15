@@ -93,14 +93,14 @@ export function withRateLimit<T, U extends unknown[]>(
 }
 
 // For GSC queries, because they're only done on individual dates
-export function datesFromDateRange(dateRange: DateRange) {
+export function datesFromDateRange(dateRange: DateRange, format = 'YYYY-MM-DD') {
   const dates = [];
   let currentDate = dayjs(dateRange.start);
   const endDate = dayjs(dateRange.end);
 
   // doesn't include end date, which is what we want because AA date range doesn't include the end date
   while (!currentDate.isSame(endDate)) {
-    dates.push(currentDate.format('YYYY-MM-DD'));
+    dates.push(currentDate.format(format));
     currentDate = currentDate.add(1, 'day');
   }
 
