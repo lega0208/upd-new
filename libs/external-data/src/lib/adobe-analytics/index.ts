@@ -2,9 +2,15 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { Overall, PageMetrics } from '@cra-arc/db';
 import { AnalyticsCoreAPI, getAAClient } from './client';
-import { createExamplePageBreakdownMetricsQuery, createOverallMetricsQuery, createPageMetricsQuery } from './queries';
-import { ReportSearch, ReportSettings } from './querybuilder';
+import {
+  createExamplePageBreakdownMetricsQuery,
+  createOverallMetricsQuery,
+  createPageMetricsQuery,
+} from './queries';
+import { queryDateFormat, ReportSearch, ReportSettings } from './querybuilder';
 import { DateRange } from '../types';
+import { datesFromDateRange } from '../utils';
+import { wait } from '@cra-arc/utils-common';
 
 export * from './client';
 export * from './querybuilder';
@@ -32,11 +38,10 @@ export class AdobeAnalyticsClient {
     options = {
       limit: 400,
       ...options,
-    }
+    };
 
     const overallMetricsQuery = createOverallMetricsQuery(dateRange, options);
 
-    // removed timeout for now
     const results = await this.client.getReport(overallMetricsQuery);
 
     // todo: should probably handle results having more than 1 "page" (i.e. paginated results)
@@ -73,34 +78,68 @@ export class AdobeAnalyticsClient {
   // todo: refactor to use single date instead of a range
   async getPageMetrics(
     dateRange: DateRange,
-    options?: { settings?: ReportSettings; search?: ReportSearch }
-  ): Promise<Partial<PageMetrics[]>> {
+    options?: {
+      settings?: ReportSettings;
+      search?: ReportSearch;
+      postProcess?: (
+        data: Partial<PageMetrics[]>
+      ) => Promise<Partial<PageMetrics[]>> | void;
+    }
+  ): Promise<Partial<PageMetrics[]>[]> {
     if (!this.client) {
       await this.initClient();
     }
+    const dateRanges = datesFromDateRange(dateRange, queryDateFormat).map(
+      (date) => ({
+        start: date,
+        end: dayjs(date).add(1, 'day').format(queryDateFormat),
+      })
+    );
+    const promises = [];
 
-    const pageMetricsQuery = createPageMetricsQuery(dateRange, options);
-    const results = await this.client.getReport(pageMetricsQuery);
+    for (const dateRange of dateRanges) {
+      const pageMetricsQuery = createPageMetricsQuery(dateRange, options);
+      const promise = this.client
+        .getReport(pageMetricsQuery)
+        .then((results) => {
+          const { columnIds } = results.body.columns;
 
-    const { columnIds } = results.body.columns;
+          return results.body.rows.reduce((parsedResults, row) => {
+            // the 'Z' means the date is UTC, so no conversion required
+            const date = new Date(dateRange.start + 'Z');
 
-    return results.body.rows.reduce((parsedResults, row) => {
-      // the 'Z' means the date is UTC, so no conversion required
-      const date = new Date(dateRange.start + 'Z');
+            // build up results object using columnIds as keys
+            const newPageMetricsData = row.data.reduce(
+              (rowValues, value, index) => {
+                const columnId = columnIds[index];
 
-      // build up results object using columnIds as keys
-      const newPageMetricsData = row.data.reduce(
-        (rowValues, value, index) => {
-          const columnId = columnIds[index];
-          rowValues[columnId] = value;
+                if (columnId === 'bouncerate' && value === 'NaN') {
+                  rowValues[columnId] = 0;
+                } else {
+                  rowValues[columnId] = value;
+                }
 
-          return rowValues;
-        },
-        { date, url: row.value } as Partial<PageMetrics>
-      );
+                return rowValues;
+              },
+              { date, url: row.value } as Partial<PageMetrics>
+            );
 
-      return [...parsedResults, newPageMetricsData];
-    }, [] as Partial<PageMetrics>[]);
+            return [...parsedResults, newPageMetricsData];
+          }, [] as Partial<PageMetrics>[]);
+        });
+
+      await wait(500);
+
+      if (options?.postProcess) {
+        promises.push(promise.then(options.postProcess));
+      } else {
+        promises.push(promise);
+      }
+
+      promises.push(promise);
+    }
+
+    return await Promise.all(promises);
   }
 
   async getExamplePageBreakdownMetrics(dateRange: DateRange): Promise<any[]> {
@@ -108,7 +147,8 @@ export class AdobeAnalyticsClient {
       await this.initClient();
     }
 
-    const pageBreakdownMetricsQuery = createExamplePageBreakdownMetricsQuery(dateRange);
+    const pageBreakdownMetricsQuery =
+      createExamplePageBreakdownMetricsQuery(dateRange);
     const results = await this.client.getReport(pageBreakdownMetricsQuery);
 
     return results.body;
