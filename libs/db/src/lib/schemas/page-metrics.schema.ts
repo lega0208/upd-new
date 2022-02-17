@@ -4,7 +4,7 @@ import { GscSearchTermMetrics } from './types';
 
 export type PageMetricsDocument = PageMetrics & Document;
 
-@Schema({ collection: 'page_metrics' })
+@Schema({ collection: 'pages_metrics' })
 export class PageMetrics {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId('');

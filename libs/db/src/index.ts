@@ -8,9 +8,9 @@ import {
   Overall,
   OverallSchema,
   Page,
+  PageSchema,
   PageMetrics,
   PageMetricsSchema,
-  PageSchema,
 } from './lib/db.schemas';
 
 export function getOverallModel(): Model<mongoose.Document<Overall>> {
