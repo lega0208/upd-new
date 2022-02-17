@@ -75,7 +75,6 @@ export class AdobeAnalyticsClient {
     );
   }
 
-  // todo: refactor to use single date instead of a range
   async getPageMetrics(
     dateRange: DateRange,
     options?: {

@@ -66,7 +66,6 @@ export async function updateOverallMetrics() {
 
     const newOverallMetrics = await fetchAndMergeOverallMetrics(dateRange);
 
-    // ids get automatically added by Mongoose
     const inserted = await overallMetricsModel.insertMany(newOverallMetrics);
 
     const datesInserted = inserted
