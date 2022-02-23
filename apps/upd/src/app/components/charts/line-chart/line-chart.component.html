@@ -1,11 +1,6 @@
-<app-card
-  class="d-inline-block w-100"
-  card-title="Example chart"
-  title-tooltip="wow! an example!"
-  [h]="50"
->
+<app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="50">
   <div class="h-100">
-    <ngx-charts-bar-vertical
+    <ngx-charts-line-chart
       [scheme]="colorScheme"
       [results]="single"
       [gradient]="gradient"
@@ -17,9 +12,12 @@
       [showYAxisLabel]="showYAxisLabel"
       [xAxisLabel]="xAxisLabel"
       [yAxisLabel]="yAxisLabel"
-      [roundEdges]="roundEdges"
+      [trimXAxisTicks]="trimXAxisTicks"
+      [trimYAxisTicks]="trimYAxisTicks"
+      [rotateXAxisTicks]="rotateXAxisTicks"
+      [maxXAxisTickLength]="maxXAxisTickLength"
+      [maxYAxisTickLength]="maxYAxisTickLength"
       (select)="onSelect($event)"
-    >
-    </ngx-charts-bar-vertical>
+    ></ngx-charts-line-chart>
   </div>
 </app-card>

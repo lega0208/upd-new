@@ -1,0 +1,29 @@
+<app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="50">
+  <div class="h-100">
+    <ngx-charts-bar-vertical-2d
+      [view]="view"
+      [scheme]="colorScheme"
+      [results]="single"
+      [gradient]="gradient"
+      [xAxis]="showXAxis"
+      [yAxis]="showYAxis"
+      [legend]="showLegend"
+      [legendTitle]="legendTitle"
+      [legendPosition]="legendPosition"
+      [showXAxisLabel]="showXAxisLabel"
+      [showYAxisLabel]="showYAxisLabel"
+      [xAxisLabel]="xAxisLabel"
+      [yAxisLabel]="yAxisLabel"
+      [roundEdges]="roundEdges"
+      [barPadding]="barPadding"
+      [groupPadding]="groupPadding"
+      [trimXAxisTicks]="trimXAxisTicks"
+      [trimYAxisTicks]="trimYAxisTicks"
+      [rotateXAxisTicks]="rotateXAxisTicks"
+      [maxXAxisTickLength]="maxXAxisTickLength"
+      [maxYAxisTickLength]="maxYAxisTickLength"
+      (select)="onSelect($event)"
+    >
+    </ngx-charts-bar-vertical-2d>
+  </div>
+</app-card>

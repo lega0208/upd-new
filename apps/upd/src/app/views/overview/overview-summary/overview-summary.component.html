@@ -2,4 +2,34 @@
 <!--  <p>Card content!</p>-->
 <!--</app-card>-->
 
-<app-example-chart></app-example-chart>
+<!-- <app-example-chart></app-example-chart> -->
+
+<app-vertical-bar-chart
+  [title]="'Example Title'"
+  [yAxisLabel]="'Tron'"
+  [xAxisLabel]="'Date'"
+  [displayLegend]="'below'"
+  [showLegend]="false"
+  [showGridLines]="false"
+  [colour]="['#2E5EA7']"
+  [data]="'overall'"
+></app-vertical-bar-chart>
+
+<app-grouped-vertical-bar-chart
+  [title]="'Example Title'"
+  [showLegend]="true"
+></app-grouped-vertical-bar-chart>
+
+<app-horizontal-bar-chart [title]="'Example Title'"></app-horizontal-bar-chart>
+
+<app-line-chart [title]="'Example Title'"></app-line-chart>
+
+<app-pie-chart [title]="'Example Title'"></app-pie-chart>
+
+<app-stacked-vertical-bar-chart
+  [title]="'Example Title'"
+></app-stacked-vertical-bar-chart>
+
+<app-grouped-vertical-bar-line-chart
+  [title]="'Example Title'"
+></app-grouped-vertical-bar-line-chart>

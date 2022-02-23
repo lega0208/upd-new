@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { first, map } from 'rxjs/operators';
-import { Color, ScaleType } from '@swimlane/ngx-charts';
+import { Color, LegendPosition, ScaleType } from '@lega0208/ngx-charts';
 import { ApiService } from '../../services/api/api.service';
 import dayjs from 'dayjs';
 
@@ -17,7 +17,8 @@ export class ExampleChartComponent implements OnInit {
   showXAxis = true;
   showYAxis = true;
   gradient = false;
-  showLegend = false;
+  showLegend = true;
+  legendPosition = LegendPosition.Below;
   showXAxisLabel = true;
   xAxisLabel = 'Date';
   showYAxisLabel = true;
