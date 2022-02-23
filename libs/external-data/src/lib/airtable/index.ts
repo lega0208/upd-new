@@ -5,10 +5,9 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { FieldSet, Query } from 'airtable';
 import { QueryParams, SortParameter } from 'airtable/lib/query_params';
 import { wait } from '@cra-arc/utils-common';
-import { getATClient, AirTableAPI, AirtableAPIBase } from './client';
+import { getATClient, AirTableAPI } from './client';
 import { bases } from './base';
-import { AirTableFields } from './query'
-import { CalldriverData, PagesData, TaskData, UxTestsData } from './types';
+import { CalldriverData, PageData, TaskData, UxTestsData } from './types';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -116,7 +115,7 @@ export class AirtableClient {
       })) as UxTestsData[];
   }
 
-  async getPages(lastUpdatedDate?: DateType): Promise<PagesData[]> {
+  async getPages(lastUpdatedDate?: DateType): Promise<PageData[]> {
     const params = lastUpdatedDate ? {
       filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate)
     } : {};
@@ -128,7 +127,7 @@ export class AirtableClient {
         title: fields['Page Title'],
         url: fields['Url'],
         tasks: fields['Tasks'],
-      })) as PagesData[];
+      })) as PageData[];
   }
 
   createCalldriverQueries(dateRange: { start: DateType, end: DateType }) {

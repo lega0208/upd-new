@@ -130,7 +130,7 @@ export async function updatePageUrls(pages: Document<Page>[], pagesModel: Model<
       await pagesModel.updateOne(
         { _id: page['_id'] },
         {
-          $currentDate: { lastUpdated: true, lastModified: true },
+          $currentDate: { lastChecked: true, lastModified: true },
           $set: { url: newUrl },
           $addToSet: { all_urls: page['url'] },
         }
@@ -208,7 +208,7 @@ export async function updatePageTitles(pages: Document<Page>[], pagesModel: Mode
         const res = await pagesModel.updateOne(
           { _id: new Types.ObjectId(title['_id']) },
           {
-            $currentDate: { lastUpdated: true, lastModified: true },
+            $currentDate: { lastChecked: true, lastModified: true },
             $set: { title: title['title'].trim() },
           }
         );
@@ -228,10 +228,10 @@ export async function updatePages() {
   const pages = await pagesModel
     .find(
       {
-        // find pages that have not been updated in the last two days, or that have never been updated
+        // find pages that have not been checked in the last two days, or that have never been updated
         $or: [{
-          lastUpdated: { $lte: twoDaysAgo } },
-          { lastUpdated: { $exists: false } }
+          lastChecked: { $lte: twoDaysAgo } },
+          { lastChecked: { $exists: false } }
         ],
       },
       { _id: 1, url: 1, title: 1 },
@@ -241,12 +241,12 @@ export async function updatePages() {
   await updatePageUrls(pages, pagesModel);
   await updatePageTitles(pages, pagesModel);
 
-  // update lastUpdated for all pages
+  // update lastChecked for all pages
   const pageIds = pages.map((page) => page['_id']);
   return pagesModel.updateMany(
     { _id: { $in: pageIds } },
     {
-      $currentDate: { lastUpdated: true },
+      $currentDate: { lastChecked: true },
     },
   );
 }

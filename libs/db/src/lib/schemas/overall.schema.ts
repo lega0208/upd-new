@@ -189,7 +189,7 @@ export class Overall {
       term: String,
     }]
   })
-  gsc_searchterms: GscSearchTermMetrics[] = [];
+  gsc_searchterms?: GscSearchTermMetrics[];
 }
 
 

@@ -7,8 +7,8 @@ export interface TaskData {
   subgroup?: string;
   topic?: string;
   subtopic?: string;
-  ux_tests?: string[];
   user_type?: string;
+  ux_tests?: string[];
   pages?: string[];
 }
 
@@ -26,7 +26,7 @@ export interface CalldriverData {
 
 export interface UxTestsData {
   airtable_id: string;
-  date: Date;
+  date?: Date;
   project_title: string;
   success_rate?: number;
   test_type?: string;
@@ -49,7 +49,7 @@ export interface UxTestsData {
   cops?: boolean;
 }
 
-export interface PagesData {
+export interface PageData {
   airtable_id: string;
   title: string;
   url: string;
