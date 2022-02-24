@@ -24,8 +24,8 @@ export class HorizontalBarChartComponent implements OnInit {
   @Input() barPadding = 8;
   @Input() gradient = false;
   @Input() displayLegend = 'below';
-  @Input() xAxisLabel = 'Date';
-  @Input() yAxisLabel = 'Number of Visits';
+  @Input() xAxisLabel = 'Number of Visits';
+  @Input() yAxisLabel = 'Date';
   @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D'];
   @Input() showLegend = false;
   @Input() showGridLines = false;
