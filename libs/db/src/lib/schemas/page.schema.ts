@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { model, Document, Model, Types } from 'mongoose';
 import { Task } from './task.schema';
 import { Project } from './project.schema';
 import { UxTest } from './ux-test.schema';
@@ -9,7 +9,7 @@ export type PageDocument = Page & Document;
 @Schema()
 export class Page {
   @Prop({ required: true })
-  _id: Types.ObjectId = new Types.ObjectId('');
+  _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ required: true, type: String })
   url = '';
@@ -20,8 +20,8 @@ export class Page {
   @Prop({ required: true, type: String })
   title = '';
 
-  @Prop({ type: String, unique: true })
-  airtable_id = '';
+  @Prop({ unique: true })
+  airtable_id?: string;
 
   @Prop({ type: Date })
   lastChecked = new Date(0);
@@ -30,13 +30,17 @@ export class Page {
   lastModified = new Date(0);
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }] })
-  tasks?: Task[];
+  tasks?: Types.ObjectId[] | Task[];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Project' }] })
-  projects?: Project[];
+  projects?: Types.ObjectId[] | Project[];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }] })
-  ux_tests?: UxTest[];
+  ux_tests?: Types.ObjectId[] | UxTest[];
 }
 
 export const PageSchema = SchemaFactory.createForClass(Page);
+
+export function getPageModel(): Model<Document<Page>> {
+  return model(Page.name, PageSchema);
+}

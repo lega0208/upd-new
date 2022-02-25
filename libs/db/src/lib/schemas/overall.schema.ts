@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { model, Document, Model, Types } from 'mongoose';
 import { GscSearchTermMetrics } from './types';
 
 export type OverallDocument = Overall & Document;
@@ -7,7 +7,7 @@ export type OverallDocument = Overall & Document;
 @Schema({ collection: 'overall_metrics' })
 export class Overall {
   @Prop({ required: true })
-  _id: Types.ObjectId = new Types.ObjectId('');
+  _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ required: true, type: Date })
   date = new Date(0);
@@ -194,3 +194,7 @@ export class Overall {
 
 
 export const OverallSchema = SchemaFactory.createForClass(Overall);
+
+export function getOverallModel(): Model<Document<Overall>> {
+  return model(Overall.name, OverallSchema);
+}

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { model, Document, Model, Types } from 'mongoose';
 import { GscSearchTermMetrics } from './types';
 
 export type PageMetricsDocument = PageMetrics & Document;
@@ -7,7 +7,7 @@ export type PageMetricsDocument = PageMetrics & Document;
 @Schema({ collection: 'pages_metrics' })
 export class PageMetrics {
   @Prop({ required: true })
-  _id: Types.ObjectId = new Types.ObjectId('');
+  _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ required: true, type: String })
   url = '';
@@ -196,3 +196,7 @@ export class PageMetrics {
 }
 
 export const PageMetricsSchema = SchemaFactory.createForClass(PageMetrics);
+
+export function getPageMetricsModel(): Model<Document<PageMetrics>> {
+  return model(PageMetrics.name, PageMetricsSchema);
+}

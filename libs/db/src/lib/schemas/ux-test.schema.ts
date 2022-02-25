@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { model, Document, Model, Types } from 'mongoose';
 import { Page } from './page.schema';
 import { Project } from './project.schema';
 import { Task } from './task.schema';
@@ -8,20 +8,20 @@ export type UxTestDocument = UxTest & Document;
 
 @Schema({ collection: 'ux_tests' })
 export class UxTest {
-  @Prop({ required: true, unique: true })
-  _id: Types.ObjectId = new Types.ObjectId('');
+  @Prop({ required: true })
+  _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ required: true, unique: true })
   airtable_id: string;
 
   @Prop({ required: true, type: Types.ObjectId, ref: 'UxTest' })
-  project: Project;
+  project: Types.ObjectId | Project;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Page' }] })
-  pages?: Page[];
+  pages?: Types.ObjectId[] | Page[];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }] })
-  tasks?: Task[];
+  tasks?: Types.ObjectId[] | Task[];
 
   @Prop({ type: String })
   subtask? = '';
@@ -76,3 +76,7 @@ export class UxTest {
 }
 
 export const UxTestSchema = SchemaFactory.createForClass(UxTest);
+
+export function getUxTestModel(): Model<Document<UxTest>> {
+  return model(UxTest.name, UxTestSchema);
+}
