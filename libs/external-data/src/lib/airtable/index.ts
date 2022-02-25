@@ -7,7 +7,7 @@ import { QueryParams, SortParameter } from 'airtable/lib/query_params';
 import { wait } from '@cra-arc/utils-common';
 import { getATClient, AirTableAPI } from './client';
 import { bases } from './base';
-import { CalldriverData, PageData, TaskData, UxTestsData } from './types';
+import { CalldriverData, PageData, TaskData, UxTestData } from './types';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -76,11 +76,11 @@ export class AirtableClient {
         subtopic: fields['Sub Topic'],
         ux_tests: fields['User Testing Projects'],
         user_type: fields['User Type'],
-        pages: fields['Lookup_Pages'],
+        pages: fields['Pages 2'],
       })) as TaskData[];
   }
 
-  async getUxTests(lastUpdatedDate?: DateType): Promise<UxTestsData[]> {
+  async getUxTests(lastUpdatedDate?: DateType): Promise<UxTestData[]> {
     const params = lastUpdatedDate ? {
       filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate)
     } : {};
@@ -99,7 +99,7 @@ export class AirtableClient {
         scenario: fields['Scenario/Questions'],
         tasks: fields['Task'],
         subtasks: fields['Sub-Task'],
-        pages: fields['Lookup_Pages'],
+        pages: fields['Pages_RecordIds'],
         vendor: fields['Vendor'],
         version_tested: fields['Version Tested'],
         github_repo: fields['GitHub Repo'],
@@ -112,7 +112,7 @@ export class AirtableClient {
         launch_date: fields['Launch Date'],
         status: fields['Status'],
         cops: fields['COPS'],
-      })) as UxTestsData[];
+      })) as UxTestData[];
   }
 
   async getPages(lastUpdatedDate?: DateType): Promise<PageData[]> {

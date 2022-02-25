@@ -24,7 +24,7 @@ export interface CalldriverData {
   calls: number;
 }
 
-export interface UxTestsData {
+export interface UxTestData {
   airtable_id: string;
   date?: Date;
   project_title: string;
