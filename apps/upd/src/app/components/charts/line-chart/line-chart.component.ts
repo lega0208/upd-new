@@ -124,7 +124,7 @@ export class LineChartComponent implements OnInit {
     return { min: `${min}`, max: `${max}` };
   }
 
-  yTickFormat(data: any) {
+  yAxisTickFormat(data: any) {
     return (data / 1000).toLocaleString();
   }
 
