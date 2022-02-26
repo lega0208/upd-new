@@ -1,7 +1,11 @@
 <app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="50">
-  <div class="h-100" style="margin-right: 60px">
+  <div #ContainerRef class="vh-45 mr-60">
     <combo-grouped-vertical-bar-line-chart
-      [view]="view"
+      [view]="
+        showLegend && displayLegend === 'below'
+          ? [ContainerRef.offsetWidth, ContainerRef.offsetHeight + 40]
+          : [ContainerRef.offsetWidth, ContainerRef.offsetHeight]
+      "
       [scheme]="comboBarScheme"
       [colorSchemeLine]="lineChartScheme"
       [results]="barChart"
@@ -37,6 +41,10 @@
       [rotateXAxisTicks]="rotateXAxisTicks"
       [maxXAxisTickLength]="maxXAxisTickLength"
       [maxYAxisTickLength]="maxYAxisTickLength"
+      [showDataLabel]="showDataLabel"
+      [rangeFillOpacity]="rangeFillOpacity"
+      [autoScale]="autoScale"
+      [curve]="curve"
       (select)="onSelect($event)"
     >
     </combo-grouped-vertical-bar-line-chart>

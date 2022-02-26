@@ -34,7 +34,7 @@ export class GroupedVerticalBarChartComponent implements OnInit {
   @Input() gradient = false;
   @Input() displayLegend = 'below';
   @Input() xAxisLabel = 'Date';
-  @Input() yAxisLabel = 'Number of Visits';
+  @Input() yAxisLabel = 'Visits (in thousands)';
   @Input() colour = ['#2E5EA7', '#B5C2CC'];
   @Input() showLegend = false;
   @Input() showGridLines = false;
@@ -44,13 +44,19 @@ export class GroupedVerticalBarChartComponent implements OnInit {
   @Input() trimYAxisTicks = true;
   @Input() maxXAxisTickLength = 16;
   @Input() maxYAxisTickLength = 16;
+  @Input() showDataLabel = false;
+  @Input() yScaleMax!: number;
+  @Input() yScaleMin = 0;
+  @Input() roundDomains = true;
+  @Input() tooltipDisabled = false;
+  @Input() animations = true;
 
   @Input() data = 'overall';
 
   week: string[] = dayjs.weekdays();
 
-  colorScheme: any;
-  legendPosition: any;
+  colorScheme!: Color;
+  legendPosition!: LegendPosition;
 
   constructor(private apiService: ApiService) {}
 
@@ -58,10 +64,6 @@ export class GroupedVerticalBarChartComponent implements OnInit {
     this.getData();
     this.setColourScheme();
     this.setLegendPosition();
-
-    if (!this.fitContainer) {
-      this.applyDimensions();
-    }
   }
 
   setColourScheme() {
@@ -186,6 +188,10 @@ export class GroupedVerticalBarChartComponent implements OnInit {
 
   applyDimensions() {
     this.view = [this.width, this.height];
+  }
+
+  yAxisTickFormat(data: any) {
+    return (data / 1000).toLocaleString();
   }
 
   onSelect(event: any) {

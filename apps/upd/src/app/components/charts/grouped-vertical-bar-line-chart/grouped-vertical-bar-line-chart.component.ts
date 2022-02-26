@@ -1,6 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ScaleType, LegendPosition } from '@lega0208/ngx-charts';
+import {
+  ScaleType,
+  LegendPosition,
+  ColorHelper,
+  Color,
+} from '@lega0208/ngx-charts';
 import { ApiService } from '../../../services/api/api.service';
+import * as shape from 'd3-shape';
 import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 dayjs.extend(localeData);
@@ -33,18 +39,17 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
   @Input() gradient = false;
   @Input() showLegend = true;
   @Input() legendTitle = 'Legend';
-  @Input() legendPosition = LegendPosition.Below;
   @Input() showXAxisLabel = true;
   @Input() tooltipDisabled = false;
   @Input() xAxisLabel = 'Days of Week';
   @Input() showYAxisLabel = true;
-  @Input() yAxisLabel = 'Visits';
+  @Input() yAxisLabel = 'Visits (in thousands)';
   @Input() showGridLines = true;
   @Input() barPadding = 6;
   @Input() groupPadding = 12;
   @Input() roundDomains = false;
   @Input() showSeriesOnHover = true;
-  @Input() displayLegend = 'below';
+  @Input() displayLegend = 'right';
   @Input() roundEdges = false;
   @Input() animations = true;
   @Input() xScaleMin: any;
@@ -55,18 +60,25 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
   @Input() colorLabelLeft = '';
   @Input() colorLabelRight = '#f37d35';
   @Input() showRightYAxisLabel = true;
-  @Input() yAxisLabelRight = 'Call volume';
+  @Input() yAxisLabelRight = 'Call volume (in thousands)';
   @Input() lineColour = ['#f37d35', '#fbbc4d'];
   @Input() barColour = ['#2E5EA7', '#B5C2CC'];
   @Input() trimXAxisTicks = true;
   @Input() trimYAxisTicks = true;
   @Input() maxXAxisTickLength = 16;
   @Input() maxYAxisTickLength = 16;
+  @Input() yScaleMax!: number;
+  @Input() yScaleMin = 0;
+  @Input() curveType: Curves = 'Linear';
+  @Input() rangeFillOpacity = 0.15;
+  @Input() autoScale = false;
   @Input() data = '';
 
   colorLabelDefault = 'black';
-  lineChartScheme: any;
-  comboBarScheme: any;
+  lineChartScheme!: Color;
+  comboBarScheme!: Color;
+  legendPosition!: LegendPosition;
+  curve: any;
 
   constructor(private apiService: ApiService) {}
 
@@ -74,6 +86,7 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
     this.getData();
     this.setColourScheme();
     this.setLegendPosition();
+    this.setCurve();
 
     if (!this.fitContainer) {
       this.applyDimensions();
@@ -108,6 +121,10 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
     } else {
       this.legendPosition = LegendPosition.Right;
     }
+  }
+
+  setCurve() {
+    this.curve = curves[this.curveType];
   }
 
   getData(): void {
@@ -222,11 +239,11 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
   }
 
   yLeftTickFormat(data: any) {
-    return `${data.toLocaleString()}`;
+    return (data / 1000).toLocaleString();
   }
 
   yRightTickFormat(data: any) {
-    return `${data.toLocaleString()}`;
+    return (data / 1000).toLocaleString();
   }
   /*
   **
@@ -238,3 +255,20 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
     console.log(event);
   }
 }
+
+const curves = {
+  Basis: shape.curveBasis,
+  Bundle: shape.curveBundle.beta(1),
+  Cardinal: shape.curveCardinal,
+  'Catmull Rom': shape.curveCatmullRom,
+  Linear: shape.curveLinear,
+  'Monotone X': shape.curveMonotoneX,
+  'Monotone Y': shape.curveMonotoneY,
+  Natural: shape.curveNatural,
+  Step: shape.curveStep,
+  'Step After': shape.curveStepAfter,
+  'Step Before': shape.curveStepBefore,
+  default: shape.curveLinear,
+};
+
+export type Curves = keyof typeof curves;

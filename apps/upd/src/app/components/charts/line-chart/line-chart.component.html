@@ -1,17 +1,35 @@
 <app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="50">
-  <div class="h-100">
+  <div #ContainerRef class="vh-45">
     <ngx-charts-line-chart
+      [view]="
+        showLegend && displayLegend === 'below'
+          ? [ContainerRef.offsetWidth, ContainerRef.offsetHeight + 40]
+          : [ContainerRef.offsetWidth, ContainerRef.offsetHeight]
+      "
       [scheme]="colorScheme"
       [results]="single"
+      [animations]="animations"
+      [legend]="showLegend"
+      [legendTitle]="legendTitle"
+      [legendPosition]="legendPosition"
       [gradient]="gradient"
       [xAxis]="showXAxis"
       [yAxis]="showYAxis"
-      [legend]="showLegend"
-      [legendPosition]="legendPosition"
       [showXAxisLabel]="showXAxisLabel"
       [showYAxisLabel]="showYAxisLabel"
       [xAxisLabel]="xAxisLabel"
       [yAxisLabel]="yAxisLabel"
+      [autoScale]="autoScale"
+      [xScaleMin]="xScaleMin"
+      [xScaleMax]="xScaleMax"
+      [yScaleMin]="yScaleMin"
+      [yScaleMax]="yScaleMax"
+      [timeline]="timeline"
+      [showGridLines]="showGridLines"
+      [curve]="curve"
+      [rangeFillOpacity]="rangeFillOpacity"
+      [roundDomains]="roundDomains"
+      [tooltipDisabled]="tooltipDisabled"
       [trimXAxisTicks]="trimXAxisTicks"
       [trimYAxisTicks]="trimYAxisTicks"
       [rotateXAxisTicks]="rotateXAxisTicks"

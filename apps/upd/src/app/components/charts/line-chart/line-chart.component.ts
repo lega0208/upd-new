@@ -1,11 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
-import {
-  Color,
-  ScaleType,
-  LegendPosition,
-  TreeMapModule,
-} from '@lega0208/ngx-charts';
+import { Color, ScaleType, LegendPosition } from '@lega0208/ngx-charts';
 import { ApiService } from '../../../services/api/api.service';
+import * as shape from 'd3-shape';
 import dayjs from 'dayjs';
 
 @Component({
@@ -16,6 +12,7 @@ import dayjs from 'dayjs';
 export class LineChartComponent implements OnInit {
   @Input() title = '';
   @Input() titleTooltip = '';
+  @Input() animations = true;
   @Input() showXAxis = true;
   @Input() showYAxis = true;
   @Input() showXAxisLabel = true;
@@ -24,23 +21,35 @@ export class LineChartComponent implements OnInit {
   @Input() rotateXAxisTicks = true;
   @Input() barPadding = 8;
   @Input() gradient = false;
-  @Input() displayLegend = 'below';
-  @Input() xAxisLabel = 'Date';
-  @Input() yAxisLabel = 'Number of Visits';
-  @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D'];
   @Input() showLegend = false;
-  @Input() showGridLines = false;
+  @Input() displayLegend = 'below';
+  @Input() legendTitle = 'Legend';
+  @Input() xAxisLabel = 'Date';
+  @Input() yAxisLabel = 'Visits (in thousands)';
+  @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D'];
+  @Input() showGridLines = true;
   @Input() noBarWhenZero = true;
   @Input() data = 'overall';
-  @Input() legendTitle = 'Legend';
-
   @Input() trimXAxisTicks = true;
   @Input() trimYAxisTicks = true;
   @Input() maxXAxisTickLength = 16;
   @Input() maxYAxisTickLength = 16;
+  @Input() rangeFillOpacity = 0.15;
+  @Input() autoScale = false;
+  @Input() yScaleMax!: number;
+  @Input() yScaleMin = 0;
+  @Input() xScaleMax!: number;
+  @Input() xScaleMin = 0;
+  @Input() tooltipDisabled = false;
+  @Input() timeline = false;
+  @Input() curveType: Curves = 'Basis';
+  @Input() roundDomains = false;
 
-  colorScheme: any;
-  legendPosition: any;
+  //curveType = 'default';
+
+  colorScheme!: Color;
+  legendPosition!: LegendPosition;
+  curve: any;
 
   // data
   single: any = [];
@@ -51,6 +60,8 @@ export class LineChartComponent implements OnInit {
     this.getData();
     this.setLegendPosition();
     this.setColourScheme();
+
+    this.setCurve();
   }
 
   getData(): void {
@@ -105,7 +116,36 @@ export class LineChartComponent implements OnInit {
     };
   }
 
+  setCurve() {
+    this.curve = curves[this.curveType];
+  }
+
+  yAxisScale(min: any, max: any) {
+    return { min: `${min}`, max: `${max}` };
+  }
+
+  yTickFormat(data: any) {
+    return (data / 1000).toLocaleString();
+  }
+
   onSelect(event: any) {
     console.log(event);
   }
 }
+
+const curves = {
+  Basis: shape.curveBasis,
+  Bundle: shape.curveBundle.beta(1),
+  Cardinal: shape.curveCardinal,
+  'Catmull Rom': shape.curveCatmullRom,
+  Linear: shape.curveLinear,
+  'Monotone X': shape.curveMonotoneX,
+  'Monotone Y': shape.curveMonotoneY,
+  Natural: shape.curveNatural,
+  Step: shape.curveStep,
+  'Step After': shape.curveStepAfter,
+  'Step Before': shape.curveStepBefore,
+  default: shape.curveLinear,
+};
+
+export type Curves = keyof typeof curves;

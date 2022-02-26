@@ -25,7 +25,7 @@ export class VerticalBarChartComponent implements OnInit {
   @Input() gradient = false;
   @Input() displayLegend = 'below';
   @Input() xAxisLabel = 'Date';
-  @Input() yAxisLabel = 'Number of Visits';
+  @Input() yAxisLabel = 'Visits (in thousands)';
   @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D'];
   @Input() showLegend = false;
   @Input() showGridLines = false;
@@ -36,6 +36,12 @@ export class VerticalBarChartComponent implements OnInit {
   @Input() trimYAxisTicks = true;
   @Input() maxXAxisTickLength = 16;
   @Input() maxYAxisTickLength = 16;
+  @Input() showDataLabel = false;
+  @Input() yScaleMax!: number;
+  @Input() yScaleMin = 0;
+  @Input() roundDomains = true;
+  @Input() tooltipDisabled = false;
+  @Input() animations = true;
 
   colorScheme: any;
   legendPosition: any;
@@ -83,6 +89,10 @@ export class VerticalBarChartComponent implements OnInit {
       selectable: true,
       domain: this.colour,
     };
+  }
+
+  yAxisTickFormat(data: any) {
+    return (data / 1000).toLocaleString();
   }
 
   onSelect(event: any) {

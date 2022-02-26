@@ -1,9 +1,14 @@
 <app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="50">
-  <div class="h-100">
+  <div #ContainerRef class="vh-45">
     <ngx-charts-bar-vertical-2d
-      [view]="view"
+      [view]="
+        showLegend && displayLegend === 'below'
+          ? [ContainerRef.offsetWidth, ContainerRef.offsetHeight + 40]
+          : [ContainerRef.offsetWidth, ContainerRef.offsetHeight]
+      "
       [scheme]="colorScheme"
       [results]="single"
+      [animations]="animations"
       [gradient]="gradient"
       [xAxis]="showXAxis"
       [yAxis]="showYAxis"
@@ -12,18 +17,31 @@
       [legendPosition]="legendPosition"
       [showXAxisLabel]="showXAxisLabel"
       [showYAxisLabel]="showYAxisLabel"
+      [tooltipDisabled]="tooltipDisabled"
       [xAxisLabel]="xAxisLabel"
       [yAxisLabel]="yAxisLabel"
-      [roundEdges]="roundEdges"
+      [showGridLines]="showGridLines"
       [barPadding]="barPadding"
       [groupPadding]="groupPadding"
+      [roundDomains]="roundDomains"
+      [roundEdges]="roundEdges"
+      [yScaleMax]="yScaleMax"
+      [noBarWhenZero]="noBarWhenZero"
+      [showDataLabel]="showDataLabel"
       [trimXAxisTicks]="trimXAxisTicks"
       [trimYAxisTicks]="trimYAxisTicks"
       [rotateXAxisTicks]="rotateXAxisTicks"
       [maxXAxisTickLength]="maxXAxisTickLength"
       [maxYAxisTickLength]="maxYAxisTickLength"
+      [yAxisTickFormatting]="yAxisTickFormat"
       (select)="onSelect($event)"
     >
+      <ng-template #tooltipTemplate let-model="model">
+        <span class="tooltip-label"
+          >{{ model.series }} • {{ model.label }}</span
+        >
+        <span class="tooltip-val">{{ model.value.toLocaleString() }}</span>
+      </ng-template>
     </ngx-charts-bar-vertical-2d>
   </div>
 </app-card>

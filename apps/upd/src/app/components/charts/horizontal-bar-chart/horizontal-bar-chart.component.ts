@@ -24,7 +24,7 @@ export class HorizontalBarChartComponent implements OnInit {
   @Input() barPadding = 8;
   @Input() gradient = false;
   @Input() displayLegend = 'below';
-  @Input() xAxisLabel = 'Number of Visits';
+  @Input() xAxisLabel = 'Visits (in thousands)';
   @Input() yAxisLabel = 'Date';
   @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D'];
   @Input() showLegend = false;
@@ -36,6 +36,12 @@ export class HorizontalBarChartComponent implements OnInit {
   @Input() trimYAxisTicks = true;
   @Input() maxXAxisTickLength = 16;
   @Input() maxYAxisTickLength = 16;
+  showDataLabel = false;
+  xScaleMax!: number;
+  xScaleMin = 0;
+  roundDomains = false;
+  tooltipDisabled = false;
+  animations = true;
 
   colorScheme: any;
   legendPosition: any;
@@ -83,6 +89,10 @@ export class HorizontalBarChartComponent implements OnInit {
       selectable: true,
       domain: this.colour,
     };
+  }
+
+  xAxisTickFormat(data: any) {
+    return (data / 1000).toLocaleString();
   }
 
   onSelect(event: any) {

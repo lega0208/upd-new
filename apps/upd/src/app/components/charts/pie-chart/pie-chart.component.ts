@@ -1,5 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Color, ScaleType, LegendPosition } from '@lega0208/ngx-charts';
+import {
+  formatLabel,
+  escapeLabel,
+  Color,
+  ScaleType,
+  LegendPosition,
+} from '@lega0208/ngx-charts';
 import { ApiService } from '../../../services/api/api.service';
 import dayjs from 'dayjs';
 
@@ -12,6 +18,7 @@ export class PieChartComponent implements OnInit {
   view: any;
   @Input() title = '';
   @Input() titleTooltip = '';
+  @Input() animations = true;
   @Input() width = 1020;
   @Input() height = 400;
   @Input() fitContainer = true;
@@ -21,10 +28,14 @@ export class PieChartComponent implements OnInit {
   @Input() showLegend = true;
   @Input() data = 'overall';
   @Input() legendTitle = 'Legend';
+  @Input() tooltipDisabled = false;
+  @Input() showLabels = false;
+  @Input() explodeSlices = false;
+  @Input() arcWidth = 0.25;
   @Input() type = '';
 
-  colorScheme: any;
-  legendPosition: any;
+  colorScheme!: Color;
+  legendPosition!: LegendPosition;
   doughnut = false;
 
   // data
@@ -84,6 +95,16 @@ export class PieChartComponent implements OnInit {
       selectable: true,
       domain: this.colour,
     };
+  }
+
+  pieTooltipText({ data }: any) {
+    const label = formatLabel(data.name);
+    const val = formatLabel(data.value);
+
+    return `
+      <span class="tooltip-label">${escapeLabel(label)}</span>
+      <span class="tooltip-val">${val}</span>
+    `;
   }
 
   onSelect(event: any) {

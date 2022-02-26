@@ -1,29 +1,38 @@
 <app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="50">
-  <div class="h-100">
+  <div #ContainerRef class="vh-45">
     <ngx-charts-bar-horizontal
-      [view]="view"
+      [view]="
+        showLegend && displayLegend === 'below'
+          ? [ContainerRef.offsetWidth, ContainerRef.offsetHeight + 40]
+          : [ContainerRef.offsetWidth, ContainerRef.offsetHeight]
+      "
       [scheme]="colorScheme"
       [results]="single"
+      [animations]="animations"
       [gradient]="gradient"
       [xAxis]="showXAxis"
       [yAxis]="showYAxis"
       [legend]="showLegend"
+      [legendTitle]="legendTitle"
       [legendPosition]="legendPosition"
       [showXAxisLabel]="showXAxisLabel"
       [showYAxisLabel]="showYAxisLabel"
+      [tooltipDisabled]="tooltipDisabled"
       [xAxisLabel]="xAxisLabel"
       [yAxisLabel]="yAxisLabel"
-      [roundEdges]="roundEdges"
-      [barPadding]="barPadding"
       [showGridLines]="showGridLines"
-      [rotateXAxisTicks]="rotateXAxisTicks"
+      [barPadding]="barPadding"
+      [roundDomains]="roundDomains"
+      [roundEdges]="roundEdges"
+      [xScaleMax]="xScaleMax"
       [noBarWhenZero]="noBarWhenZero"
-      [legendTitle]="legendTitle"
+      [showDataLabel]="showDataLabel"
       [trimXAxisTicks]="trimXAxisTicks"
       [trimYAxisTicks]="trimYAxisTicks"
       [rotateXAxisTicks]="rotateXAxisTicks"
       [maxXAxisTickLength]="maxXAxisTickLength"
       [maxYAxisTickLength]="maxYAxisTickLength"
+      [xAxisTickFormatting]="xAxisTickFormat"
       (select)="onSelect($event)"
     >
     </ngx-charts-bar-horizontal>
