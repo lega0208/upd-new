@@ -1,37 +1,42 @@
 import {
   FilterDimension,
   FilterOperator,
-  dimension,
-  aggregationType,
-  dataState,
-  type,
+  Dimension,
+  AggregationType,
+  DataState,
+  QueryType,
 } from './gsc-property';
 
-export interface SearchFilters {
+export interface SearchFilter {
   dimension?: FilterDimension;
   operator?: FilterOperator;
   expression?: string;
 }
 
-export interface SearchAnalyticsReportQuery {
+export interface SearchAnalyticsReportQueryBody {
   startDate?: string;
   endDate?: string;
-  dimensions?: [dimension];
-  type?: type;
+  dimensions?: Dimension[];
+  type?: QueryType;
   dimensionFilterGroups?: [
     {
-      filters?: SearchFilters[];
+      filters?: SearchFilter[];
       groupType?: string;
     }
   ];
-  aggregationType?: aggregationType;
+  aggregationType?: AggregationType;
   rowLimit?: number;
   startRow?: number;
-  dataState?: dataState;
+  dataState?: DataState;
+}
+
+export interface SearchAnalyticsReportQuery {
+  siteUrl: string,
+  requestBody: SearchAnalyticsReportQueryBody,
 }
 
 export class SearchAnalyticsQueryBuilder {
-  private readonly query: SearchAnalyticsReportQuery;
+  private readonly query: SearchAnalyticsReportQueryBody;
 
   constructor() {
     this.query = {
@@ -49,12 +54,17 @@ export class SearchAnalyticsQueryBuilder {
     return this;
   }
 
-  public addDimensions(dimensions: dimension) {
-    if (!this.query.dimensions) {
-      this.query.dimensions = [dimensions];
-    } else {
-      this.query.dimensions.push(dimensions);
+  public addDimensions(dimensions: Dimension | Dimension[]) {
+    if (!Array.isArray(dimensions)) {
+      dimensions = [dimensions];
     }
+
+    if (!this.query.dimensions) {
+      this.query.dimensions = [];
+    }
+
+    this.query.dimensions.push(...dimensions);
+
     return this;
   }
 
@@ -68,36 +78,33 @@ export class SearchAnalyticsQueryBuilder {
     return this;
   }
 
-  public setAggregationType(aggregationType: aggregationType) {
+  public setAggregationType(aggregationType: AggregationType) {
     this.query.aggregationType = aggregationType;
     return this;
   }
 
-  public setDataState(dataState: dataState) {
+  public setDataState(dataState: DataState) {
     this.query.dataState = dataState;
     return this;
   }
 
-  public setFilter(SearchFilters: SearchFilters[]) {
-    this.query.dimensionFilterGroups = [{ filters: SearchFilters }];
+  public setFilters(searchFilters: SearchFilter[]) {
+    this.query.dimensionFilterGroups = [{ filters: searchFilters }];
 
     return this;
   }
 
-  // public addDimensionFilterGroup( SearchFilters: SearchFilters[] ) {
-  //     this.query.dimensionFilterGroups = SearchDimensionFilterGroup;
-  //     SearchDimensionFilterGroup
-  //     return this;
-  // }
-
   public build(): SearchAnalyticsReportQuery {
-    if (this.hasDuplicates(this.query.dimensions)) {
+    if (this.query.dimensions && this.hasDuplicates(this.query.dimensions)) {
       throw new Error(
         'Tried to build the query but found the same value in dimension, they must be unique'
       );
     }
 
-    return this.query;
+    return {
+      siteUrl: 'https://www.canada.ca/',
+      requestBody: this.query,
+    };
   }
 
   public hasDuplicates(array) {

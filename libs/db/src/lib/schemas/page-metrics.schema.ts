@@ -1,9 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { GscSearchTermMetrics } from './types';
 
 export type PageMetricsDocument = PageMetrics & Document;
 
-@Schema({ collection: 'page_metrics' })
+@Schema({ collection: 'pages_metrics' })
 export class PageMetrics {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId('');
@@ -90,6 +91,18 @@ export class PageMetrics {
   rap_blank_form = 0;
 
   @Prop({ type: Number })
+  fwylf_cant_find_info = 0;
+
+  @Prop({ type: Number })
+  fwylf_other = 0;
+
+  @Prop({ type: Number })
+  fwylf_hard_to_understand = 0;
+
+  @Prop({ type: Number })
+  fwylf_error = 0;
+
+  @Prop({ type: Number })
   visits_geo_ab = 0;
 
   @Prop({ type: Number })
@@ -157,6 +170,29 @@ export class PageMetrics {
 
   @Prop({ type: Number })
   visits_device_tablet = 0;
+
+  @Prop({ type: Number })
+  gsc_total_clicks = 0;
+
+  @Prop({ type: Number })
+  gsc_total_ctr = 0;
+
+  @Prop({ type: Number })
+  gsc_total_impressions = 0;
+
+  @Prop({ type: Number })
+  gsc_total_position = 0;
+
+  @Prop({
+    type: [{
+      clicks: Number,
+      ctr: Number,
+      impressions: Number,
+      position: Number,
+      term: String,
+    }]
+  })
+  gsc_searchterms: GscSearchTermMetrics[] = [];
 }
 
 export const PageMetricsSchema = SchemaFactory.createForClass(PageMetrics);

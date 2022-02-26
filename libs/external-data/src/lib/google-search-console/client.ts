@@ -1,4 +1,3 @@
-import path from 'path';
 import { auth, searchconsole_v1 } from '@googleapis/searchconsole';
 
 const authClient = new auth.GoogleAuth({

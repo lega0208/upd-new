@@ -1,10 +1,37 @@
 import dayjs from 'dayjs';
-import { AdobeAnalyticsClient, queryDateFormat } from '@cra-arc/external-data';
+import {
+  AdobeAnalyticsClient,
+  DateRange,
+  queryDateFormat,
+  SearchAnalyticsClient,
+} from '@cra-arc/external-data';
 import { getOverallModel, Overall, getDbConnectionString } from '@cra-arc/db';
-import { connect, Model, Document } from 'mongoose';
+import { connect, Model, Document, Types } from 'mongoose';
 import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc); // have to use UTC mode or else the output will be off by the timezone offset
+
+export async function fetchAndMergeOverallMetrics(dateRange: DateRange) {
+  const adobeAnalyticsClient = new AdobeAnalyticsClient();
+  const gscClient = new SearchAnalyticsClient();
+
+  const [aaResults, gscResults] = await Promise.all([
+    adobeAnalyticsClient.getOverallMetrics(dateRange),
+    gscClient.getOverallMetrics(dateRange),
+  ]);
+
+  return aaResults.map((result) => {
+    const gscResult = gscResults.find(
+      (gscResult) => gscResult.date.getTime() === result.date.getTime()
+    );
+
+    return {
+      _id: new Types.ObjectId(),
+      ...result,
+      ...gscResult,
+    };
+  });
+}
 
 export async function updateOverallMetrics() {
   await connect(getDbConnectionString());
@@ -28,20 +55,17 @@ export async function updateOverallMetrics() {
 
   // fetch data if our db isn't up-to-date
   if (startTime.isBefore(cutoffDate)) {
-    const client = new AdobeAnalyticsClient();
-
     const dateRange = {
       start: startTime.format(queryDateFormat),
       end: cutoffDate.format(queryDateFormat),
     };
 
     console.log(
-      `\r\nFetching data from Adobe Analytics for overall_metrics for dates: ${dateRange.start} to ${dateRange.end}\r\n`
+      `\r\nFetching overall metrics from AA & GSC for dates: ${dateRange.start} to ${dateRange.end}\r\n`
     );
 
-    const newOverallMetrics = await client.getOverallMetrics(dateRange);
+    const newOverallMetrics = await fetchAndMergeOverallMetrics(dateRange);
 
-    // ids get automatically added by Mongoose
     const inserted = await overallMetricsModel.insertMany(newOverallMetrics);
 
     const datesInserted = inserted

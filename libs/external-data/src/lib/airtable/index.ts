@@ -2,129 +2,182 @@ import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-
+import { FieldSet, Query } from 'airtable';
+import { QueryParams, SortParameter } from 'airtable/lib/query_params';
+import { wait } from '@cra-arc/utils-common';
 import { getATClient, AirTableAPI, AirtableAPIBase } from './client';
 import { bases } from './base';
 import { AirTableFields } from './query'
+import { CalldriverData, PagesData, TaskData, UxTestsData } from './types';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
 dayjs.extend(isSameOrBefore)
 
 export * from './client';
+export * from './types';
+
+export type DateType = string | Date | Dayjs;
+
+export const createLastUpdatedFilterFormula = (date: DateType) => (
+  `IS_AFTER(LAST_UPDATED_TIME(), "${dayjs(date).format('YYYY-MM-DD')}")`
+);
+
+export const createDateRangeFilterFormula = (dateRange: { start: DateType, end: DateType }, dateField: string) => {
+  const start = dayjs(dateRange.start)
+    .utc(true)
+    .subtract(1, 'day')
+    .format('YYYY-MM-DD');
+
+  const end = dayjs(dateRange.end)
+    .utc(true)
+    .add(1, 'day')
+    .format('YYYY-MM-DD');
+
+  return (
+    `AND(\
+      IS_AFTER({${dateField}}, "${start}"),\
+      IS_BEFORE({${dateField}}, "${end}")\
+    )`.replace(/\s+/g, '')
+  );
+};
 
 export class AirtableClient {
-  client: AirTableAPI;
+  client: AirTableAPI = getATClient();
 
-  async initClient() {
-    this.client = await getATClient();
+  createQuery(baseId: string, tableName: string, params: QueryParams<FieldSet> = {}): Query<FieldSet> {
+    return this.client.base(baseId)(tableName).select(params);
   }
 
-  async getTasks(): Promise<string[]> {
-    if (!this.client) {
-      await this.initClient();
-    }
+  async selectAll(query: Query<FieldSet>): Promise<FieldSet[]> {
+    const results = [];
 
-    const base: AirtableAPIBase = this.client.base(bases.TASKS_INVENTORY);
-    const allResults: string[] = [];
+    await query.eachPage((records, nextPage) => {
+      results.push(...(records.map((r) => r._rawJson)));
 
-    const results: void = await base('Tasks')
-      .select()
-      .eachPage((records, fetchNextPage) => {
-        records.forEach((record) => {
-          allResults.push(record._rawJson);
-        });
-        fetchNextPage();
-      });
+      wait(200).then(nextPage);
+    });
 
-    return allResults;
+    return results;
   }
 
-  async findTask( id: string ): Promise<string[]> {
-    if (!this.client) {
-      await this.initClient();
-    }
+  async getTasks(lastUpdatedDate?: DateType): Promise<TaskData[]> {
+    const params = lastUpdatedDate ? {
+      filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate)
+    } : {};
+    const query = this.createQuery(bases.TASKS_INVENTORY, 'Tasks', params);
 
-    const base: AirtableAPIBase = this.client.base(bases.TASKS_INVENTORY);
-    const allResults: string[] = [];
-
-    const results = await base('Tasks').find(id);
-
-    allResults.push(results._rawJson);
-
-    return allResults;
+    return (await this.selectAll(query))
+      .map(({ id, fields }) => ({
+        airtable_id: id,
+        title: fields['Task'],
+        group: fields['Group'],
+        subgroup: fields['Sub-Group'],
+        topic: fields['Topic'],
+        subtopic: fields['Sub Topic'],
+        ux_tests: fields['User Testing Projects'],
+        user_type: fields['User Type'],
+        pages: fields['Lookup_Pages'],
+      })) as TaskData[];
   }
 
-  async getCallDriverCall(
-    element: Record<AirTableFields, string>,
-    dateRange: {
-      start: Dayjs;
-      end: Dayjs;
-    }
-  ): Promise<string[]> {
-    //console.log(element.base);
-    const allResults: string[] = [];
+  async getUxTests(lastUpdatedDate?: DateType): Promise<UxTestsData[]> {
+    const params = lastUpdatedDate ? {
+      filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate)
+    } : {};
+    const query = this.createQuery(bases.TASKS_INVENTORY, 'User Testing', params);
 
-    const base: AirtableAPIBase = this.client.base(bases[`${element.base}`]);
-    const results: void = await base(`${element.table}`)
-      .select({
-        filterByFormula: `AND(IS_AFTER({CALL_DATE}, DATEADD("${dateRange.start}",-1,"days")), IS_BEFORE({CALL_DATE}, DATEADD("${dateRange.end}",1,"days")))`,
-        sort: [{ field: 'CALL_DATE', direction: 'asc' }],
-      })
-      .eachPage((records, fetchNextPage) => {
-        records.forEach((record) => {
-          allResults.push(record._rawJson);
-        });
-        fetchNextPage();
-      });
-
-    //console.log(allResults);
-
-    return allResults;
+    return (await this.selectAll(query))
+      .map(({ id, fields }) => ({
+        airtable_id: id,
+        date: dayjs(fields['Date']).utc(true).toDate(),
+        project_title: fields['UX Research Project Title'],
+        success_rate: fields['Success Rate'],
+        test_type: fields['Test Type'],
+        session_type: Array.isArray(fields['Session Type'])
+          ? fields['Session Type'][0]
+          : undefined,
+        scenario: fields['Scenario/Questions'],
+        tasks: fields['Task'],
+        subtasks: fields['Sub-Task'],
+        pages: fields['Lookup_Pages'],
+        vendor: fields['Vendor'],
+        version_tested: fields['Version Tested'],
+        github_repo: fields['GitHub Repo'],
+        total_users: fields['# of Users'],
+        successful_users: fields['Succesful Users'],
+        program: fields['Program/Service'],
+        branch: fields['Branch'],
+        audience: fields['Audience'],
+        project_lead: fields['Project Lead'],
+        launch_date: fields['Launch Date'],
+        status: fields['Status'],
+        cops: fields['COPS'],
+      })) as UxTestsData[];
   }
 
-  async getCallDriver(dateRange: { start: string; end: string }) {
-    if (!this.client) {
-      await this.initClient();
+  async getPages(lastUpdatedDate?: DateType): Promise<PagesData[]> {
+    const params = lastUpdatedDate ? {
+      filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate)
+    } : {};
+    const query = this.createQuery(bases.TASKS_INVENTORY, 'Pages', params);
+
+    return (await this.selectAll(query))
+      .map(({ id, fields }) => ({
+        airtable_id: id,
+        title: fields['Page Title'],
+        url: fields['Url'],
+        tasks: fields['Tasks'],
+      })) as PagesData[];
+  }
+
+  createCalldriverQueries(dateRange: { start: DateType, end: DateType }) {
+    const queries: Query<FieldSet>[] = [];
+
+    const start = dayjs(dateRange.start).utc(true);
+    const end = dayjs(dateRange.end).utc(true);
+
+    let queryDate = dayjs(dateRange.start).utc(true);
+
+    if (start.isBefore('2021-01-01')) {
+      throw Error('Calldriver data is not available before 2021-01-01');
     }
 
-    const start: Dayjs = dayjs(dateRange.start).utc(true);
-    const end: Dayjs = dayjs(dateRange.end).utc(true);
-    let tempDate: Dayjs = dayjs(dateRange.start).utc(true);
-    const datesBetween: Array<Record<AirTableFields, string>> = [];
+    while (queryDate.isSameOrBefore(end)) {
+      const baseId = bases[`DCD_${queryDate.year()}_Q${queryDate.quarter()}`];
+      const table = `${queryDate.format('MMMM')} ${queryDate.year()}`;
+      const filterByFormula = createDateRangeFilterFormula(dateRange, 'CALL_DATE');
+      const sort = [{ field: 'CALL_DATE', direction: 'asc' } as SortParameter<FieldSet>];
 
-    const year: number = start.get('year');
-    if (year > 2020) {
-      while (tempDate.isSameOrBefore(end)) {
-        datesBetween.push({
-          table: tempDate.format('MMMM') + ' ' + tempDate.year(),
-          base: 'DCD_' + tempDate.year() + '_Q' + tempDate.quarter(),
-        });
+      queries.push(this.createQuery(baseId, table, { filterByFormula, sort }));
 
-        tempDate = tempDate.set('date', 1).add(1, 'month');
-      }
+      queryDate = queryDate.add(1, 'month').startOf('month');
+    }
 
-      const allResults: Array<string[]> = await Promise.all(
-        datesBetween.map(async (dates: Record<AirTableFields, string>) => {
-          return await this.getCallDriverCall(dates, { start, end });
-        })
-      );
+    return queries;
+  }
 
-      return allResults
-        .reduce((r, a) => r.concat(a), [])
-        .reduce((parsedResults, row) => {
-          const newData = {
-            _id: row['id'],
-            date: row['fields']['CALL_DATE'],
-            enquiry_line: row['fields']['Enquiry_line'],
-            topic: row['fields']['Topic'],
-            sub_topic: row['fields']['Sub-topic'],
-            tpc_id: row['fields']['TPC_ID'],
-            impact: row['fields']['Impact'],
-            calls: row['fields']['Calls'],
-          };
-          return [...parsedResults, newData];
-        }, []);
-    } else return;
+  async getCalldrivers(dateRange: { start: DateType, end: DateType}) {
+    const queries = this.createCalldriverQueries(dateRange);
+
+    const results = [];
+
+    for (const query of queries) {
+      const records = await this.selectAll(query);
+
+      results.push(...records);
+    }
+
+    return results.map(({ id, fields }) => ({
+      airtable_id: id,
+      date: dayjs(fields['CALL_DATE']).utc(true).toDate(),
+      enquiry_line: fields['Enquiry_line'],
+      topic: fields['Topic'],
+      subtopic: fields['Sub-topic'],
+      sub_subtopic: fields['Sub-sub-topic'],
+      tpc_id: fields['TPC_ID'],
+      impact: fields['Impact'],
+      calls: fields['Calls'],
+    })) as CalldriverData[];
   }
 }
