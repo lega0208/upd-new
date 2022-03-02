@@ -1,0 +1,25 @@
+<app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="50">
+  <div #ContainerRef class="vh-45">
+    <ngx-charts-pie-chart
+      [view]="
+        showLegend && displayLegend === 'below'
+          ? [ContainerRef.offsetWidth, ContainerRef.offsetHeight + 40]
+          : [ContainerRef.offsetWidth, ContainerRef.offsetHeight]
+      "
+      [scheme]="colorScheme"
+      [results]="single"
+      [animations]="animations"
+      [legend]="showLegend"
+      [legendTitle]="legendTitle"
+      [legendPosition]="legendPosition"
+      [explodeSlices]="explodeSlices"
+      [labels]="showLabels"
+      [doughnut]="doughnut"
+      [arcWidth]="arcWidth"
+      [gradient]="gradient"
+      [tooltipDisabled]="tooltipDisabled"
+      [tooltipText]="pieTooltipText"
+      (select)="onSelect($event)"
+    ></ngx-charts-pie-chart>
+  </div>
+</app-card>

@@ -3,7 +3,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgxChartsModule } from '@lega0208/ngx-charts';
 
 // todo: same as router file-- will probably want to split each view into its own module (and probably load lazily)
 import { AppRoutingModule } from './app-routing.module';
@@ -42,6 +43,19 @@ import { CardComponent } from './components/card/card.component';
 import { DateSelectorComponent } from './components/date-selector/date-selector.component';
 import { ExampleChartComponent } from './components/example-chart/example-chart.component';
 import { DataTableComponent } from './components/datatable/data-table/data-table.component';
+import { GroupedVerticalBarChartComponent } from './components/charts/grouped-vertical-bar-chart/grouped-vertical-bar-chart.component';
+import { VerticalBarChartComponent } from './components/charts/vertical-bar-chart/vertical-bar-chart.component';
+//import { AccordianComponent } from './components/datatable/accordian/accordian.component';
+import {
+  ComboGroupedVerticalBarLineChartComponent,
+  ComboSeriesVerticalComponent,
+} from './components/charts/combo/combo-grouped-vertical-bar-line-chart';
+import { GroupedVerticalBarLineChartComponent } from './components/charts/grouped-vertical-bar-line-chart/grouped-vertical-bar-line-chart.component';
+import { PieChartComponent } from './components/charts/pie-chart/pie-chart.component';
+import { LineChartComponent } from './components/charts/line-chart/line-chart.component';
+import { StackedVerticalBarChartComponent } from './components/charts/stacked-vertical-bar-chart/stacked-vertical-bar-chart.component';
+import { HorizontalBarChartComponent } from './components/charts/horizontal-bar-chart/horizontal-bar-chart.component';
+import { GaugeChartComponent } from './components/charts/gauge-chart/gauge-chart.component';
 
 @NgModule({
   declarations: [
@@ -80,6 +94,17 @@ import { DataTableComponent } from './components/datatable/data-table/data-table
     ExampleChartComponent,
     DataTableComponent,
     CardComponent,
+    GroupedVerticalBarChartComponent,
+    VerticalBarChartComponent,
+
+    ComboGroupedVerticalBarLineChartComponent,
+    ComboSeriesVerticalComponent,
+    GroupedVerticalBarLineChartComponent,
+    PieChartComponent,
+    LineChartComponent,
+    StackedVerticalBarChartComponent,
+    HorizontalBarChartComponent,
+    GaugeChartComponent,
   ],
   imports: [
     BrowserModule,
@@ -87,6 +112,7 @@ import { DataTableComponent } from './components/datatable/data-table/data-table
     BrowserAnimationsModule,
     AppRoutingModule,
     NgbPopoverModule,
+    NgbAccordionModule,
     NgxChartsModule,
   ],
   providers: [],
