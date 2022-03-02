@@ -28,7 +28,7 @@ body {
   text-decoration: none;
 }
 
-header {
+header#header {
   border-bottom-style: solid;
   border-bottom-color: #c4c4c4;
   border-width: 1px;

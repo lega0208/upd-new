@@ -1,4 +1,9 @@
-<app-card card-title="Example chart" title-tooltip="wow! an example!" [h]="50">
+<app-card
+  class="d-inline-block w-100"
+  card-title="Example chart"
+  title-tooltip="wow! an example!"
+  [h]="50"
+>
   <div class="h-100">
     <ngx-charts-bar-vertical
       [scheme]="colorScheme"
@@ -7,6 +12,7 @@
       [xAxis]="showXAxis"
       [yAxis]="showYAxis"
       [legend]="showLegend"
+      [legendPosition]="legendPosition"
       [showXAxisLabel]="showXAxisLabel"
       [showYAxisLabel]="showYAxisLabel"
       [xAxisLabel]="xAxisLabel"
