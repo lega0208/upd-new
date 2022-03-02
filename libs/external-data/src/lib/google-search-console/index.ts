@@ -50,7 +50,7 @@ export class SearchAnalyticsClient {
         ...searchTerms,
       }));
 
-      await wait(500);
+      await wait(100);
 
       promises.push(mergedDateResults);
     }
@@ -179,7 +179,7 @@ export class SearchAnalyticsClient {
         return [...resultsWithTotals, ...resultsWithoutTotals];
       });
 
-      await wait(500);
+      await wait(100);
 
       promises.push(mergedDateResults);
     }

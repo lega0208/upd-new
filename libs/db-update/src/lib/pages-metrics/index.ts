@@ -4,6 +4,7 @@ import {
   DateRange,
   queryDateFormat,
   SearchAnalyticsClient,
+  datesFromDateRange,
 } from '@cra-arc/external-data';
 import {
   getDbConnectionString,
@@ -20,17 +21,21 @@ export async function fetchAndMergePageMetrics(dateRange: DateRange) {
   const gscClient = new SearchAnalyticsClient();
 
   const [aaResults, gscResults] = await Promise.all([
-    adobeAnalyticsClient.getPageMetrics(dateRange),
-    gscClient.getPageMetrics(dateRange),
+    adobeAnalyticsClient.getPageMetrics(dateRange, {
+      // temporary fix for pages longer than 255 characters
+      search: {
+        clause: `BEGINS-WITH 'www.canada.ca' AND (BEGINS-WITH 'www.canada.ca/en/revenue-agency'\
+        OR BEGINS-WITH 'www.canada.ca/fr/agence-revenu' OR BEGINS-WITH 'www.canada.ca/fr/services/impots'\
+        OR BEGINS-WITH 'www.canada.ca/en/services/taxes')`,
+      }
+    }),
+    gscClient.getPageMetrics(dateRange, { dataState: 'all' }),
   ]);
 
   // because there'll be potentially tens of thousands of results,
   //   we'll chunk them by date to merge them more efficiently
   const aaDates = aaResults.map((dateResults) => dateResults[0]?.date);
   const gscDates = gscResults.map((dateResults) => dateResults[0]?.date);
-
-  console.log(`Found ${aaDates.length} dates in Adobe Analytics`);
-  console.log(`Found ${gscDates.length} dates in Google Search Console`);
 
   if (aaDates.length !== gscDates.length) {
     console.error(
@@ -60,10 +65,7 @@ export async function fetchAndMergePageMetrics(dateRange: DateRange) {
         };
       });
     })
-    .reduce(
-      (finalResults, dateResults) => finalResults.concat(dateResults),
-      []
-    );
+    .flat();
 }
 
 export async function updatePageMetrics() {
@@ -75,42 +77,46 @@ export async function updatePageMetrics() {
 
   // get dates required for query
   const latestDateResults = await pageMetricsModel
-    .find({}, { date: 1 })
-    .sort({ date: -1 })
-    .limit(1)
-    .exec();
+    .findOne({}, { date: 1 })
+    .sort({ date: -1 });
 
   // get the most recent date from the DB, and set the start date to the next day
-  const latestDate = dayjs.utc(latestDateResults[0]['date']);
+  const latestDate = dayjs.utc(latestDateResults['date']);
   const startTime = latestDate.add(1, 'day');
 
   // collect data up to the start of the current day/end of the previous day
-  const cutoffDate = dayjs.utc().subtract(1, 'day').endOf('day');
+  const cutoffDate = dayjs.utc().startOf('day');
 
   // fetch data if our db isn't up-to-date
   if (startTime.isBefore(cutoffDate)) {
-    const dateRange = {
+    const fullDateRange = {
       start: startTime.format(queryDateFormat),
       end: cutoffDate.format(queryDateFormat),
     };
 
-    console.log(
-      `\r\nFetching page metrics from AA & GSC for dates: ${dateRange.start} to ${dateRange.end}\r\n`
+    // to be able to iterate over each day
+    const dateRanges = datesFromDateRange(fullDateRange, queryDateFormat).map(
+      (date) => ({
+        start: date,
+        end: dayjs(date).add(1, 'day').format(queryDateFormat),
+      })
     );
 
-    const newPageMetrics = await fetchAndMergePageMetrics(dateRange);
+    for (const dateRange of dateRanges) {
+      console.log(
+        `\r\nFetching page metrics from AA & GSC for date: ${dateRange.start}\r\n`
+      );
 
-    const inserted = await pageMetricsModel.insertMany(newPageMetrics);
+      const newPageMetrics = await fetchAndMergePageMetrics(dateRange);
 
-    const datesInserted = inserted
-      .map((i) => dayjs.utc(i['date']).format('YYYY-MM-DD'))
-      .join(', ');
+      await pageMetricsModel.insertMany(newPageMetrics, { lean: true });
 
-    console.log(
-      `Successfully inserted page metrics data for the following dates: ${datesInserted}`
-    );
+      console.log(
+        `Successfully inserted page metrics data for: ${dateRange.start}`
+      );
+    }
 
-    return inserted;
+    return await Promise.resolve();
   } else {
     console.log('Page metrics already up-to-date.');
   }
@@ -120,23 +126,15 @@ export async function updatePageMetrics() {
 async function upsertAAPageMetrics(pageMetrics: PageMetrics[]) {
   const pageMetricsModel = getPageMetricsModel();
 
-  await Promise.all(
-    pageMetrics.map((metrics) =>
-      pageMetricsModel
-        .findOneAndUpdate(
-          { url: metrics.url, date: metrics.date },
-          metrics,
-          { upsert: true, new: true, lean: true, rawResults: true }
-        )
-        .exec()
-    )
+  return await pageMetricsModel.bulkWrite(
+    pageMetrics.map((metrics) => ({
+      updateOne: {
+        filter: { url: metrics.url, date: metrics.date },
+        update: { $set: metrics },
+        upsert: true,
+      }
+    }))
   );
-
-  console.log(
-    `Successfully upserted page metrics for ${pageMetrics.length} pages`
-  );
-
-  return pageMetrics;
 }
 
 export async function addAAPageMetrics(dateRange: DateRange) {
@@ -146,5 +144,10 @@ export async function addAAPageMetrics(dateRange: DateRange) {
 
   return await adobeAnalyticsClient.getPageMetrics(dateRange, {
     postProcess: upsertAAPageMetrics,
+    search: {
+      clause: `BEGINS-WITH 'www.canada.ca' AND (BEGINS-WITH 'www.canada.ca/en/revenue-agency'\
+        OR BEGINS-WITH 'www.canada.ca/fr/agence-revenu' OR BEGINS-WITH 'www.canada.ca/fr/services/impots'\
+        OR BEGINS-WITH 'www.canada.ca/en/services/taxes')`,
+    },
   });
 }

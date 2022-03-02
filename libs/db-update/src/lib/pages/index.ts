@@ -111,37 +111,45 @@ export async function* getRedirectsWithRateLimit(
   }
 }
 
-export async function updatePageUrls(pages: Document<Page>[], pagesModel: Model<Document<Page>>) {
+export async function updatePageUrls(pages: Page[], pagesModel: Model<Document<Page>>) {
   const pageUrls = pages.map((page) => page['url']);
+  const updateOps = [];
 
-  const redirectsIterator = getRedirectsWithRateLimit(pageUrls, 25, 500);
+  const redirectsIterator = getRedirectsWithRateLimit(pageUrls, 25, 251);
 
+  // outer for loop is for batches
   for await (const redirects of redirectsIterator) {
     const pagesToUpdate = await pagesModel.find(
       { url: { $in: Object.keys(redirects) } },
       { _id: 1, url: 1 },
-    );
+    ).lean();
 
     for (const page of pagesToUpdate) {
       const newUrl = redirects[page['url']];
 
-      console.log(`[updatePageUrls] - Updating url ${page['url']} to ${newUrl}`);
+      console.log(`[updatePageUrls] - Updating url: \r\n${page['url']} \r\nto: \r\n${newUrl}`);
 
-      await pagesModel.updateOne(
-        { _id: page['_id'] },
-        {
-          $currentDate: { lastChecked: true, lastModified: true },
-          $set: { url: newUrl },
-          $addToSet: { all_urls: page['url'] },
+      updateOps.push({
+        updateOne: {
+          filter: { _id: page['_id'] },
+          update: {
+            $currentDate: { lastChecked: true, lastModified: true },
+            $set: { url: newUrl },
+            $addToSet: { all_urls: page['url'] },
+          }
         }
-      );
+      });
     }
+  }
+
+  if (updateOps.length > 0) {
+    return await pagesModel.bulkWrite(updateOps);
   }
 }
 
 // todo: make more general generator like this that can be used for both
 export async function* getPageTitlesWithRateLimit(
-  pages: Document<Page>[],
+  pages: Page[],
   batchSize: number,
   delay: number
 ) {
@@ -157,8 +165,8 @@ export async function* getPageTitlesWithRateLimit(
             .replace(' - Canada.ca', '')
 
           return {
-            _id: page.id,
-            url: page.get('url'),
+            _id: page._id,
+            url: page.url,
             title,
           }
         }));
@@ -191,13 +199,15 @@ export async function* getPageTitlesWithRateLimit(
   }
 }
 
-export async function updatePageTitles(pages: Document<Page>[], pagesModel: Model<Document<Page>>) {
-  const pageTitlesIterator = getPageTitlesWithRateLimit([...pages], 25, 250);
+export async function updatePageTitles(pages: Page[], pagesModel: Model<Document<Page>>) {
+  const pageTitlesIterator = getPageTitlesWithRateLimit([...pages], 25, 251);
+  const updateOps = [];
 
+  // outer for loop is for batches
   for await (const titles of pageTitlesIterator) {
     for (const title of titles) {
 
-      const filteredPages = pages.filter((page) => title['_id'] === page.id);
+      const filteredPages = pages.filter((page) => title['_id'] === page._id);
 
       const currentTitle = filteredPages[0]['title'];
 
@@ -205,23 +215,29 @@ export async function updatePageTitles(pages: Document<Page>[], pagesModel: Mode
         console.log(`[updatePageTitles] - Updating page title for ${title['url']}:`);
         console.log(`[updatePageTitles] - ${currentTitle} - Current`);
         console.log(`[updatePageTitles] - ${title['title']} - New`);
-        const res = await pagesModel.updateOne(
-          { _id: new Types.ObjectId(title['_id']) },
-          {
-            $currentDate: { lastChecked: true, lastModified: true },
-            $set: { title: title['title'].trim() },
+
+        updateOps.push({
+          updateOne: {
+            filter: { _id: new Types.ObjectId(title['_id']) },
+            update: {
+              $currentDate: { lastChecked: true, lastModified: true },
+              $set: { title: title['title'].trim() },
+            }
           }
-        );
-        console.log('modified: ', res.modifiedCount);
+        });
       }
     }
+  }
+
+  if (updateOps.length > 0) {
+    return await pagesModel.bulkWrite(updateOps);
   }
 }
 
 export async function updatePages() {
   await connect(getDbConnectionString());
   // Our Mongoose model, which lets us query the "pages" collection
-  const pagesModel: Model<Document<Page>> = await getPageModel();
+  const pagesModel: Model<Document<Page>> = getPageModel();
 
   const twoDaysAgo = dayjs().subtract(2, 'days').toDate();
 
@@ -234,9 +250,8 @@ export async function updatePages() {
           { lastChecked: { $exists: false } }
         ],
       },
-      { _id: 1, url: 1, title: 1 },
     )
-    .exec();
+    .lean() as Page[];
 
   await updatePageUrls(pages, pagesModel);
   await updatePageTitles(pages, pagesModel);
@@ -249,4 +264,39 @@ export async function updatePages() {
       $currentDate: { lastChecked: true },
     },
   );
+}
+
+export async function getUrlRedirectAndPageTitle(url: string) {
+  try {
+    return await axios.get(`https://${url}`).then((response) => {
+      const isRedirect = response.request._redirectable?._isRedirect;
+      const responseUrl = response.request._redirectable?._currentUrl.replace('https://', '');
+      const title = (/(?<=<title>).+(?=<\/title>)/.exec(response.data) || [''])[0]
+        .replace(/\s+(-|&nbsp;)\s+Canada\.ca/i, '')
+        .trim();
+
+      return {
+        isRedirect,
+        responseUrl,
+        title
+      }
+    });
+  } catch (e) {
+    if (e.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(`Error status code received from HTTP request to ${url}: ${e.response.status}`);
+
+      return { status: e.response.status };
+    } else if (e.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+      // http.ClientRequest in node.js
+      console.log(e.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log('Error', e.message);
+    }
+    console.log(e.toJSON());
+  }
 }

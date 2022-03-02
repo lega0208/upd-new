@@ -16,17 +16,18 @@ import {
   getUxTestModel,
   getDbConnectionString,
 } from '@cra-arc/db';
+import { getUrlRedirectAndPageTitle } from '../pages'
+import { wait } from '@cra-arc/utils-common';
 
+export * from './calldrivers';
+
+export type UxApiDataType = TaskData | UxTestData | PageData;
 export interface UxApiData {
   tasksData: TaskData[];
   uxTestData: UxTestData[];
   pageData: PageData[];
 }
-
-export type UxApiDataType = TaskData | UxTestData | PageData;
-
 export type UxDataType = Task | UxTest | Page | Project;
-
 export interface UxData {
   tasks: Task[];
   uxTests: UxTest[];
@@ -38,6 +39,7 @@ export type WithObjectId<T> = T & { _id: Types.ObjectId };
 
 export async function getUxData(): Promise<UxApiData> {
   const client = new AirtableClient();
+  console.log('Getting data from Airtable...');
   const tasksData = await client.getTasks();
   const uxTestData = await client.getUxTests();
   const pageData = await client.getPages();
@@ -145,7 +147,7 @@ async function getProjectsFromUxTests(
     return {
       _id: existingProject?._id || new Types.ObjectId(),
       title: projectTitle,
-      uxTests: uxTests.map((uxTest) => uxTest._id),
+      ux_tests: uxTests.map((uxTest) => uxTest._id),
       pages: pageObjectIds,
       tasks: taskObjectIds,
     };
@@ -276,4 +278,56 @@ function assertHasUrl(value: UxApiDataType[]): asserts value is PageData[] {
   if (!value.every((doc) => 'url' in doc)) {
     throw new Error('No URL');
   }
+}
+
+export async function updateUxData() {
+  const { tasks, uxTests, pages, projects } = await getAndPrepareUxData();
+
+  await connect(getDbConnectionString());
+
+  const pageUpdateOps = pages.map((page) => ({
+    replaceOne: {
+      filter: { _id: page._id },
+      replacement: page,
+      upsert: true,
+    },
+  }));
+  console.log('Writing pages to db');
+  await getPageModel().bulkWrite(pageUpdateOps);
+
+  const taskUpdateOps = tasks.map((task) => ({
+    replaceOne: {
+      filter: { _id: task._id },
+      replacement: task,
+      upsert: true,
+    },
+  }));
+  console.log('Writing tasks to db');
+  await getTaskModel().bulkWrite(taskUpdateOps);
+
+  const uxTestUpdateOps = uxTests.map((uxTest) => ({
+    replaceOne: {
+      filter: { _id: uxTest._id },
+      replacement: uxTest,
+      upsert: true,
+    },
+  }));
+  console.log('Writing UX tests to db');
+  await getUxTestModel().bulkWrite(uxTestUpdateOps);
+
+  const projectUpdateOps = projects.map((project) => ({
+    replaceOne: {
+      filter: { _id: project._id },
+      replacement: project,
+      upsert: true,
+    },
+  }));
+  console.log('Writing projects to db');
+  await getProjectModel().bulkWrite(projectUpdateOps);
+
+  console.log('Successfully updated Airtable data');
+
+  // async functions can sometimes behave weirdly if you
+  //  don't have a return value that depends on an awaited promise
+  return await Promise.resolve();
 }

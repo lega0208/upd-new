@@ -17,8 +17,10 @@ export async function fetchAndMergeOverallMetrics(dateRange: DateRange) {
 
   const [aaResults, gscResults] = await Promise.all([
     adobeAnalyticsClient.getOverallMetrics(dateRange),
-    gscClient.getOverallMetrics(dateRange),
+    gscClient.getOverallMetrics(dateRange, 'all'),
   ]);
+
+  console.log('Finished fetching data from AA & GSC')
 
   return aaResults.map((result) => {
     const gscResult = gscResults.find(
@@ -65,6 +67,9 @@ export async function updateOverallMetrics() {
     );
 
     const newOverallMetrics = await fetchAndMergeOverallMetrics(dateRange);
+    console.log(
+      `\r\nInserting ${newOverallMetrics.length} new overall metrics documents\r\n`
+    );
 
     const inserted = await overallMetricsModel.insertMany(newOverallMetrics);
 

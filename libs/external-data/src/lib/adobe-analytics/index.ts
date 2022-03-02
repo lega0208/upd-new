@@ -88,12 +88,17 @@ export class AdobeAnalyticsClient {
     if (!this.client) {
       await this.initClient();
     }
-    const dateRanges = datesFromDateRange(dateRange, queryDateFormat).map(
-      (date) => ({
-        start: date,
-        end: dayjs(date).add(1, 'day').format(queryDateFormat),
-      })
-    );
+    const dateRanges = datesFromDateRange(dateRange, queryDateFormat)
+      .map(
+        (date) => ({
+          start: date,
+          end: dayjs.utc(date).add(1, 'day').format(queryDateFormat),
+        })
+      )
+      .filter(
+        (dateRange) =>
+          dayjs.utc(dateRange.start).startOf('day') !== dayjs.utc().startOf('day')
+      );
     const promises = [];
 
     for (const dateRange of dateRanges) {

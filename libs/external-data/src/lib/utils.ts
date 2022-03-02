@@ -99,7 +99,7 @@ export function datesFromDateRange(dateRange: DateRange, format = 'YYYY-MM-DD') 
   const endDate = dayjs(dateRange.end);
 
   // doesn't include end date, which is what we want because AA date range doesn't include the end date
-  while (!currentDate.isSame(endDate)) {
+  while (!currentDate.isSame(endDate, 'day')) {
     dates.push(currentDate.format(format));
     currentDate = currentDate.add(1, 'day');
   }
