@@ -92,7 +92,7 @@ export function withRateLimit<T, U extends unknown[]>(
   };
 }
 
-// For GSC queries, because they're only done on individual dates
+// For GSC or AA page queries, because they're only done on individual dates
 export function datesFromDateRange(dateRange: DateRange, format = 'YYYY-MM-DD') {
   const dates = [];
   let currentDate = dayjs(dateRange.start);

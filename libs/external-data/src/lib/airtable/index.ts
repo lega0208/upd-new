@@ -54,7 +54,7 @@ export class AirtableClient {
     await query.eachPage((records, nextPage) => {
       results.push(...(records.map((r) => r._rawJson)));
 
-      wait(200).then(nextPage);
+      wait(201).then(nextPage);
     });
 
     return results;
@@ -138,7 +138,7 @@ export class AirtableClient {
 
     let queryDate = dayjs(dateRange.start).utc(true);
 
-    if (start.isBefore('2021-01-01')) {
+    if (start.isBefore('2021-01-01', 'day')) {
       throw Error('Calldriver data is not available before 2021-01-01');
     }
 

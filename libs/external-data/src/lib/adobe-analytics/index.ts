@@ -82,7 +82,7 @@ export class AdobeAnalyticsClient {
       search?: ReportSearch;
       postProcess?: (
         data: Partial<PageMetrics[]>
-      ) => Promise<Partial<PageMetrics[]>> | void;
+      ) => unknown | void;
     }
   ): Promise<Partial<PageMetrics[]>[]> {
     if (!this.client) {
@@ -120,22 +120,23 @@ export class AdobeAnalyticsClient {
 
                 return rowValues;
               },
-              { date, url: row.value } as Partial<PageMetrics>
+              { date, url: row.value, aa_item_id: row.itemId } as Partial<PageMetrics>
             );
 
             return [...parsedResults, newPageMetricsData];
           }, [] as Partial<PageMetrics>[]);
         });
 
-      await wait(500);
-
       if (options?.postProcess) {
-        promises.push(promise.then(options.postProcess));
+        promises.push(
+          promise.then(options.postProcess)
+            .then((data) => console.log(`Successfully inserted data for ${data?.modifiedCount} pages`))
+        );
       } else {
         promises.push(promise);
       }
 
-      promises.push(promise);
+      await wait(500);
     }
 
     return await Promise.all(promises);
