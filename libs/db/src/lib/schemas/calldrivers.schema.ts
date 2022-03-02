@@ -5,7 +5,7 @@ export type CallDriverDocument = CallDriver & Document;
 
 @Schema()
 export class CallDriver {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: String, required: true, unique: true })
@@ -26,14 +26,14 @@ export class CallDriver {
   @Prop({ type: String })
   sub_subtopic?: string;
 
-  @Prop({ type: Number, required: true })
-  tpc_id: number;
+  @Prop({ type: Number })
+  tpc_id = 999999; // Some records don't have a tpc_id, so they will default to this value
 
-  @Prop({ type: Number, required: true })
-  impact: number;
+  @Prop({ type: Number })
+  impact = 0;
 
-  @Prop({ type: Number, required: true })
-  calls: number;
+  @Prop({ type: Number })
+  calls = 0;
 }
 
 export const CallDriverSchema = SchemaFactory.createForClass(CallDriver);

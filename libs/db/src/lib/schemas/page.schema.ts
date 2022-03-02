@@ -23,6 +23,9 @@ export class Page {
   @Prop({ unique: true })
   airtable_id?: string;
 
+  @Prop({ type: String })
+  aa_item_id?: string;
+
   @Prop({ type: Date })
   lastChecked = new Date(0);
 
@@ -37,6 +40,9 @@ export class Page {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }] })
   ux_tests?: Types.ObjectId[] | UxTest[];
+
+  @Prop({ type: Number })
+  url_status?: number;
 }
 
 export const PageSchema = SchemaFactory.createForClass(Page);

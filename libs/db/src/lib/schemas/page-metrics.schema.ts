@@ -15,6 +15,9 @@ export class PageMetrics {
   @Prop({ required: true, type: Date })
   date = new Date(0);
 
+  @Prop({ type: String })
+  aa_item_id?: string;
+
   @Prop({ type: Number })
   dyf_submit = 0;
 
