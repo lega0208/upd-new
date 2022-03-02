@@ -45,7 +45,7 @@
       [labelText]="yAxisLabel"
       [tickFormatting]="yAxisTickFormatting"
       (dimensionsChanged)="updateYAxisWidth($event)"
-      [style.fill]="colorLabelLeft ? colorLabelLeft : colorLabelDefault"
+      [style.fill]="colorLabelLeft ? colorLabelLeft : 'black'"
     ></svg:g>
 
     <svg:g
@@ -59,7 +59,7 @@
       [labelText]="yAxisLabelRight"
       [tickFormatting]="yRightAxisTickFormatting"
       (dimensionsChanged)="updateYAxisWidth($event)"
-      [style.fill]="colorLabelRight ? colorLabelRight : colorLabelDefault"
+      [style.fill]="colorLabelRight ? colorLabelRight : 'black'"
     ></svg:g>
 
     <svg:g

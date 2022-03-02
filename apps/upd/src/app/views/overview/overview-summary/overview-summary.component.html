@@ -4,6 +4,40 @@
 
 <!-- <app-example-chart></app-example-chart> -->
 
+<app-card [card-title]="'KPI Example'">
+  <div class="row mb-2 gx-2">
+  <div class="col-lg-4 col-md-4 col-sm-12 h-100">
+    <app-gauge-chart
+      [title]="'Example Title'"
+      [showLegend]="false"
+    ></app-gauge-chart>
+  </div>
+  <div class="col-lg-4 col-md-4 col-sm-12 h-100">
+    <app-gauge-chart
+      [title]="'Example Title'"
+      [showLegend]="false"
+    ></app-gauge-chart>
+  </div>
+  <div class="col-lg-4 col-md-4 col-sm-12 h-100">
+    <app-gauge-chart
+      [title]="'Example Title'"
+      [showLegend]="false"
+    ></app-gauge-chart>
+  </div>
+  </div>
+  </app-card>
+
+  <div class="row mb-2 gx-2">
+    <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+      <app-grouped-vertical-bar-line-chart
+        [title]="'Example Title'"
+        [displayLegend]="'below'"
+        [showRightYAxisLabel]="true"
+        [curveType]="'Natural'"
+      ></app-grouped-vertical-bar-line-chart>
+    </div>
+  </div>
+
 <div class="row mb-2 gx-2">
   <div class="col-lg-6 col-md-6 col-sm-12 h-100">
     <app-vertical-bar-chart
@@ -32,11 +66,14 @@
       [showLegend]="false"
     ></app-horizontal-bar-chart>
   </div>
+
   <div class="col-lg-6 col-md-6 col-sm-12 h-100">
     <app-line-chart
       [title]="'Example Title'"
       [showLegend]="true"
-      [curveType]="'Linear'"
+      [displayLegend]="'right'"
+      [curveType]="'default'"
+      [roundDomains]="true"
     ></app-line-chart>
   </div>
 </div>
@@ -54,14 +91,5 @@
     <app-stacked-vertical-bar-chart
       [title]="'Example Title'"
     ></app-stacked-vertical-bar-chart>
-  </div>
-</div>
-
-<div class="row mb-2 gx-2">
-  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
-    <app-grouped-vertical-bar-line-chart
-      [title]="'Example Title'"
-      [displayLegend]="'below'"
-    ></app-grouped-vertical-bar-line-chart>
   </div>
 </div>

@@ -55,6 +55,7 @@ import { PieChartComponent } from './components/charts/pie-chart/pie-chart.compo
 import { LineChartComponent } from './components/charts/line-chart/line-chart.component';
 import { StackedVerticalBarChartComponent } from './components/charts/stacked-vertical-bar-chart/stacked-vertical-bar-chart.component';
 import { HorizontalBarChartComponent } from './components/charts/horizontal-bar-chart/horizontal-bar-chart.component';
+import { GaugeChartComponent } from './components/charts/gauge-chart/gauge-chart.component';
 
 @NgModule({
   declarations: [
@@ -103,6 +104,7 @@ import { HorizontalBarChartComponent } from './components/charts/horizontal-bar-
     LineChartComponent,
     StackedVerticalBarChartComponent,
     HorizontalBarChartComponent,
+    GaugeChartComponent,
   ],
   imports: [
     BrowserModule,

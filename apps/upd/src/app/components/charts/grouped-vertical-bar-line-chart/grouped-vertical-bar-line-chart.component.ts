@@ -57,8 +57,8 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
   @Input() showDataLabel = false;
   @Input() noBarWhenZero = false;
   @Input() rotateXAxisTicks = true;
-  @Input() colorLabelLeft = '';
-  @Input() colorLabelRight = '#f37d35';
+  @Input() yAxisColourLeft = '';
+  @Input() yAxisColourRight = '#f37d35';
   @Input() showRightYAxisLabel = true;
   @Input() yAxisLabelRight = 'Call volume (in thousands)';
   @Input() lineColour = ['#f37d35', '#fbbc4d'];

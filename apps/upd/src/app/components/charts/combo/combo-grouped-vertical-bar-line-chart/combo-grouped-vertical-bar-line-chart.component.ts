@@ -186,10 +186,12 @@ export class ComboGroupedVerticalBarLineChartComponent extends BaseChartComponen
 
     if (!this.yAxis) {
       this.legendSpacing = 0;
-    } else if (this.showYAxisLabel && this.yAxis) {
-      this.legendSpacing = 60;
-    } else {
-      this.legendSpacing = 60;
+    } else if (this.showRightYAxisLabel && this.yAxis && this.legendPosition == LegendPosition.Right) {
+      this.legendSpacing = 80;
+    } else if (this.showRightYAxisLabel && this.yAxis && this.legendPosition == LegendPosition.Below) {
+        this.legendSpacing = 80;
+      } else {
+      this.legendSpacing = 40;
     }
 
     this.formatDates();
