@@ -45,7 +45,7 @@ import { ExampleChartComponent } from './components/example-chart/example-chart.
 import { DataTableComponent } from './components/datatable/data-table/data-table.component';
 import { GroupedVerticalBarChartComponent } from './components/charts/grouped-vertical-bar-chart/grouped-vertical-bar-chart.component';
 import { VerticalBarChartComponent } from './components/charts/vertical-bar-chart/vertical-bar-chart.component';
-//import { AccordianComponent } from './components/datatable/accordian/accordian.component';
+
 import {
   ComboGroupedVerticalBarLineChartComponent,
   ComboSeriesVerticalComponent,
@@ -56,6 +56,10 @@ import { LineChartComponent } from './components/charts/line-chart/line-chart.co
 import { StackedVerticalBarChartComponent } from './components/charts/stacked-vertical-bar-chart/stacked-vertical-bar-chart.component';
 import { HorizontalBarChartComponent } from './components/charts/horizontal-bar-chart/horizontal-bar-chart.component';
 import { GaugeChartComponent } from './components/charts/gauge-chart/gauge-chart.component';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -114,6 +118,18 @@ import { GaugeChartComponent } from './components/charts/gauge-chart/gauge-chart
     NgbPopoverModule,
     NgbAccordionModule,
     NgxChartsModule,
+    StoreModule.forRoot(
+      {},
+      {
+        metaReducers: !environment.production ? [] : [],
+        runtimeChecks: {
+          strictActionImmutability: true,
+          strictStateImmutability: true,
+        },
+      }
+    ),
+    EffectsModule.forRoot([]),
+    !environment.production ? StoreDevtoolsModule.instrument() : [],
   ],
   providers: [],
   bootstrap: [AppComponent],
