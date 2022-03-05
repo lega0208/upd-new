@@ -7,9 +7,9 @@
     "db-updater": "apps/db-updater",
     "external-data": "libs/external-data",
     "upd": "apps/upd",
+    "upd-components": "libs/upd/components",
     "upd-e2e": "apps/upd-e2e",
-    "upd-libs-components": "libs/upd-libs/components",
-    "upd-libs-views": "libs/upd-libs/views",
+    "upd-views-overview": "libs/upd/views/overview",
     "utils-common": "libs/utils-common"
   }
 }

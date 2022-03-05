@@ -1,30 +1,30 @@
 {
   "projectType": "library",
-  "root": "libs/upd-libs/components",
-  "sourceRoot": "libs/upd-libs/components/src",
+  "root": "libs/upd/views/overview",
+  "sourceRoot": "libs/upd/views/overview/src",
   "prefix": "cra-arc",
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",
-      "outputs": ["dist/libs/upd-libs/components"],
+      "outputs": ["dist/libs/upd/views/overview"],
       "options": {
-        "project": "libs/upd-libs/components/ng-package.json"
+        "project": "libs/upd/views/overview/ng-package.json"
       },
       "configurations": {
         "production": {
-          "tsConfig": "libs/upd-libs/components/tsconfig.lib.prod.json"
+          "tsConfig": "libs/upd/views/overview/tsconfig.lib.prod.json"
         },
         "development": {
-          "tsConfig": "libs/upd-libs/components/tsconfig.lib.json"
+          "tsConfig": "libs/upd/views/overview/tsconfig.lib.json"
         }
       },
       "defaultConfiguration": "production"
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/upd-libs/components"],
+      "outputs": ["coverage/libs/upd/views/overview"],
       "options": {
-        "jestConfig": "libs/upd-libs/components/jest.config.js",
+        "jestConfig": "libs/upd/views/overview/jest.config.js",
         "passWithNoTests": true
       }
     },
@@ -32,8 +32,8 @@
       "executor": "@nrwl/linter:eslint",
       "options": {
         "lintFilePatterns": [
-          "libs/upd-libs/components/src/**/*.ts",
-          "libs/upd-libs/components/src/**/*.html"
+          "libs/upd/views/overview/src/**/*.ts",
+          "libs/upd/views/overview/src/**/*.html"
         ]
       }
     }

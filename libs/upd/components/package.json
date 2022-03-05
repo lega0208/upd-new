@@ -1,5 +1,5 @@
 {
-  "name": "@cra-arc/upd-libs/views",
+  "name": "@cra-arc/upd-components",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^13.2.0",

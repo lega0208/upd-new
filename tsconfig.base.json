@@ -19,8 +19,8 @@
       "@cra-arc/db": ["libs/db/src/index.ts"],
       "@cra-arc/db-update": ["libs/db-update/src/index.ts"],
       "@cra-arc/external-data": ["libs/external-data/src/index.ts"],
-      "@cra-arc/upd-libs/components": ["libs/upd-libs/components/src/index.ts"],
-      "@cra-arc/upd-libs/views": ["libs/upd-libs/views/src/index.ts"],
+      "@cra-arc/upd-components": ["libs/upd/components/src/index.ts"],
+      "@cra-arc/upd/views/overview": ["libs/upd/views/overview/src/index.ts"],
       "@cra-arc/utils-common": ["libs/utils-common/src/index.ts"]
     },
     "allowSyntheticDefaultImports": true,

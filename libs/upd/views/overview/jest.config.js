@@ -1,6 +1,6 @@
 module.exports = {
-  displayName: 'upd-libs-components',
-  preset: '../../../jest.preset.js',
+  displayName: 'upd-views-overview',
+  preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
     'ts-jest': {
@@ -8,7 +8,7 @@ module.exports = {
       stringifyContentPathRegex: '\\.(html|svg)$',
     },
   },
-  coverageDirectory: '../../../coverage/libs/upd-libs/components',
+  coverageDirectory: '../../../../coverage/libs/upd/views/overview',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
   },
