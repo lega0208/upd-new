@@ -8,6 +8,8 @@
     "external-data": "libs/external-data",
     "upd": "apps/upd",
     "upd-e2e": "apps/upd-e2e",
+    "upd-libs-components": "libs/upd-libs/components",
+    "upd-libs-views": "libs/upd-libs/views",
     "utils-common": "libs/utils-common"
   }
 }

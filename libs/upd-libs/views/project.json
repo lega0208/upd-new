@@ -1,0 +1,42 @@
+{
+  "projectType": "library",
+  "root": "libs/upd-libs/views",
+  "sourceRoot": "libs/upd-libs/views/src",
+  "prefix": "cra-arc",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:ng-packagr-lite",
+      "outputs": ["dist/libs/upd-libs/views"],
+      "options": {
+        "project": "libs/upd-libs/views/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/upd-libs/views/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/upd-libs/views/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/upd-libs/views"],
+      "options": {
+        "jestConfig": "libs/upd-libs/views/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/upd-libs/views/src/**/*.ts",
+          "libs/upd-libs/views/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}
