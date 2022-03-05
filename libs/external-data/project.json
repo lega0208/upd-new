@@ -5,23 +5,30 @@
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/external-data/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/external-data/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/libs/external-data"
-      ],
+      "outputs": ["coverage/libs/external-data"],
       "options": {
         "jestConfig": "libs/external-data/jest.config.js",
         "passWithNoTests": true
+      }
+    },
+    "compodoc": {
+      "executor": "@twittwer/compodoc:compodoc",
+      "options": {
+        "tsConfig": "libs/external-data/tsconfig.compodoc.json",
+        "outputPath": "dist/compodoc/external-data",
+        "workspaceDocs": true
+      },
+      "configurations": {
+        "json": {
+          "exportFormat": "json"
+        }
       }
     }
   },

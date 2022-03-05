@@ -17,6 +17,19 @@
         "jestConfig": "libs/db/jest.config.js",
         "passWithNoTests": true
       }
+    },
+    "compodoc": {
+      "executor": "@twittwer/compodoc:compodoc",
+      "options": {
+        "tsConfig": "libs/db/tsconfig.compodoc.json",
+        "outputPath": "dist/compodoc/db",
+        "workspaceDocs": true
+      },
+      "configurations": {
+        "json": {
+          "exportFormat": "json"
+        }
+      }
     }
   },
   "tags": []

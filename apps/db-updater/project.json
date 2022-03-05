@@ -46,6 +46,19 @@
         "jestConfig": "apps/db-updater/jest.config.js",
         "passWithNoTests": true
       }
+    },
+    "compodoc": {
+      "executor": "@twittwer/compodoc:compodoc",
+      "options": {
+        "tsConfig": "apps/db-updater/tsconfig.compodoc.json",
+        "outputPath": "dist/compodoc/db-updater",
+        "workspaceDocs": true
+      },
+      "configurations": {
+        "json": {
+          "exportFormat": "json"
+        }
+      }
     }
   },
   "tags": []

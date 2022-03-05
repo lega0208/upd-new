@@ -86,6 +86,19 @@
         "jestConfig": "apps/upd/jest.config.js",
         "passWithNoTests": true
       }
+    },
+    "compodoc": {
+      "executor": "@twittwer/compodoc:compodoc",
+      "options": {
+        "tsConfig": "apps/upd/tsconfig.compodoc.json",
+        "outputPath": "dist/compodoc/upd",
+        "workspaceDocs": true
+      },
+      "configurations": {
+        "json": {
+          "exportFormat": "json"
+        }
+      }
     }
   },
   "tags": []
