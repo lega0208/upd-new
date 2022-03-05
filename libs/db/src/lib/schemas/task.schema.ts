@@ -12,7 +12,7 @@ export class Task {
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ required: true, unique: true })
-  airtable_id: string;
+  airtable_id: string = '';
 
   @Prop({ required: true, type: String })
   title = '';

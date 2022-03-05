@@ -12,10 +12,10 @@ export class UxTest {
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ required: true, unique: true })
-  airtable_id: string;
+  airtable_id = '';
 
   @Prop({ required: true, type: Types.ObjectId, ref: 'UxTest' })
-  project: Types.ObjectId | Project;
+  project: Types.ObjectId | Project = new Types.ObjectId('');
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Page' }] })
   pages?: Types.ObjectId[] | Page[];

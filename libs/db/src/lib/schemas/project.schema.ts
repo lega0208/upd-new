@@ -12,7 +12,7 @@ export class Project {
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: String, required: true, unique: true })
-  title;
+  title = '';
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }] })
   ux_tests?: Types.ObjectId[] | UxTest[];

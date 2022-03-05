@@ -9,13 +9,13 @@ export class CallDriver {
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: String, required: true, unique: true })
-  airtable_id: string;
+  airtable_id = '';
 
   @Prop({ type: Date, required: true })
-  date: Date;
+  date = new Date(0);
 
   @Prop({ type: String, required: true })
-  enquiry_line: string;
+  enquiry_line = '';
 
   @Prop({ type: String })
   topic?: string;
