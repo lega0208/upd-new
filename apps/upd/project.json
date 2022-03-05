@@ -5,7 +5,7 @@
   "prefix": "cra-arc",
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:browser",
+      "executor": "@nrwl/angular:webpack-browser",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/upd",
@@ -52,19 +52,20 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@nrwl/web:file-server",
       "configurations": {
         "production": {
-          "browserTarget": "upd:build:production"
+          "browserTarget": "upd:build:production",
+          "buildTarget": "upd:build:production"
         },
         "development": {
-          "browserTarget": "upd:build:development"
+          "buildTarget": "upd:build:development"
         }
       },
       "defaultConfiguration": "development",
       "options": {
-        "proxyConfig": "apps/upd/proxy.conf.json",
-        "browserTarget": "upd:build:development"
+        "buildTarget": "upd:build:development",
+        "parallel": true
       }
     },
     "extract-i18n": {

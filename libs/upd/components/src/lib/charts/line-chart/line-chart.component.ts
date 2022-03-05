@@ -1,8 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Color, ScaleType, LegendPosition } from '@lega0208/ngx-charts';
-import { ApiService } from '../../../services/api/api.service';
-import * as shape from 'd3-shape';
 import dayjs from 'dayjs';
+import { curves, Curves } from '../types';
 
 @Component({
   selector: 'app-line-chart',
@@ -53,8 +52,6 @@ export class LineChartComponent implements OnInit {
 
   // data
   single: any = [];
-
-  constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
     this.getData();
@@ -133,19 +130,4 @@ export class LineChartComponent implements OnInit {
   }
 }
 
-const curves = {
-  Basis: shape.curveBasis,
-  Bundle: shape.curveBundle.beta(1),
-  Cardinal: shape.curveCardinal,
-  'Catmull Rom': shape.curveCatmullRom,
-  Linear: shape.curveLinear,
-  'Monotone X': shape.curveMonotoneX,
-  'Monotone Y': shape.curveMonotoneY,
-  Natural: shape.curveNatural,
-  Step: shape.curveStep,
-  'Step After': shape.curveStepAfter,
-  'Step Before': shape.curveStepBefore,
-  default: shape.curveLinear,
-};
 
-export type Curves = keyof typeof curves;

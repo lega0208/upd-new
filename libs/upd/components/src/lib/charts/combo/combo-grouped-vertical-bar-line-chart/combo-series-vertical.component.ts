@@ -61,7 +61,7 @@ import { isPlatformServer } from '@angular/common';
       [tooltipContext]="bar.data"
       [noBarWhenZero]="noBarWhenZero"
       [animations]="animations"
-    ></svg:g>
+    />
     <svg:g *ngIf="showDataLabel">
       <svg:g
         ngx-charts-bar-label

@@ -1,17 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Color, ScaleType, LegendPosition } from '@lega0208/ngx-charts';
-//import { ChartsService } from '../../charts.service';
 import dayjs from 'dayjs';
-import localeData from 'dayjs/plugin/localeData';
-import { ApiService } from '../../../services/api/api.service';
-dayjs.extend(localeData);
 
 @Component({
-  selector: 'app-grouped-vertical-bar-chart',
-  templateUrl: './grouped-vertical-bar-chart.component.html',
-  styleUrls: ['./grouped-vertical-bar-chart.component.scss'],
+  selector: 'app-stacked-vertical-bar-chart',
+  templateUrl: './stacked-vertical-bar-chart.component.html',
+  styleUrls: ['./stacked-vertical-bar-chart.component.scss'],
 })
-export class GroupedVerticalBarChartComponent implements OnInit {
+export class StackedVerticalBarChartComponent implements OnInit {
   // data
   single: any = [];
   multi: any = [];
@@ -27,16 +23,14 @@ export class GroupedVerticalBarChartComponent implements OnInit {
   @Input() showYAxis = true;
   @Input() showXAxisLabel = true;
   @Input() showYAxisLabel = true;
-  @Input() roundEdges = false;
   @Input() rotateXAxisTicks = true;
   @Input() barPadding = 6;
-  @Input() groupPadding = 12;
   @Input() gradient = false;
   @Input() displayLegend = 'below';
   @Input() xAxisLabel = 'Date';
   @Input() yAxisLabel = 'Visits (in thousands)';
   @Input() colour = ['#2E5EA7', '#B5C2CC'];
-  @Input() showLegend = false;
+  @Input() showLegend = true;
   @Input() showGridLines = false;
   @Input() noBarWhenZero = true;
   @Input() legendTitle = 'Legend';
@@ -55,15 +49,17 @@ export class GroupedVerticalBarChartComponent implements OnInit {
 
   week: string[] = dayjs.weekdays();
 
-  colorScheme!: Color;
-  legendPosition!: LegendPosition;
-
-  constructor(private apiService: ApiService) {}
+  colorScheme: any;
+  legendPosition: any;
 
   ngOnInit(): void {
     this.getData();
     this.setColourScheme();
     this.setLegendPosition();
+
+    if (!this.fitContainer) {
+      this.applyDimensions();
+    }
   }
 
   setColourScheme() {

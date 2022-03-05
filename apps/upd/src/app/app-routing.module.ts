@@ -1,15 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-// todo: will probably want to seperate views into their own routers
-import { OverviewComponent } from './views/overview/overview.component';
-import { OverviewSummaryComponent } from './views/overview/overview-summary/overview-summary.component';
-import { OverviewWebtrafficComponent } from './views/overview/overview-webtraffic/overview-webtraffic.component';
-import { OverviewFeedbackComponent } from './views/overview/overview-feedback/overview-feedback.component';
-import { OverviewSearchAnalyticsComponent } from './views/overview/overview-search-analytics/overview-search-analytics.component';
-import { OverviewUxTestsComponent } from './views/overview/overview-ux-tests/overview-ux-tests.component';
-import { OverviewCalldriversComponent } from './views/overview/overview-calldrivers/overview-calldrivers.component';
-
 import { PagesComponent } from './views/pages/pages.component';
 import { PagesHomeComponent } from './views/pages/pages-home/pages-home.component';
 import { PageDetailsComponent } from './views/pages/page-details/page-details.component';
@@ -38,16 +29,8 @@ const routes: Routes = [
   { path: '', redirectTo: 'overview', pathMatch: 'full' },
   {
     path: 'overview',
-    component: OverviewComponent,
-    children: [
-      { path: '', redirectTo: 'summary', pathMatch: 'full' },
-      { path: 'summary', component: OverviewSummaryComponent },
-      { path: 'webtraffic', component: OverviewWebtrafficComponent },
-      { path: 'search_analytics', component: OverviewSearchAnalyticsComponent },
-      { path: 'feedback', component: OverviewFeedbackComponent },
-      { path: 'calldrivers', component: OverviewCalldriversComponent },
-      { path: 'uxtests', component: OverviewUxTestsComponent },
-    ],
+    loadChildren: () => import('@cra-arc/upd/views/overview')
+      .then((m) => m.OverviewModule)
   },
   {
     path: 'pages',
@@ -112,8 +95,6 @@ const routes: Routes = [
       },
     ],
   },
-
-  // todo: add rest of views
 
   { path: '**', redirectTo: 'overview' },
 ];

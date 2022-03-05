@@ -6,7 +6,6 @@ import {
   ScaleType,
   LegendPosition,
 } from '@lega0208/ngx-charts';
-import { ApiService } from '../../../services/api/api.service';
 import dayjs from 'dayjs';
 
 @Component({
@@ -56,8 +55,6 @@ export class GaugeChartComponent implements OnInit {
 
   // data
   single: any = [];
-
-  constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
     this.getData();
