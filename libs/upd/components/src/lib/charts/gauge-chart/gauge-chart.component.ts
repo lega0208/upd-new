@@ -5,7 +5,7 @@ import {
   Color,
   ScaleType,
   LegendPosition,
-} from '@lega0208/ngx-charts';
+} from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
 
 @Component({

@@ -1,11 +1,7 @@
 <app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="50">
   <div #ContainerRef class="vh-45 mr-80">
     <combo-grouped-vertical-bar-line-chart
-      [view]="
-        showLegend && displayLegend === 'below'
-          ? [ContainerRef.offsetWidth, ContainerRef.offsetHeight + 40]
-          : [ContainerRef.offsetWidth, ContainerRef.offsetHeight]
-      "
+      [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
       [scheme]="comboBarScheme"
       [colorSchemeLine]="lineChartScheme"
       [results]="barChart"

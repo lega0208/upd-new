@@ -26,7 +26,7 @@ import {
   D0Types,
   ScaleType,
   escapeLabel,
-} from '@lega0208/ngx-charts';
+} from '@amonsour/ngx-charts';
 import { isPlatformServer } from '@angular/common';
 
 @Component({

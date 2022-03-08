@@ -4,7 +4,7 @@ import {
   LegendPosition,
   Color,
   MultiSeries,
-} from '@lega0208/ngx-charts';
+} from '@amonsour/ngx-charts';
 import { CurveFactory } from 'd3-shape'
 import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';

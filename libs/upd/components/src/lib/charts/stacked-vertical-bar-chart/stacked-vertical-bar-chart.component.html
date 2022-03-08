@@ -1,11 +1,7 @@
 <app-card [card-title]="title" [title-tooltip]="titleTooltip">
   <div #ContainerRef class="vh-45">
     <ngx-charts-bar-vertical-stacked
-      [view]="
-        showLegend && displayLegend === 'below'
-          ? [ContainerRef.offsetWidth, ContainerRef.offsetHeight + 40]
-          : [ContainerRef.offsetWidth, ContainerRef.offsetHeight]
-      "
+      [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
       [scheme]="colorScheme"
       [results]="single"
       [animations]="animations"

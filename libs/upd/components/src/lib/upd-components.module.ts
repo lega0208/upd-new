@@ -1,10 +1,13 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
-import { BarVertical2DComponent, NgxChartsModule } from '@lega0208/ngx-charts';
+import { BarVertical2DComponent, NgxChartsModule } from '@amonsour/ngx-charts';
 import { CardComponent } from './card/card.component';
 import { DataTableComponent } from './data-table/data-table.component';
 import { DateSelectorComponent } from './date-selector/date-selector.component';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 import {
   ComboGroupedVerticalBarLineChartComponent,
   ComboSeriesVerticalComponent,
@@ -19,7 +22,7 @@ import {
 import { PieChartComponent } from './charts/pie-chart/pie-chart.component';
 
 @NgModule({
-  imports: [CommonModule, NgbPopoverModule, NgxChartsModule],
+  imports: [CommonModule, NgbPopoverModule, NgxChartsModule, TableModule, ButtonModule, InputTextModule],
   declarations: [
     CardComponent,
     DataTableComponent,
@@ -37,6 +40,9 @@ import { PieChartComponent } from './charts/pie-chart/pie-chart.component';
   ],
   exports: [
     NgxChartsModule,
+    TableModule,
+    ButtonModule,
+    InputTextModule,
     CardComponent,
     DataTableComponent,
     DateSelectorComponent,

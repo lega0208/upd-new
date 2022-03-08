@@ -2,11 +2,7 @@
     <div #ContainerRef class="vh-45">
 
 <ngx-charts-gauge
-        [view]="
-        showLegend && displayLegend === 'below'
-          ? [ContainerRef.offsetWidth, ContainerRef.offsetHeight + 40]
-          : [ContainerRef.offsetWidth, ContainerRef.offsetHeight]
-      "
+        [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
         [legend]="showLegend"
         [legendTitle]="legendTitle"
         [legendPosition]="legendPosition"

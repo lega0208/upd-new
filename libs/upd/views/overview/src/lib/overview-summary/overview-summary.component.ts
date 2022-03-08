@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { catchError, map, of } from 'rxjs';
 import dayjs from 'dayjs';
-import { MultiSeries } from '@lega0208/ngx-charts';
+import { MultiSeries } from '@amonsour/ngx-charts';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({

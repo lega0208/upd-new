@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Color, ScaleType, LegendPosition } from '@lega0208/ngx-charts';
+import { Color, ScaleType, LegendPosition } from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
 
 @Component({
