@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateOverallDto } from './dto/create-overall.dto';
-import { UpdateOverallDto } from './dto/update-overall.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Overall, OverallDocument } from '@cra-arc/db';
 import { FilterQuery, Model } from 'mongoose';
@@ -10,10 +8,6 @@ export class OverallService {
   constructor(
     @InjectModel(Overall.name) private overallModel: Model<OverallDocument>
   ) {}
-
-  create(createOverallDto: CreateOverallDto) {
-    return 'This action adds a new overall';
-  }
 
   async getMetrics(dateRange: {
     endDate?: string;
@@ -32,15 +26,16 @@ export class OverallService {
     return this.overallModel.find({ date: dateQuery }).sort({ date: 1 }).exec();
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} overall`;
-  }
-
-  update(id: string, updateOverallDto: UpdateOverallDto) {
-    return `This action updates a #${id} overall`;
-  }
-
-  remove(id: string) {
-    return `This action removes a #${id} overall`;
+  async getVisits(): Promise<Pick<Overall, 'visits' & 'date'>[]> {
+    // hardcoded everything for now, just to demo
+    return this.overallModel.find(
+      {
+        date: {
+          $gte: new Date('2022-02-06'),
+          $lte: new Date('2022-02-19'),
+        }
+      },
+      { _id: 0, visits: 1, date: 1 }
+    ).sort({ date: 1 });
   }
 }

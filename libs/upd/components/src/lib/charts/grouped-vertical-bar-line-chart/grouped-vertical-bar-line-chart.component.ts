@@ -2,9 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import {
   ScaleType,
   LegendPosition,
-  ColorHelper,
   Color,
+  MultiSeries,
 } from '@lega0208/ngx-charts';
+import { CurveFactory } from 'd3-shape'
 import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 import { curves, Curves } from '../types';
@@ -18,8 +19,8 @@ dayjs.extend(localeData);
 })
 export class GroupedVerticalBarLineChartComponent implements OnInit {
   // data
-  barChart: any = [];
-  lineChart: any = [];
+  @Input() barChart: MultiSeries | null = [];
+  lineChart: MultiSeries = [];
 
   //days of the week (Sunday to Saturday)
   week: string[] = dayjs.weekdays();
@@ -28,7 +29,7 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
 
   // set view to [ width, height ] (if fitContainer is false)
   // this would be unresponsive
-  view: any;
+  view?: [number, number];
   @Input() title = '';
   @Input() titleTooltip = '';
   @Input() fitContainer = true;
@@ -52,8 +53,8 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
   @Input() displayLegend = 'right';
   @Input() roundEdges = false;
   @Input() animations = true;
-  @Input() xScaleMin: any;
-  @Input() xScaleMax: any;
+  @Input() xScaleMin?: number;
+  @Input() xScaleMax?: number;
   @Input() showDataLabel = false;
   @Input() noBarWhenZero = false;
   @Input() rotateXAxisTicks = true;
@@ -72,13 +73,12 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
   @Input() curveType: Curves = 'Linear';
   @Input() rangeFillOpacity = 0.15;
   @Input() autoScale = false;
-  @Input() data = '';
 
   colorLabelDefault = 'black';
   lineChartScheme!: Color;
   comboBarScheme!: Color;
   legendPosition!: LegendPosition;
-  curve: any;
+  curve?: CurveFactory;
 
   ngOnInit() {
     this.getData();
@@ -122,75 +122,62 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
   }
 
   setCurve() {
-    this.curve = curves[this.curveType];
+    this.curve = curves[this.curveType] as CurveFactory;
   }
 
   getData(): void {
-    // this.chartsService.getBar2().subscribe((data: any) => {
-    //   this.barChart =  data;
-    // });
-    //   this.chartsService.getLine().subscribe((data: any) => {
-    //     this.lineChart =  data;
-    //   });
 
-    // this.apiService.getOverallMetrics().subscribe((data: any) => {
-    //   this.single = data.map((document: any) => ({
-    //     name: dayjs(document.date).format('MMM D'),
-    //     value: document.visits,
-    //   }));
-    // });
-
-    this.barChart = [
-      {
-        name: 'Sunday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 453777 },
-          { name: 'Aug 15-Aug 21', value: 436140 },
-        ],
-      },
-      {
-        name: 'Monday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 1141379 },
-          { name: 'Aug 15-Aug 21', value: 1181317 },
-        ],
-      },
-      {
-        name: 'Tuesday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 911667 },
-          { name: 'Aug 15-Aug 21', value: 967833 },
-        ],
-      },
-      {
-        name: 'Wednesday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 856571 },
-          { name: 'Aug 15-Aug 21', value: 920866 },
-        ],
-      },
-      {
-        name: 'Thursday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 842921 },
-          { name: 'Aug 15-Aug 21', value: 901947 },
-        ],
-      },
-      {
-        name: 'Friday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 800866 },
-          { name: 'Aug 15-Aug 21', value: 774515 },
-        ],
-      },
-      {
-        name: 'Saturday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 413806 },
-          { name: 'Aug 15-Aug 21', value: 433290 },
-        ],
-      },
-    ];
+    // this.barChart = [
+    //   {
+    //     name: 'Sunday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 453777 },
+    //       { name: 'Aug 15-Aug 21', value: 436140 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Monday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 1141379 },
+    //       { name: 'Aug 15-Aug 21', value: 1181317 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Tuesday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 911667 },
+    //       { name: 'Aug 15-Aug 21', value: 967833 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Wednesday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 856571 },
+    //       { name: 'Aug 15-Aug 21', value: 920866 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Thursday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 842921 },
+    //       { name: 'Aug 15-Aug 21', value: 901947 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Friday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 800866 },
+    //       { name: 'Aug 15-Aug 21', value: 774515 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Saturday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 413806 },
+    //       { name: 'Aug 15-Aug 21', value: 433290 },
+    //     ],
+    //   },
+    // ];
     this.lineChart = [
       {
         name: 'Calls Apr 18-Apr 24',
@@ -243,11 +230,6 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
   yRightTickFormat(data: any) {
     return (data / 1000).toLocaleString();
   }
-  /*
-  **
-  End of Combo Chart
-  **
-  */
 
   onSelect(event: any) {
     console.log(event);
