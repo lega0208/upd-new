@@ -21,6 +21,9 @@
       "@cra-arc/external-data": ["libs/external-data/src/index.ts"],
       "@cra-arc/upd-components": ["libs/upd/components/src/index.ts"],
       "@cra-arc/upd/views/overview": ["libs/upd/views/overview/src/index.ts"],
+      "@cra-arc/upd/views/pages": ["libs/upd/views/pages/src/index.ts"],
+      "@cra-arc/upd/views/projects": ["libs/upd/views/projects/src/index.ts"],
+      "@cra-arc/upd/views/tasks": ["libs/upd/views/tasks/src/index.ts"],
       "@cra-arc/utils-common": ["libs/utils-common/src/index.ts"]
     },
     "allowSyntheticDefaultImports": true,

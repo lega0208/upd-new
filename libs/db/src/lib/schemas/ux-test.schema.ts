@@ -11,7 +11,7 @@ export class UxTest {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, type: String })
   airtable_id = '';
 
   @Prop({ required: true, type: Types.ObjectId, ref: 'UxTest' })

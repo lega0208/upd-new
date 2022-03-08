@@ -52,20 +52,19 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nrwl/web:file-server",
+      "executor": "@nrwl/angular:webpack-server",
       "configurations": {
         "production": {
-          "browserTarget": "upd:build:production",
-          "buildTarget": "upd:build:production"
+          "browserTarget": "upd:build:production"
         },
         "development": {
-          "buildTarget": "upd:build:development"
+          "browserTarget": "upd:build:development"
         }
       },
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "upd:build:development",
-        "parallel": true
+        "proxyConfig": "apps/upd/proxy.conf.json",
+        "browserTarget": "upd:build:development"
       }
     },
     "extract-i18n": {

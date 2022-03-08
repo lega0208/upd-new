@@ -10,6 +10,9 @@
     "upd-components": "libs/upd/components",
     "upd-e2e": "apps/upd-e2e",
     "upd-views-overview": "libs/upd/views/overview",
+    "upd-views-pages": "libs/upd/views/pages",
+    "upd-views-projects": "libs/upd/views/projects",
+    "upd-views-tasks": "libs/upd/views/tasks",
     "utils-common": "libs/utils-common"
   }
 }

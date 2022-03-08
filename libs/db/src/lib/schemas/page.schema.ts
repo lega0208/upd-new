@@ -20,7 +20,7 @@ export class Page {
   @Prop({ required: true, type: String })
   title = '';
 
-  @Prop({ unique: true })
+  @Prop({ unique: true, type: String })
   airtable_id?: string;
 
   @Prop({ type: String })

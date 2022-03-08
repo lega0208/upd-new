@@ -11,8 +11,8 @@ export class Task {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
-  @Prop({ required: true, unique: true })
-  airtable_id: string = '';
+  @Prop({ required: true, unique: true, type: String })
+  airtable_id = '';
 
   @Prop({ required: true, type: String })
   title = '';

@@ -2,39 +2,19 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
-import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
-import { NgxChartsModule } from '@lega0208/ngx-charts';
 
-// todo: same as router file-- will probably want to split each view into its own module (and probably load lazily)
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { StoreRouterConnectingModule } from '@ngrx/router-store';
+
+import { overviewReducer } from '@cra-arc/upd/views/overview';
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
-import { PagesComponent } from './views/pages/pages.component';
-import { PagesHomeComponent } from './views/pages/pages-home/pages-home.component';
-import { TasksComponent } from './views/tasks/tasks.component';
-import { ProjectsComponent } from './views/projects/projects.component';
-import { PageDetailsComponent } from './views/pages/page-details/page-details.component';
-import { PageDetailsSummaryComponent } from './views/pages/page-details/page-details-summary/page-details-summary.component';
-import { PageDetailsWebtrafficComponent } from './views/pages/page-details/page-details-webtraffic/page-details-webtraffic.component';
-import { PageDetailsSearchAnalyticsComponent } from './views/pages/page-details/page-details-search-analytics/page-details-search-analytics.component';
-import { PageDetailsFeedbackComponent } from './views/pages/page-details/page-details-feedback/page-details-feedback.component';
-import { TasksHomeComponent } from './views/tasks/tasks-home/tasks-home.component';
-import { TaskDetailsComponent } from './views/tasks/task-details/task-details.component';
-import { TaskDetailsSummaryComponent } from './views/tasks/task-details/task-details-summary/task-details-summary.component';
-import { TaskDetailsWebtrafficComponent } from './views/tasks/task-details/task-details-webtraffic/task-details-webtraffic.component';
-import { TaskDetailsSearchAnalyticsComponent } from './views/tasks/task-details/task-details-search-analytics/task-details-search-analytics.component';
-import { TaskDetailsFeedbackComponent } from './views/tasks/task-details/task-details-feedback/task-details-feedback.component';
-import { ProjectsHomeComponent } from './views/projects/projects-home/projects-home.component';
-import { ProjectDetailsComponent } from './views/projects/project-details/project-details.component';
-import { ProjectDetailsSummaryComponent } from './views/projects/project-details/project-details-summary/project-details-summary.component';
-import { ProjectDetailsWebtrafficComponent } from './views/projects/project-details/project-details-webtraffic/project-details-webtraffic.component';
-import { ProjectDetailsSearchAnalyticsComponent } from './views/projects/project-details/project-details-search-analytics/project-details-search-analytics.component';
-import { ProjectDetailsFeedbackComponent } from './views/projects/project-details/project-details-feedback/project-details-feedback.component';
-import { StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+
 import { environment } from '../environments/environment';
 
 @NgModule({
@@ -42,38 +22,16 @@ import { environment } from '../environments/environment';
     AppComponent,
     HeaderComponent,
     SidebarComponent,
-    PagesComponent,
-    PagesHomeComponent,
-    TasksComponent,
-    ProjectsComponent,
-    PageDetailsComponent,
-    PageDetailsSummaryComponent,
-    PageDetailsWebtrafficComponent,
-    PageDetailsSearchAnalyticsComponent,
-    PageDetailsFeedbackComponent,
-    TasksHomeComponent,
-    TaskDetailsComponent,
-    TaskDetailsSummaryComponent,
-    TaskDetailsWebtrafficComponent,
-    TaskDetailsSearchAnalyticsComponent,
-    TaskDetailsFeedbackComponent,
-    ProjectsHomeComponent,
-    ProjectDetailsComponent,
-    ProjectDetailsSummaryComponent,
-    ProjectDetailsWebtrafficComponent,
-    ProjectDetailsSearchAnalyticsComponent,
-    ProjectDetailsFeedbackComponent,
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     BrowserAnimationsModule,
     AppRoutingModule,
-    NgbPopoverModule,
-    NgbAccordionModule,
-    NgxChartsModule,
     StoreModule.forRoot(
-      {},
+      {
+        overview: overviewReducer
+      },
       {
         metaReducers: !environment.production ? [] : [],
         runtimeChecks: {
@@ -82,6 +40,7 @@ import { environment } from '../environments/environment';
         },
       }
     ),
+    StoreRouterConnectingModule.forRoot(),
     EffectsModule.forRoot([]),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
   ],
