@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
 import { BarVertical2DComponent, NgxChartsModule } from '@amonsour/ngx-charts';
@@ -20,9 +21,10 @@ import {
   VerticalBarChartComponent,
 } from './charts';
 import { PieChartComponent } from './charts/pie-chart/pie-chart.component';
+import { NavTabsComponent } from './nav-tabs/nav-tabs.component';
 
 @NgModule({
-  imports: [CommonModule, NgbPopoverModule, NgxChartsModule, TableModule, ButtonModule, InputTextModule],
+  imports: [CommonModule, RouterModule, NgbPopoverModule, NgxChartsModule, TableModule, ButtonModule, InputTextModule],
   declarations: [
     CardComponent,
     DataTableComponent,
@@ -37,6 +39,7 @@ import { PieChartComponent } from './charts/pie-chart/pie-chart.component';
     StackedVerticalBarChartComponent,
     VerticalBarChartComponent,
     PieChartComponent,
+    NavTabsComponent
   ],
   exports: [
     NgxChartsModule,
@@ -56,6 +59,7 @@ import { PieChartComponent } from './charts/pie-chart/pie-chart.component';
     StackedVerticalBarChartComponent,
     VerticalBarChartComponent,
     PieChartComponent,
+    NavTabsComponent
   ],
 })
 export class UpdComponentsModule {}
