@@ -29,7 +29,7 @@ import {
   DataItem,
   getUniqueXDomainValues,
   StringOrNumberOrDate,
-} from '@lega0208/ngx-charts';
+} from '@amonsour/ngx-charts';
 import { isPlatformServer } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
 

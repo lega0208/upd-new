@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Color, ScaleType, LegendPosition } from '@lega0208/ngx-charts';
+import { Color, ScaleType, LegendPosition, MultiSeries } from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
 
 @Component({
@@ -9,9 +9,8 @@ import dayjs from 'dayjs';
 })
 export class StackedVerticalBarChartComponent implements OnInit {
   // data
-  single: any = [];
-  multi: any = [];
-  view: any;
+  multi: MultiSeries = [];
+  view?: [number, number];
 
   // options
   @Input() title = '';
@@ -49,8 +48,8 @@ export class StackedVerticalBarChartComponent implements OnInit {
 
   week: string[] = dayjs.weekdays();
 
-  colorScheme: any;
-  legendPosition: any;
+  colorScheme!: Color;
+  legendPosition!: LegendPosition;
 
   ngOnInit(): void {
     this.getData();
@@ -87,7 +86,7 @@ export class StackedVerticalBarChartComponent implements OnInit {
     //   }));
     // });
 
-    this.single = [
+    this.multi = [
       {
         name: 'Sunday',
         series: [
@@ -140,53 +139,53 @@ export class StackedVerticalBarChartComponent implements OnInit {
     ];
   }
 
-  processData(results: any) {
-    let entry: any = [];
-    let dateArray: any = [];
+  // processData(results: any) {
+  //   let entry: any = [];
+  //   let dateArray: any = [];
 
-    for (const arr in results) {
-      dateArray.push(new Date(results[arr].date));
-    }
+  //   for (const arr in results) {
+  //     dateArray.push(new Date(results[arr].date));
+  //   }
 
-    const maxDate = new Date(Math.max(...dateArray));
-    const minDate = new Date(Math.min(...dateArray));
-    const midDate = new Date((minDate.getTime() + maxDate.getTime()) / 2);
+  //   const maxDate = new Date(Math.max(...dateArray));
+  //   const minDate = new Date(Math.min(...dateArray));
+  //   const midDate = new Date((minDate.getTime() + maxDate.getTime()) / 2);
 
-    dateArray = [];
-    dateArray.push(minDate, maxDate, midDate);
+  //   dateArray = [];
+  //   dateArray.push(minDate, maxDate, midDate);
 
-    for (const weekday in this.week) {
-      entry = [];
-      for (const arr in results) {
-        const day = dayjs(results[arr].date).format('dddd');
-        if (this.week[weekday] === day) {
-          let name: string;
-          entry.length == 0
-            ? (name =
-                dayjs(dateArray[0]).format('MMM D') +
-                '-' +
-                dayjs(dateArray[2]).format('MMM D'))
-            : (name =
-                dayjs(dateArray[2]).add(1, 'day').format('MMM D') +
-                '-' +
-                dayjs(dateArray[1]).format('MMM D'));
-          entry.push({
-            name: name,
-            value: results[arr].value,
-          });
-        }
-      }
-      this.multi.push({ name: this.week[weekday], series: entry });
-    }
-    console.log(JSON.stringify(this.multi));
-    return this.multi;
-  }
+  //   for (const weekday in this.week) {
+  //     entry = [];
+  //     for (const arr in results) {
+  //       const day = dayjs(results[arr].date).format('dddd');
+  //       if (this.week[weekday] === day) {
+  //         let name: string;
+  //         entry.length == 0
+  //           ? (name =
+  //               dayjs(dateArray[0]).format('MMM D') +
+  //               '-' +
+  //               dayjs(dateArray[2]).format('MMM D'))
+  //           : (name =
+  //               dayjs(dateArray[2]).add(1, 'day').format('MMM D') +
+  //               '-' +
+  //               dayjs(dateArray[1]).format('MMM D'));
+  //         entry.push({
+  //           name: name,
+  //           value: results[arr].value,
+  //         });
+  //       }
+  //     }
+  //     this.multi.push({ name: this.week[weekday], series: entry });
+  //   }
+  //   console.log(JSON.stringify(this.multi));
+  //   return this.multi;
+  // }
 
   applyDimensions() {
     this.view = [this.width, this.height];
   }
 
-  yAxisTickFormat(data: any) {
+  yAxisTickFormat(data: number) {
     return (data / 1000).toLocaleString();
   }
 

@@ -5,7 +5,8 @@ import {
   Color,
   ScaleType,
   LegendPosition,
-} from '@lega0208/ngx-charts';
+  SingleSeries,
+} from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
 
 @Component({
@@ -14,7 +15,7 @@ import dayjs from 'dayjs';
   styleUrls: ['./pie-chart.component.scss'],
 })
 export class PieChartComponent implements OnInit {
-  view: any;
+  view?: [number, number];
   @Input() title = '';
   @Input() titleTooltip = '';
   @Input() animations = true;
@@ -38,7 +39,7 @@ export class PieChartComponent implements OnInit {
   doughnut = false;
 
   // data
-  single: any = [];
+  single: SingleSeries = [];
 
   ngOnInit(): void {
     this.getData();

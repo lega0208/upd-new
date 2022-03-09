@@ -4,7 +4,7 @@ import {
   LegendPosition,
   Color,
   MultiSeries,
-} from '@lega0208/ngx-charts';
+} from '@amonsour/ngx-charts';
 import { CurveFactory } from 'd3-shape'
 import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
@@ -215,19 +215,19 @@ export class GroupedVerticalBarLineChartComponent implements OnInit {
   **
   */
 
-  yLeftAxisScale(min: any, max: any) {
+  yLeftAxisScale(min: number, max: number) {
     return { min: `${min}`, max: `${max}` };
   }
 
-  yRightAxisScale(min: any, max: any) {
+  yRightAxisScale(min: number, max: number) {
     return { min: `${min}`, max: `${max}` };
   }
 
-  yLeftTickFormat(data: any) {
+  yLeftTickFormat(data: number) {
     return (data / 1000).toLocaleString();
   }
 
-  yRightTickFormat(data: any) {
+  yRightTickFormat(data: number) {
     return (data / 1000).toLocaleString();
   }
 

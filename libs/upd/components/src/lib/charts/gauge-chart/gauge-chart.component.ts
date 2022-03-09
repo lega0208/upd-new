@@ -1,11 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import {
-  formatLabel,
-  escapeLabel,
   Color,
   ScaleType,
   LegendPosition,
-} from '@lega0208/ngx-charts';
+  SingleSeries,
+} from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
 
 @Component({
@@ -15,7 +14,7 @@ import dayjs from 'dayjs';
 })
 export class GaugeChartComponent implements OnInit {
 
-  view: any;
+  view?: [number, number];
   @Input() title = '';
   @Input() titleTooltip = '';
   @Input() animations = true;
@@ -29,32 +28,31 @@ export class GaugeChartComponent implements OnInit {
   @Input() data = 'overall';
   @Input() legendTitle = 'Legend';
   @Input() tooltipDisabled = false;
+  @Input() gaugeMin = 0;
+  @Input() gaugeMax = 100;
+  @Input() gaugeLargeSegments = 2;
+  @Input() gaugeSmallSegments = 0;
+  @Input() gaugeTextValue = '';
+  @Input() gaugeUnits = '';
+  @Input() gaugeAngleSpan = 180;
+  @Input() gaugeStartAngle = -90;
+  @Input() gaugeShowAxis = true;
+  @Input() gaugeValue = 50; // linear gauge value
+  @Input() gaugePreviousValue = 70;
+  @Input() showText = true;
 
-    gaugeMin = 0;
-    gaugeMax = 100;
-    gaugeLargeSegments = 2;
-    gaugeSmallSegments = 0;
-    gaugeTextValue = '';
-    gaugeUnits = '';
-    gaugeAngleSpan = 180;
-    gaugeStartAngle = -90;
-    gaugeShowAxis = true;
-    gaugeValue = 50; // linear gauge value
-    gaugePreviousValue = 70;
-  showText = true;
-
-      // margin
-  margin = true;
-  marginTop = 40;
-  marginRight = 40;
-  marginBottom = 40;
-  marginLeft = 40;
+  // margin
+  @Input() margin = true;
+  @Input() marginTop = 40;
+  @Input() marginRight = 40;
+  @Input() marginBottom = 40;
+  @Input() marginLeft = 40;
 
   colorScheme!: Color;
   legendPosition!: LegendPosition;
 
   // data
-  single: any = [];
+  single: SingleSeries = [];
 
   ngOnInit(): void {
     this.getData();
@@ -117,11 +115,11 @@ export class GaugeChartComponent implements OnInit {
     return this.gaugeMax;
   }
 
-  axisTickFormat(data: any) {
+  axisTickFormat(data: number) {
     return (data + '%');
   }
 
-  valueFormat(data: any) {
+  valueFormat(data: number) {
     return (data + '%'); // + this.gaugeMax// + '-' + this.getGaugeMax();
   }
 

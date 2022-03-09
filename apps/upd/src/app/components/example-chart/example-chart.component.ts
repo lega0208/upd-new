@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { first, map } from 'rxjs/operators';
-import { Color, LegendPosition, ScaleType } from '@lega0208/ngx-charts';
+import { Color, LegendPosition, ScaleType } from '@amonsour/ngx-charts';
 import { ApiService } from '../../services/api/api.service';
 import dayjs from 'dayjs';
 

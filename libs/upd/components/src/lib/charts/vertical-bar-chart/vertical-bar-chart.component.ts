@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Color, ScaleType, LegendPosition } from '@lega0208/ngx-charts';
+import { Color, ScaleType, LegendPosition, SingleSeries } from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
 
 @Component({
@@ -8,7 +8,8 @@ import dayjs from 'dayjs';
   styleUrls: ['./vertical-bar-chart.component.scss'],
 })
 export class VerticalBarChartComponent implements OnInit {
-  view: any;
+  view?: [number, number];
+  @Input() single: SingleSeries | null = [];
   @Input() title = '';
   @Input() titleTooltip = '';
   @Input() width = 1020;
@@ -42,11 +43,8 @@ export class VerticalBarChartComponent implements OnInit {
   @Input() tooltipDisabled = false;
   @Input() animations = true;
 
-  colorScheme: any;
-  legendPosition: any;
-
-  // data
-  single = [];
+  colorScheme!: Color;
+  legendPosition!: LegendPosition;
 
   ngOnInit(): void {
     this.setLegendPosition();
@@ -78,7 +76,7 @@ export class VerticalBarChartComponent implements OnInit {
     };
   }
 
-  yAxisTickFormat(data: any) {
+  yAxisTickFormat(data: number) {
     return (data / 1000).toLocaleString();
   }
 

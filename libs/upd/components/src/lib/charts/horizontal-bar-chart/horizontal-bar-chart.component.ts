@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Color, ScaleType, LegendPosition } from '@lega0208/ngx-charts';
+import { Color, ScaleType, LegendPosition, SingleSeries } from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
 
 @Component({
@@ -8,7 +8,8 @@ import dayjs from 'dayjs';
   styleUrls: ['./horizontal-bar-chart.component.scss'],
 })
 export class HorizontalBarChartComponent implements OnInit {
-  view: any;
+  view?: [number, number];
+  @Input() single: SingleSeries | null = [];
   @Input() title = '';
   @Input() titleTooltip = '';
   @Input() width = 1020;
@@ -35,18 +36,15 @@ export class HorizontalBarChartComponent implements OnInit {
   @Input() trimYAxisTicks = true;
   @Input() maxXAxisTickLength = 16;
   @Input() maxYAxisTickLength = 16;
-  showDataLabel = false;
-  xScaleMax!: number;
-  xScaleMin = 0;
-  roundDomains = false;
-  tooltipDisabled = false;
-  animations = true;
+  @Input() showDataLabel = false;
+  @Input() xScaleMax!: number;
+  @Input() xScaleMin = 0;
+  @Input() roundDomains = false;
+  @Input() tooltipDisabled = false;
+  @Input() animations = true;
 
-  colorScheme: any;
-  legendPosition: any;
-
-  // data
-  single = [];
+  colorScheme!: Color;
+  legendPosition!: LegendPosition;
 
   ngOnInit(): void {
     this.setLegendPosition();
@@ -78,7 +76,7 @@ export class HorizontalBarChartComponent implements OnInit {
     };
   }
 
-  xAxisTickFormat(data: any) {
+  xAxisTickFormat(data: number) {
     return (data / 1000).toLocaleString();
   }
 
