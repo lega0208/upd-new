@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Color, ScaleType, LegendPosition } from '@amonsour/ngx-charts';
+import { Color, ScaleType, LegendPosition, MultiSeries } from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
+import { CurveFactory } from 'd3-shape';
 import { curves, Curves } from '../types';
 
 @Component({
@@ -48,10 +49,10 @@ export class LineChartComponent implements OnInit {
 
   colorScheme!: Color;
   legendPosition!: LegendPosition;
-  curve: any;
+  curve?: CurveFactory;
 
   // data
-  single: any = [];
+  single: MultiSeries = [];
 
   ngOnInit(): void {
     this.getData();
@@ -114,14 +115,14 @@ export class LineChartComponent implements OnInit {
   }
 
   setCurve() {
-    this.curve = curves[this.curveType];
+    this.curve = curves[this.curveType] as CurveFactory;
   }
 
-  yAxisScale(min: any, max: any) {
+  yAxisScale(min: number, max: number) {
     return { min: `${min}`, max: `${max}` };
   }
 
-  yAxisTickFormat(data: any) {
+  yAxisTickFormat(data: number) {
     return (data / 1000).toLocaleString();
   }
 
