@@ -42,7 +42,8 @@
       "unitTestRunner": "jest"
     },
     "@nrwl/angular:component": {
-      "style": "scss"
+      "style": "scss",
+      "project": "upd-components"
     },
     "@nrwl/nest:resource": {
       "project": "api",
