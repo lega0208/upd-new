@@ -1,12 +1,11 @@
 <p-table
   #dt
   [columns]="cols"
-  [value]="data"
+  [value]="datas"
   [rows]="10"
   [showCurrentPageReport]="true"
-  [loading]="loading"
   [rowsPerPageOptions]="[10, 25, 50, 100]"
-  styleClass="p-datatable-gridlines p-datatable-striped"
+  styleClass="p-datatable-striped p-datatable-sm"
   [paginator]="pagination ? true : false"
   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
   [globalFilterFields]="searchFields"
