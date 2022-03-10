@@ -9,10 +9,10 @@ import dayjs from 'dayjs';
 })
 export class StackedVerticalBarChartComponent implements OnInit {
   // data
-  multi: MultiSeries = [];
   view?: [number, number];
 
   // options
+  @Input() data:  MultiSeries = []
   @Input() title = '';
   @Input() titleTooltip = '';
   @Input() fitContainer = true;
@@ -28,7 +28,7 @@ export class StackedVerticalBarChartComponent implements OnInit {
   @Input() displayLegend = 'below';
   @Input() xAxisLabel = 'Date';
   @Input() yAxisLabel = 'Visits (in thousands)';
-  @Input() colour = ['#2E5EA7', '#B5C2CC'];
+  @Input() colour = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D'];
   @Input() showLegend = true;
   @Input() showGridLines = false;
   @Input() noBarWhenZero = true;
@@ -41,10 +41,9 @@ export class StackedVerticalBarChartComponent implements OnInit {
   @Input() yScaleMax!: number;
   @Input() yScaleMin = 0;
   @Input() roundDomains = true;
+  @Input() yAxisFormat = 1;
   @Input() tooltipDisabled = false;
   @Input() animations = true;
-
-  @Input() data = 'overall';
 
   week: string[] = dayjs.weekdays();
 
@@ -86,57 +85,58 @@ export class StackedVerticalBarChartComponent implements OnInit {
     //   }));
     // });
 
-    this.multi = [
-      {
-        name: 'Sunday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 453777 },
-          { name: 'Aug 15-Aug 21', value: 436140 },
-        ],
-      },
-      {
-        name: 'Monday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 1141379 },
-          { name: 'Aug 15-Aug 21', value: 1181317 },
-        ],
-      },
-      {
-        name: 'Tuesday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 911667 },
-          { name: 'Aug 15-Aug 21', value: 967833 },
-        ],
-      },
-      {
-        name: 'Wednesday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 856571 },
-          { name: 'Aug 15-Aug 21', value: 920866 },
-        ],
-      },
-      {
-        name: 'Thursday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 842921 },
-          { name: 'Aug 15-Aug 21', value: 901947 },
-        ],
-      },
-      {
-        name: 'Friday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 800866 },
-          { name: 'Aug 15-Aug 21', value: 774515 },
-        ],
-      },
-      {
-        name: 'Saturday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 413806 },
-          { name: 'Aug 15-Aug 21', value: 433290 },
-        ],
-      },
-    ];
+    //this.multi = this.data;
+    // this.multi = [
+    //   {
+    //     name: 'Sunday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 453777 },
+    //       { name: 'Aug 15-Aug 21', value: 436140 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Monday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 1141379 },
+    //       { name: 'Aug 15-Aug 21', value: 1181317 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Tuesday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 911667 },
+    //       { name: 'Aug 15-Aug 21', value: 967833 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Wednesday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 856571 },
+    //       { name: 'Aug 15-Aug 21', value: 920866 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Thursday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 842921 },
+    //       { name: 'Aug 15-Aug 21', value: 901947 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Friday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 800866 },
+    //       { name: 'Aug 15-Aug 21', value: 774515 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Saturday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 413806 },
+    //       { name: 'Aug 15-Aug 21', value: 433290 },
+    //     ],
+    //   },
+    // ];
   }
 
   // processData(results: any) {
@@ -186,7 +186,7 @@ export class StackedVerticalBarChartComponent implements OnInit {
   }
 
   yAxisTickFormat(data: number) {
-    return (data / 1000).toLocaleString();
+    return (data / 1).toLocaleString();
   }
 
   onSelect(event: any) {
