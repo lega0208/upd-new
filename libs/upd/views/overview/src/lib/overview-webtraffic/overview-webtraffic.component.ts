@@ -44,22 +44,24 @@ export class OverviewWebtrafficComponent implements OnInit {
 
     this.uniqueVisitors = 4260300;
     this.uniqueVisitorsPrev = 4500100;
+    this.visits = 8248019;
+    this.visitsPrev = 7902234;
+    this.pageViews = 28261637;
+    this.pageViewsPrev = 26234645;
 
     this.getMetrics(
       'Unique visitors',
       this.uniqueVisitors,
-      this.uniqueVisitorsPrev
+      this.uniqueVisitorsPrev,
+      this.metrics
     );
-
-    this.visits = 8248019;
-    this.visitsPrev = 7902234;
-
-    this.getMetrics('Visits', this.visits, this.visitsPrev);
-
-    this.pageViews = 28261637;
-    this.pageViewsPrev = 26234645;
-
-    this.getMetrics('Page views', this.pageViews, this.pageViewsPrev);
+    this.getMetrics('Visits', this.visits, this.visitsPrev, this.metrics);
+    this.getMetrics(
+      'Page views',
+      this.pageViews,
+      this.pageViewsPrev,
+      this.metrics
+    );
 
     this.topPagesChart = topPages.map((items) => ({
       comparison: percDiff(items.visits, items.visitsPrev),
@@ -74,11 +76,11 @@ export class OverviewWebtrafficComponent implements OnInit {
     ];
   }
 
-  getMetrics = (name: string, curr: number, prev: number) => {
+  getMetrics = (name: string, curr: number, prev: number, arr: Metrics[]) => {
     const difference = diff(curr, prev);
     const sign = getSign(difference);
 
-    return this.metrics.push({
+    return arr.push({
       metric: name,
       current: curr,
       past: prev,
