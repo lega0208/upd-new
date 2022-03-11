@@ -13,7 +13,7 @@
   "private": true,
   "dependencies": {
     "@adobe/aio-lib-analytics": "^2.1.1",
-    "@amonsour/ngx-charts": "^19.2.5",
+    "@amonsour/ngx-charts": "^19.2.6",
     "@angular/animations": "13.2.1",
     "@angular/cdk": "13.2.1",
     "@angular/common": "13.2.1",

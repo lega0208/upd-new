@@ -1,5 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Color, ScaleType, LegendPosition, MultiSeries } from '@amonsour/ngx-charts';
+import {
+  Color,
+  ScaleType,
+  LegendPosition,
+  MultiSeries,
+} from '@amonsour/ngx-charts';
 //import { ChartsService } from '../../charts.service';
 import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
@@ -12,8 +17,7 @@ dayjs.extend(localeData);
 })
 export class GroupedVerticalBarChartComponent implements OnInit {
   // data
-  single: MultiSeries = [];
-  multi: MultiSeries = [];
+  @Input() barChart: MultiSeries | null = [];
 
   view?: [number, number];
   // options
@@ -50,8 +54,6 @@ export class GroupedVerticalBarChartComponent implements OnInit {
   @Input() tooltipDisabled = false;
   @Input() animations = true;
 
-  @Input() data = 'overall';
-
   week: string[] = dayjs.weekdays();
 
   colorScheme!: Color;
@@ -87,58 +89,57 @@ export class GroupedVerticalBarChartComponent implements OnInit {
     //     value: document.visits,
     //   }));
     // });
-
-    this.single = [
-      {
-        name: 'Sunday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 453777 },
-          { name: 'Aug 15-Aug 21', value: 436140 },
-        ],
-      },
-      {
-        name: 'Monday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 1141379 },
-          { name: 'Aug 15-Aug 21', value: 1181317 },
-        ],
-      },
-      {
-        name: 'Tuesday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 911667 },
-          { name: 'Aug 15-Aug 21', value: 967833 },
-        ],
-      },
-      {
-        name: 'Wednesday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 856571 },
-          { name: 'Aug 15-Aug 21', value: 920866 },
-        ],
-      },
-      {
-        name: 'Thursday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 842921 },
-          { name: 'Aug 15-Aug 21', value: 901947 },
-        ],
-      },
-      {
-        name: 'Friday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 800866 },
-          { name: 'Aug 15-Aug 21', value: 774515 },
-        ],
-      },
-      {
-        name: 'Saturday',
-        series: [
-          { name: 'Aug 8-Aug 14', value: 413806 },
-          { name: 'Aug 15-Aug 21', value: 433290 },
-        ],
-      },
-    ];
+    // this.single = [
+    //   {
+    //     name: 'Sunday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 453777 },
+    //       { name: 'Aug 15-Aug 21', value: 436140 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Monday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 1141379 },
+    //       { name: 'Aug 15-Aug 21', value: 1181317 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Tuesday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 911667 },
+    //       { name: 'Aug 15-Aug 21', value: 967833 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Wednesday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 856571 },
+    //       { name: 'Aug 15-Aug 21', value: 920866 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Thursday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 842921 },
+    //       { name: 'Aug 15-Aug 21', value: 901947 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Friday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 800866 },
+    //       { name: 'Aug 15-Aug 21', value: 774515 },
+    //     ],
+    //   },
+    //   {
+    //     name: 'Saturday',
+    //     series: [
+    //       { name: 'Aug 8-Aug 14', value: 413806 },
+    //       { name: 'Aug 15-Aug 21', value: 433290 },
+    //     ],
+    //   },
+    // ];
   }
 
   // processData(results: any) {
