@@ -1,0 +1,12 @@
+<div class="tabs sticky">
+  <ul>
+    <li *ngFor="let tab of tabs">
+      <a
+        [routerLinkActive]="['active']"
+        [routerLink]="tab.href"
+        data-i18n="tab-summary"
+        >{{ tab.title }}
+      </a>
+    </li>
+  </ul>
+</div>

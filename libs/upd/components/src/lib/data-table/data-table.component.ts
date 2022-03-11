@@ -15,33 +15,18 @@ export class DataTableComponent implements OnInit {
   @Input() sort = true;
   @Input() pagination = true;
   @Input() filter = true;
-  data: any[] = [];
-  cols!: any[];
+  @Input() cols: Array<{ field: string; header: string }> = [];
   first = 0;
   searchFields: string[] = [];
   loading!: boolean;
 
-  // "keyvalues" pipe automatically sorts, which we don't want
-  originalOrder = (a: KeyValue<number, string>, b: KeyValue<number, string>) =>
-    0;
-
   constructor() {}
 
   ngOnInit(): void {
-    this.loading = true;
+    //this.loading = true;
 
     this.getData();
 
-    this.cols = [
-      // { field: 'airtableId', header: 'Airtable ID'},
-      // { field: '_id', header: 'ID' },
-      // { field: 'all_urls', header: 'all_urls' },
-      // { field: 'language', header: 'language'},
-      // { field: 'lastChecked', header: 'lastChecked'},
-      // { field: 'lastModified', header: 'lastModified'},
-      { field: 'title', header: 'Title' },
-      { field: 'url', header: 'URL' },
-    ];
     this.searchFields = this.cols.map((obj) => obj.field);
   }
 

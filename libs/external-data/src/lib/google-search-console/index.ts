@@ -17,7 +17,7 @@ export const craFilter: SearchFilter = {
   dimension: 'page',
   operator: 'includingRegex',
   expression:
-    '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
+    'www.canada.ca/en/revenue-agency|www.canada.ca/fr/agence-revenu|www.canada.ca/en/services/taxes|www.canada.ca/fr/services/impots',
 };
 
 export interface SearchAnalyticsQueryOptions {
@@ -293,4 +293,3 @@ export class SearchAnalyticsClient {
     }, {} as Record<string, Partial<PageMetrics>>);
   }
 }
-

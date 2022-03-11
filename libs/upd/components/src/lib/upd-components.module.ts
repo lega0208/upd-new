@@ -1,10 +1,12 @@
 import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
 import { BarVertical2DComponent, NgxChartsModule } from '@amonsour/ngx-charts';
 import { CardComponent } from './card/card.component';
 import { DataTableComponent } from './data-table/data-table.component';
 import { DateSelectorComponent } from './date-selector/date-selector.component';
+import { NavTabsComponent } from './nav-tabs/nav-tabs.component';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -18,11 +20,19 @@ import {
   LineChartComponent,
   StackedVerticalBarChartComponent,
   VerticalBarChartComponent,
+  PieChartComponent,
 } from './charts';
-import { PieChartComponent } from './charts/pie-chart/pie-chart.component';
 
 @NgModule({
-  imports: [CommonModule, NgbPopoverModule, NgxChartsModule, TableModule, ButtonModule, InputTextModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    NgbPopoverModule,
+    NgxChartsModule,
+    TableModule,
+    ButtonModule,
+    InputTextModule,
+  ],
   declarations: [
     CardComponent,
     DataTableComponent,
@@ -37,6 +47,7 @@ import { PieChartComponent } from './charts/pie-chart/pie-chart.component';
     StackedVerticalBarChartComponent,
     VerticalBarChartComponent,
     PieChartComponent,
+    NavTabsComponent,
   ],
   exports: [
     NgxChartsModule,
@@ -56,6 +67,7 @@ import { PieChartComponent } from './charts/pie-chart/pie-chart.component';
     StackedVerticalBarChartComponent,
     VerticalBarChartComponent,
     PieChartComponent,
+    NavTabsComponent,
   ],
 })
 export class UpdComponentsModule {}
