@@ -1,0 +1,14 @@
+import { createAction, props } from '@ngrx/store';
+import { <%= className %>Data } from './<%= fileName %>.models';
+
+export const init = createAction('[<%= className %>] Init');
+
+export const load<%= className %>Success = createAction(
+  '[<%= className %>/API] Load <%= className %> Success',
+  props<{ data: <%= className %>Data }>()
+);
+
+export const load<%= className %>Error = createAction(
+  '[<%= className %>/API] Load <%= className %> Error',
+  props<{ error: string }>()
+);
