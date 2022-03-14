@@ -16,7 +16,10 @@ import { OverviewUxTestsComponent } from './overview-ux-tests/overview-ux-tests.
 
 import { OverviewEffects } from './+state/overview/overview.effects';
 import { OverviewFacade } from './+state/overview/overview.facade';
-import { OVERVIEW_FEATURE_KEY, overviewReducer } from './+state/overview/overview.reducer';
+import {
+  OVERVIEW_FEATURE_KEY,
+  overviewReducer,
+} from './+state/overview/overview.reducer';
 
 @NgModule({
   imports: [
@@ -24,10 +27,7 @@ import { OVERVIEW_FEATURE_KEY, overviewReducer } from './+state/overview/overvie
     HttpClientModule,
     OverviewRoutingModule,
     UpdComponentsModule,
-    StoreModule.forFeature(
-      OVERVIEW_FEATURE_KEY,
-      overviewReducer,
-    ),
+    StoreModule.forFeature(OVERVIEW_FEATURE_KEY, overviewReducer),
     EffectsModule.forFeature([OverviewEffects]),
   ],
   declarations: [

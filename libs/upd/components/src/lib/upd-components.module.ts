@@ -1,11 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
-import { BarVertical2DComponent, NgxChartsModule } from '@amonsour/ngx-charts';
+import { NgbDropdownModule, NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgxChartsModule } from '@amonsour/ngx-charts';
 import { CardComponent } from './card/card.component';
 import { DataTableComponent } from './data-table/data-table.component';
 import { DateSelectorComponent } from './date-selector/date-selector.component';
+import { DateSelectorDropdownComponent } from './date-selector/date-selector-dropdown.component'
 import { NavTabsComponent } from './nav-tabs/nav-tabs.component';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -27,6 +28,7 @@ import {
   imports: [
     CommonModule,
     RouterModule,
+    NgbDropdownModule,
     NgbPopoverModule,
     NgxChartsModule,
     TableModule,
@@ -37,6 +39,7 @@ import {
     CardComponent,
     DataTableComponent,
     DateSelectorComponent,
+    DateSelectorDropdownComponent,
     ComboGroupedVerticalBarLineChartComponent,
     ComboSeriesVerticalComponent,
     GaugeChartComponent,
@@ -57,6 +60,7 @@ import {
     CardComponent,
     DataTableComponent,
     DateSelectorComponent,
+    DateSelectorDropdownComponent,
     ComboGroupedVerticalBarLineChartComponent,
     ComboSeriesVerticalComponent,
     GaugeChartComponent,

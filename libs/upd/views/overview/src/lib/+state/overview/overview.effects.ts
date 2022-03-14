@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { createEffect, Actions, ofType } from '@ngrx/effects';
+import { catchError, EMPTY, mergeMap, map } from 'rxjs';
 
 import * as OverviewActions from './overview.actions';
-import { HttpClient } from '@angular/common/http';
-import { catchError, EMPTY, mergeMap, map } from 'rxjs';
 
 @Injectable()
 export class OverviewEffects {
@@ -11,12 +11,12 @@ export class OverviewEffects {
     this.actions$.pipe(
       ofType(OverviewActions.init),
       mergeMap(() => this.http.get('/api/overall/getVisits', {
-          responseType: 'json',
-          observe: 'body',
-        }).pipe(
-          map((data) => OverviewActions.loadOverviewSuccess({ data })),
-          catchError(() => EMPTY)
-        )),
+        responseType: 'json',
+        observe: 'body',
+      }).pipe(
+        map((data) => OverviewActions.loadOverviewSuccess({ data })),
+        catchError(() => EMPTY)
+      )),
     )
   );
 

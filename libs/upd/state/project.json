@@ -1,0 +1,33 @@
+{
+  "root": "libs/upd/state",
+  "sourceRoot": "libs/upd/state/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/upd/state",
+        "main": "libs/upd/state/src/index.ts",
+        "tsConfig": "libs/upd/state/tsconfig.lib.json",
+        "assets": ["libs/upd/state/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/upd/state/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/upd/state"],
+      "options": {
+        "jestConfig": "libs/upd/state/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

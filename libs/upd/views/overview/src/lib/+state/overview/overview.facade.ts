@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { select, Store, Action } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 
 import * as OverviewActions from './overview.actions';
 import { OverviewState } from './overview.reducer';
@@ -23,7 +23,6 @@ export class OverviewFacade {
    * or more tasks in your Effects.
    */
   init() {
-    console.log('OverviewFacade init!')
     this.store.dispatch(OverviewActions.init());
   }
 }

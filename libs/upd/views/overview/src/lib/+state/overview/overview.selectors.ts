@@ -1,8 +1,5 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import {
-  OVERVIEW_FEATURE_KEY,
-  OverviewState,
-} from './overview.reducer';
+import { OVERVIEW_FEATURE_KEY, OverviewState } from './overview.reducer';
 
 // Select full overview state
 export const getOverviewState =
@@ -16,7 +13,7 @@ export const getOverviewLoaded = createSelector(
 
 export const getOverviewLoading = createSelector(
   getOverviewState,
-  (state: OverviewState) => state.loaded
+  (state: OverviewState) => state.loading
 );
 
 export const getOverviewError = createSelector(

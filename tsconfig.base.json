@@ -20,6 +20,7 @@
       "@cra-arc/db-update": ["libs/db-update/src/index.ts"],
       "@cra-arc/external-data": ["libs/external-data/src/index.ts"],
       "@cra-arc/upd-components": ["libs/upd/components/src/index.ts"],
+      "@cra-arc/upd/state": ["libs/upd/state/src/index.ts"],
       "@cra-arc/upd/views/overview": ["libs/upd/views/overview/src/index.ts"],
       "@cra-arc/upd/views/pages": ["libs/upd/views/pages/src/index.ts"],
       "@cra-arc/upd/views/projects": ["libs/upd/views/projects/src/index.ts"],
