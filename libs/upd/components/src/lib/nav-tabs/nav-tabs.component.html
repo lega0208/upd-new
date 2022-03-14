@@ -4,7 +4,7 @@
       <a
         [routerLinkActive]="['active']"
         [routerLink]="tab.href"
-        data-i18n="tab-summary"
+        attr.data-i18n="tab-{{ tab.href }}"
         >{{ tab.title }}
       </a>
     </li>
