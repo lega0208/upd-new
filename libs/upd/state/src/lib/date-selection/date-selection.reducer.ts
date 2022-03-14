@@ -48,20 +48,12 @@ export function dateSelectionReducer(
 export function getDateRangeFromPeriodType(periodType: DateRangePeriod, previous = false) {
   const periodName = periodType.replace(/ly$/, '') as OpUnitType & QUnitType;
 
-  let endDate = dayjs().startOf(periodName);
-
-  if (periodName === 'month') {
-    endDate = endDate.subtract(1, 'day');
-  }
+  let endDate = dayjs().startOf(periodName).subtract(1, 'day');
 
   let startDate = endDate.subtract(1, 'day').startOf(periodName);
 
-  if (periodName === 'week' as OpUnitType) {
-    startDate = startDate.add(1, 'day');
-  }
-
   if (previous) {
-    endDate = endDate.subtract(1, periodName);
+    endDate = endDate.subtract(1, periodName).endOf(periodName);
     startDate = startDate.subtract(1, periodName);
   }
 
