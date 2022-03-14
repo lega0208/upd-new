@@ -1,8 +1,9 @@
 <p-table
   #dt
   [columns]="cols"
-  [value]="datas"
+  [value]="data"
   [rows]="10"
+  [rowHover]="true"
   [showCurrentPageReport]="true"
   [rowsPerPageOptions]="[10, 25, 50, 100]"
   styleClass="p-datatable-striped p-datatable-sm"
@@ -42,9 +43,17 @@
   </ng-template>
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr>
-      <td *ngFor="let col of cols">
+      <td *ngFor="let col of columns">
+        <span class="p-column-title"
+          ><strong>{{ col.header }}</strong></span
+        >
         {{ rowData[col.field] }}
       </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="2">No data found.</td>
     </tr>
   </ng-template>
 </p-table>

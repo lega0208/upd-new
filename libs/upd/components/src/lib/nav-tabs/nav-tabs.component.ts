@@ -7,7 +7,6 @@ import { Router, ActivatedRoute, ParamMap } from '@angular/router';
   styleUrls: ['./nav-tabs.component.css'],
 })
 export class NavTabsComponent implements OnInit {
-
-    @Input() tabs: Array<{ href: string, title: string}>  = [];
+  @Input() tabs: { href: string; title: string }[] = [];
   ngOnInit(): void {}
 }

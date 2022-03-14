@@ -1,47 +1,15 @@
 <div class="row mb-2 gx-2">
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-card [card-title]="'Unique visitors'">
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100" *ngFor="let m of metrics">
+    <app-card [card-title]="m.metric">
       <div class="row">
         <div class="col-lg-8 col-md-8 col-sm-8">
-          <span class="h3 text-nowrap">{{ uniqueVisitors | number }}</span
+          <span class="h3 text-nowrap">{{ m.current | number }}</span
           ><span class="small"></span>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-4 text-end">
-          <span class="h3 text-success text-nowrap"
-            ><span class="material-icons">arrow_upward</span>
-            {{ uniqueVisitorsDiff | percent }}</span
-          >
-        </div>
-      </div></app-card
-    >
-  </div>
-
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-card [card-title]="'Visits'">
-      <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-8">
-          <span class="h3 text-nowrap">{{ visits | number }}</span
-          ><span class="small"></span>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-4 text-end">
-          <span class="h3 text-success text-nowrap"
-            ><span class="material-icons">arrow_upward</span> 6%</span
-          >
-        </div>
-      </div></app-card
-    >
-  </div>
-
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-card [card-title]="'Page views'">
-      <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-8">
-          <span class="h3 text-nowrap">{{ pageViews | number }}</span
-          ><span class="small"></span>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-4 text-end">
-          <span class="h3 text-success text-nowrap"
-            ><span class="material-icons">arrow_upward</span> 6%</span
+          <span attr.class="h3 {{ m.textStyle }} text-nowrap"
+            ><span class="material-icons">{{ m.arrow }}</span>
+            {{ m.comparison | percent }}</span
           >
         </div>
       </div></app-card
@@ -62,49 +30,17 @@
 </div>
 
 <div class="row mb-2 gx-2">
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-card [card-title]="'Total impressions from Google'">
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100" *ngFor="let m of gscMetrics">
+    <app-card [card-title]="m.metric">
       <div class="row">
         <div class="col-lg-8 col-md-8 col-sm-8">
-          <span class="h3 text-nowrap">{{ uniqueVisitors | number }}</span
+          <span class="h3 text-nowrap">{{ m.current | number }}</span
           ><span class="small"></span>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-4 text-end">
-          <span class="h3 text-success text-nowrap"
-            ><span class="material-icons">arrow_upward</span>
-            {{ uniqueVisitorsDiff | percent }}</span
-          >
-        </div>
-      </div></app-card
-    >
-  </div>
-
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-card [card-title]="'Click through rate from Google'">
-      <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-8">
-          <span class="h3 text-nowrap">{{ visits | number }}</span
-          ><span class="small"></span>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-4 text-end">
-          <span class="h3 text-success text-nowrap"
-            ><span class="material-icons">arrow_upward</span> 6%</span
-          >
-        </div>
-      </div></app-card
-    >
-  </div>
-
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-card [card-title]="'Average rank on Google'">
-      <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-8">
-          <span class="h3 text-nowrap">{{ pageViews | number }}</span
-          ><span class="small"></span>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-4 text-end">
-          <span class="h3 text-success text-nowrap"
-            ><span class="material-icons">arrow_upward</span> 6%</span
+          <span attr.class="h3 {{ m.textStyle }} text-nowrap"
+            ><span class="material-icons">{{ m.arrow }}</span>
+            {{ m.comparison | percent }}</span
           >
         </div>
       </div></app-card
@@ -120,7 +56,7 @@
           [filter]="false"
           [sort]="false"
           [pagination]="false"
-          [table-data]="taskSurvey"
+          [data]="taskSurvey"
           [cols]="taskSurveyCols"
         ></app-data-table>
       </div>
@@ -129,24 +65,24 @@
 </div>
 
 <div class="row mb-2 gx-2">
-<div class="col-lg-6 col-md-6 col-sm12 h-100">
-  <app-stacked-vertical-bar-chart
-    [title]="'Did you find what you were looking for?'"
-    [data]="dyfChart"
-    [barPadding]="150"
-    [showGridLines]="true"
-    [yAxisLabel]="'Visits'"
-  ></app-stacked-vertical-bar-chart>
-</div>
-<div class="col-lg-6 col-md-6 col-sm12 h-100">
-  <app-stacked-vertical-bar-chart
-    [title]="'What was wrong?'"
-    [data]="whatWasWrongChart"
-    [barPadding]="150"
-    [showGridLines]="true"
-    [yAxisLabel]="'Visits'"
-  ></app-stacked-vertical-bar-chart>
-</div>
+  <div class="col-lg-6 col-md-6 col-sm12 h-100">
+    <app-stacked-vertical-bar-chart
+      [title]="'Did you find what you were looking for?'"
+      [data]="dyfChart"
+      [barPadding]="150"
+      [showGridLines]="true"
+      [yAxisLabel]="'Visits'"
+    ></app-stacked-vertical-bar-chart>
+  </div>
+  <div class="col-lg-6 col-md-6 col-sm12 h-100">
+    <app-stacked-vertical-bar-chart
+      [title]="'What was wrong?'"
+      [data]="whatWasWrongChart"
+      [barPadding]="150"
+      [showGridLines]="true"
+      [yAxisLabel]="'Visits'"
+    ></app-stacked-vertical-bar-chart>
+  </div>
 </div>
 
 <!-- 
