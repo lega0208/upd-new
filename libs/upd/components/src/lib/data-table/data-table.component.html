@@ -7,7 +7,7 @@
   [showCurrentPageReport]="true"
   [rowsPerPageOptions]="[10, 25, 50, 100]"
   styleClass="p-datatable-striped p-datatable-sm"
-  [paginator]="pagination ? true : false"
+  [paginator]="pagination"
   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
   [globalFilterFields]="searchFields"
 >
@@ -53,7 +53,7 @@
   </ng-template>
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td colspan="2">No data found.</td>
+      <td attr.colspan="{{cols.length}}">No data found.</td>
     </tr>
   </ng-template>
 </p-table>

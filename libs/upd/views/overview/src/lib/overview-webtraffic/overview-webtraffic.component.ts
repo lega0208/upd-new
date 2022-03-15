@@ -23,8 +23,6 @@ export class OverviewWebtrafficComponent implements OnInit {
   pageViews = 0;
   pageViewsPrev = 0;
 
-  metrics: Metrics[] = [];
-
   topPagesChart: any = [];
   topPagesCols: any = [];
 
@@ -49,20 +47,6 @@ export class OverviewWebtrafficComponent implements OnInit {
     this.pageViews = 28261637;
     this.pageViewsPrev = 26234645;
 
-    this.getMetrics(
-      'Unique visitors',
-      this.uniqueVisitors,
-      this.uniqueVisitorsPrev,
-      this.metrics
-    );
-    this.getMetrics('Visits', this.visits, this.visitsPrev, this.metrics);
-    this.getMetrics(
-      'Page views',
-      this.pageViews,
-      this.pageViewsPrev,
-      this.metrics
-    );
-
     this.topPagesChart = topPages.map((items) => ({
       comparison: percDiff(items.visits, items.visitsPrev),
       ...items,
@@ -75,41 +59,11 @@ export class OverviewWebtrafficComponent implements OnInit {
       { field: 'comparison', header: 'Comparison' },
     ];
   }
-
-  getMetrics = (name: string, curr: number, prev: number, arr: Metrics[]) => {
-    const difference = diff(curr, prev);
-    const sign = getSign(difference);
-
-    return arr.push({
-      metric: name,
-      current: curr,
-      past: prev,
-      arrow: sign[0],
-      textStyle: sign[1],
-      comparison: absoluteNum(difference),
-    });
-  };
 }
-
-const diff = (a: number, b: number) => {
-  return (a - b) / b;
-};
 
 const percDiff = (a: number, b: number) => {
   const diff = Math.round(((a - b) / b) * 100);
   return diff > 0 ? `+ ${Math.abs(diff)}%` : `- ${Math.abs(diff)}%`;
-};
-
-const absoluteNum = (num: number) => {
-  return Math.abs(num);
-};
-
-const getSign = (diff: number) => {
-  const m =
-    Math.sign(diff) === -1
-      ? 'arrow_downward:text-danger'
-      : 'arrow_upward:text-success';
-  return m.split(':');
 };
 
 // will move these functions somewhere else

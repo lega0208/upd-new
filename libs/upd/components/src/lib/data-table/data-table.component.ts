@@ -29,6 +29,7 @@ export class DataTableComponent implements OnInit {
     // console.log(this.cols);
     // console.log(this.searchFields);
     this.datas = taskSurvey;
+    this.searchFields = this.cols.map((obj) => obj.field);
   }
 
   clear(table: Table) {

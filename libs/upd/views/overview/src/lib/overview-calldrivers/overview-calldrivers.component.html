@@ -1,1 +1,59 @@
-<p>overview-calldrivers works!</p>
+<app-grouped-vertical-bar-chart
+      [title]="'Total calls by inquiry line'"
+      [yAxisLabel]="'Number of calls (in thousands)'"
+      [showXAxisLabel]="false"
+      [showGridLines]="true"
+      [displayLegend]="'below'"
+      [groupPadding]="75"
+      [showLegend]="true"
+      [barChart]="bar"
+></app-grouped-vertical-bar-chart>
+
+<div class="row mb-2 gx-2">
+    <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+      <app-card [card-title]="'Top 10 tasks GC Task Success Survey'">
+        <div class="row">
+          <app-data-table
+            [filter]="false"
+            [sort]="false"
+            [pagination]="false"
+            [data]="charts"
+            [cols]="chartsCols"
+          ></app-data-table>
+        </div>
+      </app-card>
+    </div>
+  </div>
+
+  <div class="row mb-2 gx-2">
+    <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+      <app-card [card-title]="'Top 10 tasks GC Task Success Survey'">
+        <div class="row">
+          <app-data-table
+            [filter]="false"
+            [sort]="false"
+            [pagination]="false"
+            [data]="charts"
+            [cols]="chartsCols"
+          ></app-data-table>
+        </div>
+      </app-card>
+    </div>
+  </div>
+
+  <div class="row mb-2 gx-2">
+    <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+      <app-card [card-title]="'Top 10 tasks GC Task Success Survey'">
+        <div class="row">
+          <app-data-table
+            [filter]="false"
+            [sort]="false"
+            [pagination]="false"
+            [data]="charts"
+            [cols]="chartsCols"
+          ></app-data-table>
+        </div>
+      </app-card>
+    </div>
+  </div>
+

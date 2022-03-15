@@ -38,7 +38,7 @@ export class GroupedVerticalBarChartComponent implements OnInit {
   @Input() displayLegend = 'below';
   @Input() xAxisLabel = 'Date';
   @Input() yAxisLabel = 'Visits (in thousands)';
-  @Input() colour = ['#2E5EA7', '#B5C2CC'];
+  @Input() colour = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D', '#3EE9B7'];
   @Input() showLegend = false;
   @Input() showGridLines = false;
   @Input() noBarWhenZero = true;

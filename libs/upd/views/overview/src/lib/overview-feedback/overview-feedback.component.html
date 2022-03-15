@@ -1,1 +1,48 @@
-<p>overview-feedback works!</p>
+<div class="row mb-2 gx-2">
+    <div class="col-lg-6 col-md-6 col-sm12 h-100">
+      <app-pie-chart
+        [title]="'Did you find what you were looking for?'"
+        [data]="dyfChart"
+        [type]="'donut'"
+      ></app-pie-chart>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm12 h-100">
+      <app-pie-chart
+        [title]="'What was wrong?'"
+        [data]="whatWasWrongChart"
+        [type]="'donut'"
+      ></app-pie-chart>
+    </div>
+  </div>
+
+  <div class="row mb-2 gx-2">
+    <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+      <app-card [card-title]="'Top 5 programs/services with the most feedback'">
+        <div class="row">
+          <app-data-table
+            [filter]="false"
+            [sort]="false"
+            [pagination]="false"
+            [data]="taskSurvey"
+            [cols]="taskSurveyCols"
+          ></app-data-table>
+        </div>
+      </app-card>
+    </div>
+  </div>
+
+  <div class="row mb-2 gx-2">
+    <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+      <app-card [card-title]="'Top 5 pages with the most feedback'">
+        <div class="row">
+          <app-data-table
+            [filter]="false"
+            [sort]="false"
+            [pagination]="false"
+            [data]="taskSurvey"
+            [cols]="taskSurveyCols"
+          ></app-data-table>
+        </div>
+      </app-card>
+    </div>
+  </div>

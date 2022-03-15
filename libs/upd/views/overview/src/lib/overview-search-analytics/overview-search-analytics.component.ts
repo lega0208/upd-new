@@ -32,25 +32,6 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
     this.gscAverage = 5;
     this.gscAveragePrev = 5;
 
-    this.getMetrics(
-      'Total impressions from Google',
-      this.gscImp,
-      this.gscImpPrev,
-      this.gscMetrics
-    );
-    this.getMetrics(
-      'Click through rate from Google',
-      this.gscCTR,
-      this.gscCTRPrev,
-      this.gscMetrics
-    );
-    this.getMetrics(
-      'Average rank on Google',
-      this.gscAverage,
-      this.gscAveragePrev,
-      this.gscMetrics
-    );
-
     this.GSCSearchTerms = gscSearchTerms;
 
     this.GSCSearchTermsCols = [
@@ -70,42 +51,7 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
       { field: 'Comparison', header: 'Comparison' },
     ];
   }
-
-  getMetrics = (name: string, curr: number, prev: number, arr: Metrics[]) => {
-    const difference = diff(curr, prev);
-    const sign = getSign(difference);
-
-    return arr.push({
-      metric: name,
-      current: curr,
-      past: prev,
-      arrow: sign[0],
-      textStyle: sign[1],
-      comparison: absoluteNum(difference),
-    });
-  };
 }
-
-const diff = (a: number, b: number) => {
-  return (a - b) / b;
-};
-
-const percDiff = (a: number, b: number) => {
-  const diff = Math.round(((a - b) / b) * 100);
-  return diff > 0 ? `+ ${Math.abs(diff)}%` : `- ${Math.abs(diff)}%`;
-};
-
-const absoluteNum = (num: number) => {
-  return Math.abs(num);
-};
-
-const getSign = (diff: number) => {
-  const m =
-    Math.sign(diff) === -1
-      ? 'arrow_downward:text-danger'
-      : 'arrow_upward:text-success';
-  return m.split(':');
-};
 
 const gscSearchTerms = [
   {
