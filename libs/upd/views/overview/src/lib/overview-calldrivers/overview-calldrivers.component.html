@@ -1,4 +1,6 @@
-<app-grouped-vertical-bar-chart
+<div class="row mb-2 gx-2">
+  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+    <app-grouped-vertical-bar-chart
       [title]="'Total calls by inquiry line'"
       [yAxisLabel]="'Number of calls (in thousands)'"
       [showXAxisLabel]="false"
@@ -7,53 +9,58 @@
       [groupPadding]="75"
       [showLegend]="true"
       [barChart]="bar"
-></app-grouped-vertical-bar-chart>
+    ></app-grouped-vertical-bar-chart>
+  </div>
+</div>
 
 <div class="row mb-2 gx-2">
-    <div class="col-lg-12 col-md-12 col-sm-12 h-100">
-      <app-card [card-title]="'Top 10 tasks GC Task Success Survey'">
-        <div class="row">
-          <app-data-table
-            [filter]="false"
-            [sort]="false"
-            [pagination]="false"
-            [data]="charts"
-            [cols]="chartsCols"
-          ></app-data-table>
-        </div>
-      </app-card>
-    </div>
+  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+    <app-card [card-title]="'Top 5 call drivers'">
+      <div class="row">
+        <app-data-table
+          [filter]="false"
+          [sort]="true"
+          [pagination]="false"
+          [data]="charts"
+          [cols]="chartsCols"
+        ></app-data-table>
+      </div>
+    </app-card>
   </div>
+</div>
 
-  <div class="row mb-2 gx-2">
-    <div class="col-lg-12 col-md-12 col-sm-12 h-100">
-      <app-card [card-title]="'Top 10 tasks GC Task Success Survey'">
-        <div class="row">
-          <app-data-table
-            [filter]="false"
-            [sort]="false"
-            [pagination]="false"
-            [data]="charts"
-            [cols]="chartsCols"
-          ></app-data-table>
-        </div>
-      </app-card>
-    </div>
+<div class="row mb-2 gx-2">
+  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+    <app-card
+      [card-title]="'Top 5 call drivers with biggest increase over period'"
+    >
+      <div class="row">
+        <app-data-table
+          [filter]="false"
+          [sort]="true"
+          [pagination]="false"
+          [data]="charts"
+          [cols]="chartsCols"
+        ></app-data-table>
+      </div>
+    </app-card>
   </div>
+</div>
 
-  <div class="row mb-2 gx-2">
-    <div class="col-lg-12 col-md-12 col-sm-12 h-100">
-      <app-card [card-title]="'Top 10 tasks GC Task Success Survey'">
-        <div class="row">
-          <app-data-table
-            [filter]="false"
-            [sort]="false"
-            [pagination]="false"
-            [data]="charts"
-            [cols]="chartsCols"
-          ></app-data-table>
-        </div>
-      </app-card>
-    </div>
+<div class="row mb-2 gx-2">
+  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+    <app-card
+      [card-title]="'Top 5 call drivers with biggest decrease over period'"
+    >
+      <div class="row">
+        <app-data-table
+          [filter]="false"
+          [sort]="true"
+          [pagination]="false"
+          [data]="charts"
+          [cols]="chartsCols"
+        ></app-data-table>
+      </div>
+    </app-card>
   </div>
-
+</div>

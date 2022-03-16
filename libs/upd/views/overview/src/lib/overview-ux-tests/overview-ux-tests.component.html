@@ -1,1 +1,57 @@
-<p>overview-ux-tests works!</p>
+<div class="row mb-2 gx-2">
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card
+      [current]="testsCompleted"
+      [title]="'Tests completed since 2018'"
+    ></app-data-card>
+  </div>
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card
+      [current]="tasksTested"
+      [title]="'Tasks tested since 2018'"
+    ></app-data-card>
+  </div>
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card
+      [current]="participantsTested"
+      [title]="'Participants tested since 2018'"
+    ></app-data-card>
+  </div>
+</div>
+
+<div class="row mb-2 gx-2">
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card
+      [current]="testsConducted"
+      [title]="'Tests conducted last fiscal year (Apr 01 - Mar 31)'"
+    ></app-data-card>
+  </div>
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card
+      [current]="testsConductedLastQuarter"
+      [title]="'Tests conducted last quarter (Q4/21)'"
+    ></app-data-card>
+  </div>
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card
+      [current]="COPSTests"
+      [title]="'COPS tests completed since 2018'"
+    ></app-data-card>
+  </div>
+</div>
+
+<div class="row mb-2 gx-2">
+  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+    <app-card [card-title]="'Recent testing scores by project'">
+      <div class="row">
+        <app-data-table
+          [filter]="false"
+          [sort]="true"
+          [pagination]="false"
+          [data]="uxChartData"
+          [cols]="uxChartCols"
+        ></app-data-table>
+      </div>
+    </app-card>
+  </div>
+</div>
