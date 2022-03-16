@@ -1,0 +1,15 @@
+<app-card [card-title]="title">
+  <div class="row">
+    <div class="col-lg-8 col-md-8 col-sm-8">
+      <span class="h3 text-nowrap">{{ current | number }}</span
+      ><span class="small"></span>
+    </div>
+
+    <div class="col-lg-4 col-md-4 col-sm-4 text-end" *ngIf="isPast">
+      <span attr.class="h3 {{ textStyle }} text-nowrap"
+        ><span class="material-icons">{{ arrow }}</span>
+        {{ comparison | percent }}</span
+      >
+    </div>
+  </div></app-card
+>

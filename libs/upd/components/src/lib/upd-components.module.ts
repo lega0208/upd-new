@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { NgbDropdownModule, NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxChartsModule } from '@amonsour/ngx-charts';
 import { CardComponent } from './card/card.component';
+import { DataCardComponent } from './data-card/data-card.component';
 import { DataTableComponent } from './data-table/data-table.component';
 import { DateSelectorComponent } from './date-selector/date-selector.component';
 import { DateSelectorDropdownComponent } from './date-selector/date-selector-dropdown.component'
@@ -51,6 +52,7 @@ import {
     VerticalBarChartComponent,
     PieChartComponent,
     NavTabsComponent,
+    DataCardComponent,
   ],
   exports: [
     NgxChartsModule,
@@ -72,6 +74,7 @@ import {
     VerticalBarChartComponent,
     PieChartComponent,
     NavTabsComponent,
+    DataCardComponent,
   ],
 })
 export class UpdComponentsModule {}

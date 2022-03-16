@@ -6,6 +6,7 @@ import {
   ScaleType,
   LegendPosition,
   SingleSeries,
+  MultiSeries,
 } from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
 
@@ -24,9 +25,9 @@ export class PieChartComponent implements OnInit {
   @Input() fitContainer = true;
   @Input() gradient = false;
   @Input() displayLegend = 'below';
-  @Input() colour: string[] = ['#0D47A1', '#F57F17'];
+  @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D'];
   @Input() showLegend = true;
-  @Input() data = 'overall';
+  @Input() data: SingleSeries = [];
   @Input() legendTitle = 'Legend';
   @Input() tooltipDisabled = false;
   @Input() showLabels = false;
@@ -60,10 +61,12 @@ export class PieChartComponent implements OnInit {
     //   }));
     // });
 
-    this.single = [
-      { name: 'Yes', value: 238 },
-      { name: 'No', value: 106 },
-    ];
+    // this.single = [
+    //   { name: 'Yes', value: 238 },
+    //   { name: 'No', value: 106 },
+    // ];
+
+
   }
 
   applyDimensions() {

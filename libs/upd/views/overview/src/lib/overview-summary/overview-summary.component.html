@@ -1,19 +1,12 @@
 <div class="row mb-2 gx-2">
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100" *ngFor="let m of metrics">
-    <app-card [card-title]="m.metric">
-      <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-8">
-          <span class="h3 text-nowrap">{{ m.current | number }}</span
-          ><span class="small"></span>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-4 text-end">
-          <span attr.class="h3 {{ m.textStyle }} text-nowrap"
-            ><span class="material-icons">{{ m.arrow }}</span>
-            {{ m.comparison | percent }}</span
-          >
-        </div>
-      </div></app-card
-    >
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card [current]="uniqueVisitors" [past]="uniqueVisitorsPrev" [title]="'Unique visitors'"></app-data-card>
+  </div>
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card [current]="visits" [past]="visitsPrev" [title]="'Visits'"></app-data-card>
+  </div>
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card [current]="pageViews" [past]="pageViewsPrev" [title]="'Page views'"></app-data-card>
   </div>
 </div>
 
@@ -30,21 +23,14 @@
 </div>
 
 <div class="row mb-2 gx-2">
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100" *ngFor="let m of gscMetrics">
-    <app-card [card-title]="m.metric">
-      <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-8">
-          <span class="h3 text-nowrap">{{ m.current | number }}</span
-          ><span class="small"></span>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-4 text-end">
-          <span attr.class="h3 {{ m.textStyle }} text-nowrap"
-            ><span class="material-icons">{{ m.arrow }}</span>
-            {{ m.comparison | percent }}</span
-          >
-        </div>
-      </div></app-card
-    >
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card [current]="gscImp" [past]="gscImpPrev" [title]="'Total impressions from Google'"></app-data-card>
+  </div>
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card [current]="gscCTR" [past]="gscCTRPrev" [title]="'Click through rate from Google'"></app-data-card>
+  </div>
+  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+    <app-data-card [current]="gscAverage" [past]="gscAveragePrev" [title]="'Average rank on Google'"></app-data-card>
   </div>
 </div>
 
@@ -66,22 +52,18 @@
 
 <div class="row mb-2 gx-2">
   <div class="col-lg-6 col-md-6 col-sm12 h-100">
-    <app-stacked-vertical-bar-chart
+    <app-pie-chart
       [title]="'Did you find what you were looking for?'"
       [data]="dyfChart"
-      [barPadding]="150"
-      [showGridLines]="true"
-      [yAxisLabel]="'Visits'"
-    ></app-stacked-vertical-bar-chart>
+      [type]="'donut'"
+    ></app-pie-chart>
   </div>
   <div class="col-lg-6 col-md-6 col-sm12 h-100">
-    <app-stacked-vertical-bar-chart
+    <app-pie-chart
       [title]="'What was wrong?'"
       [data]="whatWasWrongChart"
-      [barPadding]="150"
-      [showGridLines]="true"
-      [yAxisLabel]="'Visits'"
-    ></app-stacked-vertical-bar-chart>
+      [type]="'donut'"
+    ></app-pie-chart>
   </div>
 </div>
 
@@ -110,6 +92,14 @@
 </app-card>
 
 <div class="row mb-2 gx-2">
+  <div class="col-lg-6 col-md-6 col-sm-12 h-100">
+    <app-grouped-vertical-bar-chart
+      [title]="'Example Title'"
+      [showLegend]="true"
+    ></app-grouped-vertical-bar-chart>
+  </div>
+</div>
+
   <div class="col-lg-12 col-md-12 col-sm-12 h-100">
     <app-grouped-vertical-bar-line-chart
       [title]="'Example Title'"
