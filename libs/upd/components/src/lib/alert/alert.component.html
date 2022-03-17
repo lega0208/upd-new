@@ -1,0 +1,9 @@
+<ngb-alert
+  #staticAlert
+  [type]="type"
+  [attr.style]="style"
+  *ngIf="!staticAlertClosed"
+  (closed)="staticAlertClosed = true"
+>
+  <ng-content></ng-content>
+</ngb-alert>

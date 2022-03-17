@@ -1,12 +1,33 @@
+<app-alert
+  [type]="'success'"
+  [selfClosing]="true"
+  [secondsTimeout]="5"
+  [position]="'top'"
+>
+  Hooray! It works!
+</app-alert>
+
 <div class="row mb-2 gx-2">
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-data-card [current]="uniqueVisitors" [past]="uniqueVisitorsPrev" [title]="'Unique visitors'"></app-data-card>
+    <app-data-card
+      [current]="uniqueVisitors"
+      [past]="uniqueVisitorsPrev"
+      [title]="'Unique visitors'"
+    ></app-data-card>
   </div>
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-data-card [current]="visits" [past]="visitsPrev" [title]="'Visits'"></app-data-card>
+    <app-data-card
+      [current]="visits"
+      [past]="visitsPrev"
+      [title]="'Visits'"
+    ></app-data-card>
   </div>
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-data-card [current]="pageViews" [past]="pageViewsPrev" [title]="'Page views'"></app-data-card>
+    <app-data-card
+      [current]="pageViews"
+      [past]="pageViewsPrev"
+      [title]="'Page views'"
+    ></app-data-card>
   </div>
 </div>
 
@@ -24,13 +45,25 @@
 
 <div class="row mb-2 gx-2">
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-data-card [current]="gscImp" [past]="gscImpPrev" [title]="'Total impressions from Google'"></app-data-card>
+    <app-data-card
+      [current]="gscImp"
+      [past]="gscImpPrev"
+      [title]="'Total impressions from Google'"
+    ></app-data-card>
   </div>
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-data-card [current]="gscCTR" [past]="gscCTRPrev" [title]="'Click through rate from Google'"></app-data-card>
+    <app-data-card
+      [current]="gscCTR"
+      [past]="gscCTRPrev"
+      [title]="'Click through rate from Google'"
+    ></app-data-card>
   </div>
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-data-card [current]="gscAverage" [past]="gscAveragePrev" [title]="'Average rank on Google'"></app-data-card>
+    <app-data-card
+      [current]="gscAverage"
+      [past]="gscAveragePrev"
+      [title]="'Average rank on Google'"
+    ></app-data-card>
   </div>
 </div>
 
