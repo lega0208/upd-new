@@ -6,7 +6,15 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./pages.component.css'],
 })
 export class PagesComponent implements OnInit {
+  navTabs: { href: string; title: string }[] = [];
   constructor() {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.navTabs = [
+      { href: 'summary', title: 'Summary' },
+      { href: 'webtraffic', title: 'Web Traffic' },
+      { href: 'search_analytics', title: 'Search Analytics' },
+      { href: 'feedback', title: 'Page Feedback' },
+    ];
+  }
 }
