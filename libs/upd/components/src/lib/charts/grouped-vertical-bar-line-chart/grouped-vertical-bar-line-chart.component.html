@@ -1,5 +1,5 @@
 <app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="50">
-  <div #ContainerRef class="vh-60 mr-80">
+  <div #ContainerRef class="vh-50 mr-80">
     <combo-grouped-vertical-bar-line-chart
       [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
       [scheme]="comboBarScheme"
@@ -43,5 +43,15 @@
       (select)="onSelect($event)"
     >
     </combo-grouped-vertical-bar-line-chart>
+  </div>
+
+  <div class="pt-3">
+    <app-accordion>
+      <app-data-table
+        [filter]="false"
+        [sort]="false"
+        [pagination]="false"
+      ></app-data-table>
+    </app-accordion>
   </div>
 </app-card>
