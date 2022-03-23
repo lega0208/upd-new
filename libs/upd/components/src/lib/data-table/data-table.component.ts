@@ -14,7 +14,7 @@ export class DataTableComponent {
   @Input() filter = true;
   @Input() cols: { field: string; header: string }[] = [];
   first = 0;
-  @Input() searchFields: string[] = [];
+  searchFields: string[] = this.cols.map((obj) => obj.field);
   loading!: boolean;
 
   clear(table: Table) {
