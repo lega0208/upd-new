@@ -26,7 +26,7 @@ export class OverallService {
     return this.overallModel.find({ date: dateQuery }).sort({ date: 1 }).exec();
   }
 
-  async getVisits(): Promise<Pick<Overall, 'visits' & 'date'>[]> {
+  async getVisits(): Promise<Pick<Overall, 'visits' | 'date'>[]> {
     // hardcoded everything for now, just to demo
     return this.overallModel.find(
       {

@@ -1,0 +1,34 @@
+{
+  "projectType": "library",
+  "root": "libs/upd/i18n",
+  "sourceRoot": "libs/upd/i18n/src",
+  "prefix": "cra-arc",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:ng-packagr-lite",
+      "outputs": ["dist/libs/upd/i18n"],
+      "options": {
+        "project": "libs/upd/i18n/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/upd/i18n/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/upd/i18n/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/upd/i18n/src/**/*.ts",
+          "libs/upd/i18n/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

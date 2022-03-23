@@ -14,7 +14,7 @@ export class UpdateService {
   private readonly logger = new Logger(UpdateService.name);
   private isRunning = false;
 
-  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  @Cron(CronExpression.EVERY_MINUTE) // Setting to every minute to use during development
   async updateDatabase() {
     if (this.isRunning) {
       return;
@@ -39,11 +39,11 @@ export class UpdateService {
         withRetry(updateCalldriverData, 4, 1000)().catch((err) =>
           this.logger.error('Error updating Calldrivers data', err)
         ),
-        withRetry(updatePages, 4, 1000)().catch((err) =>
-          this.logger.error('Error updating Page data', err)
-        ),
+        // withRetry(updatePages, 4, 1000)().catch((err) => // commented out for now because bugs needs to be fixed
+        //   this.logger.error('Error updating Page data', err)
+        // ),
         withRetry(updatePageMetrics, 4, 1000)().catch((err) =>
-          this.logger.error('Error updating Page data', err)
+          this.logger.error('Error updating Page metrics data', err)
         )
       ]);
     } catch (error) {

@@ -5,17 +5,17 @@ import {
 } from './date-selection.reducer';
 
 // Lookup the 'DateSelection' feature state managed by NgRx
-export const getDateSelectionState = createFeatureSelector<DateSelectionState>(
+export const selectDateSelectionState = createFeatureSelector<DateSelectionState>(
   DATE_SELECTION_FEATURE_KEY
 );
 
-export const getDatePeriodSelection = createSelector(
-  getDateSelectionState,
+export const selectDatePeriodSelection = createSelector(
+  selectDateSelectionState,
   (state: DateSelectionState) => state.periodSelection
 );
 
-export const getDateRanges = createSelector(
-  getDateSelectionState,
+export const selectDateRanges = createSelector(
+  selectDateSelectionState,
   (state: DateSelectionState) => ({
     dateRange: state.dateRange,
     comparisonDateRange: state.comparisonDateRange,

@@ -29,8 +29,8 @@ export class Task {
   @Prop({ type: String })
   subtopic = '';
 
-  @Prop({ type: String })
-  user_type = '';
+  @Prop({ type: [String] })
+  user_type = [];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }] })
   ux_tests?: Types.ObjectId[] | UxTest[];
@@ -44,6 +44,8 @@ export class Task {
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
 
+export const taskModel = model(Task.name, TaskSchema);
+
 export function getTaskModel(): Model<Document<Task>> {
-  return model(Task.name, TaskSchema);
+  return taskModel;
 }

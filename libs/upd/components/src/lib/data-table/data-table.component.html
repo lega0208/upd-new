@@ -1,7 +1,7 @@
 <p-table
   #dt
   [columns]="cols"
-  [value]="data"
+  [value]="data || []"
   [rows]="10"
   [rowHover]="true"
   [showCurrentPageReport]="true"

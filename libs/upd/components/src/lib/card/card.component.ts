@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -28,8 +28,5 @@ export class CardComponent {
     config.disablePopover = this.tooltip !== '';
     config.placement = 'right';
     config.triggers = 'hover focus';
-
-    // get ref -> use parent size and resize?
-    //  there might be some sort of built-in utility
   }
 }
