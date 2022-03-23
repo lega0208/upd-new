@@ -4,7 +4,11 @@ import { PagesModule } from '../pages/pages.module';
 import { OverallModule } from '../overall/overall.module';
 
 @Module({
-  imports: [DbModule, PagesModule, OverallModule],
+  imports: [
+    DbModule,
+    PagesModule,
+    OverallModule,
+  ],
   providers: [],
 })
 export class AppModule {}

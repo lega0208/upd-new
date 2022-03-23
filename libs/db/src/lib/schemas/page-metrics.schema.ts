@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types } from 'mongoose';
+import { model, Document, Model, Types, FilterQuery, Aggregate } from 'mongoose';
 import { GscSearchTermMetrics } from './types';
+import { getPageModel, Page, PageDocument } from './page.schema';
 
 export type PageMetricsDocument = PageMetrics & Document;
 
@@ -203,3 +204,92 @@ export const PageMetricsSchema = SchemaFactory.createForClass(PageMetrics);
 export function getPageMetricsModel(): Model<Document<PageMetrics>> {
   return model(PageMetrics.name, PageMetricsSchema);
 }
+
+export type GetAggregatedMetrics = <T>(
+  dateRange: string,
+  selectedPages: Page[],
+  selectedMetrics: (keyof T)[],
+  sortConfig?: Record<keyof PageMetricsDocument, number>
+) => Promise<T[]>;
+
+export interface PageMetricsModel extends Model<PageMetricsDocument> {
+  getAggregatedPageMetrics: GetAggregatedMetrics;
+}
+
+PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T extends { url: string }>(
+  this: Model<Document<PageMetrics>>,
+  dateRange: string,
+  selectedPages: Page[],
+  selectedMetrics: (keyof T)[],
+  sortConfig?: Record<keyof T, number>
+): Promise<T[]> {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  const pageUrls = selectedPages.flatMap((page) => [
+    page.url,
+    ...(page.all_urls || []),
+  ]);
+
+  const pagesByUrl: Record<string, Page> = {};
+
+  for (const page of selectedPages) {
+    pagesByUrl[page.url] = page;
+  }
+
+  const metricsProjections: Record<string, number> = {};
+  const metricsGroupAggregations: Record<string, { $sum: string }> = {};
+  const metricsMergeObjects: Record<string, string> = {};
+  const metricsSort: Record<string, number> = sortConfig || {};
+
+  for (const metric of selectedMetrics as string[]) {
+    metricsProjections[metric] = 1;
+    metricsGroupAggregations[metric] = { $sum: `$${metric}` };
+    metricsMergeObjects[metric] = `$${metric}`;
+
+    if (!sortConfig) {
+      metricsSort[metric] = -1;
+    }
+  }
+
+  const aggregationQuery = this.aggregate()
+    .sort({ date: 1, url: 1 })
+    .match({
+      url: {
+        $in: pageUrls,
+      },
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    })
+    .project({
+      url: 1,
+      date: 1,
+      ...metricsProjections,
+    })
+    .group({
+      _id: '$url',
+      ...metricsGroupAggregations,
+      doc: {
+        $first: '$$ROOT',
+      },
+    })
+    .replaceRoot({
+      $mergeObjects: [
+        '$doc',
+        {
+          ...metricsMergeObjects,
+        },
+      ],
+    })
+    .sort({ visits: -1 })
+    .project({
+      url: 1,
+      ...metricsProjections,
+    }) as Aggregate<T[]>;
+
+  return ((await aggregationQuery.exec()) as T[]).map((result) => ({
+    ...result,
+    ...pagesByUrl[result.url],
+  }));
+};
