@@ -16,7 +16,7 @@ const routes: Routes = [
     children: [
       { path: '', component: TasksHomeComponent, pathMatch: 'full' },
       {
-        path: 'details/:id',
+        path: ':id',
         component: TaskDetailsComponent,
         children: [
           { path: '', redirectTo: 'summary', pathMatch: 'full' },
