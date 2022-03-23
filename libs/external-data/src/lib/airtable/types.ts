@@ -7,7 +7,7 @@ export interface TaskData {
   subgroup?: string;
   topic?: string;
   subtopic?: string;
-  user_type?: string;
+  user_type?: string[];
   ux_tests?: string[];
   pages?: string[];
 }
