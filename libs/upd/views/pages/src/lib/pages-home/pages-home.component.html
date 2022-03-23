@@ -1,0 +1,64 @@
+<h2>Pages</h2>
+
+<app-card>
+  <p-table
+    #dt
+    [columns]="columns"
+    [value]="(pagesHomeData$ | async) || []"
+    [rows]="10"
+    [rowHover]="true"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 25, 50, 100]"
+    styleClass="p-datatable-striped p-datatable-sm"
+    [paginator]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [globalFilterFields]="['url', 'title']"
+  >
+    <ng-template pTemplate="caption">
+      <div class="p-d-flex">
+      <span class="p-input-icon-left p-ml-auto">
+        <i class="pi pi-search"></i>
+        <input
+          pInputText
+          type="text"
+          (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+          placeholder="Search keyword"
+        />
+      </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th *ngFor="let col of columns" [pSortableColumn]="col.field">
+          {{ col.header }}
+          <p-sortIcon [field]="col.field"></p-sortIcon>
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-rowData>
+      <tr>
+        <td>
+          <span class="p-column-title"><strong>Url</strong></span>
+          <a
+            [routerLink]="[rowData._id]"
+          >{{ rowData.url }}</a
+          >
+        </td>
+        <td>
+          <span class="p-column-title"><strong>Title</strong></span>
+          {{ rowData.title }}
+        </td>
+        <td>
+          <span class="p-column-title"><strong>Visits</strong></span>
+          {{ rowData.visits }}
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="2">No data found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</app-card>

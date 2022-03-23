@@ -3,11 +3,11 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { PagesComponent } from './pages.component';
 import { PagesHomeComponent } from './pages-home/pages-home.component';
-import { PageDetailsComponent } from './page-details/page-details.component';
-import { PageDetailsSummaryComponent } from './page-details/page-details-summary/page-details-summary.component';
-import { PageDetailsWebtrafficComponent } from './page-details/page-details-webtraffic/page-details-webtraffic.component';
-import { PageDetailsSearchAnalyticsComponent } from './page-details/page-details-search-analytics/page-details-search-analytics.component';
-import { PageDetailsFeedbackComponent } from './page-details/page-details-feedback/page-details-feedback.component';
+import { PagesDetailsComponent } from './pages-details/pages-details.component';
+import { PagesDetailsSummaryComponent } from './pages-details/pages-details-summary/pages-details-summary.component';
+import { PagesDetailsWebtrafficComponent } from './pages-details/pages-details-webtraffic/pages-details-webtraffic.component';
+import { PagesDetailsSearchAnalyticsComponent } from './pages-details/pages-details-search-analytics/pages-details-search-analytics.component';
+import { PagesDetailsFeedbackComponent } from './pages-details/pages-details-feedback/pages-details-feedback.component';
 
 const routes: Routes = [
   {
@@ -16,17 +16,17 @@ const routes: Routes = [
     children: [
       { path: '', component: PagesHomeComponent, pathMatch: 'full' },
       {
-        path: 'details',
-        component: PageDetailsComponent,
+        path: ':id',
+        component: PagesDetailsComponent,
         children: [
           { path: '', redirectTo: 'summary', pathMatch: 'full' },
-          { path: 'summary', component: PageDetailsSummaryComponent },
-          { path: 'webtraffic', component: PageDetailsWebtrafficComponent },
+          { path: 'summary', component: PagesDetailsSummaryComponent },
+          { path: 'webtraffic', component: PagesDetailsWebtrafficComponent },
           {
             path: 'search_analytics',
-            component: PageDetailsSearchAnalyticsComponent,
+            component: PagesDetailsSearchAnalyticsComponent,
           },
-          { path: 'feedback', component: PageDetailsFeedbackComponent },
+          { path: 'feedback', component: PagesDetailsFeedbackComponent },
         ],
       },
     ],
