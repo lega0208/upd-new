@@ -13,7 +13,7 @@ export class DateSelectionEffects {
   init$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DateSelectionActions.selectDatePeriod),
-      withLatestFrom(this.store$.pipe(select(DateSelectionSelectors.getDateRanges))),
+      withLatestFrom(this.store$.pipe(select(DateSelectionSelectors.selectDateRanges))),
       map(([, { dateRange, comparisonDateRange } ]) => this.router.navigate([], {
         relativeTo: this.route,
         queryParams: {
@@ -25,6 +25,8 @@ export class DateSelectionEffects {
     ),
     { dispatch: false }
   );
+
+  // todo: set date selection from queryParams?
 
   constructor(
     private readonly actions$: Actions,

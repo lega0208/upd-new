@@ -39,9 +39,7 @@ export class DateSelectorComponent {
     label: periodToDisplayFormat(period as DateRangePeriod),
   }));
 
-  constructor(private selectorService: DateSelectionFacade) {
-    console.log(this.selectorService);
-  }
+  constructor(private selectorService: DateSelectionFacade) {}
 
   selectPeriod(period: DateRangePeriod) {
     this.selectorService.selectDatePeriod(period);

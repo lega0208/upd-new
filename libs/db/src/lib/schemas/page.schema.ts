@@ -1,5 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types } from 'mongoose';
+import {
+  Document,
+  model,
+  Model,
+  Types,
+} from 'mongoose';
 import { Task } from './task.schema';
 import { Project } from './project.schema';
 import { UxTest } from './ux-test.schema';
@@ -47,6 +52,8 @@ export class Page {
 
 export const PageSchema = SchemaFactory.createForClass(Page);
 
+const pageModel = model(Page.name, PageSchema);
+
 export function getPageModel(): Model<Document<Page>> {
-  return model(Page.name, PageSchema);
+  return pageModel;
 }

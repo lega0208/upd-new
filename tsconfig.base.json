@@ -19,13 +19,20 @@
       "@cra-arc/db": ["libs/db/src/index.ts"],
       "@cra-arc/db-update": ["libs/db-update/src/index.ts"],
       "@cra-arc/external-data": ["libs/external-data/src/index.ts"],
+      "@cra-arc/types-common": ["libs/types-common/src/index.ts"],
       "@cra-arc/upd-components": ["libs/upd/components/src/index.ts"],
+      "@cra-arc/upd/i18n": ["libs/upd/i18n/src/index.ts"],
+      "@cra-arc/upd/services": ["libs/upd/services/src/index.ts"],
       "@cra-arc/upd/state": ["libs/upd/state/src/index.ts"],
       "@cra-arc/upd/views/overview": ["libs/upd/views/overview/src/index.ts"],
       "@cra-arc/upd/views/pages": ["libs/upd/views/pages/src/index.ts"],
       "@cra-arc/upd/views/projects": ["libs/upd/views/projects/src/index.ts"],
       "@cra-arc/upd/views/tasks": ["libs/upd/views/tasks/src/index.ts"],
-      "@cra-arc/utils-common": ["libs/utils-common/src/index.ts"]
+      "@cra-arc/utils-common": ["libs/utils-common/src/index.ts"],
+      "@cra-arc/utils-common/math": ["libs/utils-common/src/lib/math/index.ts"],
+      "@cra-arc/utils-common/types": [
+        "libs/utils-common/src/lib/types/index.ts"
+      ]
     },
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true

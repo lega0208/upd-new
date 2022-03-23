@@ -13,10 +13,10 @@ export class DateSelectionFacade {
    * and expose them as observables through the facade.
    */
   dateRanges$ = this.store.pipe(
-    select(DateSelectionSelectors.getDateRanges)
+    select(DateSelectionSelectors.selectDateRanges)
   );
   dateSelectionPeriod$ = this.store.pipe(
-    select(DateSelectionSelectors.getDatePeriodSelection)
+    select(DateSelectionSelectors.selectDatePeriodSelection)
   );
 
   constructor(private readonly store: Store<DateSelectionState>) {}
