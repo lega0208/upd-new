@@ -5,7 +5,6 @@ import {
   LegendPosition,
   MultiSeries,
 } from '@amonsour/ngx-charts';
-//import { ChartsService } from '../../charts.service';
 import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 dayjs.extend(localeData);
@@ -60,7 +59,6 @@ export class GroupedVerticalBarChartComponent implements OnInit {
   legendPosition!: LegendPosition;
 
   ngOnInit(): void {
-    this.getData();
     this.setColourScheme();
     this.setLegendPosition();
   }
@@ -81,108 +79,6 @@ export class GroupedVerticalBarChartComponent implements OnInit {
       this.legendPosition = LegendPosition.Right;
     }
   }
-
-  getData() {
-    // this.apiService.getOverallMetrics().subscribe((data: any) => {
-    //   this.single = data.map((document: any) => ({
-    //     name: dayjs(document.date).format('MMM D'),
-    //     value: document.visits,
-    //   }));
-    // });
-    // this.single = [
-    //   {
-    //     name: 'Sunday',
-    //     series: [
-    //       { name: 'Aug 8-Aug 14', value: 453777 },
-    //       { name: 'Aug 15-Aug 21', value: 436140 },
-    //     ],
-    //   },
-    //   {
-    //     name: 'Monday',
-    //     series: [
-    //       { name: 'Aug 8-Aug 14', value: 1141379 },
-    //       { name: 'Aug 15-Aug 21', value: 1181317 },
-    //     ],
-    //   },
-    //   {
-    //     name: 'Tuesday',
-    //     series: [
-    //       { name: 'Aug 8-Aug 14', value: 911667 },
-    //       { name: 'Aug 15-Aug 21', value: 967833 },
-    //     ],
-    //   },
-    //   {
-    //     name: 'Wednesday',
-    //     series: [
-    //       { name: 'Aug 8-Aug 14', value: 856571 },
-    //       { name: 'Aug 15-Aug 21', value: 920866 },
-    //     ],
-    //   },
-    //   {
-    //     name: 'Thursday',
-    //     series: [
-    //       { name: 'Aug 8-Aug 14', value: 842921 },
-    //       { name: 'Aug 15-Aug 21', value: 901947 },
-    //     ],
-    //   },
-    //   {
-    //     name: 'Friday',
-    //     series: [
-    //       { name: 'Aug 8-Aug 14', value: 800866 },
-    //       { name: 'Aug 15-Aug 21', value: 774515 },
-    //     ],
-    //   },
-    //   {
-    //     name: 'Saturday',
-    //     series: [
-    //       { name: 'Aug 8-Aug 14', value: 413806 },
-    //       { name: 'Aug 15-Aug 21', value: 433290 },
-    //     ],
-    //   },
-    // ];
-  }
-
-  // processData(results: any) {
-  //   let entry: any = [];
-  //   let dateArray: any = [];
-
-  //   for (const arr in results) {
-  //     dateArray.push(new Date(results[arr].date));
-  //   }
-
-  //   const maxDate = new Date(Math.max(...dateArray));
-  //   const minDate = new Date(Math.min(...dateArray));
-  //   const midDate = new Date((minDate.getTime() + maxDate.getTime()) / 2);
-
-  //   dateArray = [];
-  //   dateArray.push(minDate, maxDate, midDate);
-
-  //   for (const weekday in this.week) {
-  //     entry = [];
-  //     for (const arr in results) {
-  //       const day = dayjs(results[arr].date).format('dddd');
-  //       if (this.week[weekday] === day) {
-  //         let name: string;
-  //         entry.length == 0
-  //           ? (name =
-  //               dayjs(dateArray[0]).format('MMM D') +
-  //               '-' +
-  //               dayjs(dateArray[2]).format('MMM D'))
-  //           : (name =
-  //               dayjs(dateArray[2]).add(1, 'day').format('MMM D') +
-  //               '-' +
-  //               dayjs(dateArray[1]).format('MMM D'));
-  //         entry.push({
-  //           name: name,
-  //           value: results[arr].value,
-  //         });
-  //       }
-  //     }
-  //     this.multi.push({ name: this.week[weekday], series: entry });
-  //   }
-  //   console.log(JSON.stringify(this.multi));
-  //   return this.multi;
-  // }
 
   applyDimensions() {
     this.view = [this.width, this.height];

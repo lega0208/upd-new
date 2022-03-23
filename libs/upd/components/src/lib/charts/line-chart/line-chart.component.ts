@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Color, ScaleType, LegendPosition, MultiSeries } from '@amonsour/ngx-charts';
-import dayjs from 'dayjs';
 import { CurveFactory } from 'd3-shape';
 import { curves, Curves } from '../types';
 
@@ -29,7 +28,7 @@ export class LineChartComponent implements OnInit {
   @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D'];
   @Input() showGridLines = true;
   @Input() noBarWhenZero = true;
-  @Input() data = 'overall';
+  @Input() data: MultiSeries = []
   @Input() trimXAxisTicks = true;
   @Input() trimYAxisTicks = true;
   @Input() maxXAxisTickLength = 16;
@@ -45,56 +44,14 @@ export class LineChartComponent implements OnInit {
   @Input() curveType: Curves = 'Basis';
   @Input() roundDomains = false;
 
-  //curveType = 'default';
-
   colorScheme!: Color;
   legendPosition!: LegendPosition;
   curve?: CurveFactory;
 
-  // data
-  single: MultiSeries = [];
-
   ngOnInit(): void {
-    this.getData();
     this.setLegendPosition();
     this.setColourScheme();
-
     this.setCurve();
-  }
-
-  getData(): void {
-    this.single = [
-      {
-        name: 'Calls Apr 18-Apr 24',
-        series: [
-          { name: 'Sunday', value: 0 },
-          { name: 'Monday', value: 79917 },
-          { value: 81278, name: 'Tuesday' },
-          { name: 'Wednesday', value: 76967 },
-          { value: 72542, name: 'Thursday' },
-          { name: 'Friday', value: 65486 },
-          { value: 2953, name: 'Saturday' },
-        ],
-      },
-      {
-        name: 'Calls Apr 11-Apr 17',
-        series: [
-          { name: 'Sunday', value: 0 },
-          { name: 'Monday', value: 89599 },
-          { value: 82338, name: 'Tuesday' },
-          { name: 'Wednesday', value: 83349 },
-          { value: 75687, name: 'Thursday' },
-          { name: 'Friday', value: 69901 },
-          { value: 0, name: 'Saturday' },
-        ],
-      },
-    ];
-    // this.apiService.getOverallMetrics().subscribe((data: any) => {
-    //   this.single = data.map((document: any) => ({
-    //     name: dayjs(document.date).format('MMM D'),
-    //     value: document.visits,
-    //   }));
-    // });
   }
 
   setLegendPosition() {

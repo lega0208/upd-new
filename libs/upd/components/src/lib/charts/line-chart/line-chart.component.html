@@ -1,9 +1,9 @@
-<app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="50">
+<app-card [card-title]="title" [title-tooltip]="titleTooltip">
   <div #ContainerRef class="vh-45">
     <ngx-charts-line-chart
       [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
       [scheme]="colorScheme"
-      [results]="single"
+      [results]="data"
       [animations]="animations"
       [legend]="showLegend"
       [legendTitle]="legendTitle"
