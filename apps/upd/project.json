@@ -16,7 +16,8 @@
         "inlineStyleLanguage": "scss",
         "assets": ["apps/upd/src/favicon.ico", "apps/upd/src/assets"],
         "styles": ["apps/upd/src/styles.scss"],
-        "scripts": []
+        "scripts": [],
+        "buildLibsFromSource": false
       },
       "configurations": {
         "production": {
