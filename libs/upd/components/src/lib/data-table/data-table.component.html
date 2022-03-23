@@ -1,13 +1,13 @@
 <p-table
   #dt
   [columns]="cols"
-  [value]="data"
+  [value]="data || []"
   [rows]="10"
   [rowHover]="true"
   [showCurrentPageReport]="true"
   [rowsPerPageOptions]="[10, 25, 50, 100]"
   styleClass="p-datatable-striped p-datatable-sm"
-  [paginator]="pagination ? true : false"
+  [paginator]="pagination"
   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
   [globalFilterFields]="searchFields"
 >
