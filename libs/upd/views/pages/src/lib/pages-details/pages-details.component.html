@@ -1,1 +1,10 @@
-<p>page-details works!</p>
+<!-- "Back to pages" button -->
+
+<h2 class="h3 pt-2 pb-2">{{ title$ | async }}</h2>
+
+<!-- View URL / Copy URL stuff -->
+
+<app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
+<app-date-selector></app-date-selector>
+
+<router-outlet></router-outlet>

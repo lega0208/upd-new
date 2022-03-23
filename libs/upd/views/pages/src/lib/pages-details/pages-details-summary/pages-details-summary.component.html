@@ -1,1 +1,125 @@
-<p>page-details-summary works!</p>
+
+<div class="container-fluid gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card card-title="Unique visitors" title-tooltip="Visitors tooltip">
+        <div class="container-fluid p-0">
+          <div class="row row-no-gutters">
+            <div class="col">
+              <p class="h2 w-100">
+                {{ visitors$ | async | number }}
+              </p>
+            </div>
+            <div class="col ml-auto">
+              <span
+                [ngClass]="{
+                  'text-success': ((visitorsPercentChange$ | async) || 0) > 0,
+                  'text-danger': ((visitorsPercentChange$ | async) || 0) < 0,
+                  'hidden': ((visitorsPercentChange$ | async) || 0) === 0
+                }"
+                class="h2 float-end"
+              >
+                {{ visitorsPercentChange$ | async | percent }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </app-card>
+    </div>
+
+    <div class="col">
+      <app-card card-title="Visits" title-tooltip="Visits tooltip">
+        <div class="container-fluid p-0">
+          <div class="row row-no-gutters">
+            <div class="col">
+              <p class="h2 w-100">
+                {{ visits$ | async | number }}
+              </p>
+            </div>
+            <div class="col ml-auto">
+              <p
+                [ngClass]="{
+                  'text-success': ((visitsPercentChange$ | async) || 0) > 0,
+                  'text-danger': ((visitsPercentChange$ | async) || 0) < 0,
+                  'hidden': ((visitorsPercentChange$ | async) || 0) === 0
+                }"
+                class="h2 float-end"
+              >
+                {{ visitsPercentChange$ | async | percent }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </app-card>
+    </div>
+
+    <div class="col">
+      <app-card card-title="Page views" title-tooltip="Page views tooltip">
+        <div class="container-fluid p-0">
+          <div class="row row-no-gutters">
+            <div class="col">
+              <p class="h2 w-100">
+                {{ pageViews$ | async | number }}
+              </p>
+            </div>
+            <div class="col ml-auto">
+              <p
+                [ngClass]="{
+                  'text-success': ((pageViewsPercentChange$ | async) || 0) > 0,
+                  'text-danger': ((pageViewsPercentChange$ | async) || 0) < 0,
+                  'hidden': ((visitorsPercentChange$ | async) || 0) === 0
+                }"
+                class="h2 float-end"
+              >
+                {{ pageViewsPercentChange$ | async | percent }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </app-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-grouped-vertical-bar-chart
+        title="Visits by device type"
+        titleTooltip="Visits by device type tooltip"
+        [barChart]="visitsByDeviceType$ | async"
+        [showLegend]="true"
+      ></app-grouped-vertical-bar-chart>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-line-chart
+        title="Visits by day"
+        titleTooltip="Visits by day tooltip"
+        [data]="(visitsByDay$ | async) || []"
+      ></app-line-chart>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4">
+  <div class="row">
+    <div class="col">
+      <app-card
+        card-title="Top 5 search terms saw an increase"
+        title-tooltip="Top 5 search terms tooltip"
+      >
+        <app-data-table
+          [data]="(topSearchTermsIncrease$ | async) || []"
+          [cols]="topSearchTermsCols"
+          [pagination]="false"
+        >
+        </app-data-table>
+      </app-card>
+    </div>
+  </div>
+</div>

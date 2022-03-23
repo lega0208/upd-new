@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-page-details-feedback',
-  templateUrl: './page-details-feedback.component.html',
-  styleUrls: ['./page-details-feedback.component.css'],
+  templateUrl: './pages-details-feedback.component.html',
+  styleUrls: ['./pages-details-feedback.component.css'],
 })
-export class PageDetailsFeedbackComponent implements OnInit {
+export class PagesDetailsFeedbackComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {}

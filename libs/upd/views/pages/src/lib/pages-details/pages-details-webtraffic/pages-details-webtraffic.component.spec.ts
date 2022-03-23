@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PageDetailsWebtrafficComponent } from './page-details-webtraffic.component';
+import { PagesDetailsWebtrafficComponent } from './pages-details-webtraffic.component';
 
 describe('PageDetailsWebtrafficComponent', () => {
-  let component: PageDetailsWebtrafficComponent;
-  let fixture: ComponentFixture<PageDetailsWebtrafficComponent>;
+  let component: PagesDetailsWebtrafficComponent;
+  let fixture: ComponentFixture<PagesDetailsWebtrafficComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [PageDetailsWebtrafficComponent],
+      declarations: [PagesDetailsWebtrafficComponent],
     }).compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(PageDetailsWebtrafficComponent);
+    fixture = TestBed.createComponent(PagesDetailsWebtrafficComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

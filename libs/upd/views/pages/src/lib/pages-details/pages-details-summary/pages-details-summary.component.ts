@@ -1,12 +1,34 @@
-import { Component, OnInit } from '@angular/core';
+import { Component} from '@angular/core';
+import { PagesDetailsFacade } from '../+state/pages-details.facade';
 
 @Component({
   selector: 'app-page-details-summary',
-  templateUrl: './page-details-summary.component.html',
-  styleUrls: ['./page-details-summary.component.css'],
+  templateUrl: './pages-details-summary.component.html',
+  styleUrls: ['./pages-details-summary.component.css'],
 })
-export class PageDetailsSummaryComponent implements OnInit {
-  constructor() {}
+export class PagesDetailsSummaryComponent {
 
-  ngOnInit(): void {}
+  visitors$ = this.pageDetailsService.visitors$;
+  visitorsPercentChange$ = this.pageDetailsService.visitorsPercentChange$;
+
+  visits$ = this.pageDetailsService.visits$;
+  visitsPercentChange$ = this.pageDetailsService.visitsPercentChange$;
+
+  pageViews$ = this.pageDetailsService.pageViews$;
+  pageViewsPercentChange$ = this.pageDetailsService.pageViewsPercentChange$;
+
+  visitsByDay$ = this.pageDetailsService.visitsByDay$;
+
+  visitsByDeviceType$ = this.pageDetailsService.visitsByDeviceType$;
+
+  topSearchTermsIncrease$ = this.pageDetailsService.topSearchTermsIncrease$;
+  topSearchTermsCols = [
+    { field: 'term', header: 'Search Term' },
+    { field: 'change', header: 'Comparison' },
+    { field: 'impressions', header: 'Impressions' },
+    { field: 'ctr', header: 'CTR' },
+    { field: 'position', header: 'Position' },
+  ];
+
+  constructor(private pageDetailsService: PagesDetailsFacade) {}
 }
