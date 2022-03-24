@@ -12,7 +12,7 @@ export class AlertComponent implements OnInit {
   @ViewChild('staticAlert', { static: false }) staticAlert!: NgbAlert;
   @Input() type: Type = 'success';
   @Input() secondsTimeout = 5;
-  @Input() selfClosing = false;
+  @Input() selfClosing = true;
   @Input() position: Position = 'static';
   style = '';
 
