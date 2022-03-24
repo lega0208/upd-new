@@ -25,12 +25,14 @@ import {
 import { PagesDetailsEffects } from './pages-details/+state/pages-details.effects';
 import { PagesDetailsFacade } from './pages-details/+state/pages-details.facade';
 import { ServicesModule, ApiService } from '@cra-arc/upd/services';
+import { ClipboardModule } from '@angular/cdk/clipboard';
 
 @NgModule({
   imports: [
     CommonModule,
     PagesRoutingModule,
     UpdComponentsModule,
+    ClipboardModule,
     StoreModule.forFeature(PAGES_HOME_FEATURE_KEY, pagesHomeReducer),
     EffectsModule.forFeature([PagesHomeEffects]),
     StoreModule.forFeature(PAGES_DETAILS_FEATURE_KEY, pagesDetailsReducer),
