@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types, FilterQuery, Aggregate } from 'mongoose';
+import { model, Document, Model, Types, Aggregate } from 'mongoose';
 import { GscSearchTermMetrics } from './types';
-import { getPageModel, Page, PageDocument } from './page.schema';
+import { Page } from './page.schema';
 
 export type PageMetricsDocument = PageMetrics & Document;
 
