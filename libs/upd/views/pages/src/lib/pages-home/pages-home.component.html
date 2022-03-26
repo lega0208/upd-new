@@ -16,15 +16,15 @@
   >
     <ng-template pTemplate="caption">
       <div class="p-d-flex">
-      <span class="p-input-icon-left p-ml-auto">
-        <i class="pi pi-search"></i>
-        <input
-          pInputText
-          type="text"
-          (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-          placeholder="Search keyword"
-        />
-      </span>
+        <span class="p-input-icon-left p-ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            placeholder="Search keyword"
+          />
+        </span>
       </div>
     </ng-template>
 
@@ -40,10 +40,7 @@
       <tr>
         <td>
           <span class="p-column-title"><strong>Url</strong></span>
-          <a
-            [routerLink]="[rowData._id]"
-          >{{ rowData.url }}</a
-          >
+          <a [routerLink]="[rowData._id]">{{ rowData.url }}</a>
         </td>
         <td>
           <span class="p-column-title"><strong>Title</strong></span>
@@ -51,7 +48,7 @@
         </td>
         <td>
           <span class="p-column-title"><strong>Visits</strong></span>
-          {{ rowData.visits }}
+          {{ rowData.visits | number }}
         </td>
       </tr>
     </ng-template>

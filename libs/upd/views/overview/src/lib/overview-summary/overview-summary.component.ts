@@ -57,7 +57,7 @@ export class OverviewSummaryComponent implements OnInit {
 
     this.gscImp = 51006993;
     this.gscImpPrev = 48650123;
-    this.gscCTR = 0.10;
+    this.gscCTR = 0.1;
     this.gscCTRPrev = 0.099;
     this.gscAverage = 5;
     this.gscAveragePrev = 5;
@@ -73,6 +73,13 @@ export class OverviewSummaryComponent implements OnInit {
     this.whatWasWrongChart = whatWasWrong;
   }
 }
+
+const getWeeklyDateLabel = (startDate: Date, endDate: Date) => {
+  const start = dayjs(startDate);
+  const end = dayjs(endDate);
+
+  return `${start.format('MMM D')} - ${end.format('MMM D')}`;
+};
 
 // will move these functions somewhere else
 const getWeeklyDatesLabel = (startDate: Date, endDate: Date) => {
@@ -128,12 +135,12 @@ const taskSurvey = [
 
 const dyf = [
   { name: 'Yes', value: 76 },
-      { name: 'No', value: 24 },
+  { name: 'No', value: 24 },
 ];
 
 const whatWasWrong = [
-      { name: "I can't find the info", value: 76 },
-      { name: 'Other reason', value: 24 },
-      { name: 'Info is hard to understand', value: 21 },
-      { name: "Error/something didn't work", value: 32 },
+  { name: "I can't find the info", value: 76 },
+  { name: 'Other reason', value: 24 },
+  { name: 'Info is hard to understand', value: 21 },
+  { name: "Error/something didn't work", value: 32 },
 ];
