@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { StorageMap,  } from '@ngx-pwa/local-storage';
-import { EMPTY, map } from 'rxjs';
+import { StorageMap } from '@ngx-pwa/local-storage';
+import { map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'

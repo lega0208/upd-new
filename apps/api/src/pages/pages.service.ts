@@ -50,7 +50,7 @@ export class PagesService {
     return results;
   }
 
-  async getPageDetails(params: ApiParams) {
+  async getPageDetails(params: ApiParams): Promise<PageDetailsData> {
     if (!params.id) {
       throw Error(
         'Attempted to get Page details from API but no id was provided.'
@@ -105,11 +105,6 @@ export class PagesService {
       params.comparisonDateRange
     );
 
-    // get comparison for search terms
-    // get top 5 for both
-    // add to results
-    // test?
-    // once working, try and clean up
     const aggregatedSearchTermMetrics =
       aggregateSearchTermMetrics(dateRangeDataByDay);
     const aggregatedComparisonSearchTermMetrics = aggregateSearchTermMetrics(
@@ -149,7 +144,7 @@ export class PagesService {
       },
       topSearchTermsIncrease: topIncreasedSearchTerms,
       topSearchTermsDecrease: topDecreasedSearchTerms,
-    };
+    } as PageDetailsData;
   }
 
   async getPageDetailsDataByDay(page: Page, dateRange: string) {
