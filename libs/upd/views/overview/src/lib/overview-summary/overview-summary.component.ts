@@ -74,13 +74,6 @@ export class OverviewSummaryComponent implements OnInit {
   }
 }
 
-const getWeeklyDateLabel = (startDate: Date, endDate: Date) => {
-  const start = dayjs(startDate);
-  const end = dayjs(endDate);
-
-  return `${start.format('MMM D')} - ${end.format('MMM D')}`;
-};
-
 // will move these functions somewhere else
 const getWeeklyDatesLabel = (startDate: Date, endDate: Date) => {
   const formattedStartDate = dayjs(startDate).format('MMM D');
