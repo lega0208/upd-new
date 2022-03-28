@@ -33,13 +33,14 @@
 
 <div class="row mb-2 gx-2">
   <div class="col-lg-12 col-md-12 col-sm-12 h-100">
-    <app-grouped-vertical-bar-line-chart
+    <app-charts
+      [type]="'combo-bar-line'"
       [title]="'Visits compared to call volume'"
       [displayLegend]="'below'"
       [showRightYAxisLabel]="true"
       [curveType]="'Natural'"
       [barChart]="barChartData$ | async"
-    ></app-grouped-vertical-bar-line-chart>
+    ></app-charts>
   </div>
 </div>
 
@@ -85,18 +86,18 @@
 
 <div class="row mb-2 gx-2">
   <div class="col-lg-6 col-md-6 col-sm12 h-100">
-    <app-pie-chart
+    <app-charts
       [title]="'Did you find what you were looking for?'"
       [data]="dyfChart"
       [type]="'donut'"
-    ></app-pie-chart>
+    ></app-charts>
   </div>
   <div class="col-lg-6 col-md-6 col-sm12 h-100">
-    <app-pie-chart
+    <app-charts
       [title]="'What was wrong?'"
       [data]="whatWasWrongChart"
       [type]="'donut'"
-    ></app-pie-chart>
+    ></app-charts>
   </div>
 </div>
 

@@ -15,4 +15,18 @@ export const curves = {
   default: shape.curveLinear,
 };
 
+export const chartTypes = {
+  gauge: 'gauge',
+  line: 'line',
+  pie: 'pie',
+  donut: 'donut',
+  doughnut: 'doughnut',
+  bar: 'bar',
+  'grouped-bar': 'grouped-bar',
+  'stacked-bar': 'stacked-bar',
+  'horizontal-bar': 'horizontal-bar',
+  'combo-bar-line': 'combo-bar-line',
+};
+
 export type Curves = keyof typeof curves;
+export type ChartTypes = keyof typeof chartTypes;
