@@ -1,4 +1,3 @@
-
 <div class="container-fluid gx-0">
   <div class="row">
     <div class="col">
@@ -15,7 +14,7 @@
                 [ngClass]="{
                   'text-success': ((visitorsPercentChange$ | async) || 0) > 0,
                   'text-danger': ((visitorsPercentChange$ | async) || 0) < 0,
-                  'hidden': ((visitorsPercentChange$ | async) || 0) === 0
+                  hidden: ((visitorsPercentChange$ | async) || 0) === 0
                 }"
                 class="h2 float-end"
               >
@@ -41,7 +40,7 @@
                 [ngClass]="{
                   'text-success': ((visitsPercentChange$ | async) || 0) > 0,
                   'text-danger': ((visitsPercentChange$ | async) || 0) < 0,
-                  'hidden': ((visitorsPercentChange$ | async) || 0) === 0
+                  hidden: ((visitorsPercentChange$ | async) || 0) === 0
                 }"
                 class="h2 float-end"
               >
@@ -67,7 +66,7 @@
                 [ngClass]="{
                   'text-success': ((pageViewsPercentChange$ | async) || 0) > 0,
                   'text-danger': ((pageViewsPercentChange$ | async) || 0) < 0,
-                  'hidden': ((visitorsPercentChange$ | async) || 0) === 0
+                  hidden: ((visitorsPercentChange$ | async) || 0) === 0
                 }"
                 class="h2 float-end"
               >
@@ -84,12 +83,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-grouped-vertical-bar-chart
+      <app-charts
+        type="grouped-bar"
         title="Visits by device type"
         titleTooltip="Visits by device type tooltip"
-        [barChart]="visitsByDeviceType$ | async"
+        [data]="visitsByDeviceType$ | async"
         [showLegend]="true"
-      ></app-grouped-vertical-bar-chart>
+      ></app-charts>
     </div>
   </div>
 </div>
@@ -97,11 +97,12 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-line-chart
+      <app-charts
+        type="line"
         title="Visits by day"
         titleTooltip="Visits by day tooltip"
         [data]="(visitsByDay$ | async) || []"
-      ></app-line-chart>
+      ></app-charts>
     </div>
   </div>
 </div>

@@ -1,23 +1,36 @@
 <div class="row mb-2 gx-2">
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-data-card [current]="uniqueVisitors" [past]="uniqueVisitorsPrev" [title]="'Unique visitors'"></app-data-card>
+    <app-data-card
+      [current]="uniqueVisitors"
+      [past]="uniqueVisitorsPrev"
+      [title]="'Unique visitors'"
+    ></app-data-card>
   </div>
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-data-card [current]="visits" [past]="visitsPrev" [title]="'Visits'"></app-data-card>
+    <app-data-card
+      [current]="visits"
+      [past]="visitsPrev"
+      [title]="'Visits'"
+    ></app-data-card>
   </div>
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
-    <app-data-card [current]="pageViews" [past]="pageViewsPrev" [title]="'Page views'"></app-data-card>
+    <app-data-card
+      [current]="pageViews"
+      [past]="pageViewsPrev"
+      [title]="'Page views'"
+    ></app-data-card>
   </div>
 </div>
 
 <div class="row mb-2 gx-2">
   <div class="col-lg-12 col-md-12 col-sm-12 h-100">
-    <app-grouped-vertical-bar-chart
+    <app-charts
       [title]="'Visits'"
       [displayLegend]="'below'"
       [showLegend]="true"
-      [barChart]="barChartData$ | async"
-    ></app-grouped-vertical-bar-chart>
+      [data]="barChartData$ | async"
+      type="grouped-bar"
+    ></app-charts>
   </div>
 </div>
 
