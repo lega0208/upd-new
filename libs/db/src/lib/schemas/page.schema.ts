@@ -32,10 +32,10 @@ export class Page {
   aa_item_id?: string;
 
   @Prop({ type: Date })
-  lastChecked = new Date(0);
+  lastChecked?: Date;
 
   @Prop({ type: Date })
-  lastModified = new Date(0);
+  lastModified?: Date;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }] })
   tasks?: Types.ObjectId[] | Task[];

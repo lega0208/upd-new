@@ -122,6 +122,7 @@ export class AirtableClient {
     const query = this.createQuery(bases.TASKS_INVENTORY, 'Pages', params);
 
     return (await this.selectAll(query))
+      .filter(({ fields }) => !!fields['Url'])
       .map(({ id, fields }) => ({
         airtable_id: id,
         title: fields['Page Title'],
