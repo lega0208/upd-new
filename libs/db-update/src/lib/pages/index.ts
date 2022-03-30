@@ -65,7 +65,7 @@ export async function* getRedirectsWithRateLimit(
       const http403Errors = responses.filter(
         (response) =>
           response.status === 'rejected' &&
-          response.reason.response.status === 403
+          response.reason.response?.status === 403
       );
 
       const redirects = responses
@@ -135,7 +135,7 @@ export async function updatePageUrls(pages: Page[], pagesModel: Model<Document<P
           update: {
             $currentDate: { lastChecked: true, lastModified: true },
             $set: { url: newUrl },
-            $addToSet: { all_urls: page['url'] },
+            $addToSet: { all_urls: { $each: [page['url'], newUrl] } },
           }
         }
       });
@@ -245,9 +245,9 @@ export async function updatePages() {
     .find(
       {
         // find pages that have not been checked in the last two days, or that have never been updated
-        $or: [{
-          lastChecked: { $lte: twoDaysAgo } },
-          { lastChecked: { $exists: false } }
+        $or: [
+          { lastChecked: { $lte: twoDaysAgo } },
+          { lastChecked: { $exists: false } },
         ],
       },
     )
