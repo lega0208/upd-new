@@ -43,6 +43,8 @@ export class OverviewSummaryComponent implements OnInit {
     })
   );
 
+  chartData = [];
+
   constructor(private overviewService: OverviewFacade) {}
 
   ngOnInit(): void {
@@ -71,6 +73,8 @@ export class OverviewSummaryComponent implements OnInit {
 
     this.dyfChart = dyf;
     this.whatWasWrongChart = whatWasWrong;
+
+    
   }
 }
 

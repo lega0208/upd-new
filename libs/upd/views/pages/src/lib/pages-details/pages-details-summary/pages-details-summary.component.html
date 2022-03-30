@@ -124,3 +124,34 @@
     </div>
   </div>
 </div>
+
+<div class="container-fluid my-4">
+  <div class="row">
+    <div class="col">
+      <app-card
+        card-title="Top 5 search terms saw a decrease"
+        title-tooltip="Top 5 search terms decrease tooltip"
+      >
+        <app-data-table
+          [data]="(topSearchTermsDecrease$ | async) || []"
+          [cols]="topSearchTermsCols"
+          [pagination]="false"
+        >
+        </app-data-table>
+      </app-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4">
+  <div class="row">
+    <div class="col">
+      <app-card
+        card-title="Related tasks"
+        title-tooltip="Related tasks tooltip"
+      >
+      No Related tasks for this page
+      </app-card>
+    </div>
+  </div>
+</div>

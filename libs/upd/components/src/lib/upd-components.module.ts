@@ -6,6 +6,7 @@ import {
   NgbPopoverModule,
   NgbAlertModule,
   NgbAccordionModule,
+  NgbModalModule,
 } from '@ng-bootstrap/ng-bootstrap';
 import { NgxChartsModule } from '@amonsour/ngx-charts';
 import { CardComponent } from './card/card.component';
@@ -24,6 +25,7 @@ import {
 } from './charts';
 import { AlertComponent } from './alert/alert.component';
 import { AccordionComponent } from './accordion/accordion.component';
+import { ModalComponent } from './modal/modal.component';
 
 @NgModule({
   imports: [
@@ -33,6 +35,7 @@ import { AccordionComponent } from './accordion/accordion.component';
     NgbAlertModule,
     NgbDropdownModule,
     NgbPopoverModule,
+    NgbModalModule,
     NgxChartsModule,
     TableModule,
     ButtonModule,
@@ -50,6 +53,7 @@ import { AccordionComponent } from './accordion/accordion.component';
     AlertComponent,
     AccordionComponent,
     ChartsComponent,
+    ModalComponent,
   ],
   exports: [
     NgxChartsModule,
@@ -67,6 +71,7 @@ import { AccordionComponent } from './accordion/accordion.component';
     AlertComponent,
     AccordionComponent,
     ChartsComponent,
+    ModalComponent
   ],
 })
 export class UpdComponentsModule {}

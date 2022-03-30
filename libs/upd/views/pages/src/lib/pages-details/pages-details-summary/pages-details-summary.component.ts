@@ -30,5 +30,7 @@ export class PagesDetailsSummaryComponent {
     { field: 'position', header: 'Position' },
   ];
 
+  topSearchTermsDecrease$ = this.pageDetailsService.topSearchTermsDecrease$;
+
   constructor(private pageDetailsService: PagesDetailsFacade) {}
 }
