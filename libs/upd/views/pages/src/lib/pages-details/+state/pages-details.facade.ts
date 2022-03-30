@@ -108,6 +108,10 @@ export class PagesDetailsFacade {
     map((data) => data?.topSearchTermsIncrease || [])
   );
 
+  topSearchTermsDecrease$ = this.pagesDetailsData$.pipe(
+    map((data) => data?.topSearchTermsDecrease || [])
+  );
+
   error$ = this.store.pipe(
     select(PagesDetailsSelectors.selectPagesDetailsError)
   );

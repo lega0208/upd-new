@@ -1,12 +1,10 @@
 <app-card [card-title]="title" [title-tooltip]="titleTooltip">
-  <div
-    #ContainerRef
-    class="vh-45"
+  <div [style.padding]="'0px'" [style.height]="'100%'"
     [ngClass]="showRightYAxisLabel ? 'mr-80' : ''"
   >
     <ng-container *ngIf="type === 'combo-bar-line'">
       <combo-grouped-vertical-bar-line-chart
-        [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
+        
         [scheme]="comboBarScheme"
         [colorSchemeLine]="lineChartScheme"
         [results]="barChart"
@@ -52,7 +50,7 @@
 
     <ng-container *ngIf="type === 'line'">
       <ngx-charts-line-chart
-        [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
+        
         [scheme]="colorScheme"
         [results]="data"
         [animations]="animations"
@@ -89,7 +87,7 @@
 
     <ng-container *ngIf="type === 'bar'">
       <ngx-charts-bar-vertical
-        [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
+        
         [scheme]="colorScheme"
         [results]="data"
         [animations]="animations"
@@ -128,7 +126,7 @@
 
     <ng-container *ngIf="type === 'grouped-bar'">
       <ngx-charts-bar-vertical-2d
-        [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
+        
         [scheme]="colorScheme"
         [results]="data"
         [animations]="animations"
@@ -170,7 +168,7 @@
 
     <ng-container *ngIf="type === 'stacked-bar'">
       <ngx-charts-bar-vertical-stacked
-        [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
+        
         [scheme]="colorScheme"
         [results]="data"
         [animations]="animations"
@@ -202,7 +200,7 @@
     </ng-container>
     <ng-container *ngIf="type === 'horizontal-bar'">
       <ngx-charts-bar-horizontal
-        [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
+        
         [scheme]="colorScheme"
         [results]="data"
         [animations]="animations"
@@ -238,7 +236,7 @@
       *ngIf="type === 'pie' || type === 'donut' || type === 'doughnut'"
     >
       <ngx-charts-pie-chart
-        [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
+        
         [scheme]="colorScheme"
         [results]="data"
         [animations]="animations"
@@ -258,7 +256,7 @@
 
     <ng-container *ngIf="type === 'gauge'">
       <ngx-charts-gauge
-        [view]="[ContainerRef.offsetWidth, ContainerRef.offsetHeight]"
+        
         [legend]="showLegend"
         [legendTitle]="legendTitle"
         [legendPosition]="legendPosition"
@@ -293,6 +291,8 @@
         [filter]="false"
         [sort]="false"
         [pagination]="false"
+        [data]="chartData"
+        [cols]="chartDataCols"
       ></app-data-table>
     </app-accordion>
   </div>
