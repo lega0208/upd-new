@@ -5,3 +5,4 @@ export * from './schemas/task.schema';
 export * from './schemas/project.schema';
 export * from './schemas/ux-test.schema';
 export * from './schemas/calldrivers.schema';
+export * from './schemas/feedback.schema';

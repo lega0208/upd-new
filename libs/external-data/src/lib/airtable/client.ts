@@ -1,8 +1,8 @@
 import Airtable from 'airtable';
 import { AirtableBase } from 'airtable/lib/airtable_base';
 
-export function getATClient() {
-  return new Airtable({ apiKey: process.env.AIRTABLE_API_KEY });
+export function getATClient(apiKey: string = process.env.AIRTABLE_API_KEY) {
+  return new Airtable({ apiKey });
 }
 
 export type AirTableAPI = Airtable;

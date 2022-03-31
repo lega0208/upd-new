@@ -55,3 +55,14 @@ export interface PageData {
   url: string;
   tasks?: string[];
 }
+
+export interface FeedbackData {
+  airtable_id: string;
+  url: string;
+  date: Date;
+  tags?: string[];
+  status?: string;
+  whats_wrong?: string;
+  main_section?: string;
+  theme?: string;
+}
