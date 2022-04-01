@@ -1,3 +1,2 @@
 
-
-export type OverviewData = any;
+export { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';

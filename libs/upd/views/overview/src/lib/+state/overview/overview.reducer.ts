@@ -6,7 +6,7 @@ import { OverviewData } from './overview.models';
 export const OVERVIEW_FEATURE_KEY = 'overview';
 
 export interface OverviewState {
-  data: any[];
+  data: OverviewData;
   loaded: boolean; // has the Overview data been loaded
   loading: boolean;
   error: string | null; // last known error (if any)
@@ -18,7 +18,10 @@ export interface OverviewPartialState {
 
 export const initialState: OverviewState = {
   // set initial required properties
-  data: [],
+  data: {
+    dateRange: '',
+    comparisonDateRange: '',
+  },
   loaded: false,
   loading: false,
   error: null,
@@ -32,7 +35,7 @@ const reducer = createReducer(
     loaded: false,
     error: null,
   })),
-  on(OverviewActions.loadOverviewSuccess, (state, payload: { data: any }) => ({
+  on(OverviewActions.loadOverviewSuccess, (state, payload: { data: OverviewData }) => ({
     data: payload.data,
     loading: false,
     loaded: true,

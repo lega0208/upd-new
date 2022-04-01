@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { catchError, map, of } from 'rxjs';
-import dayjs from 'dayjs';
-import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
+import { SingleSeries } from '@amonsour/ngx-charts';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { Metrics } from '../query';
 
@@ -11,12 +9,14 @@ import { Metrics } from '../query';
   styleUrls: ['./overview-summary.component.css'],
 })
 export class OverviewSummaryComponent implements OnInit {
-  uniqueVisitors = 0;
-  uniqueVisitorsPrev = 0;
-  visits = 0;
-  visitsPrev = 0;
-  pageViews = 0;
-  pageViewsPrev = 0;
+  uniqueVisitors = this.overviewService.visitors$;
+  uniqueVisitorsPrev = this.overviewService.prevVisitors$;
+
+  visits = this.overviewService.visits$;
+  visitsPrev = this.overviewService.prevVisits$;
+
+  pageViews = this.overviewService.views$;
+  pageViewsPrev = this.overviewService.prevViews$;
 
   gscImp = 0;
   gscImpPrev = 0;
@@ -34,26 +34,12 @@ export class OverviewSummaryComponent implements OnInit {
   dyfChart: SingleSeries = [];
   whatWasWrongChart: SingleSeries = [];
 
-  barChartData$ = this.overviewService.overviewData$.pipe(
-    map(parseDataForBarchart),
-    catchError((e) => {
-      console.error(e);
-
-      return of([] as MultiSeries);
-    })
-  );
+  barChartData$ = this.overviewService.visitsByDay$;
 
   constructor(private overviewService: OverviewFacade) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.overviewService.init();
-
-    this.uniqueVisitors = 4260300;
-    this.uniqueVisitorsPrev = 4500100;
-    this.visits = 8248019;
-    this.visitsPrev = 7902234;
-    this.pageViews = 28261637;
-    this.pageViewsPrev = 26234645;
 
     this.gscImp = 51006993;
     this.gscImpPrev = 48650123;
@@ -73,45 +59,6 @@ export class OverviewSummaryComponent implements OnInit {
     this.whatWasWrongChart = whatWasWrong;
   }
 }
-
-// will move these functions somewhere else
-const getWeeklyDatesLabel = (startDate: Date, endDate: Date) => {
-  const formattedStartDate = dayjs(startDate).format('MMM D');
-  const formattedEndDate = dayjs(endDate).format('MMM D');
-
-  return `${formattedStartDate}-${formattedEndDate}`;
-};
-
-const parseDataForBarchart = (
-  data: { visits: number; date: Date }[]
-): MultiSeries => {
-  if (data.length === 0) {
-    return [];
-  }
-
-  // making a lot of assumptions here... (for the sake of quickly setting up a demo)
-  // will need to add some sanity checks / error handling / reasonable defaults
-  const prevWeek = data.slice(0, 7);
-  const latestWeek = data.slice(7, 14);
-
-  const [prevWeekBarchartData, latestWeekBarchartData] = [
-    prevWeek,
-    latestWeek,
-  ].map((week) => {
-    const weekLabel = getWeeklyDatesLabel(week[0].date, week[6].date);
-
-    return week.map((dailyData: { date: Date; visits: number }) => ({
-      name: dayjs(dailyData.date).format('dddd'),
-      series: [{ name: weekLabel, value: dailyData.visits }],
-    }));
-  });
-
-  // again, relying on the assumption of perfect data
-  return prevWeekBarchartData.map((dailyData, i) => ({
-    name: dailyData.name,
-    series: [...dailyData.series, ...latestWeekBarchartData[i].series],
-  })) as MultiSeries;
-};
 
 const taskSurvey = [
   { id: 1, task: 'Shufflester', completion: 191 },

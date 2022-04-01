@@ -10,22 +10,22 @@
 <div class="row mb-2 gx-2">
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
     <app-data-card
-      [current]="uniqueVisitors"
-      [past]="uniqueVisitorsPrev"
+      [current]="(uniqueVisitors | async) || 0"
+      [past]="(uniqueVisitorsPrev | async) || 0"
       [title]="'Unique visitors'"
     ></app-data-card>
   </div>
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
     <app-data-card
-      [current]="visits"
-      [past]="visitsPrev"
+      [current]="(visits | async) || 0"
+      [past]="(visitsPrev | async) || 0"
       [title]="'Visits'"
     ></app-data-card>
   </div>
   <div class="col-lg-4 col-md-6 col-sm-12 h-100">
     <app-data-card
-      [current]="pageViews"
-      [past]="pageViewsPrev"
+      [current]="(pageViews | async) || 0"
+      [past]="(pageViewsPrev | async) || 0"
       [title]="'Page views'"
     ></app-data-card>
   </div>
@@ -101,7 +101,7 @@
   </div>
 </div>
 
-<!-- 
+<!--
 <app-card [card-title]="'KPI Example'">
   <div class="row mb-2 gx-2">
     <div class="col-lg-4 col-md-4 col-sm-12 h-100">
