@@ -1,1 +1,139 @@
-<p>page-details-search-analytics works!</p>
+<div class="container-fluid gx-0">
+    <div class="row">
+      <div class="col">
+        <app-card card-title="Total impressions from Google" title-tooltip="Total impressions from Google tooltip">
+          <div class="container-fluid p-0">
+            <div class="row row-no-gutters">
+              <div class="col">
+                <p class="h2 w-100">
+                  {{ totalImpressionsGSC$ | async | number }}
+                </p>
+              </div>
+              <div class="col ml-auto">
+                <span
+                  [ngClass]="{
+                    'text-success': ((totalImpressionsGSCPercentChange$ | async) || 0) > 0,
+                    'text-danger': ((totalImpressionsGSCPercentChange$ | async) || 0) < 0,
+                    hidden: ((totalImpressionsGSCPercentChange$ | async) || 0) === 0
+                  }"
+                  class="h2 float-end"
+                >
+                  {{ totalImpressionsGSCPercentChange$ | async | percent }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+  
+      <div class="col">
+        <app-card card-title="Click through rate from Google" title-tooltip="Click through rate from Google tooltip">
+          <div class="container-fluid p-0">
+            <div class="row row-no-gutters">
+              <div class="col">
+                <p class="h2 w-100">
+                  {{ ctrGSC$ | async | percent }}
+                </p>
+              </div>
+              <div class="col ml-auto">
+                <p
+                  [ngClass]="{
+                    'text-success': ((ctrGSCPercentChange$ | async) || 0) > 0,
+                    'text-danger': ((ctrGSCPercentChange$ | async) || 0) < 0,
+                    hidden: ((ctrGSCPercentChange$ | async) || 0) === 0
+                  }"
+                  class="h2 float-end"
+                >
+                  {{ ctrGSCPercentChange$ | async | percent }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+  
+      <div class="col">
+        <app-card card-title="Average rank on Google" title-tooltip="Average rank on Google tooltip">
+          <div class="container-fluid p-0">
+            <div class="row row-no-gutters">
+              <div class="col">
+                <p class="h2 w-100">
+                  {{ avgRankGSC$ | async | number }}
+                </p>
+              </div>
+              <div class="col ml-auto">
+                <p
+                  [ngClass]="{
+                    'text-success': ((avgRankGSCPercentChange$ | async) || 0) > 0,
+                    'text-danger': ((avgRankGSCPercentChange$ | async) || 0) < 0,
+                    hidden: ((avgRankGSCPercentChange$ | async) || 0) === 0
+                  }"
+                  class="h2 float-end"
+                >
+                  {{ avgRankGSCPercentChange$ | async | percent }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid my-4">
+    <div class="row">
+      <div class="col">
+        <app-card
+          card-title="Top 25 search terms from Google"
+          title-tooltip="Top 25 search terms from Google tooltip"
+        >
+          <app-data-table
+            [data]="(topGSCSearchTerms$ | async) || []"
+            [cols]="topGSCSearchTermsCols"
+            [pagination]="false"
+          >
+          </app-data-table>
+        </app-card>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid my-4">
+    <div class="row">
+      <div class="col">
+        <app-card
+          card-title="Search terms from Canada.ca"
+          title-tooltip="Search terms from Canada.ca tooltip"
+        >
+          <app-data-table
+            [data]="(searchTermsCanada$ | async) || []"
+            [cols]="searchTermsCanadaCols"
+            [pagination]="false"
+          >
+          </app-data-table>
+        </app-card>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid my-4">
+    <div class="row">
+      <div class="col">
+        <app-card
+          card-title="Referrer Type"
+          title-tooltip="Referrer Type tooltip"
+        >
+          <app-data-table
+            [data]="(referrerType$ | async) || []"
+            [cols]="referrerTypeCols"
+            [pagination]="false"
+          >
+          </app-data-table>
+        </app-card>
+      </div>
+    </div>
+  </div>
+
+
+
+

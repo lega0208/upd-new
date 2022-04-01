@@ -31,7 +31,7 @@ export class ChartsComponent implements OnInit {
   @Input() displayLegend = 'below';
   @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D'];
   @Input() showLegend = true;
-  @Input() data: SingleSeries | MultiSeries | null = [];
+  @Input() data: any = [];
   @Input() legendTitle = 'Legend';
   @Input() tooltipDisabled = false;
   @Input() showLabels = false;
@@ -107,6 +107,9 @@ export class ChartsComponent implements OnInit {
   // pie/donut
   doughnut = false;
 
+  chartData: SingleSeries | MultiSeries | null = [];
+  chartDataCols: any = [];
+
   ngOnInit(): void {
     this.setLegendPosition();
     if (this.type === 'combo-bar-line') this.setComboColourScheme();
@@ -119,6 +122,20 @@ export class ChartsComponent implements OnInit {
     }
 
     this.lineChart = lineChart;
+
+    //const chartDataHeaders = Object.keys(this.chartData[0]);
+    // console.log(Object.values(this.chartData[2])[0]);
+    // console.log(chartDataHeaders);
+
+    this.chartData = this.parseDataForChartData(this.data);
+
+    this.chartDataCols = [
+      { field: 'header', header: 'Date' },
+      { field: 'name', header: this.xAxisLabel },
+      { field: 'value', header: this.yAxisLabel },
+    ];
+
+    console.log(this.chartData);
   }
 
   applyDimensions() {
@@ -128,8 +145,6 @@ export class ChartsComponent implements OnInit {
   setDoughnut() {
     if (this.type === 'doughnut' || this.type === 'donut') {
       this.doughnut = true;
-    } else {
-      this.doughnut = false;
     }
   }
 
@@ -225,6 +240,36 @@ export class ChartsComponent implements OnInit {
   onSelect(event: any) {
     console.log(event);
   }
+
+//   dataMultiSeriesToChartData(data: MultiSeries): any {
+//     return data.map((d: any) => {
+//         return {
+//           name: d.name,
+//           value: d.value,
+//         };
+//     });
+//   }
+
+// dataSingleSeriesToChartData(data: SingleSeries) {
+//   return data.map((d: any) => {
+//       return {
+//         name: d.name,
+//         value: d.value,
+//       };
+//   })
+// }
+
+parseDataForChartData = (data: MultiSeries): any => {
+  return data.map((d: { series: any[]; name: any; }) => {
+    return d.series.map((s) => ({
+        header: d.name,
+        name: s.name,
+        value: s.value,
+      }));
+  })
+  .flat();
+};
+
 }
 
 // to be removed once gotten data for line

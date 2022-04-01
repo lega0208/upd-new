@@ -48,39 +48,33 @@ export class OverviewSummaryComponent implements OnInit {
     this.gscAverage = 5;
     this.gscAveragePrev = 5;
 
-    this.taskSurvey = taskSurvey;
+    this.taskSurvey = [
+      { id: 1, task: 'Shufflester', completion: 191 },
+      { id: 2, task: 'Yotz', completion: 189 },
+      { id: 3, task: 'Shuffletag', completion: 65 },
+      { id: 4, task: 'Feednation', completion: 132 },
+      { id: 5, task: 'Zoonder', completion: 153 },
+      { id: 6, task: 'Jabbersphere', completion: 97 },
+      { id: 7, task: 'Devpulse', completion: 84 },
+      { id: 8, task: 'Photofeed', completion: 172 },
+      { id: 9, task: 'Meemm', completion: 205 },
+      { id: 10, task: 'Jetwire', completion: 176 },
+    ];
 
     this.taskSurveyCols = [
       { field: 'task', header: 'Task' },
       { field: 'completion', header: 'Task Success Survey Completed' },
     ];
 
-    this.dyfChart = dyf;
-    this.whatWasWrongChart = whatWasWrong;
+    this.dyfChart = [
+      { name: 'Yes', value: 76 },
+      { name: 'No', value: 24 },
+    ];
+    this.whatWasWrongChart = [
+      { name: "I can't find the info", value: 76 },
+      { name: 'Other reason', value: 24 },
+      { name: 'Info is hard to understand', value: 21 },
+      { name: "Error/something didn't work", value: 32 },
+    ];
   }
 }
-
-const taskSurvey = [
-  { id: 1, task: 'Shufflester', completion: 191 },
-  { id: 2, task: 'Yotz', completion: 189 },
-  { id: 3, task: 'Shuffletag', completion: 65 },
-  { id: 4, task: 'Feednation', completion: 132 },
-  { id: 5, task: 'Zoonder', completion: 153 },
-  { id: 6, task: 'Jabbersphere', completion: 97 },
-  { id: 7, task: 'Devpulse', completion: 84 },
-  { id: 8, task: 'Photofeed', completion: 172 },
-  { id: 9, task: 'Meemm', completion: 205 },
-  { id: 10, task: 'Jetwire', completion: 176 },
-];
-
-const dyf = [
-  { name: 'Yes', value: 76 },
-  { name: 'No', value: 24 },
-];
-
-const whatWasWrong = [
-  { name: "I can't find the info", value: 76 },
-  { name: 'Other reason', value: 24 },
-  { name: 'Info is hard to understand', value: 21 },
-  { name: "Error/something didn't work", value: 32 },
-];
