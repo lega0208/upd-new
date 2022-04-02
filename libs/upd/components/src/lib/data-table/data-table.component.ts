@@ -1,5 +1,6 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { Table } from 'primeng/table';
+import { columnConfig } from '../data-table-styles/types';
 
 @Component({
   selector: 'app-data-table',
@@ -12,7 +13,7 @@ export class DataTableComponent {
   @Input() sort = true;
   @Input() pagination = true;
   @Input() filter = true;
-  @Input() cols: { field: string; header: string }[] = [];
+  @Input() cols: columnConfig[] = [];
   first = 0;
   searchFields: string[] = this.cols.map((obj) => obj.field);
   loading!: boolean;
@@ -20,4 +21,6 @@ export class DataTableComponent {
   clear(table: Table) {
     table.clear();
   }
+
+  constructor() {}
 }

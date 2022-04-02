@@ -1,0 +1,34 @@
+<ng-container *ngIf="hasType && config.typeParam">
+  <a *ngIf="config.type === 'link'" [routerLink]="data[config.typeParam]">
+    {{ data[config.field] }}
+  </a>
+  <span
+    *ngIf="config.type === 'label'"
+    class="badge"
+    [ngClass]="{
+      'rounded-pill bg-success align-middle':
+        config.typeParam === 'status' && data[config.field] === 'Complete',
+      'rounded-pill bg-secondary align-middle':
+        config.typeParam === 'status' && data[config.field] === 'Unknown',
+      'bg-primary': config.typeParam === 'cops' && data[config.field] === 'COPS'
+    }"
+  >
+    {{ data[config.field] }}
+  </span>
+</ng-container>
+
+<ng-container *ngIf="hasPipe">
+  <ng-container *ngIf="config.pipe === 'number'">
+    {{ data[config.field] | number }}
+  </ng-container>
+  <ng-container *ngIf="config.pipe === 'percent'">
+    {{ data[config.field] | percent }}
+  </ng-container>
+  <ng-container *ngIf="config.pipe === 'date'">
+    {{ data[config.field] | date: config.pipeParam }}
+  </ng-container>
+</ng-container>
+
+<ng-container *ngIf="!hasType && !hasPipe">
+  {{ data[config.field] }}
+</ng-container>
