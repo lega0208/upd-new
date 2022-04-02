@@ -1,6 +1,13 @@
 <h2>Pages</h2>
 
 <app-card>
+  <app-data-table [data]="(pagesHomeData$ | async) || []" [cols]="columns">
+  </app-data-table>
+</app-card>
+
+<!-- 
+
+<app-card>
   <p-table
     #dt
     [columns]="columns"
@@ -31,16 +38,33 @@
     <ng-template pTemplate="header">
       <tr>
         <th *ngFor="let col of columns" [pSortableColumn]="col.field">
-          {{ col.header }}
+          <ng-container *ngIf="col.tooltip">
+            <span
+              class="p-column-title"
+              [class.card-tooltip]="col.tooltip"
+            >
+              <strong>{{ col.header }}</strong>
+            </span>
+          </ng-container>
           <p-sortIcon [field]="col.field"></p-sortIcon>
         </th>
       </tr>
     </ng-template>
-    <ng-template pTemplate="body" let-rowData>
+    <ng-template pTemplate="body" let-columns="columns" let-rowData>
       <tr>
+        <td *ngFor="let col of columns">
+          <span class="p-column-title"
+            ><strong>{{ col.header }}</strong></span
+          >
+          <app-data-table-styles [config]="col" [data]="rowData">
+          </app-data-table-styles>
+        </td>
+      </tr>
         <td>
           <span class="p-column-title"><strong>Url</strong></span>
-          <a [routerLink]="[rowData._id]">{{ rowData.url }}</a>
+          <app-data-table-styles [type]="columns.type" [href]="rowData._id">
+            {{ rowData.url }}
+          </app-data-table-styles>
         </td>
         <td>
           <span class="p-column-title"><strong>Title</strong></span>
@@ -50,7 +74,7 @@
           <span class="p-column-title"><strong>Visits</strong></span>
           {{ rowData.visits | number }}
         </td>
-      </tr>
+      </tr> 
     </ng-template>
     <ng-template pTemplate="emptymessage">
       <tr>
@@ -58,4 +82,4 @@
       </tr>
     </ng-template>
   </p-table>
-</app-card>
+</app-card> -->
