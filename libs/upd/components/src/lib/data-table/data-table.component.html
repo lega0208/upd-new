@@ -30,13 +30,37 @@
       <div *ngIf="sort; then thenBlock; else elseBlock"></div>
       <ng-template #thenBlock>
         <th *ngFor="let col of columns" [pSortableColumn]="col.field">
-          {{ col.header }}
+          <ng-container *ngIf="col.tooltip">
+            <span
+              class="p-column-title"
+              [class.card-tooltip]="col.tooltip"
+              [ngbPopover]="col.tooltip"
+              placement="end"
+            >
+              <strong>{{ col.header }}</strong>
+            </span>
+          </ng-container>
+          <ng-container *ngIf="!col.tooltip">
+            <strong>{{ col.header }}</strong>
+          </ng-container>
           <p-sortIcon [field]="col.field"></p-sortIcon>
         </th>
       </ng-template>
       <ng-template #elseBlock
         ><th *ngFor="let col of columns">
-          {{ col.header }}
+          <ng-container *ngIf="col.tooltip">
+            <span
+              class="p-column-title"
+              [class.card-tooltip]="col.tooltip"
+              [ngbPopover]="col.tooltip"
+              placement="end"
+            >
+              <strong>{{ col.header }}</strong>
+            </span>
+          </ng-container>
+          <ng-container *ngIf="!col.tooltip">
+            <strong>{{ col.header }}</strong>
+          </ng-container>
         </th></ng-template
       >
     </tr>
@@ -44,16 +68,21 @@
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr>
       <td *ngFor="let col of columns">
-        <span class="p-column-title"
+        <span
+          class="p-column-title"
+          [ngbPopover]="col.tooltip"
+          placement="end"
+          [class.card-tooltip]="col.tooltip"
           ><strong>{{ col.header }}</strong></span
         >
-        {{ rowData[col.field] }}
+        <app-data-table-styles [config]="col" [data]="rowData">
+        </app-data-table-styles>
       </td>
     </tr>
   </ng-template>
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td attr.colspan="{{cols.length}}">No data found.</td>
+      <td attr.colspan="{{ cols.length }}">No data found.</td>
     </tr>
   </ng-template>
 </p-table>
