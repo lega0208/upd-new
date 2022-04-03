@@ -226,7 +226,7 @@ export class AirtableClient {
       .filter(({ fields }) => fields['URL'] && fields['Date'])
       .map(({ id, fields }) => ({
         airtable_id: id,
-        url: fields['URL'],
+        url: fields['URL'].replace(/^https:\/\//i, ''),
         date: dayjs(fields['Date']).utc(true).toDate(),
         tags: fields['Lookup_tags'],
         status: fields['Status'],

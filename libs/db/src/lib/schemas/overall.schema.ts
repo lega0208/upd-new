@@ -9,7 +9,7 @@ export class Overall {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
-  @Prop({ required: true, type: Date })
+  @Prop({ required: true, type: Date, index: true })
   date = new Date(0);
 
   @Prop({ type: Number })

@@ -3,7 +3,7 @@ import { model, Document, Model, Types } from 'mongoose';
 
 export type FeedbackDocument = Feedback & Document;
 
-@Schema()
+@Schema({ collection: 'feedback' })
 export class Feedback {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -11,10 +11,10 @@ export class Feedback {
   @Prop({ type: String, required: true })
   airtable_id: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, index: true })
   url: string;
 
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date, required: true, index: true })
   date: Date;
 
   @Prop({ type: [String] })
@@ -34,6 +34,8 @@ export class Feedback {
 }
 
 export const FeedbackSchema = SchemaFactory.createForClass(Feedback);
+
+FeedbackSchema.index({ url: 1, date: 1 });
 
 export const feedbackModel = model(Feedback.name, FeedbackSchema);
 

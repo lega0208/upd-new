@@ -16,10 +16,10 @@ export class Page {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: true, type: String, index: true })
   url = '';
 
-  @Prop({ type: [String] })
+  @Prop({ type: [String], index: true })
   all_urls: string[] = [];
 
   @Prop({ required: true, type: String })

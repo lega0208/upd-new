@@ -10,10 +10,10 @@ export class PageMetrics {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: true, type: String, index: true })
   url = '';
 
-  @Prop({ required: true, type: Date })
+  @Prop({ required: true, type: Date, index: true })
   date = new Date(0);
 
   @Prop({ type: String })
@@ -200,6 +200,8 @@ export class PageMetrics {
 }
 
 export const PageMetricsSchema = SchemaFactory.createForClass(PageMetrics);
+
+PageMetricsSchema.index({ date: 1, url: 1 }, { unique: true })
 
 export function getPageMetricsModel(): Model<Document<PageMetrics>> {
   return model(PageMetrics.name, PageMetricsSchema);

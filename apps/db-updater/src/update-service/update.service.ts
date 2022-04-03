@@ -6,6 +6,7 @@ import {
   updateCalldriverData,
   updatePages,
   updatePageMetrics,
+  updateFeedbackData,
 } from '@cra-arc/db-update';
 import { withRetry } from '@cra-arc/external-data';
 
@@ -34,6 +35,10 @@ export class UpdateService {
           this.logger.error('Error updating UX data', err)
         ),
       ]);
+
+      await withRetry(updateFeedbackData, 4, 1000)().catch((err) =>
+        this.logger.error('Error updating Feedback data', err)
+      )
 
       await Promise.allSettled([
         withRetry(updateCalldriverData, 4, 1000)().catch((err) =>

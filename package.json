@@ -8,6 +8,7 @@
     "start": "nx serve",
     "dev": "nx run-many --target=serve --projects=api,upd --parallel=2",
     "build": "nx build",
+    "db-updater": "nx serve db-updater",
     "test": "nx test"
   },
   "private": true,

@@ -11,10 +11,10 @@ export class CallDriver {
   @Prop({ type: String, required: true, unique: true })
   airtable_id = '';
 
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date, required: true, index: true })
   date = new Date(0);
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, index: true })
   enquiry_line = '';
 
   @Prop({ type: String })
