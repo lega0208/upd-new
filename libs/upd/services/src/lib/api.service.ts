@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { ReturnedData, StorageCache } from './storage-cache.decorator';
-import { PageDetailsData } from '@cra-arc/types-common';
+import { OverviewData, PageDetailsData } from '@cra-arc/types-common';
 import { Injectable } from '@angular/core';
 
 export type ApiParams = {
@@ -20,5 +20,9 @@ export class ApiService {
 
   getPageDetails(params: ApiParams) {
     return this.get<PageDetailsData>('/api/pages/details', params);
+  }
+
+  getOverviewData(params: ApiParams) {
+    return this.get<OverviewData>('/api/overall', params);
   }
 }

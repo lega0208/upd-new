@@ -26,14 +26,7 @@ export class OverviewWebtrafficComponent implements OnInit {
   topPagesChart: any = [];
   topPagesCols: any = [];
 
-  barChartData$ = this.overviewService.overviewData$.pipe(
-    map(parseDataForBarchart),
-    catchError((e) => {
-      console.error(e);
-
-      return of([] as MultiSeries);
-    })
-  );
+  barChartData$ = this.overviewService.visitsByDay$;
 
   constructor(private overviewService: OverviewFacade) {}
 

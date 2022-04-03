@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
+
 import { UpdComponentsModule } from '@cra-arc/upd-components';
+import { ServicesModule } from '@cra-arc/upd/services';
 
 import { OverviewComponent } from './overview.component';
 import { OverviewRoutingModule } from './overview-routing.module';
@@ -27,6 +29,7 @@ import {
     HttpClientModule,
     OverviewRoutingModule,
     UpdComponentsModule,
+    ServicesModule,
     StoreModule.forFeature(OVERVIEW_FEATURE_KEY, overviewReducer),
     EffectsModule.forFeature([OverviewEffects]),
   ],

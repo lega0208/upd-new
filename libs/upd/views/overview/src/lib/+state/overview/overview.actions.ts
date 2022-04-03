@@ -5,7 +5,7 @@ export const init = createAction('[Overview Page] Init');
 
 export const loadOverviewSuccess = createAction(
   '[Overview/API] Load Overview Success',
-  props<{ data: unknown }>()
+  props<{ data: OverviewData }>()
 );
 
 export const loadOverviewError = createAction(

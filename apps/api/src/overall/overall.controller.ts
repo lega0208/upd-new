@@ -5,16 +5,11 @@ import { OverallService } from './overall.service';
 export class OverallController {
   constructor(private readonly overallService: OverallService) {}
 
-  @Get('/getMetrics')
+  @Get()
   getMetrics(
-    @Query('startDate') startDate: string,
-    @Query('endDate') endDate: string
+    @Query('dateRange') dateRange: string,
+    @Query('comparisonDateRange') comparisonDateRange: string,
   ) {
-    return this.overallService.getMetrics({ startDate, endDate });
-  }
-
-  @Get('/getVisits')
-  getVisits() {
-    return this.overallService.getVisits();
+    return this.overallService.getMetrics({ dateRange, comparisonDateRange });
   }
 }

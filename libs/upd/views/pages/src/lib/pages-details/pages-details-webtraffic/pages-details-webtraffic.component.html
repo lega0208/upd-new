@@ -1,1 +1,66 @@
-<p>page-details-webtraffic works!</p>
+<div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <app-charts
+          type="line"
+          title="Visits by day"
+          titleTooltip="Visits by day tooltip"
+          [data]="(visitsByDay$ | async) || []"
+        ></app-charts>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <app-card
+        card-title="Where visitors came from"
+        title-tooltip="Where visitors came from tooltip"
+      >
+        <app-data-table
+          [data]="(whereVisitorsCameFrom$ | async) || []"
+          [cols]="whereVisitorsCameFromCols"
+          [pagination]="false"
+        >
+        </app-data-table>
+      </app-card>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <app-card
+        card-title="What visitors clicked on"
+        title-tooltip="What visitors clicked on tooltip"
+      >
+        <app-data-table
+          [data]="(whatVisitorsClickedOn$ | async) || []"
+          [cols]="whatVisitorsClickedOnCols"
+          [pagination]="false"
+        >
+        </app-data-table>
+      </app-card>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <app-card
+        card-title="Visitor location"
+        title-tooltip="Visitor location tooltip"
+      >
+        <app-data-table
+          [data]="(visitorLocation$ | async) || []"
+          [cols]="visitorLocationCols"
+          [pagination]="false"
+        >
+        </app-data-table>
+      </app-card>
+      </div>
+    </div>
+  </div>

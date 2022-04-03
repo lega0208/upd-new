@@ -18,6 +18,13 @@ export {
   GscSearchTermMetrics,
 } from '@cra-arc/db';
 
+export interface ViewData<T> {
+  dateRange: string;
+  comparisonDateRange?: string;
+  dateRangeData?: T;
+  comparisonDateRangeData?: T;
+}
+
 export type PagesHomeData = Pick<Page, 'url' | 'title'> & { visits: number };
 
 export type PageDetailsMetrics = Pick<
@@ -31,13 +38,13 @@ export type PageDetailsMetrics = Pick<
   | 'visits_device_tablet'
   | 'average_time_spent'
   // | 'num_searches_internal' // todo: to be added
-  >;
+>;
 
 export interface PageAggregatedData extends PageDetailsMetrics {
   visitsByDay: { date: Date; visits: number }[];
 }
 
-export interface PageDetailsData {
+export interface PageDetailsData extends ViewData<PageAggregatedData> {
   _id: string;
   url: string;
   title: string;
@@ -50,9 +57,19 @@ export interface PageDetailsData {
   tasks?: Task[];
 }
 
+export interface OverviewAggregatedData {
+  visitors: number;
+  visits: number;
+  pageViews: number;
+  impressions: number;
+  ctr: number;
+  avgRank: number;
+  visitsByDay: { date: Date; visits: number }[];
+}
 
-
-
-
-
-
+export interface OverviewData extends ViewData<OverviewAggregatedData> {
+  dateRange: string;
+  comparisonDateRange: string;
+  dateRangeData?: OverviewAggregatedData;
+  comparisonDateRangeData?: OverviewAggregatedData;
+}
