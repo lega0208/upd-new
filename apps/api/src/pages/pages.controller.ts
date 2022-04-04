@@ -9,7 +9,7 @@ import { PagesService } from './pages.service';
 export class PagesController {
   constructor(private readonly pagesService: PagesService) {}
 
-  @Get('home/getData')
+  @Get('home')
   getPagesHomeData(@Query('dateRange') dateRange: string) {
     return this.pagesService.getPagesHomeData(dateRange);
   }

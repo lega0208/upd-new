@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { map } from 'rxjs';
 
-import { percentChange } from '@cra-arc/utils-common/math';
-import { PickByType } from '@cra-arc/utils-common/types';
+import { percentChange } from '@cra-arc/utils-common';
+import type { PickByType } from '@cra-arc/utils-common';
 import { PagesDetailsState } from './pages-details.reducer';
-import { PageAggregatedData, PageDetailsData } from './pages-details.models';
+import { PageAggregatedData, PageDetailsData } from '@cra-arc/types-common';
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { MultiSeries } from '@amonsour/ngx-charts';
@@ -58,15 +58,20 @@ export class PagesDetailsFacade {
             name: dayjs(date).format('ddd'), // todo: date label (x-axis) formatting based on date range length
             value: visits
           }))
-        },
-        {
-          name: data?.comparisonDateRange,
-          series: comparisonVisitsByDay.map(({ visits, date }) => ({
-            name: dayjs(date).format('ddd'),
-            value: visits
-          }))
         }
       ];
+
+      if (data?.comparisonDateRangeData && typeof data?.comparisonDateRange === 'string') {
+        visitsByDayData.push(
+          {
+            name: data?.comparisonDateRange,
+            series: comparisonVisitsByDay.map(({ visits, date }) => ({
+              name: dayjs(date).format('ddd'),
+              value: visits
+            }))
+          }
+        )
+      }
 
       return visitsByDayData;
     }),
@@ -127,6 +132,8 @@ export class PagesDetailsFacade {
   }
 }
 
+type DateRangeDataIndexKey = keyof PageAggregatedData & keyof PickByType<PageAggregatedData, number>
+
 // helper function to get the percent change of a property vs. the comparison date range
 function mapToPercentChange(
   propName: keyof PickByType<PageAggregatedData, number>
@@ -136,8 +143,8 @@ function mapToPercentChange(
       return;
     }
 
-    const current = data?.dateRangeData[propName];
-    const previous = data?.comparisonDateRangeData[propName];
+    const current = data?.dateRangeData[propName as DateRangeDataIndexKey];
+    const previous = data?.comparisonDateRangeData[propName as DateRangeDataIndexKey];
 
     if (!current || !previous) {
       return;

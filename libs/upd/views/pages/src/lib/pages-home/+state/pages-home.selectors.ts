@@ -18,5 +18,7 @@ export const getPagesHomeError = createSelector(
 
 export const getPagesHomeData = createSelector(
   getPagesHomeState,
-  (state: PagesHomeState) => [...state.data]
+  (state: PagesHomeState) => ({
+    ...(state.data || {})
+  })
 );

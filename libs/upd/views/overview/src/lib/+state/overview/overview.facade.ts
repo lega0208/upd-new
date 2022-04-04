@@ -76,9 +76,6 @@ export class OverviewFacade {
       }
 
       const dateRangeLabel = getWeeklyDatesLabel(data.dateRange);
-      const comparisonDateRangeLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange
-      );
 
       const dateRangeDates = visitsByDay.map(({ date }) => date);
 
@@ -87,6 +84,10 @@ export class OverviewFacade {
         value: visits,
       }));
 
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || ''
+      );
+
       const comparisonDateRangeSeries = comparisonVisitsByDay.map(
         ({ visits }) => ({
           name: comparisonDateRangeLabel,
@@ -94,10 +95,18 @@ export class OverviewFacade {
         })
       );
 
-      const visitsByDayData: MultiSeries = dateRangeDates.map((date, i) => ({
-        name: dayjs(date).utc(false).format('dddd'),
-        series: [dateRangeSeries[i], comparisonDateRangeSeries[i]],
-      }));
+      const visitsByDayData: MultiSeries = dateRangeDates.map((date, i) => {
+        const series = [dateRangeSeries[i]];
+
+        if (data.comparisonDateRange && data.comparisonDateRangeData) {
+          series.push(comparisonDateRangeSeries[i]);
+        }
+
+        return {
+          name: dayjs(date).utc(false).format('dddd'),
+          series,
+        }
+      });
 
       return visitsByDayData;
     })

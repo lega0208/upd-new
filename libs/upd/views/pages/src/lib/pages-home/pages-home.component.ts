@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PagesHomeFacade } from './+state/pages-home.facade';
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import { columnConfig } from 'libs/upd/components/src/lib/data-table-styles/types';
+import { columnConfig } from '@cra-arc/upd-components';
 
 @Component({
   selector: 'app-pages-home',
@@ -10,7 +9,7 @@ import { columnConfig } from 'libs/upd/components/src/lib/data-table-styles/type
   styleUrls: ['./pages-home.component.css'],
 })
 export class PagesHomeComponent implements OnInit {
-  pagesHomeData$ = this.pagesHomeService.pagesHomeData$;
+  pagesHomeData$ = this.pagesHomeService.pagesHomeTableData$;
 
   columns: columnConfig[] = [
     {

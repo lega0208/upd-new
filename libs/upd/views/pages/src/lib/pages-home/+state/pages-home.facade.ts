@@ -3,6 +3,7 @@ import { select, Store } from '@ngrx/store';
 
 import * as PagesHomeActions from './pages-home.actions';
 import * as PagesHomeSelectors from './pages-home.selectors';
+import { map } from 'rxjs';
 
 @Injectable()
 export class PagesHomeFacade {
@@ -12,6 +13,9 @@ export class PagesHomeFacade {
    */
   loaded$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeLoaded));
   pagesHomeData$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeData));
+  pagesHomeTableData$ = this.pagesHomeData$.pipe(
+    map((pagesHomeData) => pagesHomeData?.dateRangeData || [])
+  );
   error$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeError));
 
   constructor(private readonly store: Store) {}

@@ -5,7 +5,7 @@ export const loadPagesHomeInit = createAction('[PagesHome] Init');
 
 export const loadPagesHomeSuccess = createAction(
   '[PagesHome/API] Load PagesHome Success',
-  props<{ data: PagesHomeData[] }>()
+  props<{ data: PagesHomeData }>()
 );
 
 export const loadPagesHomeError = createAction(

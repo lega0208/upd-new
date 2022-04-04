@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { ReturnedData, StorageCache } from './storage-cache.decorator';
-import { OverviewData, PageDetailsData } from '@cra-arc/types-common';
+import { OverviewData, PageDetailsData, PagesHomeData } from '@cra-arc/types-common';
 import { Injectable } from '@angular/core';
 
 export type ApiParams = {
@@ -16,6 +16,10 @@ export class ApiService {
   // @StorageCache
   get<T extends ReturnedData<unknown>>(url: string, params?: ApiParams) {
     return this.http.get<T>(url, { params });
+  }
+
+  getPagesHomeData(params: ApiParams) {
+    return this.get<PagesHomeData>('/api/pages/home', params);
   }
 
   getPageDetails(params: ApiParams) {

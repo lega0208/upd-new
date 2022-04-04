@@ -6,7 +6,7 @@ import { PagesHomeData } from '@cra-arc/types-common';
 export const PAGES_HOME_FEATURE_KEY = 'pagesHome';
 
 export interface PagesHomeState {
-  data: PagesHomeData[];
+  data: PagesHomeData | null;
   loaded: boolean; // has the PagesHome list been loaded
   error?: string | null; // last known error (if any)
 }
@@ -17,7 +17,7 @@ export interface PagesHomePartialState {
 
 export const pagesHomeInitialState: PagesHomeState = {
   // set initial required properties
-  data: [],
+  data: null,
   loaded: false,
   error: null,
 };

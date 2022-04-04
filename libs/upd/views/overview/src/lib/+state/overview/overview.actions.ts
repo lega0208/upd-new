@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { OverviewData } from './overview.models';
+import { OverviewData } from '@cra-arc/types-common';
 
 export const init = createAction('[Overview Page] Init');
 

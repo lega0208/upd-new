@@ -9,8 +9,9 @@ import {
   PageMetrics,
   PagesHomeData,
   GscSearchTermMetrics,
+  PagesHomeAggregatedData,
 } from '@cra-arc/types-common';
-import { PageMetricsModel } from '@cra-arc/db';
+import type { PageMetricsModel } from '@cra-arc/types-common'
 import { Model, Types } from 'mongoose';
 import { ApiParams } from '@cra-arc/upd/services';
 
@@ -22,16 +23,19 @@ export class PagesService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  async getPagesHomeData(dateRange: string): Promise<PagesHomeData[]> {
+  async getPagesHomeData(dateRange: string): Promise<PagesHomeData> {
     const cachedData = await this.cacheManager.get(
       `pages-home-data-${dateRange}`
-    );
+    ) as PagesHomeAggregatedData[];
 
     if (cachedData) {
       // for some reason the cache gets cleared when .get() is called, so we'll just re-save it every time
       await this.cacheManager.set(`pages-home-data-${dateRange}`, cachedData);
 
-      return cachedData as PagesHomeData[];
+      return {
+        dateRange,
+        dateRangeData: cachedData
+      };
     }
 
     const selectedPages: Page[] = await this.pageModel
@@ -39,15 +43,18 @@ export class PagesService {
       .lean();
 
     const results =
-      await this.pageMetricsModel.getAggregatedPageMetrics<PagesHomeData>(
+      await this.pageMetricsModel.getAggregatedPageMetrics<PagesHomeAggregatedData>(
         dateRange,
         selectedPages,
-        ['visits' as keyof PagesHomeData]
+        ['visits']
       );
 
     await this.cacheManager.set(`pages-home-data-${dateRange}`, results);
 
-    return results;
+    return {
+      dateRange,
+      dateRangeData: results
+    };
   }
 
   async getPageDetails(params: ApiParams): Promise<PageDetailsData> {
@@ -59,7 +66,8 @@ export class PagesService {
 
     const page = await this.pageModel
       .findById(new Types.ObjectId(params.id), { title: 1, url: 1, tasks: 1 })
-      .populate('tasks').lean();
+      .populate('tasks')
+      .lean();
 
     const dateRangeData = (
       await this.pageMetricsModel.getAggregatedPageMetrics<PageAggregatedData>(
@@ -236,7 +244,6 @@ function getSearchTermsWithPercentChange(
       searchTermMetrics[searchTerm] &&
       comparisonSearchTermMetrics[searchTerm]
     ) {
-
       const percentChange =
         (searchTermMetrics[searchTerm].clicks -
           comparisonSearchTermMetrics[searchTerm].clicks) /
@@ -256,12 +263,11 @@ const getTop5IncreaseSearchTerms = (
   searchTermsWithPercentChange: Record<
     string,
     GscSearchTermMetrics & { change: number }
-    >
+  >
 ) =>
   Object.values(searchTermsWithPercentChange)
     .sort(({ change: change1 }, { change: change2 }) => change2 - change1)
     .slice(0, 5);
-
 
 const getTop5DecreaseSearchTerms = (
   searchTermsWithPercentChange: Record<

@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { PageDetailsData } from './pages-details.models';
+import { PageDetailsData } from '@cra-arc/types-common';
 
 export const loadPagesDetailsInit = createAction('[PagesDetails] Load PagesDetails Init');
 

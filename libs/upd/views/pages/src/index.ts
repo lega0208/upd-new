@@ -1,5 +1,4 @@
 export * from './lib/pages-details/+state/pages-details.facade';
-export * from './lib/pages-details/+state/pages-details.models';
 export * from './lib/pages-details/+state/pages-details.selectors';
 export * from './lib/pages-details/+state/pages-details.reducer';
 export * from './lib/pages-details/+state/pages-details.actions';

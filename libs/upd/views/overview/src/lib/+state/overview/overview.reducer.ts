@@ -1,7 +1,7 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
 import * as OverviewActions from './overview.actions';
-import { OverviewData } from './overview.models';
+import { OverviewData } from '@cra-arc/types-common';
 
 export const OVERVIEW_FEATURE_KEY = 'overview';
 
