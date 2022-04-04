@@ -39,8 +39,6 @@ export class OverviewSummaryComponent implements OnInit {
   constructor(private overviewService: OverviewFacade) {}
 
   ngOnInit() {
-    this.overviewService.init();
-
     this.gscImp = 51006993;
     this.gscImpPrev = 48650123;
     this.gscCTR = 0.1;

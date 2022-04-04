@@ -9,13 +9,13 @@ export class Feedback {
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: String, required: true })
-  airtable_id: string;
+  airtable_id = '';
 
   @Prop({ type: String, required: true, index: true })
-  url: string;
+  url = '';
 
   @Prop({ type: Date, required: true, index: true })
-  date: Date;
+  date: Date = new Date(0);
 
   @Prop({ type: [String] })
   tags?: string[] = [];
