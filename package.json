@@ -87,7 +87,7 @@
     "@nrwl/web": "13.9.4",
     "@nrwl/workspace": "13.9.4",
     "@swc/cli": "~0.1.52",
-    "@swc/core": "1.2.118",
+    "@swc/core": "1.2",
     "@swc/helpers": "~0.2.14",
     "@swc/jest": "0.2.15",
     "@twittwer/compodoc": "^1.6.6",
@@ -107,13 +107,13 @@
     "jest": "27.2.3",
     "jest-preset-angular": "11.1.1",
     "ng-packagr": "^13.0.0",
+    "nx": "13.9.4",
     "postcss": "^8.4.5",
     "postcss-import": "^14.0.2",
-    "postcss-preset-env": "^6.7.0",
+    "postcss-preset-env": "^7.4.3",
     "postcss-url": "^10.1.1",
     "prettier": "2.5.1",
     "ts-jest": "27.0.5",
-    "typescript": "4.5.5",
-    "nx": "13.9.4"
+    "typescript": "4.5.5"
   }
 }

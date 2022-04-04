@@ -1,19 +1,24 @@
-import { GscSearchTermMetrics, Page, PageMetrics, Task } from '@cra-arc/db';
+import { Page, PageMetrics, Task } from '@cra-arc/db';
+import type { GscSearchTermMetrics } from '@cra-arc/db';
 
 export {
   Page,
-  PageDocument,
   PageMetrics,
-  PageMetricsDocument,
   Overall,
-  OverallDocument,
   CallDriver,
-  CallDriverDocument,
   UxTest,
-  UxTestDocument,
   Task,
-  TaskDocument,
   Project,
+} from '@cra-arc/db';
+
+export type {
+  PageDocument,
+  PageMetricsDocument,
+  PageMetricsModel,
+  OverallDocument,
+  CallDriverDocument,
+  UxTestDocument,
+  TaskDocument,
   ProjectDocument,
   GscSearchTermMetrics,
 } from '@cra-arc/db';
@@ -25,7 +30,13 @@ export interface ViewData<T> {
   comparisonDateRangeData?: T;
 }
 
-export type PagesHomeData = Pick<Page, 'url' | 'title'> & { visits: number };
+export interface EntityDetailsData<T> extends ViewData<T> {
+  _id: string;
+  title: string;
+}
+
+export type PagesHomeAggregatedData = Pick<Page, 'url' | 'title'> & { visits: number };
+export type PagesHomeData = ViewData<PagesHomeAggregatedData[]>;
 
 export type PageDetailsMetrics = Pick<
   PageMetrics,
@@ -44,14 +55,8 @@ export interface PageAggregatedData extends PageDetailsMetrics {
   visitsByDay: { date: Date; visits: number }[];
 }
 
-export interface PageDetailsData extends ViewData<PageAggregatedData> {
-  _id: string;
+export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   url: string;
-  title: string;
-  dateRange: string;
-  comparisonDateRange: string;
-  dateRangeData?: PageAggregatedData;
-  comparisonDateRangeData?: PageAggregatedData;
   topSearchTermsIncrease?: GscSearchTermMetrics[];
   topSearchTermsDecrease?: GscSearchTermMetrics[];
   tasks?: Task[];
@@ -67,9 +72,4 @@ export interface OverviewAggregatedData {
   visitsByDay: { date: Date; visits: number }[];
 }
 
-export interface OverviewData extends ViewData<OverviewAggregatedData> {
-  dateRange: string;
-  comparisonDateRange: string;
-  dateRangeData?: OverviewAggregatedData;
-  comparisonDateRangeData?: OverviewAggregatedData;
-}
+export type OverviewData = ViewData<OverviewAggregatedData>;

@@ -15,7 +15,7 @@
     "loose": true
   },
   "module": {
-    "type": "commonjs",
+    "type": "es6",
     "strict": true,
     "noInterop": true
   },
@@ -25,5 +25,6 @@
     "./src/**/jest-setup.ts$",
     "./**/jest-setup.ts$",
     "./**/.*.js$"
-  ]
+  ],
+  "minify": true
 }
