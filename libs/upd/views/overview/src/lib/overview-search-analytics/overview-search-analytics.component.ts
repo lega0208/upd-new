@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { OverviewFacade } from '../+state/overview/overview.facade';
 import { Metrics } from '../query';
 
 @Component({
@@ -6,51 +7,36 @@ import { Metrics } from '../query';
   templateUrl: './overview-search-analytics.component.html',
   styleUrls: ['./overview-search-analytics.component.css'],
 })
-export class OverviewSearchAnalyticsComponent implements OnInit {
-  gscImp = 0;
-  gscImpPrev = 0;
-  gscCTR = 0;
-  gscCTRPrev = 0;
-  gscAverage = 0;
-  gscAveragePrev = 0;
+export class OverviewSearchAnalyticsComponent {
+  gscImpressions$ = this.overviewService.impressions$;
+  gscImpressionsPercentChange$ = this.overviewService.impressionsPercentChange$;
+
+  gscCTR$ = this.overviewService.ctr$;
+  gscCTRPercentChange$ = this.overviewService.ctrPercentChange$;
+
+  gscAverage$ = this.overviewService.avgRank$;
+  gscAveragePercentChange$ = this.overviewService.avgRankPercentChange$;
 
   gscMetrics: Metrics[] = [];
 
-  CanSearchTerms: any[] = [];
-  GSCSearchTerms: any[] = [];
+  CanSearchTerms = canSearchTerms;
+  GSCSearchTerms = gscSearchTerms;
 
-  CanSearchTermsCols: any[] = [];
-  GSCSearchTermsCols: any[] = [];
+  CanSearchTermsCols = [
+    { field: 'Search terms', header: 'Search terms' },
+    { field: 'Clicks', header: 'Clicks' },
+    { field: 'Comparison', header: 'Comparison' },
+  ];
+  GSCSearchTermsCols = [
+    { field: 'Search terms', header: 'Search terms' },
+    { field: 'Clicks', header: 'Clicks' },
+    { field: 'Comparison', header: 'Comparison' },
+    { field: 'Impressions', header: 'Impressions' },
+    { field: 'CTR (Click Through Rate)', header: 'CTR (Click Through Rate)' },
+    { field: 'Position', header: 'Position' },
+  ];
 
-  constructor() {}
-
-  ngOnInit(): void {
-    this.gscImp = 51006993;
-    this.gscImpPrev = 48650123;
-    this.gscCTR = 0.1;
-    this.gscCTRPrev = 0.099;
-    this.gscAverage = 5;
-    this.gscAveragePrev = 5;
-
-    this.GSCSearchTerms = gscSearchTerms;
-
-    this.GSCSearchTermsCols = [
-      { field: 'Search terms', header: 'Search terms' },
-      { field: 'Clicks', header: 'Clicks' },
-      { field: 'Comparison', header: 'Comparison' },
-      { field: 'Impressions', header: 'Impressions' },
-      { field: 'CTR (Click Through Rate)', header: 'CTR (Click Through Rate)' },
-      { field: 'Position', header: 'Position' },
-    ];
-
-    this.CanSearchTerms = canSearchTerms;
-
-    this.CanSearchTermsCols = [
-      { field: 'Search terms', header: 'Search terms' },
-      { field: 'Clicks', header: 'Clicks' },
-      { field: 'Comparison', header: 'Comparison' },
-    ];
-  }
+  constructor(private overviewService: OverviewFacade) {}
 }
 
 const gscSearchTerms = [

@@ -1,29 +1,32 @@
-<div class="row mb-2 gx-2">
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+<div class="container-fluid gx-0">
+  <div class="row">
+    <div class="col">
     <app-data-card
-      [current]="uniqueVisitors"
-      [past]="uniqueVisitorsPrev"
+      [current]="(uniqueVisitors$ | async | number) || 0"
+      [comparison]="(uniqueVisitorsPercentChange$ | async) || 0"
       [title]="'Unique visitors'"
     ></app-data-card>
   </div>
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+  <div class="col">
     <app-data-card
-      [current]="visits"
-      [past]="visitsPrev"
+      [current]="(visits$ | async | number) || 0"
+      [comparison]="(visitsPercentChange$ | async) || 0"
       [title]="'Visits'"
     ></app-data-card>
   </div>
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+  <div class="col">
     <app-data-card
-      [current]="pageViews"
-      [past]="pageViewsPrev"
+      [current]="(pageViews$ | async | number) || 0"
+      [comparison]="(pageViewsPercentChange$ | async) || 0"
       [title]="'Page views'"
     ></app-data-card>
   </div>
 </div>
+</div>
 
-<div class="row mb-2 gx-2">
-  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+<div class="container-fluid my-4 gx-0">
+<div class="row">
+  <div class="col">
     <app-charts
       [title]="'Visits'"
       [displayLegend]="'below'"
@@ -33,19 +36,22 @@
     ></app-charts>
   </div>
 </div>
+</div>
 
-<div class="row mb-2 gx-2">
-  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+<div class="container-fluid my-4 gx-0">
+<div class="row">
+  <div class="col">
     <app-card [card-title]="'Top 10 pages visited'">
       <div class="row">
         <app-data-table
           [filter]="false"
           [sort]="false"
           [pagination]="false"
-          [data]="topPagesChart"
+          [data]="(topPagesData$ | async)  || []"
           [cols]="topPagesCols"
         ></app-data-table>
       </div>
     </app-card>
   </div>
+</div>
 </div>
