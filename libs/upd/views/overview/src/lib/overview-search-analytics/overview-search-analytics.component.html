@@ -22,41 +22,40 @@
       ></app-data-card>
     </div>
   </div>
-  </div>
-
-  <div class="container-fluid my-4 gx-0">
-<div class="row">
-  <div class="col">
-    <app-card [card-title]="'Top 10 Search terms from Google'">
-      <div class="row">
-        <app-data-table
-          [filter]="false"
-          [sort]="true"
-          [pagination]="false"
-          [data]="GSCSearchTerms"
-          [cols]="GSCSearchTermsCols"
-        ></app-data-table>
-      </div>
-    </app-card>
-  </div>
 </div>
-</div>
-
 
 <div class="container-fluid my-4 gx-0">
-<div class="row">
-  <div class="col">
-    <app-card [card-title]="'Search terms from Canada.ca'">
-      <div class="row">
-        <app-data-table
-          [filter]="false"
-          [sort]="true"
-          [pagination]="true"
-          [data]="CanSearchTerms"
-          [cols]="CanSearchTermsCols"
-        ></app-data-table>
-      </div>
-    </app-card>
+  <div class="row">
+    <div class="col">
+      <app-card [card-title]="'Top 10 Search terms from Google'">
+        <div class="row">
+          <app-data-table
+            [filter]="false"
+            [sort]="true"
+            [pagination]="false"
+            [data]="(GSCSearchTerms$ | async) || []"
+            [cols]="GSCSearchTermsCols"
+          ></app-data-table>
+        </div>
+      </app-card>
+    </div>
   </div>
 </div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card [card-title]="'Search terms from Canada.ca'">
+        <div class="row">
+          <app-data-table
+            [filter]="false"
+            [sort]="true"
+            [pagination]="true"
+            [data]="CanSearchTerms"
+            [cols]="CanSearchTermsCols"
+          ></app-data-table>
+        </div>
+      </app-card>
+    </div>
+  </div>
 </div>

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Overall, OverallDocument } from '@cra-arc/db';
-import type { PageMetricsModel } from '@cra-arc/types-common'
+import type { PageMetricsModel } from '@cra-arc/types-common';
 import { FilterQuery, Model } from 'mongoose';
 import { ApiParams } from '@cra-arc/upd/services';
 import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
@@ -9,18 +9,25 @@ import { PageMetrics } from '@cra-arc/types-common';
 
 @Injectable()
 export class OverallService {
-
   constructor(
     @InjectModel(Overall.name) private overallModel: Model<OverallDocument>,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
+    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel
   ) {}
 
   async getMetrics(params: ApiParams): Promise<OverviewData> {
     return {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
-      dateRangeData: await getOverviewMetrics(this.overallModel, this.pageMetricsModel, params.dateRange),
-      comparisonDateRangeData: await getOverviewMetrics(this.overallModel, this.pageMetricsModel, params.comparisonDateRange),
+      dateRangeData: await getOverviewMetrics(
+        this.overallModel,
+        this.pageMetricsModel,
+        params.dateRange
+      ),
+      comparisonDateRangeData: await getOverviewMetrics(
+        this.overallModel,
+        this.pageMetricsModel,
+        params.comparisonDateRange
+      ),
     } as OverviewData;
   }
 }
@@ -30,9 +37,7 @@ async function getOverviewMetrics(
   PageMetricsModel: PageMetricsModel,
   dateRange: string
 ): Promise<OverviewAggregatedData> {
-  const [startDate, endDate] = dateRange
-    .split('/')
-    .map((d) => new Date(d));
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
   const dateQuery: FilterQuery<Date> = {};
 
@@ -44,22 +49,35 @@ async function getOverviewMetrics(
     .sort({ date: 1 })
     .lean();
 
-  const topPagesVisited = await PageMetricsModel
-    .aggregate()
+  const topPagesVisited = await PageMetricsModel.aggregate()
     .match({ date: dateQuery })
-    .sort({ url: 1})
-    .group({_id: '$_id', visits: { $sum: '$visits' }})
+    .group({ _id: '$url', visits: { $sum: '$visits' } })
     .sort({ visits: -1 })
     .limit(10)
     .exec();
 
-  // const top10GSC = await overallModel
-  //   .aggregate()
-  //   .match({ date: dateQuery })
-  //   .group({  clicks: { $sum: '$gsc_total_clicks' }})
-  //   .sort({ clicks: -1 })
-  //   .limit(10)
-  //   .exec();
+  const top10GSC = await overallModel
+    .aggregate()
+    .match({ date: dateQuery })
+    .unwind('$gsc_searchterms')
+    .project({
+      term: '$gsc_searchterms.term',
+      clicks: '$gsc_searchterms.clicks',
+      impressions: '$gsc_searchterms.impressions',
+      ctr: '$gsc_searchterms.ctr',
+      avgRank: '$gsc_searchterms.position',
+    })
+    .sort({ term: 1 })
+    .group({
+      _id: '$term',
+      clicks: { $sum: '$clicks' },
+      impressions: { $sum: '$impressions' },
+      ctr: { $avg: '$ctr' },
+      avgRank: { $avg: '$avgRank' },
+    })
+    .sort({ clicks: -1 })
+    .limit(10)
+    .exec();
 
   const aggregatedMetrics = await overallModel
     .aggregate<Omit<OverviewAggregatedData, 'visitsByDay'>>()
@@ -104,5 +122,6 @@ async function getOverviewMetrics(
     visitsByDay,
     ...aggregatedMetrics[0],
     topPagesVisited,
+    top10GSC,
   };
 }

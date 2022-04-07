@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
-import { columnConfig } from '@cra-arc/upd-components';
+import { ColumnConfig } from '@cra-arc/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
@@ -12,7 +12,7 @@ export class OverviewCalldriversComponent {
 
   bar: MultiSeries = barChart;
   charts = charts;
-  chartsCols: columnConfig[] =  [
+  chartsCols: ColumnConfig[] =  [
     { field: 'Topic', header: 'Topic' },
     { field: 'Number of calls for Feb 27-Mar 05', header: 'Number of calls for Feb 27-Mar 05' },
     { field: 'Number of calls for Mar 06-Mar 12', header: 'Number of calls for Mar 06-Mar 12' },

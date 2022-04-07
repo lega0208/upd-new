@@ -20,7 +20,7 @@ export class OverviewSearchAnalyticsComponent {
   gscMetrics: Metrics[] = [];
 
   CanSearchTerms = canSearchTerms;
-  GSCSearchTerms = gscSearchTerms;
+  GSCSearchTerms$ = this.overviewService.top10GSC$;
 
   CanSearchTermsCols = [
     { field: 'Search terms', header: 'Search terms' },
@@ -28,100 +28,21 @@ export class OverviewSearchAnalyticsComponent {
     { field: 'Comparison', header: 'Comparison' },
   ];
   GSCSearchTermsCols = [
-    { field: 'Search terms', header: 'Search terms' },
-    { field: 'Clicks', header: 'Clicks' },
+    { field: '_id', header: 'Search terms' },
+    { field: 'clicks', header: 'Clicks', pipe: 'number' },
     { field: 'Comparison', header: 'Comparison' },
-    { field: 'Impressions', header: 'Impressions' },
-    { field: 'CTR (Click Through Rate)', header: 'CTR (Click Through Rate)' },
-    { field: 'Position', header: 'Position' },
+    { field: 'impressions', header: 'Impressions', pipe: 'number' },
+    { field: 'ctr', header: 'CTR (Click Through Rate)', pipe: 'percent' },
+    {
+      field: 'avgRank',
+      header: 'Position',
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
   ];
 
   constructor(private overviewService: OverviewFacade) {}
 }
-
-const gscSearchTerms = [
-  {
-    'Search terms': 'Vitara',
-    Clicks: 2523,
-    Comparison: 6024,
-    Impressions: 7819,
-    'CTR (Click Through Rate)': 0.38,
-    Position: 1.0,
-  },
-  {
-    'Search terms': 'Grand Prix',
-    Clicks: 5228,
-    Comparison: 5943,
-    Impressions: 6234,
-    'CTR (Click Through Rate)': 0.28,
-    Position: 1.4,
-  },
-  {
-    'Search terms': 'Golf',
-    Clicks: 8027,
-    Comparison: 8869,
-    Impressions: 4534,
-    'CTR (Click Through Rate)': 0.22,
-    Position: 2.6,
-  },
-  {
-    'Search terms': 'Maxima',
-    Clicks: 3162,
-    Comparison: 5868,
-    Impressions: 3340,
-    'CTR (Click Through Rate)': 0.06,
-    Position: 1.9,
-  },
-  {
-    'Search terms': 'C-Class',
-    Clicks: 2630,
-    Comparison: 5141,
-    Impressions: 6578,
-    'CTR (Click Through Rate)': 0.44,
-    Position: 1.7,
-  },
-  {
-    'Search terms': 'Solara',
-    Clicks: 3574,
-    Comparison: 7813,
-    Impressions: 5178,
-    'CTR (Click Through Rate)': 0.51,
-    Position: 2.3,
-  },
-  {
-    'Search terms': 'Venture',
-    Clicks: 3096,
-    Comparison: 7619,
-    Impressions: 3647,
-    'CTR (Click Through Rate)': 0.99,
-    Position: 1.9,
-  },
-  {
-    'Search terms': 'RX',
-    Clicks: 4604,
-    Comparison: 7888,
-    Impressions: 7459,
-    'CTR (Click Through Rate)': 0.67,
-    Position: 2.3,
-  },
-  {
-    'Search terms': 'Avalon',
-    Clicks: 1531,
-    Comparison: 5429,
-    Impressions: 4564,
-    'CTR (Click Through Rate)': 0.24,
-    Position: 2.8,
-  },
-  {
-    'Search terms': 'Highlander',
-    Clicks: 5317,
-    Comparison: 8476,
-    Impressions: 8546,
-    'CTR (Click Through Rate)': 0.98,
-    Position: 2.3,
-  },
-];
-
 const canSearchTerms = [{"Search terms":"Arnage","Clicks":5545,"Comparison":0.8},
 {"Search terms":"Cooper","Clicks":2381,"Comparison":0.5},
 {"Search terms":"GS","Clicks":4183,"Comparison":0.32},

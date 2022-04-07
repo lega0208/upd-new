@@ -11,7 +11,7 @@ import {
   GscSearchTermMetrics,
   PagesHomeAggregatedData,
 } from '@cra-arc/types-common';
-import type { PageMetricsModel } from '@cra-arc/types-common'
+import type { PageMetricsModel } from '@cra-arc/types-common';
 import { Model, Types } from 'mongoose';
 import { ApiParams } from '@cra-arc/upd/services';
 
@@ -24,9 +24,9 @@ export class PagesService {
   ) {}
 
   async getPagesHomeData(dateRange: string): Promise<PagesHomeData> {
-    const cachedData = await this.cacheManager.get(
+    const cachedData = (await this.cacheManager.get(
       `pages-home-data-${dateRange}`
-    ) as PagesHomeAggregatedData[];
+    )) as PagesHomeAggregatedData[];
 
     if (cachedData) {
       // for some reason the cache gets cleared when .get() is called, so we'll just re-save it every time
@@ -34,7 +34,7 @@ export class PagesService {
 
       return {
         dateRange,
-        dateRangeData: cachedData
+        dateRangeData: cachedData,
       };
     }
 
@@ -53,7 +53,7 @@ export class PagesService {
 
     return {
       dateRange,
-      dateRangeData: results
+      dateRangeData: results,
     };
   }
 
@@ -82,6 +82,36 @@ export class PagesService {
           'visits_device_mobile',
           'visits_device_tablet',
           'average_time_spent',
+          'gsc_total_clicks',
+          'gsc_total_impressions',
+          'gsc_total_ctr',
+          'gsc_total_position',
+          'dyf_no',
+          'dyf_yes',
+          'dyf_submit',
+          'fwylf_cant_find_info',
+          'fwylf_error',
+          'fwylf_hard_to_understand',
+          'fwylf_other',
+          'visits_geo_ab',
+          'visits_geo_bc',
+          'visits_geo_mb',
+          'visits_geo_nb',
+          'visits_geo_nl',
+          'visits_geo_ns',
+          'visits_geo_nt',
+          'visits_geo_nu',
+          'visits_geo_on',
+          'visits_geo_pe',
+          'visits_geo_qc',
+          'visits_geo_sk',
+          'visits_geo_us',
+          'visits_geo_yt',
+          'visits_geo_outside_canada',
+          'visits_referrer_other',
+          'visits_referrer_searchengine',
+          'visits_referrer_social',
+          'visits_referrer_typed_bookmarked',
         ]
       )
     )[0];
@@ -104,6 +134,36 @@ export class PagesService {
           'visits_device_mobile',
           'visits_device_tablet',
           'average_time_spent',
+          'gsc_total_clicks',
+          'gsc_total_impressions',
+          'gsc_total_ctr',
+          'gsc_total_position',
+          'dyf_no',
+          'dyf_yes',
+          'dyf_submit',
+          'fwylf_cant_find_info',
+          'fwylf_error',
+          'fwylf_hard_to_understand',
+          'fwylf_other',
+          'visits_geo_ab',
+          'visits_geo_bc',
+          'visits_geo_mb',
+          'visits_geo_nb',
+          'visits_geo_nl',
+          'visits_geo_ns',
+          'visits_geo_nt',
+          'visits_geo_nu',
+          'visits_geo_on',
+          'visits_geo_pe',
+          'visits_geo_qc',
+          'visits_geo_sk',
+          'visits_geo_us',
+          'visits_geo_yt',
+          'visits_geo_outside_canada',
+          'visits_referrer_other',
+          'visits_referrer_searchengine',
+          'visits_referrer_social',
+          'visits_referrer_typed_bookmarked',
         ]
       )
     )[0];
@@ -125,6 +185,10 @@ export class PagesService {
     );
 
     const topIncreasedSearchTerms = getTop5IncreaseSearchTerms(
+      searchTermsWithPercentChange
+    );
+
+    const top25GSCSearchTerms = getTop25SearchTerms(
       searchTermsWithPercentChange
     );
 
@@ -152,6 +216,7 @@ export class PagesService {
       },
       topSearchTermsIncrease: topIncreasedSearchTerms,
       topSearchTermsDecrease: topDecreasedSearchTerms,
+      top25GSCSearchTerms: top25GSCSearchTerms,
     } as PageDetailsData;
   }
 
@@ -258,6 +323,16 @@ function getSearchTermsWithPercentChange(
 
   return searchTermsWithPercentChange;
 }
+
+const getTop25SearchTerms = (
+  searchTermsWithPercentChange: Record<
+    string,
+    GscSearchTermMetrics & { change: number }
+  >
+) =>
+  Object.values(searchTermsWithPercentChange)
+    .sort(({ clicks: clicks1 }, { clicks: clicks2 }) => clicks2 - clicks1)
+    .slice(0, 25);
 
 const getTop5IncreaseSearchTerms = (
   searchTermsWithPercentChange: Record<

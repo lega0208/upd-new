@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { columnConfig } from '@cra-arc/upd-components';
+import { ColumnConfig } from '@cra-arc/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
@@ -9,7 +9,7 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
 })
 export class OverviewUxTestsComponent {
   uxChartData = uxChart;
-  uxChartCols: columnConfig[] = [
+  uxChartCols: ColumnConfig[] = [
     { field: 'UX projects', header: 'UX projects' },
     { field: 'Test', header: 'Test' },
     { field: 'Date', header: 'Date' },

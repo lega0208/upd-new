@@ -7,23 +7,23 @@ import { PagesDetailsFacade } from '../+state/pages-details.facade';
   styleUrls: ['./pages-details-search-analytics.component.css'],
 })
 export class PagesDetailsSearchAnalyticsComponent {
+  totalImpressionsGSC$ = this.pageDetailsService.impressions$;
+  totalImpressionsGSCPercentChange$ =
+    this.pageDetailsService.impressionsPercentChange$;
 
-  totalImpressionsGSC$ = this.pageDetailsService.visitors$;
-  totalImpressionsGSCPercentChange$ = this.pageDetailsService.visitorsPercentChange$;
+  ctrGSC$ = this.pageDetailsService.ctr$;
+  ctrGSCPercentChange$ = this.pageDetailsService.ctrPercentChange$;
 
-  ctrGSC$ = this.pageDetailsService.visits$;
-  ctrGSCPercentChange$ = this.pageDetailsService.visitsPercentChange$;
+  avgRankGSC$ = this.pageDetailsService.avgRank$;
+  avgRankGSCPercentChange$ = this.pageDetailsService.avgRankPercentChange$;
 
-  avgRankGSC$ = this.pageDetailsService.pageViews$;
-  avgRankGSCPercentChange$ = this.pageDetailsService.pageViewsPercentChange$;
-
-  topGSCSearchTerms$ = this.pageDetailsService.topSearchTermsIncrease$;
+  topGSCSearchTerms$ = this.pageDetailsService.top25GSCSearchTerms$;
   topGSCSearchTermsCols = [
     { field: 'term', header: 'Search terms' },
-    { field: 'clicks', header: 'Clicks' },
-    { field: 'change', header: 'Comparison' },
-    { field: 'impressions', header: 'Impressions' },
-    { field: 'ctr', header: 'CTR (click through rate)' },
+    { field: 'clicks', header: 'Clicks', pipe: 'number' },
+    { field: 'change', header: 'Comparison', pipe: 'percent' },
+    { field: 'impressions', header: 'Impressions', pipe: 'number' },
+    { field: 'ctr', header: 'CTR (click through rate)', pipe: 'percent' },
     { field: 'position', header: 'Position' },
   ];
 
@@ -34,13 +34,12 @@ export class PagesDetailsSearchAnalyticsComponent {
     { field: 'change', header: 'Comparison' },
   ];
 
-  referrerType$ = this.pageDetailsService.topSearchTermsIncrease$;
+  referrerType$ = this.pageDetailsService.referrerType$;
   referrerTypeCols = [
-    { field: 'referrer', header: 'Type' },
-    { field: 'visits', header: 'Visits' },
+    { field: 'type', header: 'Type' },
+    { field: 'value', header: 'Visits', pipe: 'number' },
     { field: 'change', header: 'Comparison' },
   ];
-
 
   constructor(private pageDetailsService: PagesDetailsFacade) {}
 }

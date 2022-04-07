@@ -1,81 +1,30 @@
-<div class="container-fluid gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card card-title="Unique visitors" title-tooltip="Visitors tooltip">
-        <div class="container-fluid p-0">
-          <div class="row row-no-gutters">
-            <div class="col">
-              <p class="h2 w-100">
-                {{ visitors$ | async | number }}
-              </p>
-            </div>
-            <div class="col ml-auto">
-              <span
-                [ngClass]="{
-                  'text-success': ((visitorsPercentChange$ | async) || 0) > 0,
-                  'text-danger': ((visitorsPercentChange$ | async) || 0) < 0,
-                  hidden: ((visitorsPercentChange$ | async) || 0) === 0
-                }"
-                class="h2 float-end"
-              >
-                {{ visitorsPercentChange$ | async | percent }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </app-card>
+      <app-data-card
+        [current]="(visitors$ | async | number) || 0"
+        [comparison]="(visitorsPercentChange$ | async) || 0"
+        [title]="'Unique visitors'"
+        [tooltip]="'Visitors tooltip'"
+      ></app-data-card>
     </div>
 
     <div class="col">
-      <app-card card-title="Visits" title-tooltip="Visits tooltip">
-        <div class="container-fluid p-0">
-          <div class="row row-no-gutters">
-            <div class="col">
-              <p class="h2 w-100">
-                {{ visits$ | async | number }}
-              </p>
-            </div>
-            <div class="col ml-auto">
-              <p
-                [ngClass]="{
-                  'text-success': ((visitsPercentChange$ | async) || 0) > 0,
-                  'text-danger': ((visitsPercentChange$ | async) || 0) < 0,
-                  hidden: ((visitorsPercentChange$ | async) || 0) === 0
-                }"
-                class="h2 float-end"
-              >
-                {{ visitsPercentChange$ | async | percent }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </app-card>
+      <app-data-card
+        [current]="(visits$ | async | number) || 0"
+        [comparison]="(visitsPercentChange$ | async) || 0"
+        [title]="'Visits'"
+        [tooltip]="'Visits tooltip'"
+      ></app-data-card>
     </div>
 
     <div class="col">
-      <app-card card-title="Page views" title-tooltip="Page views tooltip">
-        <div class="container-fluid p-0">
-          <div class="row row-no-gutters">
-            <div class="col">
-              <p class="h2 w-100">
-                {{ pageViews$ | async | number }}
-              </p>
-            </div>
-            <div class="col ml-auto">
-              <p
-                [ngClass]="{
-                  'text-success': ((pageViewsPercentChange$ | async) || 0) > 0,
-                  'text-danger': ((pageViewsPercentChange$ | async) || 0) < 0,
-                  hidden: ((visitorsPercentChange$ | async) || 0) === 0
-                }"
-                class="h2 float-end"
-              >
-                {{ pageViewsPercentChange$ | async | percent }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </app-card>
+      <app-data-card
+        [current]="(pageViews$ | async | number) || 0"
+        [comparison]="(pageViewsPercentChange$ | async) || 0"
+        [title]="'Page views'"
+        [tooltip]="'Page views tooltip'"
+      ></app-data-card>
     </div>
   </div>
 </div>
@@ -107,7 +56,7 @@
   </div>
 </div>
 
-<div class="container-fluid my-4">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-card
@@ -125,7 +74,7 @@
   </div>
 </div>
 
-<div class="container-fluid my-4">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-card
@@ -143,14 +92,14 @@
   </div>
 </div>
 
-<div class="container-fluid my-4">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-card
         card-title="Related tasks"
         title-tooltip="Related tasks tooltip"
       >
-      No Related tasks for this page
+        No Related tasks for this page
       </app-card>
     </div>
   </div>
