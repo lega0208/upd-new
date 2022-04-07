@@ -65,7 +65,7 @@ async function getOverviewMetrics(
       clicks: '$gsc_searchterms.clicks',
       impressions: '$gsc_searchterms.impressions',
       ctr: '$gsc_searchterms.ctr',
-      avgRank: '$gsc_searchterms.position',
+      position: '$gsc_searchterms.position',
     })
     .sort({ term: 1 })
     .group({
@@ -73,7 +73,7 @@ async function getOverviewMetrics(
       clicks: { $sum: '$clicks' },
       impressions: { $sum: '$impressions' },
       ctr: { $avg: '$ctr' },
-      avgRank: { $avg: '$avgRank' },
+      position: { $avg: '$position' },
     })
     .sort({ clicks: -1 })
     .limit(10)
@@ -106,7 +106,7 @@ async function getOverviewMetrics(
       pageViews: { $sum: '$views' },
       impressions: { $sum: '$gsc_total_impressions' },
       ctr: { $avg: '$gsc_total_ctr' },
-      avgRank: { $avg: '$gsc_total_position' },
+      position: { $avg: '$gsc_total_position' },
       dyf_yes: { $sum: '$dyf_yes' },
       dyf_no: { $sum: '$dyf_no' },
       dyf_submit: { $sum: '$dyf_submit' },

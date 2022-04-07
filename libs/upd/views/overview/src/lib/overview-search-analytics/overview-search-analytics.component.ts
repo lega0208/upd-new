@@ -35,7 +35,7 @@ export class OverviewSearchAnalyticsComponent {
     { field: 'impressions', header: 'Impressions', pipe: 'number' },
     { field: 'ctr', header: 'CTR (Click Through Rate)', pipe: 'percent' },
     {
-      field: 'avgRank',
+      field: 'position',
       header: 'Position',
       pipe: 'number',
       pipeParam: '1.0-2',

@@ -55,18 +55,14 @@ export class OverviewFacade {
   ctrPercentChange$ = this.overviewData$.pipe(mapToPercentChange('ctr'));
 
   avgRank$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.avgRank)
+    map((overviewData) => overviewData?.dateRangeData?.position)
   );
   avgRankPercentChange$ = this.overviewData$.pipe(
-    mapToPercentChange('avgRank')
+    mapToPercentChange('position')
   );
 
   topPagesVisited$ = this.overviewData$.pipe(
-    map((data) => {
-      const topPages = data?.dateRangeData?.topPagesVisited || [];
-
-      return topPages;
-    })
+    map((data) => data?.dateRangeData?.topPagesVisited || [])
   );
 
   top10GSC$ = this.overviewData$.pipe(

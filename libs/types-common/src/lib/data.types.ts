@@ -101,7 +101,7 @@ export interface OverviewAggregatedData {
   pageViews: number;
   impressions: number;
   ctr: number;
-  avgRank: number;
+  position: number;
   dyf_yes: number;
   dyf_no: number;
   dyf_submit: number;
@@ -111,13 +111,7 @@ export interface OverviewAggregatedData {
   fwylf_cant_find_info: number;
   visitsByDay: { date: Date; visits: number }[];
   topPagesVisited: { url: string; visits: number }[];
-  top10GSC: {
-    term: string;
-    clicks: number;
-    ctr: number;
-    impressions: number;
-    avgRank: number;
-  }[];
+  top10GSC: GscSearchTermMetrics[];
 }
 
 export type OverviewData = ViewData<OverviewAggregatedData>;
