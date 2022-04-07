@@ -116,7 +116,6 @@ export interface OverviewAggregatedData {
 
 export type OverviewData = ViewData<OverviewAggregatedData>;
 
-
 export interface TasksHomeAggregatedData {
   _id: string;
   title: string;
@@ -134,13 +133,30 @@ export interface TaskDetailsMetrics {
 }
 
 export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
-  visitsByPage: { _id: string; title: string; visits: number }[]
+  visitsByPage: { _id: string; title: string; visits: number }[];
 }
 
-export interface TaskDetailsData extends EntityDetailsData<TaskDetailsAggregatedData> {
+export interface TaskDetailsData
+  extends EntityDetailsData<TaskDetailsAggregatedData> {
   avgTaskSuccessFromLastTest: number;
-  taskSuccessByUxTest: { title: string; date: Date; testType: string; successRate: number; }[]
+  taskSuccessByUxTest: {
+    title: string;
+    date: Date;
+    testType: string;
+    successRate: number;
+  }[];
 }
+
+export type ProjectStatus =
+  | 'Planning'
+  | 'In progress'
+  | 'Discovery'
+  | 'Being monitored'
+  | 'Needs review'
+  | 'Complete'
+  | 'Paused'
+  | 'Delayed'
+  | 'Unknown';
 
 export interface ProjectsHomeProject {
   _id: string;
@@ -149,16 +165,7 @@ export interface ProjectsHomeProject {
   startDate?: Date;
   launchDate?: Date;
   avgSuccessRate?: number;
-  status:
-    | 'Planning'
-    | 'In progress'
-    | 'Discovery'
-    | 'Being monitored'
-    | 'Needs review'
-    | 'Complete'
-    | 'Paused'
-    | 'Delayed'
-    | 'Unknown';
+  status: ProjectStatus;
 }
 
 export interface ProjectsHomeData {
