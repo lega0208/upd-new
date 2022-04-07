@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Table } from 'primeng/table';
 import { columnConfig } from '../data-table-styles/types';
 
@@ -7,19 +7,23 @@ import { columnConfig } from '../data-table-styles/types';
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.css'],
 })
-export class DataTableComponent {
+export class DataTableComponent implements OnInit {
   @ViewChild('dt') table!: Table;
   @Input() data: unknown[] | null = [];
   @Input() sort = true;
   @Input() pagination = true;
   @Input() filter = true;
   @Input() cols: columnConfig[] = [];
+  searchFields: string[] = [];
   first = 0;
-  searchFields: string[] = this.cols.map((obj) => obj.field);
   loading!: boolean;
 
   clear(table: Table) {
     table.clear();
+  }
+
+  ngOnInit(): void {
+    this.searchFields = this.cols.map((obj) => obj.field);
   }
 
   constructor() {}

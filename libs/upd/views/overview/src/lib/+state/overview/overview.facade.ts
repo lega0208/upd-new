@@ -5,9 +5,11 @@ import { map } from 'rxjs';
 import * as OverviewActions from './overview.actions';
 import { OverviewState } from './overview.reducer';
 import * as OverviewSelectors from './overview.selectors';
-import { MultiSeries } from '@amonsour/ngx-charts';
+import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
+import { percentChange, PickByType } from '@cra-arc/utils-common';
 
 dayjs.extend(utc);
 
@@ -24,44 +26,40 @@ export class OverviewFacade {
   visitors$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.visitors)
   );
-  prevVisitors$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.comparisonDateRangeData?.visitors)
-  );
+  visitorsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('visitors'));
 
   visits$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.visits)
   );
-  prevVisits$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.comparisonDateRangeData?.visits)
-  );
+  visitsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('visits'));
 
   views$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.pageViews)
   );
-  prevViews$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.comparisonDateRangeData?.pageViews)
-  );
+  viewsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('pageViews'));
 
   impressions$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.impressions)
   );
-  prevImpressions$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.comparisonDateRangeData?.impressions)
-  );
+  impressionsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('impressions'));
 
   ctr$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.ctr)
   );
-  prevCtr$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.comparisonDateRangeData?.ctr)
-  );
+  ctrPercentChange$ = this.overviewData$.pipe(mapToPercentChange('ctr'));
 
   avgRank$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.avgRank)
   );
-  prevAvgRank$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.comparisonDateRangeData?.avgRank)
-  );
+  avgRankPercentChange$ = this.overviewData$.pipe(mapToPercentChange('avgRank'));
+
+  topPagesVisited$ = this.overviewData$.pipe( map((data) => {
+    const topPages = data?.dateRangeData?.topPagesVisited || [];
+    //const comparisonTopPages = data?.comparisonDateRangeData?.topPagesVisited || [];
+
+    return topPages;
+
+  }));
 
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
@@ -112,6 +110,33 @@ export class OverviewFacade {
     })
   );
 
+  dyfData$ = this.overviewData$.pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map((data) => {
+      const pieChartData: SingleSeries = [
+        { name: 'Yes', value: data?.dateRangeData?.dyf_yes || 0 },
+        { name: 'No', value: data?.dateRangeData?.dyf_no || 0 },
+      ];
+
+      return pieChartData;
+    })
+  );
+
+  whatWasWrongData$ = this.overviewData$.pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map((data) => {
+      const pieChartData: SingleSeries = [
+        { name: 'I can’t find the info', value: data?.dateRangeData?.fwylf_cant_find_info || 0 },
+        { name: 'Other reason', value: data?.dateRangeData?.fwylf_other || 0 },
+        { name: 'Info is hard to understand', value: data?.dateRangeData?.fwylf_hard_to_understand || 0 },
+        { name: 'Error/something didn’t work', value: data?.dateRangeData?.fwylf_error || 0 },
+        
+      ];
+
+      return pieChartData;
+    })
+  );
+
   error$ = this.store.pipe(select(OverviewSelectors.getOverviewError));
 
   constructor(private readonly store: Store<OverviewState>) {}
@@ -129,3 +154,25 @@ const getWeeklyDatesLabel = (dateRange: string) => {
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };
+
+type DateRangeDataIndexKey = keyof OverviewAggregatedData & keyof PickByType<OverviewAggregatedData, number>
+
+// helper function to get the percent change of a property vs. the comparison date range
+function mapToPercentChange(
+  propName: keyof PickByType<OverviewAggregatedData, number>
+) {
+  return map((data: OverviewData) => {
+    if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
+      return;
+    }
+
+    const current = data?.dateRangeData[propName as DateRangeDataIndexKey];
+    const previous = data?.comparisonDateRangeData[propName as DateRangeDataIndexKey];
+
+    if (!current || !previous) {
+      return;
+    }
+
+    return percentChange(current, previous);
+  });
+}

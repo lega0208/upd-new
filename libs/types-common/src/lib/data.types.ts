@@ -69,7 +69,15 @@ export interface OverviewAggregatedData {
   impressions: number;
   ctr: number;
   avgRank: number;
+  dyf_yes: number;
+  dyf_no: number;
+  dyf_submit: number;
+  fwylf_error: number;
+  fwylf_hard_to_understand: number;
+  fwylf_other: number;
+  fwylf_cant_find_info: number;
   visitsByDay: { date: Date; visits: number }[];
+  topPagesVisited: {url: string, visits: number}[];
 }
 
 export type OverviewData = ViewData<OverviewAggregatedData>;

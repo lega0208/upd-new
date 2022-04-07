@@ -1,102 +1,54 @@
-import { Component, OnInit } from '@angular/core';
-import { catchError, map, of } from 'rxjs';
-import dayjs from 'dayjs';
-import { MultiSeries } from '@amonsour/ngx-charts';
-import { OverviewFacade } from '../+state/overview/overview.facade';
-import { PercentPipe } from '@angular/common';
-import { Metrics } from '../query';
+import { Component } from '@angular/core';
+
+import { columnConfig } from '@cra-arc/upd-components';
+import { OverviewFacade } from '@cra-arc/upd/views/overview';
 
 @Component({
   selector: 'app-overview-webtraffic',
   templateUrl: './overview-webtraffic.component.html',
   styleUrls: ['./overview-webtraffic.component.css'],
 })
-export class OverviewWebtrafficComponent implements OnInit {
-  uniqueVisitors = 0;
-  uniqueVisitorsPrev = 0;
-  uniqueVisitorsDiff = 0;
-  uniqueVisitorsSign = '';
+export class OverviewWebtrafficComponent {
+  uniqueVisitors$ = this.overviewService.visitors$;
+  uniqueVisitorsPercentChange$ = this.overviewService.visitorsPercentChange$;
 
-  visits = 0;
-  visitsPrev = 0;
+  visits$ = this.overviewService.visits$;
+  visitsPercentChange$ = this.overviewService.visitsPercentChange$;
 
-  pageViews = 0;
-  pageViewsPrev = 0;
+  pageViews$ = this.overviewService.views$;
+  pageViewsPercentChange$ = this.overviewService.viewsPercentChange$;
 
-  topPagesChart: any = [];
-  topPagesCols: any = [];
+  topPagesData$ = this.overviewService.topPagesVisited$;
+  topPagesCols: columnConfig[] = [
+    { field: 'rank', header: 'Rank' },
+    { field: '_id', header: 'URL' },
+    { field: 'visits', header: 'Visits', pipe: 'number' },
+    { field: 'comparison', header: 'Comparison' },
+  ];
 
   barChartData$ = this.overviewService.visitsByDay$;
 
+  // topPagesData$ = this.pagesHomeService.pagesHomeTableData$;
+
+  // columns: columnConfig[] = [
+  //   {
+  //     field: 'url',
+  //     header: 'Url',
+  //     type: 'link',
+  //     typeParam: '_id',
+  //     tooltip: 'Url tooltip',
+  //   },
+  //   { field: 'title', header: 'Title', tooltip: 'Title tooltip' },
+  //   {
+  //     field: 'visits',
+  //     header: 'Visits',
+  //     pipe: 'number',
+  //   },
+  // ];
+
   constructor(private overviewService: OverviewFacade) {}
 
-  ngOnInit(): void {
-    this.overviewService.init();
-
-    this.uniqueVisitors = 4260300;
-    this.uniqueVisitorsPrev = 4500100;
-    this.visits = 8248019;
-    this.visitsPrev = 7902234;
-    this.pageViews = 28261637;
-    this.pageViewsPrev = 26234645;
-
-    this.topPagesChart = topPages.map((items) => ({
-      comparison: percDiff(items.visits, items.visitsPrev),
-      ...items,
-    }));
-
-    this.topPagesCols = [
-      { field: 'rank', header: 'Rank' },
-      { field: 'page', header: 'Page' },
-      { field: 'visits', header: 'Visits' },
-      { field: 'comparison', header: 'Comparison' },
-    ];
-  }
 }
-
-const percDiff = (a: number, b: number) => {
-  const diff = Math.round(((a - b) / b) * 100);
-  return diff > 0 ? `+ ${Math.abs(diff)}%` : `- ${Math.abs(diff)}%`;
-};
-
-// will move these functions somewhere else
-const getWeeklyDatesLabel = (startDate: Date, endDate: Date) => {
-  const formattedStartDate = dayjs(startDate).format('MMM D');
-  const formattedEndDate = dayjs(endDate).format('MMM D');
-
-  return `${formattedStartDate}-${formattedEndDate}`;
-};
-
-const parseDataForBarchart = (
-  data: { visits: number; date: Date }[]
-): MultiSeries => {
-  if (data.length === 0) {
-    return [];
-  }
-
-  // making a lot of assumptions here... (for the sake of quickly setting up a demo)
-  // will need to add some sanity checks / error handling / reasonable defaults
-  const prevWeek = data.slice(0, 7);
-  const latestWeek = data.slice(7, 14);
-
-  const [prevWeekBarchartData, latestWeekBarchartData] = [
-    prevWeek,
-    latestWeek,
-  ].map((week) => {
-    const weekLabel = getWeeklyDatesLabel(week[0].date, week[6].date);
-
-    return week.map((dailyData: { date: Date; visits: number }) => ({
-      name: dayjs(dailyData.date).format('dddd'),
-      series: [{ name: weekLabel, value: dailyData.visits }],
-    }));
-  });
-
-  // again, relying on the assumption of perfect data
-  return prevWeekBarchartData.map((dailyData, i) => ({
-    name: dailyData.name,
-    series: [...dailyData.series, ...latestWeekBarchartData[i].series],
-  })) as MultiSeries;
-};
 
 const topPages: any[] = [
   {

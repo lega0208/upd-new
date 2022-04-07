@@ -1,33 +1,21 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-data-card',
   templateUrl: './data-card.component.html',
   styleUrls: ['./data-card.component.scss'],
 })
-export class DataCardComponent implements OnInit {
-  @Input() current = 0;
+export class DataCardComponent {
+  @Input() current: string | number = '';
   @Input() past = 0;
+  @Input() comparison = 0;
   @Input() title = '';
+  @Input() tooltip = '';
   arrow: string = '';
   textStyle: string = '';
-  comparison = 0;
   isPast = 0;
 
   constructor() {}
-
-  ngOnInit(): void {
-    if (this.past > 0) {
-      const difference = diff(this.current, this.past);
-      const sign = getSign(difference);
-
-      (this.arrow = sign[0]),
-        (this.textStyle = sign[1]),
-        (this.comparison = absoluteNum(difference));
-
-      this.isPast = 1;
-    }
-  }
 }
 
 const diff = (a: number, b: number) => {
