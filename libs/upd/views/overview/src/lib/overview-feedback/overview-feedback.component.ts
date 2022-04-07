@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { catchError, map, of } from 'rxjs';
 import dayjs from 'dayjs';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
-import { columnConfig } from '@cra-arc/upd-components';
+import { ColumnConfig } from '@cra-arc/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
@@ -13,7 +13,7 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
 export class OverviewFeedbackComponent {
 
   taskSurvey = taskSurvey;
-  taskSurveyCols: columnConfig[] = [
+  taskSurveyCols: ColumnConfig[] = [
     { field: 'task', header: 'Task' },
     { field: 'completion', header: 'Task Success Survey Completed' },
   ];

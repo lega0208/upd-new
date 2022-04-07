@@ -24,10 +24,10 @@ export class PagesDetailsWebtrafficComponent {
     { field: 'change', header: 'Comparison' },
   ];
 
-  visitorLocation$ = this.pageDetailsService.topSearchTermsIncrease$;
+  visitorLocation$ = this.pageDetailsService.visitorLocation$;
   visitorLocationCols = [
     { field: 'province', header: 'Province' },
-    { field: 'visits', header: 'Visits' },
+    { field: 'value', header: 'Visits', pipe: 'number' },
     { field: 'change', header: 'Comparison' },
   ];
 

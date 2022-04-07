@@ -50,6 +50,36 @@ export type PageDetailsMetrics = Pick<
   | 'visits_device_mobile'
   | 'visits_device_tablet'
   | 'average_time_spent'
+  | 'gsc_total_clicks'
+  | 'gsc_total_impressions'
+  | 'gsc_total_ctr'
+  | 'gsc_total_position'
+  | 'dyf_no'
+  | 'dyf_yes'
+  | 'dyf_submit'
+  | 'fwylf_cant_find_info'
+  | 'fwylf_error'
+  | 'fwylf_hard_to_understand'
+  | 'fwylf_other'
+  | 'visits_geo_ab'
+  | 'visits_geo_bc'
+  | 'visits_geo_mb'
+  | 'visits_geo_nb'
+  | 'visits_geo_nl'
+  | 'visits_geo_ns'
+  | 'visits_geo_nt'
+  | 'visits_geo_nu'
+  | 'visits_geo_on'
+  | 'visits_geo_pe'
+  | 'visits_geo_qc'
+  | 'visits_geo_sk'
+  | 'visits_geo_us'
+  | 'visits_geo_yt'
+  | 'visits_geo_outside_canada'
+  | 'visits_referrer_other'
+  | 'visits_referrer_searchengine'
+  | 'visits_referrer_social'
+  | 'visits_referrer_typed_bookmarked'
   // | 'num_searches_internal' // todo: to be added
 >;
 
@@ -61,6 +91,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   url: string;
   topSearchTermsIncrease?: GscSearchTermMetrics[];
   topSearchTermsDecrease?: GscSearchTermMetrics[];
+  top25GSCSearchTerms?: GscSearchTermMetrics[];
   tasks?: Task[];
 }
 
@@ -79,10 +110,18 @@ export interface OverviewAggregatedData {
   fwylf_other: number;
   fwylf_cant_find_info: number;
   visitsByDay: { date: Date; visits: number }[];
-  topPagesVisited: {url: string, visits: number}[];
+  topPagesVisited: { url: string; visits: number }[];
+  top10GSC: {
+    term: string;
+    clicks: number;
+    ctr: number;
+    impressions: number;
+    avgRank: number;
+  }[];
 }
 
 export type OverviewData = ViewData<OverviewAggregatedData>;
+
 
 export interface TasksHomeAggregatedData {
   _id: string;

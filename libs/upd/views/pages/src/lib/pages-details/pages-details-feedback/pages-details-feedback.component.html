@@ -1,18 +1,18 @@
 <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col-lg-6 col-md-6 col-sm-12">
+  <div class="row">
+    <div class="col-lg-6 col-md-6 col-sm-12">
       <app-charts
         [title]="'Did you find what you were looking for?'"
         [titleTooltip]="'Did you find what you were looking for tooltip'"
-        [data]="dyfChart"
+        [data]="(dyfChart | async) || 0"
         [type]="'donut'"
       ></app-charts>
-      </div>
-        <div class="col-lg-6 col-md-6 col-sm-12">
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-12">
       <app-charts
         [title]="'What was wrong?'"
         [titleTooltip]="'What was wrong tooltip'"
-        [data]="whatWasWrongChart"
+        [data]="(whatWasWrongChart | async) || 0"
         [type]="'donut'"
       ></app-charts>
     </div>
@@ -20,28 +20,27 @@
 </div>
 
 <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col">
-        <app-card
+  <div class="row">
+    <div class="col">
+      <app-card
         card-title="Total feedback by page"
         title-tooltip="Total feedback by page tooltip"
       >
-      No Page feedback comments/tags for selected date range
+        No Page feedback comments/tags for selected date range
       </app-card>
-      </div>
+    </div>
   </div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col">
-        <app-card
+  <div class="row">
+    <div class="col">
+      <app-card
         card-title="Feedback by tags"
         title-tooltip="Feedback by tags tooltip"
       >
-      No Page feedback comments/tags for selected date range
+        No Page feedback comments/tags for selected date range
       </app-card>
-      </div>
+    </div>
   </div>
 </div>
-
