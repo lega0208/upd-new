@@ -1,7 +1,14 @@
 import { HttpClient } from '@angular/common/http';
-import { ReturnedData, StorageCache } from './storage-cache.decorator';
-import { OverviewData, PageDetailsData, PagesHomeData } from '@cra-arc/types-common';
 import { Injectable } from '@angular/core';
+import { ReturnedData, StorageCache } from './storage-cache.decorator';
+import {
+  OverviewData,
+  PageDetailsData,
+  PagesHomeData,
+  ProjectsHomeData,
+  TasksHomeData,
+  TaskDetailsData,
+} from '@cra-arc/types-common';
 
 export type ApiParams = {
   dateRange: string;
@@ -14,7 +21,7 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   // @StorageCache
-  get<T extends ReturnedData<unknown>>(url: string, params?: ApiParams) {
+  private get<T extends ReturnedData<unknown>>(url: string, params?: ApiParams) {
     return this.http.get<T>(url, { params });
   }
 
@@ -28,5 +35,17 @@ export class ApiService {
 
   getOverviewData(params: ApiParams) {
     return this.get<OverviewData>('/api/overall', params);
+  }
+
+  getTasksHomeData(params: ApiParams) {
+    return this.get<TasksHomeData>('/api/tasks/home', params);
+  }
+
+  getTasksDetailsData(params: ApiParams) {
+    return this.get<TaskDetailsData>('/api/tasks/details', params);
+  }
+
+  getProjectsHomeData(params: ApiParams) {
+    return this.get<ProjectsHomeData>('/api/projects/home', params);
   }
 }

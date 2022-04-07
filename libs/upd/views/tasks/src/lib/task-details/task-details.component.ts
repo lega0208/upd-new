@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TasksDetailsFacade } from './+state/tasks-details.facade';
 
 @Component({
   selector: 'app-task-details',
@@ -6,7 +7,9 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./task-details.component.css'],
 })
 export class TaskDetailsComponent implements OnInit {
-  constructor() {}
+  constructor(private readonly taskDetailsService: TasksDetailsFacade) {}
 
-  ngOnInit(): void {}
+  ngOnInit() {
+    this.taskDetailsService.init();
+  }
 }

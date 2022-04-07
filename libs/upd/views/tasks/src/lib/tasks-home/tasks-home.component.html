@@ -1,1 +1,9 @@
-<p>tasks-home works!</p>
+<h2>Tasks</h2>
+
+<app-card>
+  <app-data-table
+    [data]="(tasksHomeData$ | async) || []"
+    [cols]="columns"
+    [searchFields]="searchFields"
+  ></app-data-table>
+</app-card>

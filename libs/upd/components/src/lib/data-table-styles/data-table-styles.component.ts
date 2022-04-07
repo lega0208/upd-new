@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { columnConfig } from './types';
+import { ColumnConfig } from './types';
 
 @Component({
   selector: 'app-data-table-styles',
@@ -7,7 +7,7 @@ import { columnConfig } from './types';
   styleUrls: ['./data-table-styles.component.scss'],
 })
 export class DataTableStylesComponent implements OnInit {
-  @Input() config!: columnConfig;
+  @Input() config!: ColumnConfig;
   @Input() href: string = '';
   @Input() data: any;
   @Input() hasData = false;

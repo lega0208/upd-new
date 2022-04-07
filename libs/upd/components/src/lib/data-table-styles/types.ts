@@ -1,4 +1,4 @@
-export interface columnConfig {
+export interface ColumnConfig {
   field: string;
   header: string;
   type?: string;

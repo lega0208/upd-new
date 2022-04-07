@@ -35,7 +35,9 @@ export interface EntityDetailsData<T> extends ViewData<T> {
   title: string;
 }
 
-export type PagesHomeAggregatedData = Pick<Page, 'url' | 'title'> & { visits: number };
+export type PagesHomeAggregatedData = Pick<Page, 'url' | 'title'> & {
+  visits: number;
+};
 export type PagesHomeData = ViewData<PagesHomeAggregatedData[]>;
 
 export type PageDetailsMetrics = Pick<
@@ -73,3 +75,57 @@ export interface OverviewAggregatedData {
 }
 
 export type OverviewData = ViewData<OverviewAggregatedData>;
+
+export interface TasksHomeAggregatedData {
+  _id: string;
+  title: string;
+  group: string;
+  topic: string;
+  subtopic: string;
+  visits: number;
+}
+export type TasksHomeData = ViewData<TasksHomeAggregatedData[]>;
+
+export interface TaskDetailsMetrics {
+  visits: number;
+  dyfYes: number;
+  dyfNo: number;
+}
+
+export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
+  visitsByPage: { _id: string; title: string; visits: number }[]
+}
+
+export interface TaskDetailsData extends EntityDetailsData<TaskDetailsAggregatedData> {
+  avgTaskSuccessFromLastTest: number;
+  taskSuccessByUxTest: { title: string; date: Date; testType: string; successRate: number; }[]
+}
+
+export interface ProjectsHomeProject {
+  _id: string;
+  title: string;
+  cops: boolean;
+  startDate: Date;
+  launchDate: Date;
+  avgSuccessRate: number;
+  status:
+    | 'Planning'
+    | 'In progress'
+    | 'Discovery'
+    | 'Being monitored'
+    | 'Needs review'
+    | 'Complete'
+    | 'Paused'
+    | 'Delayed'
+    | 'Unknown';
+}
+
+export interface ProjectsHomeAggregatedData {
+  numInProgress: number;
+  numCompletedLast6Months: number;
+  totalCompleted: number;
+  numDelayed: number;
+  projects: ProjectsHomeProject[];
+}
+
+export type ProjectsHomeData = ViewData<ProjectsHomeAggregatedData>;

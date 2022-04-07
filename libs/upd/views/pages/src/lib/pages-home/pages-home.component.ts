@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PagesHomeFacade } from './+state/pages-home.facade';
 
-import { columnConfig } from '@cra-arc/upd-components';
+import { ColumnConfig } from '@cra-arc/upd-components';
 
 @Component({
   selector: 'app-pages-home',
@@ -11,7 +11,7 @@ import { columnConfig } from '@cra-arc/upd-components';
 export class PagesHomeComponent implements OnInit {
   pagesHomeData$ = this.pagesHomeService.pagesHomeTableData$;
 
-  columns: columnConfig[] = [
+  columns: ColumnConfig[] = [
     {
       field: 'url',
       header: 'Url',
