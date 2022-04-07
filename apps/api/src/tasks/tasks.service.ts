@@ -116,14 +116,14 @@ async function getTaskAggregatedData(
     .group({
       _id: '$url',
       visits: { $sum: '$visits' },
-      dyfYes: { $sum: '$pages.dyf_yes' },
-      dyfNo: { $sum: '$pages.dyf_no' },
+      dyfYes: { $sum: '$dyf_yes' },
+      dyfNo: { $sum: '$dyf_no' },
     })
     .group({
       _id: null,
       visits: { $sum: '$visits' },
-      dyfYes: { $sum: '$pages.dyf_yes' },
-      dyfNo: { $sum: '$pages.dyf_no' },
+      dyfYes: { $sum: '$dyfYes' },
+      dyfNo: { $sum: '$dyfNo' },
       visitsByPage: { $addToSet: '$$ROOT' },
     })
     .lookup({
