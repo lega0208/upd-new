@@ -152,9 +152,9 @@ export interface ProjectsHomeProject {
   _id: string;
   title: string;
   cops: boolean;
-  startDate: Date;
-  launchDate: Date;
-  avgSuccessRate: number;
+  startDate?: Date;
+  launchDate?: Date;
+  avgSuccessRate?: number;
   status:
     | 'Planning'
     | 'In progress'
@@ -167,12 +167,10 @@ export interface ProjectsHomeProject {
     | 'Unknown';
 }
 
-export interface ProjectsHomeAggregatedData {
+export interface ProjectsHomeData {
   numInProgress: number;
   numCompletedLast6Months: number;
   totalCompleted: number;
   numDelayed: number;
   projects: ProjectsHomeProject[];
 }
-
-export type ProjectsHomeData = ViewData<ProjectsHomeAggregatedData>;

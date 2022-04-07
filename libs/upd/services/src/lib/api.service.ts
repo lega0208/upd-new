@@ -45,7 +45,7 @@ export class ApiService {
     return this.get<TaskDetailsData>('/api/tasks/details', params);
   }
 
-  getProjectsHomeData(params: ApiParams) {
-    return this.get<ProjectsHomeData>('/api/projects/home', params);
+  getProjectsHomeData() {
+    return this.http.get<ProjectsHomeData>('/api/projects/home');
   }
 }

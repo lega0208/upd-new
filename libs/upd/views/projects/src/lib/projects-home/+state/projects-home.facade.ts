@@ -4,6 +4,7 @@ import { select, Store } from '@ngrx/store';
 import * as ProjectsHomeActions from './projects-home.actions';
 import { ProjectsHomeState } from './projects-home.reducer';
 import * as ProjectsHomeSelectors from './projects-home.selectors';
+import { map } from 'rxjs';
 
 @Injectable()
 export class ProjectsHomeFacade {
@@ -17,9 +18,12 @@ export class ProjectsHomeFacade {
   projectsHomeData$ = this.store.pipe(
     select(ProjectsHomeSelectors.getProjectsHomeData)
   );
+  projectsHomeTableData$ = this.projectsHomeData$.pipe(
+    map((data) => [...data.projects])
+  )
   error$ = this.store.pipe(select(ProjectsHomeSelectors.getProjectsHomeError));
 
-  constructor(private readonly store: Store) {}
+  constructor(private readonly store: Store<ProjectsHomeState>) {}
 
   /**
    * Use the initialization action to perform one

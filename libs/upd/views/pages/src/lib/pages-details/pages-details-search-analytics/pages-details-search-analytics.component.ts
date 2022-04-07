@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
+import { ColumnConfig } from '@cra-arc/upd-components';
 
 @Component({
   selector: 'app-page-details-search-analytics',
@@ -25,21 +26,21 @@ export class PagesDetailsSearchAnalyticsComponent {
     { field: 'impressions', header: 'Impressions', pipe: 'number' },
     { field: 'ctr', header: 'CTR (click through rate)', pipe: 'percent' },
     { field: 'position', header: 'Position' },
-  ];
+  ] as ColumnConfig[];
 
   searchTermsCanada$ = this.pageDetailsService.topSearchTermsIncrease$;
   searchTermsCanadaCols = [
     { field: 'term', header: 'Search terms' },
     { field: 'clicks', header: 'Clicks' },
     { field: 'change', header: 'Comparison' },
-  ];
+  ] as ColumnConfig[];
 
   referrerType$ = this.pageDetailsService.referrerType$;
   referrerTypeCols = [
     { field: 'type', header: 'Type' },
     { field: 'value', header: 'Visits', pipe: 'number' },
     { field: 'change', header: 'Comparison' },
-  ];
+  ] as ColumnConfig[];
 
   constructor(private pageDetailsService: PagesDetailsFacade) {}
 }

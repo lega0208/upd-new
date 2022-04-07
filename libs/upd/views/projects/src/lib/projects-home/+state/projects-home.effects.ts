@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { createEffect, Actions, ofType } from '@ngrx/effects';
 import { catchError, EMPTY, mergeMap, map } from 'rxjs';
 
+import { ApiService } from '@cra-arc/upd/services';
 import * as ProjectsHomeActions from './projects-home.actions';
 
 @Injectable()
@@ -11,20 +11,13 @@ export class ProjectsHomeEffects {
     this.actions$.pipe(
       ofType(ProjectsHomeActions.loadProjectsHomeInit),
       mergeMap(() =>
-        this.http
-          .get('/api/projectsHome/getData', {
-            responseType: 'json',
-            observe: 'body',
-          })
-          .pipe(
-            map((data) =>
-              ProjectsHomeActions.loadProjectsHomeSuccess({ data })
-            ),
-            catchError(() => EMPTY)
-          )
+        this.api.getProjectsHomeData().pipe(
+          map((data) => ProjectsHomeActions.loadProjectsHomeSuccess({ data })),
+          catchError(() => EMPTY)
+        )
       )
     )
   );
 
-  constructor(private readonly actions$: Actions, private http: HttpClient) {}
+  constructor(private readonly actions$: Actions, private api: ApiService) {}
 }

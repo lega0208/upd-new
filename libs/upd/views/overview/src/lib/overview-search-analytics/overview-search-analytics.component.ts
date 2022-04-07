@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { Metrics } from '../query';
+import { ColumnConfig } from '@cra-arc/upd-components';
 
 @Component({
   selector: 'app-overview-search-analytics',
@@ -26,7 +27,7 @@ export class OverviewSearchAnalyticsComponent {
     { field: 'Search terms', header: 'Search terms' },
     { field: 'Clicks', header: 'Clicks' },
     { field: 'Comparison', header: 'Comparison' },
-  ];
+  ] as ColumnConfig[];
   GSCSearchTermsCols = [
     { field: '_id', header: 'Search terms' },
     { field: 'clicks', header: 'Clicks', pipe: 'number' },
@@ -39,7 +40,7 @@ export class OverviewSearchAnalyticsComponent {
       pipe: 'number',
       pipeParam: '1.0-2',
     },
-  ];
+  ] as ColumnConfig[];
 
   constructor(private overviewService: OverviewFacade) {}
 }

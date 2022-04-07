@@ -1,7 +1,7 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
+import { ProjectsHomeData } from '@cra-arc/types-common';
 import * as ProjectsHomeActions from './projects-home.actions';
-import { ProjectsHomeData } from './projects-home.models';
 
 export const PROJECTS_HOME_FEATURE_KEY = 'projectsHome';
 
@@ -17,7 +17,13 @@ export interface ProjectsHomePartialState {
 
 export const projectsHomeInitialState: ProjectsHomeState = {
   // set initial required properties
-  data: {},
+  data: {
+    numInProgress: 0,
+    numCompletedLast6Months: 0,
+    totalCompleted: 0,
+    numDelayed: 0,
+    projects: [],
+  },
   loaded: false,
   error: null,
 };

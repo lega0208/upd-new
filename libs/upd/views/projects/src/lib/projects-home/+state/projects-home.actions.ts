@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { ProjectsHomeData } from './projects-home.models';
+import { ProjectsHomeData } from '@cra-arc/types-common';
 
 export const loadProjectsHomeInit = createAction('[ProjectsHome] Init');
 

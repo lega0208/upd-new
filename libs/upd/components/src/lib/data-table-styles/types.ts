@@ -1,9 +1,9 @@
 export interface ColumnConfig {
   field: string;
   header: string;
-  type?: string;
+  type?: 'link' | 'label';
   typeParam?: string;
-  pipe?: string;
+  pipe?: 'number' | 'percent' | 'date';
   pipeParam?: any;
   tooltip?: string;
   translate?: boolean;

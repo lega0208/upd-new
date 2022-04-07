@@ -6,8 +6,8 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Get('home')
-  getProjectsHomeData(@Query('dateRange') dateRange: string) {
-    return this.projectsService.getProjectsHomeData(dateRange);
+  getProjectsHomeData() {
+    return this.projectsService.getProjectsHomeData();
   }
 
   @Get('details')
