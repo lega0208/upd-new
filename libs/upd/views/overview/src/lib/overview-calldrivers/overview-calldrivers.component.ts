@@ -1,33 +1,23 @@
-import { Component, OnInit } from '@angular/core';
-import { catchError, map, of } from 'rxjs';
-import dayjs from 'dayjs';
+import { Component } from '@angular/core';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
+import { columnConfig } from '@cra-arc/upd-components';
+import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
   selector: 'app-overview-calldrivers',
   templateUrl: './overview-calldrivers.component.html',
   styleUrls: ['./overview-calldrivers.component.css'],
 })
-export class OverviewCalldriversComponent implements OnInit {
+export class OverviewCalldriversComponent {
 
-  bar: MultiSeries = [];
-  charts: any[] = [];
-  chartsCols: any[] = [];
-  constructor() {}
-
-  ngOnInit(): void {
-
-    this.bar = barChart;
-
-    this.charts = charts;
-
-    this.chartsCols = [
-      { field: 'Topic', header: 'Topic' },
-      { field: 'Number of calls for Feb 27-Mar 05', header: 'Number of calls for Feb 27-Mar 05' },
-      { field: 'Number of calls for Mar 06-Mar 12', header: 'Number of calls for Mar 06-Mar 12' },
-    ];
-
-  }
+  bar: MultiSeries = barChart;
+  charts = charts;
+  chartsCols: columnConfig[] =  [
+    { field: 'Topic', header: 'Topic' },
+    { field: 'Number of calls for Feb 27-Mar 05', header: 'Number of calls for Feb 27-Mar 05' },
+    { field: 'Number of calls for Mar 06-Mar 12', header: 'Number of calls for Mar 06-Mar 12' },
+  ];
+  constructor(private overviewService: OverviewFacade) {}
 }
 
 const barChart: MultiSeries = [

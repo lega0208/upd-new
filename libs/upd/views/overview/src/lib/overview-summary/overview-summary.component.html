@@ -1,30 +1,30 @@
-<div class="container-fluid my-4">
-<div class="row">
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+<div class="container-fluid gx-0">
+  <div class="row">
+    <div class="col">
     <app-data-card
-      [current]="(uniqueVisitors | async) || 0"
-      [past]="(uniqueVisitorsPrev | async) || 0"
+      [current]="(uniqueVisitors$ | async | number) || 0"
+      [comparison]="(uniqueVisitorsPercentChange$ | async) || 0"
       [title]="'Unique visitors'"
     ></app-data-card>
   </div>
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+  <div class="col">
     <app-data-card
-      [current]="(visits | async) || 0"
-      [past]="(visitsPrev | async) || 0"
+      [current]="(visits$ | async | number) || 0"
+      [comparison]="(visitsPercentChange$ | async) || 0"
       [title]="'Visits'"
     ></app-data-card>
   </div>
-  <div class="col-lg-4 col-md-6 col-sm-12 h-100">
+  <div class="col">
     <app-data-card
-      [current]="(pageViews | async) || 0"
-      [past]="(pageViewsPrev | async) || 0"
+      [current]="(pageViews$ | async | number) || 0"
+      [comparison]="(pageViewsPercentChange$ | async) || 0"
       [title]="'Page views'"
     ></app-data-card>
   </div>
 </div>
 </div>
 
-<div class="container-fluid my-4">
+<div class="container-fluid my-4 gx-0">
 <div class="row">
   <div class="col">
     <app-charts
@@ -39,33 +39,33 @@
 </div>
 </div>
 
-<div class="container-fluid my-4">
-<div class="row">
-  <div class="col-lg-4 col-md-6 col-sm-12">
-    <app-data-card
-      [current]="gscImp"
-      [past]="gscImpPrev"
-      [title]="'Total impressions from Google'"
-    ></app-data-card>
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-data-card
+        [current]="(gscImpressions$ | async | number) || 0"
+        [comparison]="(gscImpressionsPercentChange$ | async) || 0"
+        [title]="'Total impressions from Google'"
+      ></app-data-card>
+    </div>
+    <div class="col">
+      <app-data-card
+        [current]="(gscCTR$ | async | percent) || 0"
+        [comparison]="(gscCTRPercentChange$ | async) || 0"
+        [title]="'Click through rate from Google'"
+      ></app-data-card>
+    </div>
+    <div class="col">
+      <app-data-card
+        [current]="(gscAverage$ | async | number: '1.0-2') || 0"
+        [comparison]="(gscAveragePercentChange$ | async) || 0"
+        [title]="'Average rank on Google'"
+      ></app-data-card>
+    </div>
   </div>
-  <div class="col-lg-4 col-md-6 col-sm-12">
-    <app-data-card
-      [current]="gscCTR"
-      [past]="gscCTRPrev"
-      [title]="'Click through rate from Google'"
-    ></app-data-card>
   </div>
-  <div class="col-lg-4 col-md-6 col-sm-12">
-    <app-data-card
-      [current]="gscAverage"
-      [past]="gscAveragePrev"
-      [title]="'Average rank on Google'"
-    ></app-data-card>
-  </div>
-</div>
-</div>
 
-<div class="container-fluid my-4">
+<div class="container-fluid my-4 gx-0">
 <div class="row">
   <div class="col">
     <app-card [card-title]="'Top 10 tasks GC Task Success Survey'">
@@ -81,19 +81,19 @@
 </div>
 </div>
 
-<div class="container-fluid my-4">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-12">
     <app-charts
       [title]="'Did you find what you were looking for?'"
-      [data]="dyfChart"
+      [data]="dyfChart$ | async"
       [type]="'donut'"
     ></app-charts>
     </div>
       <div class="col-lg-6 col-md-6 col-sm-12">
     <app-charts
       [title]="'What was wrong?'"
-      [data]="whatWasWrongChart"
+      [data]="whatWasWrongChart$ | async"
       [type]="'donut'"
     ></app-charts>
   </div>

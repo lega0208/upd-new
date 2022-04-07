@@ -1,15 +1,23 @@
-<app-card [card-title]="title">
-  <div class="row">
-    <div class="col-lg-8 col-md-8 col-sm-8">
-      <span class="h3 text-nowrap">{{ current | number }}</span
-      ><span class="small"></span>
-    </div>
-
-    <div class="col-lg-4 col-md-4 col-sm-4 text-end" *ngIf="isPast">
-      <span attr.class="h3 {{ textStyle }} text-nowrap"
-        ><span class="material-icons">{{ arrow }}</span>
-        {{ comparison | percent }}</span
-      >
-    </div>
-  </div></app-card
->
+    <app-card [card-title]="title" [title-tooltip]="tooltip">
+      <div class="container-fluid p-0">
+        <div class="row row-no-gutters">
+          <div class="col">
+            <p class="h2 w-100">
+              {{ current }}
+            </p>
+          </div>
+          <div class="col ml-auto">
+            <span
+              [ngClass]="{
+                'text-success': (comparison) > 0,
+                'text-danger': (comparison) < 0,
+                hidden: (comparison) === 0
+              }"
+              class="h2 float-end"
+            >
+              {{ comparison | percent }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </app-card>

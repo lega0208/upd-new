@@ -1,42 +1,31 @@
 import { Component, OnInit } from '@angular/core';
+import { columnConfig } from '@cra-arc/upd-components';
+import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
   selector: 'app-overview-ux-tests',
   templateUrl: './overview-ux-tests.component.html',
   styleUrls: ['./overview-ux-tests.component.css'],
 })
-export class OverviewUxTestsComponent implements OnInit {
-  uxChartData: any[] = [];
-  uxChartCols: any[] = [];
+export class OverviewUxTestsComponent {
+  uxChartData = uxChart;
+  uxChartCols: columnConfig[] = [
+    { field: 'UX projects', header: 'UX projects' },
+    { field: 'Test', header: 'Test' },
+    { field: 'Date', header: 'Date' },
+    { field: 'Score', header: 'Score' },
+    { field: 'Participants', header: 'Participants' },
+  ];
 
-  testsCompleted = 0;
-  tasksTested = 0;
-  participantsTested = 0;
+  testsCompleted = 36;
+  tasksTested = 254;
+  participantsTested = 1710;
 
-  testsConducted = 0;
-  testsConductedLastQuarter = 0;
-  COPSTests = 0;
+  testsConducted = 28;
+  testsConductedLastQuarter = 4;
+  COPSTests = 21;
 
-  constructor() {}
-
-  ngOnInit(): void {
-    this.testsCompleted = 36;
-    this.tasksTested = 254;
-    this.participantsTested = 1710;
-    this.testsConducted = 28;
-    this.testsConductedLastQuarter = 4;
-    this.COPSTests = 21;
-
-    this.uxChartData = uxChart;
-
-    this.uxChartCols = [
-      { field: 'UX projects', header: 'UX projects' },
-      { field: 'Test', header: 'Test' },
-      { field: 'Date', header: 'Date' },
-      { field: 'Score', header: 'Score' },
-      { field: 'Participants', header: 'Participants' },
-    ];
-  }
+  constructor(private overviewService: OverviewFacade) {}
 }
 
 const uxChart = [

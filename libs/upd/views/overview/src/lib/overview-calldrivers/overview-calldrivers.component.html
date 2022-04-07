@@ -1,5 +1,6 @@
-<div class="row mb-2 gx-2">
-  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+<div class="container-fluid gx-0">
+  <div class="row">
+  <div class="col">
     <app-charts
       [title]="'Total calls by inquiry line'"
       [yAxisLabel]="'Number of calls (in thousands)'"
@@ -13,9 +14,11 @@
     ></app-charts>
   </div>
 </div>
+</div>
 
-<div class="row mb-2 gx-2">
-  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+  <div class="col">
     <app-card [card-title]="'Top 5 call drivers'">
       <div class="row">
         <app-data-table
@@ -29,9 +32,11 @@
     </app-card>
   </div>
 </div>
+</div>
 
-<div class="row mb-2 gx-2">
-  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+  <div class="col">
     <app-card
       [card-title]="'Top 5 call drivers with biggest increase over period'"
     >
@@ -47,9 +52,11 @@
     </app-card>
   </div>
 </div>
+</div>
 
-<div class="row mb-2 gx-2">
-  <div class="col-lg-12 col-md-12 col-sm-12 h-100">
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+  <div class="col">
     <app-card
       [card-title]="'Top 5 call drivers with biggest decrease over period'"
     >
@@ -64,4 +71,5 @@
       </div>
     </app-card>
   </div>
+</div>
 </div>
