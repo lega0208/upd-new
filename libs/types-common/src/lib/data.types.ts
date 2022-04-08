@@ -139,12 +139,7 @@ export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
 export interface TaskDetailsData
   extends EntityDetailsData<TaskDetailsAggregatedData> {
   avgTaskSuccessFromLastTest: number;
-  taskSuccessByUxTest: {
-    title: string;
-    date: Date;
-    testType: string;
-    successRate: number;
-  }[];
+  taskSuccessByUxTest: { title: string; date: Date; testType: string; successRate: number; }[]
 }
 
 export type ProjectStatus =

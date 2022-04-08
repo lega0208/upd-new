@@ -28,6 +28,7 @@ import { AlertComponent } from './alert/alert.component';
 import { AccordionComponent } from './accordion/accordion.component';
 import { ModalComponent } from './modal/modal.component';
 import { DataTableStylesComponent } from './data-table-styles/data-table-styles.component';
+import { ProjectStatusLabelComponent } from './project-status-label/project-status-label.component';
 
 @NgModule({
   imports: [
@@ -58,6 +59,7 @@ import { DataTableStylesComponent } from './data-table-styles/data-table-styles.
     ChartsComponent,
     ModalComponent,
     DataTableStylesComponent,
+    ProjectStatusLabelComponent,
   ],
   exports: [
     NgbPopoverModule,
