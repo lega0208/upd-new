@@ -81,6 +81,34 @@ export class TasksDetailsFacade {
     })
   );
 
+  gscTotalClicks$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.dateRangeData?.gscTotalClicks)
+  );
+  gscTotalClicksPercentChange$ = this.tasksDetailsData$.pipe(
+    mapToPercentChange('gscTotalClicks')
+  );
+
+  gscTotalImpressions$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.dateRangeData?.gscTotalImpressions)
+  );
+  gscTotalImpressionsPercentChange$ = this.tasksDetailsData$.pipe(
+    mapToPercentChange('gscTotalImpressions')
+  );
+
+  gscTotalCtr$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.dateRangeData?.gscTotalCtr)
+  );
+  gscTotalCtrPercentChange$ = this.tasksDetailsData$.pipe(
+    mapToPercentChange('gscTotalCtr')
+  );
+
+  gscTotalPosition$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.dateRangeData?.gscTotalPosition)
+  );
+  gscTotalPositionPercentChange$ = this.tasksDetailsData$.pipe(
+    mapToPercentChange('gscTotalPosition')
+  );
+
   taskSuccessByUxTest$ = this.tasksDetailsData$.pipe(
     map((data) => data?.taskSuccessByUxTest)
   );

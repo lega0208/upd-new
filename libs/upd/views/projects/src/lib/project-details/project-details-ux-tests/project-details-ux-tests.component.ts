@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 @Component({
-  selector: 'app-project-details-summary',
-  templateUrl: './project-details-summary.component.html',
-  styleUrls: ['./project-details-summary.component.css'],
+  selector: 'app-project-details-ux-tests',
+  templateUrl: './project-details-ux-tests.component.html',
+  styleUrls: ['./project-details-ux-tests.component.css'],
 })
-export class ProjectDetailsSummaryComponent {
+export class ProjectDetailsUxTestsComponent {
 
   data$ = this.projectsDetailsService.projectsDetailsData$;
   

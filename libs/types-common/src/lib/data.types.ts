@@ -134,6 +134,10 @@ export interface TaskDetailsMetrics {
   fwylfHardToUnderstand: number;
   fwylfOther: number;
   fwylfError: number;
+  gscTotalClicks: number;
+  gscTotalImpressions: number;
+  gscTotalCtr: number;
+  gscTotalPosition: number;
 }
 
 export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {

@@ -13,6 +13,7 @@ import { ProjectDetailsSummaryComponent } from './project-details/project-detail
 import { ProjectDetailsWebtrafficComponent } from './project-details/project-details-webtraffic/project-details-webtraffic.component';
 import { ProjectDetailsSearchAnalyticsComponent } from './project-details/project-details-search-analytics/project-details-search-analytics.component';
 import { ProjectDetailsFeedbackComponent } from './project-details/project-details-feedback/project-details-feedback.component';
+import { ProjectDetailsCalldriversComponent } from './project-details/project-details-calldrivers/project-details-calldrivers.component';
 import { ProjectsRoutingModule } from './projects-routing.module';
 
 import {
@@ -51,6 +52,7 @@ import { ProjectsDetailsFacade } from './project-details/+state/projects-details
     ProjectDetailsWebtrafficComponent,
     ProjectDetailsSearchAnalyticsComponent,
     ProjectDetailsFeedbackComponent,
+    ProjectDetailsCalldriversComponent
   ],
   providers: [ProjectsHomeFacade, ProjectsDetailsFacade, ApiService],
 })
