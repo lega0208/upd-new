@@ -127,6 +127,17 @@ async function getTaskAggregatedData(
       fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
       fwylfOther: { $sum: '$fwylf_other' },
     })
+    .lookup({
+      from: 'pages',
+      localField: '_id',
+      foreignField: 'url', // not all_urls...
+      as: 'page',
+    })
+    .unwind('$page')
+    .replaceRoot({
+      $mergeObjects: ['$$ROOT', '$page']
+    })
+    .project({ page: 0 })
     .group({
       _id: null,
       visits: { $sum: '$visits' },
@@ -138,42 +149,7 @@ async function getTaskAggregatedData(
       fwylfOther: { $sum: '$fwylfOther' },
       visitsByPage: { $addToSet: '$$ROOT' },
     })
-    .lookup({
-      from: 'pages',
-      localField: 'visitsByPage._id',
-      foreignField: 'url', // not all_urls...
-      as: 'pages',
-    })
-    .addFields({
-      visitsByPage: {
-        $map: {
-          input: {
-            $zip: {
-              inputs: [
-                '$visitsByPage',
-                {
-                  $map: {
-                    input: '$pages',
-                    as: 'page',
-                    in: {
-                      _id: '$$page._id',
-                      title: '$$page.title',
-                      url: '$$page.url',
-                    },
-                  },
-                },
-              ],
-              useLongestLength: true,
-            },
-          },
-          as: 'pageObjects',
-          in: {
-            $mergeObjects: '$$pageObjects',
-          },
-        },
-      },
-    })
-    .project({ _id: 0, pages: 0 })
+    .project({ _id: 0 })
     .exec();
 
   return results[0];
