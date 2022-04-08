@@ -7,8 +7,9 @@ import { Component, Input } from '@angular/core';
 })
 export class DataCardComponent {
   @Input() current: string | number = '';
-  @Input() past = 0;
   @Input() comparison = 0;
+  @Input() date!: Date | string;
+  @Input() numUxTests = 0;
   @Input() title = '';
   @Input() tooltip = '';
   arrow: string = '';

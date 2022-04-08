@@ -3,7 +3,7 @@ import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
 import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
 
 import * as TasksDetailsActions from './tasks-details.actions';
-import { DateSelectionState, selectDateRanges, selectRouteNestedParam } from '@cra-arc/upd/state';
+import { DateSelectionState, selectDatePeriod, selectDateRanges, selectRouteNestedParam } from '@cra-arc/upd/state';
 import { Store } from '@ngrx/store';
 import { ApiService } from '@cra-arc/upd/services';
 import { selectTasksDetailsData } from './tasks-details.selectors';
@@ -45,6 +45,13 @@ export class TasksDetailsEffects {
             catchError(() => EMPTY)
           );
       })
+    )
+  );
+  
+    dateChange$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(selectDatePeriod),
+      mergeMap(() => of(TasksDetailsActions.loadTasksDetailsInit()))
     )
   );
 

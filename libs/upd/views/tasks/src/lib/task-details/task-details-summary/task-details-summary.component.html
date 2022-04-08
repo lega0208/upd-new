@@ -1,5 +1,78 @@
-<code>
-  <pre>
-    {{ data$ | async | json }}
-  </pre>
-</code>
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-6 col-sm-12">
+      <app-data-card
+        [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
+        [date]="(dateFromLastTest$ | async) || ''"
+        [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
+        [title]="'Average task success from last UX test'"
+        [tooltip]="'Average task success from last UX test tooltip'"
+      ></app-data-card>
+    </div>
+
+    <div class="col-lg-6 col-sm-12">
+      <app-data-card
+        [current]="(visits$ | async | number) || 0"
+        [comparison]="(visitsPercentChange$ | async) || 0"
+        [title]="'Total visits from all pages'"
+        [tooltip]="'Total visits from all pages tooltip'"
+      ></app-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Visits by page'"
+        [title-tooltip]="'Visits by page tooltip'"
+      >
+        <app-data-table
+          [data]="(visitsByPage$ | async) || []"
+          [cols]="visitsByPageCols"
+        >
+        </app-data-table>
+      </app-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-6 col-md-6 col-sm-12">
+      <app-charts
+        [title]="'Did you find what you were looking for?'"
+        [titleTooltip]="'Did you find what you were looking for? tooltip'"
+        [data]="dyfChart$ | async"
+        [type]="'donut'"
+      ></app-charts>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-12">
+      <app-charts
+        [title]="'What was wrong?'"
+        [titleTooltip]="'What was wrong? tooltip'"
+        [data]="whatWasWrongChart$ | async"
+        [type]="'donut'"
+      ></app-charts>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Task success by UX test'"
+        [title-tooltip]="'Task success by UX test tooltip'"
+      >
+        <app-data-table
+          [data]="(taskSuccessByUxTest$ | async) || []"
+          [cols]="taskSuccessByUxTestCols"
+          [pagination]="false"
+        >
+        </app-data-table>
+      </app-card>
+    </div>
+  </div>
+</div>

@@ -71,6 +71,7 @@ export class TasksService {
       ),
       taskSuccessByUxTest: [],
       avgTaskSuccessFromLastTest: 1, // todo: better handle N/A
+      dateFromLastTest: new Date(),
     };
 
     if (task.ux_tests && task.ux_tests.length !== 0) {
@@ -93,6 +94,9 @@ export class TasksService {
 
       returnData.avgTaskSuccessFromLastTest =
         'success_rate' in lastUxTest ? lastUxTest.success_rate : 1; // todo: better handle nulls
+
+      returnData.dateFromLastTest =
+        'date' in lastUxTest ? lastUxTest.date : new Date(); // todo: better handle nulls
     }
 
     return returnData;
@@ -118,12 +122,20 @@ async function getTaskAggregatedData(
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyf_yes' },
       dyfNo: { $sum: '$dyf_no' },
+      fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
+      fwylfError: { $sum: '$fwylf_error' },
+      fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
+      fwylfOther: { $sum: '$fwylf_other' },
     })
     .group({
       _id: null,
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyfYes' },
       dyfNo: { $sum: '$dyfNo' },
+      fwylfCantFindInfo: { $sum: '$fwylfCantFindInfo' },
+      fwylfError: { $sum: '$fwylfError' },
+      fwylfHardToUnderstand: { $sum: '$fwylfHardToUnderstand' },
+      fwylfOther: { $sum: '$fwylfOther' },
       visitsByPage: { $addToSet: '$$ROOT' },
     })
     .lookup({
@@ -143,7 +155,11 @@ async function getTaskAggregatedData(
                   $map: {
                     input: '$pages',
                     as: 'page',
-                    in: { _id: '$$page._id', title: '$$page.title' },
+                    in: {
+                      _id: '$$page._id',
+                      title: '$$page.title',
+                      url: '$$page.url',
+                    },
                   },
                 },
               ],
