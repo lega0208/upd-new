@@ -13,6 +13,8 @@ import { TaskDetailsSummaryComponent } from './task-details/task-details-summary
 import { TaskDetailsWebtrafficComponent } from './task-details/task-details-webtraffic/task-details-webtraffic.component';
 import { TaskDetailsSearchAnalyticsComponent } from './task-details/task-details-search-analytics/task-details-search-analytics.component';
 import { TaskDetailsFeedbackComponent } from './task-details/task-details-feedback/task-details-feedback.component';
+import { TaskDetailsCalldriversComponent } from './task-details/task-details-calldrivers/task-details-calldrivers.component';
+import { TaskDetailsUxTestsComponent } from './task-details/task-details-ux-tests/task-details-ux-tests.component';
 import { TasksRoutingModule } from './tasks-routing.module';
 
 import {
@@ -48,6 +50,8 @@ import { TasksDetailsFacade } from './task-details/+state/tasks-details.facade';
     TaskDetailsWebtrafficComponent,
     TaskDetailsSearchAnalyticsComponent,
     TaskDetailsFeedbackComponent,
+    TaskDetailsCalldriversComponent,
+    TaskDetailsUxTestsComponent,
   ],
   providers: [ApiService, TasksHomeFacade, TasksDetailsFacade],
 })

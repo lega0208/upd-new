@@ -17,7 +17,7 @@ export class TaskDetailsWebtrafficComponent {
       field: 'title',
       header: 'Page title',
       type: 'link',
-      typeParams: { linkParent: '/pages', link: '_id' },
+      typeParams: { preLink: '/pages', link: '_id' },
     },
     {
       field: 'url',

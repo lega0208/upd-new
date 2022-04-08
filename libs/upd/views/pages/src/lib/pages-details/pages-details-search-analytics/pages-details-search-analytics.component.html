@@ -11,7 +11,7 @@
 
     <div class="col">
       <app-data-card
-        [current]="(ctrGSC$ | async | number) || 0"
+        [current]="(ctrGSC$ | async | percent) || 0"
         [comparison]="(ctrGSCPercentChange$ | async) || 0"
         [title]="'Click through rate from Google'"
         [tooltip]="'Click through rate from Google tooltip'"

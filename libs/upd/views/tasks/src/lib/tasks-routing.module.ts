@@ -8,6 +8,8 @@ import { TaskDetailsSummaryComponent } from './task-details/task-details-summary
 import { TaskDetailsWebtrafficComponent } from './task-details/task-details-webtraffic/task-details-webtraffic.component';
 import { TaskDetailsSearchAnalyticsComponent } from './task-details/task-details-search-analytics/task-details-search-analytics.component';
 import { TaskDetailsFeedbackComponent } from './task-details/task-details-feedback/task-details-feedback.component';
+import { TaskDetailsCalldriversComponent } from './task-details/task-details-calldrivers/task-details-calldrivers.component';
+import { TaskDetailsUxTestsComponent } from './task-details/task-details-ux-tests/task-details-ux-tests.component';
 
 const routes: Routes = [
   {
@@ -27,6 +29,8 @@ const routes: Routes = [
             component: TaskDetailsSearchAnalyticsComponent,
           },
           { path: 'feedback', component: TaskDetailsFeedbackComponent },
+          { path: 'calldrivers', component: TaskDetailsCalldriversComponent },
+          { path: 'uxtests', component: TaskDetailsUxTestsComponent },
         ],
       },
     ],

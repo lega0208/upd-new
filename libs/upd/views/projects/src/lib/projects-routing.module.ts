@@ -8,6 +8,8 @@ import { ProjectDetailsSummaryComponent } from './project-details/project-detail
 import { ProjectDetailsWebtrafficComponent } from './project-details/project-details-webtraffic/project-details-webtraffic.component';
 import { ProjectDetailsSearchAnalyticsComponent } from './project-details/project-details-search-analytics/project-details-search-analytics.component';
 import { ProjectDetailsFeedbackComponent } from './project-details/project-details-feedback/project-details-feedback.component';
+import { ProjectDetailsCalldriversComponent } from './project-details/project-details-calldrivers/project-details-calldrivers.component';
+import { ProjectDetailsUxTestsComponent } from './project-details/project-details-ux-tests/project-details-ux-tests.component';
 
 const routes: Routes = [
   {
@@ -27,6 +29,8 @@ const routes: Routes = [
             component: ProjectDetailsSearchAnalyticsComponent,
           },
           { path: 'feedback', component: ProjectDetailsFeedbackComponent },
+          { path: 'calldrivers', component: ProjectDetailsCalldriversComponent },
+          { path: 'uxtests', component: ProjectDetailsUxTestsComponent },
         ],
       },
     ],

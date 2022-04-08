@@ -14,6 +14,8 @@ export class TaskDetailsComponent implements OnInit {
     { href: 'webtraffic', title: 'Web Traffic' },
     { href: 'search_analytics', title: 'Search Analytics' },
     { href: 'feedback', title: 'Page Feedback' },
+    { href: 'calldrivers', title: 'Call Drivers' },
+    { href: 'uxtests', title: 'UX Tests' },
   ];
 
   constructor(private readonly taskDetailsService: TasksDetailsFacade) {}

@@ -21,6 +21,19 @@ export class ProjectsHomeFacade {
   projectsHomeTableData$ = this.projectsHomeData$.pipe(
     map((data) => [...data.projects])
   )
+
+  numInProgress$ = this.projectsHomeData$.pipe(
+    map((data) => data?.numInProgress)
+  );
+  numCompletedLast6Months$ = this.projectsHomeData$.pipe(
+    map((data) => data?.numCompletedLast6Months)
+  );
+  totalCompleted$ = this.projectsHomeData$.pipe(
+    map((data) => data?.totalCompleted)
+  );
+  numDelayed$ = this.projectsHomeData$.pipe(
+    map((data) => data?.numDelayed)
+  );
   error$ = this.store.pipe(select(ProjectsHomeSelectors.getProjectsHomeError));
 
   constructor(private readonly store: Store<ProjectsHomeState>) {}

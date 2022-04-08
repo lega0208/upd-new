@@ -3,17 +3,31 @@
     {{ data[config.field] }}
   </a>
   <span
-    *ngIf="config.type === 'label'"
+    *ngIf="config.type === 'label' && config.typeParam !== 'cops'"
     class="badge"
     [ngClass]="{
-      'rounded-pill bg-success align-middle':
+      'rounded-pill bg-completed align-middle':
         config.typeParam === 'status' && data[config.field] === 'Complete',
-      'rounded-pill bg-secondary align-middle':
-        config.typeParam === 'status' && data[config.field] === 'Unknown',
-      'bg-primary': config.typeParam === 'cops' && data[config.field] === 'COPS'
+      'rounded-pill bg-planned align-middle':
+        config.typeParam === 'status' && data[config.field] === 'Planning',
+      'rounded-pill bg-delayed align-middle':
+        config.typeParam === 'status' && data[config.field] === 'Delayed',
+      'rounded-pill bg-inProgress align-middle':
+        config.typeParam === 'status' && data[config.field] === 'In progress',
+      'rounded-pill bg-unknown align-middle':
+        config.typeParam === 'status' && data[config.field] === 'Unknown'
     }"
   >
     {{ data[config.field] }}
+  </span>
+  <span
+    *ngIf="config.type === 'label' && config.typeParam === 'cops' && data[config.field] === true"
+    class="badge"
+    [ngClass]="{
+      'bg-primary': config.typeParam === 'cops'
+    }"
+  >
+    COPS
   </span>
 </ng-container>
 

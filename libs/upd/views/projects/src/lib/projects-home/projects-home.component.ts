@@ -10,6 +10,11 @@ import { ColumnConfig } from '@cra-arc/upd-components';
 export class ProjectsHomeComponent implements OnInit {
   data$ = this.projectsHomeService.projectsHomeData$;
   tableData$ = this.projectsHomeService.projectsHomeTableData$;
+  
+  numInProgress$ = this.projectsHomeService.numInProgress$;
+  numCompletedLast6Months$ = this.projectsHomeService.numCompletedLast6Months$;
+  totalCompleted$ = this.projectsHomeService.totalCompleted$;
+  numDelayed$ = this.projectsHomeService.numDelayed$;
 
   columns: ColumnConfig[] = [
     {
@@ -21,13 +26,16 @@ export class ProjectsHomeComponent implements OnInit {
     },
     {
       field: 'cops',
-      header: 'COPS',
+      header: 'Type',
+      type: 'label',
+      typeParam: 'cops',
       tooltip: 'tooltip',
     },
     {
       field: 'status',
       header: 'Status',
       type: 'label',
+      typeParam: 'status',
       tooltip: 'tooltip',
     },
     {

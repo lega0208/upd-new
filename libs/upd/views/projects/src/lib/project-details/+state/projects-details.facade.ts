@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
+import { map } from 'rxjs';
 
 import * as ProjectsDetailsActions from './projects-details.actions';
 import { ProjectsDetailsState } from './projects-details.reducer';
@@ -17,6 +18,11 @@ export class ProjectsDetailsFacade {
   projectsDetailsData$ = this.store.pipe(
     select(ProjectsDetailsSelectors.getProjectsDetailsData)
   );
+
+  // title$ = this.projectsDetailsData$.pipe(
+  //   map((data) => data)
+  // );
+
   error$ = this.store.pipe(
     select(ProjectsDetailsSelectors.getProjectsDetailsError)
   );
