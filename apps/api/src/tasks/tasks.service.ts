@@ -70,7 +70,7 @@ export class TasksService {
         taskUrls
       ),
       taskSuccessByUxTest: [],
-      avgTaskSuccessFromLastTest: 0, // todo: better handle N/A
+      avgTaskSuccessFromLastTest: 1, // todo: better handle N/A
       dateFromLastTest: new Date(),
     };
 
@@ -93,7 +93,7 @@ export class TasksService {
       )[0];
 
       returnData.avgTaskSuccessFromLastTest =
-        'success_rate' in lastUxTest ? lastUxTest.success_rate : 0; // todo: better handle nulls
+        'success_rate' in lastUxTest ? lastUxTest.success_rate : 1; // todo: better handle nulls
 
       returnData.dateFromLastTest =
         'date' in lastUxTest ? lastUxTest.date : new Date(); // todo: better handle nulls
