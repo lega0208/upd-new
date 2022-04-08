@@ -10,18 +10,14 @@ import { ColumnConfig } from '../data-table-styles/types';
 export class DataTableComponent implements OnInit {
   @ViewChild('dt') table!: Table;
   @Input() data: unknown[] | null = [];
+  @Input() displayRows: number = 10;
   @Input() sort = true;
   @Input() pagination = true;
   @Input() filter = true;
   @Input() cols: ColumnConfig[] = [];
   @Input() searchFields: string[] = [];
-  first = 0;
 
   loading!: boolean;
-
-  clear(table: Table) {
-    table.clear();
-  }
 
   ngOnInit(): void {
     if (this.searchFields.length === 0) {

@@ -130,6 +130,10 @@ export interface TaskDetailsMetrics {
   visits: number;
   dyfYes: number;
   dyfNo: number;
+  fwylfCantFindInfo: number;
+  fwylfHardToUnderstand: number;
+  fwylfOther: number;
+  fwylfError: number;
 }
 
 export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
@@ -139,6 +143,7 @@ export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
 export interface TaskDetailsData
   extends EntityDetailsData<TaskDetailsAggregatedData> {
   avgTaskSuccessFromLastTest: number;
+  dateFromLastTest: Date;
   taskSuccessByUxTest: { title: string; date: Date; testType: string; successRate: number; }[]
 }
 

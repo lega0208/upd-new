@@ -1,15 +1,18 @@
 export interface ColumnConfig {
   field: string;
   header: string;
-  type?: 'link' | 'label';
+  type?: string;
   typeParam?: string;
-  pipe?: 'number' | 'percent' | 'date';
+  typeParams?: typeParams;
+  pipe?: string;
   pipeParam?: any;
   tooltip?: string;
   translate?: boolean;
 }
 
 export interface typeParams {
-  label: string;
-  value: string;
+  link: string;
+  preLink: string;
+  postLink: string;
+  external?: boolean;
 }

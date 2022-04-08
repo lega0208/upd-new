@@ -1,23 +1,72 @@
-    <app-card [card-title]="title" [title-tooltip]="tooltip">
-      <div class="container-fluid p-0">
-        <div class="row row-no-gutters">
-          <div class="col">
-            <p class="h2 w-100">
-              {{ current }}
-            </p>
-          </div>
-          <div class="col ml-auto">
-            <span
-              [ngClass]="{
-                'text-success': (comparison) > 0,
-                'text-danger': (comparison) < 0,
-                hidden: (comparison) === 0
-              }"
-              class="h2 float-end"
-            >
-              {{ comparison | percent }}
-            </span>
-          </div>
+<ng-container *ngIf="date && numUxTests > 0">
+  <app-card
+    [card-title]="title + ' (' + (date | date: 'MMM dd, YYYY') + ')'"
+    [title-tooltip]="tooltip"
+  >
+    <div class="container-fluid p-0">
+      <div class="row row-no-gutters">
+        <div class="col">
+          <p class="h3 w-100">
+            {{ comparison | percent }}
+          </p>
         </div>
       </div>
-    </app-card>
+      <div class="row row-no-gutters">
+        <div class="col">
+          <p class="w-100">
+            <ng-container *ngIf="comparison < 0.8; else elseBlock">
+              <span class="text-danger text-nowrap"
+                ><span class="material-icons">warning</span></span
+              >
+              Did not meet objective of 80% task success or 20 point increase
+            </ng-container>
+            <ng-template #elseBlock>
+              <span class="text-success text-nowrap"
+                ><span class="material-icons">check_circle</span></span
+              >
+              Met objective of 80% task success or 20 point increase
+            </ng-template>
+          </p>
+        </div>
+      </div>
+    </div>
+  </app-card>
+</ng-container>
+
+<ng-container *ngIf="date && numUxTests === 0">
+  <app-card [card-title]="title" [title-tooltip]="tooltip">
+    <div class="container-fluid p-0">
+      <div class="row row-no-gutters">
+        <div class="col">
+          <p class="w-100">This task hasn't been tested yet.</p>
+        </div>
+      </div>
+    </div>
+  </app-card>
+</ng-container>
+
+<ng-container *ngIf="!date">
+  <app-card [card-title]="title" [title-tooltip]="tooltip">
+    <div class="container-fluid p-0">
+      <div class="row row-no-gutters">
+        <div class="col">
+          <p class="h3 w-100">
+            {{ current }}
+          </p>
+        </div>
+        <div class="col ml-auto">
+          <span
+            [ngClass]="{
+              'text-success': comparison > 0,
+              'text-danger': comparison < 0,
+              hidden: comparison === 0
+            }"
+            class="h3 float-end"
+          >
+            {{ comparison | percent }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </app-card>
+</ng-container>
