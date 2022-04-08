@@ -1,5 +1,5 @@
 <ng-container *ngIf="hasType && config.typeParam">
-  <a *ngIf="config.type === 'link'" [routerLink]="data[config.typeParam]">
+  <a *ngIf="config.type === 'link'" [routerLink]="[data[config.typeParam]]">
     {{ data[config.field] }}
   </a>
   <span
@@ -17,9 +17,43 @@
   </span>
 </ng-container>
 
-<ng-container *ngIf="hasPipe">
+<ng-container *ngIf="hasType && config.typeParams">
+  <ng-container *ngIf="config.typeParams.external">
+    <a
+      *ngIf="config.type === 'link'"
+      [href]="'https://' + data[config.typeParams.link]"
+    >
+      {{ data[config.field] }}
+    </a>
+  </ng-container>
+  <ng-container *ngIf="!config.typeParams.external">
+    <a
+      *ngIf="config.type === 'link' && config.typeParams.postLink"
+      [routerLink]="[
+        config.typeParams.preLink,
+        data[config.typeParams.link],
+        config.typeParams.postLink
+      ]"
+    >
+      <ng-container *ngIf="config.pipe === 'number'; else elseBlock">
+        {{ data[config.field] | number: config.pipeParam }}
+      </ng-container>
+      <ng-template #elseBlock>
+        {{ data[config.field] }}
+      </ng-template>
+    </a>
+    <a
+      *ngIf="config.type === 'link' && !config.typeParams.postLink"
+      [routerLink]="[config.typeParams.preLink, data[config.typeParams.link]]"
+    >
+      {{ data[config.field] }}
+    </a>
+  </ng-container>
+</ng-container>
+
+<ng-container *ngIf="hasPipe && !hasType">
   <ng-container *ngIf="config.pipe === 'number'">
-    {{ data[config.field] | number }}
+    {{ data[config.field] | number: config.pipeParam }}
   </ng-container>
   <ng-container *ngIf="config.pipe === 'percent'">
     {{ data[config.field] | percent }}
