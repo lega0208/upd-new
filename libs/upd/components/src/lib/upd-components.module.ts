@@ -80,6 +80,7 @@ import { ProjectStatusLabelComponent } from './project-status-label/project-stat
     ChartsComponent,
     ModalComponent,
     DataTableStylesComponent,
+    ProjectStatusLabelComponent,
   ],
 })
 export class UpdComponentsModule {}

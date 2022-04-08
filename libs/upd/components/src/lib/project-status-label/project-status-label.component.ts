@@ -1,20 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { ProjectStatus } from '@cra-arc/types-common';
 
 @Component({
-  selector: 'cra-arc-project-status-label',
+  selector: 'app-project-status-label',
   template: `
-    <p>
-      project-status-label works!
-    </p>
+    <span class="badge {{ classMap[statusText] }}">{{ statusText }}</span>
   `,
-  styles: [
-  ]
+  styles: []
 })
-export class ProjectStatusLabelComponent implements OnInit {
+export class ProjectStatusLabelComponent {
+  @Input() statusText: ProjectStatus = 'Unknown';
 
-  constructor() { }
-
-  ngOnInit(): void {
+  // Change type to Record<ProjectStatus, string>
+  classMap: Record<string, string> = {
+    'Unknown': 'bg-secondary',
   }
-
 }
