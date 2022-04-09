@@ -30,6 +30,7 @@ import {
 import { ProjectsDetailsEffects } from './project-details/+state/projects-details.effects';
 import { ProjectsDetailsFacade } from './project-details/+state/projects-details.facade';
 import { ProjectDetailsDetailsComponent } from './project-details/project-details-details/project-details-details.component';
+import { ProjectDetailsUxTestsComponent } from './project-details/project-details-ux-tests/project-details-ux-tests.component';
 
 @NgModule({
   imports: [
@@ -53,8 +54,9 @@ import { ProjectDetailsDetailsComponent } from './project-details/project-detail
     ProjectDetailsWebtrafficComponent,
     ProjectDetailsSearchAnalyticsComponent,
     ProjectDetailsFeedbackComponent,
+    ProjectDetailsUxTestsComponent,
     ProjectDetailsCalldriversComponent,
-    ProjectDetailsDetailsComponent
+    ProjectDetailsDetailsComponent,
   ],
   providers: [ProjectsHomeFacade, ProjectsDetailsFacade, ApiService],
 })

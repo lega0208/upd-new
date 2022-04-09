@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TaskDetailsUxTestsComponent } from './task-details-ux-tests.component';
 
-describe('TaskDetailsWebtrafficComponent', () => {
+describe('TaskDetailsUxTestsComponent', () => {
   let component: TaskDetailsUxTestsComponent;
   let fixture: ComponentFixture<TaskDetailsUxTestsComponent>;
 

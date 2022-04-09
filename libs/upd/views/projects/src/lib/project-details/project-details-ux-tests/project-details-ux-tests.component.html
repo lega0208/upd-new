@@ -1,1 +1,83 @@
-<p>project-details-ux-tests works!</p>
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-6 col-sm-12">
+      <app-data-card
+        [current]="(participantTasks$[0].successRate | percent) || 0"
+        [title]="'Average task success from last UX test'"
+        [tooltip]="'Average task success from last UX test tooltip'"
+      ></app-data-card>
+    </div>
+
+    <div class="col-lg-6 col-sm-12">
+      <app-data-card
+        [current]="(participantTasks$[0].total_users | number) || 0"
+        [title]="'Total participants'"
+        [tooltip]="'Total participants tooltip'"
+      ></app-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-12">
+      <app-charts
+        [title]="'Tasks success by Test'"
+        [titleTooltip]="'Tasks success by Test tooltip'"
+        [data]="uxTests$"
+        [type]="'horizontal-bar'"
+        [yAxisLabel]="'UX tests'"
+        [xAxisLabel]="'Task success rate (%)'"
+      ></app-charts>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Participant tasks'"
+        [title-tooltip]="'Participant tasks tooltip'"
+      >
+        <app-data-table
+          [data]="participantTasks$ || []"
+          [cols]="participantTasksCols"
+          [sort]="false"
+          [pagination]="false"
+          [filter]="false"
+        >
+        </app-data-table>
+      </app-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Success rate and scenarios'"
+        [title-tooltip]="'Success rate and scenarios tooltip'"
+      >
+        <app-data-table
+          [data]="successRate$ || []"
+          [cols]="successRateCols"
+          [filter]="false"
+          [sort]="false"
+          [pagination]="false"
+        >
+        </app-data-table>
+
+        <div>
+          <div class="legend">
+            <p class="legend_field">
+              <span class="legend_color" style="background: #90ee90"></span>Met
+              objective of 80% success rate or 20 point increase
+            </p>
+          </div>
+        </div>
+      </app-card>
+    </div>
+  </div>
+</div>

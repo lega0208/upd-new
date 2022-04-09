@@ -1,1 +1,66 @@
-<p>ux-tests works!</p>
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-6 col-sm-12">
+      <app-data-card
+        [current]="successRate$[0].result || 0"
+        [title]="'Latest success rate'"
+        [tooltip]="'Latest success rate tooltip'"
+      ></app-data-card>
+    </div>
+
+    <div class="col-lg-6 col-sm-12">
+      <app-data-card
+        [current]="(successRate$[0].participants | number) || 0"
+        [title]="'Total participants from all tests'"
+        [tooltip]="'Total participants from all tests tooltip'"
+      ></app-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-12">
+      <app-charts
+        [title]="'Tasks success by Test'"
+        [titleTooltip]="'Tasks success by Test tooltip'"
+        [data]="uxTests$"
+        [type]="'horizontal-bar'"
+        [yAxisLabel]="'UX tests'"
+        [xAxisLabel]="'Task success rate (%)'"
+      ></app-charts>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Success rate and scenarios'"
+        [title-tooltip]="'Success rate and scenarios tooltip'"
+      >
+        <app-data-table
+          [data]="successRate$ || []"
+          [cols]="successRateCols"
+          [filter]="false"
+          [sort]="false"
+          [pagination]="false"
+        >
+        </app-data-table>
+      </app-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Documents'"
+        [title-tooltip]="'Documents tooltip'"
+      >
+      </app-card>
+    </div>
+  </div>
+</div>

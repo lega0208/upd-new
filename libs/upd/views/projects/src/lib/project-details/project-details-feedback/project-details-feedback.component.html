@@ -1,37 +1,64 @@
 <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col-lg-6 col-md-6 col-sm-12">
-        <app-charts
-          [title]="'Did you find what you were looking for?'"
-          [titleTooltip]="'Did you find what you were looking for? tooltip'"
-          [data]="dyfChart$"
-          [type]="'donut'"
-        ></app-charts>
-      </div>
-      <div class="col-lg-6 col-md-6 col-sm-12">
-        <app-charts
-          [title]="'What was wrong?'"
-          [titleTooltip]="'What was wrong? tooltip'"
-          [data]="whatWasWrongChart$"
-          [type]="'donut'"
-        ></app-charts>
-      </div>
+  <div class="row">
+    <div class="col-lg-6 col-md-6 col-sm-12">
+      <app-charts
+        [title]="'Did you find what you were looking for?'"
+        [titleTooltip]="'Did you find what you were looking for? tooltip'"
+        [data]="dyfChart$"
+        [type]="'donut'"
+      ></app-charts>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-12">
+      <app-charts
+        [title]="'What was wrong?'"
+        [titleTooltip]="'What was wrong? tooltip'"
+        [data]="whatWasWrongChart$"
+        [type]="'donut'"
+      ></app-charts>
     </div>
   </div>
-  
-  <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col">
-        <app-card
-          [card-title]="'Breakdown by Page - Did you find what you were looking for?'"
-          [title-tooltip]="'Breakdown by Page - Did you find what you were looking for? tooltip'"
-        >
-          <app-data-table
-            [data]="(visitsByPage$) || []"
-            [cols]="visitsByPageCols"
-          >
-          </app-data-table>
-        </app-card>
-      </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="
+          'Breakdown by Page - Did you find what you were looking for?'
+        "
+        [title-tooltip]="
+          'Breakdown by Page - Did you find what you were looking for? tooltip'
+        "
+      >
+        <app-data-table [data]="visitsByPage$ || []" [cols]="visitsByPageCols">
+        </app-data-table>
+      </app-card>
     </div>
   </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Total feedback by page'"
+        [title-tooltip]="'Total feedback by page tooltip'"
+      >
+        <p>No Page feedback comments/tags for selected date range</p>
+      </app-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Feedback by tags'"
+        [title-tooltip]="'eedback by tags tooltip'"
+      >
+        <p>No Page feedback comments/tags for selected date range</p>
+      </app-card>
+    </div>
+  </div>
+</div>
