@@ -1,1 +1,53 @@
-<p>project-details-summary works!</p>
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-6 col-sm-12">
+      <app-data-card
+        [current]="(avgTaskSuccessFromLastTest$ | percent) || 0"
+        [title]="'Average task success from last UX test'"
+        [tooltip]="'Average task success from last UX test tooltip'"
+      ></app-data-card>
+    </div>
+    <div class="col-lg-6 col-sm-12">
+      <app-data-card
+        [current]="(visits$ | number) || 0"
+        [title]="'Total visits from all pages'"
+        [tooltip]="'Total visits from all pages tooltip'"
+      ></app-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Participant tasks'"
+        [title-tooltip]="'Participant tasks tooltip'"
+      >
+        <app-data-table [data]="participantTasks$ || []" [cols]="participantTasksCols" [sort]="false" [pagination]="false" [filter]="false">
+        </app-data-table>
+      </app-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-6 col-md-6 col-sm-12">
+      <app-charts
+        [title]="'Did you find what you were looking for?'"
+        [titleTooltip]="'Did you find what you were looking for? tooltip'"
+        [data]="dyfChart$"
+        [type]="'donut'"
+      ></app-charts>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-12">
+      <app-charts
+        [title]="'What was wrong?'"
+        [titleTooltip]="'What was wrong? tooltip'"
+        [data]="whatWasWrongChart$"
+        [type]="'donut'"
+      ></app-charts>
+    </div>
+  </div>
+</div>

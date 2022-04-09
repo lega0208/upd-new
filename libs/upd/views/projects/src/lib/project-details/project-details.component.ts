@@ -7,7 +7,8 @@ import { ProjectsDetailsFacade } from './+state/projects-details.facade';
   styleUrls: ['./project-details.component.css'],
 })
 export class ProjectDetailsComponent implements OnInit {
-  title$ = this.projectsDetailsService.projectsDetailsData$;
+  title$ = this.projectsDetailsService.title$;
+  status$ = this.projectsDetailsService.status$;
 
   navTabs: { href: string; title: string }[] = [
     { href: 'summary', title: 'Summary' },
@@ -16,10 +17,11 @@ export class ProjectDetailsComponent implements OnInit {
     { href: 'feedback', title: 'Page Feedback' },
     { href: 'calldrivers', title: 'Call Drivers' },
     { href: 'uxtests', title: 'UX Tests' },
+    { href: 'details', title: 'Details' },
   ];
-  
+
   data$ = this.projectsDetailsService.projectsDetailsData$;
-  
+
   constructor(private readonly projectsDetailsService: ProjectsDetailsFacade) {}
 
   ngOnInit(): void {}
