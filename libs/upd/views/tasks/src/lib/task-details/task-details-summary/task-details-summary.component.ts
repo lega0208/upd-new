@@ -45,5 +45,7 @@ export class TaskDetailsSummaryComponent {
     { field: 'successRate', header: 'Success rate', pipe: 'percent' },
   ] as ColumnConfig[];
 
+  data$ = this.taskDetailsService.tasksDetailsData$;
+
   constructor(private readonly taskDetailsService: TasksDetailsFacade) {}
 }

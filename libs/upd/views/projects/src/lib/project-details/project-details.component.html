@@ -1,8 +1,12 @@
 <h2 class="h3 pt-2 pb-2" data-i18n="task-title">
-    Project: 
-    <!-- {{ title$ | async }} -->
-  </h2>
-  
-  <app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
-  <app-date-selector></app-date-selector>
+  Project: {{ title$ }}
+  <span class="h5 d-inline-block mb-0 align-top ms-1">
+    <span class="badge rounded-pill bg-planned align-middle">{{
+      status$
+    }}</span>
+  </span>
+</h2>
+
+<app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
+<app-date-selector></app-date-selector>
 <router-outlet></router-outlet>

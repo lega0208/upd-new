@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TaskDetailsWebtrafficComponent } from './task-details-webtraffic.component';
+import { TaskDetailsCalldriversComponent } from './task-details-calldrivers.component';
 
-describe('TaskDetailsWebtrafficComponent', () => {
-  let component: TaskDetailsWebtrafficComponent;
-  let fixture: ComponentFixture<TaskDetailsWebtrafficComponent>;
+describe('TaskDetailsCalldriversComponent', () => {
+  let component: TaskDetailsCalldriversComponent;
+  let fixture: ComponentFixture<TaskDetailsCalldriversComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TaskDetailsWebtrafficComponent],
+      declarations: [TaskDetailsCalldriversComponent],
     }).compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TaskDetailsWebtrafficComponent);
+    fixture = TestBed.createComponent(TaskDetailsCalldriversComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
