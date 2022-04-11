@@ -39,7 +39,9 @@
               "with": "apps/upd/src/environments/environment.prod.ts"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "generatePackageJson": true,
+          "buildLibsFromSource": true
         },
         "development": {
           "buildOptimizer": false,
