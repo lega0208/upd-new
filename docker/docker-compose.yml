@@ -1,0 +1,30 @@
+version: "3"
+services:
+  nginx:
+    image: "node_test-performance_nginx"
+    build:
+      context: ../
+      dockerfile: docker/performance_nginx/Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    restart: unless-stopped
+    container_name: node_test-performance_nginx
+    volumes:
+      - "../public:/var/www/html"
+  web:
+    image: "node_test-performance_web"
+    container_name: node_test-performance_web
+    restart: unless-stopped
+    build:
+      context: ../
+      dockerfile: docker/performance_web/Dockerfile
+      args:
+        - http_proxy=${HTTP_PROXY}
+        - https_proxy=${HTTP_PROXY}
+        - HTTP_PROXY=${HTTP_PROXY}
+        - HTTPS_PROXY=${HTTP_PROXY}
+    ports:
+      - "9000"
