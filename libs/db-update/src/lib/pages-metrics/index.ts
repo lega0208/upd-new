@@ -78,10 +78,12 @@ export async function updatePageMetrics() {
   // get dates required for query
   const latestDateResults = await pageMetricsModel
     .findOne({}, { date: 1 })
-    .sort({ date: -1 });
+    .sort({ date: -1 })
+    .lean()
+    .exec() as unknown as PageMetrics;
 
   // get the most recent date from the DB, and set the start date to the next day
-  const latestDate = dayjs.utc(latestDateResults['date']);
+  const latestDate = dayjs.utc(latestDateResults?.date);
   const startTime = latestDate.add(1, 'day');
 
   // collect data up to the start of the current day/end of the previous day

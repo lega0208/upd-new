@@ -1,12 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types } from 'mongoose';
+import { Document, Model, Types } from 'mongoose';
 import { UxTest } from './ux-test.schema';
 import { Page } from './page.schema';
 import { Project } from './project.schema';
+import { registerDiscriminator } from './collection.schema';
 
 export type TaskDocument = Task & Document;
 
-@Schema()
+@Schema({ discriminatorKey: '_type' })
 export class Task {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -44,8 +45,15 @@ export class Task {
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
 
-export const taskModel = model(Task.name, TaskSchema);
-
-export function getTaskModel(): Model<Document<Task>> {
-  return taskModel;
+export const TaskConfig = {
+  name: Task.name,
+  schema: TaskSchema,
+  value: 'tasks',
 }
+
+const taskModel = registerDiscriminator(TaskConfig);
+
+export function getTaskModel() {
+  return taskModel as Model<TaskDocument>;
+}
+

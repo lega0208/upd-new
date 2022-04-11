@@ -1,10 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types } from 'mongoose';
+import { Document, Model, Types } from 'mongoose';
 import { GscSearchTermMetrics } from './types';
+import { registerDiscriminator } from './collection.schema';
 
 export type OverallDocument = Overall & Document;
 
-@Schema({ collection: 'overall_metrics' })
+@Schema({ discriminatorKey: '_type' })
 export class Overall {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -192,9 +193,16 @@ export class Overall {
   gsc_searchterms?: GscSearchTermMetrics[];
 }
 
-
 export const OverallSchema = SchemaFactory.createForClass(Overall);
 
-export function getOverallModel(): Model<Document<Overall>> {
-  return model(Overall.name, OverallSchema);
+export const OverallConfig = {
+  name: Overall.name,
+  schema: OverallSchema,
 }
+
+const overallModel = registerDiscriminator(OverallConfig);
+
+export function getOverallModel() {
+  return overallModel as Model<OverallDocument>;
+}
+

@@ -2,7 +2,7 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
-import { PageMetrics, Project, Task, UxTest } from '@cra-arc/db';
+import { PageMetrics, Project, Task, UxTest, getProjectModel, getTaskModel, getUxTestModel } from '@cra-arc/db';
 import type {
   PageMetricsModel,
   ProjectDocument,
@@ -127,17 +127,18 @@ async function getTaskAggregatedData(
       fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
       fwylfOther: { $sum: '$fwylf_other' },
     })
-    .lookup({
-      from: 'pages',
-      localField: '_id',
-      foreignField: 'url', // not all_urls...
-      as: 'page',
-    })
-    .unwind('$page')
-    .replaceRoot({
-      $mergeObjects: ['$$ROOT', '$page']
-    })
-    .project({ page: 0 })
+    // .lookup({
+    //   from: 'pages',
+    //   localField: '_id',
+    //   foreignField: 'url', // not all_urls...
+    //   as: 'page',
+    // })
+    // .unwind('$page')
+    // .replaceRoot({
+    //   $mergeObjects: ['$$ROOT', '$page']
+    // })
+    .addFields({ url: '$_id' })
+    .project({ _id: 0 })
     .group({
       _id: null,
       visits: { $sum: '$visits' },

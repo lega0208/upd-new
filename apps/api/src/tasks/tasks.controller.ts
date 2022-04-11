@@ -11,11 +11,14 @@ export class TasksController {
   }
 
   @Get('details')
-  getTaskDetails(
+  async getTaskDetails(
     @Query('id') id: string,
     @Query('dateRange') dateRange: string,
     @Query('comparisonDateRange') comparisonDateRange: string,
   ) {
-    return this.tasksService.getTaskDetails({ id, dateRange, comparisonDateRange });
+    const queryResults = await this.tasksService.getTaskDetails({ id, dateRange, comparisonDateRange });
+    console.log(queryResults);
+
+    return queryResults;
   }
 }

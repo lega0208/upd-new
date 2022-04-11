@@ -1,6 +1,7 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cache } from 'cache-manager';
+import { getPageModel } from '@cra-arc/db';
 import {
   Page,
   PageAggregatedData,
@@ -18,8 +19,8 @@ import { ApiParams } from '@cra-arc/upd/services';
 @Injectable()
 export class PagesService {
   constructor(
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
+    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -39,7 +40,7 @@ export class PagesService {
     }
 
     const selectedPages: Page[] = await this.pageModel
-      .find({ airtableId: { $exists: true } })
+      .find({ airtable_id: { $exists: true } })
       .lean();
 
     const results =
@@ -167,6 +168,8 @@ export class PagesService {
         ]
       )
     )[0];
+
+    console.log(comparisonDateRangeData);
 
     const comparisonDateRangeDataByDay = await this.getPageDetailsDataByDay(
       page,

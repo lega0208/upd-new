@@ -8,16 +8,12 @@ import {
   PageMetricsSchema,
   PageMetrics,
   TaskSchema,
-  Task,
+  Task, DbModule
 } from '@cra-arc/db';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Page.name, schema: PageSchema },
-      { name: PageMetrics.name, schema: PageMetricsSchema },
-      { name: Task.name, schema: TaskSchema },
-    ]),
+    DbModule,
     CacheModule.register(),
   ],
   controllers: [PagesController],

@@ -10,8 +10,8 @@ import { ProjectsHomeData } from '@cra-arc/types-common';
 @Injectable()
 export class ProjectsService {
   constructor(
-    @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
+    @InjectModel(Project.name) private projectsModel: Model<ProjectDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
