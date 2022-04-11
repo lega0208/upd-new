@@ -1,1 +1,30 @@
-<p>project-details-webtraffic works!</p>
+<div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col-lg-4 col-sm-12">
+        <app-data-card
+          [current]="(visits$ | number) || 0"
+          [comparison]="0"
+          [title]="'Total visits from all pages'"
+          [tooltip]="'Total visits from all pages tooltip'"
+        ></app-data-card>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <app-card
+          [card-title]="'Visits by page'"
+          [title-tooltip]="'Visits by page tooltip'"
+        >
+          <app-data-table
+            [data]="(visitsByPage$) || []"
+            [cols]="visitsByPageCols"
+          >
+          </app-data-table>
+        </app-card>
+      </div>
+    </div>
+  </div>
+  

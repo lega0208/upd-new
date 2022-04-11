@@ -126,6 +126,10 @@ async function getTaskAggregatedData(
       fwylfError: { $sum: '$fwylf_error' },
       fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
       fwylfOther: { $sum: '$fwylf_other' },
+      gscTotalClicks: { $sum: '$gsc_total_clicks' },
+      gscTotalImpressions: { $sum: '$gsc_total_impressions' },
+      gscTotalCtr: { $avg: '$gsc_total_ctr' },
+      gscTotalPosition: { $avg: '$gsc_total_position' },
     })
     // .lookup({
     //   from: 'pages',
@@ -148,6 +152,10 @@ async function getTaskAggregatedData(
       fwylfError: { $sum: '$fwylfError' },
       fwylfHardToUnderstand: { $sum: '$fwylfHardToUnderstand' },
       fwylfOther: { $sum: '$fwylfOther' },
+      gscTotalClicks: { $sum: '$gscTotalClicks' },
+      gscTotalImpressions: { $sum: '$gscTotalImpressions' },
+      gscTotalCtr: { $avg: '$gscTotalCtr' },
+      gscTotalPosition: { $avg: '$gscTotalPosition' },
       visitsByPage: { $addToSet: '$$ROOT' },
     })
     .project({ _id: 0 })

@@ -1,0 +1,47 @@
+<div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col-lg-12">
+      <app-card
+      [card-title]="'Project description'"
+      [title-tooltip]="'Project description tooltip'"
+    ></app-card>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <app-card
+          [card-title]="'Task success by UX test'"
+          [title-tooltip]="'Task success by UX test tooltip'"
+        >
+          <app-data-table
+            [data]="(memberList$) || []"
+            [cols]="memberListCols"
+            [pagination]="false"
+            [filter]="false"
+            [sort]="false"
+          >
+          </app-data-table>
+        </app-card>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col-lg-12">
+      <app-card
+      [card-title]="'Timeline'"
+      [title-tooltip]="'Timeline tooltip'"
+    >
+    <p>Start Date:</p>
+    <p>Launch Date:</p>
+    <p>Completed:</p>
+    <p>Year review:</p>
+
+</app-card>
+      </div>
+    </div>
+  </div>

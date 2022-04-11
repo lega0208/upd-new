@@ -1,1 +1,40 @@
-<p>project-details-search-analytics works!</p>
+<div class="container-fluid gx-0">
+    <div class="row">
+      <div class="col">
+        <app-data-card
+          [current]="(gscTotalImpressions$ | number) || 0"
+          [comparison]="0"
+          [title]="'Total impressions from Google'"
+        ></app-data-card>
+      </div>
+      <div class="col">
+        <app-data-card
+          [current]="(gscTotalCtr$ | percent) || 0"
+          [title]="'Click through rate from Google'"
+        ></app-data-card>
+      </div>
+      <div class="col">
+        <app-data-card
+          [current]="(gscTotalPosition$ | number: '1.0-2') || 0"
+          [title]="'Average rank on Google'"
+        ></app-data-card>
+      </div>
+    </div>
+  </div>
+
+<div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <app-card
+          [card-title]="'Breakdown by Page - Search from Google'"
+          [title-tooltip]="'Breakdown by Page - Search from Google tooltip'"
+        >
+          <app-data-table
+            [data]="(visitsByPage$ ) || []"
+            [cols]="visitsByPageCols"
+          >
+          </app-data-table>
+        </app-card>
+      </div>
+    </div>
+  </div>

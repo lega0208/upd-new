@@ -23,14 +23,44 @@
   <div class="row">
     <div class="col">
       <app-card
-        [card-title]="'Visits by page'"
-        [title-tooltip]="'Visits by page tooltip'"
+        [card-title]="
+          'Breakdown by Page - Did you find what you were looking for?'
+        "
+        [title-tooltip]="
+          'Breakdown by Page - Did you find what you were looking for? tooltip'
+        "
       >
         <app-data-table
           [data]="(visitsByPage$ | async) || []"
           [cols]="visitsByPageCols"
         >
         </app-data-table>
+      </app-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Total feedback by page'"
+        [title-tooltip]="'Total feedback by page tooltip'"
+      >
+        <p>No Page feedback comments/tags for selected date range</p>
+      </app-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-card
+        [card-title]="'Feedback by tags'"
+        [title-tooltip]="'eedback by tags tooltip'"
+      >
+        <p>No Page feedback comments/tags for selected date range</p>
       </app-card>
     </div>
   </div>

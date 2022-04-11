@@ -1,14 +1,14 @@
-import { Component } from '@angular/core';
-import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
+import { MultiSeries } from '@amonsour/ngx-charts';
+import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
-import { OverviewFacade } from '../+state/overview/overview.facade';
+import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 @Component({
-  selector: 'app-overview-calldrivers',
-  templateUrl: './overview-calldrivers.component.html',
-  styleUrls: ['./overview-calldrivers.component.css'],
+  selector: 'app-project-details-calldrivers',
+  templateUrl: './project-details-calldrivers.component.html',
+  styleUrls: ['./project-details-calldrivers.component.css'],
 })
-export class OverviewCalldriversComponent {
+export class ProjectDetailsCalldriversComponent {
   bar: MultiSeries = [
     {
       name: 'Feb 27-Mar 05',
@@ -69,5 +69,6 @@ export class OverviewCalldriversComponent {
       header: 'Number of calls for Mar 06-Mar 12',
     },
   ];
-  constructor(private overviewService: OverviewFacade) {}
+
+  constructor(private readonly projectsDetailsService: ProjectsDetailsFacade) {}
 }
