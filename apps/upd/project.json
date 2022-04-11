@@ -17,7 +17,8 @@
         "assets": ["apps/upd/src/favicon.ico", "apps/upd/src/assets"],
         "styles": ["apps/upd/src/styles.scss"],
         "scripts": [],
-        "buildLibsFromSource": false
+        "statsJson": true,
+        "vendorChunk": true
       },
       "configurations": {
         "production": {
@@ -25,7 +26,7 @@
             {
               "type": "initial",
               "maximumWarning": "500kb",
-              "maximumError": "1mb"
+              "maximumError": "1.5mb"
             },
             {
               "type": "anyComponentStyle",
@@ -40,7 +41,6 @@
             }
           ],
           "outputHashing": "all",
-          "generatePackageJson": true,
           "buildLibsFromSource": true
         },
         "development": {
@@ -50,7 +50,8 @@
           "extractLicenses": false,
           "sourceMap": true,
           "namedChunks": true,
-          "verbose": true
+          "verbose": true,
+          "buildLibsFromSource": false
         }
       },
       "defaultConfiguration": "production"

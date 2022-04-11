@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { PagesHomeFacade } from '@cra-arc/upd/views/pages';
+import { PagesHomeFacade } from './+state/pages-home.facade';
 
 import { ColumnConfig } from '@cra-arc/upd-components';
 
