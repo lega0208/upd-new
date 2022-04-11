@@ -1,7 +1,7 @@
 version: "3"
 services:
   nginx:
-    image: "node_test-performance_nginx"
+    image: "upd_nginx"
     build:
       context: ../
       dockerfile: docker/performance_nginx/Dockerfile
@@ -11,12 +11,10 @@ services:
     depends_on:
       - web
     restart: unless-stopped
-    container_name: node_test-performance_nginx
-    volumes:
-      - "../public:/var/www/html"
+    container_name: upd_nginx
   web:
-    image: "node_test-performance_web"
-    container_name: node_test-performance_web
+    image: "upd_web"
+    container_name: upd_web
     restart: unless-stopped
     build:
       context: ../

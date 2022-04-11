@@ -1,13 +1,14 @@
 # syntax=docker/dockerfile:1
-FROM node:16-alpine3.13
+FROM node:16-alpine3.15
+
+USER node
+
 ENV NODE_ENV=production
 
-COPY ["package.json", "package-lock.json", "./"]
+COPY --from=upd-node-base --chown=node:node api/ .
 
-RUN npm ci
-
-COPY . .
+RUN npm install pm2 -g
 
 EXPOSE 9000
 
-CMD npx pm2-runtime start ./bin/www
+CMD ["pm2-runtime", "main.js"]
