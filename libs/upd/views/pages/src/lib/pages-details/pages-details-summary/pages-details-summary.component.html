@@ -4,8 +4,8 @@
       <app-data-card
         [current]="(visitors$ | async | number) || 0"
         [comparison]="(visitorsPercentChange$ | async) || 0"
-        [title]="'Unique visitors'"
-        [tooltip]="'Visitors tooltip'"
+        [title]="'unique-visitors'"
+        [tooltip]="'tooltip-unique-visitors'"
       ></app-data-card>
     </div>
 
@@ -13,8 +13,8 @@
       <app-data-card
         [current]="(visits$ | async | number) || 0"
         [comparison]="(visitsPercentChange$ | async) || 0"
-        [title]="'Visits'"
-        [tooltip]="'Visits tooltip'"
+        [title]="'visits'"
+        [tooltip]="'tooltip-visits'"
       ></app-data-card>
     </div>
 
@@ -22,8 +22,8 @@
       <app-data-card
         [current]="(pageViews$ | async | number) || 0"
         [comparison]="(pageViewsPercentChange$ | async) || 0"
-        [title]="'Page views'"
-        [tooltip]="'Page views tooltip'"
+        [title]="'page-views'"
+        [tooltip]="'tooltip-page-views'"
       ></app-data-card>
     </div>
   </div>
@@ -34,8 +34,8 @@
     <div class="col">
       <app-charts
         type="grouped-bar"
-        title="Visits by device type"
-        titleTooltip="Visits by device type tooltip"
+        [title]="'d3-visits-by-device-type'"
+        titleTooltip="{{'tooltip-d3-visits-by-device-type' | translate}}"
         [data]="visitsByDeviceType$ | async"
         [showLegend]="true"
       ></app-charts>

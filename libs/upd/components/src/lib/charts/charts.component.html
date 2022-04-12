@@ -1,5 +1,5 @@
 <app-card [card-title]="title" [title-tooltip]="titleTooltip">
-  <div [style.padding]="'0px'" [style.height]="'100%'"
+  <div class="vh-45" [style.padding]="'0px'"
     [ngClass]="showRightYAxisLabel ? 'mr-80' : ''"
   >
     <ng-container *ngIf="type === 'combo-bar-line'">
@@ -287,12 +287,20 @@
 
   <div class="pt-3">
     <app-accordion>
-      <app-data-table
+      <app-data-table *ngIf="table"
         [filter]="false"
         [sort]="false"
         [pagination]="false"
-        [data]="chartData"
-        [cols]="chartDataCols"
+        [data]="table"
+        [cols]="tableCols"
+      ></app-data-table>
+
+      <app-data-table *ngIf="!table"
+        [filter]="false"
+        [sort]="false"
+        [pagination]="false"
+        [data]="data"
+        [cols]="tableCols"
       ></app-data-table>
     </app-accordion>
   </div>

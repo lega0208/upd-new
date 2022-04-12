@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 
+import { TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-data-card',
   templateUrl: './data-card.component.html',
@@ -16,7 +17,7 @@ export class DataCardComponent {
   textStyle: string = '';
   isPast = 0;
 
-  constructor() {}
+  constructor(public translateService: TranslateService) {}
 }
 
 const diff = (a: number, b: number) => {

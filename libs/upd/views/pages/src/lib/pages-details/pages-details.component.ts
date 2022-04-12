@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PagesDetailsFacade } from './+state/pages-details.facade';
 
+import { TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-page-details',
   templateUrl: './pages-details.component.html',
@@ -15,12 +16,12 @@ export class PagesDetailsComponent implements OnInit {
   navTabs: { href: string; title: string }[] = [
     { href: 'summary', title: 'Summary' },
     { href: 'webtraffic', title: 'Web Traffic' },
-    { href: 'search_analytics', title: 'Search Analytics' },
-    { href: 'feedback', title: 'Page Feedback' },
+    { href: 'searchanalytics', title: 'Search Analytics' },
+    { href: 'pagefeedback', title: 'Page Feedback' },
     // { href: 'details', title: 'Details' },
   ];
 
-  constructor(private pageDetailsService: PagesDetailsFacade) {}
+  constructor(private pageDetailsService: PagesDetailsFacade, public translateService:TranslateService) {}
 
   ngOnInit(): void {
     this.pageDetailsService.init();

@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
+import { ColumnConfig } from '@cra-arc/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { Metrics } from '../query';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-overview-summary',
@@ -32,9 +34,18 @@ export class OverviewSummaryComponent {
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
 
+  dyfTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'Selection' },
+    { field: 'value', header: 'Visits', pipe: 'number' },
+  ]
+  whatWasWrongTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'What was wrong' },
+    { field: 'value', header: 'Visits', pipe: 'number' },
+  ]
+
   barChartData$ = this.overviewService.visitsByDay$;
 
-  constructor(private overviewService: OverviewFacade) {}
+  constructor(private overviewService: OverviewFacade, public translateService: TranslateService) {}
 }
 
 const taskSurvey = [

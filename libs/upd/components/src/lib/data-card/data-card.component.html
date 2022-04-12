@@ -7,7 +7,7 @@
       <div class="row row-no-gutters">
         <div class="col">
           <p class="h3 w-100">
-            {{ comparison | percent }}
+            {{ comparison | percent : undefined :  translateService.currentLang }}
           </p>
         </div>
       </div>
@@ -63,7 +63,7 @@
             }"
             class="h3 float-end"
           >
-            {{ comparison | percent }}
+            {{ comparison | percent : undefined :  translateService.currentLang }}
           </span>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgbAlert } from '@ng-bootstrap/ng-bootstrap';
 
+import { TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-alert',
   templateUrl: './alert.component.html',
@@ -15,7 +16,9 @@ export class AlertComponent implements OnInit {
   @Input() selfClosing = true;
   @Input() position: Position = 'static';
   style = '';
-
+  
+  constructor(public translateService:TranslateService) {}
+  
   ngOnInit(): void {
     if (this.selfClosing)
       setTimeout(() => this.staticAlert.close(), this.secondsTimeout * 1000);

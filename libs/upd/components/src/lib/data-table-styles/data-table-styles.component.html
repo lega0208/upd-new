@@ -2,24 +2,11 @@
   <a *ngIf="config.type === 'link'" [routerLink]="[data[config.typeParam]]">
     {{ data[config.field] }}
   </a>
-  <span
+  <ng-container
     *ngIf="config.type === 'label' && config.typeParam !== 'cops'"
-    class="badge"
-    [ngClass]="{
-      'rounded-pill bg-completed align-middle':
-        config.typeParam === 'status' && data[config.field] === 'Complete',
-      'rounded-pill bg-planned align-middle':
-        config.typeParam === 'status' && data[config.field] === 'Planning',
-      'rounded-pill bg-delayed align-middle':
-        config.typeParam === 'status' && data[config.field] === 'Delayed',
-      'rounded-pill bg-inProgress align-middle':
-        config.typeParam === 'status' && data[config.field] === 'In progress',
-      'rounded-pill bg-unknown align-middle':
-        config.typeParam === 'status' && data[config.field] === 'Unknown'
-    }"
   >
-    {{ data[config.field] }}
-  </span>
+    <app-project-status-label [statusText]="data[config.field]"></app-project-status-label>
+  </ng-container>
   <span
     *ngIf="config.type === 'label' && config.typeParam === 'cops' && data[config.field] === true"
     class="badge"
@@ -66,15 +53,7 @@
 </ng-container>
 
 <ng-container *ngIf="hasPipe && !hasType">
-  <ng-container *ngIf="config.pipe === 'number'">
-    {{ data[config.field] | number: config.pipeParam }}
-  </ng-container>
-  <ng-container *ngIf="config.pipe === 'percent'">
-    {{ data[config.field] | percent }}
-  </ng-container>
-  <ng-container *ngIf="config.pipe === 'date'">
-    {{ data[config.field] | date: config.pipeParam }}
-  </ng-container>
+ {{ numberVal }}
 </ng-container>
 
 <ng-container *ngIf="!hasType && !hasPipe">

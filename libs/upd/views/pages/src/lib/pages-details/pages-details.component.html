@@ -16,6 +16,7 @@
       cdkCopyToClipboard="{{url$ | async}}"
       [cdkCopyToClipboardAttempts]="5"
       (click)="toggleAlert()"
+	  translate
       ><span class="material-icons align-top">content_copy</span> Copy URL</span
     >
     <ng-container *ngIf="showAlert">

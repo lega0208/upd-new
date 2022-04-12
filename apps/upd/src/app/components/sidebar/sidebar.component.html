@@ -2,9 +2,13 @@
   <nav class="nav">
     <div>
       <a class="nav_logo">
-        <span class="material-icons nav_logo-icon">leaderboard</span>
-        <span class="nav_logo-name">UPD</span>
-      </a>
+        <!--<span class="material-icons nav_logo-icon">leaderboard</span>
+         <span class="nav_logo-name">UPD</span> -->
+         <img
+         src="../../../assets/img/upd-logo.png"
+         alt="Usability Performance Dashboard"
+		 > 	
+		</a>
       <div class="nav_list mt-5">
         <!-- <a class="nav_link active" aria-current="page" id="active"> <span class="material-icons nav_icon">home</span> <span class="nav_name" data-i18n="menu-overview">Overview</span> </a> -->
         <a
@@ -15,7 +19,7 @@
           id="active"
         >
           <span class="material-icons nav_icon">home</span>
-          <span class="nav_name" data-i18n="menu-overview">Overview</span>
+          <span class="nav_name" data-i18n="menu-overview">{{'menu-overview' | translate}}</span>
         </a>
         <a
           [routerLink]="['/pages']"
@@ -23,7 +27,7 @@
           class="nav_link"
         >
           <span class="material-icons nav_icon">layers</span>
-          <span class="nav_name" data-i18n="menu-pages">Pages</span>
+          <span class="nav_name" data-i18n="menu-pages">{{'menu-pages' | translate}}</span>
         </a>
         <a
           [routerLink]="['/tasks']"
@@ -31,7 +35,7 @@
           class="nav_link"
         >
           <span class="material-icons nav_icon">assignment</span>
-          <span class="nav_name" data-i18n="menu-tasks">Tasks</span>
+          <span class="nav_name" data-i18n="menu-tasks">{{'menu-tasks' | translate}}</span>
         </a>
         <a
           [routerLink]="['/projects']"
@@ -39,14 +43,14 @@
           class="nav_link"
         >
           <span class="material-icons nav_icon">folder</span>
-          <span class="nav_name" data-i18n="menu-projects">Projects</span>
+          <span class="nav_name" data-i18n="menu-projects">{{'menu-projects' | translate}}</span>
         </a>
       </div>
     </div>
     <div class="mb-4">
       <a href="mailto:DUAADCG@cra-arc.gc.ca?subject=Feedback for UPD (Usability Performance Dashboard)&body=" class="nav_link">
         <span class="material-icons nav_icon">feedback</span>
-        <span class="nav_name" data-i18n="menu-feedback">Feedback</span>
+        <span class="nav_name" data-i18n="menu-feedback">{{'menu-feedback' | translate}}</span>
       </a>
       <a class="nav_link">
         <span class="material-icons nav_icon pointer" id="header-toggle"

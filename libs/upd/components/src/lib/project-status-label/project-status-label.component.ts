@@ -6,13 +6,17 @@ import { ProjectStatus } from '@cra-arc/types-common';
   template: `
     <span class="badge {{ classMap[statusText] }}">{{ statusText }}</span>
   `,
-  styles: []
+  styleUrls: ['./project-status-label.component.scss']
 })
 export class ProjectStatusLabelComponent {
   @Input() statusText: ProjectStatus = 'Unknown';
 
   // Change type to Record<ProjectStatus, string>
   classMap: Record<string, string> = {
-    'Unknown': 'bg-secondary',
+    'Unknown': 'bg-unknown',
+    'Planning': 'bg-planning',
+    'In progress': 'bg-in-progress',
+    'Complete': 'bg-complete',
+    'Delayed': 'bg-delayed',
   }
 }

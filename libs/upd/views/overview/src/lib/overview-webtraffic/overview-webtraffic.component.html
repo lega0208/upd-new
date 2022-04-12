@@ -33,6 +33,8 @@
       [showLegend]="true"
       [data]="barChartData$ | async"
       type="grouped-bar"
+      [table]="barTable$ | async"
+      [tableCols]="barTableCols"
     ></app-charts>
   </div>
 </div>

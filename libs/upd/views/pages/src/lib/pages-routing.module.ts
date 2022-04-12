@@ -23,10 +23,10 @@ const routes: Routes = [
           { path: 'summary', component: PagesDetailsSummaryComponent },
           { path: 'webtraffic', component: PagesDetailsWebtrafficComponent },
           {
-            path: 'search_analytics',
+            path: 'searchanalytics',
             component: PagesDetailsSearchAnalyticsComponent,
           },
-          { path: 'feedback', component: PagesDetailsFeedbackComponent },
+          { path: 'pagefeedback', component: PagesDetailsFeedbackComponent },
         ],
       },
     ],

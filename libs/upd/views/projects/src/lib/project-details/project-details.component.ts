@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ProjectStatus } from '@cra-arc/types-common';
 import { ProjectsDetailsFacade } from './+state/projects-details.facade';
 
 @Component({
@@ -8,7 +9,7 @@ import { ProjectsDetailsFacade } from './+state/projects-details.facade';
 })
 export class ProjectDetailsComponent implements OnInit {
   title$ = this.projectsDetailsService.title$;
-  status$ = this.projectsDetailsService.status$;
+  status$ = this.projectsDetailsService.status$ as ProjectStatus;
 
   navTabs: { href: string; title: string }[] = [
     { href: 'summary', title: 'Summary' },
