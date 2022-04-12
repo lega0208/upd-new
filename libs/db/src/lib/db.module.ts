@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { getDbConnectionString } from './db.connection';
-import { Collection, CollectionSchema, registerDiscriminator } from './schemas/collection.schema';
+import { Collection, CollectionSchema } from './schemas/collection.schema';
 import {
   CalldriversConfig,
   FeedbackConfig,
   OverallConfig,
-  PageConfig, PageMetrics, PageMetricsSchema,
+  PageConfig,
+  PageMetrics,
+  PageMetricsSchema,
   ProjectConfig,
   TaskConfig,
-  UxTestConfig
+  UxTestConfig,
 } from './db.schemas';
 
 @Module({
@@ -34,20 +35,4 @@ import {
   providers: [],
   exports: [MongooseModule],
 })
-export class DbModule {
-  // constructor() {
-  //   const discriminatorConfigs = [
-  //     CalldriversConfig,
-  //     FeedbackConfig,
-  //     OverallConfig,
-  //     PageConfig,
-  //     ProjectConfig,
-  //     TaskConfig,
-  //     UxTestConfig,
-  //   ];
-  //
-  //   for (const config of discriminatorConfigs) {
-  //     registerDiscriminator(config);
-  //   }
-  // }
-}
+export class DbModule {}

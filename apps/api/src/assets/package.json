@@ -1,0 +1,9 @@
+{
+  "name": "api",
+  "version": "0.0.1",
+  "dependencies": {
+    "mongoose": "^6.2.10",
+    "cache-manager": "^3.6.0"
+  },
+  "main": "main.js"
+}

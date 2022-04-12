@@ -7,7 +7,7 @@ import { registerDiscriminator } from './collection.schema';
 
 export type ProjectDocument = Project & Document;
 
-@Schema({ discriminatorKey: '_type' })
+@Schema()
 export class Project {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -30,12 +30,9 @@ export const ProjectSchema = SchemaFactory.createForClass(Project);
 export const ProjectConfig = {
   name: Project.name,
   schema: ProjectSchema,
-  value: 'projects',
 }
 
-const projectModel = registerDiscriminator(ProjectConfig);
-
 export function getProjectModel() {
-  return projectModel as Model<ProjectDocument>;
+  return registerDiscriminator(ProjectConfig);
 }
 

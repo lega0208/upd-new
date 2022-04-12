@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Overall, OverallDocument, getOverallModel } from '@cra-arc/db';
+import { Overall, OverallDocument } from '@cra-arc/db';
 import type { PageMetricsModel } from '@cra-arc/types-common';
 import { FilterQuery, Model } from 'mongoose';
 import { ApiParams } from '@cra-arc/upd/services';

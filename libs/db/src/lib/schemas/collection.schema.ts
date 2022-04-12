@@ -17,11 +17,16 @@ export const collectionModel = mongoose.model(
 export const registerDiscriminator = (config: {
   name: string;
   schema: mongoose.Schema;
-  value?: string;
+  overwriteModels?: boolean;
 }) => {
+  console.log(collectionModel.discriminators);
+  if (collectionModel.discriminators && collectionModel.discriminators[config.name]) {
+    return collectionModel.discriminators[config.name];
+  }
+
   return collectionModel.discriminator(
     config.name,
-    config.schema
+    config.schema,
   );
 };
 

@@ -7,7 +7,7 @@ import { registerDiscriminator } from './collection.schema';
 
 export type TaskDocument = Task & Document;
 
-@Schema({ discriminatorKey: '_type' })
+@Schema()
 export class Task {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -48,12 +48,9 @@ export const TaskSchema = SchemaFactory.createForClass(Task);
 export const TaskConfig = {
   name: Task.name,
   schema: TaskSchema,
-  value: 'tasks',
 }
 
-const taskModel = registerDiscriminator(TaskConfig);
-
 export function getTaskModel() {
-  return taskModel as Model<TaskDocument>;
+  return registerDiscriminator(TaskConfig);
 }
 

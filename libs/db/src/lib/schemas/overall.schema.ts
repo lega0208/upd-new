@@ -5,7 +5,7 @@ import { registerDiscriminator } from './collection.schema';
 
 export type OverallDocument = Overall & Document;
 
-@Schema({ discriminatorKey: '_type' })
+@Schema()
 export class Overall {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -200,9 +200,7 @@ export const OverallConfig = {
   schema: OverallSchema,
 }
 
-const overallModel = registerDiscriminator(OverallConfig);
-
 export function getOverallModel() {
-  return overallModel as Model<OverallDocument>;
+  return registerDiscriminator(OverallConfig);
 }
 

@@ -7,7 +7,7 @@ import { registerDiscriminator } from './collection.schema';
 
 export type PageDocument = Page & Document;
 
-@Schema({ discriminatorKey: '_type' })
+@Schema()
 export class Page {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -51,12 +51,9 @@ export const PageSchema = SchemaFactory.createForClass(Page);
 export const PageConfig = {
   name: Page.name,
   schema: PageSchema,
-  value: 'pages',
 }
 
-const pageModel = registerDiscriminator(PageConfig);
-
 export function getPageModel() {
-  return pageModel as Model<PageDocument>;
+  return registerDiscriminator(PageConfig);
 }
 

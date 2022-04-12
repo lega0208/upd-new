@@ -169,8 +169,6 @@ export class PagesService {
       )
     )[0];
 
-    console.log(comparisonDateRangeData);
-
     const comparisonDateRangeDataByDay = await this.getPageDetailsDataByDay(
       page,
       params.comparisonDateRange

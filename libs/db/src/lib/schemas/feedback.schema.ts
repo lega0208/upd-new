@@ -4,7 +4,7 @@ import { registerDiscriminator } from './collection.schema';
 
 export type FeedbackDocument = Feedback & Document;
 
-@Schema({ discriminatorKey: '_type' })
+@Schema()
 export class Feedback {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -41,9 +41,7 @@ export const FeedbackConfig = {
   schema: FeedbackSchema,
 }
 
-const feedbackModel = registerDiscriminator(FeedbackConfig);
-
 export function getFeedbackModel() {
-  return feedbackModel as Model<Document<Feedback>>;
+  return registerDiscriminator(FeedbackConfig);
 }
 

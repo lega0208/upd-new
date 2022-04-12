@@ -4,7 +4,7 @@ import { registerDiscriminator } from './collection.schema';
 
 export type CallDriverDocument = CallDriver & Document;
 
-@Schema({ discriminatorKey: '_type' })
+@Schema()
 export class CallDriver {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -44,9 +44,7 @@ export const CalldriversConfig = {
   schema: CallDriverSchema,
 }
 
-const callDriversModel = registerDiscriminator(CalldriversConfig);
-
 export function getCallDriversModel() {
-  return callDriversModel as Model<Document<CallDriver>>;
+  return registerDiscriminator(CalldriversConfig)
 }
 

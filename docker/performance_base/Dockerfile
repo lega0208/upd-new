@@ -3,12 +3,14 @@ FROM node:16-alpine3.15 as builder
 
 ENV NODE_ENV=production
 
+ENV NX_DAEMON=false
+
 COPY ["package.json", "package-lock.json", "decorate-angular-cli.js", "./"]
 
 RUN npm ci
 
 COPY . .
 
-RUN npx nx run-many --target=build --projects=api,upd
+RUN npm run build
 
-COPY dist/apps/ .
+RUN npm prune --production

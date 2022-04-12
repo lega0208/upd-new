@@ -7,7 +7,7 @@ import { registerDiscriminator } from './collection.schema';
 
 export type UxTestDocument = UxTest & Document;
 
-@Schema({ discriminatorKey: '_type' })
+@Schema()
 export class UxTest {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -81,11 +81,8 @@ export const UxTestSchema = SchemaFactory.createForClass(UxTest);
 export const UxTestConfig = {
   name: UxTest.name,
   schema: UxTestSchema,
-  value: 'ux_tests',
 }
 
-const uxTestModel = registerDiscriminator(UxTestConfig);
-
 export function getUxTestModel() {
-  return uxTestModel as Model<UxTestDocument>;
+  return registerDiscriminator(UxTestConfig);
 }

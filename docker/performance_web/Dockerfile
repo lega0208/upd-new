@@ -1,13 +1,15 @@
 # syntax=docker/dockerfile:1
 FROM node:16-alpine3.15
 
+RUN npm install pm2 -g
+
 USER node
 
 ENV NODE_ENV=production
 
-COPY --from=upd-node-base --chown=node:node api/ .
+COPY dist/apps/api/ .
 
-RUN npm install pm2 -g
+COPY .env .
 
 EXPOSE 9000
 
