@@ -14,16 +14,17 @@
   <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
-        <app-card
-          [card-title]="'Visits by page'"
-          [title-tooltip]="'Visits by page tooltip'"
-        >
-          <app-data-table
-            [data]="(visitsByPage$) || []"
-            [cols]="visitsByPageCols"
-          >
-          </app-data-table>
-        </app-card>
+        <app-data-table-card
+        [data]="(visitsByPage$) || []"
+        [cols]="visitsByPageCols"
+      [sort]="false" 
+      [pagination]="false" 
+      [filter]="false"
+      title="Visits by page"
+      tooltip="Visits by page tooltip"
+    >
+    </app-data-table-card>
+
       </div>
     </div>
   </div>

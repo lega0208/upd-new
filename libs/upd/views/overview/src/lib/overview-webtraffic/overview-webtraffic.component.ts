@@ -26,6 +26,21 @@ export class OverviewWebtrafficComponent {
   ];
 
   barChartData$ = this.overviewService.visitsByDay$;
-  constructor(private overviewService: OverviewFacade) {}
+  barTable$ = this.overviewService.barTable$;
 
+  label = 'Visits';
+
+  dateRangeLabel$ = this.overviewService.dateRangeLabel$;
+
+  barTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'Dates' },
+    {
+      field: 'currValue',
+      header: 'Visits for ' + this.dateRangeLabel$,
+      pipe: 'number',
+    },
+    { field: 'prevValue', header: 'Visits for ', pipe: 'number' },
+  ];
+
+  constructor(private overviewService: OverviewFacade) {}
 }

@@ -1,62 +1,62 @@
 <div class="container-fluid gx-0">
-<div class="row">
-  <div class="col-lg-4 col-sm-12">
-    <app-data-card
-      [current]="testsCompleted"
-      [title]="'Tests completed since 2018'"
-    ></app-data-card>
+  <div class="row">
+    <div class="col-lg-4 col-sm-12">
+      <app-data-card
+        [current]="testsCompleted"
+        [title]="'Tests completed since 2018'"
+      ></app-data-card>
+    </div>
+    <div class="col-lg-4 col-sm-12">
+      <app-data-card
+        [current]="tasksTested"
+        [title]="'Tasks tested since 2018'"
+      ></app-data-card>
+    </div>
+    <div class="col-lg-4 col-sm-12">
+      <app-data-card
+        [current]="participantsTested"
+        [title]="'Participants tested since 2018'"
+      ></app-data-card>
+    </div>
   </div>
-  <div class="col-lg-4 col-sm-12">
-    <app-data-card
-      [current]="tasksTested"
-      [title]="'Tasks tested since 2018'"
-    ></app-data-card>
-  </div>
-  <div class="col-lg-4 col-sm-12">
-    <app-data-card
-      [current]="participantsTested"
-      [title]="'Participants tested since 2018'"
-    ></app-data-card>
-  </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-  <div class="col-lg-4 col-sm-12">
-    <app-data-card
-      [current]="testsConducted"
-      [title]="'Tests conducted last fiscal year (Apr 01 - Mar 31)'"
-    ></app-data-card>
+    <div class="col-lg-4 col-sm-12">
+      <app-data-card
+        [current]="testsConducted"
+        [title]="'Tests conducted last fiscal year (Apr 01 - Mar 31)'"
+      ></app-data-card>
+    </div>
+    <div class="col-lg-4 col-sm-12">
+      <app-data-card
+        [current]="testsConductedLastQuarter"
+        [title]="'Tests conducted last quarter (Q4/21)'"
+      ></app-data-card>
+    </div>
+    <div class="col-lg-4 col-sm-12">
+      <app-data-card
+        [current]="COPSTests"
+        [title]="'COPS tests completed since 2018'"
+      ></app-data-card>
+    </div>
   </div>
-  <div class="col-lg-4 col-sm-12">
-    <app-data-card
-      [current]="testsConductedLastQuarter"
-      [title]="'Tests conducted last quarter (Q4/21)'"
-    ></app-data-card>
-  </div>
-  <div class="col-lg-4 col-sm-12">
-    <app-data-card
-      [current]="COPSTests"
-      [title]="'COPS tests completed since 2018'"
-    ></app-data-card>
-  </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
-<div class="row">
-  <div class="col">
-    <app-card [card-title]="'Recent testing scores by project'">
-      <div class="row">
-        <app-data-table
-          [filter]="false"
-          [sort]="true"
-          [pagination]="false"
-          [data]="uxChartData"
-          [cols]="uxChartCols"
-        ></app-data-table>
-      </div>
-    </app-card>
+  <div class="row">
+    <div class="col">
+      <app-data-table-card
+        [filter]="false"
+        [sort]="true"
+        [pagination]="false"
+        [data]="uxChartData"
+        [cols]="uxChartCols"
+        title="Recent testing scores by project"
+        tooltip="Recent testing scores by project tooltip"
+      >
+      </app-data-table-card>
+    </div>
   </div>
 </div>

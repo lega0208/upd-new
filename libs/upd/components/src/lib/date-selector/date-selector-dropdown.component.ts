@@ -2,6 +2,8 @@ import { Component, Input } from '@angular/core';
 import { of } from 'rxjs';
 import { DateRangePeriod } from "@cra-arc/upd/state";
 
+import { TranslateService } from '@ngx-translate/core';
+
 @Component({
   selector: 'app-date-selector-dropdown',
   template: `
@@ -10,15 +12,17 @@ import { DateRangePeriod } from "@cra-arc/upd/state";
         class="btn bg-white border border-1 dropdown-toggle"
         id="range-button"
         ngbDropdownToggle
+        translate="{{ selectedPeriod | async}}"
       >
-        <span class="material-icons align-top">calendar_today</span>
-        <span data-i18n="dr-lastweek">{{ selectedPeriod | async }}</span>
+        <span class="material-icons align-top pe-1">calendar_today</span>
+        <span></span>&nbsp;
       </button>
       <div ngbDropdownMenu aria-labelledby="range-button">
         <button
           *ngFor="let selectionOption of selectionOptions"
           (click)="onSelect(selectionOption.value)"
           ngbDropdownItem
+          translate
         >
           {{ selectionOption.label }}
         </button>
@@ -28,6 +32,8 @@ import { DateRangePeriod } from "@cra-arc/upd/state";
   styleUrls: ['./date-selector.component.css'],
 })
 export class DateSelectorDropdownComponent {
+
+  constructor(private translateService: TranslateService) {}
   @Input() selectedPeriod = of('');
   @Input() selectionOptions: { label: string; value: DateRangePeriod }[] = [];
   @Input() onSelect: (value: DateRangePeriod) => void = (value) => console.log(value);

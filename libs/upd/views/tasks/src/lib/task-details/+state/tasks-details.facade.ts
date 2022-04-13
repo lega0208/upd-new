@@ -54,6 +54,11 @@ export class TasksDetailsFacade {
         { name: 'No', value: data?.dateRangeData?.dyfNo || 0 },
       ];
 
+      const isZero = pieChartData.every((v) => v.value === 0);
+      if (isZero) {
+        return [];
+      }
+
       return pieChartData;
     })
   );
@@ -76,6 +81,11 @@ export class TasksDetailsFacade {
           value: data?.dateRangeData?.fwylfError || 0,
         },
       ];
+
+      const isZero = pieChartData.every((v) => v.value === 0);
+      if (isZero) {
+        return [];
+      }
 
       return pieChartData;
     })

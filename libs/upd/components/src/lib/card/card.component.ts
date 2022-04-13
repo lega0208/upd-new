@@ -11,7 +11,8 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
           class="card-title h6 pb-2"
           [class.card-tooltip]="tooltip"
         >
-          <span [ngbPopover]="tooltip">{{ title }}</span>
+          <!-- <span [ngbPopover]="tooltip" [ngbTooltip]="tooltip" placement="top">{{ title }}</span> -->
+        <span placement="top" ngbTooltip="{{tooltip | translate}}">{{ title | translate }}</span>
         </h3>
         <ng-content></ng-content>
       </div>

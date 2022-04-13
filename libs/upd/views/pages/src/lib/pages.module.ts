@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { UpdComponentsModule } from '@cra-arc/upd-components';
 
 import { PagesRoutingModule } from './pages-routing.module';
@@ -27,12 +28,27 @@ import { PagesDetailsFacade } from './pages-details/+state/pages-details.facade'
 import { ServicesModule, ApiService } from '@cra-arc/upd/services';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+
+export function HttpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
 @NgModule({
   imports: [
     CommonModule,
     PagesRoutingModule,
     UpdComponentsModule,
     ClipboardModule,
+    HttpClientModule,
+    TranslateModule.forChild({
+      defaultLanguage: 'en-CA',
+      loader: {
+          provide: TranslateLoader,
+          useFactory: HttpLoaderFactory,
+          deps: [HttpClient]
+      }
+    }),
     StoreModule.forFeature(PAGES_HOME_FEATURE_KEY, pagesHomeReducer),
     EffectsModule.forFeature([PagesHomeEffects]),
     StoreModule.forFeature(PAGES_DETAILS_FEATURE_KEY, pagesDetailsReducer),

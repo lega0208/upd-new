@@ -1,66 +1,69 @@
 <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col">
+  <div class="row">
+    <div class="col">
+      <ng-container
+        *ngIf="(visitsByDay$ | async)?.length === 0; else elseVisitsByDay"
+      >
+        <app-card
+          [card-title]="'Visits by day'"
+          title-tooltip="Visits by day tooltip"
+        >
+          <p>Visits by day data is not available for this date range.</p>
+        </app-card>
+      </ng-container>
+      <ng-template #elseVisitsByDay>
         <app-charts
           type="line"
           title="Visits by day"
           titleTooltip="Visits by day tooltip"
           [data]="(visitsByDay$ | async) || []"
         ></app-charts>
-      </div>
+      </ng-template>
     </div>
   </div>
+</div>
 
-  <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col">
-        <app-card
-        card-title="Where visitors came from"
-        title-tooltip="Where visitors came from tooltip"
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-data-table-card
+        [data]="(whereVisitorsCameFrom$ | async) || []"
+        [cols]="whereVisitorsCameFromCols"
+        [pagination]="false"
+        title="Where visitors came from"
+        tooltip="Where visitors came from tooltip"
       >
-        <app-data-table
-          [data]="(whereVisitorsCameFrom$ | async) || []"
-          [cols]="whereVisitorsCameFromCols"
-          [pagination]="false"
-        >
-        </app-data-table>
-      </app-card>
-      </div>
+      </app-data-table-card>
     </div>
   </div>
+</div>
 
-  <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col">
-        <app-card
-        card-title="What visitors clicked on"
-        title-tooltip="What visitors clicked on tooltip"
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-data-table-card
+        [data]="(whatVisitorsClickedOn$ | async) || []"
+        [cols]="whatVisitorsClickedOnCols"
+        [pagination]="false"
+        title="What visitors clicked on"
+        tooltip="What visitors clicked on tooltip"
       >
-        <app-data-table
-          [data]="(whatVisitorsClickedOn$ | async) || []"
-          [cols]="whatVisitorsClickedOnCols"
-          [pagination]="false"
-        >
-        </app-data-table>
-      </app-card>
-      </div>
+      </app-data-table-card>
     </div>
   </div>
+</div>
 
-  <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col">
-        <app-card
-        card-title="Visitor location"
-        title-tooltip="Visitor location tooltip"
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-data-table-card
+        [data]="(visitorLocation$ | async) || []"
+        [cols]="visitorLocationCols"
+        [pagination]="false"
+        title="Visitor location"
+        tooltip="Visitor location tooltip"
       >
-        <app-data-table
-          [data]="(visitorLocation$ | async) || []"
-          [cols]="visitorLocationCols"
-          [pagination]="false"
-        >
-        </app-data-table>
-      </app-card>
-      </div>
+      </app-data-table-card>
     </div>
   </div>
+</div>

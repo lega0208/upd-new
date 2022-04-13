@@ -1,101 +1,131 @@
 <div class="container-fluid gx-0">
   <div class="row">
     <div class="col">
-    <app-data-card
-      [current]="(uniqueVisitors$ | async | number) || 0"
-      [comparison]="(uniqueVisitorsPercentChange$ | async) || 0"
-      [title]="'Unique visitors'"
-    ></app-data-card>
+      <app-data-card
+        [current]="
+          (uniqueVisitors$
+            | async
+            | number: undefined:translateService.currentLang) || 0
+        "
+        [comparison]="(uniqueVisitorsPercentChange$ | async) || 0"
+        [title]="'unique-visitors'"
+        [tooltip]="'tooltip-unique-visitors'"
+      ></app-data-card>
+    </div>
+    <div class="col">
+      <app-data-card
+        [current]="
+          (visits$ | async | number: undefined:translateService.currentLang) ||
+          0
+        "
+        [comparison]="(visitsPercentChange$ | async) || 0"
+        [title]="'visits'"
+        [tooltip]="'tooltip-visits'"
+      ></app-data-card>
+    </div>
+    <div class="col">
+      <app-data-card
+        [current]="
+          (pageViews$
+            | async
+            | number: undefined:translateService.currentLang) || 0
+        "
+        [comparison]="(pageViewsPercentChange$ | async) || 0"
+        [title]="'page-views'"
+        [tooltip]="'tooltip-page-views'"
+      ></app-data-card>
+    </div>
   </div>
-  <div class="col">
-    <app-data-card
-      [current]="(visits$ | async | number) || 0"
-      [comparison]="(visitsPercentChange$ | async) || 0"
-      [title]="'Visits'"
-    ></app-data-card>
-  </div>
-  <div class="col">
-    <app-data-card
-      [current]="(pageViews$ | async | number) || 0"
-      [comparison]="(pageViewsPercentChange$ | async) || 0"
-      [title]="'Page views'"
-    ></app-data-card>
-  </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
-<div class="row">
-  <div class="col">
-    <app-charts
-      [type]="'combo-bar-line'"
-      [title]="'Visits compared to call volume'"
-      [displayLegend]="'below'"
-      [showRightYAxisLabel]="true"
-      [curveType]="'Natural'"
-      [barChart]="barChartData$ | async"
-    ></app-charts>
+  <div class="row">
+    <div class="col">
+      <app-charts
+        [type]="'combo-bar-line'"
+        [title]="'d3-visits-compared-to-calls'"
+        [displayLegend]="'below'"
+        [showRightYAxisLabel]="true"
+        [curveType]="'Natural'"
+        [barChart]="barChartData$ | async"
+      ></app-charts>
+    </div>
   </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-data-card
-        [current]="(gscImpressions$ | async | number) || 0"
+        [current]="
+          (gscImpressions$
+            | async
+            | number: undefined:translateService.currentLang) || 0
+        "
         [comparison]="(gscImpressionsPercentChange$ | async) || 0"
         [title]="'Total impressions from Google'"
       ></app-data-card>
     </div>
     <div class="col">
       <app-data-card
-        [current]="(gscCTR$ | async | percent) || 0"
+        [current]="
+          (gscCTR$ | async | percent: undefined:translateService.currentLang) ||
+          0
+        "
         [comparison]="(gscCTRPercentChange$ | async) || 0"
         [title]="'Click through rate from Google'"
       ></app-data-card>
     </div>
     <div class="col">
       <app-data-card
-        [current]="(gscAverage$ | async | number: '1.0-2') || 0"
+        [current]="
+          (gscAverage$
+            | async
+            | number: '1.0-2':translateService.currentLang) || 0
+        "
         [comparison]="(gscAveragePercentChange$ | async) || 0"
         [title]="'Average rank on Google'"
       ></app-data-card>
     </div>
   </div>
-  </div>
+</div>
 
 <div class="container-fluid my-4 gx-0">
-<div class="row">
-  <div class="col">
-    <app-card [card-title]="'Top 10 tasks GC Task Success Survey'">
-        <app-data-table
-          [filter]="false"
-          [sort]="false"
-          [pagination]="false"
-          [data]="taskSurvey"
-          [cols]="taskSurveyCols"
-        ></app-data-table>
-    </app-card>
+  <div class="row">
+    <div class="col">
+      <app-data-table-card
+        [filter]="false"
+        [sort]="false"
+        [pagination]="false"
+        [data]="taskSurvey"
+        [cols]="taskSurveyCols"
+        title="{{ 'top10-tasks' | translate }}"
+        tooltip="{{ 'tooltip-top10-tasks' | translate }}"
+      >
+      </app-data-table-card>
+    </div>
   </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-12">
-    <app-charts
-      [title]="'Did you find what you were looking for?'"
-      [data]="dyfChart$ | async"
-      [type]="'donut'"
-    ></app-charts>
+      <app-charts
+        [title]="'d3-dyfwywlf'"
+        titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
+        [data]="dyfChart$ | async"
+        [type]="'donut'"
+        [tableCols]="dyfTableCols"
+      ></app-charts>
     </div>
-      <div class="col-lg-6 col-md-6 col-sm-12">
-    <app-charts
-      [title]="'What was wrong?'"
-      [data]="whatWasWrongChart$ | async"
-      [type]="'donut'"
-    ></app-charts>
+    <div class="col-lg-6 col-md-6 col-sm-12">
+      <app-charts
+        [title]="'d3-www'"
+        titleTooltip="{{ 'tooltip-d3-www' | translate }}"
+        [data]="whatWasWrongChart$ | async"
+        [type]="'donut'"
+        [tableCols]="whatWasWrongTableCols"
+      ></app-charts>
+    </div>
   </div>
-</div>
 </div>

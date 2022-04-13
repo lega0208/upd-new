@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 
@@ -23,15 +23,32 @@ import {
   overviewReducer,
 } from './+state/overview/overview.reducer';
 
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+
+export function HttpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
 @NgModule({
   imports: [
     CommonModule,
     HttpClientModule,
+    TranslateModule.forChild({
+      defaultLanguage: 'en-CA',
+      loader: {
+          provide: TranslateLoader,
+          useFactory: HttpLoaderFactory,
+          deps: [HttpClient]
+      }
+    }),
     OverviewRoutingModule,
     UpdComponentsModule,
     ServicesModule,
     StoreModule.forFeature(OVERVIEW_FEATURE_KEY, overviewReducer),
     EffectsModule.forFeature([OverviewEffects]),
+    NgbModule
   ],
   declarations: [
     OverviewComponent,

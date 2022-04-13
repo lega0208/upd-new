@@ -12,19 +12,17 @@
   <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
-        <app-card
-          [card-title]="'Task success by UX test'"
-          [title-tooltip]="'Task success by UX test tooltip'"
-        >
-          <app-data-table
-            [data]="(memberList$) || []"
-            [cols]="memberListCols"
-            [pagination]="false"
-            [filter]="false"
-            [sort]="false"
-          >
-          </app-data-table>
-        </app-card>
+        <app-data-table-card
+        [data]="(memberList$) || []"
+        [cols]="memberListCols"
+        [sort]="false"
+        [filter]="false"
+        [pagination]="false"
+        title="Task success by UX test"
+        tooltip="Task success by UX test tooltip"
+      >
+      </app-data-table-card>
+  
       </div>
     </div>
   </div>

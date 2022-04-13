@@ -2,6 +2,10 @@ import { Component } from '@angular/core';
 import { map } from 'rxjs';
 import { DateSelectionFacade, DateRangePeriod } from '@cra-arc/upd/state';
 import dayjs from 'dayjs';
+//import 'dayjs/locale/en-CA';
+//import 'dayjs/locale/fr-CA';
+
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-date-selector',
@@ -39,7 +43,7 @@ export class DateSelectorComponent {
     label: periodToDisplayFormat(period as DateRangePeriod),
   }));
 
-  constructor(private selectorService: DateSelectionFacade) {}
+  constructor(public translateService: TranslateService, private selectorService: DateSelectionFacade) {}
 
   selectPeriod(period: DateRangePeriod) {
     this.selectorService.selectDatePeriod(period);

@@ -81,6 +81,13 @@ export class OverviewFacade {
         return [] as MultiSeries;
       }
 
+      const isCurrZero = visitsByDay.every((v) => v.visits === 0);
+      const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
+
+      if (isCurrZero && isPrevZero) {
+        return [] as MultiSeries;
+      }
+
       const dateRangeLabel = getWeeklyDatesLabel(data.dateRange);
 
       const dateRangeDates = visitsByDay.map(({ date }) => date);
@@ -118,6 +125,49 @@ export class OverviewFacade {
     })
   );
 
+
+  // todo: reorder bars? (grey then blue instead of blue then grey?)
+  //  also clean this up a bit, simplify logic instead of doing everything twice
+  barTable$ = this.overviewData$.pipe(
+    map((data) => {
+      const visitsByDay = data?.dateRangeData?.visitsByDay;
+      const comparisonVisitsByDay =
+        data?.comparisonDateRangeData?.visitsByDay || [];
+
+      if (!visitsByDay) {
+        return [] as MultiSeries;
+      }
+
+      const dateRangeDates = visitsByDay.map(({ date }) => date);
+      const dateRangeSeries = visitsByDay.map(({ visits }) => ({
+        visits,
+      }));
+      const comparisonDateRangeSeries = comparisonVisitsByDay.map(
+        ({ visits }) => ({
+          visits,
+        })
+      );
+
+      const visitsByDayData = dateRangeDates.map((date, i) => {
+        return {
+          name: dayjs(date).utc(false).format('dddd'),
+          currValue: dateRangeSeries[i].visits,
+          prevValue: comparisonDateRangeSeries[i].visits
+        };
+      })
+      
+      return visitsByDayData;
+    })
+  );
+
+  dateRangeLabel$ = this.overviewData$.pipe(
+    map((data) => getWeeklyDatesLabel(data.dateRange))
+  );
+
+  comparisonDateRangeLabel$ = this.overviewData$.pipe(
+    map((data) => getWeeklyDatesLabel(data.comparisonDateRange || ''))
+  );
+
   dyfData$ = this.overviewData$.pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map((data) => {
@@ -125,6 +175,11 @@ export class OverviewFacade {
         { name: 'Yes', value: data?.dateRangeData?.dyf_yes || 0 },
         { name: 'No', value: data?.dateRangeData?.dyf_no || 0 },
       ];
+
+      const isZero = pieChartData.every((v) => v.value === 0);
+      if (isZero) {
+        return [];
+      }
 
       return pieChartData;
     })
@@ -148,6 +203,11 @@ export class OverviewFacade {
           value: data?.dateRangeData?.fwylf_error || 0,
         },
       ];
+
+      const isZero = pieChartData.every((v) => v.value === 0);
+      if (isZero) {
+        return [];
+      }
 
       return pieChartData;
     })

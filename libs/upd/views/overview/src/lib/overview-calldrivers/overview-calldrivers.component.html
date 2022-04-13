@@ -1,75 +1,65 @@
 <div class="container-fluid gx-0">
   <div class="row">
-  <div class="col">
-    <app-charts
-      [title]="'Total calls by inquiry line'"
-      [yAxisLabel]="'Number of calls (in thousands)'"
-      [showXAxisLabel]="false"
-      [showGridLines]="true"
-      [displayLegend]="'below'"
-      [groupPadding]="75"
-      [showLegend]="true"
-      [data]="bar"
-      [type]="'grouped-bar'"
-    ></app-charts>
+    <div class="col">
+      <app-charts
+        [title]="'Total calls by inquiry line'"
+        [yAxisLabel]="'Number of calls (in thousands)'"
+        [showXAxisLabel]="false"
+        [showGridLines]="true"
+        [displayLegend]="'below'"
+        [groupPadding]="75"
+        [showLegend]="true"
+        [data]="bar"
+        [type]="'grouped-bar'"
+      ></app-charts>
+    </div>
   </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-  <div class="col">
-    <app-card [card-title]="'Top 5 call drivers'">
-      <div class="row">
-        <app-data-table
-          [filter]="false"
-          [sort]="true"
-          [pagination]="false"
-          [data]="charts"
-          [cols]="chartsCols"
-        ></app-data-table>
-      </div>
-    </app-card>
+    <div class="col">
+      <app-data-table-card
+        [data]="charts"
+        [cols]="chartsCols"
+        [filter]="false"
+        [pagination]="false"
+        title="Top 5 call drivers"
+        tooltip="Top 5 call drivers tooltip"
+      >
+      </app-data-table-card>
+    </div>
   </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-  <div class="col">
-    <app-card
-      [card-title]="'Top 5 call drivers with biggest increase over period'"
-    >
-      <div class="row">
-        <app-data-table
-          [filter]="false"
-          [sort]="true"
-          [pagination]="false"
-          [data]="charts"
-          [cols]="chartsCols"
-        ></app-data-table>
-      </div>
-    </app-card>
+    <div class="col">
+      <app-data-table-card
+        [data]="charts"
+        [cols]="chartsCols"
+        [filter]="false"
+        [pagination]="false"
+        title="Top 5 call drivers with biggest increase over period"
+        tooltip="Top 5 call drivers with biggest increase over period tooltip"
+      >
+      </app-data-table-card>
+    </div>
   </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-  <div class="col">
-    <app-card
-      [card-title]="'Top 5 call drivers with biggest decrease over period'"
-    >
-      <div class="row">
-        <app-data-table
-          [filter]="false"
-          [sort]="true"
-          [pagination]="false"
-          [data]="charts"
-          [cols]="chartsCols"
-        ></app-data-table>
-      </div>
-    </app-card>
+    <div class="col">
+      <app-data-table-card
+        [data]="charts"
+        [cols]="chartsCols"
+        [filter]="false"
+        [pagination]="false"
+        title="Top 5 call drivers with biggest decrease over period"
+        tooltip="Top 5 call drivers with biggest decrease over period tooltip"
+      >
+      </app-data-table-card>
+    </div>
   </div>
-</div>
 </div>

@@ -12,6 +12,8 @@ import dayjs from 'dayjs';
 import { CurveFactory } from 'd3-shape';
 import localeData from 'dayjs/plugin/localeData';
 import { curves, Curves, ChartTypes } from './types';
+import { ColumnConfig } from '@cra-arc/upd-components';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-charts',
@@ -19,6 +21,7 @@ import { curves, Curves, ChartTypes } from './types';
   styleUrls: ['./charts.component.css'],
 })
 export class ChartsComponent implements OnInit {
+constructor(public translateService:TranslateService){ }
   view?: [number, number];
   @Input() title = '';
   @Input() titleTooltip = '';
@@ -29,7 +32,7 @@ export class ChartsComponent implements OnInit {
   @Input() fitContainer = true;
   @Input() gradient = false;
   @Input() displayLegend = 'below';
-  @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D'];
+  @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D', '#1DE9B6', '#F57F17', '#602E9C', '#2196F3', '#DE4CAE', '#C3680A', '#C5C5FF', '#1A8361'];
   @Input() showLegend = true;
   @Input() data: any = [];
   @Input() legendTitle = 'Legend';
@@ -56,7 +59,7 @@ export class ChartsComponent implements OnInit {
   @Input() rotateXAxisTicks = true;
   @Input() yAxisColourLeft = '';
   @Input() yAxisColourRight = '#f37d35';
-  @Input() showRightYAxisLabel = true;
+  @Input() showRightYAxisLabel = false;
   @Input() yAxisLabelRight = 'Call volume (in thousands)';
   @Input() lineColour = ['#f37d35', '#fbbc4d'];
   @Input() barColour = ['#2E5EA7', '#B5C2CC'];
@@ -108,7 +111,8 @@ export class ChartsComponent implements OnInit {
   doughnut = false;
 
   chartData: SingleSeries | MultiSeries | null = [];
-  chartDataCols: any = [];
+  @Input() table: any;
+  @Input() tableCols: ColumnConfig[] = [];
 
   ngOnInit(): void {
     this.setLegendPosition();
@@ -122,20 +126,6 @@ export class ChartsComponent implements OnInit {
     }
 
     this.lineChart = lineChart;
-
-    //const chartDataHeaders = Object.keys(this.chartData[0]);
-    // console.log(Object.values(this.chartData[2])[0]);
-    // console.log(chartDataHeaders);
-
-    this.chartData = this.parseDataForChartData(this.data);
-
-    this.chartDataCols = [
-      { field: 'header', header: 'Date' },
-      { field: 'name', header: this.xAxisLabel },
-      { field: 'value', header: this.yAxisLabel },
-    ];
-
-    console.log(this.chartData);
   }
 
   applyDimensions() {
