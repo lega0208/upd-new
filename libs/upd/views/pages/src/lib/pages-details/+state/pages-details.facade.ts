@@ -79,6 +79,13 @@ export class PagesDetailsFacade {
         return [] as MultiSeries;
       }
 
+      const isCurrZero = visitsByDay.every((v) => v.visits === 0);
+      const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
+
+      if (isCurrZero && isPrevZero) {
+        return [] as MultiSeries;
+      }
+
       const visitsByDayData: MultiSeries = [
         {
           name: data?.dateRange,
@@ -144,6 +151,13 @@ export class PagesDetailsFacade {
         },
       ];
 
+      const isCurrZero = dataByDeviceType.every((v) => v.value === 0);
+      const isPrevZero = comparisonDataByDeviceType.every((v) => v.value === 0);
+
+      if (isCurrZero && isPrevZero) {
+        return [] as MultiSeries;
+      }
+
       const barChartData: MultiSeries = [
         {
           name: data?.dateRange || '', // todo: formatted date range labels
@@ -161,42 +175,42 @@ export class PagesDetailsFacade {
 
   referrerType$ = this.pagesDetailsData$.pipe(
     map((data) => {
-      const other = data?.dateRangeData?.visits_referrer_other || 0;
-      const search = data?.dateRangeData?.visits_referrer_searchengine || 0;
-      const typed = data?.dateRangeData?.visits_referrer_typed_bookmarked || 0;
-      const social = data?.dateRangeData?.visits_referrer_social || 0;
-
-      if (!other && !search && !typed && !social) {
-        return [];
-      }
-      return [
+      const dataByReferrerType = [
         {
           type: 'Other Web Sites',
-          value: other || 0,
+          value: data?.dateRangeData?.visits_referrer_other || 0,
           change: 0,
         },
         {
           type: 'Search Engines',
-          value: search|| 0,
+          value: data?.dateRangeData?.visits_referrer_searchengine || 0,
           change: 0,
         },
         {
           type: 'Typed/Bookmarked',
-          value: typed || 0,
+          value: data?.dateRangeData?.visits_referrer_typed_bookmarked || 0,
           change: 0,
         },
         {
           type: 'Social Networks',
-          value: social || 0,
+          value: data?.dateRangeData?.visits_referrer_social || 0,
           change: 0,
         },
       ];
+
+      const isZero = dataByReferrerType.every((v) => v.value === 0);
+
+      if (isZero) {
+        return [] as MultiSeries;
+      }
+
+      return dataByReferrerType;
     })
   );
 
   visitorLocation$ = this.pagesDetailsData$.pipe(
     map((data) => {
-      return [
+      const dataByLocation = [
         {
           province: 'Alberta',
           value: data?.dateRangeData?.visits_geo_ab || 0,
@@ -268,6 +282,13 @@ export class PagesDetailsFacade {
           change: 0,
         },
       ];
+
+      const isZero = dataByLocation.every((v) => v.value === 0);
+      if (isZero) {
+        return [];
+      }
+
+      return dataByLocation;
     })
   );
 
@@ -279,6 +300,11 @@ export class PagesDetailsFacade {
         { name: 'No', value: data?.dateRangeData?.dyf_no || 0 },
       ];
 
+      const isZero = pieChartData.every((v) => v.value === 0);
+      if (isZero) {
+        return [];
+      }
+
       return pieChartData;
     })
   );
@@ -288,7 +314,8 @@ export class PagesDetailsFacade {
     map((data) => {
       const cantFindInfo = data?.dateRangeData?.fwylf_cant_find_info || 0;
       const otherReason = data?.dateRangeData?.fwylf_other || 0;
-      const hardToUnderstand = data?.dateRangeData?.fwylf_hard_to_understand || 0;
+      const hardToUnderstand =
+        data?.dateRangeData?.fwylf_hard_to_understand || 0;
       const error = data?.dateRangeData?.fwylf_error || 0;
 
       if (!cantFindInfo && !otherReason && !hardToUnderstand && !error) {
@@ -302,13 +329,18 @@ export class PagesDetailsFacade {
         { name: 'Other reason', value: otherReason },
         {
           name: 'Info is hard to understand',
-          value:hardToUnderstand,
+          value: hardToUnderstand,
         },
         {
           name: 'Error/something didn’t work',
           value: error,
         },
       ];
+
+      const isZero = pieChartData.every((v) => v.value === 0);
+      if (isZero) {
+        return [];
+      }
 
       return pieChartData;
     })

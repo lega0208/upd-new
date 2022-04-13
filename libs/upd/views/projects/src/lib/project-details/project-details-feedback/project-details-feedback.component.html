@@ -22,17 +22,14 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="
-          'Breakdown by Page - Did you find what you were looking for?'
-        "
-        [title-tooltip]="
-          'Breakdown by Page - Did you find what you were looking for? tooltip'
-        "
-      >
-        <app-data-table [data]="visitsByPage$ || []" [cols]="visitsByPageCols">
-        </app-data-table>
-      </app-card>
+      <app-data-table-card
+      [data]="visitsByPage$ || []"
+      [cols]="visitsByPageCols"
+      title="Breakdown by Page - Did you find what you were looking for?"
+      tooltip="Breakdown by Page - Did you find what you were looking for? tooltip"
+    >
+    </app-data-table-card>
+
     </div>
   </div>
 </div>

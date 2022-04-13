@@ -19,17 +19,15 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card [card-title]="'Top 5 call drivers'">
-        <div class="row">
-          <app-data-table
-            [filter]="false"
-            [sort]="true"
-            [pagination]="false"
-            [data]="charts"
-            [cols]="chartsCols"
-          ></app-data-table>
-        </div>
-      </app-card>
+      <app-data-table-card
+        [data]="charts"
+        [cols]="chartsCols"
+        [filter]="false"
+        [pagination]="false"
+        title="Top 5 call drivers"
+        tooltip="Top 5 call drivers tooltip"
+      >
+      </app-data-table-card>
     </div>
   </div>
 </div>
@@ -37,19 +35,15 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'Top 5 call drivers with biggest increase over period'"
+      <app-data-table-card
+        [data]="charts"
+        [cols]="chartsCols"
+        [filter]="false"
+        [pagination]="false"
+        title="Top 5 call drivers with biggest increase over period"
+        tooltip="Top 5 call drivers with biggest increase over period tooltip"
       >
-        <div class="row">
-          <app-data-table
-            [filter]="false"
-            [sort]="true"
-            [pagination]="false"
-            [data]="charts"
-            [cols]="chartsCols"
-          ></app-data-table>
-        </div>
-      </app-card>
+      </app-data-table-card>
     </div>
   </div>
 </div>
@@ -57,19 +51,15 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'Top 5 call drivers with biggest decrease over period'"
+      <app-data-table-card
+        [data]="charts"
+        [cols]="chartsCols"
+        [filter]="false"
+        [pagination]="false"
+        title="Top 5 call drivers with biggest decrease over period"
+        tooltip="Top 5 call drivers with biggest decrease over period tooltip"
       >
-        <div class="row">
-          <app-data-table
-            [filter]="false"
-            [sort]="true"
-            [pagination]="false"
-            [data]="charts"
-            [cols]="chartsCols"
-          ></app-data-table>
-        </div>
-      </app-card>
+      </app-data-table-card>
     </div>
   </div>
 </div>

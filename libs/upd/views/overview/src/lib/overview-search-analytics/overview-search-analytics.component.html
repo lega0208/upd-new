@@ -27,17 +27,16 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card [card-title]="'Top 10 Search terms from Google'">
-        <div class="row">
-          <app-data-table
-            [filter]="false"
-            [sort]="true"
-            [pagination]="false"
-            [data]="(GSCSearchTerms$ | async) || []"
-            [cols]="GSCSearchTermsCols"
-          ></app-data-table>
-        </div>
-      </app-card>
+      <app-data-table-card
+        [filter]="false"
+        [sort]="true"
+        [pagination]="false"
+        [data]="(GSCSearchTerms$ | async) || []"
+        [cols]="GSCSearchTermsCols"
+        title="Top 10 Search terms from Google"
+        tooltip="Top 10 Search terms from Google tooltip"
+      >
+      </app-data-table-card>
     </div>
   </div>
 </div>
@@ -45,17 +44,16 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card [card-title]="'Search terms from Canada.ca'">
-        <div class="row">
-          <app-data-table
-            [filter]="false"
-            [sort]="true"
-            [pagination]="true"
-            [data]="CanSearchTerms"
-            [cols]="CanSearchTermsCols"
-          ></app-data-table>
-        </div>
-      </app-card>
+      <app-data-table-card
+        [filter]="false"
+        [sort]="true"
+        [pagination]="true"
+        [data]="CanSearchTerms"
+        [cols]="CanSearchTermsCols"
+        title="Search terms from Canada.ca"
+        tooltip="Search terms from Canada.ca tooltip"
+      >
+      </app-data-table-card>
     </div>
   </div>
 </div>

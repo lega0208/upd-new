@@ -81,6 +81,13 @@ export class OverviewFacade {
         return [] as MultiSeries;
       }
 
+      const isCurrZero = visitsByDay.every((v) => v.visits === 0);
+      const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
+
+      if (isCurrZero && isPrevZero) {
+        return [] as MultiSeries;
+      }
+
       const dateRangeLabel = getWeeklyDatesLabel(data.dateRange);
 
       const dateRangeDates = visitsByDay.map(({ date }) => date);
@@ -169,6 +176,11 @@ export class OverviewFacade {
         { name: 'No', value: data?.dateRangeData?.dyf_no || 0 },
       ];
 
+      const isZero = pieChartData.every((v) => v.value === 0);
+      if (isZero) {
+        return [];
+      }
+
       return pieChartData;
     })
   );
@@ -191,6 +203,11 @@ export class OverviewFacade {
           value: data?.dateRangeData?.fwylf_error || 0,
         },
       ];
+
+      const isZero = pieChartData.every((v) => v.value === 0);
+      if (isZero) {
+        return [];
+      }
 
       return pieChartData;
     })

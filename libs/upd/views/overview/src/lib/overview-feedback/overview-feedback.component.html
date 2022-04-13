@@ -1,57 +1,54 @@
-
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-12">
-    <app-charts
-      [title]="'Did you find what you were looking for?'"
-      [data]="dyfChart$ | async"
-      [type]="'donut'"
-      [tableCols]="dyfTableCols"
-    ></app-charts>
+      <app-charts
+        [title]="'Did you find what you were looking for?'"
+        [data]="dyfChart$ | async"
+        [type]="'donut'"
+        [tableCols]="dyfTableCols"
+      ></app-charts>
     </div>
-      <div class="col-lg-6 col-md-6 col-sm-12">
-    <app-charts
-      [title]="'What was wrong?'"
-      [data]="whatWasWrongChart$ | async"
-      [type]="'donut'"
-      [tableCols]="whatWasWrongTableCols"
-    ></app-charts>
+    <div class="col-lg-6 col-md-6 col-sm-12">
+      <app-charts
+        [title]="'What was wrong?'"
+        [data]="whatWasWrongChart$ | async"
+        [type]="'donut'"
+        [tableCols]="whatWasWrongTableCols"
+      ></app-charts>
+    </div>
   </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-  <div class="col">
-    <app-card [card-title]="'Top 5 programs/services with the most feedback'">
-      <div class="row">
-        <app-data-table
-          [filter]="false"
-          [sort]="false"
-          [pagination]="false"
-          [data]="taskSurvey"
-          [cols]="taskSurveyCols"
-        ></app-data-table>
-      </div>
-    </app-card>
+    <div class="col">
+      <app-data-table-card
+        [filter]="false"
+        [sort]="false"
+        [pagination]="false"
+        [data]="taskSurvey"
+        [cols]="taskSurveyCols"
+        title="Top 5 programs/services with the most feedback"
+        tooltip="Top 5 programs/services with the most feedback tooltip"
+      >
+      </app-data-table-card>
+    </div>
   </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-  <div class="col">
-    <app-card [card-title]="'Top 5 pages with the most feedback'">
-      <div class="row">
-        <app-data-table
-          [filter]="false"
-          [sort]="false"
-          [pagination]="false"
-          [data]="taskSurvey"
-          [cols]="taskSurveyCols"
-        ></app-data-table>
-      </div>
-    </app-card>
+    <div class="col">
+      <app-data-table-card
+        [filter]="false"
+        [sort]="false"
+        [pagination]="false"
+        [data]="taskSurvey"
+        [cols]="taskSurveyCols"
+        title="Top 5 pages with the most feedback"
+        tooltip="Top 5 pages with the most feedback tooltip"
+      >
+      </app-data-table-card>
+    </div>
   </div>
-</div>
 </div>

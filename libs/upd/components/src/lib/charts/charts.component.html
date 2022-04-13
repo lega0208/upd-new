@@ -1,307 +1,313 @@
 <app-card [card-title]="title" [title-tooltip]="titleTooltip">
-  <div class="vh-45" [style.padding]="'0px'"
-    [ngClass]="showRightYAxisLabel ? 'mr-80' : ''"
+  <ng-container
+    *ngIf="
+      data.length === 0 && (barChart?.length === 0 || lineChart?.length === 0);
+      else elseBlock
+    "
   >
-    <ng-container *ngIf="type === 'combo-bar-line'">
-      <combo-grouped-vertical-bar-line-chart
-        
-        [scheme]="comboBarScheme"
-        [colorSchemeLine]="lineChartScheme"
-        [results]="barChart"
-        [animations]="animations"
-        [lineChart]="lineChart"
-        [tooltipDisabled]="tooltipDisabled"
-        [yAxisTickFormatting]="yLeftTickFormat"
-        [yLeftAxisScaleFactor]="yLeftAxisScale"
-        [yRightAxisScaleFactor]="yRightAxisScale"
-        [yRightAxisTickFormatting]="yRightTickFormat"
-        [gradient]="gradient"
-        [xAxis]="showXAxis"
-        [yAxis]="showYAxis"
-        [legend]="showLegend"
-        [legendTitle]="legendTitle"
-        [legendPosition]="legendPosition"
-        [showGridLines]="showGridLines"
-        [showXAxisLabel]="showXAxisLabel"
-        [showYAxisLabel]="showYAxisLabel"
-        [showRightYAxisLabel]="showRightYAxisLabel"
-        [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel"
-        [yAxisLabelRight]="yAxisLabelRight"
-        [noBarWhenZero]="noBarWhenZero"
-        [barPadding]="barPadding"
-        [groupPadding]="groupPadding"
-        [colorLabelRight]="yAxisColourRight"
-        [colorLabelLeft]="yAxisColourLeft"
-        [roundEdges]="roundEdges"
-        [trimXAxisTicks]="trimXAxisTicks"
-        [trimYAxisTicks]="trimYAxisTicks"
-        [rotateXAxisTicks]="rotateXAxisTicks"
-        [maxXAxisTickLength]="maxXAxisTickLength"
-        [maxYAxisTickLength]="maxYAxisTickLength"
-        [showDataLabel]="showDataLabel"
-        [rangeFillOpacity]="rangeFillOpacity"
-        [autoScale]="autoScale"
-        [curve]="curve"
-        (select)="onSelect($event)"
-      >
-      </combo-grouped-vertical-bar-line-chart>
-    </ng-container>
-
-    <ng-container *ngIf="type === 'line'">
-      <ngx-charts-line-chart
-        
-        [scheme]="colorScheme"
-        [results]="data"
-        [animations]="animations"
-        [legend]="showLegend"
-        [legendTitle]="legendTitle"
-        [legendPosition]="legendPosition"
-        [gradient]="gradient"
-        [xAxis]="showXAxis"
-        [yAxis]="showYAxis"
-        [showXAxisLabel]="showXAxisLabel"
-        [showYAxisLabel]="showYAxisLabel"
-        [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel"
-        [autoScale]="autoScale"
-        [xScaleMin]="xScaleMin"
-        [xScaleMax]="xScaleMax"
-        [yScaleMin]="yScaleMin"
-        [yScaleMax]="yScaleMax"
-        [timeline]="timeline"
-        [showGridLines]="showGridLines"
-        [curve]="curve"
-        [rangeFillOpacity]="rangeFillOpacity"
-        [roundDomains]="roundDomains"
-        [tooltipDisabled]="tooltipDisabled"
-        [trimXAxisTicks]="trimXAxisTicks"
-        [trimYAxisTicks]="trimYAxisTicks"
-        [rotateXAxisTicks]="rotateXAxisTicks"
-        [maxXAxisTickLength]="maxXAxisTickLength"
-        [maxYAxisTickLength]="maxYAxisTickLength"
-        [yAxisTickFormatting]="yAxisTickFormat"
-        (select)="onSelect($event)"
-      ></ngx-charts-line-chart>
-    </ng-container>
-
-    <ng-container *ngIf="type === 'bar'">
-      <ngx-charts-bar-vertical
-        
-        [scheme]="colorScheme"
-        [results]="data"
-        [animations]="animations"
-        [gradient]="gradient"
-        [xAxis]="showXAxis"
-        [yAxis]="showYAxis"
-        [legend]="showLegend"
-        [legendTitle]="legendTitle"
-        [legendPosition]="legendPosition"
-        [showXAxisLabel]="showXAxisLabel"
-        [showYAxisLabel]="showYAxisLabel"
-        [tooltipDisabled]="tooltipDisabled"
-        [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel"
-        [showGridLines]="showGridLines"
-        [barPadding]="barPadding"
-        [roundDomains]="roundDomains"
-        [roundEdges]="roundEdges"
-        [yScaleMax]="yScaleMax"
-        [noBarWhenZero]="noBarWhenZero"
-        [showDataLabel]="showDataLabel"
-        [trimXAxisTicks]="trimXAxisTicks"
-        [trimYAxisTicks]="trimYAxisTicks"
-        [rotateXAxisTicks]="rotateXAxisTicks"
-        [maxXAxisTickLength]="maxXAxisTickLength"
-        [maxYAxisTickLength]="maxYAxisTickLength"
-        [yAxisTickFormatting]="yAxisTickFormat"
-        (select)="onSelect($event)"
-      >
-        <ng-template #tooltipTemplate let-model="model">
-          <span class="tooltip-label">{{ model.label }}</span>
-          <span class="tooltip-val">{{ model.value.toLocaleString() }}</span>
-        </ng-template>
-      </ngx-charts-bar-vertical>
-    </ng-container>
-
-    <ng-container *ngIf="type === 'grouped-bar'">
-      <ngx-charts-bar-vertical-2d
-        
-        [scheme]="colorScheme"
-        [results]="data"
-        [animations]="animations"
-        [gradient]="gradient"
-        [xAxis]="showXAxis"
-        [yAxis]="showYAxis"
-        [legend]="showLegend"
-        [legendTitle]="legendTitle"
-        [legendPosition]="legendPosition"
-        [showXAxisLabel]="showXAxisLabel"
-        [showYAxisLabel]="showYAxisLabel"
-        [tooltipDisabled]="tooltipDisabled"
-        [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel"
-        [showGridLines]="showGridLines"
-        [barPadding]="barPadding"
-        [groupPadding]="groupPadding"
-        [roundDomains]="roundDomains"
-        [roundEdges]="roundEdges"
-        [yScaleMax]="yScaleMax"
-        [noBarWhenZero]="noBarWhenZero"
-        [showDataLabel]="showDataLabel"
-        [trimXAxisTicks]="trimXAxisTicks"
-        [trimYAxisTicks]="trimYAxisTicks"
-        [rotateXAxisTicks]="rotateXAxisTicks"
-        [maxXAxisTickLength]="maxXAxisTickLength"
-        [maxYAxisTickLength]="maxYAxisTickLength"
-        [yAxisTickFormatting]="yAxisTickFormat"
-        (select)="onSelect($event)"
-      >
-        <ng-template #tooltipTemplate let-model="model">
-          <span class="tooltip-label"
-            >{{ model.series }} • {{ model.label }}</span
-          >
-          <span class="tooltip-val">{{ model.value.toLocaleString() }}</span>
-        </ng-template>
-      </ngx-charts-bar-vertical-2d>
-    </ng-container>
-
-    <ng-container *ngIf="type === 'stacked-bar'">
-      <ngx-charts-bar-vertical-stacked
-        
-        [scheme]="colorScheme"
-        [results]="data"
-        [animations]="animations"
-        [gradient]="gradient"
-        [tooltipDisabled]="tooltipDisabled"
-        [xAxis]="showXAxis"
-        [yAxis]="showYAxis"
-        [legend]="showLegend"
-        [legendTitle]="legendTitle"
-        [legendPosition]="legendPosition"
-        [showXAxisLabel]="showXAxisLabel"
-        [showYAxisLabel]="showYAxisLabel"
-        [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel"
-        [showGridLines]="showGridLines"
-        [barPadding]="barPadding"
-        [roundDomains]="roundDomains"
-        [noBarWhenZero]="noBarWhenZero"
-        [yScaleMax]="yScaleMax"
-        [showDataLabel]="showDataLabel"
-        [trimXAxisTicks]="trimXAxisTicks"
-        [trimYAxisTicks]="trimYAxisTicks"
-        [maxXAxisTickLength]="maxXAxisTickLength"
-        [maxYAxisTickLength]="maxYAxisTickLength"
-        [yAxisTickFormatting]="yAxisTickFormat"
-        (select)="onSelect($event)"
-      >
-      </ngx-charts-bar-vertical-stacked>
-    </ng-container>
-    <ng-container *ngIf="type === 'horizontal-bar'">
-      <ngx-charts-bar-horizontal
-        
-        [scheme]="colorScheme"
-        [results]="data"
-        [animations]="animations"
-        [gradient]="gradient"
-        [xAxis]="showXAxis"
-        [yAxis]="showYAxis"
-        [legend]="showLegend"
-        [legendTitle]="legendTitle"
-        [legendPosition]="legendPosition"
-        [showXAxisLabel]="showXAxisLabel"
-        [showYAxisLabel]="showYAxisLabel"
-        [tooltipDisabled]="tooltipDisabled"
-        [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel"
-        [showGridLines]="showGridLines"
-        [barPadding]="barPadding"
-        [roundDomains]="roundDomains"
-        [roundEdges]="roundEdges"
-        [xScaleMax]="xScaleMax"
-        [noBarWhenZero]="noBarWhenZero"
-        [showDataLabel]="showDataLabel"
-        [trimXAxisTicks]="trimXAxisTicks"
-        [trimYAxisTicks]="trimYAxisTicks"
-        [rotateXAxisTicks]="rotateXAxisTicks"
-        [maxXAxisTickLength]="maxXAxisTickLength"
-        [maxYAxisTickLength]="maxYAxisTickLength"
-        [xAxisTickFormatting]="xAxisTickFormat"
-        (select)="onSelect($event)"
-      >
-      </ngx-charts-bar-horizontal>
-    </ng-container>
-    <ng-container
-      *ngIf="type === 'pie' || type === 'donut' || type === 'doughnut'"
+    <p>{{ title | translate }} data is not available for this date range.</p>
+  </ng-container>
+  <ng-template #elseBlock>
+    <div
+      class="vh-45"
+      [style.padding]="'0px'"
+      [ngClass]="showRightYAxisLabel ? 'mr-80' : ''"
     >
-      <ngx-charts-pie-chart
-        
-        [scheme]="colorScheme"
-        [results]="data"
-        [animations]="animations"
-        [legend]="showLegend"
-        [legendTitle]="legendTitle"
-        [legendPosition]="legendPosition"
-        [explodeSlices]="explodeSlices"
-        [labels]="showLabels"
-        [doughnut]="doughnut"
-        [arcWidth]="arcWidth"
-        [gradient]="gradient"
-        [tooltipDisabled]="tooltipDisabled"
-        [tooltipText]="pieTooltipText"
-        (select)="onSelect($event)"
-      ></ngx-charts-pie-chart>
-    </ng-container>
+      <ng-container *ngIf="type === 'combo-bar-line'">
+        <combo-grouped-vertical-bar-line-chart
+          [scheme]="comboBarScheme"
+          [colorSchemeLine]="lineChartScheme"
+          [results]="barChart"
+          [animations]="animations"
+          [lineChart]="lineChart"
+          [tooltipDisabled]="tooltipDisabled"
+          [yAxisTickFormatting]="yLeftTickFormat"
+          [yLeftAxisScaleFactor]="yLeftAxisScale"
+          [yRightAxisScaleFactor]="yRightAxisScale"
+          [yRightAxisTickFormatting]="yRightTickFormat"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [legendTitle]="legendTitle"
+          [legendPosition]="legendPosition"
+          [showGridLines]="showGridLines"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [showRightYAxisLabel]="showRightYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [yAxisLabelRight]="yAxisLabelRight"
+          [noBarWhenZero]="noBarWhenZero"
+          [barPadding]="barPadding"
+          [groupPadding]="groupPadding"
+          [colorLabelRight]="yAxisColourRight"
+          [colorLabelLeft]="yAxisColourLeft"
+          [roundEdges]="roundEdges"
+          [trimXAxisTicks]="trimXAxisTicks"
+          [trimYAxisTicks]="trimYAxisTicks"
+          [rotateXAxisTicks]="rotateXAxisTicks"
+          [maxXAxisTickLength]="maxXAxisTickLength"
+          [maxYAxisTickLength]="maxYAxisTickLength"
+          [showDataLabel]="showDataLabel"
+          [rangeFillOpacity]="rangeFillOpacity"
+          [autoScale]="autoScale"
+          [curve]="curve"
+          (select)="onSelect($event)"
+        >
+        </combo-grouped-vertical-bar-line-chart>
+      </ng-container>
 
-    <ng-container *ngIf="type === 'gauge'">
-      <ngx-charts-gauge
-        
-        [legend]="showLegend"
-        [legendTitle]="legendTitle"
-        [legendPosition]="legendPosition"
-        [results]="gaugeData"
-        [animations]="animations"
-        [textValue]="gaugeTextValue"
-        [scheme]="colorScheme"
-        [min]="gaugeMin"
-        [max]="gaugeMax"
-        [units]="gaugeUnits"
-        [angleSpan]="gaugeAngleSpan"
-        [startAngle]="gaugeStartAngle"
-        [showAxis]="gaugeShowAxis"
-        [bigSegments]="gaugeLargeSegments"
-        [smallSegments]="gaugeSmallSegments"
-        [margin]="
-          margin ? [marginTop, marginRight, marginBottom, marginLeft] : []
-        "
-        [tooltipDisabled]="tooltipDisabled"
-        [showText]="showText"
-        [axisTickFormatting]="axisTickFormat"
-        [valueFormatting]="valueFormat"
-        (select)="onSelect($event)"
+      <ng-container *ngIf="type === 'line'">
+        <ngx-charts-line-chart
+          [scheme]="colorScheme"
+          [results]="data"
+          [animations]="animations"
+          [legend]="showLegend"
+          [legendTitle]="legendTitle"
+          [legendPosition]="legendPosition"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [autoScale]="autoScale"
+          [xScaleMin]="xScaleMin"
+          [xScaleMax]="xScaleMax"
+          [yScaleMin]="yScaleMin"
+          [yScaleMax]="yScaleMax"
+          [timeline]="timeline"
+          [showGridLines]="showGridLines"
+          [curve]="curve"
+          [rangeFillOpacity]="rangeFillOpacity"
+          [roundDomains]="roundDomains"
+          [tooltipDisabled]="tooltipDisabled"
+          [trimXAxisTicks]="trimXAxisTicks"
+          [trimYAxisTicks]="trimYAxisTicks"
+          [rotateXAxisTicks]="rotateXAxisTicks"
+          [maxXAxisTickLength]="maxXAxisTickLength"
+          [maxYAxisTickLength]="maxYAxisTickLength"
+          [yAxisTickFormatting]="yAxisTickFormat"
+          (select)="onSelect($event)"
+        ></ngx-charts-line-chart>
+      </ng-container>
+
+      <ng-container *ngIf="type === 'bar'">
+        <ngx-charts-bar-vertical
+          [scheme]="colorScheme"
+          [results]="data"
+          [animations]="animations"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [legendTitle]="legendTitle"
+          [legendPosition]="legendPosition"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [tooltipDisabled]="tooltipDisabled"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [showGridLines]="showGridLines"
+          [barPadding]="barPadding"
+          [roundDomains]="roundDomains"
+          [roundEdges]="roundEdges"
+          [yScaleMax]="yScaleMax"
+          [noBarWhenZero]="noBarWhenZero"
+          [showDataLabel]="showDataLabel"
+          [trimXAxisTicks]="trimXAxisTicks"
+          [trimYAxisTicks]="trimYAxisTicks"
+          [rotateXAxisTicks]="rotateXAxisTicks"
+          [maxXAxisTickLength]="maxXAxisTickLength"
+          [maxYAxisTickLength]="maxYAxisTickLength"
+          [yAxisTickFormatting]="yAxisTickFormat"
+          (select)="onSelect($event)"
+        >
+          <ng-template #tooltipTemplate let-model="model">
+            <span class="tooltip-label">{{ model.label }}</span>
+            <span class="tooltip-val">{{ model.value.toLocaleString() }}</span>
+          </ng-template>
+        </ngx-charts-bar-vertical>
+      </ng-container>
+
+      <ng-container *ngIf="type === 'grouped-bar'">
+        <ngx-charts-bar-vertical-2d
+          [scheme]="colorScheme"
+          [results]="data"
+          [animations]="animations"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [legendTitle]="legendTitle"
+          [legendPosition]="legendPosition"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [tooltipDisabled]="tooltipDisabled"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [showGridLines]="showGridLines"
+          [barPadding]="barPadding"
+          [groupPadding]="groupPadding"
+          [roundDomains]="roundDomains"
+          [roundEdges]="roundEdges"
+          [yScaleMax]="yScaleMax"
+          [noBarWhenZero]="noBarWhenZero"
+          [showDataLabel]="showDataLabel"
+          [trimXAxisTicks]="trimXAxisTicks"
+          [trimYAxisTicks]="trimYAxisTicks"
+          [rotateXAxisTicks]="rotateXAxisTicks"
+          [maxXAxisTickLength]="maxXAxisTickLength"
+          [maxYAxisTickLength]="maxYAxisTickLength"
+          [yAxisTickFormatting]="yAxisTickFormat"
+          (select)="onSelect($event)"
+        >
+          <ng-template #tooltipTemplate let-model="model">
+            <span class="tooltip-label"
+              >{{ model.series }} • {{ model.label }}</span
+            >
+            <span class="tooltip-val">{{ model.value.toLocaleString() }}</span>
+          </ng-template>
+        </ngx-charts-bar-vertical-2d>
+      </ng-container>
+
+      <ng-container *ngIf="type === 'stacked-bar'">
+        <ngx-charts-bar-vertical-stacked
+          [scheme]="colorScheme"
+          [results]="data"
+          [animations]="animations"
+          [gradient]="gradient"
+          [tooltipDisabled]="tooltipDisabled"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [legendTitle]="legendTitle"
+          [legendPosition]="legendPosition"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [showGridLines]="showGridLines"
+          [barPadding]="barPadding"
+          [roundDomains]="roundDomains"
+          [noBarWhenZero]="noBarWhenZero"
+          [yScaleMax]="yScaleMax"
+          [showDataLabel]="showDataLabel"
+          [trimXAxisTicks]="trimXAxisTicks"
+          [trimYAxisTicks]="trimYAxisTicks"
+          [maxXAxisTickLength]="maxXAxisTickLength"
+          [maxYAxisTickLength]="maxYAxisTickLength"
+          [yAxisTickFormatting]="yAxisTickFormat"
+          (select)="onSelect($event)"
+        >
+        </ngx-charts-bar-vertical-stacked>
+      </ng-container>
+      <ng-container *ngIf="type === 'horizontal-bar'">
+        <ngx-charts-bar-horizontal
+          [scheme]="colorScheme"
+          [results]="data"
+          [animations]="animations"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [legendTitle]="legendTitle"
+          [legendPosition]="legendPosition"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [tooltipDisabled]="tooltipDisabled"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [showGridLines]="showGridLines"
+          [barPadding]="barPadding"
+          [roundDomains]="roundDomains"
+          [roundEdges]="roundEdges"
+          [xScaleMax]="xScaleMax"
+          [noBarWhenZero]="noBarWhenZero"
+          [showDataLabel]="showDataLabel"
+          [trimXAxisTicks]="trimXAxisTicks"
+          [trimYAxisTicks]="trimYAxisTicks"
+          [rotateXAxisTicks]="rotateXAxisTicks"
+          [maxXAxisTickLength]="maxXAxisTickLength"
+          [maxYAxisTickLength]="maxYAxisTickLength"
+          [xAxisTickFormatting]="xAxisTickFormat"
+          (select)="onSelect($event)"
+        >
+        </ngx-charts-bar-horizontal>
+      </ng-container>
+      <ng-container
+        *ngIf="type === 'pie' || type === 'donut' || type === 'doughnut'"
       >
-      </ngx-charts-gauge>
-    </ng-container>
-  </div>
+        <ngx-charts-pie-chart
+          [scheme]="colorScheme"
+          [results]="data"
+          [animations]="animations"
+          [legend]="showLegend"
+          [legendTitle]="legendTitle"
+          [legendPosition]="legendPosition"
+          [explodeSlices]="explodeSlices"
+          [labels]="showLabels"
+          [doughnut]="doughnut"
+          [arcWidth]="arcWidth"
+          [gradient]="gradient"
+          [tooltipDisabled]="tooltipDisabled"
+          [tooltipText]="pieTooltipText"
+          (select)="onSelect($event)"
+        ></ngx-charts-pie-chart>
+      </ng-container>
 
-  <div class="pt-3">
-    <app-accordion>
-      <app-data-table *ngIf="table"
-        [filter]="false"
-        [sort]="false"
-        [pagination]="false"
-        [data]="table"
-        [cols]="tableCols"
-      ></app-data-table>
+      <ng-container *ngIf="type === 'gauge'">
+        <ngx-charts-gauge
+          [legend]="showLegend"
+          [legendTitle]="legendTitle"
+          [legendPosition]="legendPosition"
+          [results]="gaugeData"
+          [animations]="animations"
+          [textValue]="gaugeTextValue"
+          [scheme]="colorScheme"
+          [min]="gaugeMin"
+          [max]="gaugeMax"
+          [units]="gaugeUnits"
+          [angleSpan]="gaugeAngleSpan"
+          [startAngle]="gaugeStartAngle"
+          [showAxis]="gaugeShowAxis"
+          [bigSegments]="gaugeLargeSegments"
+          [smallSegments]="gaugeSmallSegments"
+          [margin]="
+            margin ? [marginTop, marginRight, marginBottom, marginLeft] : []
+          "
+          [tooltipDisabled]="tooltipDisabled"
+          [showText]="showText"
+          [axisTickFormatting]="axisTickFormat"
+          [valueFormatting]="valueFormat"
+          (select)="onSelect($event)"
+        >
+        </ngx-charts-gauge>
+      </ng-container>
+    </div>
 
-      <app-data-table *ngIf="!table"
-        [filter]="false"
-        [sort]="false"
-        [pagination]="false"
-        [data]="data"
-        [cols]="tableCols"
-      ></app-data-table>
-    </app-accordion>
-  </div>
+    <div class="pt-3">
+      <app-accordion>
+        <app-data-table
+          *ngIf="table"
+          [filter]="false"
+          [sort]="false"
+          [pagination]="false"
+          [data]="table"
+          [cols]="tableCols"
+        ></app-data-table>
+
+        <app-data-table
+          *ngIf="!table"
+          [filter]="false"
+          [sort]="false"
+          [pagination]="false"
+          [data]="data"
+          [cols]="tableCols"
+        ></app-data-table>
+      </app-accordion>
+    </div>
+  </ng-template>
 </app-card>

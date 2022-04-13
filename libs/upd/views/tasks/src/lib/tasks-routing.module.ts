@@ -25,10 +25,10 @@ const routes: Routes = [
           { path: 'summary', component: TaskDetailsSummaryComponent },
           { path: 'webtraffic', component: TaskDetailsWebtrafficComponent },
           {
-            path: 'search_analytics',
+            path: 'searchanalytics',
             component: TaskDetailsSearchAnalyticsComponent,
           },
-          { path: 'feedback', component: TaskDetailsFeedbackComponent },
+          { path: 'pagefeedback', component: TaskDetailsFeedbackComponent },
           { path: 'calldrivers', component: TaskDetailsCalldriversComponent },
           { path: 'uxtests', component: TaskDetailsUxTestsComponent },
         ],

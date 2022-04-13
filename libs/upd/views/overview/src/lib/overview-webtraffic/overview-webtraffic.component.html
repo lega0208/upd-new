@@ -1,59 +1,58 @@
 <div class="container-fluid gx-0">
   <div class="row">
     <div class="col">
-    <app-data-card
-      [current]="(uniqueVisitors$ | async | number) || 0"
-      [comparison]="(uniqueVisitorsPercentChange$ | async) || 0"
-      [title]="'Unique visitors'"
-    ></app-data-card>
+      <app-data-card
+        [current]="(uniqueVisitors$ | async | number) || 0"
+        [comparison]="(uniqueVisitorsPercentChange$ | async) || 0"
+        [title]="'Unique visitors'"
+      ></app-data-card>
+    </div>
+    <div class="col">
+      <app-data-card
+        [current]="(visits$ | async | number) || 0"
+        [comparison]="(visitsPercentChange$ | async) || 0"
+        [title]="'Visits'"
+      ></app-data-card>
+    </div>
+    <div class="col">
+      <app-data-card
+        [current]="(pageViews$ | async | number) || 0"
+        [comparison]="(pageViewsPercentChange$ | async) || 0"
+        [title]="'Page views'"
+      ></app-data-card>
+    </div>
   </div>
-  <div class="col">
-    <app-data-card
-      [current]="(visits$ | async | number) || 0"
-      [comparison]="(visitsPercentChange$ | async) || 0"
-      [title]="'Visits'"
-    ></app-data-card>
-  </div>
-  <div class="col">
-    <app-data-card
-      [current]="(pageViews$ | async | number) || 0"
-      [comparison]="(pageViewsPercentChange$ | async) || 0"
-      [title]="'Page views'"
-    ></app-data-card>
-  </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
-<div class="row">
-  <div class="col">
-    <app-charts
-      [title]="'Visits'"
-      [displayLegend]="'below'"
-      [showLegend]="true"
-      [data]="barChartData$ | async"
-      type="grouped-bar"
-      [table]="barTable$ | async"
-      [tableCols]="barTableCols"
-    ></app-charts>
+  <div class="row">
+    <div class="col">
+      <app-charts
+        [title]="'Visits'"
+        [displayLegend]="'below'"
+        [showLegend]="true"
+        [data]="barChartData$ | async"
+        type="grouped-bar"
+        [table]="barTable$ | async"
+        [tableCols]="barTableCols"
+      ></app-charts>
+    </div>
   </div>
-</div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
-<div class="row">
-  <div class="col">
-    <app-card [card-title]="'Top 10 pages visited'">
-      <div class="row">
-        <app-data-table
-          [filter]="false"
-          [sort]="false"
-          [pagination]="false"
-          [data]="(topPagesData$ | async)  || []"
-          [cols]="topPagesCols"
-        ></app-data-table>
-      </div>
-    </app-card>
+  <div class="row">
+    <div class="col">
+      <app-data-table-card
+        [filter]="false"
+        [sort]="false"
+        [pagination]="false"
+        [data]="(topPagesData$ | async) || []"
+        [cols]="topPagesCols"
+        title="Top 10 pages visited"
+        tooltip="Top 10 pages visited tooltip"
+      >
+      </app-data-table-card>
+    </div>
   </div>
-</div>
 </div>

@@ -26,11 +26,14 @@ const routes: Routes = [
           { path: 'summary', component: ProjectDetailsSummaryComponent },
           { path: 'webtraffic', component: ProjectDetailsWebtrafficComponent },
           {
-            path: 'search_analytics',
+            path: 'searchanalytics',
             component: ProjectDetailsSearchAnalyticsComponent,
           },
-          { path: 'feedback', component: ProjectDetailsFeedbackComponent },
-          { path: 'calldrivers', component: ProjectDetailsCalldriversComponent },
+          { path: 'pagefeedback', component: ProjectDetailsFeedbackComponent },
+          {
+            path: 'calldrivers',
+            component: ProjectDetailsCalldriversComponent,
+          },
           { path: 'uxtests', component: ProjectDetailsUxTestsComponent },
           { path: 'details', component: ProjectDetailsDetailsComponent },
         ],

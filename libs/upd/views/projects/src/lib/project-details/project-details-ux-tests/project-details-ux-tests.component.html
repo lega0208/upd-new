@@ -36,19 +36,16 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'Participant tasks'"
-        [title-tooltip]="'Participant tasks tooltip'"
-      >
-        <app-data-table
-          [data]="participantTasks$ || []"
-          [cols]="participantTasksCols"
-          [sort]="false"
-          [pagination]="false"
-          [filter]="false"
-        >
-        </app-data-table>
-      </app-card>
+      <app-data-table-card
+      [data]="participantTasks$ || []"
+      [cols]="participantTasksCols" 
+      [sort]="false" 
+      [pagination]="false" 
+      [filter]="false"
+      title="Participant tasks"
+      tooltip="Participant tasks tooltip"
+    >
+    </app-data-table-card>
     </div>
   </div>
 </div>
@@ -56,28 +53,17 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'Success rate and scenarios'"
-        [title-tooltip]="'Success rate and scenarios tooltip'"
-      >
-        <app-data-table
-          [data]="successRate$ || []"
-          [cols]="successRateCols"
-          [filter]="false"
-          [sort]="false"
-          [pagination]="false"
-        >
-        </app-data-table>
+      <app-data-table-card
+      [data]="successRate$ || []"
+      [cols]="successRateCols"
+      [sort]="false" 
+      [pagination]="false" 
+      [filter]="false"
+      title="Success rate and scenarios"
+      tooltip="Success rate and scenarios tooltip"
+    >
+    </app-data-table-card>
 
-        <div>
-          <div class="legend">
-            <p class="legend_field">
-              <span class="legend_color" style="background: #90ee90"></span>Met
-              objective of 80% success rate or 20 point increase
-            </p>
-          </div>
-        </div>
-      </app-card>
     </div>
   </div>
 </div>
