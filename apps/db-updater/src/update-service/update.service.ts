@@ -31,22 +31,22 @@ export class UpdateService {
         withRetry(updateOverallMetrics, 4, 1000)().catch((err) =>
           this.logger.error('Error updating overall metrics', err)
         ),
-        // withRetry(updateUxData, 4, 1000)().catch((err) =>
-        //   this.logger.error('Error updating UX data', err)
-        // ),
+        withRetry(updateUxData, 4, 1000)().catch((err) =>
+          this.logger.error('Error updating UX data', err)
+        ),
       ]);
 
-      // await withRetry(updateFeedbackData, 4, 1000)().catch((err) =>
-      //   this.logger.error('Error updating Feedback data', err)
-      // )
+      await withRetry(updateFeedbackData, 4, 1000)().catch((err) =>
+        this.logger.error('Error updating Feedback data', err)
+      )
 
       await Promise.allSettled([
-        // withRetry(updateCalldriverData, 4, 1000)().catch((err) =>
-        //   this.logger.error('Error updating Calldrivers data', err)
-        // ),
-        // withRetry(updatePages, 4, 1000)().catch((err) =>
-        //   this.logger.error('Error updating Page data', err)
-        // ),
+        withRetry(updateCalldriverData, 4, 1000)().catch((err) =>
+          this.logger.error('Error updating Calldrivers data', err)
+        ),
+        withRetry(updatePages, 4, 1000)().catch((err) => // commented out for now because bugs needs to be fixed
+          this.logger.error('Error updating Page data', err)
+        ),
         withRetry(updatePageMetrics, 4, 1000)().catch((err) =>
           this.logger.error('Error updating Page metrics data', err)
         )

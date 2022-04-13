@@ -1,10 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
-import { registerDiscriminator } from './collection.schema';
+import { model, Document, Model, Types } from 'mongoose';
 
 export type CallDriverDocument = CallDriver & Document;
 
-@Schema({ autoIndex: false })
+@Schema()
 export class CallDriver {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -27,7 +26,7 @@ export class CallDriver {
   @Prop({ type: String })
   sub_subtopic?: string;
 
-  @Prop({ type: Number, index: true })
+  @Prop({ type: Number })
   tpc_id = 999999; // Some records don't have a tpc_id, so they will default to this value
 
   @Prop({ type: Number })
@@ -39,12 +38,6 @@ export class CallDriver {
 
 export const CallDriverSchema = SchemaFactory.createForClass(CallDriver);
 
-export const CalldriversConfig = {
-  name: CallDriver.name,
-  schema: CallDriverSchema,
+export function getCallDriversModel(): Model<Document<CallDriver>> {
+  return model(CallDriver.name, CallDriverSchema);
 }
-
-export function getCallDriversModel() {
-  return registerDiscriminator(CalldriversConfig)
-}
-

@@ -1,13 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import {
+  Document,
+  model,
+  Model,
+  Types,
+} from 'mongoose';
 import { Task } from './task.schema';
 import { Project } from './project.schema';
 import { UxTest } from './ux-test.schema';
-import { registerDiscriminator } from './collection.schema';
 
 export type PageDocument = Page & Document;
 
-@Schema({ autoIndex: false })
+@Schema()
 export class Page {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -48,12 +52,8 @@ export class Page {
 
 export const PageSchema = SchemaFactory.createForClass(Page);
 
-export const PageConfig = {
-  name: Page.name,
-  schema: PageSchema,
-}
+const pageModel = model(Page.name, PageSchema);
 
-export function getPageModel() {
-  return registerDiscriminator(PageConfig);
+export function getPageModel(): Model<Document<Page>> {
+  return pageModel;
 }
-

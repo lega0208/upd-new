@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel, InjectConnection } from '@nestjs/mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 import { Overall, OverallDocument } from '@cra-arc/db';
 import type { PageMetricsModel } from '@cra-arc/types-common';
-import { FilterQuery, Model, Connection } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { ApiParams } from '@cra-arc/upd/services';
 import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
 import { PageMetrics } from '@cra-arc/types-common';
@@ -11,16 +11,11 @@ import { PageMetrics } from '@cra-arc/types-common';
 export class OverallService {
   constructor(
     @InjectModel(Overall.name) private overallModel: Model<OverallDocument>,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
-    @InjectConnection('defaultConnection') private connection: Connection,
+    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel
   ) {
   }
 
   async getMetrics(params: ApiParams): Promise<OverviewData> {
-    console.log(this.connection.config);
-    console.log('readyState:', this.connection.readyState);
-    console.log('client:', this.connection.getClient());
-
     return {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -54,9 +49,6 @@ async function getOverviewMetrics(
     .find({ date: dateQuery }, { _id: 0, date: 1, visits: 1 })
     .sort({ date: 1 })
     .lean();
-
-  console.log('visitsByDay:');
-  console.log(visitsByDay);
 
   const topPagesVisited = await PageMetricsModel.aggregate()
     .match({ date: dateQuery })

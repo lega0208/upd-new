@@ -1,13 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { model, Document, Model, Types } from 'mongoose';
 import { Page } from './page.schema';
 import { Project } from './project.schema';
 import { Task } from './task.schema';
-import { registerDiscriminator } from './collection.schema';
 
 export type UxTestDocument = UxTest & Document;
 
-@Schema({ autoIndex: false })
+@Schema({ collection: 'ux_tests' })
 export class UxTest {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -78,11 +77,6 @@ export class UxTest {
 
 export const UxTestSchema = SchemaFactory.createForClass(UxTest);
 
-export const UxTestConfig = {
-  name: UxTest.name,
-  schema: UxTestSchema,
-}
-
-export function getUxTestModel() {
-  return registerDiscriminator(UxTestConfig);
+export function getUxTestModel(): Model<Document<UxTest>> {
+  return model(UxTest.name, UxTestSchema);
 }

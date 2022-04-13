@@ -10,7 +10,6 @@ export class OverallController {
     @Query('dateRange') dateRange: string,
     @Query('comparisonDateRange') comparisonDateRange: string,
   ) {
-    console.log('getMetrics');
     return this.overallService.getMetrics({ dateRange, comparisonDateRange });
   }
 }

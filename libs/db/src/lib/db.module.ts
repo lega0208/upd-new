@@ -1,16 +1,22 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Collection, CollectionSchema } from './schemas/collection.schema';
 import {
-  CalldriversConfig,
-  FeedbackConfig,
-  OverallConfig,
-  PageConfig,
+  CallDriver,
+  CallDriverSchema,
+  Feedback,
+  FeedbackSchema,
+  Overall,
+  OverallSchema,
+  Page,
   PageMetrics,
   PageMetricsSchema,
-  ProjectConfig,
-  TaskConfig,
-  UxTestConfig,
+  PageSchema,
+  Project,
+  ProjectSchema,
+  Task,
+  TaskSchema,
+  UxTest,
+  UxTestSchema,
 } from './db.schemas';
 import { ConfigModule } from '@nestjs/config';
 import { getDbConnectionString } from './db.connection';
@@ -20,24 +26,21 @@ import { getDbConnectionString } from './db.connection';
     ConfigModule.forRoot(),
     MongooseModule.forRoot(getDbConnectionString(), {
       connectionName: 'defaultConnection',
-      dbName: 'upd-test-discriminators',
+      dbName: 'upd-test',
     }),
-    MongooseModule.forFeature([
-      { name: PageMetrics.name, schema: PageMetricsSchema },
-      {
-        name: Collection.name,
-        schema: CollectionSchema,
-        discriminators: [
-          CalldriversConfig,
-          FeedbackConfig,
-          OverallConfig,
-          PageConfig,
-          ProjectConfig,
-          TaskConfig,
-          UxTestConfig,
-        ],
-      },
-    ], 'defaultConnection'),
+    MongooseModule.forFeature(
+      [
+        { name: CallDriver.name, schema: CallDriverSchema },
+        { name: Feedback.name, schema: FeedbackSchema },
+        { name: Overall.name, schema: OverallSchema },
+        { name: PageMetrics.name, schema: PageMetricsSchema },
+        { name: Page.name, schema: PageSchema },
+        { name: Task.name, schema: TaskSchema },
+        { name: UxTest.name, schema: UxTestSchema },
+        { name: Project.name, schema: ProjectSchema },
+      ],
+      'defaultConnection'
+    ),
   ],
   providers: [],
   exports: [MongooseModule],

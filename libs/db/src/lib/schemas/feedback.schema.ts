@@ -1,10 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
-import { registerDiscriminator } from './collection.schema';
+import { model, Document, Model, Types } from 'mongoose';
 
 export type FeedbackDocument = Feedback & Document;
 
-@Schema({ autoIndex: false })
+@Schema({ collection: 'feedback' })
 export class Feedback {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -36,12 +35,10 @@ export class Feedback {
 
 export const FeedbackSchema = SchemaFactory.createForClass(Feedback);
 
-export const FeedbackConfig = {
-  name: Feedback.name,
-  schema: FeedbackSchema,
-}
+FeedbackSchema.index({ url: 1, date: 1 });
 
-export function getFeedbackModel() {
-  return registerDiscriminator(FeedbackConfig);
-}
+export const feedbackModel = model(Feedback.name, FeedbackSchema);
 
+export function getFeedbackModel(): Model<Document<Feedback>> {
+  return feedbackModel;
+}

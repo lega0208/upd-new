@@ -1,5 +1,5 @@
 
-export const getDbConnectionString = (dbName = 'upd-test-discriminators') => {
+export const getDbConnectionString = (dbName = 'upd-test') => {
   const { DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_QUERYSTRING } =
     process.env;
 
