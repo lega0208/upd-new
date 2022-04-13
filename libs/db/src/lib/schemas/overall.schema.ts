@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Model, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { GscSearchTermMetrics } from './types';
 import { registerDiscriminator } from './collection.schema';
 
 export type OverallDocument = Overall & Document;
 
-@Schema()
+@Schema({ autoIndex: false })
 export class Overall {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();

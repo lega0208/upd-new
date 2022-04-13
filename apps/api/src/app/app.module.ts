@@ -4,13 +4,12 @@ import { PagesModule } from '../pages/pages.module';
 import { OverallModule } from '../overall/overall.module';
 import { TasksModule } from '../tasks/tasks.module';
 import { ProjectsModule } from '../projects/projects.module';
-import { MongooseModule } from '@nestjs/mongoose';
+import { set } from 'mongoose';
 import { getDbConnectionString } from '@cra-arc/db';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    MongooseModule.forRoot(getDbConnectionString()),
     PagesModule,
     OverallModule,
     TasksModule,
@@ -18,4 +17,8 @@ import { getDbConnectionString } from '@cra-arc/db';
   ],
   providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    set('debug', true);
+  }
+}

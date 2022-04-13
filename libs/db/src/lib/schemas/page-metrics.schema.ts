@@ -5,7 +5,7 @@ import { Page } from './page.schema';
 
 export type PageMetricsDocument = PageMetrics & Document;
 
-@Schema({ collection: 'pages_metrics' })
+@Schema({ collection: 'pages_metrics', autoIndex: false })
 export class PageMetrics {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
@@ -254,14 +254,17 @@ PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T extend
   }
 
   const aggregationQuery = this.aggregate()
-    .sort({ date: 1, url: 1 })
+    .sort({ date: 1 })
     .match({
-      url: {
-        $in: pageUrls,
-      },
       date: {
         $gte: startDate,
         $lte: endDate,
+      },
+    })
+    .sort({ url: 1 })
+    .match({
+      url: {
+        $in: pageUrls,
       },
     })
     .project({

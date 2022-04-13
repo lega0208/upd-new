@@ -26,3 +26,9 @@ services:
         - HTTPS_PROXY=${HTTP_PROXY}
     ports:
       - "9000"
+  mongodb:
+    image: mongo:4.4
+    container_name: upd_mongo
+    restart: unless-stopped
+    volumes:
+      - ../db/data:/data

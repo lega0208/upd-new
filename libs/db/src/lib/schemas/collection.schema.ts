@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 
-@Schema({ _id: false, discriminatorKey: '_type' })
+@Schema({ _id: false, discriminatorKey: '_type', autoIndex: false })
 export class Collection {
   @Prop({ type: String, required: true, index: true })
   _type = '';

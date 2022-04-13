@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Model, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { registerDiscriminator } from './collection.schema';
 
 export type FeedbackDocument = Feedback & Document;
 
-@Schema()
+@Schema({ autoIndex: false })
 export class Feedback {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Model, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { Page } from './page.schema';
 import { UxTest } from './ux-test.schema';
 import { Task } from './task.schema';
@@ -7,7 +7,7 @@ import { registerDiscriminator } from './collection.schema';
 
 export type ProjectDocument = Project & Document;
 
-@Schema()
+@Schema({ autoIndex: false })
 export class Project {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();

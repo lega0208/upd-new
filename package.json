@@ -7,7 +7,7 @@
     "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2015 browser module main",
     "start": "nx serve",
     "dev": "nx run-many --target=serve --projects=api,upd --parallel=2",
-    "build": "nx run-many --target=build --projects=api,upd --parallel",
+    "build": "nx run-many --target=build --projects=api,upd --parallel --prod",
     "db-updater": "nx serve db-updater",
     "test": "nx test",
     "analyze-upd-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json"
