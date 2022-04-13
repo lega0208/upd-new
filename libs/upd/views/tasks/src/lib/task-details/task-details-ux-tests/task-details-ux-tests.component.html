@@ -36,19 +36,17 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'Success rate and scenarios'"
-        [title-tooltip]="'Success rate and scenarios tooltip'"
-      >
-        <app-data-table
-          [data]="successRate$ || []"
-          [cols]="successRateCols"
-          [filter]="false"
+      <app-data-table-card
+      [data]="successRate$ || []"
+      [cols]="successRateCols"
+      [filter]="false"
           [sort]="false"
           [pagination]="false"
-        >
-        </app-data-table>
-      </app-card>
+      title="Success rate and scenarios"
+      tooltip="Success rate and scenarios tooltip"
+    >
+    </app-data-table-card>
+
     </div>
   </div>
 </div>

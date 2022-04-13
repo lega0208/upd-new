@@ -1,9 +1,7 @@
 <h2 class="h3 pt-2 pb-2" data-i18n="task-title">
   Project: {{ title$ }}
   <span class="h5 d-inline-block mb-0 align-top ms-1">
-    <span class="badge rounded-pill bg-planned align-middle">{{
-      status$
-    }}</span>
+    <app-project-status-label [statusText]="status$"></app-project-status-label>
   </span>
 </h2>
 

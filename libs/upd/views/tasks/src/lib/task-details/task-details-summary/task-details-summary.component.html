@@ -1,13 +1,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-sm-12">
-      <app-data-card
+      <app-data-kpi-card
         [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
         [date]="(dateFromLastTest$ | async) || ''"
         [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
         [title]="'Average task success from last UX test'"
         [tooltip]="'Average task success from last UX test tooltip'"
-      ></app-data-card>
+      ></app-data-kpi-card>
     </div>
 
     <div class="col-lg-6 col-sm-12">
@@ -24,16 +24,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'Visits by page'"
-        [title-tooltip]="'Visits by page tooltip'"
-      >
-        <app-data-table
-          [data]="(visitsByPage$ | async) || []"
-          [cols]="visitsByPageCols"
-        >
-        </app-data-table>
-      </app-card>
+      <app-data-table-card
+      [data]="(visitsByPage$ | async) || []"
+      [cols]="visitsByPageCols"
+      title="Visits by page"
+      tooltip="Visits by page tooltip"
+    >
+    </app-data-table-card>
     </div>
   </div>
 </div>
@@ -62,17 +59,14 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'Task success by UX test'"
-        [title-tooltip]="'Task success by UX test tooltip'"
-      >
-        <app-data-table
-          [data]="(taskSuccessByUxTest$ | async) || []"
-          [cols]="taskSuccessByUxTestCols"
-          [pagination]="false"
-        >
-        </app-data-table>
-      </app-card>
+      <app-data-table-card
+      [data]="(taskSuccessByUxTest$ | async) || []"
+      [cols]="taskSuccessByUxTestCols"
+      [pagination]="false"
+      title="Task success by UX test"
+      tooltip="Task success by UX test tooltip"
+    >
+    </app-data-table-card>
     </div>
   </div>
 </div>

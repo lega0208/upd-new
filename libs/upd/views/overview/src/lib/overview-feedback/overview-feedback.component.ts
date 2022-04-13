@@ -21,6 +21,15 @@ export class OverviewFeedbackComponent {
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
 
+  dyfTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'Selection' },
+    { field: 'value', header: 'Visits', pipe: 'number' },
+  ]
+  whatWasWrongTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'What was wrong' },
+    { field: 'value', header: 'Visits', pipe: 'number' },
+  ]
+
   constructor(private overviewService: OverviewFacade) { }
 }
 

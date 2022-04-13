@@ -1,0 +1,15 @@
+<app-card [card-title]="title" [title-tooltip]="tooltip">
+  <ng-container *ngIf="data.length == 0; else elseBlock">
+    <p>{{ title | translate }} data is not available for this date range.</p>
+  </ng-container>
+  <ng-template #elseBlock>
+    <app-data-table
+      [filter]="filter"
+      [sort]="sort"
+      [pagination]="pagination"
+      [data]="data"
+      [cols]="cols"
+      [captionTitle]="captionTitle"
+    ></app-data-table>
+  </ng-template>
+</app-card>

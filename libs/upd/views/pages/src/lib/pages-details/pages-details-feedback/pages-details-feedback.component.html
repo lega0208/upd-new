@@ -4,7 +4,7 @@
       <app-charts
         [title]="'Did you find what you were looking for?'"
         [titleTooltip]="'Did you find what you were looking for tooltip'"
-        [data]="(dyfChart | async) || 0"
+        [data]="(dyfChart$ | async) || 0"
         [type]="'donut'"
       ></app-charts>
     </div>
@@ -12,7 +12,7 @@
       <app-charts
         [title]="'What was wrong?'"
         [titleTooltip]="'What was wrong tooltip'"
-        [data]="(whatWasWrongChart | async) || 0"
+        [data]="(whatWasWrongChart$ | async) || 0"
         [type]="'donut'"
       ></app-charts>
     </div>

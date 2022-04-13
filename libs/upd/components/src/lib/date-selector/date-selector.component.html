@@ -5,16 +5,16 @@
     [selectionOptions]="selectionOptions"
   ></app-date-selector-dropdown>
 
-  <span class="text-secondary ps-3 text-nowrap dates-header-week">
+    <span class="text-secondary ps-3 pe-2 text-nowrap dates-header-week">
     <strong>{{ displayFormatDateRange$ | async }}</strong>
   </span>
   <span
-    class="text-secondary ps-1 text-nowrap dates-header-week"
+    class="text-secondary ps-0 pe-0 text-nowrap dates-header-week"
     data-i18n="compared_to"
+    translate='compared_to'
   >
-  compared to
   </span>
-  <span class="text-secondary ps-1 text-nowrap dates-header-week">
+  <span class="text-secondary ps-2 pe-0 text-nowrap dates-header-week">
     <strong>{{ displayFormatComparisonDateRange$ | async }}</strong>
   </span>
 </div>

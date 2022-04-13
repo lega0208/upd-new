@@ -20,13 +20,17 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'Participant tasks'"
-        [title-tooltip]="'Participant tasks tooltip'"
-      >
-        <app-data-table [data]="participantTasks$ || []" [cols]="participantTasksCols" [sort]="false" [pagination]="false" [filter]="false">
-        </app-data-table>
-      </app-card>
+      <app-data-table-card
+      [data]="participantTasks$ || []"
+      [cols]="participantTasksCols" 
+      [sort]="false" 
+      [pagination]="false" 
+      [filter]="false"
+      title="Participant tasks"
+      tooltip="Participant tasks tooltip"
+    >
+    </app-data-table-card>
+
     </div>
   </div>
 </div>

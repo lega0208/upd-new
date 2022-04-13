@@ -4,21 +4,28 @@
       <img
         class="img-fluid fip-colour"
         src="../../../assets/img/CRA-FIP-9pt-e.png"
-        alt="Government of Canada"
+        alt="{{'government_of_canada' | translate}}"
       />
     </div>
     <div
-      class="col-lg-9 col-md-8 col-sm-6 col-6 text-end lang-toggle locale-switcher"
+      class="col-lg-9 col-md-8 col-sm-6 col-6 text-end lang-toggle"
     >
-      <ul class="locale-switcher list-inline">
-        <!-- todo: language toggle & i18n -->
+          <!-- todo: language toggle & i18n -->
+      <!-- <ul class="locale-switcher list-inline">
         <li class="list-inline-item hidden">
           <a href="#" data-locale="en">English</a>
         </li>
         <li class="list-inline-item">
           <a href="#" data-locale="fr">Français</a>
         </li>
-      </ul>
+      </ul> -->
+      <div class="language-picker-area">
+        <div class="picker-label" ></div>
+        <select (change)="selectLanguage($event)" class="language-picker">
+          <option value="en-CA"> {{ 'language.english' | translate }} </option>
+          <option value="fr-CA"> {{ 'language.french' | translate }} </option>
+        </select>
+      </div>
     </div>
   </div>
 </header>

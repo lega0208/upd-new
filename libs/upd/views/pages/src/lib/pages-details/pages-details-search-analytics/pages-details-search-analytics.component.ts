@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { ColumnConfig } from '@cra-arc/upd-components';
+import { isEmpty } from 'rxjs/operators';
 
 @Component({
   selector: 'app-page-details-search-analytics',
   templateUrl: './pages-details-search-analytics.component.html',
   styleUrls: ['./pages-details-search-analytics.component.css'],
 })
-export class PagesDetailsSearchAnalyticsComponent {
+export class PagesDetailsSearchAnalyticsComponent implements OnInit {
   totalImpressionsGSC$ = this.pageDetailsService.impressions$;
   totalImpressionsGSCPercentChange$ =
     this.pageDetailsService.impressionsPercentChange$;
@@ -41,6 +42,12 @@ export class PagesDetailsSearchAnalyticsComponent {
     { field: 'value', header: 'Visits', pipe: 'number' },
     { field: 'change', header: 'Comparison' },
   ] as ColumnConfig[];
+
+  ngOnInit(): void {
+    const empty = this.referrerType$.pipe(isEmpty());
+    console.log(empty);
+    empty.subscribe((x) => console.log(x));
+  }
 
   constructor(private pageDetailsService: PagesDetailsFacade) {}
 }

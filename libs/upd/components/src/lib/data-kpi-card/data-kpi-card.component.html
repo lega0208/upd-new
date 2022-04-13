@@ -1,0 +1,40 @@
+<app-card [card-title]="title" [title-tooltip]="tooltip">
+  <ng-container *ngIf="numUxTests === 0; else elseBlock">
+    <div class="container-fluid p-0">
+      <div class="row row-no-gutters">
+        <div class="col">
+          <p class="w-100">This task hasn't been tested yet.</p>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #elseBlock>
+    <div class="container-fluid p-0">
+      <div class="row row-no-gutters">
+        <div class="col">
+          <p class="h3 w-100">
+            {{ comparison | percent: undefined:translateService.currentLang }}
+          </p>
+        </div>
+      </div>
+      <div class="row row-no-gutters">
+        <div class="col">
+          <p class="w-100">
+            <ng-container *ngIf="comparison < 0.8; else elseBlock">
+              <span class="text-danger text-nowrap"
+                ><span class="material-icons">warning</span></span
+              >
+              Did not meet objective of 80% task success or 20 point increase
+            </ng-container>
+            <ng-template #elseBlock>
+              <span class="text-success text-nowrap"
+                ><span class="material-icons">check_circle</span></span
+              >
+              Met objective of 80% task success or 20 point increase
+            </ng-template>
+          </p>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</app-card>

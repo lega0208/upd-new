@@ -9,8 +9,8 @@ export class OverviewComponent implements OnInit {
   navTabs: { href: string; title: string }[] = [
     { href: 'summary', title: 'Summary' },
     { href: 'webtraffic', title: 'Web Traffic' },
-    { href: 'search_analytics', title: 'Search Analytics' },
-    { href: 'feedback', title: 'Page Feedback' },
+    { href: 'searchanalytics', title: 'Search Analytics' },
+    { href: 'pagefeedback', title: 'Page Feedback' },
     { href: 'calldrivers', title: 'Call drivers' },
     { href: 'uxtests', title: 'UX tests' },
   ];

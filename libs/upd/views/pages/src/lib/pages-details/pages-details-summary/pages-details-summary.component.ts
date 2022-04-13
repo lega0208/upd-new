@@ -1,6 +1,7 @@
 import { Component} from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 
+import { TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-page-details-summary',
   templateUrl: './pages-details-summary.component.html',
@@ -32,5 +33,5 @@ export class PagesDetailsSummaryComponent {
 
   topSearchTermsDecrease$ = this.pageDetailsService.topSearchTermsDecrease$;
 
-  constructor(private pageDetailsService: PagesDetailsFacade) {}
+  constructor(private pageDetailsService: PagesDetailsFacade,  public translateService: TranslateService) {}
 }

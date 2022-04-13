@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { ColumnConfig } from '@cra-arc/upd-components';
-import { OverviewFacade } from '../+state/overview/overview.facade';
+import { OverviewFacade } from '@cra-arc/upd/views/overview';
 
 @Component({
   selector: 'app-overview-webtraffic',
@@ -26,6 +26,21 @@ export class OverviewWebtrafficComponent {
   ];
 
   barChartData$ = this.overviewService.visitsByDay$;
-  constructor(private overviewService: OverviewFacade) {}
+  barTable$ = this.overviewService.barTable$;
 
+  label = 'Visits';
+
+  dateRangeLabel$ = this.overviewService.dateRangeLabel$;
+
+  barTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'Dates' },
+    {
+      field: 'currValue',
+      header: 'Visits for ' + this.dateRangeLabel$,
+      pipe: 'number',
+    },
+    { field: 'prevValue', header: 'Visits for ', pipe: 'number' },
+  ];
+
+  constructor(private overviewService: OverviewFacade) {}
 }

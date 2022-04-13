@@ -5,7 +5,8 @@
         [routerLinkActive]="['active']"
         [routerLink]="tab.href"
         attr.data-i18n="tab-{{ tab.href }}"
-        >{{ tab.title }}
+        translate="tab-{{ tab.href }}">
+		{{ tab.title }}
       </a>
     </li>
   </ul>

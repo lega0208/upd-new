@@ -1,52 +1,17 @@
-<ng-container *ngIf="date && numUxTests > 0">
-  <app-card
-    [card-title]="title + ' (' + (date | date: 'MMM dd, YYYY') + ')'"
-    [title-tooltip]="tooltip"
-  >
+<app-card [card-title]="title" [title-tooltip]="tooltip">
+  <ng-container *ngIf="current === '0' || current === '0%'; else elseBlock">
     <div class="container-fluid p-0">
-      <div class="row row-no-gutters">
-        <div class="col">
-          <p class="h3 w-100">
-            {{ comparison | percent }}
-          </p>
-        </div>
-      </div>
       <div class="row row-no-gutters">
         <div class="col">
           <p class="w-100">
-            <ng-container *ngIf="comparison < 0.8; else elseBlock">
-              <span class="text-danger text-nowrap"
-                ><span class="material-icons">warning</span></span
-              >
-              Did not meet objective of 80% task success or 20 point increase
-            </ng-container>
-            <ng-template #elseBlock>
-              <span class="text-success text-nowrap"
-                ><span class="material-icons">check_circle</span></span
-              >
-              Met objective of 80% task success or 20 point increase
-            </ng-template>
+            {{ title | translate }} data is not available for this date range.
           </p>
         </div>
       </div>
     </div>
-  </app-card>
-</ng-container>
+  </ng-container>
 
-<ng-container *ngIf="date && numUxTests === 0">
-  <app-card [card-title]="title" [title-tooltip]="tooltip">
-    <div class="container-fluid p-0">
-      <div class="row row-no-gutters">
-        <div class="col">
-          <p class="w-100">This task hasn't been tested yet.</p>
-        </div>
-      </div>
-    </div>
-  </app-card>
-</ng-container>
-
-<ng-container *ngIf="!date">
-  <app-card [card-title]="title" [title-tooltip]="tooltip">
+  <ng-template #elseBlock>
     <div class="container-fluid p-0">
       <div class="row row-no-gutters">
         <div class="col">
@@ -63,10 +28,10 @@
             }"
             class="h3 float-end"
           >
-            {{ comparison | percent }}
+            {{ comparison | percent: undefined:translateService.currentLang }}
           </span>
         </div>
       </div>
     </div>
-  </app-card>
-</ng-container>
+  </ng-template>
+</app-card>
