@@ -30,6 +30,7 @@ import {
 } from './task-details/+state/tasks-details.reducer';
 import { TasksDetailsEffects } from './task-details/+state/tasks-details.effects';
 import { TasksDetailsFacade } from './task-details/+state/tasks-details.facade';
+import { I18nModule } from '@cra-arc/upd/i18n';
 
 @NgModule({
   imports: [
@@ -41,6 +42,7 @@ import { TasksDetailsFacade } from './task-details/+state/tasks-details.facade';
     EffectsModule.forFeature([TasksHomeEffects]),
     StoreModule.forFeature(TASKS_DETAILS_FEATURE_KEY, tasksDetailsReducer),
     EffectsModule.forFeature([TasksDetailsEffects]),
+    I18nModule,
   ],
   declarations: [
     TasksComponent,

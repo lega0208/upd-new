@@ -1,12 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
-import { TranslateService } from '@ngx-translate/core';
+import { I18nService } from '@cra-arc/upd/i18n';
 @Component({
   selector: 'app-data-kpi-card',
   templateUrl: './data-kpi-card.component.html',
   styleUrls: ['./data-kpi-card.component.scss'],
 })
-export class DataKpiCardComponent implements OnInit {
+export class DataKpiCardComponent {
   @Input() current: string | number = '';
   @Input() comparison = 0;
   @Input() date: Date | string = '';
@@ -14,7 +14,5 @@ export class DataKpiCardComponent implements OnInit {
   @Input() title = '';
   @Input() tooltip = '';
 
-  ngOnInit(): void {}
-
-  constructor(public translateService: TranslateService) {}
+  constructor(public i18n: I18nService) {}
 }

@@ -50,8 +50,7 @@
           "extractLicenses": false,
           "sourceMap": true,
           "namedChunks": true,
-          "verbose": true,
-          "buildLibsFromSource": false
+          "verbose": true
         }
       },
       "defaultConfiguration": "production"

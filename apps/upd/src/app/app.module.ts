@@ -24,9 +24,9 @@ import {
 
 import { environment } from '../environments/environment';
 
-
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { I18nModule } from '@cra-arc/upd/i18n';
 
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -37,14 +37,7 @@ export function HttpLoaderFactory(http: HttpClient) {
   imports: [
     BrowserModule,
     HttpClientModule,
-    TranslateModule.forRoot({
-      defaultLanguage: 'en-CA',
-      loader: {
-          provide: TranslateLoader,
-          useFactory: HttpLoaderFactory,
-          deps: [HttpClient]
-      }
-    }),
+    I18nModule.forRoot(),
     BrowserAnimationsModule,
     AppRoutingModule,
     StoreModule.forRoot(

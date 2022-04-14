@@ -12,7 +12,7 @@ import dayjs from 'dayjs';
 import { CurveFactory } from 'd3-shape';
 import localeData from 'dayjs/plugin/localeData';
 import { curves, Curves, ChartTypes } from './types';
-import { ColumnConfig } from '@cra-arc/upd-components';
+import { ColumnConfig } from '../data-table-styles/types';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({

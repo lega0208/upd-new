@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-
 import { ColumnConfig } from '@cra-arc/upd-components';
-import { OverviewFacade } from '@cra-arc/upd/views/overview';
+import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
   selector: 'app-overview-webtraffic',

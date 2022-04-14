@@ -9,7 +9,6 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['./data-table.component.css'],
 })
 export class DataTableComponent implements OnInit {
-  constructor(public translateService: TranslateService) {}
   @ViewChild('dt') table!: Table;
   @Input() data: unknown[] | null = [];
   @Input() displayRows: number = 10;
@@ -21,6 +20,8 @@ export class DataTableComponent implements OnInit {
   @Input() captionTitle: string = '';
 
   loading!: boolean;
+
+  constructor(public translateService: TranslateService) {}
 
   ngOnInit(): void {
     if (this.searchFields.length === 0) {

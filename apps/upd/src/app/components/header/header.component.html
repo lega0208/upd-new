@@ -10,18 +10,9 @@
     <div
       class="col-lg-9 col-md-8 col-sm-6 col-6 text-end lang-toggle"
     >
-          <!-- todo: language toggle & i18n -->
-      <!-- <ul class="locale-switcher list-inline">
-        <li class="list-inline-item hidden">
-          <a href="#" data-locale="en">English</a>
-        </li>
-        <li class="list-inline-item">
-          <a href="#" data-locale="fr">Français</a>
-        </li>
-      </ul> -->
       <div class="language-picker-area">
         <div class="picker-label" ></div>
-        <select (change)="selectLanguage($event)" class="language-picker">
+        <select #selector (change)="selectLanguage(selector.value)" class="language-picker">
           <option value="en-CA"> {{ 'language.english' | translate }} </option>
           <option value="fr-CA"> {{ 'language.french' | translate }} </option>
         </select>

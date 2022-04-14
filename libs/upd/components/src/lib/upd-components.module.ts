@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import {
   NgbDropdownModule,
@@ -34,13 +33,8 @@ import { ProjectStatusLabelComponent } from './project-status-label/project-stat
 import { DataTableCardComponent } from './data-table-card/data-table-card.component';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { I18nModule } from '@cra-arc/upd/i18n';
 
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-
-export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
-}
 @NgModule({
   imports: [
     CommonModule,
@@ -56,14 +50,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     ButtonModule,
     InputTextModule,
     NgbModule,
-    TranslateModule.forChild({
-      defaultLanguage: 'en-CA',
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient],
-      },
-    }),
+    I18nModule,
   ],
   declarations: [
     CardComponent,

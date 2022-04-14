@@ -5,7 +5,7 @@
         [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
         [date]="(dateFromLastTest$ | async) || ''"
         [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
-        [title]="'Average task success from last UX test'"
+        [title]="'Average task success from last UX test' | translate"
         [tooltip]="'Average task success from last UX test tooltip'"
       ></app-data-kpi-card>
     </div>

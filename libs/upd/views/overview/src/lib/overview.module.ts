@@ -24,25 +24,12 @@ import {
 } from './+state/overview/overview.reducer';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { I18nModule } from '@cra-arc/upd/i18n';
 
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-
-export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
-}
 @NgModule({
   imports: [
     CommonModule,
-    HttpClientModule,
-    TranslateModule.forChild({
-      defaultLanguage: 'en-CA',
-      loader: {
-          provide: TranslateLoader,
-          useFactory: HttpLoaderFactory,
-          deps: [HttpClient]
-      }
-    }),
+    I18nModule,
     OverviewRoutingModule,
     UpdComponentsModule,
     ServicesModule,
