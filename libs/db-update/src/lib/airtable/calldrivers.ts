@@ -11,6 +11,7 @@ import { AirtableClient, DateRange, DateType } from '@cra-arc/external-data';
 dayjs.extend(utc);
 
 export async function updateCalldriverData(endDate?: DateType) {
+  console.log('Updating calldrivers data');
   await connect(getDbConnectionString());
 
   const calldriversModel = getCallDriversModel();

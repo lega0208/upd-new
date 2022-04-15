@@ -16,6 +16,7 @@ import {
   getUxTestModel,
   getDbConnectionString,
 } from '@cra-arc/db';
+import { assertHasUrl, assertObjectId } from './utils';
 
 export * from './calldrivers';
 export * from './feedback';
@@ -263,31 +264,30 @@ export async function getAndPrepareUxData(): Promise<UxData> {
   };
 }
 
-function assertObjectId(
-  value: UxDataType[] | Types.ObjectId[]
-): asserts value is Types.ObjectId[] {
-  for (const item of value) {
-    if (!(item instanceof Types.ObjectId)) {
-      throw new Error('Not an ObjectId');
-    }
-  }
-}
-
-function assertHasUrl(value: UxApiDataType[]): asserts value is PageData[] {
-  if (!value.every((doc) => 'url' in doc)) {
-    throw new Error('No URL');
-  }
-}
-
 export async function updateUxData() {
   const { tasks, uxTests, pages, projects } = await getAndPrepareUxData();
 
   await connect(getDbConnectionString());
 
   const pageUpdateOps = pages.map((page) => ({
-    replaceOne: {
+    updateOne: {
       filter: { _id: page._id },
-      replacement: page,
+      update: {
+        $setOnInsert: {
+          _id: page._id,
+          title: page.title,
+          url: page.url,
+        },
+        $addToSet: {
+          tasks: { $each: page.tasks || [] },
+          projects: { $each: page.projects || [] },
+          ux_tests: { $each: page.ux_tests || [] },
+          all_urls: page.url,
+        },
+        $set: {
+          airtable_id: page.airtable_id,
+        }
+      },
       upsert: true,
     },
   }));

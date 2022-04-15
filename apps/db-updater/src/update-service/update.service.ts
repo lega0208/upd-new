@@ -44,9 +44,9 @@ export class UpdateService {
         withRetry(updateCalldriverData, 4, 1000)().catch((err) =>
           this.logger.error('Error updating Calldrivers data', err)
         ),
-        // withRetry(updatePages, 4, 1000)().catch((err) => // commented out for now because bugs needs to be fixed
-        //   this.logger.error('Error updating Page data', err)
-        // ),
+        withRetry(updatePages, 4, 1000)().catch((err) => // commented out for now because bugs needs to be fixed
+          this.logger.error('Error updating Page data', err)
+        ),
         withRetry(updatePageMetrics, 4, 1000)().catch((err) =>
           this.logger.error('Error updating Page metrics data', err)
         )
