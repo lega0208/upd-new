@@ -5,7 +5,7 @@
         [current]="
           (uniqueVisitors$
             | async
-            | number: undefined:translateService.currentLang) || 0
+            | number: undefined:currentLang) || 0
         "
         [comparison]="(uniqueVisitorsPercentChange$ | async) || 0"
         [title]="'unique-visitors'"
@@ -15,7 +15,7 @@
     <div class="col">
       <app-data-card
         [current]="
-          (visits$ | async | number: undefined:translateService.currentLang) ||
+          (visits$ | async | number: undefined:currentLang) ||
           0
         "
         [comparison]="(visitsPercentChange$ | async) || 0"
@@ -28,7 +28,7 @@
         [current]="
           (pageViews$
             | async
-            | number: undefined:translateService.currentLang) || 0
+            | number: undefined:currentLang) || 0
         "
         [comparison]="(pageViewsPercentChange$ | async) || 0"
         [title]="'page-views'"
@@ -48,6 +48,7 @@
         [showRightYAxisLabel]="true"
         [curveType]="'Natural'"
         [barChart]="barChartData$ | async"
+        [currentLang$]="currentLang$"
       ></app-charts>
     </div>
   </div>
@@ -60,7 +61,7 @@
         [current]="
           (gscImpressions$
             | async
-            | number: undefined:translateService.currentLang) || 0
+            | number: undefined:currentLang) || 0
         "
         [comparison]="(gscImpressionsPercentChange$ | async) || 0"
         [title]="'Total impressions from Google'"
@@ -69,7 +70,7 @@
     <div class="col">
       <app-data-card
         [current]="
-          (gscCTR$ | async | percent: undefined:translateService.currentLang) ||
+          (gscCTR$ | async | percent: undefined:currentLang) ||
           0
         "
         [comparison]="(gscCTRPercentChange$ | async) || 0"
@@ -81,7 +82,7 @@
         [current]="
           (gscAverage$
             | async
-            | number: '1.0-2':translateService.currentLang) || 0
+            | number: '1.0-2':currentLang) || 0
         "
         [comparison]="(gscAveragePercentChange$ | async) || 0"
         [title]="'Average rank on Google'"

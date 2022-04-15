@@ -1,24 +1,26 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { map } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 
-import * as OverviewActions from './overview.actions';
-import { OverviewState } from './overview.reducer';
-import * as OverviewSelectors from './overview.selectors';
-import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import 'dayjs/esm/locale/en-CA';
+import 'dayjs/esm/locale/fr-CA';
+
+import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
+import { LocaleId } from '@cra-arc/upd/i18n';
 import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
 import { percentChange, PickByType } from '@cra-arc/utils-common';
+import * as OverviewActions from './overview.actions';
+import * as OverviewSelectors from './overview.selectors';
+import { OverviewState } from './overview.reducer';
+import { I18nFacade } from '@cra-arc/upd/state';
 
 dayjs.extend(utc);
 
 @Injectable()
 export class OverviewFacade {
-  /**
-   * Combine pieces of state using createSelector,
-   * and expose them as observables through the facade.
-   */
+  currentLang$ = this.i18n.currentLang$;
   loaded$ = this.store.pipe(select(OverviewSelectors.getOverviewLoaded));
   loading$ = this.store.pipe(select(OverviewSelectors.getOverviewLoading));
   overviewData$ = this.store.pipe(select(OverviewSelectors.getOverviewData));
@@ -71,8 +73,9 @@ export class OverviewFacade {
 
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
-  visitsByDay$ = this.overviewData$.pipe(
-    map((data) => {
+  visitsByDay$ = combineLatest([this.overviewData$, this.currentLang$])
+    .pipe(
+      map(([data, lang]) => {
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
         data?.comparisonDateRangeData?.visitsByDay || [];
@@ -88,7 +91,7 @@ export class OverviewFacade {
         return [] as MultiSeries;
       }
 
-      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange);
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
 
       const dateRangeDates = visitsByDay.map(({ date }) => date);
 
@@ -98,7 +101,8 @@ export class OverviewFacade {
       }));
 
       const comparisonDateRangeLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange || ''
+        data.comparisonDateRange || '',
+        lang
       );
 
       const comparisonDateRangeSeries = comparisonVisitsByDay.map(
@@ -124,7 +128,6 @@ export class OverviewFacade {
       return visitsByDayData;
     })
   );
-
 
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
@@ -152,20 +155,20 @@ export class OverviewFacade {
         return {
           name: dayjs(date).utc(false).format('dddd'),
           currValue: dateRangeSeries[i].visits,
-          prevValue: comparisonDateRangeSeries[i].visits
+          prevValue: comparisonDateRangeSeries[i].visits,
         };
-      })
-      
+      });
+
       return visitsByDayData;
     })
   );
 
-  dateRangeLabel$ = this.overviewData$.pipe(
-    map((data) => getWeeklyDatesLabel(data.dateRange))
+  dateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang))
   );
 
-  comparisonDateRangeLabel$ = this.overviewData$.pipe(
-    map((data) => getWeeklyDatesLabel(data.comparisonDateRange || ''))
+  comparisonDateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => getWeeklyDatesLabel(data.comparisonDateRange || '', lang))
   );
 
   dyfData$ = this.overviewData$.pipe(
@@ -215,18 +218,21 @@ export class OverviewFacade {
 
   error$ = this.store.pipe(select(OverviewSelectors.getOverviewError));
 
-  constructor(private readonly store: Store<OverviewState>) {}
+  constructor(
+    private readonly store: Store<OverviewState>,
+    private i18n: I18nFacade
+  ) {}
 
   init() {
     this.store.dispatch(OverviewActions.init());
   }
 }
 
-const getWeeklyDatesLabel = (dateRange: string) => {
+const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-  const formattedStartDate = dayjs(startDate).utc(false).format('MMM D');
-  const formattedEndDate = dayjs(endDate).utc(false).format('MMM D');
+  const formattedStartDate = dayjs(startDate).utc(false).locale(lang).format('MMM D');
+  const formattedEndDate = dayjs(endDate).utc(false).locale(lang).format('MMM D');
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };

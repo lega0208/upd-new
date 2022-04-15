@@ -13,7 +13,8 @@ import { CurveFactory } from 'd3-shape';
 import localeData from 'dayjs/plugin/localeData';
 import { curves, Curves, ChartTypes } from './types';
 import { ColumnConfig } from '../data-table-styles/types';
-import { TranslateService } from '@ngx-translate/core';
+import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-charts',
@@ -21,10 +22,12 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['./charts.component.css'],
 })
 export class ChartsComponent implements OnInit {
-constructor(public translateService:TranslateService){ }
   view?: [number, number];
+  lang: LocaleId = EN_CA
+
   @Input() title = '';
   @Input() titleTooltip = '';
+  @Input() currentLang$: Observable<LocaleId> = of(EN_CA);
   @Input() animations = true;
   @Input() type: ChartTypes = 'pie';
   @Input() width = 1020;
@@ -114,7 +117,7 @@ constructor(public translateService:TranslateService){ }
   @Input() table: any;
   @Input() tableCols: ColumnConfig[] = [];
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.setLegendPosition();
     if (this.type === 'combo-bar-line') this.setComboColourScheme();
     else this.setColourScheme();
@@ -126,6 +129,12 @@ constructor(public translateService:TranslateService){ }
     }
 
     this.lineChart = lineChart;
+
+    this.currentLang$.subscribe((nextLang) => {
+      this.lang = nextLang;
+
+
+    })
   }
 
   applyDimensions() {
@@ -182,8 +191,8 @@ constructor(public translateService:TranslateService){ }
     const val = formatLabel(data.value);
 
     return `
-      <span class="tooltip-label">${escapeLabel(label)}</span>
-      <span class="tooltip-val">${val}</span>
+      <span class='tooltip-label'>${escapeLabel(label)}</span>
+      <span class='tooltip-val'>${val}</span>
     `;
   }
 
@@ -196,19 +205,19 @@ constructor(public translateService:TranslateService){ }
   }
 
   yLeftTickFormat(data: number) {
-    return (data / 1000).toLocaleString();
+    return (data / 1000).toLocaleString(this.lang);
   }
 
   yRightTickFormat(data: number) {
-    return (data / 1000).toLocaleString();
+    return (data / 1000).toLocaleString(this.lang);
   }
 
   xAxisTickFormat(data: number) {
-    return (data / 1000).toLocaleString();
+    return (data / 1000).toLocaleString(this.lang);
   }
 
   yAxisTickFormat(data: number) {
-    return (data / 1000).toLocaleString();
+    return (data / 1000).toLocaleString(this.lang);
   }
 
   getGaugeMin() {
@@ -230,36 +239,6 @@ constructor(public translateService:TranslateService){ }
   onSelect(event: any) {
     console.log(event);
   }
-
-//   dataMultiSeriesToChartData(data: MultiSeries): any {
-//     return data.map((d: any) => {
-//         return {
-//           name: d.name,
-//           value: d.value,
-//         };
-//     });
-//   }
-
-// dataSingleSeriesToChartData(data: SingleSeries) {
-//   return data.map((d: any) => {
-//       return {
-//         name: d.name,
-//         value: d.value,
-//       };
-//   })
-// }
-
-parseDataForChartData = (data: MultiSeries): any => {
-  return data.map((d: { series: any[]; name: any; }) => {
-    return d.series.map((s) => ({
-        header: d.name,
-        name: s.name,
-        value: s.value,
-      }));
-  })
-  .flat();
-};
-
 }
 
 // to be removed once gotten data for line

@@ -4,7 +4,7 @@ import { TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 import * as enCA from './translations/en-CA.json';
 import * as frCA from './translations/fr-CA.json';
-import { LocaleId } from './types';
+import { LocaleId } from './i18n.types';
 
 export class JsonLoader implements TranslateLoader {
   getTranslation(lang: LocaleId): Observable<Record<string, string>> {

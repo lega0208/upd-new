@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -13,24 +13,20 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 
-import { overviewReducer } from '@cra-arc/upd/views/overview';
+import { I18nModule } from '@cra-arc/upd/i18n';
 
-import { DateSelectionEffects } from '@cra-arc/upd/state';
-import { DateSelectionFacade } from '@cra-arc/upd/state';
 import {
+  DateSelectionEffects,
+  DateSelectionFacade,
   dateSelectionReducer,
   DATE_SELECTION_FEATURE_KEY,
+  i18nReducer,
+  I18N_FEATURE_KEY,
+  I18nEffects,
+  I18nFacade,
 } from '@cra-arc/upd/state';
 
 import { environment } from '../environments/environment';
-
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { I18nModule } from '@cra-arc/upd/i18n';
-
-export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
-}
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidebarComponent],
@@ -42,9 +38,9 @@ export function HttpLoaderFactory(http: HttpClient) {
     AppRoutingModule,
     StoreModule.forRoot(
       {
-        overview: overviewReducer,
         dateSelection: dateSelectionReducer,
         router: routerReducer,
+        i18n: i18nReducer,
       },
       {
         metaReducers: !environment.production ? [] : [],
@@ -60,8 +56,10 @@ export function HttpLoaderFactory(http: HttpClient) {
     !environment.production ? StoreDevtoolsModule.instrument() : [],
     StoreModule.forFeature(DATE_SELECTION_FEATURE_KEY, dateSelectionReducer),
     EffectsModule.forFeature([DateSelectionEffects]),
+    StoreModule.forFeature(I18N_FEATURE_KEY, i18nReducer),
+    EffectsModule.forFeature([I18nEffects]),
   ],
-  providers: [DateSelectionFacade],
+  providers: [DateSelectionFacade, I18nFacade],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

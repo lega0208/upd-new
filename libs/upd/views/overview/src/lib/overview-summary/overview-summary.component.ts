@@ -1,15 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
+import { I18nFacade } from '@cra-arc/upd/state';
+import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
-import { Metrics } from '../query';
-import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-overview-summary',
   templateUrl: './overview-summary.component.html',
   styleUrls: ['./overview-summary.component.css'],
 })
-export class OverviewSummaryComponent {
+export class OverviewSummaryComponent implements OnInit {
+  currentLang: LocaleId = EN_CA;
+  currentLang$ = this.i18n.currentLang$;
+
   uniqueVisitors$ = this.overviewService.visitors$;
   uniqueVisitorsPercentChange$ = this.overviewService.visitorsPercentChange$;
 
@@ -37,15 +40,24 @@ export class OverviewSummaryComponent {
   dyfTableCols: ColumnConfig[] = [
     { field: 'name', header: 'Selection' },
     { field: 'value', header: 'Visits', pipe: 'number' },
-  ]
+  ];
   whatWasWrongTableCols: ColumnConfig[] = [
     { field: 'name', header: 'What was wrong' },
     { field: 'value', header: 'Visits', pipe: 'number' },
-  ]
+  ];
 
   barChartData$ = this.overviewService.visitsByDay$;
 
-  constructor(private overviewService: OverviewFacade, public translateService: TranslateService) {}
+  constructor(
+    private overviewService: OverviewFacade,
+    private i18n: I18nFacade
+  ) {}
+
+  ngOnInit() {
+    this.i18n.service.onLangChange(
+      ({ lang }) => (this.currentLang = lang as LocaleId)
+    );
+  }
 }
 
 const taskSurvey = [

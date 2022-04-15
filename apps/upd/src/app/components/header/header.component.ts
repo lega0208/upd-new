@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { I18nService, LocaleId } from '@cra-arc/upd/i18n';
+import { Component, Input } from '@angular/core';
+import { LocaleId, EN_CA, FR_CA } from '@cra-arc/upd/i18n';
+import { I18nFacade } from '@cra-arc/upd/state';
 
 @Component({
   selector: 'app-header',
@@ -7,9 +8,13 @@ import { I18nService, LocaleId } from '@cra-arc/upd/i18n';
   styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent {
-  constructor(private i18n: I18nService) {}
+  @Input() lang = EN_CA;
+  en = EN_CA;
+  fr = FR_CA;
 
-  selectLanguage(value: string){
-    this.i18n.use(value as LocaleId)
+  constructor(private i18n: I18nFacade) {}
+
+  selectLanguage(value: string) {
+    this.i18n.setLang(value as LocaleId);
   }
 }

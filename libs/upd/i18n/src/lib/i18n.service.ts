@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
-import { LocaleId } from './types';
+import { LocaleId } from './i18n.types';
 import { registerLocaleData } from '@angular/common';
 import localeEnCa from '@angular/common/locales/en-CA';
 import localeFrCa from '@angular/common/locales/fr-CA';
@@ -35,7 +35,8 @@ export class I18nService {
   }
 
   use(lang: LocaleId) {
-    this.translateService.use(lang);
+    console.log('Setting lang to: ', lang);
+    return this.translateService.use(lang);
   }
 
   // to add translations at runtime if we need to

@@ -13,8 +13,8 @@
       <div class="language-picker-area">
         <div class="picker-label" ></div>
         <select #selector (change)="selectLanguage(selector.value)" class="language-picker">
-          <option value="en-CA"> {{ 'language.english' | translate }} </option>
-          <option value="fr-CA"> {{ 'language.french' | translate }} </option>
+          <option [value]="en"> {{ 'language.english' | translate }} </option>
+          <option [value]="fr"> {{ 'language.french' | translate }} </option>
         </select>
       </div>
     </div>
