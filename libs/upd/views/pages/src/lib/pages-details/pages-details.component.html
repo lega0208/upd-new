@@ -1,32 +1,45 @@
-<!-- "Back to pages" button -->
-
-<h2 class="h3 pt-2 pb-2">Page: {{ title$ | async }}</h2>
-<ng-container *ngIf="showUrl"
-  ><p class="page_url">{{ url$ | async }}</p></ng-container
->
-<div class="page_header back_link">
-  <span id="page_project">
-    <span id="view_url" (click)="toggleUrl()">
-      <span class="material-icons align-top">link</span>
-      <ng-container *ngIf="!showUrl">View</ng-container>
-      <ng-container *ngIf="showUrl">Hide</ng-container> URL
-    </span>
-    <span
-      id="copy_url"
-      cdkCopyToClipboard="{{url$ | async}}"
-      [cdkCopyToClipboardAttempts]="5"
-      (click)="toggleAlert()"
-	  translate
-      ><span class="material-icons align-top">content_copy</span> Copy URL</span
-    >
-    <ng-container *ngIf="showAlert">
-      <app-alert position="top">Copied successfully!</app-alert>
-    </ng-container>
-  </span>
+<div class="back_link">
+  <span class="material-icons align-top">west</span>
+  <a [routerLink]="'/pages'">Pages</a>
 </div>
-<!-- View URL / Copy URL stuff -->
 
-<app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
-<app-date-selector></app-date-selector>
+<app-loading-spinner
+  *ngIf="(loading$ | async) && (url$ | async) !== ''; else elseBlock"
+></app-loading-spinner>
 
-<router-outlet></router-outlet>
+<ng-template #elseBlock>
+  <app-page-404 *ngIf="(loading$ | async) === true && (url$ | async) === ''; else elseBlock2"></app-page-404>
+</ng-template>
+<ng-template #elseBlock2>
+  <h2 class="h3 pt-2 pb-2">Page: {{ title$ | async }}</h2>
+  <ng-container *ngIf="showUrl"
+    ><p class="page_url">{{ url$ | async }}</p></ng-container
+  >
+  <div class="page_header back_link">
+    <span id="page_project">
+      <span id="view_url" (click)="toggleUrl()">
+        <span class="material-icons align-top">link</span>
+        <ng-container *ngIf="!showUrl">View</ng-container>
+        <ng-container *ngIf="showUrl">Hide</ng-container> URL
+      </span>
+      <span
+        id="copy_url"
+        cdkCopyToClipboard="{{ url$ | async }}"
+        [cdkCopyToClipboardAttempts]="5"
+        (click)="toggleAlert()"
+        translate
+        ><span class="material-icons align-top">content_copy</span> Copy
+        URL</span
+      >
+      <ng-container *ngIf="showAlert">
+        <app-alert position="top">Copied successfully!</app-alert>
+      </ng-container>
+    </span>
+  </div>
+  <!-- View URL / Copy URL stuff -->
+
+  <app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
+  <app-date-selector></app-date-selector>
+
+  <router-outlet></router-outlet>
+</ng-template>

@@ -8,6 +8,7 @@ export const TASKS_DETAILS_FEATURE_KEY = 'tasksDetails';
 export interface TasksDetailsState {
   data: TaskDetailsData;
   loaded: boolean; // has the TasksDetails list been loaded
+  loading: boolean; // is the TasksDetails list currently being loaded
   error?: string | null; // last known error (if any)
 }
 
@@ -27,6 +28,7 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     taskSuccessByUxTest: []
   },
   loaded: false,
+  loading: false,
   error: null,
 };
 
@@ -35,6 +37,7 @@ const reducer = createReducer(
   on(TasksDetailsActions.loadTasksDetailsInit, (state) => ({
     ...state,
     loaded: false,
+    loading: true,
     error: null,
   })),
   on(TasksDetailsActions.loadTasksDetailsSuccess, (state, { data }) =>
@@ -42,18 +45,21 @@ const reducer = createReducer(
       ? {
           ...state,
           loaded: true,
+          loading: false,
           error: null,
         }
       : {
           ...state,
           data: { ...data },
           loaded: true,
+          loading: false,
           error: null,
         }
   ),
   on(TasksDetailsActions.loadTasksDetailsError, (state, { error }) => ({
     ...state,
     loaded: true,
+    loading: false,
     error,
   }))
 );

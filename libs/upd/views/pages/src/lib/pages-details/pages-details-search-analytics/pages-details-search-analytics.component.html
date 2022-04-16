@@ -35,8 +35,8 @@
       <app-data-table-card
         [data]="(topGSCSearchTerms$ | async) || []"
         [cols]="topGSCSearchTermsCols"
-        title="Top 25 search terms from Google"
-        tooltip="Top 25 search terms from Googletooltip"
+        [title]="'Top 25 search terms from Google'"
+        [tooltip]="'Top 25 search terms from Googletooltip'"
       >
       </app-data-table-card>
     </div>
@@ -50,8 +50,8 @@
         [data]="(searchTermsCanada$ | async) || []"
         [cols]="searchTermsCanadaCols"
         [pagination]="false"
-        title="Search terms from Canada.ca"
-        tooltip="Search terms from Canada.ca tooltip"
+        [title]="'Search terms from Canada.ca'"
+        [tooltip]="'Search terms from Canada.ca tooltip'"
       >
       </app-data-table-card>
     </div>
@@ -65,8 +65,8 @@
         [data]="(referrerType$ | async) || []"
         [cols]="referrerTypeCols"
         [pagination]="false"
-        title="Referrer Type"
-        tooltip="Referrer Type tooltip"
+        [title]="'Referrer Type'"
+        [tooltip]="'Referrer Type tooltip'"
       >
       </app-data-table-card>
     </div>

@@ -4,6 +4,7 @@ import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr-CA';
 import { stringify } from 'querystring';
+import { I18nService } from '@cra-arc/upd/i18n';
 
 registerLocaleData(localeFr, 'fr-CA');
 
@@ -11,7 +12,7 @@ registerLocaleData(localeFr, 'fr-CA');
   selector: 'app-data-table-styles',
   templateUrl: './data-table-styles.component.html',
   styleUrls: ['./data-table-styles.component.scss'],
-  providers: [PercentPipe, DecimalPipe, DatePipe]
+  providers: [PercentPipe, DecimalPipe, DatePipe],
 })
 export class DataTableStylesComponent implements OnInit {
   @Input() config!: ColumnConfig;
@@ -28,23 +29,44 @@ export class DataTableStylesComponent implements OnInit {
     this.hasType = this.config.hasOwnProperty('type');
     this.hasPipe = this.config.hasOwnProperty('pipe');
 
-    if ( this.hasPipe ) {
-      this.numberVal = this.configurePipe( this.data[this.config.field], this.config.pipe, this.config.pipeParam || '');
+    if (this.hasPipe) {
+      this.numberVal = this.configurePipe(
+        this.data[this.config.field],
+        this.config.pipe,
+        this.config.pipeParam || ''
+      );
     }
   }
 
   configurePipe(data: string, pipe: any, pipeParam: string): number {
     let numberVal = 0;
     if (pipe === 'number') {
-      numberVal = this.decimalPipe.transform(data, pipeParam, 'en-CA' ) as unknown as number;
+      numberVal = this.decimalPipe.transform(
+        data,
+        pipeParam,
+        this.i18n.currentLang
+      ) as unknown as number;
     } else if (pipe === 'percent') {
-      numberVal = this.percentPipe.transform(data, pipeParam, 'en-CA' ) as unknown as number;
+      numberVal = this.percentPipe.transform(
+        data,
+        pipeParam,
+        this.i18n.currentLang
+      ) as unknown as number;
     } else if (pipe === 'date') {
-      numberVal = this.datePipe.transform(data, pipeParam, 'en-CA' ) as unknown as number;
+      numberVal = this.datePipe.transform(
+        data,
+        pipeParam,
+        this.i18n.currentLang
+      ) as unknown as number;
     }
 
     return numberVal;
   }
 
-  constructor(private percentPipe: PercentPipe, private decimalPipe: DecimalPipe, private datePipe: DatePipe) {}
+  constructor(
+    private percentPipe: PercentPipe,
+    private decimalPipe: DecimalPipe,
+    private datePipe: DatePipe,
+    private i18n: I18nService
+  ) {}
 }

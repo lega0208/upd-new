@@ -24,8 +24,8 @@
         [cols]="chartsCols"
         [filter]="false"
         [pagination]="false"
-        title="Top 5 call drivers"
-        tooltip="Top 5 call drivers tooltip"
+        [title]="'Top 5 call drivers'"
+        [tooltip]="'Top 5 call drivers tooltip'"
       >
       </app-data-table-card>
     </div>
@@ -40,8 +40,10 @@
         [cols]="chartsCols"
         [filter]="false"
         [pagination]="false"
-        title="Top 5 call drivers with biggest increase over period"
-        tooltip="Top 5 call drivers with biggest increase over period tooltip"
+        [title]="'Top 5 call drivers with biggest increase over period'"
+        [tooltip]="
+          'Top 5 call drivers with biggest increase over period tooltip'
+        "
       >
       </app-data-table-card>
     </div>
@@ -56,8 +58,10 @@
         [cols]="chartsCols"
         [filter]="false"
         [pagination]="false"
-        title="Top 5 call drivers with biggest decrease over period"
-        tooltip="Top 5 call drivers with biggest decrease over period tooltip"
+        [title]="'Top 5 call drivers with biggest decrease over period'"
+        [tooltip]="
+          'Top 5 call drivers with biggest decrease over period tooltip'
+        "
       >
       </app-data-table-card>
     </div>

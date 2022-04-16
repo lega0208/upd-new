@@ -1,6 +1,6 @@
-<div class="container-fluid gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
-    <div class="col">
+    <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="
           (uniqueVisitors$
@@ -12,7 +12,7 @@
         [tooltip]="'tooltip-unique-visitors'"
       ></app-data-card>
     </div>
-    <div class="col">
+    <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="
           (visits$ | async | number: undefined:currentLang) ||
@@ -23,7 +23,7 @@
         [tooltip]="'tooltip-visits'"
       ></app-data-card>
     </div>
-    <div class="col">
+    <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="
           (pageViews$
@@ -47,8 +47,7 @@
         [displayLegend]="'below'"
         [showRightYAxisLabel]="true"
         [curveType]="'Natural'"
-        [barChart]="barChartData$ | async"
-        [currentLang$]="currentLang$"
+        [barChart]="(barChartData$ | async) || []"
       ></app-charts>
     </div>
   </div>
@@ -56,7 +55,7 @@
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-    <div class="col">
+    <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="
           (gscImpressions$
@@ -67,7 +66,7 @@
         [title]="'Total impressions from Google'"
       ></app-data-card>
     </div>
-    <div class="col">
+    <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="
           (gscCTR$ | async | percent: undefined:currentLang) ||
@@ -77,7 +76,7 @@
         [title]="'Click through rate from Google'"
       ></app-data-card>
     </div>
-    <div class="col">
+    <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="
           (gscAverage$
@@ -100,8 +99,8 @@
         [pagination]="false"
         [data]="taskSurvey"
         [cols]="taskSurveyCols"
-        title="{{ 'top10-tasks' | translate }}"
-        tooltip="{{ 'tooltip-top10-tasks' | translate }}"
+        [title]="'top10-tasks'"
+        [tooltip]="'tooltip-top10-tasks'"
       >
       </app-data-table-card>
     </div>

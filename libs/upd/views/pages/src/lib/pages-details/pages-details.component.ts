@@ -10,6 +10,8 @@ import { TranslateService } from '@ngx-translate/core';
 export class PagesDetailsComponent implements OnInit {
   title$ = this.pageDetailsService.pageTitle$;
   url$ = this.pageDetailsService.pageUrl$;
+  loading$ = this.pageDetailsService.loading$;
+  startSession$ = this.pageDetailsService.startSession$;
   showUrl = true;
   showAlert = false;
 
@@ -21,7 +23,10 @@ export class PagesDetailsComponent implements OnInit {
     // { href: 'details', title: 'Details' },
   ];
 
-  constructor(private pageDetailsService: PagesDetailsFacade, public translateService:TranslateService) {}
+  constructor(
+    private pageDetailsService: PagesDetailsFacade,
+    public translateService: TranslateService
+  ) {}
 
   ngOnInit(): void {
     this.pageDetailsService.init();

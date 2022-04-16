@@ -5,3 +5,15 @@
 @import url('../../../node_modules/primeicons/primeicons.css');
 @import url('../../../node_modules/primeng/resources/themes/saga-blue/theme.css');
 @import url('../../../node_modules/primeng/resources/primeng.min.css');
+
+// dependency changes
+.show4nLabels
+.x.axis {
+    .tick {
+      display: none !important;
+  
+      &:nth-child(4n) {
+        display: block !important;
+      }
+    }
+  }

@@ -35,7 +35,7 @@ export class OverviewWebtrafficComponent {
     { field: 'name', header: 'Dates' },
     {
       field: 'currValue',
-      header: 'Visits for ' + this.dateRangeLabel$,
+      header: `Visits for ${this.dateRangeLabel$}`,
       pipe: 'number',
     },
     { field: 'prevValue', header: 'Visits for ', pipe: 'number' },

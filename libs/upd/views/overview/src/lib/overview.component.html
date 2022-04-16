@@ -1,5 +1,13 @@
-<h2 class="h3 pt-2 pb-2" data-i18n="overview-title">{{'overview-title' | translate}}</h2>
+<h2 class="h3 pt-2 pb-2" data-i18n="overview-title">
+  {{ 'overview-title' | translate }}
+</h2>
 
-<app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
-<app-date-selector></app-date-selector>
-<router-outlet></router-outlet>
+<app-loading-spinner
+  *ngIf="loading$ | async; else elseBlock"
+></app-loading-spinner>
+
+<ng-template #elseBlock>
+  <app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
+  <app-date-selector></app-date-selector>
+  <router-outlet></router-outlet>
+</ng-template>

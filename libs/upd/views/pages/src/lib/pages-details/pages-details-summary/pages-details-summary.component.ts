@@ -1,4 +1,4 @@
-import { Component} from '@angular/core';
+import { Component } from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 
 import { TranslateService } from '@ngx-translate/core';
@@ -8,6 +8,10 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['./pages-details-summary.component.css'],
 })
 export class PagesDetailsSummaryComponent {
+  data$ = this.pageDetailsService.pagesDetailsData$;
+  error$ = this.pageDetailsService.error$;
+
+  url$ = this.pageDetailsService.pageUrl$;
 
   visitors$ = this.pageDetailsService.visitors$;
   visitorsPercentChange$ = this.pageDetailsService.visitorsPercentChange$;
@@ -33,5 +37,8 @@ export class PagesDetailsSummaryComponent {
 
   topSearchTermsDecrease$ = this.pageDetailsService.topSearchTermsDecrease$;
 
-  constructor(private pageDetailsService: PagesDetailsFacade,  public translateService: TranslateService) {}
+  constructor(
+    private pageDetailsService: PagesDetailsFacade,
+    public translateService: TranslateService
+  ) {}
 }

@@ -21,6 +21,9 @@ export class TasksDetailsFacade {
   loaded$ = this.store.pipe(
     select(TasksDetailsSelectors.selectTasksDetailsLoaded)
   );
+  loading$ = this.store.pipe(
+    select(TasksDetailsSelectors.selectTasksDetailsLoading)
+  );
   tasksDetailsData$ = this.store.pipe(
     select(TasksDetailsSelectors.selectTasksDetailsData)
   );

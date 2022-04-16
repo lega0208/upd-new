@@ -11,6 +11,11 @@ export const getPagesHomeLoaded = createSelector(
   (state: PagesHomeState) => state.loaded
 );
 
+export const getPagesHomeLoading = createSelector(
+  getPagesHomeState,
+  (state: PagesHomeState) => state.loading
+);
+
 export const getPagesHomeError = createSelector(
   getPagesHomeState,
   (state: PagesHomeState) => state.error
@@ -19,6 +24,6 @@ export const getPagesHomeError = createSelector(
 export const getPagesHomeData = createSelector(
   getPagesHomeState,
   (state: PagesHomeState) => ({
-    ...(state.data || {})
+    ...(state.data || {}),
   })
 );

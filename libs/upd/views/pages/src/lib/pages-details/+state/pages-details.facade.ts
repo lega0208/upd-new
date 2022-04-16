@@ -10,6 +10,9 @@ import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 @Injectable()
 export class PagesDetailsFacade {
@@ -19,6 +22,12 @@ export class PagesDetailsFacade {
    */
   loaded$ = this.store.pipe(
     select(PagesDetailsSelectors.selectPagesDetailsLoaded)
+  );
+  loading$ = this.store.pipe(
+    select(PagesDetailsSelectors.getPagesDetailsLoading)
+  );
+  startSession$ = this.store.pipe(
+    select(PagesDetailsSelectors.getPagesDetailsStartSession)
   );
   pagesDetailsData$ = this.store.pipe(
     select(PagesDetailsSelectors.selectPagesDetailsData)
@@ -74,6 +83,9 @@ export class PagesDetailsFacade {
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
         data?.comparisonDateRangeData?.visitsByDay || [];
+      const days = visitsByDay?.length || 0;
+      const granularity = Math.ceil(days / 7);
+      const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
 
       if (!visitsByDay) {
         return [] as MultiSeries;
@@ -86,12 +98,14 @@ export class PagesDetailsFacade {
         return [] as MultiSeries;
       }
 
+      console.log(granularity);
+
       const visitsByDayData: MultiSeries = [
         {
           name: data?.dateRange,
           series: visitsByDay.map(({ visits, date }) => ({
-            name: dayjs(date).format('ddd'), // todo: date label (x-axis) formatting based on date range length
-            value: visits,
+            name: dayjs(date).utc(false).format(dateFormat), // todo: date label (x-axis) formatting based on date range length
+            value: visits || 0,
           })),
         },
       ];
@@ -102,12 +116,25 @@ export class PagesDetailsFacade {
       ) {
         visitsByDayData.push({
           name: data?.comparisonDateRange,
-          series: comparisonVisitsByDay.map(({ visits, date }) => ({
-            name: dayjs(date).format('ddd'),
-            value: visits,
+          series: visitsByDay.map(({ date }, idx) => ({
+            name: dayjs(date).utc(false).format(dateFormat),
+            value: comparisonVisitsByDay[idx]?.visits || 0,
           })),
         });
       }
+
+      // if (
+      //   data?.comparisonDateRangeData &&
+      //   typeof data?.comparisonDateRange === 'string'
+      // ) {
+      //   visitsByDayData.push({
+      //     name: data?.comparisonDateRange,
+      //     series: comparisonVisitsByDay.map(({ visits, date }) => ({
+      //       name: dayjs(date).format('ddd'),
+      //       value: visits,
+      //     })),
+      //   });
+      // }
 
       return visitsByDayData;
     })
