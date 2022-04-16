@@ -11,6 +11,9 @@ export class UxTest {
   @Prop({ required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
+  @Prop({ required: true, type: String })
+  title = '';
+
   @Prop({ required: true, unique: true, type: String, index: true })
   airtable_id = '';
 
@@ -26,7 +29,7 @@ export class UxTest {
   @Prop({ type: String })
   subtask? = '';
 
-  @Prop({ type: Date })
+  @Prop({ type: Date, index: true })
   date?: Date;
 
   @Prop({ type: Number })
@@ -68,7 +71,7 @@ export class UxTest {
   @Prop({ type: Date })
   launch_date?: Date;
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: true })
   status?: string;
 
   @Prop({ type: Boolean })

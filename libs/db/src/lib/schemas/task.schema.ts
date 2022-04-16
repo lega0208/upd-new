@@ -30,7 +30,7 @@ export class Task {
   subtopic = '';
 
   @Prop({ type: [String] })
-  user_type = [];
+  user_type: string[] = [];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }] })
   ux_tests?: Types.ObjectId[] | UxTest[];
@@ -40,6 +40,9 @@ export class Task {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Page' }] })
   pages?: Types.ObjectId[] | Page[];
+
+  @Prop({ type: [Number] })
+  tpc_ids: number[] = [];
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

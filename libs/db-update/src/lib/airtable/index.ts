@@ -1,4 +1,5 @@
 import { connect, Document, Model, Types } from 'mongoose';
+import { WithObjectId } from '@cra-arc/utils-common'
 import {
   AirtableClient,
   PageData,
@@ -20,12 +21,14 @@ import { assertHasUrl, assertObjectId } from './utils';
 
 export * from './calldrivers';
 export * from './feedback';
+export * from './duplicate-pages';
 
 export type UxApiDataType = TaskData | UxTestData | PageData;
 export interface UxApiData {
   tasksData: TaskData[];
   uxTestData: UxTestData[];
   pageData: PageData[];
+  tasksTopicsMap: Record<string, number[]>;
 }
 export type UxDataType = Task | UxTest | Page | Project;
 export interface UxData {
@@ -35,16 +38,15 @@ export interface UxData {
   projects: Project[];
 }
 
-export type WithObjectId<T> = T & { _id: Types.ObjectId };
-
 export async function getUxData(): Promise<UxApiData> {
   const client = new AirtableClient();
   console.log('Getting data from Airtable...');
   const tasksData = await client.getTasks();
   const uxTestData = await client.getUxTests();
   const pageData = await client.getPages();
+  const tasksTopicsMap = await client.getTasksTopicsMap();
 
-  return { tasksData, uxTestData, pageData };
+  return { tasksData, uxTestData, pageData, tasksTopicsMap };
 }
 
 // function to help with getting or creating objectIds, and populating an airtableId to ObjectId map to add references
@@ -100,7 +102,7 @@ async function getProjectsFromUxTests(
   }
 ): Promise<Project[]> {
   const projectTitles = [
-    ...new Set(uxTestsWithIds.map((uxTest) => uxTest.project_title)),
+    ...new Set(uxTestsWithIds.map((uxTest) => uxTest.title)),
   ];
 
   const existingProjects = (await getProjectModel()
@@ -109,7 +111,7 @@ async function getProjectsFromUxTests(
 
   return projectTitles.map((projectTitle) => {
     const uxTests = uxTestsWithIds.filter(
-      (uxTest) => uxTest.project_title === projectTitle
+      (uxTest) => uxTest.title === projectTitle
     );
 
     const pageAirtableIds = [
@@ -155,7 +157,7 @@ async function getProjectsFromUxTests(
 }
 
 export async function getAndPrepareUxData(): Promise<UxData> {
-  const { tasksData, uxTestData, pageData } = await getUxData();
+  const { tasksData, uxTestData, pageData, tasksTopicsMap } = await getUxData();
 
   const airtableIdToObjectIdMaps = {
     tasks: new Map<string, Types.ObjectId>(),
@@ -191,7 +193,7 @@ export async function getAndPrepareUxData(): Promise<UxData> {
   // finally, add all missing refs each data type
   const uxTestsWithRefs = uxTestsWithIds.map((uxTest) => {
     const project = projectsWithRefs.find(
-      (project) => project.title === uxTest.project_title
+      (project) => project.title === uxTest.title
     );
 
     return {
@@ -207,18 +209,19 @@ export async function getAndPrepareUxData(): Promise<UxData> {
   });
 
   const tasksWithRefs = tasksWithIds.map((task) => {
-    const ux_tests = uxTestsWithRefs
-      .filter((uxTest) => {
-        if (uxTest.tasks) {
-          assertObjectId(uxTest.tasks);
+    const ux_tests = uxTestsWithRefs.filter((uxTest) => {
+      if (uxTest.tasks) {
+        assertObjectId(uxTest.tasks);
 
-          return uxTest.tasks?.includes(task._id);
-        }
-      });
+        return uxTest.tasks?.includes(task._id);
+      }
+    });
 
     const projects = [
       ...new Set(ux_tests.map((uxTest) => uxTest.project)),
     ] as Types.ObjectId[];
+
+    const tpc_ids = tasksTopicsMap[task.airtable_id] || [];
 
     return {
       ...task,
@@ -227,18 +230,18 @@ export async function getAndPrepareUxData(): Promise<UxData> {
       pages: (task.pages || []).map((pageAirtableId) =>
         airtableIdToObjectIdMaps.pages.get(pageAirtableId)
       ),
+      tpc_ids
     } as Task;
   });
 
   const pagesWithRefs = pagesWithIds.map((page) => {
-    const ux_tests = uxTestsWithRefs
-      .filter((uxTest) => {
-        if (uxTest.pages) {
-          assertObjectId(uxTest.pages);
+    const ux_tests = uxTestsWithRefs.filter((uxTest) => {
+      if (uxTest.pages) {
+        assertObjectId(uxTest.pages);
 
-          return uxTest.pages?.includes(page._id);
-        }
-      });
+        return uxTest.pages?.includes(page._id);
+      }
+    });
 
     const projects = [
       ...new Set(ux_tests.map((uxTest) => uxTest.project)),
@@ -286,7 +289,7 @@ export async function updateUxData() {
         },
         $set: {
           airtable_id: page.airtable_id,
-        }
+        },
       },
       upsert: true,
     },

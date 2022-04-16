@@ -6,16 +6,21 @@ import {
   updateCalldriverData,
   updatePages,
   updatePageMetrics,
-  updateFeedbackData,
+  updateFeedbackData, consolidateDuplicatePages
 } from '@cra-arc/db-update';
 import { withRetry } from '@cra-arc/external-data';
+import { environment } from '../environments/environment';
 
 @Injectable()
 export class UpdateService {
   private readonly logger = new Logger(UpdateService.name);
   private isRunning = false;
 
-  @Cron(CronExpression.EVERY_MINUTE) // Setting to every minute to use during development
+  @Cron(
+    environment.production
+      ? CronExpression.EVERY_MINUTE
+      : CronExpression.EVERY_DAY_AT_1AM
+  )
   async updateDatabase() {
     if (this.isRunning) {
       return;
@@ -38,19 +43,24 @@ export class UpdateService {
 
       await withRetry(updateFeedbackData, 4, 1000)().catch((err) =>
         this.logger.error('Error updating Feedback data', err)
-      )
+      );
 
       await Promise.allSettled([
         withRetry(updateCalldriverData, 4, 1000)().catch((err) =>
           this.logger.error('Error updating Calldrivers data', err)
         ),
-        withRetry(updatePages, 4, 1000)().catch((err) => // commented out for now because bugs needs to be fixed
+        withRetry(updatePages, 4, 1000)().catch((err) =>
           this.logger.error('Error updating Page data', err)
         ),
-        withRetry(updatePageMetrics, 4, 1000)().catch((err) =>
-          this.logger.error('Error updating Page metrics data', err)
-        )
       ]);
+
+      await consolidateDuplicatePages().catch((err) =>
+        this.logger.error('Error consolidating duplicate Pages', err)
+      );
+
+      await withRetry(updatePageMetrics, 4, 1000)().catch((err) =>
+        this.logger.error('Error updating Page metrics data', err)
+      );
     } catch (error) {
       this.logger.error(error);
     }

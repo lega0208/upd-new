@@ -116,7 +116,7 @@ export class AirtableClient {
     return (await this.selectAll(query)).map(({ id, fields }) => ({
       airtable_id: id,
       date: dayjs(fields['Date']).utc(true).toDate(),
-      project_title: fields['UX Research Project Title'],
+      title: fields['UX Research Project Title'].trim(),
       success_rate: fields['Success Rate'],
       test_type: fields['Test Type'],
       session_type: Array.isArray(fields['Session Type'])
@@ -234,5 +234,36 @@ export class AirtableClient {
         main_section: fields['Main section'],
         theme: fields['Theme'],
       })) as FeedbackData[];
+  }
+
+  async getTasksTopicsMap() {
+    const filterByFormula = 'NOT({Task} = "")';
+
+    const query = this.createQuery(
+      bases.TASKS_INVENTORY,
+      'Unique Call Drivers',
+      { filterByFormula }
+    );
+
+    const results = (await this.selectAll(query)).map(({ fields }) => ({
+      tpc_id: fields['TPC ID'],
+      tasks: fields['Task'],
+    }) as { tpc_id: number, tasks: string[] });
+
+    const tasksTopicsMap = results.reduce((tasksTopicsMap, topicTasks) => {
+      for (const task of topicTasks.tasks) {
+        if (!tasksTopicsMap[task]) {
+          tasksTopicsMap[task] = new Set();
+        }
+        tasksTopicsMap[task].add(topicTasks.tpc_id);
+      }
+
+      return tasksTopicsMap;
+    }, {} as Record<string, Set<number>>);
+
+    return Object.keys(tasksTopicsMap).reduce((newMap, task) => {
+      newMap[task] = Array.from(tasksTopicsMap[task]);
+      return newMap;
+    }, {} as Record<string, number[]>);
   }
 }

@@ -26,8 +26,8 @@ export interface CalldriverData {
 
 export interface UxTestData {
   airtable_id: string;
+  title: string;
   date?: Date;
-  project_title: string;
   success_rate?: number;
   test_type?: string;
   session_type?: string;
