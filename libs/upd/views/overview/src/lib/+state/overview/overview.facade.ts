@@ -183,8 +183,8 @@ export class OverviewFacade {
   dyfData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
-      const yes = this.i18n.service.translate('yes');
-      const no = this.i18n.service.translate('no');
+      const yes = this.i18n.service.translate('yes', lang);
+      const no = this.i18n.service.translate('no', lang);
 
       const pieChartData: SingleSeries = [
         { name: yes, value: data?.dateRangeData?.dyf_yes || 0 },
@@ -200,13 +200,13 @@ export class OverviewFacade {
     })
   );
 
-  whatWasWrongData$ = this.overviewData$.pipe(
+  whatWasWrongData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
-    map((data) => {
-      const cantFindInfo = this.i18n.service.translate('d3-cant-find-info');
-      const otherReason = this.i18n.service.translate('d3-other');
-      const hardToUnderstand = this.i18n.service.translate('d3-hard-to-understand');
-      const error = this.i18n.service.translate('d3-error');
+    map(([data, lang]) => {
+      const cantFindInfo = this.i18n.service.translate('d3-cant-find-info', lang);
+      const otherReason = this.i18n.service.translate('d3-other', lang);
+      const hardToUnderstand = this.i18n.service.translate('d3-hard-to-understand', lang);
+      const error = this.i18n.service.translate('d3-error', lang);
 
       const pieChartData: SingleSeries = [
         {

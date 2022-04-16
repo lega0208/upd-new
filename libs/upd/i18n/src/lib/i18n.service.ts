@@ -39,7 +39,8 @@ export class I18nService {
     return this.translateService.use(lang);
   }
   
-  translate(key: string, interpolateParams?: object): string {
+  translate(key: string, lang: LocaleId, interpolateParams?: object): string {
+    this.translateService.use(lang)
     return this.translateService.instant(key, interpolateParams);
   }
 
