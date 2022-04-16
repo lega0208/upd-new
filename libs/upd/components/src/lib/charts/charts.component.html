@@ -8,13 +8,14 @@
     <p>{{ title | translate }} data is not available for this date range.</p>
   </ng-container>
   <ng-template #elseBlock>
-    <div
-      class="vh-45"
-      [style.padding]="'0px'"
+    <div class="vh-45">
+      <div
+        style="height: 100%;"
       [ngClass]="showRightYAxisLabel ? 'mr-80' : ''"
     >
       <ng-container *ngIf="type === 'combo-bar-line'">
         <combo-grouped-vertical-bar-line-chart
+          [ngClass]="barChart.length > 7 ? 'show4nLabels' : ''"
           [scheme]="comboBarScheme"
           [colorSchemeLine]="lineChartScheme"
           [results]="barChart"
@@ -60,6 +61,7 @@
 
       <ng-container *ngIf="type === 'line'">
         <ngx-charts-line-chart
+          [ngClass]="data[0].series.length > 7 ? 'show4nLabels' : ''"
           [scheme]="colorScheme"
           [results]="data"
           [animations]="animations"
@@ -134,6 +136,7 @@
 
       <ng-container *ngIf="type === 'grouped-bar'">
         <ngx-charts-bar-vertical-2d
+          [ngClass]="data.length > 7 ? 'show4nLabels' : ''"
           [scheme]="colorScheme"
           [results]="data"
           [animations]="animations"
@@ -287,7 +290,9 @@
         </ngx-charts-gauge>
       </ng-container>
     </div>
+    </div>
 
+    <p></p>
     <div class="pt-3">
       <app-accordion>
         <app-data-table

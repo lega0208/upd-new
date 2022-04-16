@@ -15,10 +15,11 @@ export class AlertComponent implements OnInit {
   @Input() secondsTimeout = 5;
   @Input() selfClosing = true;
   @Input() position: Position = 'static';
+  @Input() dismissible = true;
   style = '';
-  
-  constructor(public translateService:TranslateService) {}
-  
+
+  constructor(public translateService: TranslateService) {}
+
   ngOnInit(): void {
     if (this.selfClosing)
       setTimeout(() => this.staticAlert.close(), this.secondsTimeout * 1000);

@@ -6,28 +6,29 @@
   [rowHover]="true"
   [showCurrentPageReport]="true"
   [rowsPerPageOptions]="[10, 25, 50, 100]"
+  [loading]="loading"
   styleClass="p-datatable-striped p-datatable-sm"
   [paginator]="pagination"
   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
   [globalFilterFields]="searchFields"
 >
   <ng-template *ngIf="filter || captionTitle" pTemplate="caption">
-    <ng-container *ngIf="captionTitle" >
-    {{ captionTitle }}
-  </ng-container>
-    <ng-container *ngIf="filter" >
-    <div class="p-d-flex">
-      <span class="p-input-icon-left p-ml-auto">
-        <i class="pi pi-search"></i>
-        <input
-          pInputText
-          type="text"
-          (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-          placeholder="{{'dt_search_keyword' | translate}}"
-        />
-      </span>
-    </div>
-  </ng-container>
+    <ng-container *ngIf="captionTitle">
+      {{ captionTitle }}
+    </ng-container>
+    <ng-container *ngIf="filter">
+      <div class="p-d-flex">
+        <span class="p-input-icon-left p-ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            placeholder="{{ 'dt_search_keyword' | translate }}"
+          />
+        </span>
+      </div>
+    </ng-container>
   </ng-template>
 
   <ng-template pTemplate="header" let-columns>

@@ -38,6 +38,11 @@ export class I18nService {
     console.log('Setting lang to: ', lang);
     return this.translateService.use(lang);
   }
+  
+  translate(key: string, lang: LocaleId, interpolateParams?: object): string {
+    this.translateService.use(lang)
+    return this.translateService.instant(key, interpolateParams);
+  }
 
   // to add translations at runtime if we need to
   addTranslations(lang: LocaleId, translations: Record<string, string>) {

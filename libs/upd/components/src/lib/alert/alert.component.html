@@ -4,6 +4,7 @@
   [attr.style]="style"
   *ngIf="!staticAlertClosed"
   (closed)="staticAlertClosed = true"
+  [dismissible]="dismissible"
   translate
 >
   <ng-content></ng-content>

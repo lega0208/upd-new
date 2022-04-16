@@ -15,6 +15,8 @@ export class OverviewComponent implements OnInit {
     { href: 'uxtests', title: 'UX tests' },
   ];
 
+  loading$ = this.overviewService.loading$;
+
   constructor(private overviewService: OverviewFacade) {}
 
   ngOnInit() {

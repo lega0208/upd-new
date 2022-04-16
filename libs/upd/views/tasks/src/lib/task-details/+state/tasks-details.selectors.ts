@@ -14,6 +14,11 @@ export const selectTasksDetailsLoaded = createSelector(
   (state: TasksDetailsState) => state.loaded
 );
 
+export const selectTasksDetailsLoading = createSelector(
+  selectTasksDetailsState,
+  (state: TasksDetailsState) => state.loading
+);
+
 export const selectTasksDetailsError = createSelector(
   selectTasksDetailsState,
   (state: TasksDetailsState) => state.error

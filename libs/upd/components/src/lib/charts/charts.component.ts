@@ -35,7 +35,20 @@ export class ChartsComponent implements OnInit {
   @Input() fitContainer = true;
   @Input() gradient = false;
   @Input() displayLegend = 'below';
-  @Input() colour: string[] = ['#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D', '#1DE9B6', '#F57F17', '#602E9C', '#2196F3', '#DE4CAE', '#C3680A', '#C5C5FF', '#1A8361'];
+  @Input() colour: string[] = [
+    '#2E5EA7',
+    '#64B5F6',
+    '#26A69A',
+    '#FBC02D',
+    '#1DE9B6',
+    '#F57F17',
+    '#602E9C',
+    '#2196F3',
+    '#DE4CAE',
+    '#C3680A',
+    '#C5C5FF',
+    '#1A8361',
+  ];
   @Input() showLegend = true;
   @Input() data: any = [];
   @Input() legendTitle = 'Legend';
@@ -50,8 +63,8 @@ export class ChartsComponent implements OnInit {
   @Input() showYAxisLabel = true;
   @Input() yAxisLabel = 'Visits (in thousands)';
   @Input() showGridLines = true;
-  @Input() barPadding = 6;
-  @Input() groupPadding = 12;
+  @Input() barPadding = 2;
+  @Input() groupPadding = 2;
   @Input() roundDomains = false;
   @Input() showSeriesOnHover = true;
   @Input() roundEdges = false;
@@ -100,8 +113,8 @@ export class ChartsComponent implements OnInit {
   @Input() marginLeft = 40;
 
   // combo data
-  @Input() barChart: SingleSeries | MultiSeries | null = [];
-  @Input() lineChart: SingleSeries | MultiSeries | null = [];
+  @Input() barChart: SingleSeries | MultiSeries = [];
+  @Input() lineChart: SingleSeries | MultiSeries = [];
   colorLabelDefault = 'black';
   lineChartScheme!: Color;
   comboBarScheme!: Color;
@@ -132,8 +145,6 @@ export class ChartsComponent implements OnInit {
 
     this.currentLang$.subscribe((nextLang) => {
       this.lang = nextLang;
-
-
     })
   }
 
@@ -241,7 +252,7 @@ export class ChartsComponent implements OnInit {
   }
 }
 
-// to be removed once gotten data for line
+// to be removed once data for this chart is available (call drivers)
 
 const lineChart = [
   {

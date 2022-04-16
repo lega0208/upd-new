@@ -12,7 +12,10 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
 export class OverviewSummaryComponent implements OnInit {
   currentLang: LocaleId = EN_CA;
   currentLang$ = this.i18n.currentLang$;
-
+  
+  loaded$ = this.overviewService.loaded$;
+  loading$ = this.overviewService.loading$;
+  error$ = this.overviewService.error$;
   uniqueVisitors$ = this.overviewService.visitors$;
   uniqueVisitorsPercentChange$ = this.overviewService.visitorsPercentChange$;
 
@@ -55,7 +58,7 @@ export class OverviewSummaryComponent implements OnInit {
 
   ngOnInit() {
     this.i18n.service.onLangChange(
-      ({ lang }) => (this.currentLang = lang as LocaleId)
+      ({ lang }) => { this.currentLang = lang as LocaleId; }
     );
   }
 }

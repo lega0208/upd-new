@@ -5,6 +5,7 @@
     [data]="(pagesHomeData$ | async) || []"
     [cols]="columns"
     [displayRows]="25"
+    [loading]="(loading$ | async) || false"
   >
   </app-data-table>
 </app-card>

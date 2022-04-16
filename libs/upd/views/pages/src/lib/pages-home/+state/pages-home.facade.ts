@@ -11,6 +11,7 @@ export class PagesHomeFacade {
    * Combine pieces of state using createSelector,
    * and expose them as observables through the facade.
    */
+  loading$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeLoading));
   loaded$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeLoaded));
   pagesHomeData$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeData));
   pagesHomeTableData$ = this.pagesHomeData$.pipe(

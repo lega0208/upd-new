@@ -10,6 +10,7 @@ import { ColumnConfig } from '@cra-arc/upd-components';
 })
 export class PagesHomeComponent implements OnInit {
   pagesHomeData$ = this.pagesHomeService.pagesHomeTableData$;
+  loading$ = this.pagesHomeService.loading$;
 
   columns: ColumnConfig[] = [
     {

@@ -31,7 +31,8 @@ import { DataKpiCardComponent } from './data-kpi-card/data-kpi-card.component';
 import { DataTableStylesComponent } from './data-table-styles/data-table-styles.component';
 import { ProjectStatusLabelComponent } from './project-status-label/project-status-label.component';
 import { DataTableCardComponent } from './data-table-card/data-table-card.component';
-
+import { Page404Component } from './page-404/page-404.component';
+import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { I18nModule } from '@cra-arc/upd/i18n';
 
@@ -69,6 +70,8 @@ import { I18nModule } from '@cra-arc/upd/i18n';
     ProjectStatusLabelComponent,
     DataKpiCardComponent,
     DataTableCardComponent,
+    Page404Component,
+    LoadingSpinnerComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -92,6 +95,8 @@ import { I18nModule } from '@cra-arc/upd/i18n';
     ProjectStatusLabelComponent,
     DataKpiCardComponent,
     DataTableCardComponent,
+    Page404Component,
+    LoadingSpinnerComponent,
   ],
 })
 export class UpdComponentsModule {}

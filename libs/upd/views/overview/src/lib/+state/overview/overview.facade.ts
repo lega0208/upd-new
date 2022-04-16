@@ -4,8 +4,8 @@ import { combineLatest, map } from 'rxjs';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import 'dayjs/esm/locale/en-CA';
-import 'dayjs/esm/locale/fr-CA';
+import 'dayjs/locale/en-CA';
+import 'dayjs/locale/fr-CA';
 
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { LocaleId } from '@cra-arc/upd/i18n';
@@ -79,15 +79,16 @@ export class OverviewFacade {
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
         data?.comparisonDateRangeData?.visitsByDay || [];
+      const days = visitsByDay?.length || 0;
+      const prevDays = comparisonVisitsByDay?.length || 0;
+      const maxDays = Math.max(days, prevDays);
+      const granularity = Math.ceil(days / 7);
+      const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
 
-      if (!visitsByDay) {
-        return [] as MultiSeries;
-      }
-
-      const isCurrZero = visitsByDay.every((v) => v.visits === 0);
+      const isCurrZero = visitsByDay?.every((v) => v.visits === 0);
       const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
 
-      if (isCurrZero && isPrevZero) {
+      if (!visitsByDay || (isCurrZero && isPrevZero)) {
         return [] as MultiSeries;
       }
 
@@ -97,30 +98,34 @@ export class OverviewFacade {
 
       const dateRangeSeries = visitsByDay.map(({ visits }) => ({
         name: dateRangeLabel, // todo: date label (x-axis) formatting based on date range length
-        value: visits,
+        value: visits || 0,
       }));
 
       const comparisonDateRangeLabel = getWeeklyDatesLabel(
         data.comparisonDateRange || '',
         lang
       );
-
       const comparisonDateRangeSeries = comparisonVisitsByDay.map(
         ({ visits }) => ({
           name: comparisonDateRangeLabel,
-          value: visits,
+          value: visits || 0,
         })
       );
 
       const visitsByDayData: MultiSeries = dateRangeDates.map((date, i) => {
         const series = [dateRangeSeries[i]];
 
-        if (data.comparisonDateRange && data.comparisonDateRangeData) {
+        if (comparisonDateRangeSeries[i] !== undefined) {
           series.push(comparisonDateRangeSeries[i]);
+        } else {
+          series.push({
+            name: comparisonDateRangeLabel,
+            value: 0,
+          });
         }
 
         return {
-          name: dayjs(date).utc(false).format('dddd'),
+          name: dayjs(date).utc(false).locale(lang).format(dateFormat),
           series,
         };
       });
@@ -131,11 +136,15 @@ export class OverviewFacade {
 
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
-  barTable$ = this.overviewData$.pipe(
-    map((data) => {
+  barTable$ = combineLatest([this.overviewData$, this.currentLang$])
+  .pipe(
+    map(([data, lang]) => {
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
         data?.comparisonDateRangeData?.visitsByDay || [];
+      const days = visitsByDay?.length || 0;
+      const granularity = Math.ceil(days / 7);
+      const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
 
       if (!visitsByDay) {
         return [] as MultiSeries;
@@ -153,9 +162,9 @@ export class OverviewFacade {
 
       const visitsByDayData = dateRangeDates.map((date, i) => {
         return {
-          name: dayjs(date).utc(false).format('dddd'),
-          currValue: dateRangeSeries[i].visits,
-          prevValue: comparisonDateRangeSeries[i].visits,
+          name: dayjs(date).utc(false).locale(lang).format(dateFormat),
+          currValue: dateRangeSeries[i]?.visits || 0,
+          prevValue: comparisonDateRangeSeries[i]?.visits || 0,
         };
       });
 
@@ -171,12 +180,15 @@ export class OverviewFacade {
     map(([data, lang]) => getWeeklyDatesLabel(data.comparisonDateRange || '', lang))
   );
 
-  dyfData$ = this.overviewData$.pipe(
+  dyfData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
-    map((data) => {
+    map(([data, lang]) => {
+      const yes = this.i18n.service.translate('yes', lang);
+      const no = this.i18n.service.translate('no', lang);
+
       const pieChartData: SingleSeries = [
-        { name: 'Yes', value: data?.dateRangeData?.dyf_yes || 0 },
-        { name: 'No', value: data?.dateRangeData?.dyf_no || 0 },
+        { name: yes, value: data?.dateRangeData?.dyf_yes || 0 },
+        { name: no, value: data?.dateRangeData?.dyf_no || 0 },
       ];
 
       const isZero = pieChartData.every((v) => v.value === 0);
@@ -188,21 +200,26 @@ export class OverviewFacade {
     })
   );
 
-  whatWasWrongData$ = this.overviewData$.pipe(
+  whatWasWrongData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
-    map((data) => {
+    map(([data, lang]) => {
+      const cantFindInfo = this.i18n.service.translate('d3-cant-find-info', lang);
+      const otherReason = this.i18n.service.translate('d3-other', lang);
+      const hardToUnderstand = this.i18n.service.translate('d3-hard-to-understand', lang);
+      const error = this.i18n.service.translate('d3-error', lang);
+
       const pieChartData: SingleSeries = [
         {
-          name: 'I can’t find the info',
+          name: cantFindInfo,
           value: data?.dateRangeData?.fwylf_cant_find_info || 0,
         },
-        { name: 'Other reason', value: data?.dateRangeData?.fwylf_other || 0 },
+        { name: otherReason, value: data?.dateRangeData?.fwylf_other || 0 },
         {
-          name: 'Info is hard to understand',
+          name: hardToUnderstand,
           value: data?.dateRangeData?.fwylf_hard_to_understand || 0,
         },
         {
-          name: 'Error/something didn’t work',
+          name: error,
           value: data?.dateRangeData?.fwylf_error || 0,
         },
       ];
