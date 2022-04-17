@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { map } from 'rxjs';
+import { map, debounceTime } from 'rxjs';
 
 import { percentChange } from '@cra-arc/utils-common';
 import type { PickByType } from '@cra-arc/utils-common';
@@ -24,7 +24,8 @@ export class PagesDetailsFacade {
     select(PagesDetailsSelectors.selectPagesDetailsLoaded)
   );
   loading$ = this.store.pipe(
-    select(PagesDetailsSelectors.getPagesDetailsLoading)
+    select(PagesDetailsSelectors.getPagesDetailsLoading),
+    debounceTime(500)
   );
   startSession$ = this.store.pipe(
     select(PagesDetailsSelectors.getPagesDetailsStartSession)

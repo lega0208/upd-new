@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, debounceTime, map } from 'rxjs';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -22,7 +22,10 @@ dayjs.extend(utc);
 export class OverviewFacade {
   currentLang$ = this.i18n.currentLang$;
   loaded$ = this.store.pipe(select(OverviewSelectors.getOverviewLoaded));
-  loading$ = this.store.pipe(select(OverviewSelectors.getOverviewLoading));
+  loading$ = this.store.pipe(
+    select(OverviewSelectors.getOverviewLoading),
+    debounceTime(500)
+  );
   overviewData$ = this.store.pipe(select(OverviewSelectors.getOverviewData));
 
   visitors$ = this.overviewData$.pipe(
@@ -73,9 +76,8 @@ export class OverviewFacade {
 
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
-  visitsByDay$ = combineLatest([this.overviewData$, this.currentLang$])
-    .pipe(
-      map(([data, lang]) => {
+  visitsByDay$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
         data?.comparisonDateRangeData?.visitsByDay || [];
@@ -136,8 +138,7 @@ export class OverviewFacade {
 
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
-  barTable$ = combineLatest([this.overviewData$, this.currentLang$])
-  .pipe(
+  barTable$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
@@ -176,8 +177,13 @@ export class OverviewFacade {
     map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang))
   );
 
-  comparisonDateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => getWeeklyDatesLabel(data.comparisonDateRange || '', lang))
+  comparisonDateRangeLabel$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) =>
+      getWeeklyDatesLabel(data.comparisonDateRange || '', lang)
+    )
   );
 
   dyfData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
@@ -200,12 +206,21 @@ export class OverviewFacade {
     })
   );
 
-  whatWasWrongData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+  whatWasWrongData$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
-      const cantFindInfo = this.i18n.service.translate('d3-cant-find-info', lang);
+      const cantFindInfo = this.i18n.service.translate(
+        'd3-cant-find-info',
+        lang
+      );
       const otherReason = this.i18n.service.translate('d3-other', lang);
-      const hardToUnderstand = this.i18n.service.translate('d3-hard-to-understand', lang);
+      const hardToUnderstand = this.i18n.service.translate(
+        'd3-hard-to-understand',
+        lang
+      );
       const error = this.i18n.service.translate('d3-error', lang);
 
       const pieChartData: SingleSeries = [
@@ -248,8 +263,14 @@ export class OverviewFacade {
 const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-  const formattedStartDate = dayjs(startDate).utc(false).locale(lang).format('MMM D');
-  const formattedEndDate = dayjs(endDate).utc(false).locale(lang).format('MMM D');
+  const formattedStartDate = dayjs(startDate)
+    .utc(false)
+    .locale(lang)
+    .format('MMM D');
+  const formattedEndDate = dayjs(endDate)
+    .utc(false)
+    .locale(lang)
+    .format('MMM D');
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };

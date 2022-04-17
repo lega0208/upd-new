@@ -3,7 +3,7 @@ import { select, Store } from '@ngrx/store';
 
 import * as PagesHomeActions from './pages-home.actions';
 import * as PagesHomeSelectors from './pages-home.selectors';
-import { map } from 'rxjs';
+import { debounceTime, map } from 'rxjs';
 
 @Injectable()
 export class PagesHomeFacade {
@@ -11,7 +11,10 @@ export class PagesHomeFacade {
    * Combine pieces of state using createSelector,
    * and expose them as observables through the facade.
    */
-  loading$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeLoading));
+  loading$ = this.store.pipe(
+    select(PagesHomeSelectors.getPagesHomeLoading),
+    debounceTime(500),
+  );
   loaded$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeLoaded));
   pagesHomeData$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeData));
   pagesHomeTableData$ = this.pagesHomeData$.pipe(
