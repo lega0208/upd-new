@@ -31,4 +31,4 @@ services:
     container_name: upd_mongo
     restart: unless-stopped
     volumes:
-      - ../db/data:/data
+      - ~/db/data:/data
