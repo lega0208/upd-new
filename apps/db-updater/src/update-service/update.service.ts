@@ -6,7 +6,7 @@ import {
   updateCalldriverData,
   updatePages,
   updatePageMetrics,
-  updateFeedbackData, consolidateDuplicatePages
+  updateFeedbackData, consolidateDuplicatePages, addRefsToPageMetrics
 } from '@cra-arc/db-update';
 import { withRetry } from '@cra-arc/external-data';
 import { environment } from '../environments/environment';
@@ -61,6 +61,10 @@ export class UpdateService {
       await withRetry(updatePageMetrics, 4, 1000)().catch((err) =>
         this.logger.error('Error updating Page metrics data', err)
       );
+
+      await addRefsToPageMetrics().catch((err) =>
+        this.logger.error('Error adding refs to Page metrics', err)
+      )
     } catch (error) {
       this.logger.error(error);
     }

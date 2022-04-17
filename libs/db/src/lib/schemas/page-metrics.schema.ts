@@ -2,6 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types, Aggregate } from 'mongoose';
 import { GscSearchTermMetrics } from './types';
 import { Page } from './page.schema';
+import { Task } from './task.schema';
+import { Project } from './project.schema';
+import { UxTest } from './ux-test.schema';
 
 export type PageMetricsDocument = PageMetrics & Document;
 
@@ -197,6 +200,18 @@ export class PageMetrics {
     }]
   })
   gsc_searchterms: GscSearchTermMetrics[] = [];
+
+  @Prop({ type: Types.ObjectId, ref: 'Page', index: true })
+  page?: Types.ObjectId | Page;
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }], index: true })
+  tasks?: Types.ObjectId[] | Task[];
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Project' }], index: true })
+  projects?: Types.ObjectId[] | Project[];
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }], index: true })
+  ux_tests?: Types.ObjectId[] | UxTest[];
 }
 
 export const PageMetricsSchema = SchemaFactory.createForClass(PageMetrics);

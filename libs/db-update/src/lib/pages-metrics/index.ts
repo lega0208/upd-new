@@ -10,6 +10,8 @@ import {
   getDbConnectionString,
   PageMetrics,
   getPageMetricsModel,
+  getPageModel,
+  Page,
 } from '@cra-arc/db';
 import { connect, Model, Document, Types } from 'mongoose';
 import utc from 'dayjs/plugin/utc';
@@ -27,7 +29,7 @@ export async function fetchAndMergePageMetrics(dateRange: DateRange) {
         clause: `BEGINS-WITH 'www.canada.ca' AND (BEGINS-WITH 'www.canada.ca/en/revenue-agency'\
         OR BEGINS-WITH 'www.canada.ca/fr/agence-revenu' OR BEGINS-WITH 'www.canada.ca/fr/services/impots'\
         OR BEGINS-WITH 'www.canada.ca/en/services/taxes')`,
-      }
+      },
     }),
     gscClient.getPageMetrics(dateRange, { dataState: 'all' }),
   ]);
@@ -132,7 +134,7 @@ async function upsertAAPageMetrics(pageMetrics: PageMetrics[]) {
         filter: { url: metrics.url, date: metrics.date },
         update: { $set: metrics },
         upsert: true,
-      }
+      },
     }))
   );
 }
@@ -150,4 +152,60 @@ export async function addAAPageMetrics(dateRange: DateRange) {
         OR BEGINS-WITH 'www.canada.ca/en/services/taxes')`,
     },
   });
+}
+
+export async function addRefsToPageMetrics() {
+  await connect(getDbConnectionString());
+  console.log('Adding references to Page Metrics');
+
+  const pageModel = getPageModel();
+
+  // First check if there are any pages that share urls. If that's the case we can't associate to a specific Page
+  for (const page of (await pageModel.find({}, { all_urls: 1 })) as Page[]) {
+    const pagesWithCommonUrls = await pageModel.find(
+      {
+        _id: { $ne: page._id },
+        all_urls: {
+          $elemMatch: { $in: page.all_urls },
+        },
+      },
+      { _id: 1 }
+    );
+
+    if (pagesWithCommonUrls.length > 0) {
+      throw new Error(
+        `Found pages with duplicated URLs- Cannot add references:\r\n ${JSON.stringify(
+          pagesWithCommonUrls,
+          null,
+          2
+        )}`
+      );
+    }
+  }
+  const pageMetricsModel = getPageMetricsModel();
+
+  // We can only associate metrics with pages from airtable, otherwise they can't be mapped to tasks/tests/projects
+  // Iterate through pages w/ airtable_id and add refs to metric docs w/ url in all_urls
+  const pages = (await pageModel.find({
+    airtable_id: { $exists: true },
+  })) as Page[];
+
+  const bulkWriteOps = pages.map((page) => ({
+    updateMany: {
+      filter: { url: { $in: page.all_urls } },
+      update: {
+        $set: {
+          page: page._id,
+          tasks: page.tasks,
+          projects: page.projects,
+          ux_tests: page.ux_tests,
+        },
+      },
+    },
+  }));
+
+  const results = await pageMetricsModel.bulkWrite(bulkWriteOps);
+
+  console.log('Results: ', results);
+  console.log('Successfully added references to Page Metrics');
 }
