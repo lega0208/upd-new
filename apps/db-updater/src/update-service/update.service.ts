@@ -18,8 +18,8 @@ export class UpdateService {
 
   @Cron(
     environment.production
-      ? CronExpression.EVERY_MINUTE
-      : CronExpression.EVERY_DAY_AT_1AM
+      ? CronExpression.EVERY_DAY_AT_1AM
+      : CronExpression.EVERY_MINUTE
   )
   async updateDatabase() {
     if (this.isRunning) {

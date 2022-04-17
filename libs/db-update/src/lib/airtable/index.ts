@@ -268,9 +268,8 @@ export async function getAndPrepareUxData(): Promise<UxData> {
 }
 
 export async function updateUxData() {
-  const { tasks, uxTests, pages, projects } = await getAndPrepareUxData();
-
   await connect(getDbConnectionString());
+  const { tasks, uxTests, pages, projects } = await getAndPrepareUxData();
 
   const pageUpdateOps = pages.map((page) => ({
     updateOne: {
@@ -290,6 +289,10 @@ export async function updateUxData() {
         $set: {
           airtable_id: page.airtable_id,
         },
+        $unset: {
+          lastModified: true,
+          lastChecked: true,
+        }
       },
       upsert: true,
     },

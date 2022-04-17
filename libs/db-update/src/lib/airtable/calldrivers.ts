@@ -44,5 +44,12 @@ export async function updateCalldriverData(endDate?: DateType) {
       } as CallDriver)
   );
 
-  return await calldriversModel.insertMany(calldriversData);
+  if (calldriversData.length === 0) {
+    console.log('Calldrivers already up-to-date.');
+    return;
+  }
+
+  await calldriversModel.insertMany(calldriversData);
+
+  console.log(`Successfully inserted ${calldriversData.length} Calldriver documents.`);
 }
