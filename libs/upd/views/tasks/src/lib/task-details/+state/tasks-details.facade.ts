@@ -4,7 +4,7 @@ import {
   TaskDetailsData,
 } from '@cra-arc/types-common';
 import { select, Store } from '@ngrx/store';
-import { map } from 'rxjs';
+import { debounceTime, map } from 'rxjs';
 
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
@@ -22,7 +22,8 @@ export class TasksDetailsFacade {
     select(TasksDetailsSelectors.selectTasksDetailsLoaded)
   );
   loading$ = this.store.pipe(
-    select(TasksDetailsSelectors.selectTasksDetailsLoading)
+    select(TasksDetailsSelectors.selectTasksDetailsLoading),
+    debounceTime(500)
   );
   tasksDetailsData$ = this.store.pipe(
     select(TasksDetailsSelectors.selectTasksDetailsData)

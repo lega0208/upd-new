@@ -16,9 +16,6 @@ export class TasksController {
     @Query('dateRange') dateRange: string,
     @Query('comparisonDateRange') comparisonDateRange: string,
   ) {
-    const queryResults = await this.tasksService.getTaskDetails({ id, dateRange, comparisonDateRange });
-    console.log(queryResults);
-
-    return queryResults;
+    return await this.tasksService.getTaskDetails({ id, dateRange, comparisonDateRange });
   }
 }

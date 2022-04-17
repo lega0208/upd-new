@@ -2,7 +2,15 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
-import { PageMetrics, Project, Task, UxTest, getProjectModel, getTaskModel, getUxTestModel } from '@cra-arc/db';
+import {
+  PageMetrics,
+  Project,
+  Task,
+  UxTest,
+  getProjectModel,
+  getTaskModel,
+  getUxTestModel,
+} from '@cra-arc/db';
 import type {
   PageMetricsModel,
   ProjectDocument,
@@ -13,6 +21,7 @@ import type {
   UxTestDocument,
 } from '@cra-arc/types-common';
 import type { ApiParams } from '@cra-arc/upd/services';
+import { TasksHomeAggregatedData } from '@cra-arc/types-common';
 
 @Injectable()
 export class TasksService {
@@ -25,9 +34,44 @@ export class TasksService {
   ) {}
 
   async getTasksHomeData(dateRange: string): Promise<TasksHomeData> {
-    const tasksData = (
-      await this.taskModel.find({}).sort({ title: 1 }).lean()
-    ).map((task) => ({ ...task, visits: 12 }));
+    const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+    const tasksData = await this.pageMetricsModel
+      .aggregate<TasksHomeAggregatedData>()
+      .project({ date: 1, visits: 1, tasks: 1 })
+      .sort({ tasks: 1, date: 1 }) // todo: add index for this sort
+      .match({
+        $and: [
+          {
+            tasks: { $exists: true },
+          },
+          {
+            tasks: { $ne: null },
+          },
+          {
+            tasks: { $not: { $size: 0 } },
+          },
+          { date: { $gte: startDate, $lte: endDate } },
+        ],
+      })
+      .unwind({ path: '$tasks' })
+      .sort({ tasks: 1 })
+      .group({
+        _id: '$tasks',
+        visits: {
+          $sum: '$visits',
+        },
+      })
+      .lookup({
+        from: 'tasks',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'task',
+      })
+      .replaceRoot({
+        $mergeObjects: [{ $first: '$task' }, { visits: '$visits' }],
+      })
+      .exec();
 
     return {
       dateRange,

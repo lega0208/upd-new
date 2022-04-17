@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { combineLatest, debounceTime, map } from 'rxjs';
 
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import 'dayjs/locale/en-CA';
-import 'dayjs/locale/fr-CA';
+import dayjs from 'dayjs/esm';
+import utc from 'dayjs/esm/plugin/utc';
+import 'dayjs/esm/locale/en-CA';
+import 'dayjs/esm/locale/fr-CA';
 
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { LocaleId } from '@cra-arc/upd/i18n';
