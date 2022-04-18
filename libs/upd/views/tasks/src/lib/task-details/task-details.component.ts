@@ -8,8 +8,8 @@ import { TasksDetailsFacade } from './+state/tasks-details.facade';
 })
 export class TaskDetailsComponent implements OnInit {
   title$ = this.taskDetailsService.title$;
+  error$ = this.taskDetailsService.error$;
   loading$ = this.taskDetailsService.loading$;
-  
 
   navTabs: { href: string; title: string }[] = [
     { href: 'summary', title: 'Summary' },

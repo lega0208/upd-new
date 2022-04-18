@@ -1,10 +1,12 @@
+export type ColumnConfigPipe = 'percent' | 'number' | 'date';
+
 export interface ColumnConfig {
   field: string;
   header: string;
   type?: string;
   typeParam?: string;
   typeParams?: typeParams;
-  pipe?: string;
+  pipe?: ColumnConfigPipe;
   pipeParam?: string;
   tooltip?: string;
   translate?: boolean;

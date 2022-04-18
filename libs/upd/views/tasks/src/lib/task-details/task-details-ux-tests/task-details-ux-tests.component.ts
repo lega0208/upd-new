@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@cra-arc/upd-components';
+import { ColumnConfig, ColumnConfigPipe } from '@cra-arc/upd-components';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 
 @Component({
@@ -29,7 +29,7 @@ export class TaskDetailsUxTestsComponent {
     { field: 'title', header: 'Title' },
     { field: 'scenario', header: 'Scenario' },
     { field: 'result', header: 'Result' },
-    { field: 'date', header: 'Date', pipe: 'date' },
+    { field: 'date', header: 'Date', pipe: 'date' as ColumnConfigPipe },
   ];
 
   constructor(private readonly taskDetailsService: TasksDetailsFacade) {}

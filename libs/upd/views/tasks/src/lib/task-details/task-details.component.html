@@ -5,7 +5,7 @@
 ></app-loading-spinner>
 
 <ng-template #elseBlock>
-  <app-page-404 *ngIf="(title$ | async) === ''; else elseBlock2"></app-page-404>
+  <app-page-404 *ngIf="(error$ | async) === ''; else elseBlock2"></app-page-404>
 </ng-template>
 <ng-template #elseBlock2>
 <h2 class="h3 pt-2 pb-2" data-i18n="task-title">

@@ -1,12 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ColumnConfig } from './types';
+import { ColumnConfig, ColumnConfigPipe } from './types';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
-import { registerLocaleData } from '@angular/common';
-import localeFr from '@angular/common/locales/fr-CA';
-import { stringify } from 'querystring';
 import { I18nService } from '@cra-arc/upd/i18n';
+import { ProjectStatus } from '@cra-arc/types-common';
 
-registerLocaleData(localeFr, 'fr-CA');
 
 @Component({
   selector: 'app-data-table-styles',
@@ -15,52 +12,52 @@ registerLocaleData(localeFr, 'fr-CA');
   providers: [PercentPipe, DecimalPipe, DatePipe],
 })
 export class DataTableStylesComponent implements OnInit {
-  @Input() config!: ColumnConfig;
+  @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() href: string = '';
-  @Input() data: any;
-  @Input() hasData = false;
+  @Input() data: Record<string, number | string> = {};
 
+  numberVal: number | string = 0;
+
+  isProjectLabel = this.config.type === 'label' && this.config.typeParam !== 'cops';
+  projectLabel = this.data[this.config.field] as ProjectStatus
   hasType = false;
   hasPipe = false;
 
-  numberVal: number = 0;
-
-  ngOnInit(): void {
-    this.hasType = this.config.hasOwnProperty('type');
-    this.hasPipe = this.config.hasOwnProperty('pipe');
+  ngOnInit() {
+    this.hasType = !!this.config.type;
+    this.hasPipe = !!this.config.pipe;
 
     if (this.hasPipe) {
       this.numberVal = this.configurePipe(
-        this.data[this.config.field],
+        this.data[this.config.field] as number,
         this.config.pipe,
-        this.config.pipeParam || ''
-      );
+        this.config.pipeParam
+      ) || '';
     }
   }
 
-  configurePipe(data: string, pipe: any, pipeParam: string): number {
-    let numberVal = 0;
+  configurePipe(data: number, pipe?: ColumnConfigPipe, pipeParam?: string) {
     if (pipe === 'number') {
-      numberVal = this.decimalPipe.transform(
+      return this.decimalPipe.transform(
         data,
         pipeParam,
         this.i18n.currentLang
-      ) as unknown as number;
+      );
     } else if (pipe === 'percent') {
-      numberVal = this.percentPipe.transform(
+      return this.percentPipe.transform(
         data,
         pipeParam,
         this.i18n.currentLang
-      ) as unknown as number;
+      );
     } else if (pipe === 'date') {
-      numberVal = this.datePipe.transform(
+      return this.datePipe.transform(
         data,
         pipeParam,
         this.i18n.currentLang
-      ) as unknown as number;
+      );
     }
 
-    return numberVal;
+    return data;
   }
 
   constructor(

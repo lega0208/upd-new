@@ -4,9 +4,9 @@ import { DateSelectionFacade, DateRangePeriod } from '@cra-arc/upd/state';
 import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
 
-import dayjs from 'dayjs';
-import 'dayjs/locale/en-CA';
-import 'dayjs/locale/fr-CA';
+import dayjs from 'dayjs/esm';
+import 'dayjs/esm/locale/en-CA';
+import 'dayjs/esm/locale/fr-CA';
 
 @Component({
   selector: 'app-date-selector',

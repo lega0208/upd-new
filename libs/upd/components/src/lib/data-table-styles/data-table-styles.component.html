@@ -3,12 +3,12 @@
     {{ data[config.field] }}
   </a>
   <ng-container
-    *ngIf="config.type === 'label' && config.typeParam !== 'cops'"
+    *ngIf="isProjectLabel"
   >
-    <app-project-status-label [statusText]="data[config.field]"></app-project-status-label>
+    <app-project-status-label [statusText]="projectLabel"></app-project-status-label>
   </ng-container>
   <span
-    *ngIf="config.type === 'label' && config.typeParam === 'cops' && data[config.field] === true"
+    *ngIf="config.type === 'label' && config.typeParam === 'cops' && !!data[config.field]"
     class="badge"
     [ngClass]="{
       'bg-primary': config.typeParam === 'cops'

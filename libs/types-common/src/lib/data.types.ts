@@ -153,7 +153,7 @@ export interface TaskDetailsData
 
 export type ProjectStatus =
   | 'Planning'
-  | 'In progress'
+  | 'In Progress'
   | 'Discovery'
   | 'Being monitored'
   | 'Needs review'

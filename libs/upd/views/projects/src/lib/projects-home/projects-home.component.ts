@@ -10,7 +10,7 @@ import { ColumnConfig } from '@cra-arc/upd-components';
 export class ProjectsHomeComponent implements OnInit {
   data$ = this.projectsHomeService.projectsHomeData$;
   tableData$ = this.projectsHomeService.projectsHomeTableData$;
-  
+
   numInProgress$ = this.projectsHomeService.numInProgress$;
   numCompletedLast6Months$ = this.projectsHomeService.numCompletedLast6Months$;
   totalCompleted$ = this.projectsHomeService.totalCompleted$;
