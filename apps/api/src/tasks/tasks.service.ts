@@ -163,6 +163,7 @@ async function getTaskAggregatedData(
     })
     .group({
       _id: '$url',
+      page: { $first: '$page' },
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyf_yes' },
       dyfNo: { $sum: '$dyf_no' },
@@ -175,18 +176,21 @@ async function getTaskAggregatedData(
       gscTotalCtr: { $avg: '$gsc_total_ctr' },
       gscTotalPosition: { $avg: '$gsc_total_position' },
     })
-    // .lookup({
-    //   from: 'pages',
-    //   localField: '_id',
-    //   foreignField: 'url', // not all_urls...
-    //   as: 'page',
-    // })
-    // .unwind('$page')
-    // .replaceRoot({
-    //   $mergeObjects: ['$$ROOT', '$page']
-    // })
-    .addFields({ url: '$_id' })
-    .project({ _id: 0 })
+    .lookup({
+      from: 'pages',
+      localField: 'page',
+      foreignField: '_id',
+      as: 'page',
+    })
+    .unwind('$page')
+    .replaceRoot({
+      $mergeObjects: [
+        '$$ROOT',
+        { _id: '$page._id', title: '$page.title', url: '$page.url' },
+      ],
+    })
+    // .addFields({ _id: '$page' })
+    .project({ page: 0 })
     .group({
       _id: null,
       visits: { $sum: '$visits' },
