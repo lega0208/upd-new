@@ -4,8 +4,8 @@ import { combineLatest, debounceTime, map } from 'rxjs';
 
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
-import 'dayjs/esm/locale/en-CA';
-import 'dayjs/esm/locale/fr-CA';
+import 'dayjs/esm/locale/en-ca';
+import 'dayjs/esm/locale/fr-ca';
 
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { LocaleId } from '@cra-arc/upd/i18n';
@@ -86,6 +86,10 @@ export class OverviewFacade {
       const maxDays = Math.max(days, prevDays);
       const granularity = Math.ceil(days / 7);
       const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
+      let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
+      let [prevStartDate] = (data.comparisonDateRange || '')
+        .split('/')
+        .map((d) => new Date(d));
 
       const isCurrZero = visitsByDay?.every((v) => v.visits === 0);
       const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
@@ -107,6 +111,7 @@ export class OverviewFacade {
         data.comparisonDateRange || '',
         lang
       );
+
       const comparisonDateRangeSeries = comparisonVisitsByDay.map(
         ({ visits }) => ({
           name: comparisonDateRangeLabel,
@@ -114,16 +119,58 @@ export class OverviewFacade {
         })
       );
 
+      let dayCount = 0;
+
+      while (dayCount < maxDays) {
+        const prevMonthDays = getMonthlyDays(prevStartDate);
+        const currMonthDays = getMonthlyDays(startDate);
+
+        if (currMonthDays > prevMonthDays) {
+          // if the current month has more days than the previous month,
+          // we need to pad the previous month with zeros
+
+          const daysToPad = currMonthDays - prevMonthDays;
+
+          comparisonDateRangeSeries.splice(
+            dayCount + prevMonthDays,
+            0,
+            ...Array(daysToPad).fill({
+              name: comparisonDateRangeLabel,
+              value: 0,
+            })
+          );
+
+          dayCount += currMonthDays;
+        } else {
+          // if the current month has less days than the previous month,
+          // we need to pad the current month with zeros
+
+          const daysToPad = prevMonthDays - currMonthDays;
+
+          dateRangeSeries.splice(
+            dayCount + currMonthDays,
+            0,
+            ...Array(daysToPad).fill({
+              name: dateRangeLabel,
+              value: 0,
+            })
+          );
+
+          dayCount += prevMonthDays;
+        }
+
+        prevStartDate = dayjs(prevStartDate)
+          .utc(false)
+          .add(1, 'month')
+          .toDate();
+        startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
+      }
+
       const visitsByDayData: MultiSeries = dateRangeDates.map((date, i) => {
         const series = [dateRangeSeries[i]];
 
         if (comparisonDateRangeSeries[i] !== undefined) {
           series.push(comparisonDateRangeSeries[i]);
-        } else {
-          series.push({
-            name: comparisonDateRangeLabel,
-            value: 0,
-          });
         }
 
         return {
@@ -144,15 +191,21 @@ export class OverviewFacade {
       const comparisonVisitsByDay =
         data?.comparisonDateRangeData?.visitsByDay || [];
       const days = visitsByDay?.length || 0;
+      const prevDays = comparisonVisitsByDay?.length || 0;
+      const maxDays = Math.max(days, prevDays);
       const granularity = Math.ceil(days / 7);
       const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
+      let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
+      let [prevStartDate] = (data.comparisonDateRange || '')
+        .split('/')
+        .map((d) => new Date(d));
 
       if (!visitsByDay) {
         return [] as MultiSeries;
       }
 
-      const dateRangeDates = visitsByDay.map(({ date }) => date);
-      const dateRangeSeries = visitsByDay.map(({ visits }) => ({
+      const dateRangeSeries = visitsByDay.map(({ date, visits }) => ({
+        date,
         visits,
       }));
       const comparisonDateRangeSeries = comparisonVisitsByDay.map(
@@ -160,6 +213,54 @@ export class OverviewFacade {
           visits,
         })
       );
+
+      let dayCount = 0;
+
+      while (dayCount < maxDays) {
+        const prevMonthDays = getMonthlyDays(prevStartDate);
+        const currMonthDays = getMonthlyDays(startDate);
+
+        if (currMonthDays > prevMonthDays) {
+          // if the current month has more days than the previous month,
+          // we need to pad the previous month with zeros
+
+          const daysToPad = currMonthDays - prevMonthDays;
+          comparisonDateRangeSeries.splice(
+            dayCount + prevMonthDays,
+            0,
+            ...Array(daysToPad).fill({
+              date: '*',
+              visits: 0,
+            })
+          );
+
+          dayCount += currMonthDays;
+        } else {
+          // if the current month has less days than the previous month,
+          // we need to pad the current month with zeros
+
+          const daysToPad = prevMonthDays - currMonthDays;
+
+          dateRangeSeries.splice(
+            dayCount + currMonthDays,
+            0,
+            ...Array(daysToPad).fill({
+              date: '*',
+              visits: 0,
+            })
+          );
+
+          dayCount += prevMonthDays;
+        }
+
+        prevStartDate = dayjs(prevStartDate)
+          .utc(false)
+          .add(1, 'month')
+          .toDate();
+        startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
+      }
+
+      const dateRangeDates = dateRangeSeries.map(({ date }) => date);
 
       const visitsByDayData = dateRangeDates.map((date, i) => {
         return {
@@ -273,6 +374,10 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
     .format('MMM D');
 
   return `${formattedStartDate}-${formattedEndDate}`;
+};
+
+const getMonthlyDays = (date: Date) => {
+  return dayjs(date).utc(false).daysInMonth();
 };
 
 type DateRangeDataIndexKey = keyof OverviewAggregatedData &
