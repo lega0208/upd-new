@@ -12,7 +12,7 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
 export class OverviewSummaryComponent implements OnInit {
   currentLang: LocaleId = EN_CA;
   currentLang$ = this.i18n.currentLang$;
-  
+
   loaded$ = this.overviewService.loaded$;
   loading$ = this.overviewService.loading$;
   error$ = this.overviewService.error$;
@@ -50,6 +50,22 @@ export class OverviewSummaryComponent implements OnInit {
   ];
 
   barChartData$ = this.overviewService.visitsByDay$;
+
+  barTable$ = this.overviewService.barTable$;
+
+  label = 'Visits';
+
+  dateRangeLabel$ = this.overviewService.dateRangeLabel$;
+
+  barTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'Dates' },
+    {
+      field: 'currValue',
+      header: `Visits for ${this.dateRangeLabel$}`,
+      pipe: 'number',
+    },
+    { field: 'prevValue', header: 'Visits for ', pipe: 'number' },
+  ];
 
   constructor(
     private overviewService: OverviewFacade,
