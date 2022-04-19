@@ -6,9 +6,8 @@ import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
 import * as ProjectsDetailsActions from './projects-details.actions';
 import { ApiService } from '@cra-arc/upd/services';
 import { Store } from '@ngrx/store';
-import { selectDateRanges, selectRouteNestedParam } from '@cra-arc/upd/state';
+import { selectDatePeriod, selectDateRanges, selectRouteNestedParam } from '@cra-arc/upd/state';
 import { selectProjectsDetailsData } from './projects-details.selectors';
-import { loadTasksDetailsSuccess } from '@cra-arc/upd/views/tasks';
 import { loadProjectsDetailsSuccess } from './projects-details.actions';
 
 @Injectable()
@@ -54,6 +53,13 @@ export class ProjectsDetailsEffects {
             );
         }
       )
+    )
+  );
+  
+  dateChange$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(selectDatePeriod),
+      mergeMap(() => of(ProjectsDetailsActions.loadProjectsDetailsInit()))
     )
   );
 

@@ -8,14 +8,30 @@ import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
   styleUrls: ['./project-details-ux-tests.component.css'],
 })
 export class ProjectDetailsUxTestsComponent {
-  participantTasks$ = this.projectsDetailsService.taskSuccessByUxTest$;
+  participantTasks$ = this.projectsDetailsService.taskSuccessByUxTestDefault$;
   participantTasksCols = [
     {
       field: 'title',
       header: 'Task list',
       type: 'link',
-      typeParams: { preLink: '/tasks', link: '_id' },
+      typeParams: { preLink: '/tasks', link: 'tasks' },
     },
+  ] as ColumnConfig[];
+
+  taskSuccessRateCols = [
+    {
+      field: 'title',
+      header: 'Task list',
+    },
+    {
+      field: 'testType',
+      header: 'Test type',
+    },
+    {
+      field: 'successRate',
+      header: 'Success rate',
+      pipe: 'percent',
+    }
   ] as ColumnConfig[];
 
   uxTests$ = [

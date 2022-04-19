@@ -13,18 +13,27 @@ export class ProjectDetailsSummaryComponent {
 
   visits$ = this.projectsDetailsService.visits$;
 
-  participantTasks$ = this.projectsDetailsService.taskSuccessByUxTest$;
+  participantTasks$ = this.projectsDetailsService.taskSuccessByUxTestDefault$;
   participantTasksCols = [
     {
       field: 'title',
       header: 'Task list',
       type: 'link',
-      typeParams: { preLink: '/tasks', link: '_id' },
+      typeParams: { preLink: '/tasks', link: 'tasks' },
     }
   ] as ColumnConfig[];
 
   dyfChart$ = this.projectsDetailsService.dyfData$;
   whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
+
+  dyfTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'Selection' },
+    { field: 'value', header: 'Visits', pipe: 'number' },
+  ];
+  whatWasWrongTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'What was wrong' },
+    { field: 'value', header: 'Visits', pipe: 'number' },
+  ];
 
   constructor(private readonly projectsDetailsService: ProjectsDetailsFacade) {}
 }

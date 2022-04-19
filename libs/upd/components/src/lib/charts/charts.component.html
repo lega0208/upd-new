@@ -209,6 +209,7 @@
       </ng-container>
       <ng-container *ngIf="type === 'horizontal-bar'">
         <ngx-charts-bar-horizontal
+        *ngIf="isPercent"
           [scheme]="colorScheme"
           [results]="data"
           [animations]="animations"
@@ -227,14 +228,50 @@
           [barPadding]="barPadding"
           [roundDomains]="roundDomains"
           [roundEdges]="roundEdges"
+          [xScaleMin]="xScaleMin"
           [xScaleMax]="xScaleMax"
           [noBarWhenZero]="noBarWhenZero"
           [showDataLabel]="showDataLabel"
           [trimXAxisTicks]="trimXAxisTicks"
           [trimYAxisTicks]="trimYAxisTicks"
           [rotateXAxisTicks]="rotateXAxisTicks"
-          [maxXAxisTickLength]="maxXAxisTickLength"
-          [maxYAxisTickLength]="maxYAxisTickLength"
+          [xAxisTickFormatting]="xAxisPercentTickFormat"
+          (select)="onSelect($event)"
+        >
+        <ng-template #tooltipTemplate let-model="model">
+          <span class="tooltip-label"
+            >{{ model.label }}</span
+          >
+          <span class="tooltip-val">{{ (model.value * 100).toFixed(0) }}%</span>
+        </ng-template>
+        </ngx-charts-bar-horizontal>
+        <ngx-charts-bar-horizontal
+        *ngIf="!isPercent"
+          [scheme]="colorScheme"
+          [results]="data"
+          [animations]="animations"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [legendTitle]="legendTitle"
+          [legendPosition]="legendPosition"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [tooltipDisabled]="tooltipDisabled"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [showGridLines]="showGridLines"
+          [barPadding]="barPadding"
+          [roundDomains]="roundDomains"
+          [roundEdges]="roundEdges"
+          [xScaleMin]="xScaleMin"
+          [xScaleMax]="xScaleMax"
+          [noBarWhenZero]="noBarWhenZero"
+          [showDataLabel]="showDataLabel"
+          [trimXAxisTicks]="trimXAxisTicks"
+          [trimYAxisTicks]="trimYAxisTicks"
+          [rotateXAxisTicks]="rotateXAxisTicks"
           [xAxisTickFormatting]="xAxisTickFormat"
           (select)="onSelect($event)"
         >

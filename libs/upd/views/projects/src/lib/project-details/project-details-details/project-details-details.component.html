@@ -13,13 +13,13 @@
     <div class="row">
       <div class="col">
         <app-data-table-card
-        [data]="(memberList$) || []"
+        [data]="(memberList$ | async) || []"
         [cols]="memberListCols"
         [sort]="false"
         [filter]="false"
         [pagination]="false"
-        title="Task success by UX test"
-        tooltip="Task success by UX test tooltip"
+        title="Members"
+        tooltip="Members tooltip"
       >
       </app-data-table-card>
   

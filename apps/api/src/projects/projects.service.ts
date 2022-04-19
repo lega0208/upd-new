@@ -231,16 +231,25 @@ export class ProjectsService {
                 date: 1,
                 test_type: { $ifNull: ['$test_type', 'Unknown test type'] },
                 success_rate: 1,
-                tasks: 1
+                tasks: 1,
+                total_users: 1,
+                successful_users: 1,
+                project_lead: 1,
+                vendor: 1
               },
             },
             {
               $group: {
                 _id: {
                   // assuming they're the same "test" if the date, test type, tasks are the same:
+                  title: '$title',
                   test_type: '$test_type',
                   date: '$date',
-                  tasks: '$tasks',
+                  tasks: { $first: '$tasks'},
+                  total_users: '$total_users',
+                  successful_users: '$successful_users',
+                  project_lead: '$project_lead',
+                  vendor: '$vendor'
                 },
                 status: { $first: '$status' },
                 successRate: { $avg: '$success_rate' },
@@ -249,9 +258,14 @@ export class ProjectsService {
             {
               $project: {
                 _id: 0,
+                title: '$_id.title',
                 tasks: '$_id.tasks',
                 date: '$_id.date',
                 testType: '$_id.test_type',
+                totalUsers: '$_id.total_users',
+                successfulUsers: '$_id.successful_users',
+                projectLead: '$_id.project_lead',
+                vendor: '$_id.vendor',
                 status: 1,
                 successRate: 1,
               }
@@ -313,6 +327,7 @@ async function getAggregatedProjectMetrics(
       .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
       .group({
         _id: '$url',
+        page: { $first: '$page' },
         visits: { $sum: '$visits' },
         dyfYes: { $sum: '$dyf_yes' },
         dyfNo: { $sum: '$dyf_no' },
@@ -325,6 +340,21 @@ async function getAggregatedProjectMetrics(
         gscTotalCtr: { $sum: '$gsc_total_ctr' },
         gscTotalPosition: { $avg: '$gsc_total_position' },
       })
+      .lookup({
+        from: 'pages',
+        localField: 'page',
+        foreignField: '_id',
+        as: 'page',
+      })
+      .unwind('$page')
+      .replaceRoot({
+        $mergeObjects: [
+          '$$ROOT',
+          { _id: '$page._id', title: '$page.title', url: '$page.url' },
+        ],
+      })
+      // .addFields({ _id: '$page' })
+      .project({ page: 0 })
       .group({
         _id: null,
         visitsByPage: {

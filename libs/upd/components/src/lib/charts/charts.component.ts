@@ -15,6 +15,7 @@ import { curves, Curves, ChartTypes } from './types';
 import { ColumnConfig } from '../data-table-styles/types';
 import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { Observable, of } from 'rxjs';
+import { I18nFacade } from '@cra-arc/upd/state';
 
 @Component({
   selector: 'app-charts',
@@ -23,7 +24,7 @@ import { Observable, of } from 'rxjs';
 })
 export class ChartsComponent implements OnInit {
   view?: [number, number];
-  lang: LocaleId = EN_CA
+  @Input() lang: LocaleId = EN_CA
 
   @Input() title = '';
   @Input() titleTooltip = '';
@@ -126,6 +127,8 @@ export class ChartsComponent implements OnInit {
   // pie/donut
   doughnut = false;
 
+  @Input() isPercent = false;
+
   chartData: SingleSeries | MultiSeries | null = [];
   @Input() table: any;
   @Input() tableCols: ColumnConfig[] = [];
@@ -146,6 +149,11 @@ export class ChartsComponent implements OnInit {
     this.currentLang$.subscribe((nextLang) => {
       this.lang = nextLang;
     })
+
+    if (this.isPercent) {
+      this.xScaleMax = 1;
+      this.xScaleMin = 0;
+    }
   }
 
   applyDimensions() {
@@ -227,8 +235,16 @@ export class ChartsComponent implements OnInit {
     return (data / 1000).toLocaleString(this.lang);
   }
 
+  xAxisPercentTickFormat(data: number) {
+    return `${data * 100}%`;
+  }
+
   yAxisTickFormat(data: number) {
     return (data / 1000).toLocaleString(this.lang);
+  }
+
+  yAxisPercentTickFormat(data: number) {
+    return `${data * 100}%`;
   }
 
   getGaugeMin() {
@@ -250,6 +266,8 @@ export class ChartsComponent implements OnInit {
   onSelect(event: any) {
     console.log(event);
   }
+
+  constructor(private i18n: I18nFacade) {}
 }
 
 // to be removed once data for this chart is available (call drivers)

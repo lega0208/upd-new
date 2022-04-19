@@ -4,13 +4,14 @@ import {
   TaskDetailsData,
 } from '@cra-arc/types-common';
 import { select, Store } from '@ngrx/store';
-import { debounceTime, map } from 'rxjs';
+import { combineLatest, debounceTime, map } from 'rxjs';
 
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import { TasksDetailsState } from './tasks-details.reducer';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { SingleSeries } from '@amonsour/ngx-charts';
+import { I18nFacade } from '@cra-arc/upd/state';
 
 @Injectable()
 export class TasksDetailsFacade {
@@ -29,6 +30,7 @@ export class TasksDetailsFacade {
     select(TasksDetailsSelectors.selectTasksDetailsData)
   );
 
+  currentLang$ = this.i18n.currentLang$;
   title$ = this.tasksDetailsData$.pipe(map((data) => data.title));
 
   avgTaskSuccessFromLastTest$ = this.tasksDetailsData$.pipe(
@@ -50,12 +52,15 @@ export class TasksDetailsFacade {
     map((data) => data?.dateRangeData?.visitsByPage)
   );
 
-  dyfData$ = this.tasksDetailsData$.pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
-    map((data) => {
+  dyfData$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+
+      const yes = this.i18n.service.translate('yes', lang);
+      const no = this.i18n.service.translate('no', lang);
+
       const pieChartData: SingleSeries = [
-        { name: 'Yes', value: data?.dateRangeData?.dyfYes || 0 },
-        { name: 'No', value: data?.dateRangeData?.dyfNo || 0 },
+        { name: yes, value: data?.dateRangeData?.dyfYes || 0 },
+        { name: no, value: data?.dateRangeData?.dyfNo || 0 },
       ];
 
       const isZero = pieChartData.every((v) => v.value === 0);
@@ -67,21 +72,32 @@ export class TasksDetailsFacade {
     })
   );
 
-  whatWasWrongData$ = this.tasksDetailsData$.pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
-    map((data) => {
+  whatWasWrongData$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+
+      const cantFindInfo = this.i18n.service.translate(
+        'd3-cant-find-info',
+        lang
+      );
+      const otherReason = this.i18n.service.translate('d3-other', lang);
+      const hardToUnderstand = this.i18n.service.translate(
+        'd3-hard-to-understand',
+        lang
+      );
+      const error = this.i18n.service.translate('d3-error', lang);
+
       const pieChartData: SingleSeries = [
         {
-          name: 'I can’t find the info',
+          name: cantFindInfo,
           value: data?.dateRangeData?.fwylfCantFindInfo || 0,
         },
-        { name: 'Other reason', value: data?.dateRangeData?.fwylfOther || 0 },
+        { name: otherReason, value: data?.dateRangeData?.fwylfOther || 0 },
         {
-          name: 'Info is hard to understand',
+          name: hardToUnderstand,
           value: data?.dateRangeData?.fwylfHardToUnderstand || 0,
         },
         {
-          name: 'Error/something didn’t work',
+          name: error,
           value: data?.dateRangeData?.fwylfError || 0,
         },
       ];
@@ -92,6 +108,23 @@ export class TasksDetailsFacade {
       }
 
       return pieChartData;
+    })
+  );
+
+  taskSuccessChart$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+
+      const taskSuccessByUxTest = data?.taskSuccessByUxTest;
+
+      if ( !taskSuccessByUxTest )
+        return [];
+
+      return taskSuccessByUxTest.map(({title, successRate}, idx) => {
+        return {
+          name: `UX Test: ${(idx + 1)} - ${title}`,
+          value: successRate || 0,
+        };
+      });
     })
   );
 
@@ -131,7 +164,7 @@ export class TasksDetailsFacade {
     select(TasksDetailsSelectors.selectTasksDetailsError)
   );
 
-  constructor(private readonly store: Store) {}
+  constructor(private readonly store: Store, private i18n: I18nFacade) {}
 
   /**
    * Use the initialization action to perform one

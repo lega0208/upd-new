@@ -4,7 +4,7 @@
       <app-charts
         [title]="'Did you find what you were looking for?'"
         [titleTooltip]="'Did you find what you were looking for? tooltip'"
-        [data]="dyfChart$"
+        [data]="(dyfChart$ | async)"
         [type]="'donut'"
       ></app-charts>
     </div>
@@ -12,7 +12,7 @@
       <app-charts
         [title]="'What was wrong?'"
         [titleTooltip]="'What was wrong? tooltip'"
-        [data]="whatWasWrongChart$"
+        [data]="(whatWasWrongChart$ | async)"
         [type]="'donut'"
       ></app-charts>
     </div>
@@ -23,7 +23,7 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-      [data]="visitsByPage$ || []"
+      [data]="(visitsByPage$ | async) || []"
       [cols]="visitsByPageCols"
       title="Breakdown by Page - Did you find what you were looking for?"
       tooltip="Breakdown by Page - Did you find what you were looking for? tooltip"

@@ -1,8 +1,8 @@
-<div class="container-fluid my-4 gx-0">
+<!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(participantTasks$[0].successRate | percent) || 0"
+        [current]="( (participantTasks$ | async)?.successRate | percent) || 0"
         [title]="'Average task success from last UX test'"
         [tooltip]="'Average task success from last UX test tooltip'"
       ></app-data-card>
@@ -16,9 +16,9 @@
       ></app-data-card>
     </div>
   </div>
-</div>
+</div> -->
 
-<div class="container-fluid my-4 gx-0">
+<!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-12">
       <app-charts
@@ -31,13 +31,30 @@
       ></app-charts>
     </div>
   </div>
+</div> -->
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-data-table-card
+      [data]="(participantTasks$ | async) || []"
+      [cols]="taskSuccessRateCols" 
+      [sort]="false" 
+      [pagination]="false" 
+      [filter]="false"
+      title="Tasks success by test"
+      tooltip="Tasks success by test tooltip"
+    >
+    </app-data-table-card>
+    </div>
+  </div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-data-table-card
-      [data]="participantTasks$ || []"
+      [data]="(participantTasks$ | async) || []"
       [cols]="participantTasksCols" 
       [sort]="false" 
       [pagination]="false" 
@@ -50,7 +67,7 @@
   </div>
 </div>
 
-<div class="container-fluid my-4 gx-0">
+<!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-data-table-card
@@ -66,4 +83,4 @@
 
     </div>
   </div>
-</div>
+</div> -->
