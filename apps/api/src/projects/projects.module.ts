@@ -1,26 +1,10 @@
 import { CacheModule, Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import {
-  DbModule,
-  Page,
-  PageMetrics,
-  PageMetricsSchema,
-  PageSchema,
-  Project,
-  ProjectSchema,
-  Task,
-  TaskSchema,
-  UxTest,
-  UxTestSchema
-} from '@cra-arc/db';
+import { DbModule } from '@cra-arc/db';
 import { ProjectsController } from './projects.controller';
 import { ProjectsService } from './projects.service';
 
 @Module({
-  imports: [
-    DbModule,
-    CacheModule.register(),
-  ],
+  imports: [CacheModule.register({ ttl: 12 * 60 * 60 }), DbModule],
   controllers: [ProjectsController],
   providers: [ProjectsService],
 })

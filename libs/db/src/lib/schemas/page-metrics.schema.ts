@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types, Aggregate } from 'mongoose';
-import { GscSearchTermMetrics } from './types';
+import { model, Document, Model, Types, FilterQuery } from 'mongoose';
+import { GscSearchTermMetrics, AccumulatorOperator } from './types';
 import { Page } from './page.schema';
 import { Task } from './task.schema';
 import { Project } from './project.schema';
@@ -191,13 +191,15 @@ export class PageMetrics {
   gsc_total_position = 0;
 
   @Prop({
-    type: [{
-      clicks: Number,
-      ctr: Number,
-      impressions: Number,
-      position: Number,
-      term: String,
-    }]
+    type: [
+      {
+        clicks: Number,
+        ctr: Number,
+        impressions: Number,
+        position: Number,
+        term: String,
+      },
+    ],
   })
   gsc_searchterms: GscSearchTermMetrics[] = [];
 
@@ -216,97 +218,109 @@ export class PageMetrics {
 
 export const PageMetricsSchema = SchemaFactory.createForClass(PageMetrics);
 
-PageMetricsSchema.index({ date: 1, url: 1 }, { unique: true })
+PageMetricsSchema.index({ date: 1, url: 1 }, { unique: true });
+PageMetricsSchema.index(
+  { date: 1, page: 1 },
+  { background: true, partialFilterExpression: { page: { $exists: true } } }
+);
 
 export function getPageMetricsModel(): Model<Document<PageMetrics>> {
   return model(PageMetrics.name, PageMetricsSchema);
 }
 
+export type MetricsConfig<T> = {
+  [key in AccumulatorOperator]?: keyof Partial<T>;
+};
+
 export type GetAggregatedMetrics = <T>(
   dateRange: string,
-  selectedPages: Page[],
-  selectedMetrics: (keyof T)[],
-  sortConfig?: Record<keyof PageMetricsDocument, number>
+  selectedMetrics: (keyof T | MetricsConfig<T>)[],
+  pagesFilter?: FilterQuery<PageMetrics>,
+  sortConfig?: { [key in keyof Partial<T>]: 1 | -1 }
 ) => Promise<T[]>;
 
 export interface PageMetricsModel extends Model<PageMetricsDocument> {
   getAggregatedPageMetrics: GetAggregatedMetrics;
 }
 
-PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T extends { url: string }>(
+PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T>(
   this: Model<Document<PageMetrics>>,
   dateRange: string,
-  selectedPages: Page[],
-  selectedMetrics: (keyof T)[],
-  sortConfig?: Record<keyof T, number>
+  selectedMetrics: (keyof T | MetricsConfig<T>)[],
+  pagesFilter?: FilterQuery<PageMetrics>,
+  sortConfig?: { [key in keyof Partial<T>]: 1 | -1 }
 ): Promise<T[]> {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-  const pageUrls = selectedPages.flatMap((page) => [
-    page.url,
-    ...(page.all_urls || []),
-  ]);
-
-  const pagesByUrl: Record<string, Page> = {};
-
-  for (const page of selectedPages) {
-    pagesByUrl[page.url] = page;
-  }
-
   const metricsProjections: Record<string, number> = {};
-  const metricsGroupAggregations: Record<string, { $sum: string }> = {};
+  const metricsGroupAggregations: Record<
+    string,
+    { [key in AccumulatorOperator]?: string }
+  > = {};
   const metricsMergeObjects: Record<string, string> = {};
-  const metricsSort: Record<string, number> = sortConfig || {};
+  const metricsSort: Record<string, 1 | -1> = sortConfig || {};
 
-  for (const metric of selectedMetrics as string[]) {
-    metricsProjections[metric] = 1;
-    metricsGroupAggregations[metric] = { $sum: `$${metric}` };
-    metricsMergeObjects[metric] = `$${metric}`;
+  for (const [i, metric] of selectedMetrics.entries()) {
+    const metricName =
+      typeof metric === 'string' ? metric : Object.values(metric)[0];
+    const metricOperator =
+      typeof metric === 'string' ? '$sum' : Object.keys(metric)[0];
 
-    if (!sortConfig) {
-      metricsSort[metric] = -1;
+    metricsProjections[metricName] = 1;
+    metricsGroupAggregations[metricName] = {
+      [metricOperator]: `$${metricName}`,
+    };
+    metricsMergeObjects[metricName] = `$${metric}`;
+
+    if (!sortConfig && i === 0) {
+      metricsSort[metricName] = -1;
     }
   }
+  const pagesFilterQuery = pagesFilter || {};
 
-  const aggregationQuery = this.aggregate()
-    .sort({ date: 1, url: 1 })
+  return await this.aggregate<T>()
+    .sort({ date: 1 })
     .match({
-      url: {
-        $in: pageUrls,
-      },
       date: {
         $gte: startDate,
         $lte: endDate,
       },
+      page: { $exists: true },
+      ...pagesFilterQuery,
     })
     .project({
-      url: 1,
+      page: 1,
       date: 1,
       ...metricsProjections,
     })
     .group({
-      _id: '$url',
+      _id: '$page',
       ...metricsGroupAggregations,
       doc: {
         $first: '$$ROOT',
       },
     })
+    .lookup({
+      from: 'pages',
+      localField: '_id',
+      foreignField: '_id',
+      as: 'page',
+    })
+    .unwind('page')
     .replaceRoot({
       $mergeObjects: [
         '$doc',
         {
           ...metricsMergeObjects,
         },
+        '$page',
       ],
     })
-    .sort({ visits: -1 })
     .project({
       url: 1,
+      title: 1,
       ...metricsProjections,
-    }) as Aggregate<T[]>;
-
-  return ((await aggregationQuery.exec()) as T[]).map((result) => ({
-    ...result,
-    ...pagesByUrl[result.url],
-  }));
+    })
+    .sort(metricsSort)
+    .exec();
 };

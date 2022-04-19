@@ -2,15 +2,7 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
-import {
-  PageMetrics,
-  Project,
-  Task,
-  UxTest,
-  getProjectModel,
-  getTaskModel,
-  getUxTestModel,
-} from '@cra-arc/db';
+import { PageMetrics, Project, Task, UxTest } from '@cra-arc/db';
 import type {
   PageMetricsModel,
   ProjectDocument,
@@ -34,6 +26,15 @@ export class TasksService {
   ) {}
 
   async getTasksHomeData(dateRange: string): Promise<TasksHomeData> {
+    const cacheKey = `getTasksHomeData-${dateRange}`;
+    const cachedData = await this.cacheManager.store.get<TasksHomeData>(
+      cacheKey
+    );
+
+    if (cachedData) {
+      return cachedData;
+    }
+
     const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
     const tasksData = await this.pageMetricsModel
@@ -71,12 +72,17 @@ export class TasksService {
       .replaceRoot({
         $mergeObjects: [{ $first: '$task' }, { visits: '$visits' }],
       })
+      .sort({ visits: -1 })
       .exec();
 
-    return {
+    const results = {
       dateRange,
       dateRangeData: tasksData,
     };
+
+    await this.cacheManager.set(cacheKey, results);
+
+    return results;
   }
 
   async getTaskDetails(params: ApiParams): Promise<TaskDetailsData> {
@@ -84,6 +90,15 @@ export class TasksService {
       throw Error(
         'Attempted to get Task details from API but no id was provided.'
       );
+    }
+
+    const cacheKey = `getTaskDetails-${params.id}-${params.dateRange}-${params.comparisonDateRange}`;
+    const cachedData = await this.cacheManager.store.get<TaskDetailsData>(
+      cacheKey
+    );
+
+    if (cachedData) {
+      return cachedData;
     }
 
     const task = await this.taskModel
@@ -142,6 +157,8 @@ export class TasksService {
       returnData.dateFromLastTest =
         'date' in lastUxTest ? lastUxTest.date : new Date(); // todo: better handle nulls
     }
+
+    await this.cacheManager.set(cacheKey, returnData);
 
     return returnData;
   }

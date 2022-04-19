@@ -1,20 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Overall, OverallDocument } from '@cra-arc/db';
 import type { PageMetricsModel } from '@cra-arc/types-common';
 import { FilterQuery, Model } from 'mongoose';
 import { ApiParams } from '@cra-arc/upd/services';
-import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
+import {
+  OverviewAggregatedData,
+  OverviewData,
+} from '@cra-arc/types-common';
 import { PageMetrics } from '@cra-arc/types-common';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class OverallService {
   constructor(
     @InjectModel(Overall.name) private overallModel: Model<OverallDocument>,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel
-  ) {
-  }
+    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
+  ) {}
 
+  // todo: precache everything on startup
   async getMetrics(params: ApiParams): Promise<OverviewData> {
     return {
       dateRange: params.dateRange,
@@ -22,11 +27,13 @@ export class OverallService {
       dateRangeData: await getOverviewMetrics(
         this.overallModel,
         this.pageMetricsModel,
+        this.cacheManager,
         params.dateRange
       ),
       comparisonDateRangeData: await getOverviewMetrics(
         this.overallModel,
         this.pageMetricsModel,
+        this.cacheManager,
         params.comparisonDateRange
       ),
     } as OverviewData;
@@ -36,8 +43,16 @@ export class OverallService {
 async function getOverviewMetrics(
   overallModel: Model<OverallDocument>,
   PageMetricsModel: PageMetricsModel,
+  cacheManager: Cache,
   dateRange: string
 ): Promise<OverviewAggregatedData> {
+  const cacheKey = `getOverviewMetrics-${dateRange}`;
+  const cachedData = await cacheManager.store.get<OverviewAggregatedData>(cacheKey);
+
+  if (cachedData) {
+    return cachedData;
+  }
+
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
   const dateQuery: FilterQuery<Date> = {};
@@ -51,6 +66,7 @@ async function getOverviewMetrics(
     .lean();
 
   const topPagesVisited = await PageMetricsModel.aggregate()
+    .sort({ date: 1, url: 1 })
     .match({ date: dateQuery })
     .group({ _id: '$url', visits: { $sum: '$visits' } })
     .sort({ visits: -1 })
@@ -59,6 +75,7 @@ async function getOverviewMetrics(
 
   const top10GSC = await overallModel
     .aggregate()
+    .sort({ date: 1 })
     .match({ date: dateQuery })
     .unwind('$gsc_searchterms')
     .project({
@@ -119,10 +136,14 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
-  return {
+  const results = {
     visitsByDay,
     ...aggregatedMetrics[0],
     topPagesVisited,
     top10GSC,
   };
+
+  await cacheManager.set(cacheKey, results);
+
+  return results;
 }

@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { set } from 'mongoose';
 import { PagesModule } from '../pages/pages.module';
 import { OverallModule } from '../overall/overall.module';
 import { TasksModule } from '../tasks/tasks.module';
 import { ProjectsModule } from '../projects/projects.module';
-import { set } from 'mongoose';
-import { getDbConnectionString } from '@cra-arc/db';
-import { MongooseModule } from '@nestjs/mongoose';
+import { environment } from '../environments/environment';
 
 @Module({
   imports: [
@@ -19,6 +17,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 })
 export class AppModule {
   constructor() {
-    set('debug', true);
+    !environment.production && set('debug', true);
   }
 }

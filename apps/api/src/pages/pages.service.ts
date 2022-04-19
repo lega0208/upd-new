@@ -1,7 +1,7 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cache } from 'cache-manager';
-import { getPageModel } from '@cra-arc/db';
+import { getPageModel, MetricsConfig } from '@cra-arc/db';
 import {
   Page,
   PageAggregatedData,
@@ -10,7 +10,7 @@ import {
   PageMetrics,
   PagesHomeData,
   GscSearchTermMetrics,
-  PagesHomeAggregatedData,
+  PagesHomeAggregatedData, TaskDetailsData
 } from '@cra-arc/types-common';
 import type { PageMetricsModel } from '@cra-arc/types-common';
 import { Model, Types } from 'mongoose';
@@ -25,32 +25,28 @@ export class PagesService {
   ) {}
 
   async getPagesHomeData(dateRange: string): Promise<PagesHomeData> {
-    const cachedData = (await this.cacheManager.get(
-      `pages-home-data-${dateRange}`
+    const cacheKey =  `getPagesHomeData-${dateRange}`
+    const cachedData = (await this.cacheManager.store.get(
+      cacheKey
     )) as PagesHomeAggregatedData[];
 
-    if (cachedData) {
-      // for some reason the cache gets cleared when .get() is called, so we'll just re-save it every time
-      await this.cacheManager.set(`pages-home-data-${dateRange}`, cachedData);
 
+    if (cachedData) {
       return {
         dateRange,
         dateRangeData: cachedData,
       };
     }
 
-    const selectedPages: Page[] = await this.pageModel
-      .find({})
-      .lean();
-
     const results =
       await this.pageMetricsModel.getAggregatedPageMetrics<PagesHomeAggregatedData>(
         dateRange,
-        selectedPages,
-        ['visits']
+        ['visits'],
+        {},
+        { visits: -1 }
       );
 
-    await this.cacheManager.set(`pages-home-data-${dateRange}`, results);
+    await this.cacheManager.set(cacheKey, results);
 
     return {
       dateRange,
@@ -64,56 +60,66 @@ export class PagesService {
         'Attempted to get Page details from API but no id was provided.'
       );
     }
+    const cacheKey = `getPageDetails-${params.id}-${params.dateRange}-${params.comparisonDateRange}`;
+    const cachedData = await this.cacheManager.store.get<PageDetailsData>(
+      cacheKey
+    );
+
+    if (cachedData) {
+      return cachedData;
+    }
 
     const page = await this.pageModel
       .findById(new Types.ObjectId(params.id), { title: 1, url: 1, tasks: 1 })
       .populate('tasks')
       .lean();
 
+    const queryMetricsConfig = [
+      'visits',
+      'visitors',
+      'views',
+      'visits_device_other',
+      'visits_device_desktop',
+      'visits_device_mobile',
+      'visits_device_tablet',
+      { $avg: 'average_time_spent' },
+      'gsc_total_clicks',
+      'gsc_total_impressions',
+      { $avg: 'gsc_total_ctr' },
+      { $avg: 'gsc_total_position' },
+      'dyf_no',
+      'dyf_yes',
+      'dyf_submit',
+      'fwylf_cant_find_info',
+      'fwylf_error',
+      'fwylf_hard_to_understand',
+      'fwylf_other',
+      'visits_geo_ab',
+      'visits_geo_bc',
+      'visits_geo_mb',
+      'visits_geo_nb',
+      'visits_geo_nl',
+      'visits_geo_ns',
+      'visits_geo_nt',
+      'visits_geo_nu',
+      'visits_geo_on',
+      'visits_geo_pe',
+      'visits_geo_qc',
+      'visits_geo_sk',
+      'visits_geo_us',
+      'visits_geo_yt',
+      'visits_geo_outside_canada',
+      'visits_referrer_other',
+      'visits_referrer_searchengine',
+      'visits_referrer_social',
+      'visits_referrer_typed_bookmarked',
+    ] as (keyof PageAggregatedData | MetricsConfig<PageAggregatedData>)[];
+
     const dateRangeData = (
       await this.pageMetricsModel.getAggregatedPageMetrics<PageAggregatedData>(
         params.dateRange,
-        [page],
-        [
-          'visits',
-          'visitors',
-          'views',
-          'visits_device_other',
-          'visits_device_desktop',
-          'visits_device_mobile',
-          'visits_device_tablet',
-          'average_time_spent',
-          'gsc_total_clicks',
-          'gsc_total_impressions',
-          'gsc_total_ctr',
-          'gsc_total_position',
-          'dyf_no',
-          'dyf_yes',
-          'dyf_submit',
-          'fwylf_cant_find_info',
-          'fwylf_error',
-          'fwylf_hard_to_understand',
-          'fwylf_other',
-          'visits_geo_ab',
-          'visits_geo_bc',
-          'visits_geo_mb',
-          'visits_geo_nb',
-          'visits_geo_nl',
-          'visits_geo_ns',
-          'visits_geo_nt',
-          'visits_geo_nu',
-          'visits_geo_on',
-          'visits_geo_pe',
-          'visits_geo_qc',
-          'visits_geo_sk',
-          'visits_geo_us',
-          'visits_geo_yt',
-          'visits_geo_outside_canada',
-          'visits_referrer_other',
-          'visits_referrer_searchengine',
-          'visits_referrer_social',
-          'visits_referrer_typed_bookmarked',
-        ]
+        queryMetricsConfig,
+        { page: page._id }
       )
     )[0];
 
@@ -125,47 +131,8 @@ export class PagesService {
     const comparisonDateRangeData = (
       await this.pageMetricsModel.getAggregatedPageMetrics<PageAggregatedData>(
         params.comparisonDateRange,
-        [page],
-        [
-          'visits',
-          'visitors',
-          'views',
-          'visits_device_other',
-          'visits_device_desktop',
-          'visits_device_mobile',
-          'visits_device_tablet',
-          'average_time_spent',
-          'gsc_total_clicks',
-          'gsc_total_impressions',
-          'gsc_total_ctr',
-          'gsc_total_position',
-          'dyf_no',
-          'dyf_yes',
-          'dyf_submit',
-          'fwylf_cant_find_info',
-          'fwylf_error',
-          'fwylf_hard_to_understand',
-          'fwylf_other',
-          'visits_geo_ab',
-          'visits_geo_bc',
-          'visits_geo_mb',
-          'visits_geo_nb',
-          'visits_geo_nl',
-          'visits_geo_ns',
-          'visits_geo_nt',
-          'visits_geo_nu',
-          'visits_geo_on',
-          'visits_geo_pe',
-          'visits_geo_qc',
-          'visits_geo_sk',
-          'visits_geo_us',
-          'visits_geo_yt',
-          'visits_geo_outside_canada',
-          'visits_referrer_other',
-          'visits_referrer_searchengine',
-          'visits_referrer_social',
-          'visits_referrer_typed_bookmarked',
-        ]
+        queryMetricsConfig,
+        { page: page._id }
       )
     )[0];
 
@@ -197,7 +164,7 @@ export class PagesService {
       searchTermsWithPercentChange
     );
 
-    return {
+    const results = {
       ...page,
       dateRange: params.dateRange,
       dateRangeData: {
@@ -219,6 +186,10 @@ export class PagesService {
       topSearchTermsDecrease: topDecreasedSearchTerms,
       top25GSCSearchTerms: top25GSCSearchTerms,
     } as PageDetailsData;
+
+    await this.cacheManager.set(cacheKey, results);
+
+    return results;
   }
 
   async getPageDetailsDataByDay(page: Page, dateRange: string) {

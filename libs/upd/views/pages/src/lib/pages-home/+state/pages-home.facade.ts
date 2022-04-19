@@ -18,7 +18,7 @@ export class PagesHomeFacade {
   loaded$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeLoaded));
   pagesHomeData$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeData));
   pagesHomeTableData$ = this.pagesHomeData$.pipe(
-    map((pagesHomeData) => pagesHomeData?.dateRangeData || [])
+    map((pagesHomeData) => [...pagesHomeData?.dateRangeData || []])
   );
   error$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeError));
 

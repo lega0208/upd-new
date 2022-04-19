@@ -19,8 +19,9 @@ import type {
 } from '@cra-arc/types-common';
 import { ApiParams } from '@cra-arc/upd/services';
 import {
+  OverviewAggregatedData,
   ProjectDetailsAggregatedData,
-  ProjectsHomeData,
+  ProjectsHomeData
 } from '@cra-arc/types-common';
 
 dayjs.extend(utc);
@@ -73,6 +74,13 @@ export class ProjectsService {
   ) {}
 
   async getProjectsHomeData(): Promise<ProjectsHomeData> {
+    const cacheKey = `getProjectsHomeData`;
+    const cachedData = await this.cacheManager.store.get<ProjectsHomeData>(cacheKey);
+
+    if (cachedData) {
+      return cachedData;
+    }
+
     const defaultData = {
       numInProgress: 0,
       numCompletedLast6Months: 0,
@@ -196,10 +204,14 @@ export class ProjectsService {
         status: 1,
       });
 
-    return {
+    const results = {
       ...aggregatedData,
       projects: projectsData,
     };
+
+    await this.cacheManager.set(cacheKey, results);
+
+    return results;
   }
 
   async getProjectDetails(params: ApiParams): Promise<ProjectsDetailsData> {
@@ -207,6 +219,13 @@ export class ProjectsService {
       throw Error(
         'Attempted to get Project details from API but no id was provided.'
       );
+    }
+
+    const cacheKey = `getProjectDetails-${params.id}-${params.dateRange}-${params.comparisonDateRange}`;
+    const cachedData = await this.cacheManager.store.get<ProjectsDetailsData>(cacheKey);
+
+    if (cachedData) {
+      return cachedData;
     }
 
     const projectData = (
@@ -292,10 +311,7 @@ export class ProjectsService {
         .exec()
     )[0];
 
-    console.log('projectData:');
-    console.log(JSON.stringify(projectData, null, 2));
-
-    return {
+    const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
       dateRangeData: await getAggregatedProjectMetrics(
@@ -310,6 +326,10 @@ export class ProjectsService {
       ),
       ...projectData,
     };
+
+    await this.cacheManager.set(cacheKey, results);
+
+    return results;
   }
 }
 
