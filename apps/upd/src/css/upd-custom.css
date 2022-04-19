@@ -337,7 +337,8 @@ a {
 }
 
 .text-secondary {
-  color: #686f78 !important;
+   /* color: #686f78 !important; */
+   color: #000 !important;
 }
 
 /* located in the current css file*/

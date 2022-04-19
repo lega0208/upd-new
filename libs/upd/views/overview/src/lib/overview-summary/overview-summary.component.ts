@@ -3,6 +3,7 @@ import { ColumnConfig } from '@cra-arc/upd-components';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-overview-summary',
@@ -40,14 +41,14 @@ export class OverviewSummaryComponent implements OnInit {
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig[] = [
-    { field: 'name', header: 'Selection' },
-    { field: 'value', header: 'Visits', pipe: 'number' },
-  ];
-  whatWasWrongTableCols: ColumnConfig[] = [
-    { field: 'name', header: 'What was wrong' },
-    { field: 'value', header: 'Visits', pipe: 'number' },
-  ];
+  // dyfTableCols: ColumnConfig[] = [
+  //   { field: 'name', header: 'Selection' },
+  //   { field: 'value', header: 'Visits', pipe: 'number' },
+  // ];
+  // whatWasWrongTableCols: ColumnConfig[] = [
+  //   { field: 'name', header: 'What was wrong' },
+  //   { field: 'value', header: 'Visits', pipe: 'number' },
+  // ];
 
   barChartData$ = this.overviewService.visitsByDay$;
 
@@ -56,6 +57,7 @@ export class OverviewSummaryComponent implements OnInit {
   label = 'Visits';
 
   dateRangeLabel$ = this.overviewService.dateRangeLabel$;
+  comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
 
   barTableCols: ColumnConfig[] = [
     { field: 'name', header: 'Dates' },
@@ -72,10 +74,37 @@ export class OverviewSummaryComponent implements OnInit {
     private i18n: I18nFacade
   ) {}
 
+  dyfTableCols2: ColumnConfig[] = [];
+  whatWasWrongTableCols2: ColumnConfig[] = [];
+  barTableCols2: ColumnConfig[] = [];
+  taskSurveyCols2: ColumnConfig[] = [];
+
   ngOnInit() {
     this.i18n.service.onLangChange(
       ({ lang }) => { this.currentLang = lang as LocaleId; }
     );
+
+    combineLatest([this.currentLang$, this.dateRangeLabel$, this.comparisonDateRangeLabel$]).subscribe(([lang, dateRange, comparisonDateRange]) => {
+      this.dyfTableCols2 = [
+        { field: 'name', header: this.i18n.service.translate('Selection', lang) },
+        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+      ];
+      this.whatWasWrongTableCols2 = [
+        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
+        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+      ];
+      this.barTableCols2 = [
+        { field: 'name', header: this.i18n.service.translate('Dates', lang) },
+        //{ field: 'currValue', header: `Visits for ${this.dateRangeLabel$}`, pipe: 'number' },
+        { field: 'currValue', header: this.i18n.service.translate('Visits for ', lang, {value: dateRange  }), pipe: 'number' },
+        { field: 'prevValue', header: this.i18n.service.translate('Visits for ', lang, {value: comparisonDateRange  }), pipe: 'number' }
+      ];
+      this.taskSurveyCols2 = [
+        { field: 'task', header: this.i18n.service.translate('task', lang) },
+        { field: 'completion', header: this.i18n.service.translate('Task Success Survey Completed', lang) }
+      ];
+
+    });
   }
 }
 
