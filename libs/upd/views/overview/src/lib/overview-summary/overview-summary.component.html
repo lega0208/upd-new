@@ -40,7 +40,7 @@
         [curveType]="'Natural'"
         [barChart]="(barChartData$ | async) || []"
         [table]="barTable$ | async"
-        [tableCols]="barTableCols"
+        [tableCols]="barTableCols2"
       ></app-charts>
     </div>
   </div>
@@ -54,21 +54,24 @@
           (gscImpressions$ | async | number: undefined:currentLang) || 0
         "
         [comparison]="(gscImpressionsPercentChange$ | async) || 0"
-        [title]="'Total impressions from Google'"
+        [title]="'total-impressions-google'"
+        [tooltip]="'tooltip-total-impressions-google'"
       ></app-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="(gscCTR$ | async | percent: undefined:currentLang) || 0"
         [comparison]="(gscCTRPercentChange$ | async) || 0"
-        [title]="'Click through rate from Google'"
+        [title]="'ctr-google'"
+        [tooltip]="'tooltip-ctr-google'"
       ></app-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="(gscAverage$ | async | number: '1.0-2':currentLang) || 0"
         [comparison]="(gscAveragePercentChange$ | async) || 0"
-        [title]="'Average rank on Google'"
+        [title]="'avg-rank-google'"
+        [tooltip]="'tooltip-avg-rank-google'"
       ></app-data-card>
     </div>
   </div>
@@ -82,9 +85,9 @@
         [sort]="false"
         [pagination]="false"
         [data]="taskSurvey"
-        [cols]="taskSurveyCols"
-        [title]="'top10-tasks'"
-        [tooltip]="'tooltip-top10-tasks'"
+        [cols]="taskSurveyCols2"
+        [title]="'top10-tasks-GC'"
+        [tooltip]="'tooltip-top10-tasks-GC'"
       >
       </app-data-table-card>
     </div>
@@ -99,7 +102,7 @@
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [data]="dyfChart$ | async"
         [type]="'donut'"
-        [tableCols]="dyfTableCols"
+        [tableCols]="dyfTableCols2"
       ></app-charts>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
@@ -108,7 +111,7 @@
         titleTooltip="{{ 'tooltip-d3-www' | translate }}"
         [data]="whatWasWrongChart$ | async"
         [type]="'donut'"
-        [tableCols]="whatWasWrongTableCols"
+        [tableCols]="whatWasWrongTableCols2"
       ></app-charts>
     </div>
   </div>

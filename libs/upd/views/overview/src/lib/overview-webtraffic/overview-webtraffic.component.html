@@ -2,23 +2,26 @@
   <div class="row">
     <div class="col">
       <app-data-card
-        [current]="(uniqueVisitors$ | async | number) || 0"
+        [current]="(uniqueVisitors$ | async | number: undefined:currentLang) || 0"
         [comparison]="(uniqueVisitorsPercentChange$ | async) || 0"
-        [title]="'Unique visitors'"
+        [title]="'unique-visitors'"
+        [tooltip]="'tooltip-unique-visitors'"
       ></app-data-card>
     </div>
     <div class="col">
       <app-data-card
-        [current]="(visits$ | async | number) || 0"
+        [current]="(visits$ | async | number: undefined:currentLang) || 0"
         [comparison]="(visitsPercentChange$ | async) || 0"
-        [title]="'Visits'"
+        [title]="'visits'"
+        [tooltip]="'tooltip-visits'"
       ></app-data-card>
     </div>
     <div class="col">
       <app-data-card
-        [current]="(pageViews$ | async | number) || 0"
+        [current]="(pageViews$ | async | number: undefined:currentLang) || 0"
         [comparison]="(pageViewsPercentChange$ | async) || 0"
-        [title]="'Page views'"
+        [title]="'page-views'"
+        [tooltip]="'tooltip-page-views'"
       ></app-data-card>
     </div>
   </div>
@@ -28,13 +31,13 @@
   <div class="row">
     <div class="col">
       <app-charts
-        [title]="'Visits'"
+        [title]="'visits'"
         [displayLegend]="'below'"
         [showLegend]="true"
         [data]="barChartData$ | async"
         type="grouped-bar"
         [table]="barTable$ | async"
-        [tableCols]="barTableCols"
+        [tableCols]="barTableCols2"
       ></app-charts>
     </div>
   </div>
@@ -48,9 +51,8 @@
         [sort]="false"
         [pagination]="false"
         [data]="(topPagesData$ | async) || []"
-        [cols]="topPagesCols"
-        title="Top 10 pages visited"
-        tooltip="Top 10 pages visited tooltip"
+        [cols]="topPagesCols2"
+        [title]="'top10-pages-visited'"
       >
       </app-data-table-card>
     </div>
