@@ -27,14 +27,14 @@ export class ProjectDetailsSearchAnalyticsComponent  {
       header: 'Clicks',
       pipe: 'number',
       type: 'link',
-      typeParams: { preLink: '/pages', link: '_id', postLink: 'search_analytics' },
+      typeParams: { preLink: '/pages', link: '_id', postLink: 'searchanalytics' },
     },
     {
       field: 'gscTotalImpressions',
       header: 'Impressions',
       pipe: 'number',
       type: 'link',
-      typeParams: { preLink: '/pages', link: '_id', postLink: 'search_analytics' },
+      typeParams: { preLink: '/pages', link: '_id', postLink: 'searchanalytics' },
     },
     {
       field: 'gscTotalCtr',

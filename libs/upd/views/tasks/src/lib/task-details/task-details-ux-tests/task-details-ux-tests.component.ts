@@ -8,29 +8,23 @@ import { TasksDetailsFacade } from '../+state/tasks-details.facade';
   styleUrls: ['./task-details-ux-tests.component.css'],
 })
 export class TaskDetailsUxTestsComponent {
-  uxTests$ = [
-    {
-      name: 'SPR Baseline 3',
-      value: 0.88,
-    },
-  ];
 
-  successRate$ = [
-    {
-      title: 'SPR Baseline 3',
-      scenario: 'Lorem ipsum',
-      result: '88%',
-      date: 2021 - 10 - 27,
-      participants: 8,
-    },
-  ];
+  taskSuccessChart$ = this.taskDetailsService.taskSuccessChart$;
+  taskSuccessChartCols = [
+    { field: 'name', header: 'Title' },
+    { field: 'value', header: 'Success Rate', pipe: 'percent' },
+  ] as ColumnConfig[];
+  taskSuccessData$ = this.taskDetailsService.taskSuccessByUxTest$;
 
-  successRateCols = [
+  avgTaskSuccessFromLastTest$ = this.taskDetailsService.avgTaskSuccessFromLastTest$;
+
+  taskSuccessDataCols = [
     { field: 'title', header: 'Title' },
     { field: 'scenario', header: 'Scenario' },
     { field: 'result', header: 'Result' },
-    { field: 'date', header: 'Date', pipe: 'date' as ColumnConfigPipe },
-  ];
+    { field: 'successRate', header: 'Result', pipe: 'percent' },
+    { field: 'date', header: 'Date', pipe: 'date', pipeParam: 'MMM d, y' as ColumnConfigPipe },
+  ] as ColumnConfig[];
 
   constructor(private readonly taskDetailsService: TasksDetailsFacade) {}
 }

@@ -3,6 +3,9 @@ import { ColumnConfig, ColumnConfigPipe } from './types';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { I18nService } from '@cra-arc/upd/i18n';
 import { ProjectStatus } from '@cra-arc/types-common';
+import localeFrCa from '@angular/common/locales/fr-CA';
+import { registerLocaleData } from '@angular/common';
+registerLocaleData(localeFrCa);
 
 
 @Component({

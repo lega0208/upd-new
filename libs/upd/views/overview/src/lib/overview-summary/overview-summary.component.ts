@@ -10,7 +10,7 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
   styleUrls: ['./overview-summary.component.css'],
 })
 export class OverviewSummaryComponent implements OnInit {
-  currentLang: LocaleId = EN_CA;
+  currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
   loaded$ = this.overviewService.loaded$;

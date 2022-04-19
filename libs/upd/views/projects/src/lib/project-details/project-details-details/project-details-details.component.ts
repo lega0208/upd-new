@@ -9,18 +9,18 @@ import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 })
 export class ProjectDetailsDetailsComponent {
 
-  memberList$ = this.projectsDetailsService.memberList$;
+  memberList$ = this.projectsDetailsService.taskSuccessByUxTest$;
   memberListCols = [
     {
       field: 'role',
       header: 'Role',
     },
     {
-      field: 'project_lead',
+      field: 'projectLead',
       header: 'Name',
     },
     {
-      field: 'product',
+      field: 'vendor',
       header: 'Product',
     }
   ] as ColumnConfig[];

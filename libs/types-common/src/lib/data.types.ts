@@ -211,5 +211,6 @@ export interface ProjectsDetailsData
     date: Date;
     testType: string;
     successRate: number;
+    status: string;
   }[];
 }

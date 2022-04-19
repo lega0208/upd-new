@@ -192,7 +192,7 @@ async function getTaskAggregatedData(
     // .addFields({ _id: '$page' })
     .project({ page: 0 })
     .group({
-      _id: null,
+      _id: 'null',
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyfYes' },
       dyfNo: { $sum: '$dyfNo' },

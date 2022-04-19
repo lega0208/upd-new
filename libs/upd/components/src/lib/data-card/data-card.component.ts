@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
+import { I18nFacade } from '@cra-arc/upd/state';
 
-import { TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-data-card',
   templateUrl: './data-card.component.html',
@@ -14,5 +14,5 @@ export class DataCardComponent {
   @Input() title = '';
   @Input() tooltip = '';
 
-  constructor(public translateService: TranslateService) {}
+  constructor(public i18n: I18nFacade) {}
 }

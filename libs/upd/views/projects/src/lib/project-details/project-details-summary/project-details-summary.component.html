@@ -2,14 +2,14 @@
   <div class="row">
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(avgTaskSuccessFromLastTest$ | percent) || 0"
+        [current]="(avgTaskSuccessFromLastTest$ | async | percent) || 0"
         [title]="'Average task success from last UX test'"
         [tooltip]="'Average task success from last UX test tooltip'"
       ></app-data-card>
     </div>
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(visits$ | number) || 0"
+        [current]="(visits$ | async | number) || 0"
         [title]="'Total visits from all pages'"
         [tooltip]="'Total visits from all pages tooltip'"
       ></app-data-card>
@@ -21,7 +21,7 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-      [data]="participantTasks$ || []"
+      [data]="(participantTasks$ | async) || []"
       [cols]="participantTasksCols" 
       [sort]="false" 
       [pagination]="false" 
@@ -41,7 +41,8 @@
       <app-charts
         [title]="'Did you find what you were looking for?'"
         [titleTooltip]="'Did you find what you were looking for? tooltip'"
-        [data]="dyfChart$"
+        [data]="(dyfChart$ | async)"
+        [tableCols]="dyfTableCols"
         [type]="'donut'"
       ></app-charts>
     </div>
@@ -49,7 +50,8 @@
       <app-charts
         [title]="'What was wrong?'"
         [titleTooltip]="'What was wrong? tooltip'"
-        [data]="whatWasWrongChart$"
+        [data]="(whatWasWrongChart$ | async)"
+        [tableCols]="whatWasWrongTableCols"
         [type]="'donut'"
       ></app-charts>
     </div>

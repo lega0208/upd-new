@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="successRate$[0].result || 0"
+        [current]="(avgTaskSuccessFromLastTest$ | async | percent) || 0"
         [title]="'Latest success rate'"
         [tooltip]="'Latest success rate tooltip'"
       ></app-data-card>
@@ -10,7 +10,7 @@
 
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(successRate$[0].participants | number) || 0"
+        [current]="8"
         [title]="'Total participants from all tests'"
         [tooltip]="'Total participants from all tests tooltip'"
       ></app-data-card>
@@ -24,8 +24,10 @@
       <app-charts
         [title]="'Tasks success by Test'"
         [titleTooltip]="'Tasks success by Test tooltip'"
-        [data]="uxTests$"
+        [data]="( taskSuccessChart$ | async ) || [] "
+        [tableCols]="taskSuccessChartCols"
         [type]="'horizontal-bar'"
+        [isPercent]="true"
         [yAxisLabel]="'UX tests'"
         [xAxisLabel]="'Task success rate (%)'"
       ></app-charts>
@@ -37,8 +39,8 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-      [data]="successRate$ || []"
-      [cols]="successRateCols"
+      [data]="(taskSuccessData$ | async) || []"
+      [cols]="taskSuccessDataCols"
       [filter]="false"
           [sort]="false"
           [pagination]="false"

@@ -21,8 +21,10 @@ export class AlertComponent implements OnInit {
   constructor(public translateService: TranslateService) {}
 
   ngOnInit(): void {
-    if (this.selfClosing)
+    if (this.selfClosing) {
       setTimeout(() => this.staticAlert.close(), this.secondsTimeout * 1000);
+      this.staticAlertClosed = false;
+    }
 
     this.getPosition();
   }
