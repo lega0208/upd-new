@@ -148,7 +148,12 @@ export interface TaskDetailsData
   extends EntityDetailsData<TaskDetailsAggregatedData> {
   avgTaskSuccessFromLastTest: number;
   dateFromLastTest: Date;
-  taskSuccessByUxTest: { title: string; date: Date; testType: string; successRate: number; }[]
+  taskSuccessByUxTest: {
+    title: string;
+    date: Date;
+    testType: string;
+    successRate: number;
+  }[];
 }
 
 export type ProjectStatus =
@@ -178,4 +183,33 @@ export interface ProjectsHomeData {
   totalCompleted: number;
   numDelayed: number;
   projects: ProjectsHomeProject[];
+}
+
+export interface ProjectDetailsAggregatedData {
+  visits: number;
+  dyfYes: number;
+  dyfNo: number;
+  fwylfCantFindInfo: number;
+  fwylfHardToUnderstand: number;
+  fwylfOther: number;
+  fwylfError: number;
+  gscTotalClicks: number;
+  gscTotalImpressions: number;
+  gscTotalCtr: number;
+  gscTotalPosition: number;
+  gscSearchTerms: GscSearchTermMetrics;
+  visitsByPage: { _id: string; url: string; title: string; visits: number }[];
+}
+
+export interface ProjectsDetailsData
+  extends EntityDetailsData<ProjectDetailsAggregatedData> {
+  status: ProjectStatus;
+  avgTaskSuccessFromLastTest: number;
+  dateFromLastTest: Date;
+  taskSuccessByUxTest: {
+    tasks: string[];
+    date: Date;
+    testType: string;
+    successRate: number;
+  }[];
 }

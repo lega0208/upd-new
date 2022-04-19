@@ -1,19 +1,67 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { PageMetrics, Project, UxTest, UxTestDocument } from '@cra-arc/db';
+import {
+  GscSearchTermMetrics,
+  PageMetrics,
+  Project,
+  UxTest,
+  UxTestDocument,
+} from '@cra-arc/db';
 import type {
   ProjectDocument,
   PageMetricsModel,
   ProjectsHomeProject,
+  ProjectsDetailsData,
 } from '@cra-arc/types-common';
 import { ApiParams } from '@cra-arc/upd/services';
-import { ProjectsHomeData } from '@cra-arc/types-common';
+import {
+  ProjectDetailsAggregatedData,
+  ProjectsHomeData,
+} from '@cra-arc/types-common';
 
 dayjs.extend(utc);
+
+const projectStatusSwitchExpression = {
+  $switch: {
+    branches: [
+      {
+        case: {
+          $allElementsTrue: {
+            $map: {
+              input: '$statuses',
+              as: 'status',
+              in: { $eq: ['$$status', 'Complete'] },
+            },
+          },
+        },
+        then: 'Complete',
+      },
+      {
+        case: {
+          $in: ['Delayed', '$statuses'],
+        },
+        then: 'Delayed',
+      },
+      {
+        case: {
+          $in: ['In Progress', '$statuses'],
+        },
+        then: 'In Progress',
+      },
+      {
+        case: {
+          $in: ['Planning', '$statuses'],
+        },
+        then: 'Planning',
+      },
+    ],
+    default: 'Unknown',
+  },
+};
 
 @Injectable()
 export class ProjectsService {
@@ -49,43 +97,7 @@ export class ProjectsService {
             last6Months: {
               $gte: ['$date', sixMonthsAgo],
             },
-            status: {
-              $switch: {
-                branches: [
-                  {
-                    case: {
-                      $allElementsTrue: {
-                        $map: {
-                          input: '$statuses',
-                          as: 'status',
-                          in: { $eq: ['$$status', 'Complete'] },
-                        },
-                      },
-                    },
-                    then: 'Complete',
-                  },
-                  {
-                    case: {
-                      $in: ['Delayed', '$statuses'],
-                    },
-                    then: 'Delayed',
-                  },
-                  {
-                    case: {
-                      $in: ['In Progress', '$statuses'],
-                    },
-                    then: 'In Progress',
-                  },
-                  {
-                    case: {
-                      $in: ['Planning', '$statuses'],
-                    },
-                    then: 'Planning',
-                  },
-                ],
-                default: 'Unknown',
-              },
-            },
+            status: projectStatusSwitchExpression,
           })
           .sort({ status: 1 })
           .group({
@@ -165,43 +177,7 @@ export class ProjectsService {
           },
           {
             $addFields: {
-              status: {
-                $switch: {
-                  branches: [
-                    {
-                      case: {
-                        $allElementsTrue: {
-                          $map: {
-                            input: '$statuses',
-                            as: 'status',
-                            in: { $eq: ['$$status', 'Complete'] },
-                          },
-                        },
-                      },
-                      then: 'Complete',
-                    },
-                    {
-                      case: {
-                        $in: ['Delayed', '$statuses'],
-                      },
-                      then: 'Delayed',
-                    },
-                    {
-                      case: {
-                        $in: ['In Progress', '$statuses'],
-                      },
-                      then: 'In Progress',
-                    },
-                    {
-                      case: {
-                        $in: ['Planning', '$statuses'],
-                      },
-                      then: 'Planning',
-                    },
-                  ],
-                  default: 'Unknown',
-                },
-              },
+              status: projectStatusSwitchExpression,
             },
           },
         ],
@@ -209,7 +185,6 @@ export class ProjectsService {
       })
       .unwind('$tests_aggregated')
       .replaceRoot({
-        // maybe current instead of root?>??
         $mergeObjects: ['$$ROOT', '$tests_aggregated', { _id: '$_id' }],
       })
       .project({
@@ -227,8 +202,147 @@ export class ProjectsService {
     };
   }
 
-  async getProjectDetails(params: ApiParams): Promise<unknown> {
-    // todo: unimplemented
-    return params;
+  async getProjectDetails(params: ApiParams): Promise<ProjectsDetailsData> {
+    if (!params.id) {
+      throw Error(
+        'Attempted to get Project details from API but no id was provided.'
+      );
+    }
+
+    const projectData = (
+      await this.projectsModel
+        .aggregate<ProjectsDetailsData>()
+        .match({ _id: new Types.ObjectId(params.id) })
+        .lookup({
+          from: 'ux_tests',
+          let: { project_id: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$project', '$$project_id'],
+                },
+              },
+            },
+            {
+              $project: {
+                title: 1,
+                status: { $ifNull: ['$status', 'Unknown'] },
+                date: 1,
+                test_type: { $ifNull: ['$test_type', 'Unknown test type'] },
+                success_rate: 1,
+                tasks: 1
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  // assuming they're the same "test" if the date, test type, tasks are the same:
+                  test_type: '$test_type',
+                  date: '$date',
+                  tasks: '$tasks',
+                },
+                status: { $first: '$status' },
+                successRate: { $avg: '$success_rate' },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                tasks: '$_id.tasks',
+                date: '$_id.date',
+                testType: '$_id.test_type',
+                status: 1,
+                successRate: 1,
+              }
+            },
+            {
+              $sort: { date: -1 },
+            },
+          ],
+          as: 'ux_tests',
+        })
+        .project({
+          title: 1,
+          statuses: '$ux_tests.status',
+          lastTest: { $first: '$ux_tests' },
+          ux_tests: 1,
+        })
+        .project({
+          title: 1,
+          status: projectStatusSwitchExpression,
+          avgTaskSuccessFromLastTest: '$lastTest.successRate',
+          dateFromLastTest: '$lastTest.date',
+          taskSuccessByUxTest: '$ux_tests',
+        })
+        .exec()
+    )[0];
+
+    console.log('projectData:');
+    console.log(JSON.stringify(projectData, null, 2));
+
+    return {
+      dateRange: params.dateRange,
+      comparisonDateRange: params.comparisonDateRange,
+      dateRangeData: await getAggregatedProjectMetrics(
+        this.pageMetricsModel,
+        new Types.ObjectId(params.id),
+        params.dateRange
+      ),
+      comparisonDateRangeData: await getAggregatedProjectMetrics(
+        this.pageMetricsModel,
+        new Types.ObjectId(params.id),
+        params.comparisonDateRange
+      ),
+      ...projectData,
+    };
   }
+}
+
+async function getAggregatedProjectMetrics(
+  pageMetricsModel: PageMetricsModel,
+  id: Types.ObjectId,
+  dateRange: string
+): Promise<ProjectDetailsAggregatedData> {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  return (
+    await pageMetricsModel
+      .aggregate<ProjectDetailsAggregatedData>()
+      .sort({ date: 1, projects: 1 })
+      .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
+      .group({
+        _id: '$url',
+        visits: { $sum: '$visits' },
+        dyfYes: { $sum: '$dyf_yes' },
+        dyfNo: { $sum: '$dyf_no' },
+        fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
+        fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
+        fwylfOther: { $sum: '$fwylf_other' },
+        fwylfError: { $sum: '$fwylf_error' },
+        gscTotalClicks: { $sum: '$gsc_total_clicks' },
+        gscTotalImpressions: { $sum: '$gsc_total_impressions' },
+        gscTotalCtr: { $sum: '$gsc_total_ctr' },
+        gscTotalPosition: { $avg: '$gsc_total_position' },
+      })
+      .group({
+        _id: null,
+        visitsByPage: {
+          $push: '$$ROOT',
+        },
+        visits: { $sum: '$visits' },
+        dyfYes: { $sum: '$dyfYes' },
+        dyfNo: { $sum: '$dyfNo' },
+        fwylfCantFindInfo: { $sum: '$fwylfCantFindInfo' },
+        fwylfHardToUnderstand: { $sum: '$fwylfHardToUnderstand' },
+        fwylfOther: { $sum: '$fwylfOther' },
+        fwylfError: { $sum: '$fwylfError' },
+        gscTotalClicks: { $sum: '$gscTotalClicks' },
+        gscTotalImpressions: { $sum: '$gscTotalImpressions' },
+        gscTotalCtr: { $sum: '$gscTotalCtr' },
+        gscTotalPosition: { $avg: '$gscTotalPosition' },
+      })
+      .project({ _id: 0 })
+      .exec()
+  )[0];
 }

@@ -5,20 +5,20 @@ import {
 } from './projects-details.reducer';
 
 // Lookup the 'ProjectsDetails' feature state managed by NgRx
-export const getProjectsDetailsState =
+export const selectProjectsDetailsState =
   createFeatureSelector<ProjectsDetailsState>(PROJECTS_DETAILS_FEATURE_KEY);
 
-export const getProjectsDetailsLoaded = createSelector(
-  getProjectsDetailsState,
+export const selectProjectsDetailsLoaded = createSelector(
+  selectProjectsDetailsState,
   (state: ProjectsDetailsState) => state.loaded
 );
 
-export const getProjectsDetailsError = createSelector(
-  getProjectsDetailsState,
+export const selectProjectsDetailsError = createSelector(
+  selectProjectsDetailsState,
   (state: ProjectsDetailsState) => state.error
 );
 
-export const getProjectsDetailsData = createSelector(
-  getProjectsDetailsState,
+export const selectProjectsDetailsData = createSelector(
+  selectProjectsDetailsState,
   (state: ProjectsDetailsState) => state.data
 );

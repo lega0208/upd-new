@@ -1,5 +1,4 @@
 export * from './lib/project-details/+state/projects-details.facade';
-export * from './lib/project-details/+state/projects-details.models';
 export * from './lib/project-details/+state/projects-details.selectors';
 export * from './lib/project-details/+state/projects-details.reducer';
 export * from './lib/project-details/+state/projects-details.actions';

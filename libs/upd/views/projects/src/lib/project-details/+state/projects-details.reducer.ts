@@ -1,7 +1,7 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
+import type { ProjectsDetailsData } from '@cra-arc/types-common';
 import * as ProjectsDetailsActions from './projects-details.actions';
-import { ProjectsDetailsData } from './projects-details.models';
 
 export const PROJECTS_DETAILS_FEATURE_KEY = 'projectsDetails';
 
@@ -17,7 +17,16 @@ export interface ProjectsDetailsPartialState {
 
 export const projectDetailsInitialState: ProjectsDetailsState = {
   // set initial required properties
-  data: {},
+  data: {
+    _id: '',
+    title: '',
+    status: 'Unknown',
+    dateRange: '',
+    comparisonDateRange: '',
+    avgTaskSuccessFromLastTest: 1,
+    dateFromLastTest: new Date(0),
+    taskSuccessByUxTest: []
+  },
   loaded: false,
   error: null,
 };
@@ -29,11 +38,19 @@ const reducer = createReducer(
     loaded: false,
     error: null,
   })),
-  on(ProjectsDetailsActions.loadProjectsDetailsSuccess, (state, { data }) => ({
-    data: data,
-    loaded: true,
-    error: null,
-  })),
+  on(ProjectsDetailsActions.loadProjectsDetailsSuccess, (state, { data }) =>
+    data === null
+      ? {
+        ...state,
+        loaded: true,
+        error: null,
+      }
+      : {
+        ...state,
+        data: { ...data },
+        loaded: true,
+        error: null,
+      }),
   on(ProjectsDetailsActions.loadProjectsDetailsError, (state, { error }) => ({
     ...state,
     loaded: true,

@@ -5,8 +5,8 @@ import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
 
 import dayjs from 'dayjs/esm';
-import 'dayjs/esm/locale/en-CA';
-import 'dayjs/esm/locale/fr-CA';
+import 'dayjs/esm/locale/en-ca';
+import 'dayjs/esm/locale/fr-ca';
 
 @Component({
   selector: 'app-date-selector',

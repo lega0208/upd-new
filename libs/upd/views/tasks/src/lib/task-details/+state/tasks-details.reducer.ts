@@ -24,8 +24,8 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     dateRange: '',
     comparisonDateRange: '',
     avgTaskSuccessFromLastTest: 1,
-    dateFromLastTest: new Date(),
-    taskSuccessByUxTest: []
+    dateFromLastTest: new Date(0),
+    taskSuccessByUxTest: [],
   },
   loaded: false,
   loading: false,

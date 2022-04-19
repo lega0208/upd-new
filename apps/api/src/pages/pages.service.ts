@@ -40,7 +40,7 @@ export class PagesService {
     }
 
     const selectedPages: Page[] = await this.pageModel
-      .find({ airtable_id: { $exists: true } })
+      .find({})
       .lean();
 
     const results =

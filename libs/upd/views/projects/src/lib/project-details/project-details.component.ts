@@ -25,5 +25,7 @@ export class ProjectDetailsComponent implements OnInit {
 
   constructor(private readonly projectsDetailsService: ProjectsDetailsFacade) {}
 
-  ngOnInit(): void {}
+  ngOnInit() {
+    this.projectsDetailsService.init();
+  }
 }

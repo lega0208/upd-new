@@ -7,7 +7,7 @@ import {
   PagesHomeData,
   ProjectsHomeData,
   TasksHomeData,
-  TaskDetailsData,
+  TaskDetailsData, ProjectsDetailsData
 } from '@cra-arc/types-common';
 
 export type ApiParams = {
@@ -47,5 +47,9 @@ export class ApiService {
 
   getProjectsHomeData() {
     return this.http.get<ProjectsHomeData>('/api/projects/home');
+  }
+
+  getProjectsDetailsData(params: ApiParams) {
+    return this.get<ProjectsDetailsData>('/api/projects/details', params);
   }
 }

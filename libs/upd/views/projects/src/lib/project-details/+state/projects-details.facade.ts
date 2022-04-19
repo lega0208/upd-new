@@ -17,11 +17,11 @@ export class ProjectsDetailsFacade {
    * and expose them as observables through the facade.
    */
   loaded$ = this.store.pipe(
-    select(ProjectsDetailsSelectors.getProjectsDetailsLoaded)
+    select(ProjectsDetailsSelectors.selectProjectsDetailsLoaded)
   );
 
   projectsDetailsData$ = this.store.pipe(
-    select(ProjectsDetailsSelectors.getProjectsDetailsData)
+    select(ProjectsDetailsSelectors.selectProjectsDetailsData)
   );
 
 
@@ -72,7 +72,7 @@ export class ProjectsDetailsFacade {
   ];
 
   error$ = this.store.pipe(
-    select(ProjectsDetailsSelectors.getProjectsDetailsError)
+    select(ProjectsDetailsSelectors.selectProjectsDetailsError)
   );
 
   constructor(private readonly store: Store) {}

@@ -54,13 +54,13 @@ describe('ProjectsDetails Selectors', () => {
     });
 
     it('getProjectsDetailsLoaded() should return the current "loaded" status', () => {
-      const result = ProjectsDetailsSelectors.getProjectsDetailsLoaded(state);
+      const result = ProjectsDetailsSelectors.selectProjectsDetailsLoaded(state);
 
       expect(result).toBe(true);
     });
 
     it('getProjectsDetailsError() should return the current "error" state', () => {
-      const result = ProjectsDetailsSelectors.getProjectsDetailsError(state);
+      const result = ProjectsDetailsSelectors.selectProjectsDetailsError(state);
 
       expect(result).toBe(ERROR_MSG);
     });
