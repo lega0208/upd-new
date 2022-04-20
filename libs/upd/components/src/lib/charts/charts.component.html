@@ -1,15 +1,17 @@
-<app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="!hasData ? 100 : 0">
-  <ng-container
-    *ngIf="
-      !hasData;
-      else elseBlock
-    "
-  >
+<app-card
+  [card-title]="title"
+  [title-tooltip]="titleTooltip"
+  [h]="!hasData ? 100 : 0"
+>
+  <ng-container *ngIf="!hasData; else elseBlock">
     <p>{{ title | translate }} data is not available for this date range.</p>
   </ng-container>
   <ng-template #elseBlock>
     <div class="vh-45">
-      <div style="height: 100%" [ngClass]="showRightYAxisLabel && !convertToLine ? 'mr-80' : ''">
+      <div
+        style="height: 100%"
+        [ngClass]="showRightYAxisLabel && !convertToLine ? 'mr-80' : ''"
+      >
         <ng-container *ngIf="type === 'combo-bar-line'">
           <ng-container *ngIf="!this.convertToLine; else elseConvertLine2">
             <combo-grouped-vertical-bar-line-chart
@@ -90,7 +92,22 @@
               [maxYAxisTickLength]="maxYAxisTickLength"
               [yAxisTickFormatting]="yAxisTickFormat"
               (select)="onSelect($event)"
-            ></ngx-charts-line-chart>
+            >
+              <!-- <ng-template #seriesTooltipTemplate let-model="model">
+              <div class="area-tooltip-container">
+            <div *ngFor="let tooltip of model;  let i = index" class="tooltip-item">
+              <span class="tooltip-item-color" [style.background-color]="tooltip.color"></span>
+              <ng-container *ngIf="i===1; else elseBlock">
+              {{ dayjs(tooltip.name).subtract(3, 'month').format('MMM DD YYYY') }} :
+            </ng-container>
+            <ng-template #elseBlock>
+              {{ dayjs(tooltip.name).format('MMM DD YYYY') }} :
+            </ng-template>
+              {{tooltip.value.toLocaleString(lang)}}
+          </div>
+          </div>
+            </ng-template> -->
+            </ngx-charts-line-chart>
           </ng-template>
         </ng-container>
 

@@ -161,6 +161,7 @@ export interface TaskDetailsData
     date: Date;
     testType: string;
     successRate: number;
+    totalUsers: number;
   }[];
 }
 
@@ -220,5 +221,6 @@ export interface ProjectsDetailsData
     testType: string;
     successRate: number;
     status: string;
+    totalUsers: number;
   }[];
 }

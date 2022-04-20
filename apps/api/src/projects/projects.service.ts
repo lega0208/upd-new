@@ -376,6 +376,7 @@ async function getAggregatedProjectMetrics(
         })
         // .addFields({ _id: '$page' })
         .project({ page: 0 })
+        .sort( { title: 1 })
         .group({
           _id: null,
           visitsByPage: {

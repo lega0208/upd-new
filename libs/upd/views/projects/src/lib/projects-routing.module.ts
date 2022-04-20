@@ -35,7 +35,7 @@ const routes: Routes = [
             component: ProjectDetailsCalldriversComponent,
           },
           { path: 'uxtests', component: ProjectDetailsUxTestsComponent },
-          { path: 'details', component: ProjectDetailsDetailsComponent },
+          // { path: 'details', component: ProjectDetailsDetailsComponent },
         ],
       },
     ],

@@ -85,7 +85,10 @@ export class PagesDetailsFacade {
     mapToPercentChange('gsc_total_position')
   );
 
-  visitsByDay$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
+  visitsByDay$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
     map(([data, lang]) => {
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
@@ -118,7 +121,7 @@ export class PagesDetailsFacade {
         name: dateRangeLabel, // todo: date label (x-axis) formatting based on date range length
         value: visits || 0,
       }));
-      
+
       const comparisonDateRangeLabel = getWeeklyDatesLabel(
         data.comparisonDateRange || '',
         lang
@@ -181,20 +184,26 @@ export class PagesDetailsFacade {
         {
           name: data?.dateRange,
           series: dateRangeSeries.map(({ value }, i) => ({
-            name: dayjs(dateRangeDates[i]).utc(false).locale(lang).format(dateFormat),
+            name: dayjs(dateRangeDates[i])
+              .utc(false)
+              .locale(lang)
+              .format(dateFormat),
             value: value || 0,
           })),
         },
       ];
 
       if (
-          data?.comparisonDateRangeData &&
-          typeof data?.comparisonDateRange === 'string'
-        ) {
+        data?.comparisonDateRangeData &&
+        typeof data?.comparisonDateRange === 'string'
+      ) {
         visitsByDayData.push({
           name: data?.comparisonDateRange,
           series: comparisonDateRangeSeries.map(({ value }, i) => ({
-            name: dayjs(dateRangeDates[i]).utc(false).locale(lang).format(dateFormat),
+            name: dayjs(dateRangeDates[i])
+              .utc(false)
+              .locale(lang)
+              .format(dateFormat),
             value: value || 0,
           })),
         });
@@ -383,6 +392,10 @@ export class PagesDetailsFacade {
     })
   );
 
+  // topPagesVisitedWithPercentChange$ = this.pagesDetailsData$.pipe(
+  //   mapObjectArraysWithPercentChange('root', 'visits')
+  // );
+
   dyfData$ = this.pagesDetailsData$.pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map((data) => {
@@ -438,22 +451,25 @@ export class PagesDetailsFacade {
   );
 
   topSearchTermsIncrease$ = this.pagesDetailsData$.pipe(
-    map((data) =>[...data?.topSearchTermsIncrease || []])
+    map((data) => [...(data?.topSearchTermsIncrease || [])])
   );
 
   topSearchTermsDecrease$ = this.pagesDetailsData$.pipe(
-    map((data) => [...data?.topSearchTermsDecrease || []])
+    map((data) => [...(data?.topSearchTermsDecrease || [])])
   );
 
   top25GSCSearchTerms$ = this.pagesDetailsData$.pipe(
-    map((data) => [...data?.top25GSCSearchTerms || []])
+    map((data) => [...(data?.top25GSCSearchTerms || [])])
   );
 
   error$ = this.store.pipe(
     select(PagesDetailsSelectors.selectPagesDetailsError)
   );
 
-  constructor(private readonly store: Store<PagesDetailsState>, private i18n: I18nFacade) {}
+  constructor(
+    private readonly store: Store<PagesDetailsState>,
+    private i18n: I18nFacade
+  ) {}
 
   /**
    * Use the initialization action to perform one
@@ -506,3 +522,40 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };
+
+function mapObjectArraysWithPercentChange(
+  propName: keyof PageAggregatedData,
+  propPath: string
+) {
+  return map((data: PageDetailsData) => {
+    if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
+      return;
+    }
+
+    const current = data?.dateRangeData[propName];
+    const previous = data?.comparisonDateRangeData[propName];
+
+    if (!current || !previous) {
+      return;
+    }
+
+    const propsAreValidArrays =
+      Array.isArray(current) &&
+      Array.isArray(previous) &&
+      current.length > 0 &&
+      previous.length > 0 &&
+      current.length === previous.length;
+
+    if (propsAreValidArrays) {
+      return current.map((val: any, i) => ({
+        ...val,
+        percentChange: percentChange(
+          val[propPath],
+          (previous as any)[i][propPath]
+        ),
+      }));
+    }
+
+    throw Error('Invalid data arrays in mapObjectArraysWithPercentChange');
+  });
+}

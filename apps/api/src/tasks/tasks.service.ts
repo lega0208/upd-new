@@ -72,7 +72,7 @@ export class TasksService {
       .replaceRoot({
         $mergeObjects: [{ $first: '$task' }, { visits: '$visits' }],
       })
-      .sort({ visits: -1 })
+      .sort({ title: 'asc' })
       .exec();
 
     const results = {
@@ -142,6 +142,7 @@ export class TasksService {
               date: uxTest.date,
               testType: uxTest.test_type,
               successRate: uxTest.success_rate,
+              totalUsers: uxTest.total_users,
             }
         )
         .filter((uxTest) => !!uxTest);
