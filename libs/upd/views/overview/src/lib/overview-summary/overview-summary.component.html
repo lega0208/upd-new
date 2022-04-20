@@ -41,7 +41,7 @@
         [barChart]="(barChartData$ | async) || []"
         [table]="barTable$ | async"
         [convertToLine]="(isChartDataOver31Days$ | async) || false"
-        [tableCols]="barTableCols2"
+        [tableCols]="barTableCols"
       ></app-charts>
     </div>
   </div>
@@ -78,7 +78,7 @@
   </div>
 </div>
 
-<div class="container-fluid my-4 gx-0">
+<!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-data-table-card
@@ -86,14 +86,14 @@
         [sort]="false"
         [pagination]="false"
         [data]="taskSurvey"
-        [cols]="taskSurveyCols2"
+        [cols]="taskSurveyCols"
         [title]="'top10-tasks-GC'"
         [tooltip]="'tooltip-top10-tasks-GC'"
       >
       </app-data-table-card>
     </div>
   </div>
-</div>
+</div> -->
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
@@ -103,7 +103,7 @@
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [data]="dyfChart$ | async"
         [type]="'donut'"
-        [tableCols]="dyfTableCols2"
+        [tableCols]="dyfTableCols"
       ></app-charts>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
@@ -112,7 +112,7 @@
         titleTooltip="{{ 'tooltip-d3-www' | translate }}"
         [data]="whatWasWrongChart$ | async"
         [type]="'donut'"
-        [tableCols]="whatWasWrongTableCols2"
+        [tableCols]="whatWasWrongTableCols"
       ></app-charts>
     </div>
   </div>
