@@ -5,17 +5,15 @@
         *ngIf="(visitsByDay$ | async)?.length === 0; else elseVisitsByDay"
       >
         <app-card
-          [card-title]="'Visits by day'"
-          title-tooltip="Visits by day tooltip"
+          [card-title]="'visits'"
         >
-          <p>Visits by day data is not available for this date range.</p>
+          <p translate='nodata-visits-by-day'></p>
         </app-card>
       </ng-container>
       <ng-template #elseVisitsByDay>
         <app-charts
           type="line"
-          title="Visits by day"
-          titleTooltip="Visits by day tooltip"
+          [title]="'visits'"
           [data]="(visitsByDay$ | async) || []"
         ></app-charts>
       </ng-template>
@@ -23,7 +21,7 @@
   </div>
 </div>
 
-<div class="container-fluid my-4 gx-0">
+<!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-data-table-card
@@ -36,9 +34,9 @@
       </app-data-table-card>
     </div>
   </div>
-</div>
+</div> -->
 
-<div class="container-fluid my-4 gx-0">
+<!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-data-table-card
@@ -51,7 +49,7 @@
       </app-data-table-card>
     </div>
   </div>
-</div>
+</div> -->
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
@@ -60,8 +58,7 @@
         [data]="(visitorLocation$ | async) || []"
         [cols]="visitorLocationCols"
         [pagination]="false"
-        title="Visitor location"
-        tooltip="Visitor location tooltip"
+        [title]="'visitor-location'"
       >
       </app-data-table-card>
     </div>

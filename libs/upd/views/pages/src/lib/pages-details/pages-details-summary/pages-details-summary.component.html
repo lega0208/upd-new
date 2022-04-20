@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col">
       <app-data-card
-        [current]="(visitors$ | async | number) || 0"
+        [current]="(visitors$ | async | number: undefined: currentLang) || 0"
         [comparison]="(visitorsPercentChange$ | async) || 0"
         [title]="'unique-visitors'"
         [tooltip]="'tooltip-unique-visitors'"
@@ -11,7 +11,7 @@
 
     <div class="col">
       <app-data-card
-        [current]="(visits$ | async | number) || 0"
+        [current]="(visits$ | async | number: undefined: currentLang) || 0"
         [comparison]="(visitsPercentChange$ | async) || 0"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
@@ -20,7 +20,7 @@
 
     <div class="col">
       <app-data-card
-        [current]="(pageViews$ | async | number) || 0"
+        [current]="(pageViews$ | async | number: undefined: currentLang) || 0"
         [comparison]="(pageViewsPercentChange$ | async) || 0"
         [title]="'page-views'"
         [tooltip]="'tooltip-page-views'"
@@ -39,7 +39,7 @@
           [card-title]="'d3-visits-by-device-type'"
           title-tooltip="{{ 'tooltip-d3-visits-by-device-type' | translate }}"
         >
-          <p>Device type data is not available for this date range.</p>
+          <p translate='nodata-device-type'></p>
         </app-card>
       </ng-container>
       <ng-template #elseDeviceType>
@@ -62,17 +62,15 @@
         *ngIf="(visitsByDay$ | async)?.length === 0; else elseVisitsByDay"
       >
         <app-card
-          [card-title]="'Visits by day'"
-          title-tooltip="Visits by day tooltip"
+          [card-title]="'visits'"
         >
-          <p>Visits by day data is not available for this date range.</p>
+          <p translate='nodata-visits-by-day'></p>
         </app-card>
       </ng-container>
       <ng-template #elseVisitsByDay>
         <app-charts
           type="line"
-          title="Visits by day"
-          titleTooltip="Visits by day tooltip"
+          [title]="'visits'"
           [data]="(visitsByDay$ | async) || []"
         ></app-charts>
       </ng-template>
@@ -87,8 +85,7 @@
         [data]="(topSearchTermsIncrease$ | async) || []"
         [cols]="topSearchTermsCols"
         [pagination]="false"
-        title="Top 5 search terms saw an increase"
-        tooltip="Top 5 search terms saw an increase tooltip"
+        [title]="'top5-search-terms-increase'"
       >
       </app-data-table-card>
     </div>
@@ -102,23 +99,20 @@
         [data]="(topSearchTermsDecrease$ | async) || []"
         [cols]="topSearchTermsCols"
         [pagination]="false"
-        title="Top 5 search terms saw a decrease"
-        tooltip="Top 5 search terms saw a decrease tooltip"
+        [title]="'top5-search-terms-decrease'"
       >
       </app-data-table-card>
     </div>
   </div>
 </div>
 
-<div class="container-fluid my-4 gx-0">
+<!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-card
-        card-title="Related tasks"
-        title-tooltip="Related tasks tooltip"
+        [card-title]="'related-tasks'"
       >
-        No Related tasks for this page
       </app-card>
     </div>
   </div>
-</div>
+</div> -->

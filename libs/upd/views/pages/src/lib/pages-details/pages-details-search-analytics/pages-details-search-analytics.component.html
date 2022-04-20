@@ -2,28 +2,28 @@
   <div class="row">
     <div class="col">
       <app-data-card
-        [current]="(totalImpressionsGSC$ | async | number) || 0"
+        [current]="(totalImpressionsGSC$ | async | number:undefined: currentLang) || 0"
         [comparison]="(totalImpressionsGSCPercentChange$ | async) || 0"
-        [title]="'Total impressions from Google'"
-        [tooltip]="'Total impressions from Google tooltip'"
+        [title]="'total-impressions-google'"
+        [tooltip]="'tooltip-impressions-page-google'"
       ></app-data-card>
     </div>
 
     <div class="col">
       <app-data-card
-        [current]="(ctrGSC$ | async | percent) || 0"
+        [current]="(ctrGSC$ | async | percent: undefined: currentLang) || 0"
         [comparison]="(ctrGSCPercentChange$ | async) || 0"
-        [title]="'Click through rate from Google'"
-        [tooltip]="'Click through rate from Google tooltip'"
+        [title]="'ctr-google'"
+        [tooltip]="'tooltip-ctr-google'"
       ></app-data-card>
     </div>
 
     <div class="col">
       <app-data-card
-        [current]="(avgRankGSC$ | async | number) || 0"
+        [current]="(avgRankGSC$ | async | number: undefined: currentLang) || 0"
         [comparison]="(avgRankGSCPercentChange$ | async) || 0"
-        [title]="'Average rank on Google'"
-        [tooltip]="'Average rank on Google tooltip'"
+        [title]="'avg-rank-google'"
+        [tooltip]="'tooltip-avg-rank-page-google'"
       ></app-data-card>
     </div>
   </div>
@@ -35,8 +35,8 @@
       <app-data-table-card
         [data]="(topGSCSearchTerms$ | async) || []"
         [cols]="topGSCSearchTermsCols"
-        [title]="'Top 25 search terms from Google'"
-        [tooltip]="'Top 25 search terms from Googletooltip'"
+        [title]="'top25-search-terms-google-page'"
+        [tooltip]="'tooltip_table_title_top25_search_terms_google'"
       >
       </app-data-table-card>
     </div>
@@ -50,8 +50,7 @@
         [data]="(searchTermsCanada$ | async) || []"
         [cols]="searchTermsCanadaCols"
         [pagination]="false"
-        [title]="'Search terms from Canada.ca'"
-        [tooltip]="'Search terms from Canada.ca tooltip'"
+        [title]="'search-terms-canada'"
       >
       </app-data-table-card>
     </div>
@@ -65,8 +64,7 @@
         [data]="(referrerType$ | async) || []"
         [cols]="referrerTypeCols"
         [pagination]="false"
-        [title]="'Referrer Type'"
-        [tooltip]="'Referrer Type tooltip'"
+        [title]="'referrer-type'"
       >
       </app-data-table-card>
     </div>

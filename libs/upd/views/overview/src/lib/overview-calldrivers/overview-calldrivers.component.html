@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col">
       <app-charts
-        [title]="'Total calls by inquiry line'"
+        [title]="'d3-tcbil'"
         [yAxisLabel]="'Number of calls (in thousands)'"
         [showXAxisLabel]="false"
         [showGridLines]="true"
@@ -16,7 +16,7 @@
   </div>
 </div>
 
-<div class="container-fluid my-4 gx-0">
+<!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-data-table-card
@@ -24,8 +24,7 @@
         [cols]="chartsCols"
         [filter]="false"
         [pagination]="false"
-        [title]="'Top 5 call drivers'"
-        [tooltip]="'Top 5 call drivers tooltip'"
+        [title]="'top5-call-drivers'"
       >
       </app-data-table-card>
     </div>
@@ -40,10 +39,7 @@
         [cols]="chartsCols"
         [filter]="false"
         [pagination]="false"
-        [title]="'Top 5 call drivers with biggest increase over period'"
-        [tooltip]="
-          'Top 5 call drivers with biggest increase over period tooltip'
-        "
+        [title]="'top5-call-drivers-increase'"
       >
       </app-data-table-card>
     </div>
@@ -58,12 +54,9 @@
         [cols]="chartsCols"
         [filter]="false"
         [pagination]="false"
-        [title]="'Top 5 call drivers with biggest decrease over period'"
-        [tooltip]="
-          'Top 5 call drivers with biggest decrease over period tooltip'
-        "
+        [title]="'top5-call-drivers-decrease'"
       >
       </app-data-table-card>
     </div>
   </div>
-</div>
+</div> -->

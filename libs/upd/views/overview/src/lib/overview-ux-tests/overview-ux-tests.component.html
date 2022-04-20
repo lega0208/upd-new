@@ -3,19 +3,19 @@
     <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="testsCompleted"
-        [title]="'Tests completed since 2018'"
+        [title]="'tests-completed-since2018'"
       ></app-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="tasksTested"
-        [title]="'Tasks tested since 2018'"
+        [title]="'tasks-tested-since2018'"
       ></app-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="participantsTested"
-        [title]="'Participants tested since 2018'"
+        [title]="'participants-since2018'"
       ></app-data-card>
     </div>
   </div>
@@ -26,19 +26,19 @@
     <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="testsConducted"
-        [title]="'Tests conducted last fiscal year (Apr 01 - Mar 31)'"
+        [title]="'tests-conducted-lastfiscal'"
       ></app-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="testsConductedLastQuarter"
-        [title]="'Tests conducted last quarter (Q4/21)'"
+        [title]="'tests-conducted-lastquarter'"
       ></app-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
         [current]="COPSTests"
-        [title]="'COPS tests completed since 2018'"
+        [title]="'cops-completed-since2018'"
       ></app-data-card>
     </div>
   </div>
@@ -53,8 +53,7 @@
         [pagination]="false"
         [data]="uxChartData"
         [cols]="uxChartCols"
-        title="Recent testing scores by project"
-        tooltip="Recent testing scores by project tooltip"
+        [title]="'Recent testing scores by project'"
       >
       </app-data-table-card>
     </div>

@@ -4,6 +4,9 @@ import dayjs from 'dayjs';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
+import { I18nFacade } from '@cra-arc/upd/state';
+import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-overview-feedback',
@@ -11,26 +14,57 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
   styleUrls: ['./overview-feedback.component.css'],
 })
 export class OverviewFeedbackComponent {
+  currentLang!: LocaleId;
+  currentLang$ = this.i18n.currentLang$;
 
   taskSurvey = taskSurvey;
-  taskSurveyCols: ColumnConfig[] = [
-    { field: 'task', header: 'Task' },
-    { field: 'completion', header: 'Task Success Survey Completed' },
-  ];
+  // taskSurveyCols: ColumnConfig[] = [
+  //   { field: 'task', header: 'Task' },
+  //   { field: 'completion', header: 'Task Success Survey Completed' },
+  // ];
 
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig[] = [
-    { field: 'name', header: 'Selection' },
-    { field: 'value', header: 'Visits', pipe: 'number' },
-  ]
-  whatWasWrongTableCols: ColumnConfig[] = [
-    { field: 'name', header: 'What was wrong' },
-    { field: 'value', header: 'Visits', pipe: 'number' },
-  ]
+  // dyfTableCols: ColumnConfig[] = [
+  //   { field: 'name', header: 'Selection' },
+  //   { field: 'value', header: 'Visits', pipe: 'number' },
+  // ]
+  // whatWasWrongTableCols: ColumnConfig[] = [
+  //   { field: 'name', header: 'What was wrong' },
+  //   { field: 'value', header: 'Visits', pipe: 'number' },
+  // ]
 
-  constructor(private overviewService: OverviewFacade) { }
+  dyfTableCols: ColumnConfig[] = [];
+  whatWasWrongTableCols: ColumnConfig[] = [];
+  taskSurveyCols: ColumnConfig[] = [];
+
+  constructor(
+    private overviewService: OverviewFacade,
+    private i18n: I18nFacade
+  ) {}
+
+  ngOnInit() {
+    this.i18n.service.onLangChange(
+      ({ lang }) => { this.currentLang = lang as LocaleId; }
+    );
+
+    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+      this.dyfTableCols = [
+        { field: 'name', header: this.i18n.service.translate('Selection', lang) },
+        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+      ];
+      this.whatWasWrongTableCols = [
+        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
+        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+      ];
+      this.taskSurveyCols = [
+        { field: 'task', header: this.i18n.service.translate('task', lang) },
+        { field: 'completion', header: this.i18n.service.translate('Task Success Survey Completed', lang) }
+      ];
+
+    });
+  }
 }
 
 const taskSurvey = [

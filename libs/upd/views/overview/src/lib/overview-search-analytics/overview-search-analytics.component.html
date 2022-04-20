@@ -2,23 +2,26 @@
   <div class="row">
     <div class="col">
       <app-data-card
-        [current]="(gscImpressions$ | async | number) || 0"
+        [current]="(gscImpressions$ | async | number: undefined:currentLang) || 0"
         [comparison]="(gscImpressionsPercentChange$ | async) || 0"
-        [title]="'Total impressions from Google'"
+        [title]="'total-impressions-google'"
+        [tooltip]="'tooltip-total-impressions-google'"
       ></app-data-card>
     </div>
     <div class="col">
       <app-data-card
-        [current]="(gscCTR$ | async | percent) || 0"
+        [current]="(gscCTR$ | async | percent: undefined:currentLang) || 0"
         [comparison]="(gscCTRPercentChange$ | async) || 0"
-        [title]="'Click through rate from Google'"
+        [title]="'ctr-google'"
+        [tooltip]="'tooltip-ctr-google'"
       ></app-data-card>
     </div>
     <div class="col">
       <app-data-card
-        [current]="(gscAverage$ | async | number: '1.0-2') || 0"
+        [current]="(gscAverage$ | async | number: '1.0-2': currentLang) || 0"
         [comparison]="(gscAveragePercentChange$ | async) || 0"
-        [title]="'Average rank on Google'"
+        [title]="'avg-rank-google'"
+        [tooltip]="'tooltip-avg-rank-google'"
       ></app-data-card>
     </div>
   </div>
@@ -33,15 +36,15 @@
         [pagination]="false"
         [data]="(GSCSearchTerms$ | async) || []"
         [cols]="GSCSearchTermsCols"
-        [title]="'Top 10 Search terms from Google'"
-        [tooltip]="'Top 10 Search terms from Google tooltip'"
+        [title]="'top10-terms-google'"
+        [tooltip]="'tooltip-top10-search-terms-google'"
       >
       </app-data-table-card>
     </div>
   </div>
 </div>
 
-<div class="container-fluid my-4 gx-0">
+<!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-data-table-card
@@ -50,10 +53,9 @@
         [pagination]="true"
         [data]="CanSearchTerms"
         [cols]="CanSearchTermsCols"
-        [title]="'Search terms from Canada.ca'"
-        [tooltip]="'Search terms from Canada.ca tooltip'"
+        [title]="'search-terms-canada'"
       >
       </app-data-table-card>
     </div>
   </div>
-</div>
+</div> -->

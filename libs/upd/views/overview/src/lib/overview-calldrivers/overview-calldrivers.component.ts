@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { ColumnConfig } from '@cra-arc/upd-components';
+import { I18nFacade } from '@cra-arc/upd/state';
 import { OverviewFacade } from '../+state/overview/overview.facade';
+import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-overview-calldrivers',
@@ -9,28 +12,9 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
   styleUrls: ['./overview-calldrivers.component.css'],
 })
 export class OverviewCalldriversComponent {
-  bar: MultiSeries = [
-    {
-      name: 'Feb 27-Mar 05',
-      series: [
-        { name: 'Benefits', value: 27704 },
-        { name: 'e-Services Help Desk', value: 275665 },
-        { name: 'ITE', value: 5887 },
-        { name: 'C4 - Identity Theft', value: 1208 },
-        { name: 'BE', value: 87427 },
-      ],
-    },
-    {
-      name: 'Mar 06-Mar 12',
-      series: [
-        { name: 'Benefits', value: 24704 },
-        { name: 'e-Services Help Desk', value: 277665 },
-        { name: 'ITE', value: 6255 },
-        { name: 'C4 - Identity Theft', value: 201 },
-        { name: 'BE', value: 81427 },
-      ],
-    },
-  ];
+  currentLang!: LocaleId;
+  currentLang$ = this.i18n.currentLang$;
+
   charts = [
     {
       Topic: 'Electronic Services',
@@ -58,16 +42,60 @@ export class OverviewCalldriversComponent {
       'Number of calls for Mar 06-Mar 12': '22,806',
     },
   ];
-  chartsCols: ColumnConfig[] = [
-    { field: 'Topic', header: 'Topic' },
-    {
-      field: 'Number of calls for Feb 27-Mar 05',
-      header: 'Number of calls for Feb 27-Mar 05',
-    },
-    {
-      field: 'Number of calls for Mar 06-Mar 12',
-      header: 'Number of calls for Mar 06-Mar 12',
-    },
-  ];
-  constructor(private overviewService: OverviewFacade) {}
+
+  dateRangeLabel$ = this.overviewService.dateRangeLabel$;
+  comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
+
+  constructor(
+    private overviewService: OverviewFacade,
+    private i18n: I18nFacade
+  ) {}
+
+  bar: MultiSeries = [];
+  chartsCols: ColumnConfig[] = [];
+
+  ngOnInit() {
+    this.i18n.service.onLangChange(
+      ({ lang }) => { this.currentLang = lang as LocaleId; }
+    );
+
+    combineLatest([this.currentLang$, this.dateRangeLabel$, this.comparisonDateRangeLabel$]).subscribe(([lang, dateRange, comparisonDateRange]) => {
+      this.bar = [
+        {
+          name: 'Feb 27-Mar 05',
+          series: [
+            { name: this.i18n.service.translate('d3-benefits', lang), value: 27704 },
+            { name: this.i18n.service.translate('d3-e-Services', lang), value: 275665 },
+            { name: this.i18n.service.translate('d3-ITE', lang), value: 5887 },
+            { name: this.i18n.service.translate('d3-c4', lang), value: 1208 },
+            { name: this.i18n.service.translate('d3-be', lang), value: 87427 }
+          ],
+        },
+        {
+          name: 'Mar 06-Mar 12',
+          series: [
+            { name: this.i18n.service.translate('d3-benefits', lang), value: 22704 },
+            { name: this.i18n.service.translate('d3-e-Services', lang), value: 289665 },
+            { name: this.i18n.service.translate('d3-ITE', lang), value: 8757 },
+            { name: this.i18n.service.translate('d3-c4', lang), value: 3208 },
+            { name: this.i18n.service.translate('d3-be', lang), value: 65027 }
+          ],
+        },
+      ];
+
+      this.chartsCols = [
+        { field: 'Topic', header: this.i18n.service.translate('topic', lang) },
+        {
+          field: this.i18n.service.translate('Number of calls for', lang, {value: ' Feb 27-Mar 05'}),
+          header: this.i18n.service.translate('Number of calls for', lang, {value: ' Feb 27-Mar 05'})
+        },
+        {
+          field: this.i18n.service.translate('Number of calls for', lang, {value: ' Mar 06-Mar 12'}),
+          header: this.i18n.service.translate('Number of calls for', lang, {value: ' Mar 06-Mar 12'})
+        },
+      ];
+
+    });
+  }
+
 }
