@@ -23,6 +23,8 @@ export class OverviewWebtrafficComponent {
   pageViews$ = this.overviewService.views$;
   pageViewsPercentChange$ = this.overviewService.viewsPercentChange$;
 
+  isChartDataOver31Days$ = this.overviewService.isChartDataOver31Days$;
+
   topPagesData$ = this.overviewService.topPagesVisited$;
   topPagesCols: ColumnConfig[] = [
     { field: '_id', header: 'URL' },

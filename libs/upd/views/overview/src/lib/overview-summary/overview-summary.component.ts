@@ -59,15 +59,7 @@ export class OverviewSummaryComponent implements OnInit {
   dateRangeLabel$ = this.overviewService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
 
-  barTableCols: ColumnConfig[] = [
-    { field: 'name', header: 'Dates' },
-    {
-      field: 'currValue',
-      header: `Visits for ${this.dateRangeLabel$}`,
-      pipe: 'number',
-    },
-    { field: 'prevValue', header: 'Visits for ', pipe: 'number' },
-  ];
+  isChartDataOver31Days$ = this.overviewService.isChartDataOver31Days$;
 
   constructor(
     private overviewService: OverviewFacade,
@@ -96,8 +88,8 @@ export class OverviewSummaryComponent implements OnInit {
       this.barTableCols2 = [
         { field: 'name', header: this.i18n.service.translate('Dates', lang) },
         //{ field: 'currValue', header: `Visits for ${this.dateRangeLabel$}`, pipe: 'number' },
-        { field: 'currValue', header: this.i18n.service.translate('Visits for ', lang, {value: dateRange  }), pipe: 'number' },
-        { field: 'prevValue', header: this.i18n.service.translate('Visits for ', lang, {value: comparisonDateRange  }), pipe: 'number' }
+        { field: 'currValue', header: this.i18n.service.translate(`Visits for ${dateRange}`, lang), pipe: 'number' },
+        { field: 'prevValue', header: this.i18n.service.translate(`Visits for ${comparisonDateRange}`, lang), pipe: 'number' }
       ];
       this.taskSurveyCols2 = [
         { field: 'task', header: this.i18n.service.translate('task', lang) },

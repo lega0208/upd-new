@@ -1,12 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ColumnConfig, ColumnConfigPipe } from './types';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
-import { I18nService } from '@cra-arc/upd/i18n';
 import { ProjectStatus } from '@cra-arc/types-common';
 import localeFrCa from '@angular/common/locales/fr-CA';
 import { registerLocaleData } from '@angular/common';
+import { I18nFacade } from '@cra-arc/upd/state';
 registerLocaleData(localeFrCa);
-
 
 @Component({
   selector: 'app-data-table-styles',
@@ -21,8 +20,8 @@ export class DataTableStylesComponent implements OnInit {
 
   numberVal: number | string = 0;
 
-  isProjectLabel = this.config.type === 'label' && this.config.typeParam !== 'cops';
-  projectLabel = this.data[this.config.field] as ProjectStatus
+  isProjectLabel = false;
+  projectLabel: ProjectStatus = 'Unknown';
   hasType = false;
   hasPipe = false;
 
@@ -31,12 +30,18 @@ export class DataTableStylesComponent implements OnInit {
     this.hasPipe = !!this.config.pipe;
 
     if (this.hasPipe) {
-      this.numberVal = this.configurePipe(
-        this.data[this.config.field] as number,
-        this.config.pipe,
-        this.config.pipeParam
-      ) || '';
+      this.numberVal =
+        this.configurePipe(
+          this.data[this.config.field] as number,
+          this.config.pipe,
+          this.config.pipeParam
+        ) || '';
     }
+
+    if (this.config.type === 'label' && this.config.typeParam !== 'cops')
+      this.isProjectLabel = true;
+
+    this.projectLabel = this.data[this.config.field] as ProjectStatus;
   }
 
   configurePipe(data: number, pipe?: ColumnConfigPipe, pipeParam?: string) {
@@ -44,19 +49,19 @@ export class DataTableStylesComponent implements OnInit {
       return this.decimalPipe.transform(
         data,
         pipeParam,
-        this.i18n.currentLang
+        this.i18n.service.currentLang
       );
     } else if (pipe === 'percent') {
       return this.percentPipe.transform(
         data,
         pipeParam,
-        this.i18n.currentLang
+        this.i18n.service.currentLang
       );
     } else if (pipe === 'date') {
       return this.datePipe.transform(
         data,
         pipeParam,
-        this.i18n.currentLang
+        this.i18n.service.currentLang
       );
     }
 
@@ -67,6 +72,6 @@ export class DataTableStylesComponent implements OnInit {
     private percentPipe: PercentPipe,
     private decimalPipe: DecimalPipe,
     private datePipe: DatePipe,
-    private i18n: I18nService
+    private i18n: I18nFacade
   ) {}
 }

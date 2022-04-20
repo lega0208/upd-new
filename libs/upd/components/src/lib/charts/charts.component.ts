@@ -24,7 +24,8 @@ import { I18nFacade } from '@cra-arc/upd/state';
 })
 export class ChartsComponent implements OnInit {
   view?: [number, number];
-  @Input() lang: LocaleId = EN_CA
+  @Input() lang: LocaleId = EN_CA;
+  @Input() convertToLine = false;
 
   @Input() title = '';
   @Input() titleTooltip = '';
@@ -114,8 +115,8 @@ export class ChartsComponent implements OnInit {
   @Input() marginLeft = 40;
 
   // combo data
-  @Input() barChart: SingleSeries | MultiSeries = [];
-  @Input() lineChart: SingleSeries | MultiSeries = [];
+  @Input() barChart: any = [];
+  @Input() lineChart: any = [];
   colorLabelDefault = 'black';
   lineChartScheme!: Color;
   comboBarScheme!: Color;
@@ -148,7 +149,7 @@ export class ChartsComponent implements OnInit {
 
     this.currentLang$.subscribe((nextLang) => {
       this.lang = nextLang;
-    })
+    });
 
     if (this.isPercent) {
       this.xScaleMax = 1;

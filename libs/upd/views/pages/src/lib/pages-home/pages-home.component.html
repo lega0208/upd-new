@@ -1,5 +1,12 @@
 <h2>Pages</h2>
 
+<app-date-selector></app-date-selector>
+
+<app-alert [type]="'info'" [dismissible]="false" [selfClosing]="false">
+  <span class="material-icons align-top pe-1">info</span>
+  The following table contains the top pages by number of visits for selected date range
+</app-alert>
+
 <app-card>
   <app-data-table
     [data]="(pagesHomeData$ | async) || []"

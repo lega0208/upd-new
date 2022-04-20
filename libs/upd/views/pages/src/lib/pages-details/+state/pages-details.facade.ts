@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { map, debounceTime } from 'rxjs';
+import { map, debounceTime, combineLatest } from 'rxjs';
 
 import { percentChange } from '@cra-arc/utils-common';
 import type { PickByType } from '@cra-arc/utils-common';
@@ -9,8 +9,12 @@ import { PageAggregatedData, PageDetailsData } from '@cra-arc/types-common';
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
+import dayjs from 'dayjs/esm';
+import utc from 'dayjs/esm/plugin/utc';
+import 'dayjs/esm/locale/en-ca';
+import 'dayjs/esm/locale/fr-ca';
+import { LocaleId } from '@cra-arc/upd/i18n';
+import { I18nFacade } from '@cra-arc/upd/state';
 
 dayjs.extend(utc);
 
@@ -33,6 +37,8 @@ export class PagesDetailsFacade {
   pagesDetailsData$ = this.store.pipe(
     select(PagesDetailsSelectors.selectPagesDetailsData)
   );
+
+  currentLang$ = this.i18n.currentLang$;
 
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
@@ -79,14 +85,20 @@ export class PagesDetailsFacade {
     mapToPercentChange('gsc_total_position')
   );
 
-  visitsByDay$ = this.pagesDetailsData$.pipe(
-    map((data) => {
+  visitsByDay$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
         data?.comparisonDateRangeData?.visitsByDay || [];
       const days = visitsByDay?.length || 0;
+      const prevDays = comparisonVisitsByDay?.length || 0;
+      const maxDays = Math.max(days, prevDays);
       const granularity = Math.ceil(days / 7);
       const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
+      let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
+      let [prevStartDate] = (data.comparisonDateRange || '')
+        .split('/')
+        .map((d) => new Date(d));
 
       if (!visitsByDay) {
         return [] as MultiSeries;
@@ -99,43 +111,94 @@ export class PagesDetailsFacade {
         return [] as MultiSeries;
       }
 
-      console.log(granularity);
+      const dateRangeDates = visitsByDay.map(({ date }) => date);
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
+
+      const dateRangeSeries = visitsByDay.map(({ visits }, i) => ({
+        name: dateRangeLabel, // todo: date label (x-axis) formatting based on date range length
+        value: visits || 0,
+      }));
+      
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
+      );
+
+      const comparisonDateRangeSeries = comparisonVisitsByDay.map(
+        ({ visits }) => ({
+          name: comparisonDateRangeLabel,
+          value: visits || 0,
+        })
+      );
+
+      let dayCount = 0;
+
+      while (dayCount < maxDays) {
+        const prevMonthDays = getMonthlyDays(prevStartDate);
+        const currMonthDays = getMonthlyDays(startDate);
+
+        if (currMonthDays > prevMonthDays) {
+          // if the current month has more days than the previous month,
+          // we need to pad the previous month with zeros
+
+          const daysToPad = currMonthDays - prevMonthDays;
+          comparisonDateRangeSeries.splice(
+            dayCount + prevMonthDays,
+            0,
+            ...Array(daysToPad).fill({
+              date: '*',
+              visits: 0,
+            })
+          );
+
+          dayCount += currMonthDays;
+        } else {
+          // if the current month has less days than the previous month,
+          // we need to pad the current month with zeros
+
+          const daysToPad = prevMonthDays - currMonthDays;
+
+          dateRangeSeries.splice(
+            dayCount + currMonthDays,
+            0,
+            ...Array(daysToPad).fill({
+              date: '*',
+              visits: 0,
+            })
+          );
+
+          dayCount += prevMonthDays;
+        }
+
+        prevStartDate = dayjs(prevStartDate)
+          .utc(false)
+          .add(1, 'month')
+          .toDate();
+        startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
+      }
 
       const visitsByDayData: MultiSeries = [
         {
           name: data?.dateRange,
-          series: visitsByDay.map(({ visits, date }) => ({
-            name: dayjs(date).utc(false).format(dateFormat), // todo: date label (x-axis) formatting based on date range length
-            value: visits || 0,
+          series: dateRangeSeries.map(({ value }, i) => ({
+            name: dayjs(dateRangeDates[i]).utc(false).locale(lang).format(dateFormat),
+            value: value || 0,
           })),
         },
       ];
 
       if (
-        data?.comparisonDateRangeData &&
-        typeof data?.comparisonDateRange === 'string'
-      ) {
+          data?.comparisonDateRangeData &&
+          typeof data?.comparisonDateRange === 'string'
+        ) {
         visitsByDayData.push({
           name: data?.comparisonDateRange,
-          series: visitsByDay.map(({ date }, idx) => ({
-            name: dayjs(date).utc(false).format(dateFormat),
-            value: comparisonVisitsByDay[idx]?.visits || 0,
+          series: comparisonDateRangeSeries.map(({ value }, i) => ({
+            name: dayjs(dateRangeDates[i]).utc(false).locale(lang).format(dateFormat),
+            value: value || 0,
           })),
         });
       }
-
-      // if (
-      //   data?.comparisonDateRangeData &&
-      //   typeof data?.comparisonDateRange === 'string'
-      // ) {
-      //   visitsByDayData.push({
-      //     name: data?.comparisonDateRange,
-      //     series: comparisonVisitsByDay.map(({ visits, date }) => ({
-      //       name: dayjs(date).format('ddd'),
-      //       value: visits,
-      //     })),
-      //   });
-      // }
 
       return visitsByDayData;
     })
@@ -375,22 +438,22 @@ export class PagesDetailsFacade {
   );
 
   topSearchTermsIncrease$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.topSearchTermsIncrease || [])
+    map((data) =>[...data?.topSearchTermsIncrease || []])
   );
 
   topSearchTermsDecrease$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.topSearchTermsDecrease || [])
+    map((data) => [...data?.topSearchTermsDecrease || []])
   );
 
   top25GSCSearchTerms$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.top25GSCSearchTerms || [])
+    map((data) => [...data?.top25GSCSearchTerms || []])
   );
 
   error$ = this.store.pipe(
     select(PagesDetailsSelectors.selectPagesDetailsError)
   );
 
-  constructor(private readonly store: Store<PagesDetailsState>) {}
+  constructor(private readonly store: Store<PagesDetailsState>, private i18n: I18nFacade) {}
 
   /**
    * Use the initialization action to perform one
@@ -400,6 +463,10 @@ export class PagesDetailsFacade {
     this.store.dispatch(PagesDetailsActions.loadPagesDetailsInit());
   }
 }
+
+const getMonthlyDays = (date: Date) => {
+  return dayjs(date).utc(false).daysInMonth();
+};
 
 type DateRangeDataIndexKey = keyof PageAggregatedData &
   keyof PickByType<PageAggregatedData, number>;
@@ -424,3 +491,18 @@ function mapToPercentChange(
     return percentChange(current, previous);
   });
 }
+
+const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  const formattedStartDate = dayjs(startDate)
+    .utc(false)
+    .locale(lang)
+    .format('MMM D');
+  const formattedEndDate = dayjs(endDate)
+    .utc(false)
+    .locale(lang)
+    .format('MMM D');
+
+  return `${formattedStartDate}-${formattedEndDate}`;
+};

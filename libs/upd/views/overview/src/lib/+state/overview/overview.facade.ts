@@ -74,6 +74,15 @@ export class OverviewFacade {
     map((data) => data?.dateRangeData?.top10GSC)
   );
 
+  isChartDataOver31Days$ = this.overviewData$.pipe(
+    map((data) => {
+      const visitsByDay = data?.dateRangeData?.visitsByDay;
+      const days = visitsByDay?.length || 0;
+
+      return days > 31;
+    })
+  );
+
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
   visitsByDay$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
@@ -102,7 +111,7 @@ export class OverviewFacade {
 
       const dateRangeDates = visitsByDay.map(({ date }) => date);
 
-      const dateRangeSeries = visitsByDay.map(({ visits }) => ({
+      const dateRangeSeries = visitsByDay.map(({ visits }, i) => ({
         name: dateRangeLabel, // todo: date label (x-axis) formatting based on date range length
         value: visits || 0,
       }));
@@ -166,18 +175,70 @@ export class OverviewFacade {
         startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
       }
 
-      const visitsByDayData: MultiSeries = dateRangeDates.map((date, i) => {
-        const series = [dateRangeSeries[i]];
+      let visitsByDayData: MultiSeries = [];
 
-        if (comparisonDateRangeSeries[i] !== undefined) {
-          series.push(comparisonDateRangeSeries[i]);
+      if (maxDays > 31) {
+
+        // visitsByDayData = [
+        //   {
+        //     name: data?.dateRange,
+        //     series: visitsByDay.map(({ visits, date }) => ({
+        //       name: dayjs(date).utc(false).locale(lang).format(dateFormat), // todo: date label (x-axis) formatting based on date range length
+        //       value: visits || 0,
+        //     })),
+        //   },
+        // ];
+
+        // if (
+        //   data?.comparisonDateRangeData &&
+        //   typeof data?.comparisonDateRange === 'string'
+        // ) {
+        //   visitsByDayData.push({
+        //     name: data?.comparisonDateRange,
+        //     series: visitsByDay.map(({ date }, idx) => ({
+        //       name: dayjs(date).utc(false).locale(lang).format(dateFormat),
+        //       value: comparisonVisitsByDay[idx]?.visits || 0,
+        //     })),
+        //   });
+        // }
+
+
+        visitsByDayData = [
+          {
+            name: data?.dateRange,
+            series: dateRangeSeries.map(({ value }, i) => ({
+              name: dayjs(dateRangeDates[i]).utc(false).locale(lang).format(dateFormat),
+              value: value || 0,
+            })),
+          },
+        ];
+
+        if (
+            data?.comparisonDateRangeData &&
+            typeof data?.comparisonDateRange === 'string'
+          ) {
+          visitsByDayData.push({
+            name: data?.comparisonDateRange,
+            series: comparisonDateRangeSeries.map(({ value }, i) => ({
+              name: dayjs(dateRangeDates[i]).utc(false).locale(lang).format(dateFormat),
+              value: value || 0,
+            })),
+          });
         }
+      } else {
+        visitsByDayData = dateRangeDates.map((date, i) => {
+          const series = [dateRangeSeries[i]];
 
-        return {
-          name: dayjs(date).utc(false).locale(lang).format(dateFormat),
-          series,
-        };
-      });
+          if (comparisonDateRangeSeries[i] !== undefined) {
+            series.push(comparisonDateRangeSeries[i]);
+          }
+
+          return {
+            name: dayjs(date).utc(false).locale(lang).format(dateFormat),
+            series,
+          };
+        });
+      }
 
       return visitsByDayData;
     })
