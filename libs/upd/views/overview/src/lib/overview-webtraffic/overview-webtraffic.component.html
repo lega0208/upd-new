@@ -38,7 +38,7 @@
         type="grouped-bar"
         [convertToLine]="(isChartDataOver31Days$ | async) || false"
         [table]="barTable$ | async"
-        [tableCols]="barTableCols2"
+        [tableCols]="barTableCols"
       ></app-charts>
     </div>
   </div>
@@ -51,8 +51,8 @@
         [filter]="false"
         [sort]="false"
         [pagination]="false"
-        [data]="(topPagesData$ | async) || []"
-        [cols]="topPagesCols2"
+        [data]="(topPagesWithChangeData$ | async) || []"
+        [cols]="topPagesCols"
         [title]="'top10-pages-visited'"
       >
       </app-data-table-card>

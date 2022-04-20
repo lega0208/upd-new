@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { I18nFacade } from '@cra-arc/upd/state';
@@ -10,7 +10,7 @@ import { combineLatest } from 'rxjs';
   templateUrl: './overview-webtraffic.component.html',
   styleUrls: ['./overview-webtraffic.component.css'],
 })
-export class OverviewWebtrafficComponent {
+export class OverviewWebtrafficComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
@@ -26,11 +26,7 @@ export class OverviewWebtrafficComponent {
   isChartDataOver31Days$ = this.overviewService.isChartDataOver31Days$;
 
   topPagesData$ = this.overviewService.topPagesVisited$;
-  topPagesCols: ColumnConfig[] = [
-    { field: '_id', header: 'URL' },
-    { field: 'visits', header: 'Visits', pipe: 'number' },
-    { field: 'comparison', header: 'Comparison' },
-  ];
+  topPagesWithChangeData$ = this.overviewService.topPagesVisitedWithPercentChange$;
 
   barChartData$ = this.overviewService.visitsByDay$;
   barTable$ = this.overviewService.barTable$;
@@ -40,42 +36,53 @@ export class OverviewWebtrafficComponent {
   dateRangeLabel$ = this.overviewService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
 
-  barTableCols: ColumnConfig[] = [
-    { field: 'name', header: 'Dates' },
-    {
-      field: 'currValue',
-      header: `Visits for ${this.dateRangeLabel$}`,
-      pipe: 'number',
-    },
-    { field: 'prevValue', header: 'Visits for ', pipe: 'number' },
-  ];
-
   constructor(
-    private overviewService: OverviewFacade,  
+    private overviewService: OverviewFacade,
     private i18n: I18nFacade
   ) {}
 
-  dyfTableCols2: ColumnConfig[] = [];
-  topPagesCols2: ColumnConfig[] = [];
-  barTableCols2: ColumnConfig[] = [];
+  topPagesCols: ColumnConfig[] = [];
+  barTableCols: ColumnConfig[] = [];
 
   ngOnInit() {
-    this.i18n.service.onLangChange(
-      ({ lang }) => { this.currentLang = lang as LocaleId; }
-    );
+    this.i18n.service.onLangChange(({ lang }) => {
+      this.currentLang = lang as LocaleId;
+    });
 
-    combineLatest([this.currentLang$, this.dateRangeLabel$, this.comparisonDateRangeLabel$]).subscribe(([lang, dateRange, comparisonDateRange]) => {
-      
-      this.topPagesCols2 = [
+    combineLatest([
+      this.currentLang$,
+      this.dateRangeLabel$,
+      this.comparisonDateRangeLabel$,
+    ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
+      this.topPagesCols = [
         { field: '_id', header: this.i18n.service.translate('URL', lang) },
-        { field: 'visits', header: this.i18n.service.translate('visits', lang), pipe: 'number' },
-        { field: 'comparison',  header: this.i18n.service.translate('comparison', lang)},
+        {
+          field: 'visits',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
+        {
+          field: 'percentChange',
+          header: this.i18n.service.translate('comparison', lang),
+          pipe: 'percent',
+        },
       ];
-      this.barTableCols2 = [
+      this.barTableCols = [
         { field: 'name', header: this.i18n.service.translate('Dates', lang) },
-        //{ field: 'currValue', header: `Visits for ${this.dateRangeLabel$}`, pipe: 'number' },
-        { field: 'currValue', header: this.i18n.service.translate('Visits for ', lang, {value: dateRange  }), pipe: 'number' },
-        { field: 'prevValue', header: this.i18n.service.translate('Visits for ', lang, {value: comparisonDateRange  }), pipe: 'number' }
+        {
+          field: 'currValue',
+          header: this.i18n.service.translate('Visits for ', lang, {
+            value: dateRange,
+          }),
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: this.i18n.service.translate('Visits for ', lang, {
+            value: comparisonDateRange,
+          }),
+          pipe: 'number',
+        },
       ];
     });
   }

@@ -70,6 +70,10 @@ export class OverviewFacade {
     map((data) => data?.dateRangeData?.topPagesVisited || [])
   );
 
+  topPagesVisitedWithPercentChange$ = this.overviewData$.pipe(
+    mapObjectArraysWithPercentChange('topPagesVisited', 'visits')
+  );
+
   top10GSC$ = this.overviewData$.pipe(
     map((data) => data?.dateRangeData?.top10GSC)
   );
@@ -462,5 +466,42 @@ function mapToPercentChange(
     }
 
     return percentChange(current, previous);
+  });
+}
+
+function mapObjectArraysWithPercentChange(
+  propName: keyof OverviewAggregatedData,
+  propPath: string
+) {
+  return map((data: OverviewData) => {
+    if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
+      return;
+    }
+
+    const current = data?.dateRangeData[propName];
+    const previous = data?.comparisonDateRangeData[propName];
+
+    if (!current || !previous) {
+      return;
+    }
+
+    const propsAreValidArrays =
+      Array.isArray(current) &&
+      Array.isArray(previous) &&
+      current.length > 0 &&
+      previous.length > 0 &&
+      current.length === previous.length;
+
+    if (propsAreValidArrays) {
+      return current.map((val: any, i) => ({
+        ...val,
+        percentChange: percentChange(
+          val[propPath],
+          (previous as any)[i][propPath]
+        ),
+      }));
+    }
+
+    throw Error('Invalid data arrays in mapObjectArraysWithPercentChange');
   });
 }
