@@ -1,14 +1,22 @@
 <div class="l-navbar show-n" id="nav-bar">
   <nav class="nav">
     <div>
-      <a class="nav_logo">
+      <a class="nav_logo" *ngIf="!logoVisible">
         <!--<span class="material-icons nav_logo-icon">leaderboard</span>
          <span class="nav_logo-name">UPD</span> -->
-         <img
+         <img 
          src="../../../assets/img/upd-logo.png"
          alt="Usability Performance Dashboard"
 		 > 	
 		</a>
+    <a class="nav_logo" *ngIf="logoVisible">
+      <!--<span class="material-icons nav_logo-icon">leaderboard</span>
+       <span class="nav_logo-name">UPD</span> -->
+       <img 
+       src="../../../assets/img/upd-logo-fr.png"
+       alt="Tableau de bord de la convivialité et du rendement"
+   > 	
+  </a>
       <div class="nav_list mt-5">
         <!-- <a class="nav_link active" aria-current="page" id="active"> <span class="material-icons nav_icon">home</span> <span class="nav_name" data-i18n="menu-overview">Overview</span> </a> -->
         <a
