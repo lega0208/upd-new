@@ -4,7 +4,7 @@ import {
   TaskDetailsData,
 } from '@cra-arc/types-common';
 import { select, Store } from '@ngrx/store';
-import { combineLatest, debounceTime, map } from 'rxjs';
+import { combineLatest, debounceTime, map, reduce } from 'rxjs';
 
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
@@ -52,9 +52,20 @@ export class TasksDetailsFacade {
     map((data) => data?.dateRangeData?.visitsByPage)
   );
 
+  visitsByPageWithPercentChange$ = this.tasksDetailsData$.pipe(
+    mapObjectArraysWithPercentChange('visitsByPage', 'visits')
+  );
+
+  visitsByPageGSCWithPercentChange$ = this.tasksDetailsData$.pipe(
+    mapObjectArraysWithPercentChange('visitsByPage', 'gscTotalClicks')
+  );
+
+  visitsByPageFeedbackWithPercentChange$ = this.tasksDetailsData$.pipe(
+    mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo')
+  );
+
   dyfData$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
-
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
 
@@ -72,9 +83,11 @@ export class TasksDetailsFacade {
     })
   );
 
-  whatWasWrongData$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
+  whatWasWrongData$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
     map(([data, lang]) => {
-
       const cantFindInfo = this.i18n.service.translate(
         'd3-cant-find-info',
         lang
@@ -111,17 +124,18 @@ export class TasksDetailsFacade {
     })
   );
 
-  taskSuccessChart$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
+  taskSuccessChart$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
     map(([data, lang]) => {
-
       const taskSuccessByUxTest = data?.taskSuccessByUxTest;
 
-      if ( !taskSuccessByUxTest )
-        return [];
+      if (!taskSuccessByUxTest) return [];
 
-      return taskSuccessByUxTest.map(({title, successRate}, idx) => {
+      return taskSuccessByUxTest.map(({ title, successRate }, idx) => {
         return {
-          name: `UX Test: ${(idx + 1)} - ${title}`,
+          name: `UX Test: ${idx + 1} - ${title}`,
           value: successRate || 0,
         };
       });
@@ -160,6 +174,14 @@ export class TasksDetailsFacade {
     map((data) => data?.taskSuccessByUxTest)
   );
 
+  totalParticipants$ = this.tasksDetailsData$.pipe(
+    map((data) =>
+      data?.taskSuccessByUxTest
+        ?.map((data) => data?.totalUsers)
+        .reduce((a, b) => a + b, 0)
+    )
+  );
+
   error$ = this.store.pipe(
     select(TasksDetailsSelectors.selectTasksDetailsError)
   );
@@ -196,5 +218,42 @@ function mapToPercentChange(
     }
 
     return percentChange(current, previous);
+  });
+}
+
+function mapObjectArraysWithPercentChange(
+  propName: keyof TaskDetailsAggregatedData,
+  propPath: string
+) {
+  return map((data: TaskDetailsData) => {
+    if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
+      return;
+    }
+
+    const current = data?.dateRangeData[propName];
+    const previous = data?.comparisonDateRangeData[propName];
+
+    if (!current || !previous) {
+      return;
+    }
+
+    const propsAreValidArrays =
+      Array.isArray(current) &&
+      Array.isArray(previous) &&
+      current.length > 0 &&
+      previous.length > 0 &&
+      current.length === previous.length;
+
+    if (propsAreValidArrays) {
+      return current.map((val: any, i) => ({
+        ...val,
+        percentChange: percentChange(
+          val[propPath],
+          (previous as any)[i][propPath]
+        ),
+      }));
+    }
+
+    throw Error('Invalid data arrays in mapObjectArraysWithPercentChange');
   });
 }

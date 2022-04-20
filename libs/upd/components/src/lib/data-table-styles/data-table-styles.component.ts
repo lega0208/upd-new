@@ -24,6 +24,7 @@ export class DataTableStylesComponent implements OnInit {
   projectLabel: ProjectStatus = 'Unknown';
   hasType = false;
   hasPipe = false;
+  currentLang = this.i18n.service.currentLang;
 
   ngOnInit() {
     this.hasType = !!this.config.type;
@@ -46,23 +47,11 @@ export class DataTableStylesComponent implements OnInit {
 
   configurePipe(data: number, pipe?: ColumnConfigPipe, pipeParam?: string) {
     if (pipe === 'number') {
-      return this.decimalPipe.transform(
-        data,
-        pipeParam,
-        this.i18n.service.currentLang
-      );
+      return this.decimalPipe.transform(data, pipeParam, this.currentLang);
     } else if (pipe === 'percent') {
-      return this.percentPipe.transform(
-        data,
-        pipeParam,
-        this.i18n.service.currentLang
-      );
+      return this.percentPipe.transform(data, pipeParam, this.currentLang);
     } else if (pipe === 'date') {
-      return this.datePipe.transform(
-        data,
-        pipeParam,
-        this.i18n.service.currentLang
-      );
+      return this.datePipe.transform(data, pipeParam, this.currentLang);
     }
 
     return data;

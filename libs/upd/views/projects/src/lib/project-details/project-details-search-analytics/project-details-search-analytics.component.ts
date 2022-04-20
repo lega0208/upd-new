@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
+import { LocaleId } from '@cra-arc/upd/i18n';
+import { I18nFacade } from '@cra-arc/upd/state';
+import { combineLatest } from 'rxjs';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 @Component({
@@ -7,47 +10,77 @@ import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
   templateUrl: './project-details-search-analytics.component.html',
   styleUrls: ['./project-details-search-analytics.component.css'],
 })
-export class ProjectDetailsSearchAnalyticsComponent  {
+export class ProjectDetailsSearchAnalyticsComponent implements OnInit {
+  currentLang!: LocaleId;
+  currentLang$ = this.i18n.currentLang$;
+
   gscTotalClicks$ = this.projectsDetailsService.gscTotalClicks$;
 
   gscTotalImpressions$ = this.projectsDetailsService.gscTotalImpressions$;
   gscTotalCtr$ = this.projectsDetailsService.gscTotalCtr$;
   gscTotalPosition$ = this.projectsDetailsService.gscTotalPosition$;
 
-  visitsByPage$ = this.projectsDetailsService.visitsByPage$;
-  visitsByPageCols = [
-    {
-      field: 'url',
-      header: 'Url',
-      type: 'link',
-      typeParams: { preLink: '/pages', link: '_id' },
-    },
-    {
-      field: 'gscTotalClicks',
-      header: 'Clicks',
-      pipe: 'number',
-      type: 'link',
-      typeParams: { preLink: '/pages', link: '_id', postLink: 'searchanalytics' },
-    },
-    {
-      field: 'gscTotalImpressions',
-      header: 'Impressions',
-      pipe: 'number',
-      type: 'link',
-      typeParams: { preLink: '/pages', link: '_id', postLink: 'searchanalytics' },
-    },
-    {
-      field: 'gscTotalCtr',
-      header: 'CTR (Click Through Rate)',
-      pipe: 'percent',
-    },
-    {
-      field: 'gscTotalPosition',
-      header: 'Position',
-      pipe: 'number',
-    },
-    { field: '0', header: 'Comparison (for Clicks)', pipe: 'percent' },
-  ] as ColumnConfig[];
-  
-  constructor(private readonly projectsDetailsService: ProjectsDetailsFacade) {}
+  visitsByPage$ = this.projectsDetailsService.visitsByPageGSCWithPercentChange$;
+  visitsByPageCols: ColumnConfig[] = [];
+
+  ngOnInit(): void {
+    this.i18n.service.onLangChange(({ lang }) => {
+      this.currentLang = lang as LocaleId;
+    });
+
+    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+      this.visitsByPageCols = [
+        {
+          field: 'url',
+          header: 'Url',
+          type: 'link',
+          typeParams: { preLink: '/pages', link: '_id' },
+        },
+        {
+          field: 'gscTotalClicks',
+          header: 'Clicks',
+          pipe: 'number',
+          type: 'link',
+          typeParams: {
+            preLink: '/pages',
+            link: '_id',
+            postLink: 'searchanalytics',
+          },
+        },
+        {
+          field: 'gscTotalImpressions',
+          header: 'Impressions',
+          pipe: 'number',
+          type: 'link',
+          typeParams: {
+            preLink: '/pages',
+            link: '_id',
+            postLink: 'searchanalytics',
+          },
+        },
+        {
+          field: 'gscTotalCtr',
+          header: 'CTR (Click Through Rate)',
+          pipe: 'percent',
+        },
+        {
+          field: 'gscTotalPosition',
+          header: 'Position',
+          pipe: 'number',
+          pipeParam: '1.2-2',
+        },
+        { field: '0', header: 'Comparison (for Clicks)', pipe: 'percent' },
+        {
+          field: 'percentChange',
+          header: this.i18n.service.translate('comparison', lang),
+          pipe: 'percent',
+        },
+      ];
+    });
+  }
+
+  constructor(
+    private readonly projectsDetailsService: ProjectsDetailsFacade,
+    private i18n: I18nFacade
+  ) {}
 }

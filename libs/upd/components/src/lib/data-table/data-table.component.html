@@ -36,20 +36,22 @@
       <div *ngIf="sort; then thenBlock; else elseBlock"></div>
       <ng-template #thenBlock>
         <th *ngFor="let col of columns" [pSortableColumn]="col.field">
-          <ng-container *ngIf="col.tooltip">
-            <span
-              class="p-column-title"
-              [class.card-tooltip]="col.tooltip"
-              [ngbPopover]="col.tooltip"
-              placement="end"
-            >
+          <div class="text-nowrap">
+            <ng-container *ngIf="col.tooltip">
+              <span
+                class="p-column-title"
+                [class.card-tooltip]="col.tooltip"
+                [ngbPopover]="col.tooltip"
+                placement="end"
+              >
+                <strong>{{ col.header }}</strong>
+              </span>
+            </ng-container>
+            <ng-container *ngIf="!col.tooltip">
               <strong>{{ col.header }}</strong>
-            </span>
-          </ng-container>
-          <ng-container *ngIf="!col.tooltip">
-            <strong>{{ col.header }}</strong>
-          </ng-container>
-          <p-sortIcon [field]="col.field"></p-sortIcon>
+            </ng-container>
+            <p-sortIcon [field]="col.field"></p-sortIcon>
+          </div>
         </th>
       </ng-template>
       <ng-template #elseBlock

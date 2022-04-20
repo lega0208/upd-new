@@ -2,13 +2,17 @@
   <a *ngIf="config.type === 'link'" [routerLink]="[data[config.typeParam]]">
     {{ data[config.field] }}
   </a>
-  <ng-container
-    *ngIf="isProjectLabel"
-  >
-    <app-project-status-label [statusText]="projectLabel"></app-project-status-label>
+  <ng-container *ngIf="isProjectLabel">
+    <app-project-status-label
+      [statusText]="projectLabel"
+    ></app-project-status-label>
   </ng-container>
   <span
-    *ngIf="config.type === 'label' && config.typeParam === 'cops' && !!data[config.field]"
+    *ngIf="
+      config.type === 'label' &&
+      config.typeParam === 'cops' &&
+      !!data[config.field]
+    "
     class="badge"
     [ngClass]="{
       'bg-primary': config.typeParam === 'cops'
@@ -37,7 +41,7 @@
       ]"
     >
       <ng-container *ngIf="config.pipe === 'number'; else elseBlock">
-        {{ data[config.field] | number: config.pipeParam }}
+        {{ data[config.field] | number: config.pipeParam:currentLang }}
       </ng-container>
       <ng-template #elseBlock>
         {{ data[config.field] }}
@@ -53,7 +57,7 @@
 </ng-container>
 
 <ng-container *ngIf="hasPipe && !hasType">
- {{ numberVal }}
+  {{ numberVal }}
 </ng-container>
 
 <ng-container *ngIf="!hasType && !hasPipe">

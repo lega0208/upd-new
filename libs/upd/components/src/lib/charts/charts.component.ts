@@ -24,8 +24,10 @@ import { I18nFacade } from '@cra-arc/upd/state';
 })
 export class ChartsComponent implements OnInit {
   view?: [number, number];
-  @Input() lang: LocaleId = EN_CA;
+  @Input() lang!: LocaleId;
   @Input() convertToLine = false;
+
+  dayjs = dayjs;
 
   @Input() title = '';
   @Input() titleTooltip = '';

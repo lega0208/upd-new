@@ -19,7 +19,7 @@ export class ProjectDetailsComponent implements OnInit {
     { href: 'pagefeedback', title: 'Page Feedback' },
     { href: 'calldrivers', title: 'Call Drivers' },
     { href: 'uxtests', title: 'UX Tests' },
-    { href: 'details', title: 'Details' },
+    // { href: 'details', title: 'Details' },
   ];
 
   data$ = this.projectsDetailsService.projectsDetailsData$;

@@ -13,13 +13,12 @@ import { combineLatest } from 'rxjs';
 export class PagesHomeComponent implements OnInit {
   pagesHomeData$ = this.pagesHomeService.pagesHomeTableData$;
   loading$ = this.pagesHomeService.loading$;
-  
+
   currentLang$ = this.i18n.currentLang$;
 
   columns: ColumnConfig[] = [];
 
   ngOnInit() {
-
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
       this.columns = [
         {
@@ -27,8 +26,13 @@ export class PagesHomeComponent implements OnInit {
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
           typeParam: '_id',
+          tooltip: 'Url tooltip',
         },
-        { field: 'title', header: this.i18n.service.translate('Title', lang) },
+        {
+          field: 'title',
+          header: this.i18n.service.translate('Title', lang),
+          tooltip: 'Title tooltip',
+        },
         {
           field: 'visits',
           header: this.i18n.service.translate('visits', lang),
@@ -40,5 +44,8 @@ export class PagesHomeComponent implements OnInit {
     this.pagesHomeService.fetchData();
   }
 
-  constructor(private pagesHomeService: PagesHomeFacade, private i18n: I18nFacade) {}
+  constructor(
+    private pagesHomeService: PagesHomeFacade,
+    private i18n: I18nFacade
+  ) {}
 }

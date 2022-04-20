@@ -7,13 +7,27 @@
 @import url('../../../node_modules/primeng/resources/primeng.min.css');
 
 // dependency changes
-.show4nLabels
-.x.axis {
-    .tick {
-      display: none !important;
-  
-      &:nth-child(4n) {
-        display: block !important;
-      }
+.show4nLabels .x.axis {
+  .tick {
+    display: none !important;
+
+    &:nth-child(4n) {
+      display: block !important;
     }
   }
+}
+
+.tooltip-item {
+  text-align: left;
+  line-height: 1.2em;
+  padding: 5px 0;
+
+  .tooltip-item-color {
+    display: inline-block;
+    height: 12px;
+    width: 12px;
+    margin-right: 5px;
+    color: #5b646b;
+    border-radius: 3px;
+  }
+}

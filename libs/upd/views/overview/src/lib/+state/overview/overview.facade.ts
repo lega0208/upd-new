@@ -182,49 +182,30 @@ export class OverviewFacade {
       let visitsByDayData: MultiSeries = [];
 
       if (maxDays > 31) {
-
-        // visitsByDayData = [
-        //   {
-        //     name: data?.dateRange,
-        //     series: visitsByDay.map(({ visits, date }) => ({
-        //       name: dayjs(date).utc(false).locale(lang).format(dateFormat), // todo: date label (x-axis) formatting based on date range length
-        //       value: visits || 0,
-        //     })),
-        //   },
-        // ];
-
-        // if (
-        //   data?.comparisonDateRangeData &&
-        //   typeof data?.comparisonDateRange === 'string'
-        // ) {
-        //   visitsByDayData.push({
-        //     name: data?.comparisonDateRange,
-        //     series: visitsByDay.map(({ date }, idx) => ({
-        //       name: dayjs(date).utc(false).locale(lang).format(dateFormat),
-        //       value: comparisonVisitsByDay[idx]?.visits || 0,
-        //     })),
-        //   });
-        // }
-
-
         visitsByDayData = [
           {
             name: data?.dateRange,
             series: dateRangeSeries.map(({ value }, i) => ({
-              name: dayjs(dateRangeDates[i]).utc(false).locale(lang).format(dateFormat),
+              name: dayjs(dateRangeDates[i])
+                .utc(false)
+                .locale(lang)
+                .format(dateFormat),
               value: value || 0,
             })),
           },
         ];
 
         if (
-            data?.comparisonDateRangeData &&
-            typeof data?.comparisonDateRange === 'string'
-          ) {
+          data?.comparisonDateRangeData &&
+          typeof data?.comparisonDateRange === 'string'
+        ) {
           visitsByDayData.push({
             name: data?.comparisonDateRange,
             series: comparisonDateRangeSeries.map(({ value }, i) => ({
-              name: dayjs(dateRangeDates[i]).utc(false).locale(lang).format(dateFormat),
+              name: dayjs(dateRangeDates[i])
+                .utc(false)
+                .locale(lang)
+                .format(dateFormat),
               value: value || 0,
             })),
           });

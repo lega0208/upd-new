@@ -44,12 +44,12 @@ export class ProjectsHomeComponent implements OnInit {
       tooltip: 'tooltip',
       pipe: 'date',
     },
-    {
-      field: 'launchDate',
-      header: 'Launch date',
-      tooltip: 'tooltip',
-      pipe: 'date',
-    },
+    // {
+    //   field: 'launchDate',
+    //   header: 'Launch date',
+    //   tooltip: 'tooltip',
+    //   pipe: 'date',
+    // },
     {
       field: 'avgSuccessRate',
       header: 'Average test success rate',
