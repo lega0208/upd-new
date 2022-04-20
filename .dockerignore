@@ -1,7 +1,6 @@
 node_modules
 .vscode/
 .git/
-docker
 .swc
 apps
 libs
