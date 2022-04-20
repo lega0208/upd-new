@@ -147,7 +147,6 @@ export class ChartsComponent implements OnInit {
       this.applyDimensions();
     }
 
-    this.lineChart = lineChart;
 
     this.currentLang$.subscribe((nextLang) => {
       this.lang = nextLang;
@@ -279,32 +278,3 @@ export class ChartsComponent implements OnInit {
 
   constructor(private i18n: I18nFacade) {}
 }
-
-// to be removed once data for this chart is available (call drivers)
-
-const lineChart = [
-  {
-    name: 'Calls Apr 18-Apr 24',
-    series: [
-      { name: 'Sunday', value: 0 },
-      { name: 'Monday', value: 79917 },
-      { value: 81278, name: 'Tuesday' },
-      { name: 'Wednesday', value: 76967 },
-      { value: 72542, name: 'Thursday' },
-      { name: 'Friday', value: 65486 },
-      { value: 2953, name: 'Saturday' },
-    ],
-  },
-  {
-    name: 'Calls Apr 11-Apr 17',
-    series: [
-      { name: 'Sunday', value: 0 },
-      { name: 'Monday', value: 89599 },
-      { value: 82338, name: 'Tuesday' },
-      { name: 'Wednesday', value: 83349 },
-      { value: 75687, name: 'Thursday' },
-      { name: 'Friday', value: 69901 },
-      { value: 0, name: 'Saturday' },
-    ],
-  },
-];

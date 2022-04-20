@@ -1,13 +1,21 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Overall, OverallDocument, Project, ProjectDocument, Task, TaskDocument, UxTest, UxTestDocument } from '@cra-arc/db';
+import {
+  CallDriver,
+  CallDriverDocument,
+  Overall,
+  OverallDocument,
+  Project,
+  ProjectDocument,
+  Task,
+  TaskDocument,
+  UxTest,
+  UxTestDocument,
+} from '@cra-arc/db';
 import type { PageMetricsModel } from '@cra-arc/types-common';
 import { FilterQuery, Model } from 'mongoose';
 import { ApiParams } from '@cra-arc/upd/services';
-import {
-  OverviewAggregatedData,
-  OverviewData,
-} from '@cra-arc/types-common';
+import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
 import { PageMetrics } from '@cra-arc/types-common';
 import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
@@ -22,34 +30,52 @@ export class OverallService {
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>,
+    @InjectModel(CallDriver.name)
+    private calldriversModel: Model<CallDriverDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
-    ) {}
+  ) {}
 
   // todo: precache everything on startup
   async getMetrics(params: ApiParams): Promise<OverviewData> {
-    return {
+    const cacheKey = `OverviewMetrics-${params.dateRange}`;
+    const cachedData = await this.cacheManager.store.get<OverviewData>(
+      cacheKey
+    );
+
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
       dateRangeData: await getOverviewMetrics(
         this.overallModel,
         this.pageMetricsModel,
+        this.calldriversModel,
         this.cacheManager,
-        params.dateRange,
+        params.dateRange
       ),
       comparisonDateRangeData: await getOverviewMetrics(
         this.overallModel,
         this.pageMetricsModel,
+        this.calldriversModel,
         this.cacheManager,
-        params.comparisonDateRange,
+        params.comparisonDateRange
       ),
-      uxTests: await getUxTests(
-        this.uxTestModel,
-      ),
+      uxTests: await getUxTests(this.uxTestModel),
     } as OverviewData;
+
+
+    await this.cacheManager.set(cacheKey, results);
+
+    return results;
   }
 }
 
-async function getUxTests(uxTestsModel: Model<UxTestDocument>): Promise<UxTest[]> {
+async function getUxTests(
+  uxTestsModel: Model<UxTestDocument>
+): Promise<UxTest[]> {
   const defaultData = {
     numInProgress: 0,
     numCompletedLast6Months: 0,
@@ -59,67 +85,69 @@ async function getUxTests(uxTestsModel: Model<UxTestDocument>): Promise<UxTest[]
 
   const sixMonthsAgo = dayjs().utc(false).subtract(6, 'months').toDate();
   const year2018 = dayjs('2018-01-01').utc(false).toDate();
-  
-  const uxTest = ( await uxTestsModel
-      .aggregate()
-      .group({
-        _id: '$cops',
-        count: { $sum: 1 },
-        countLast6Months: {
-          $sum: {
-            $cond: [{ $gte: ['$date', sixMonthsAgo] }, 1, 0],
+
+  const uxTest =
+    (
+      await uxTestsModel
+        .aggregate()
+        .group({
+          _id: '$cops',
+          count: { $sum: 1 },
+          countLast6Months: {
+            $sum: {
+              $cond: [{ $gte: ['$date', sixMonthsAgo] }, 1, 0],
+            },
           },
-        },
-        countSince2018: {
-          $sum: {
-            $cond: [{ $gte: ['$date', year2018] }, 1, 0],
+          countSince2018: {
+            $sum: {
+              $cond: [{ $gte: ['$date', year2018] }, 1, 0],
+            },
           },
-        },
-      })
-      .group({
-        _id: null,
-        numInProgress: {
-          $sum: {
-            $cond: [{ $eq: ['$_id', 'In Progress'] }, '$count', 0],
+        })
+        .group({
+          _id: null,
+          numInProgress: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'In Progress'] }, '$count', 0],
+            },
           },
-        },
-        completedLast6Months: {
-          $sum: {
-            $cond: [{ $eq: ['$_id', 'Complete'] }, '$countLast6Months', 0],
+          completedLast6Months: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Complete'] }, '$countLast6Months', 0],
+            },
           },
-        },
-        completedSince2018: {
-          $sum: {
-            $cond: [{ $eq: ['$_id', 'Complete'] }, '$countSince2018', 0],
+          completedSince2018: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Complete'] }, '$countSince2018', 0],
+            },
           },
-        },
-        copsCompletedSince2018: {
-          $sum: {
-            $cond: [{ $eq: ['$_id', true] }, '$countSince2018', 0],
+          copsCompletedSince2018: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', true] }, '$countSince2018', 0],
+            },
           },
-        },
-        totalCompleted: {
-          $sum: {
-            $cond: [{ $eq: ['$_id', 'Complete'] }, '$count', 0],
+          totalCompleted: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Complete'] }, '$count', 0],
+            },
           },
-        },
-        numDelayed: {
-          $sum: {
-            $cond: [{ $eq: ['$_id', 'Delayed'] }, '$count', 0],
+          numDelayed: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Delayed'] }, '$count', 0],
+            },
           },
-        },
-      })
-      .project({
-        _id: 0,
-        numInProgress: 1,
-        numCompletedLast6Months: 1,
-        completedSince2018: 1,
-        totalCompleted: 1,
-        numDelayed: 1,
-        copsCompletedSince2018: 1,
-      })
-      .exec()
-  )[0] || defaultData;
+        })
+        .project({
+          _id: 0,
+          numInProgress: 1,
+          numCompletedLast6Months: 1,
+          completedSince2018: 1,
+          totalCompleted: 1,
+          numDelayed: 1,
+          copsCompletedSince2018: 1,
+        })
+        .exec()
+    )[0] || defaultData;
 
   return { ...uxTest };
 }
@@ -127,15 +155,10 @@ async function getUxTests(uxTestsModel: Model<UxTestDocument>): Promise<UxTest[]
 async function getOverviewMetrics(
   overallModel: Model<OverallDocument>,
   PageMetricsModel: PageMetricsModel,
+  calldriversModel: Model<CallDriverDocument>,
   cacheManager: Cache,
-  dateRange: string,
+  dateRange: string
 ): Promise<OverviewAggregatedData> {
-  const cacheKey = `getOverviewMetrics-${dateRange}`;
-  const cachedData = await cacheManager.store.get<OverviewAggregatedData>(cacheKey);
-
-  if (cachedData) {
-    return cachedData;
-  }
 
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
@@ -148,6 +171,23 @@ async function getOverviewMetrics(
     .find({ date: dateQuery }, { _id: 0, date: 1, visits: 1 })
     .sort({ date: 1 })
     .lean();
+
+  const calldriversByDay = await calldriversModel
+    .aggregate()
+    .match({ date: dateQuery })
+    .group({
+      _id: '$date',
+      calls: {
+        $sum: '$calls',
+      },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      calls: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
 
   const topPagesVisited = await PageMetricsModel.aggregate()
     .sort({ date: 1, url: 1 })
@@ -182,7 +222,9 @@ async function getOverviewMetrics(
     .exec();
 
   const aggregatedMetrics = await overallModel
-    .aggregate<Omit<OverviewAggregatedData, 'visitsByDay'>>()
+    .aggregate<
+      Omit<OverviewAggregatedData, 'visitsByDay' | 'calldriversByDay'>
+    >()
     .match({
       date: dateQuery,
     })
@@ -220,14 +262,11 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
-  const results = {
+  return {
     visitsByDay,
+    calldriversByDay,
     ...aggregatedMetrics[0],
     topPagesVisited,
     top10GSC,
   };
-
-  await cacheManager.set(cacheKey, results);
-
-  return results;
 }

@@ -110,6 +110,7 @@ export interface OverviewAggregatedData {
   fwylf_other: number;
   fwylf_cant_find_info: number;
   visitsByDay: { date: Date; visits: number }[];
+  calldriversByDay: { date: Date, calls: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
   uxTest: OverviewUxData;

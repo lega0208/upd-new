@@ -42,6 +42,7 @@ export class OverviewSummaryComponent implements OnInit {
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
 
   barChartData$ = this.overviewService.visitsByDay$;
+  calldriversChartData$ = this.overviewService.calldriversByDay$;
 
   barTable$ = this.overviewService.barTable$;
 
@@ -63,30 +64,61 @@ export class OverviewSummaryComponent implements OnInit {
   taskSurveyCols: ColumnConfig[] = [];
 
   ngOnInit() {
-    this.i18n.service.onLangChange(
-      ({ lang }) => { this.currentLang = lang as LocaleId; }
-    );
+    this.i18n.service.onLangChange(({ lang }) => {
+      this.currentLang = lang as LocaleId;
+    });
 
-    combineLatest([this.currentLang$, this.dateRangeLabel$, this.comparisonDateRangeLabel$]).subscribe(([lang, dateRange, comparisonDateRange]) => {
+    combineLatest([
+      this.currentLang$,
+      this.dateRangeLabel$,
+      this.comparisonDateRangeLabel$,
+    ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
       this.dyfTableCols = [
-        { field: 'name', header: this.i18n.service.translate('Selection', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'name',
+          header: this.i18n.service.translate('Selection', lang),
+        },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
       this.whatWasWrongTableCols = [
         { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
       this.barTableCols = [
         { field: 'name', header: this.i18n.service.translate('Dates', lang) },
         //{ field: 'currValue', header: `Visits for ${this.dateRangeLabel$}`, pipe: 'number' },
-        { field: 'currValue', header: this.i18n.service.translate(`Visits for ${dateRange}`, lang), pipe: 'number' },
-        { field: 'prevValue', header: this.i18n.service.translate(`Visits for ${comparisonDateRange}`, lang), pipe: 'number' }
+        {
+          field: 'currValue',
+          header: this.i18n.service.translate(`Visits for ${dateRange}`, lang),
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: this.i18n.service.translate(
+            `Visits for ${comparisonDateRange}`,
+            lang
+          ),
+          pipe: 'number',
+        },
       ];
       this.taskSurveyCols = [
         { field: 'task', header: this.i18n.service.translate('task', lang) },
-        { field: 'completion', header: this.i18n.service.translate('Task Success Survey Completed', lang) }
+        {
+          field: 'completion',
+          header: this.i18n.service.translate(
+            'Task Success Survey Completed',
+            lang
+          ),
+        },
       ];
-
     });
   }
 }

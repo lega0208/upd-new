@@ -13,8 +13,7 @@ import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
-import { OverviewState } from './overview.reducer';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { I18nFacade, selectDatePeriodSelection } from '@cra-arc/upd/state';
 
 dayjs.extend(utc);
 
@@ -26,6 +25,7 @@ export class OverviewFacade {
     select(OverviewSelectors.getOverviewLoading),
     debounceTime(500)
   );
+  dateRangeSelected$ = this.store.pipe(select(selectDatePeriodSelection));
   overviewData$ = this.store.pipe(select(OverviewSelectors.getOverviewData));
 
   visitors$ = this.overviewData$.pipe(
@@ -229,6 +229,47 @@ export class OverviewFacade {
     })
   );
 
+  calldriversByDay$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+    this.dateRangeSelected$,
+  ]).pipe(
+    map(([data, lang, dateRangePeriod]) => {
+      const calldriversByDay = data?.dateRangeData?.calldriversByDay || [];
+      const comparisonCalldriversByDay =
+        data?.comparisonDateRangeData?.calldriversByDay || [];
+
+      if (!calldriversByDay.length || !comparisonCalldriversByDay.length) {
+        return [] as MultiSeries;
+      }
+
+      const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
+
+      const dateRangeSeries = calldriversByDay.map(({ date, calls }) => ({
+        name: dayjs(date).utc(false).locale(lang).format(dateFormat),
+        value: calls,
+      }));
+
+      const comparisonDateRangeSeries = comparisonCalldriversByDay.map(
+        ({ date, calls }) => ({
+          name: dayjs(date).utc(false).locale(lang).format(dateFormat),
+          value: calls,
+        })
+      );
+
+      return [
+        {
+          name: data?.dateRange,
+          series: dateRangeSeries,
+        },
+        {
+          name: data?.comparisonDateRange,
+          series: comparisonDateRangeSeries,
+        },
+      ];
+    })
+  );
+
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
   barTable$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
@@ -397,10 +438,7 @@ export class OverviewFacade {
 
   error$ = this.store.pipe(select(OverviewSelectors.getOverviewError));
 
-  constructor(
-    private readonly store: Store<OverviewState>,
-    private i18n: I18nFacade
-  ) {}
+  constructor(private readonly store: Store, private i18n: I18nFacade) {}
 
   init() {
     this.store.dispatch(OverviewActions.init());

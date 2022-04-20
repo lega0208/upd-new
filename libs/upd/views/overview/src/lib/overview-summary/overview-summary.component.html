@@ -39,6 +39,7 @@
         [showRightYAxisLabel]="true"
         [curveType]="'Natural'"
         [barChart]="(barChartData$ | async) || []"
+        [lineChart]="(calldriversChartData$ | async) || []"
         [table]="barTable$ | async"
         [convertToLine]="(isChartDataOver31Days$ | async) || false"
         [tableCols]="barTableCols"
