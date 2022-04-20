@@ -12,6 +12,14 @@ services:
       - web
     restart: unless-stopped
     container_name: upd_nginx
+    volumes:
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
   web:
     image: "upd_web"
     container_name: upd_web
