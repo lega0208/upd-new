@@ -208,6 +208,7 @@ async function getTaskAggregatedData(
     })
     // .addFields({ _id: '$page' })
     .project({ page: 0 })
+    .sort( { title: 1 })
     .group({
       _id: 'null',
       visits: { $sum: '$visits' },
@@ -221,7 +222,7 @@ async function getTaskAggregatedData(
       gscTotalImpressions: { $sum: '$gscTotalImpressions' },
       gscTotalCtr: { $avg: '$gscTotalCtr' },
       gscTotalPosition: { $avg: '$gscTotalPosition' },
-      visitsByPage: { $addToSet: '$$ROOT' },
+      visitsByPage: { $push: '$$ROOT' },
     })
     .project({ _id: 0 })
     .exec();
