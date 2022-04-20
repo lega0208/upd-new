@@ -254,7 +254,7 @@ export class ProjectsService {
                 total_users: 1,
                 successful_users: 1,
                 project_lead: 1,
-                vendor: 1
+                vendor: 1,
               },
             },
             {
@@ -264,11 +264,11 @@ export class ProjectsService {
                   title: '$title',
                   test_type: '$test_type',
                   date: '$date',
-                  tasks: { $first: '$tasks'},
+                  tasks: { $first: '$tasks' },
                   total_users: '$total_users',
                   successful_users: '$successful_users',
                   project_lead: '$project_lead',
-                  vendor: '$vendor'
+                  vendor: '$vendor',
                 },
                 status: { $first: '$status' },
                 successRate: { $avg: '$success_rate' },
@@ -287,7 +287,7 @@ export class ProjectsService {
                 vendor: '$_id.vendor',
                 status: 1,
                 successRate: 1,
-              }
+              },
             },
             {
               $sort: { date: -1 },
@@ -341,58 +341,60 @@ async function getAggregatedProjectMetrics(
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
   return (
-    await pageMetricsModel
-      .aggregate<ProjectDetailsAggregatedData>()
-      .sort({ date: 1, projects: 1 })
-      .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
-      .group({
-        _id: '$url',
-        page: { $first: '$page' },
-        visits: { $sum: '$visits' },
-        dyfYes: { $sum: '$dyf_yes' },
-        dyfNo: { $sum: '$dyf_no' },
-        fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
-        fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
-        fwylfOther: { $sum: '$fwylf_other' },
-        fwylfError: { $sum: '$fwylf_error' },
-        gscTotalClicks: { $sum: '$gsc_total_clicks' },
-        gscTotalImpressions: { $sum: '$gsc_total_impressions' },
-        gscTotalCtr: { $sum: '$gsc_total_ctr' },
-        gscTotalPosition: { $avg: '$gsc_total_position' },
-      })
-      .lookup({
-        from: 'pages',
-        localField: 'page',
-        foreignField: '_id',
-        as: 'page',
-      })
-      .unwind('$page')
-      .replaceRoot({
-        $mergeObjects: [
-          '$$ROOT',
-          { _id: '$page._id', title: '$page.title', url: '$page.url' },
-        ],
-      })
-      // .addFields({ _id: '$page' })
-      .project({ page: 0 })
-      .group({
-        _id: null,
-        visitsByPage: {
-          $push: '$$ROOT',
-        },
-        visits: { $sum: '$visits' },
-        dyfYes: { $sum: '$dyfYes' },
-        dyfNo: { $sum: '$dyfNo' },
-        fwylfCantFindInfo: { $sum: '$fwylfCantFindInfo' },
-        fwylfHardToUnderstand: { $sum: '$fwylfHardToUnderstand' },
-        fwylfOther: { $sum: '$fwylfOther' },
-        fwylfError: { $sum: '$fwylfError' },
-        gscTotalClicks: { $sum: '$gscTotalClicks' },
-        gscTotalImpressions: { $sum: '$gscTotalImpressions' },
-        gscTotalCtr: { $sum: '$gscTotalCtr' },
-        gscTotalPosition: { $avg: '$gscTotalPosition' },
-      })
-      .project({ _id: 0 })
-      .exec()
-  )[0];
+    (
+      await pageMetricsModel
+        .aggregate<ProjectDetailsAggregatedData>()
+        .sort({ date: 1, projects: 1 })
+        .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
+        .group({
+          _id: '$url',
+          page: { $first: '$page' },
+          visits: { $sum: '$visits' },
+          dyfYes: { $sum: '$dyf_yes' },
+          dyfNo: { $sum: '$dyf_no' },
+          fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
+          fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
+          fwylfOther: { $sum: '$fwylf_other' },
+          fwylfError: { $sum: '$fwylf_error' },
+          gscTotalClicks: { $sum: '$gsc_total_clicks' },
+          gscTotalImpressions: { $sum: '$gsc_total_impressions' },
+          gscTotalCtr: { $avg: '$gsc_total_ctr' },
+          gscTotalPosition: { $avg: '$gsc_total_position' },
+        })
+        .lookup({
+          from: 'pages',
+          localField: 'page',
+          foreignField: '_id',
+          as: 'page',
+        })
+        .unwind('$page')
+        .replaceRoot({
+          $mergeObjects: [
+            '$$ROOT',
+            { _id: '$page._id', title: '$page.title', url: '$page.url' },
+          ],
+        })
+        // .addFields({ _id: '$page' })
+        .project({ page: 0 })
+        .group({
+          _id: null,
+          visitsByPage: {
+            $push: '$$ROOT',
+          },
+          visits: { $sum: '$visits' },
+          dyfYes: { $sum: '$dyfYes' },
+          dyfNo: { $sum: '$dyfNo' },
+          fwylfCantFindInfo: { $sum: '$fwylfCantFindInfo' },
+          fwylfHardToUnderstand: { $sum: '$fwylfHardToUnderstand' },
+          fwylfOther: { $sum: '$fwylfOther' },
+          fwylfError: { $sum: '$fwylfError' },
+          gscTotalClicks: { $sum: '$gscTotalClicks' },
+          gscTotalImpressions: { $sum: '$gscTotalImpressions' },
+          gscTotalCtr: { $avg: '$gscTotalCtr' },
+          gscTotalPosition: { $avg: '$gscTotalPosition' },
+        })
+        .project({ _id: 0 })
+        .exec()
+    )[0]
+  );
 }

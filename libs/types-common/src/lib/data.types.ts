@@ -112,6 +112,14 @@ export interface OverviewAggregatedData {
   visitsByDay: { date: Date; visits: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
+  uxTest: OverviewUxData;
+}
+
+export interface OverviewUxData {
+  numInProgress: number;
+  numCompletedLast6Months: number;
+  totalCompleted: number;
+  numDelayed: number;
 }
 
 export type OverviewData = ViewData<OverviewAggregatedData>;
