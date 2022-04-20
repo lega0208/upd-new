@@ -10,3 +10,8 @@
   .language-picker {
     width: 100px;
   }
+
+  .langs, .langs:hover, .langs:visited {
+    text-decoration: underline;
+    color: #2e5ea7;
+  }

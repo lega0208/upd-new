@@ -11,10 +11,12 @@ export class HeaderComponent {
   @Input() lang = EN_CA;
   en = EN_CA;
   fr = FR_CA;
+  shown: boolean = false;
 
   constructor(private i18n: I18nFacade) {}
 
   selectLanguage(value: string) {
     this.i18n.setLang(value as LocaleId);
+    this.shown = ! this.shown;
   }
 }
