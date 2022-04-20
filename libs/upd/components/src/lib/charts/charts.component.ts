@@ -161,6 +161,13 @@ export class ChartsComponent implements OnInit {
     this.view = [this.width, this.height];
   }
 
+  get hasData() {
+    return !(
+      this.data.length === 0 &&
+      (this.barChart?.length === 0 || this.lineChart?.length === 0)
+    );
+  }
+
   setDoughnut() {
     if (this.type === 'doughnut' || this.type === 'donut') {
       this.doughnut = true;

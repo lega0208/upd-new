@@ -1,7 +1,7 @@
-<app-card [card-title]="title" [title-tooltip]="titleTooltip">
+<app-card [card-title]="title" [title-tooltip]="titleTooltip" [h]="!hasData ? 100 : 0">
   <ng-container
     *ngIf="
-      data.length === 0 && (barChart?.length === 0 || lineChart?.length === 0);
+      !hasData;
       else elseBlock
     "
   >
