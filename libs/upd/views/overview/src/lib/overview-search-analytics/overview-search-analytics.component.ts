@@ -3,12 +3,19 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
 import { Metrics } from '../query';
 import { ColumnConfig } from '@cra-arc/upd-components';
 
+import { I18nFacade } from '@cra-arc/upd/state';
+import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { combineLatest } from 'rxjs';
+
 @Component({
   selector: 'app-overview-search-analytics',
   templateUrl: './overview-search-analytics.component.html',
   styleUrls: ['./overview-search-analytics.component.css'],
 })
 export class OverviewSearchAnalyticsComponent {
+  currentLang!: LocaleId;
+  currentLang$ = this.i18n.currentLang$;
+
   gscImpressions$ = this.overviewService.impressions$;
   gscImpressionsPercentChange$ = this.overviewService.impressionsPercentChange$;
 
@@ -23,26 +30,41 @@ export class OverviewSearchAnalyticsComponent {
   CanSearchTerms = canSearchTerms;
   GSCSearchTerms$ = this.overviewService.top10GSC$;
 
-  CanSearchTermsCols = [
-    { field: 'Search terms', header: 'Search terms' },
-    { field: 'Clicks', header: 'Clicks' },
-    { field: 'Comparison', header: 'Comparison' },
-  ] as ColumnConfig[];
-  GSCSearchTermsCols = [
-    { field: '_id', header: 'Search terms' },
-    { field: 'clicks', header: 'Clicks', pipe: 'number' },
-    { field: 'Comparison', header: 'Comparison' },
-    { field: 'impressions', header: 'Impressions', pipe: 'number' },
-    { field: 'ctr', header: 'CTR (Click Through Rate)', pipe: 'percent' },
-    {
-      field: 'position',
-      header: 'Position',
-      pipe: 'number',
-      pipeParam: '1.0-2',
-    },
-  ] as ColumnConfig[];
+  CanSearchTermsCols: ColumnConfig[] = [];
+  GSCSearchTermsCols: ColumnConfig[] = [];
 
-  constructor(private overviewService: OverviewFacade) {}
+  constructor(
+    private overviewService: OverviewFacade,
+    private i18n: I18nFacade
+  ) {}
+
+  ngOnInit() {
+    this.i18n.service.onLangChange(({ lang }) => {
+      this.currentLang = lang as LocaleId;
+    });
+
+    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+      this.CanSearchTermsCols = [
+        { field: 'Search terms', header: this.i18n.service.translate('search-terms', lang) },
+        { field: 'Clicks', header: this.i18n.service.translate('clicks', lang) },
+        { field: 'Comparison', header: this.i18n.service.translate('comparison', lang) }
+      ];
+      this.GSCSearchTermsCols = [
+        { field: '_id', header: this.i18n.service.translate('search-terms', lang) },
+        { field: 'clicks', header: this.i18n.service.translate('clicks', lang), pipe: 'number' },
+        { field: 'Comparison', header: this.i18n.service.translate('comparison', lang) },
+        { field: 'impressions', header: this.i18n.service.translate('impressions', lang), pipe: 'number' },
+        { field: 'ctr', header: this.i18n.service.translate('ctr', lang), pipe: 'percent' },
+        {
+          field: 'position',
+          header: this.i18n.service.translate('position', lang),
+          pipe: 'number',
+          pipeParam: '1.0-2',
+        }
+      ];
+
+    });
+  }
 }
 const canSearchTerms = [{"Search terms":"Arnage","Clicks":5545,"Comparison":0.8},
 {"Search terms":"Cooper","Clicks":2381,"Comparison":0.5},

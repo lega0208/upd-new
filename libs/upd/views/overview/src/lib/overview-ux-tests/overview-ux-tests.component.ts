@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
+import { I18nFacade } from '@cra-arc/upd/state';
+import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-overview-ux-tests',
@@ -8,14 +11,17 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
   styleUrls: ['./overview-ux-tests.component.css'],
 })
 export class OverviewUxTestsComponent {
+  currentLang!: LocaleId;
+  currentLang$ = this.i18n.currentLang$;
+
   uxChartData = uxChart;
-  uxChartCols: ColumnConfig[] = [
-    { field: 'UX projects', header: 'UX projects' },
-    { field: 'Test', header: 'Test' },
-    { field: 'Date', header: 'Date' },
-    { field: 'Score', header: 'Score' },
-    { field: 'Participants', header: 'Participants' },
-  ];
+  // uxChartCols: ColumnConfig[] = [
+  //   { field: 'UX projects', header: 'UX projects' },
+  //   { field: 'Test', header: 'Test' },
+  //   { field: 'Date', header: 'Date' },
+  //   { field: 'Score', header: 'Score' },
+  //   { field: 'Participants', header: 'Participants' },
+  // ];
 
   testsCompleted = 36;
   tasksTested = 254;
@@ -25,7 +31,28 @@ export class OverviewUxTestsComponent {
   testsConductedLastQuarter = 4;
   COPSTests = 21;
 
-  constructor(private overviewService: OverviewFacade) {}
+  constructor(
+    private overviewService: OverviewFacade,
+    private i18n: I18nFacade
+  ) {}
+
+  uxChartCols: ColumnConfig[] = [];
+
+  ngOnInit() {
+
+    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+      
+
+      this.uxChartCols = [
+        { field: 'UX projects', header: this.i18n.service.translate('ux_projects', lang) },
+        { field: 'Test', header: this.i18n.service.translate('Test', lang) },
+        { field: 'Date', header: this.i18n.service.translate('date', lang) },
+        { field: 'Score', header: this.i18n.service.translate('Score', lang) },
+        { field: 'Participants', header: this.i18n.service.translate('number_of_participants', lang) },
+      ];
+
+    });
+  }
 }
 
 const uxChart = [

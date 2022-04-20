@@ -2,7 +2,8 @@
   <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-12">
       <app-charts
-        [title]="'Did you find what you were looking for?'"
+        [title]="'d3-dyfwywlf'"
+        titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [data]="dyfChart$ | async"
         [type]="'donut'"
         [tableCols]="dyfTableCols"
@@ -10,7 +11,8 @@
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
       <app-charts
-        [title]="'What was wrong?'"
+        [title]="'d3-www'"
+        titleTooltip="{{ 'tooltip-d3-www' | translate }}"
         [data]="whatWasWrongChart$ | async"
         [type]="'donut'"
         [tableCols]="whatWasWrongTableCols"
@@ -28,8 +30,7 @@
         [pagination]="false"
         [data]="taskSurvey"
         [cols]="taskSurveyCols"
-        [title]="'Top 5 programs/services with the most feedback'"
-        [tooltip]="'Top 5 programs/services with the most feedback tooltip'"
+        [title]="'top5-programs-most-feedback'"
       >
       </app-data-table-card>
     </div>
@@ -45,8 +46,7 @@
         [pagination]="false"
         [data]="taskSurvey"
         [cols]="taskSurveyCols"
-        [title]="'Top 5 pages with the most feedback'"
-        [tooltip]="'Top 5 pages with the most feedback tooltip'"
+        [title]="'top5-pages-most-feedback'"
       >
       </app-data-table-card>
     </div>

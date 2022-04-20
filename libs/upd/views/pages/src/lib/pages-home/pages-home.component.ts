@@ -27,9 +27,8 @@ export class PagesHomeComponent implements OnInit {
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
           typeParam: '_id',
-          tooltip: 'Url tooltip',
         },
-        { field: 'title', header: this.i18n.service.translate('Title', lang), tooltip: 'Title tooltip' },
+        { field: 'title', header: this.i18n.service.translate('Title', lang) },
         {
           field: 'visits',
           header: this.i18n.service.translate('visits', lang),
