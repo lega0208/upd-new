@@ -2,20 +2,20 @@
   <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-12">
       <app-charts
-        [title]="'Did you find what you were looking for?'"
-        [titleTooltip]="'Did you find what you were looking for? tooltip'"
-        [data]="dyfChart$ | async"
-        [tableCols]="dyfTableCols"
+        [title]="'d3-dyfwywlf'"
+        titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
+        [data]="(dyfChart$ | async)"
         [type]="'donut'"
+        [tableCols]="dyfTableCols"
       ></app-charts>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
       <app-charts
-        [title]="'What was wrong?'"
-        [titleTooltip]="'What was wrong? tooltip'"
-        [data]="whatWasWrongChart$ | async"
-        [tableCols]="whatWasWrongTableCols"
+        [title]="'d3-www'"
+        titleTooltip="{{ 'tooltip-d3-www' | translate }}"
+        [data]="(whatWasWrongChart$ | async)"
         [type]="'donut'"
+        [tableCols]="whatWasWrongTableCols"
       ></app-charts>
     </div>
   </div>
@@ -25,12 +25,12 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-        [data]="(visitsByPage$ | async) || []"
-        [cols]="visitsByPageCols"
-        title="Breakdown by Page - Did you find what you were looking for?"
-        tooltip="Breakdown by Page - Did you find what you were looking for? tooltip"
-      >
-      </app-data-table-card>
+      [data]="(visitsByPage$ | async) || []"
+      [cols]="visitsByPageCols"
+      [title]="'Breakdown by Page - Did you find what you were looking for?'"
+    >
+    </app-data-table-card>
+
     </div>
   </div>
 </div>
@@ -39,10 +39,9 @@
   <div class="row">
     <div class="col">
       <app-card
-        [card-title]="'Total feedback by page'"
-        [title-tooltip]="'Total feedback by page tooltip'"
+        [card-title]="'total-feedback-by-page'"
       >
-        <p>No Page feedback comments/tags for selected date range</p>
+        <p [translate]="'nodata-pagefeedback'"></p>
       </app-card>
     </div>
   </div>
@@ -52,10 +51,9 @@
   <div class="row">
     <div class="col">
       <app-card
-        [card-title]="'Feedback by tags'"
-        [title-tooltip]="'eedback by tags tooltip'"
+      [card-title]="'feedback-by-tags'"
       >
-        <p>No Page feedback comments/tags for selected date range</p>
+        <p [translate]="'nodata-pagefeedback'"></p>
       </app-card>
     </div>
   </div>

@@ -26,19 +26,21 @@ export class TaskDetailsSummaryComponent implements OnInit {
   taskSuccessByUxTest$ = this.taskDetailsService.taskSuccessByUxTest$;
   taskSuccessByUxTestCols: ColumnConfig[] = [];
 
-  dyfTableCols: ColumnConfig[] = [
-    { field: 'name', header: 'Selection' },
-    { field: 'value', header: 'Visits', pipe: 'number' },
-  ];
-  whatWasWrongTableCols: ColumnConfig[] = [
-    { field: 'name', header: 'What was wrong' },
-    { field: 'value', header: 'Visits', pipe: 'number' },
-  ];
+  // dyfTableCols: ColumnConfig[] = [
+  //   { field: 'name', header: 'Selection' },
+  //   { field: 'value', header: 'Visits', pipe: 'number' },
+  // ];
+  // whatWasWrongTableCols: ColumnConfig[] = [
+  //   { field: 'name', header: 'What was wrong' },
+  //   { field: 'value', header: 'Visits', pipe: 'number' },
+  // ];
 
   currentLang$ = this.i18n.currentLang$;
   currentLang!: LocaleId;
 
   visitsByPageCols: ColumnConfig[] = [];
+  dyfTableCols: ColumnConfig[] = [];
+  whatWasWrongTableCols: ColumnConfig[] = [];
 
   ngOnInit(): void {
     this.i18n.service.onLangChange(({ lang }) => {
@@ -46,39 +48,37 @@ export class TaskDetailsSummaryComponent implements OnInit {
     });
 
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
-      this.taskSuccessByUxTestCols = [
-        { field: 'title', header: 'UX Test' },
-        { field: '0', header: 'Project' },
-        {
-          field: 'date',
-          header: 'Date',
-          pipe: 'date',
-          pipeParam: 'YYYY-MM-dd',
-        },
-        { field: 'testType', header: 'Test type' },
-        { field: 'successRate', header: 'Success rate', pipe: 'percent' },
-      ] as ColumnConfig[];
-
       this.visitsByPageCols = [
         {
           field: 'title',
-          header: 'Page title',
+          header: this.i18n.service.translate('page-title', lang),
           type: 'link',
           typeParams: { preLink: '/pages', link: '_id' },
         },
         {
           field: 'url',
-          header: 'Url',
+          header: this.i18n.service.translate('URL', lang),
           type: 'link',
           typeParams: { link: 'url', external: true },
         },
-        { field: 'visits', header: 'Visits', pipe: 'number' },
-        {
-          field: 'percentChange',
-          header: this.i18n.service.translate('comparison', lang),
-          pipe: 'percent',
-        },
-      ] as ColumnConfig[];
+        { field: 'visits', header: this.i18n.service.translate('visits', lang), pipe: 'number' },
+        { field: 'change', header: this.i18n.service.translate('%-change', lang), pipe: 'percent' },
+      ];
+      this.taskSuccessByUxTestCols = [
+        { field: 'title', header: this.i18n.service.translate('ux-test', lang), },
+        { field: '0', header: this.i18n.service.translate('project', lang) },
+        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date', pipeParam: 'YYYY-MM-dd' },
+        { field: 'testType', header: this.i18n.service.translate('test-type', lang) },
+        { field: 'successRate', header: this.i18n.service.translate('success-rate', lang), pipe: 'percent' },
+      ];
+      this.dyfTableCols = [
+        { field: 'name', header: this.i18n.service.translate('Selection', lang) },
+        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+      ];
+      this.whatWasWrongTableCols = [
+        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
+        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+      ];
     });
   }
 

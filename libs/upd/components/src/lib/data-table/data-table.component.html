@@ -9,7 +9,7 @@
   [loading]="loading"
   styleClass="p-datatable-striped p-datatable-sm"
   [paginator]="pagination"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  currentPageReportTemplate="{{'dt-paginator' | translate: {first:'{first}', last:'{last}', totalRecords:'{totalRecords}'} }}"
   [globalFilterFields]="searchFields"
 >
   <ng-template *ngIf="filter || captionTitle" pTemplate="caption">

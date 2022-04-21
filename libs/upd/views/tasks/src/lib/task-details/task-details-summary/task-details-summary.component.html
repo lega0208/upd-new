@@ -5,17 +5,15 @@
         [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
         [date]="(dateFromLastTest$ | async) || ''"
         [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
-        [title]="'Average task success from last UX test' | translate"
-        [tooltip]="'Average task success from last UX test tooltip'"
+        [title]="'Average task success from last UX test'"
       ></app-data-kpi-card>
     </div>
 
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(visits$ | async | number) || 0"
+        [current]="(visits$ | async | number: undefined: currentLang) || 0"
         [comparison]="(visitsPercentChange$ | async) || 0"
         [title]="'Total visits from all pages'"
-        [tooltip]="'Total visits from all pages tooltip'"
       ></app-data-card>
     </div>
   </div>
@@ -25,12 +23,11 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-        [data]="(visitsByPage$ | async) || []"
-        [cols]="visitsByPageCols"
-        title="Visits by page"
-        tooltip="Visits by page tooltip"
-      >
-      </app-data-table-card>
+      [data]="(visitsByPage$ | async) || []"
+      [cols]="visitsByPageCols"
+      [title]="'Visits by page'"
+    >
+    </app-data-table-card>
     </div>
   </div>
 </div>
@@ -39,20 +36,22 @@
   <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-12">
       <app-charts
-        [title]="'Did you find what you were looking for?'"
-        [titleTooltip]="'Did you find what you were looking for? tooltip'"
+        [title]="'d3-dyfwywlf'"
+        titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [data]="dyfChart$ | async"
         [tableCols]="dyfTableCols"
         [type]="'donut'"
+        [tableCols]="dyfTableCols"
       ></app-charts>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
       <app-charts
-        [title]="'What was wrong?'"
-        [titleTooltip]="'What was wrong? tooltip'"
+        [title]="'d3-www'"
+        titleTooltip="{{ 'tooltip-d3-www' | translate }}"
         [data]="whatWasWrongChart$ | async"
         [tableCols]="whatWasWrongTableCols"
         [type]="'donut'"
+        [tableCols]="whatWasWrongTableCols"
       ></app-charts>
     </div>
   </div>
@@ -62,13 +61,12 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-        [data]="(taskSuccessByUxTest$ | async) || []"
-        [cols]="taskSuccessByUxTestCols"
-        [pagination]="false"
-        title="Task success by UX test"
-        tooltip="Task success by UX test tooltip"
-      >
-      </app-data-table-card>
+      [data]="(taskSuccessByUxTest$ | async) || []"
+      [cols]="taskSuccessByUxTestCols"
+      [pagination]="false"
+      [title]="'Task success by UX test'"
+    >
+    </app-data-table-card>
     </div>
   </div>
 </div>

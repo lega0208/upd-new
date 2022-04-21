@@ -21,13 +21,15 @@ export class PagesDetailsComponent implements OnInit {
   showUrl = true;
   showAlert = false;
 
-  navTabs: { href: string; title: string }[] = [
-    { href: 'summary', title: 'Summary' },
-    { href: 'webtraffic', title: 'Web Traffic' },
-    { href: 'searchanalytics', title: 'Search Analytics' },
-    { href: 'pagefeedback', title: 'Page Feedback' },
-    // { href: 'details', title: 'Details' },
-  ];
+  // navTabs: { href: string; title: string }[] = [
+  //   { href: 'summary', title: 'Summary' },
+  //   { href: 'webtraffic', title: 'Web Traffic' },
+  //   { href: 'searchanalytics', title: 'Search Analytics' },
+  //   { href: 'pagefeedback', title: 'Page Feedback' },
+  //   // { href: 'details', title: 'Details' },
+  // ];
+
+  navTabs: { href: string; title: string }[] = []
 
   constructor(
     private pageDetailsService: PagesDetailsFacade,
@@ -37,6 +39,18 @@ export class PagesDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.pageDetailsService.init();
+    +
+    combineLatest([
+      this.currentLang$
+    ]).subscribe(([lang]) => {
+      this.navTabs = [
+        { href: 'summary', title: this.i18n.service.translate('tab-summary', lang) },
+        { href: 'webtraffic', title: this.i18n.service.translate('tab-webtraffic', lang) },
+        { href: 'searchanalytics', title: this.i18n.service.translate('tab-searchanalytics', lang) },
+        { href: 'pagefeedback', title: this.i18n.service.translate('tab-pagefeedback', lang) },
+        // { href: 'details', title: this.i18n.service.translate('tab-details', lang) },
+      ];
+    });
   }
 
   toggleUrl() {

@@ -25,26 +25,26 @@ export class ProjectDetailsWebtrafficComponent implements OnInit {
     });
 
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
-      this.visitsByPageCols = [
-        {
-          field: 'title',
-          header: 'Page title',
-          type: 'link',
-          typeParams: { preLink: '/pages', link: '_id' },
-        },
-        {
-          field: 'url',
-          header: 'Url',
-          type: 'link',
-          typeParams: { link: 'url', external: true },
-        },
-        { field: 'visits', header: 'Visits', pipe: 'number' },
-        {
-          field: 'percentChange',
-          header: this.i18n.service.translate('comparison', lang),
-          pipe: 'percent',
-        },
-      ] as ColumnConfig[];
+        this.visitsByPageCols = [
+          {
+            field: 'title',
+            header: this.i18n.service.translate('page-title', lang),
+            type: 'link',
+            typeParams: { preLink: '/pages', link: '_id' },
+          },
+          {
+            field: 'url',
+            header: this.i18n.service.translate('URL', lang),
+            type: 'link',
+            typeParams: { link: 'url', external: true },
+          },
+          { field: 'visits', header: this.i18n.service.translate('visits', lang), pipe: 'number' },
+          {
+            field: 'percentChange',
+            header: this.i18n.service.translate('comparison', lang),
+            pipe: 'percent',
+          }
+        ];
     });
   }
 
