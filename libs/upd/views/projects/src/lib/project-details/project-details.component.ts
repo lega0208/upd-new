@@ -11,6 +11,7 @@ import { ProjectsDetailsFacade } from './+state/projects-details.facade';
 export class ProjectDetailsComponent implements OnInit {
   title$ = this.projectsDetailsService.title$;
   status$ = this.projectsDetailsService.status$ as Observable<ProjectStatus>;
+  loaded$ = this.projectsDetailsService.loaded$;
 
   navTabs: { href: string; title: string }[] = [
     { href: 'summary', title: 'Summary' },

@@ -7,7 +7,7 @@ import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 
-import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
+import { MultiSeries, ScaleType, SingleSeries } from '@amonsour/ngx-charts';
 import { LocaleId } from '@cra-arc/upd/i18n';
 import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
 import { percentChange, PickByType } from '@cra-arc/utils-common';
@@ -184,7 +184,7 @@ export class OverviewFacade {
       if (maxDays > 31) {
         visitsByDayData = [
           {
-            name: data?.dateRange,
+            name: dateRangeLabel,
             series: dateRangeSeries.map(({ value }, i) => ({
               name: dayjs(dateRangeDates[i])
                 .utc(false)
@@ -200,7 +200,7 @@ export class OverviewFacade {
           typeof data?.comparisonDateRange === 'string'
         ) {
           visitsByDayData.push({
-            name: data?.comparisonDateRange,
+            name: comparisonDateRangeLabel,
             series: comparisonDateRangeSeries.map(({ value }, i) => ({
               name: dayjs(dateRangeDates[i])
                 .utc(false)
@@ -245,28 +245,73 @@ export class OverviewFacade {
 
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
 
-      const dateRangeSeries = calldriversByDay.map(({ date, calls }) => ({
-        name: dayjs(date).utc(false).locale(lang).format(dateFormat),
-        value: calls,
-      }));
-
-      const comparisonDateRangeSeries = comparisonCalldriversByDay.map(
-        ({ date, calls }) => ({
+      const dateRangeSeries = calldriversByDay.map(({ date, calls }) => {
+        return {
           name: dayjs(date).utc(false).locale(lang).format(dateFormat),
           value: calls,
-        })
+        };
+      });
+
+      const isOver =
+          dateRangePeriod !== 'weekly' ? 1 : 0;
+
+      const comparisonCallDrivers = isOver ? calldriversByDay : comparisonCalldriversByDay;
+
+      const comparisonDateRangeSeries = comparisonCalldriversByDay.map(
+        ({ calls }, i) => {
+          
+          return {
+            name: dayjs(comparisonCallDrivers[i]?.date)
+              .utc(false)
+              .locale(lang)
+              .format(dateFormat),
+            value: calls,
+          };
+        }
+      );
+
+      const dateLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
+      const comparisonDateLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
       );
 
       return [
         {
-          name: data?.dateRange,
+          name: `${this.i18n.service.translate('calls', lang)} ${dateLabel}`,
           series: dateRangeSeries,
         },
         {
-          name: data?.comparisonDateRange,
+          name: `${this.i18n.service.translate(
+            'calls',
+            lang
+          )} ${comparisonDateLabel}`,
           series: comparisonDateRangeSeries,
         },
       ];
+    })
+  );
+
+  colours$ = [
+    {
+      name: 'cool',
+      selectable: true,
+      group: ScaleType.Ordinal,
+      domain: ['#2E5EA7', '#B5C2CC', '#f37d35', '#fbbc4d'],
+    },
+  ];
+
+  chartMerge$ = combineLatest([
+    this.dateRangeSelected$,
+    this.visitsByDay$,
+    this.calldriversByDay$,
+  ]).pipe(
+    map(([dateRangePeriod, bar, calls]) => {
+      const isOver =
+        dateRangePeriod !== 'weekly' && dateRangePeriod !== 'monthly' ? 1 : 0;
+      if (!isOver) return;
+
+      return [...bar, ...calls];
     })
   );
 

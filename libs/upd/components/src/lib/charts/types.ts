@@ -26,6 +26,7 @@ export const chartTypes = {
   'stacked-bar': 'stacked-bar',
   'horizontal-bar': 'horizontal-bar',
   'combo-bar-line': 'combo-bar-line',
+  bubble: 'bubble',
 };
 
 export type Curves = keyof typeof curves;

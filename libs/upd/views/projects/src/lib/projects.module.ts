@@ -31,6 +31,7 @@ import { ProjectsDetailsEffects } from './project-details/+state/projects-detail
 import { ProjectsDetailsFacade } from './project-details/+state/projects-details.facade';
 import { ProjectDetailsDetailsComponent } from './project-details/project-details-details/project-details-details.component';
 import { ProjectDetailsUxTestsComponent } from './project-details/project-details-ux-tests/project-details-ux-tests.component';
+import { I18nModule } from '@cra-arc/upd/i18n';
 
 @NgModule({
   imports: [
@@ -45,6 +46,7 @@ import { ProjectDetailsUxTestsComponent } from './project-details/project-detail
       projectsDetailsReducer
     ),
     EffectsModule.forFeature([ProjectsDetailsEffects]),
+    I18nModule,
   ],
   declarations: [
     ProjectsComponent,
