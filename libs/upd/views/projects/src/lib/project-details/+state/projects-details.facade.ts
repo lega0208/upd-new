@@ -1,4 +1,4 @@
-import { SingleSeries } from '@amonsour/ngx-charts';
+import { BubbleChartMultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { combineLatest, map } from 'rxjs';
@@ -34,6 +34,10 @@ export class ProjectsDetailsFacade {
 
   avgTaskSuccessFromLastTest$ = this.projectsDetailsData$.pipe(
     map((data) => data?.avgTaskSuccessFromLastTest)
+  );
+
+  dateFromLastTest$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.dateFromLastTest)
   );
 
   taskSuccessByUxTestDefault$ = combineLatest([
@@ -168,6 +172,50 @@ export class ProjectsDetailsFacade {
 
   taskSuccessByUxTest$ = this.projectsDetailsData$.pipe(
     map((data) => data?.taskSuccessByUxTest)
+  );
+
+  totalParticipants$ = this.projectsDetailsData$.pipe(
+    map((data) =>
+      data?.taskSuccessByUxTest
+        ?.map((data) => data?.totalUsers)
+        .reduce((a, b) => a + b, 0)
+    )
+  );
+
+  bubbleChart$ = this.projectsDetailsData$.pipe(
+    map((data) => {
+      let taskSuccessByUxData = data?.taskSuccessByUxTest;
+
+      // to be removed when titles are being shown
+      taskSuccessByUxData = taskSuccessByUxData.map((taskSuccess, i) => ({
+        ...taskSuccess,
+        title: `Task ${i + 1}`,
+      }));
+
+      const taskSeries = taskSuccessByUxData.map(
+        ({ successRate, testType }) => {
+          const success = successRate === null ? 0 : successRate;
+          return {
+            name: testType,
+            x: testType,
+            y: success,
+            r: 10,
+          };
+        }
+      );
+
+      const tasks: BubbleChartMultiSeries = taskSuccessByUxData.map(
+        ({ title }, i) => {
+          const series = [taskSeries[i]];
+          return {
+            name: title,
+            series,
+          };
+        }
+      );
+
+      return tasks;
+    })
   );
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}

@@ -1,51 +1,40 @@
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-sm-12">
-      <app-data-card
-        [current]="( (participantTasks$ | async)?.successRate | percent) || 0"
+      <app-data-kpi-card
+        [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
+        [date]="(dateFromLastTest$ | async) || ''"
+        [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
         [title]="'Average task success from last UX test'"
         [tooltip]="'Average task success from last UX test tooltip'"
-      ></app-data-card>
+      ></app-data-kpi-card>
     </div>
 
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(participantTasks$[0].total_users | number) || 0"
-        [title]="'Total participants'"
-        [tooltip]="'Total participants tooltip'"
+        [current]="(totalParticipants$ | async | number) || 0"
+        [title]="'Total participants from all tests'"
+        [tooltip]="'Total participants from all tests tooltip'"
       ></app-data-card>
     </div>
   </div>
-</div> -->
+</div>
 
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-12">
       <app-charts
         [title]="'Tasks success by Test'"
         [titleTooltip]="'Tasks success by Test tooltip'"
-        [data]="uxTests$"
-        [type]="'horizontal-bar'"
-        [yAxisLabel]="'UX tests'"
-        [xAxisLabel]="'Task success rate (%)'"
+        [data]="(bubbleChart$ | async) || []"
+        [displayLegend]="'below'"
+        [type]="'bubble'"
+        [xAxisLabel]="'UX test types'"
+        [yAxisLabel]="'Task success rate'"
+        [isPercent]="true"
+        [table]="(participantTasks$ | async) || []"
+        [tableCols]="taskSuccessRateCols"
       ></app-charts>
-    </div>
-  </div>
-</div> -->
-
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <app-data-table-card
-      [data]="(participantTasks$ | async) || []"
-      [cols]="taskSuccessRateCols" 
-      [sort]="false" 
-      [pagination]="false" 
-      [filter]="false"
-      title="Tasks success by test"
-      tooltip="Tasks success by test tooltip"
-    >
-    </app-data-table-card>
     </div>
   </div>
 </div>
@@ -54,15 +43,15 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-      [data]="(participantTasks$ | async) || []"
-      [cols]="participantTasksCols" 
-      [sort]="false" 
-      [pagination]="false" 
-      [filter]="false"
-      title="Participant tasks"
-      tooltip="Participant tasks tooltip"
-    >
-    </app-data-table-card>
+        [data]="(participantTasks$ | async) || []"
+        [cols]="participantTasksCols"
+        [sort]="false"
+        [pagination]="false"
+        [filter]="false"
+        title="Participant tasks"
+        tooltip="Participant tasks tooltip"
+      >
+      </app-data-table-card>
     </div>
   </div>
 </div>

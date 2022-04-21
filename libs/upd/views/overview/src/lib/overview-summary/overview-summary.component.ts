@@ -14,6 +14,9 @@ export class OverviewSummaryComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
+  colourMerge$ = this.overviewService.colours$;
+  chartMerge$ = this.overviewService.chartMerge$;
+
   loaded$ = this.overviewService.loaded$;
   loading$ = this.overviewService.loading$;
   error$ = this.overviewService.error$;

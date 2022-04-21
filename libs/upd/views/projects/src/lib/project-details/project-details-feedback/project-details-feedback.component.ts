@@ -21,6 +21,15 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   dyfChart$ = this.projectsDetailsService.dyfData$;
   whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
 
+  dyfTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'Selection' },
+    { field: 'value', header: 'Visits', pipe: 'number' },
+  ];
+  whatWasWrongTableCols: ColumnConfig[] = [
+    { field: 'name', header: 'What was wrong' },
+    { field: 'value', header: 'Visits', pipe: 'number' },
+  ];
+
   ngOnInit(): void {
     this.i18n.service.onLangChange(({ lang }) => {
       this.currentLang = lang as LocaleId;

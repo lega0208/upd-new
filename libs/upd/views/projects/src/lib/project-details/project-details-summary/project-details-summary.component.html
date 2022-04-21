@@ -1,11 +1,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-sm-12">
-      <app-data-card
-        [current]="(avgTaskSuccessFromLastTest$ | async | percent) || 0"
+      <app-data-kpi-card
+        [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
+        [date]="(dateFromLastTest$ | async) || ''"
+        [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
         [title]="'Average task success from last UX test'"
         [tooltip]="'Average task success from last UX test tooltip'"
-      ></app-data-card>
+      ></app-data-kpi-card>
     </div>
     <div class="col-lg-6 col-sm-12">
       <app-data-card
@@ -21,16 +23,15 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-      [data]="(participantTasks$ | async) || []"
-      [cols]="participantTasksCols" 
-      [sort]="false" 
-      [pagination]="false" 
-      [filter]="false"
-      title="Participant tasks"
-      tooltip="Participant tasks tooltip"
-    >
-    </app-data-table-card>
-
+        [data]="(taskSuccessByUxTest$ | async) || []"
+        [cols]="taskSuccessByUxTestCols"
+        [sort]="false"
+        [pagination]="false"
+        [filter]="false"
+        title="Participant tasks"
+        tooltip="Participant tasks tooltip"
+      >
+      </app-data-table-card>
     </div>
   </div>
 </div>
@@ -41,7 +42,7 @@
       <app-charts
         [title]="'Did you find what you were looking for?'"
         [titleTooltip]="'Did you find what you were looking for? tooltip'"
-        [data]="(dyfChart$ | async)"
+        [data]="dyfChart$ | async"
         [tableCols]="dyfTableCols"
         [type]="'donut'"
       ></app-charts>
@@ -50,7 +51,7 @@
       <app-charts
         [title]="'What was wrong?'"
         [titleTooltip]="'What was wrong? tooltip'"
-        [data]="(whatWasWrongChart$ | async)"
+        [data]="whatWasWrongChart$ | async"
         [tableCols]="whatWasWrongTableCols"
         [type]="'donut'"
       ></app-charts>

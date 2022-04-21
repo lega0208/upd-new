@@ -8,6 +8,14 @@ import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
   styleUrls: ['./project-details-ux-tests.component.css'],
 })
 export class ProjectDetailsUxTestsComponent {
+  bubbleChart$ = this.projectsDetailsService.bubbleChart$;
+
+  avgTaskSuccessFromLastTest$ =
+    this.projectsDetailsService.avgTaskSuccessFromLastTest$;
+  dateFromLastTest$ = this.projectsDetailsService.dateFromLastTest$;
+  taskSuccessByUxTest$ = this.projectsDetailsService.taskSuccessByUxTest$;
+  totalParticipants$ = this.projectsDetailsService.totalParticipants$;
+
   participantTasks$ = this.projectsDetailsService.taskSuccessByUxTestDefault$;
   participantTasksCols = [
     {
@@ -21,7 +29,7 @@ export class ProjectDetailsUxTestsComponent {
   taskSuccessRateCols = [
     {
       field: 'title',
-      header: 'Task list',
+      header: 'Task',
     },
     {
       field: 'testType',
@@ -31,7 +39,7 @@ export class ProjectDetailsUxTestsComponent {
       field: 'successRate',
       header: 'Success rate',
       pipe: 'percent',
-    }
+    },
   ] as ColumnConfig[];
 
   uxTests$ = [

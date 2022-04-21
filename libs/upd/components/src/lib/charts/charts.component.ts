@@ -119,9 +119,11 @@ export class ChartsComponent implements OnInit {
   // combo data
   @Input() barChart: any = [];
   @Input() lineChart: any = [];
+  @Input() chartMerge: any = [];
   colorLabelDefault = 'black';
   lineChartScheme!: Color;
   comboBarScheme!: Color;
+  colourMerge!: Color;
   curve?: CurveFactory;
 
   colorScheme!: Color;
@@ -129,6 +131,10 @@ export class ChartsComponent implements OnInit {
 
   // pie/donut
   doughnut = false;
+
+  // bubble chart
+  maxRadius = 20;
+  minRadius = 5;
 
   @Input() isPercent = false;
 
@@ -147,14 +153,16 @@ export class ChartsComponent implements OnInit {
       this.applyDimensions();
     }
 
-
     this.currentLang$.subscribe((nextLang) => {
       this.lang = nextLang;
     });
 
-    if (this.isPercent) {
+    if (this.isPercent && this.type === 'horizontal-bar') {
       this.xScaleMax = 1;
       this.xScaleMin = 0;
+    } else if (this.isPercent && this.type === 'bubble') {
+      this.yScaleMax = 1;
+      this.yScaleMin = 0;
     }
   }
 
@@ -211,6 +219,13 @@ export class ChartsComponent implements OnInit {
       selectable: true,
       group: ScaleType.Ordinal,
       domain: this.barColour,
+    };
+
+    this.colourMerge = {
+      name: 'cool',
+      selectable: true,
+      group: ScaleType.Ordinal,
+      domain: ['#2E5EA7', '#B5C2CC', '#f37d35', '#fbbc4d'],
     };
   }
 
