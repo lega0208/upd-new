@@ -4,7 +4,7 @@
       <div class="row row-no-gutters">
         <div class="col">
           <p class="w-100">
-            {{ title | translate }} data is not available for this date range.
+            {{ title | translate }} <span [translate]="'nodata-available'"></span>
           </p>
         </div>
       </div>

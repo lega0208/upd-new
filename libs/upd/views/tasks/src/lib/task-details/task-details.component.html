@@ -1,4 +1,4 @@
-<div class="back_link"><span class="material-icons align-top">west</span> <a [routerLink]="'/tasks'">Tasks</a></div>
+<div class="back_link"><span class="material-icons align-top">west</span> <a [routerLink]="'/tasks'" [translate]="'menu-tasks'"></a></div>
 
 <app-loading-spinner
   *ngIf="(loading$ | async) && (title$ | async) !== ''; else elseBlock"
@@ -9,7 +9,7 @@
 </ng-template>
 <ng-template #elseBlock2>
 <h2 class="h3 pt-2 pb-2" data-i18n="task-title">
-  Task: {{ title$ | async }}
+  <span [translate]="'task'"></span>: {{ title$ | async }}
 </h2>
 
 <app-nav-tabs [tabs]="navTabs"></app-nav-tabs>

@@ -11,8 +11,8 @@ import { TasksDetailsFacade } from '../+state/tasks-details.facade';
   styleUrls: ['./task-details-webtraffic.component.css'],
 })
 export class TaskDetailsWebtrafficComponent implements OnInit {
-  currentLang$ = this.i18n.currentLang$;
   currentLang!: LocaleId;
+  currentLang$ = this.i18n.currentLang$;
 
   visitsByPage$ = this.taskDetailsService.visitsByPageWithPercentChange$;
 
@@ -30,23 +30,19 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
       this.visitsByPageCols = [
         {
           field: 'title',
-          header: 'Page title',
+          header: this.i18n.service.translate('page-title', lang),
           type: 'link',
           typeParams: { preLink: '/pages', link: '_id' },
         },
         {
           field: 'url',
-          header: 'Url',
+          header: this.i18n.service.translate('URL', lang),
           type: 'link',
           typeParams: { link: 'url', external: true },
         },
-        { field: 'visits', header: 'Visits', pipe: 'number' },
-        {
-          field: 'percentChange',
-          header: this.i18n.service.translate('comparison', lang),
-          pipe: 'percent',
-        },
-      ] as ColumnConfig[];
+        { field: 'visits', header: this.i18n.service.translate('visits', lang), pipe: 'number' },
+        { field: 'change', header: this.i18n.service.translate('%-change', lang), pipe: 'percent' },
+      ];
     });
   }
 

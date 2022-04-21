@@ -2,17 +2,15 @@
   <div class="row">
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="( (participantTasks$ | async)?.successRate | percent) || 0"
+        [current]="( (participantTasks$ | async)?.successRate | percent: undefined: currentLang) || 0"
         [title]="'Average task success from last UX test'"
-        [tooltip]="'Average task success from last UX test tooltip'"
       ></app-data-card>
     </div>
 
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(participantTasks$[0].total_users | number) || 0"
+        [current]="(participantTasks$[0].total_users | number: undefined: currentLang) || 0"
         [title]="'Total participants'"
-        [tooltip]="'Total participants tooltip'"
       ></app-data-card>
     </div>
   </div>
@@ -42,8 +40,7 @@
       [sort]="false" 
       [pagination]="false" 
       [filter]="false"
-      title="Tasks success by test"
-      tooltip="Tasks success by test tooltip"
+      [title]="'Tasks success by Test'"
     >
     </app-data-table-card>
     </div>
@@ -59,8 +56,7 @@
       [sort]="false" 
       [pagination]="false" 
       [filter]="false"
-      title="Participant tasks"
-      tooltip="Participant tasks tooltip"
+      [title]="'Participant tasks'"
     >
     </app-data-table-card>
     </div>
@@ -76,8 +72,7 @@
       [sort]="false" 
       [pagination]="false" 
       [filter]="false"
-      title="Success rate and scenarios"
-      tooltip="Success rate and scenarios tooltip"
+      [title]="'Success rate and scenarios'"
     >
     </app-data-table-card>
 

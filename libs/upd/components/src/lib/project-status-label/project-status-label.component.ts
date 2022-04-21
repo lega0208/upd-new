@@ -4,7 +4,7 @@ import { ProjectStatus } from '@cra-arc/types-common';
 @Component({
   selector: 'app-project-status-label',
   template: `
-    <span class="badge {{ classMap[statusText] }}">{{ statusText }}</span>
+    <span class="badge {{ classMap[statusText] }}">{{ statusText | translate }}</span>
   `,
   styleUrls: ['./project-status-label.component.scss'],
 })

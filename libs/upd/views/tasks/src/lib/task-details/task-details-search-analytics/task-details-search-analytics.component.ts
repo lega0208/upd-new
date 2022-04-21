@@ -37,47 +37,35 @@ export class TaskDetailsSearchAnalyticsComponent implements OnInit {
       this.visitsByPageCols = [
         {
           field: 'url',
-          header: 'Url',
+          header: this.i18n.service.translate('URL', lang),
           type: 'link',
           typeParams: { preLink: '/pages', link: '_id' },
         },
         {
           field: 'gscTotalClicks',
-          header: 'Clicks',
+          header: this.i18n.service.translate('clicks', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: {
-            preLink: '/pages',
-            link: '_id',
-            postLink: 'searchanalytics',
-          },
+          typeParams: { preLink: '/pages', link: '_id', postLink: 'searchanalytics' },
         },
         {
           field: 'gscTotalImpressions',
-          header: 'Impressions',
+          header: this.i18n.service.translate('impressions', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: {
-            preLink: '/pages',
-            link: '_id',
-            postLink: 'searchanalytics',
-          },
+          typeParams: { preLink: '/pages', link: '_id', postLink: 'searchanalytics' },
         },
         {
           field: 'gscTotalCtr',
-          header: 'CTR (Click Through Rate)',
+          header: this.i18n.service.translate('ctr', lang),
           pipe: 'percent',
         },
         {
           field: 'gscTotalPosition',
-          header: 'Position',
+          header: this.i18n.service.translate('position', lang),
           pipe: 'number',
         },
-        {
-          field: 'percentChange',
-          header: this.i18n.service.translate('comparison', lang),
-          pipe: 'percent',
-        },
+        { field: '0', header: this.i18n.service.translate('comparison-for-clicks', lang), pipe: 'percent' },
       ];
     });
   }

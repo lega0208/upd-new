@@ -21,6 +21,10 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   dyfChart$ = this.projectsDetailsService.dyfData$;
   whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
 
+  dyfTableCols: ColumnConfig[] = []; 
+  whatWasWrongTableCols: ColumnConfig[] = [];
+
+
   ngOnInit(): void {
     this.i18n.service.onLangChange(({ lang }) => {
       this.currentLang = lang as LocaleId;
@@ -30,43 +34,39 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
       this.visitsByPageCols = [
         {
           field: 'url',
-          header: 'Url',
+          header: this.i18n.service.translate('URL', lang),
           type: 'link',
           typeParams: { preLink: '/pages', link: '_id' },
         },
         {
           field: 'dyfYes',
-          header: 'Yes',
+          header: this.i18n.service.translate('yes', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: {
-            preLink: '/pages',
-            link: '_id',
-            postLink: 'pagefeedback',
-          },
+          typeParams: { preLink: '/pages', link: '_id', postLink: 'pagefeedback' },
         },
         {
           field: 'dyfNo',
-          header: 'No',
+          header: this.i18n.service.translate('No', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: {
-            preLink: '/pages',
-            link: '_id',
-            postLink: 'pagefeedback',
-          },
+          typeParams: { preLink: '/pages', link: '_id', postLink: 'pagefeedback' },
         },
-
         {
           field: 'percentChange',
           header: this.i18n.service.translate('comparison', lang),
           pipe: 'percent',
         },
-        {
-          field: '0',
-          header: '% of visitors who left feedback',
-          pipe: 'percent',
-        },
+        { field: '0', header: this.i18n.service.translate('comparison-for-No-answer', lang), pipe: 'percent' },
+        { field: '0', header: this.i18n.service.translate('% of visitors who left feedback', lang), pipe: 'percent' },
+      ],
+      this.dyfTableCols = [
+        { field: 'name', header: this.i18n.service.translate('Selection', lang) },
+        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+      ];
+      this.whatWasWrongTableCols = [
+        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
+        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
       ];
     });
   }
