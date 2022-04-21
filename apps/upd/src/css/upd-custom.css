@@ -445,3 +445,8 @@ margin: 0px 20px 0px 20px;
 .page_header span {
   cursor: pointer !important;
 }
+
+.datatable-headers {
+  color: #000 !important;
+  font-weight: bold;
+}
