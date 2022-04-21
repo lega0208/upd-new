@@ -216,5 +216,8 @@
   "Delayed": "Delayed",
   "Unknown": "Unknown",
   "Showing": "Showing",
-  "dt-paginator": "Showing {{first}} to {{last}} of {{totalRecords}} entries"
+  "dt-paginator": "Showing {{first}} to {{last}} of {{totalRecords}} entries",
+  "404 Error": "404 Error",
+  "404-message": "Something went wrong and we couldn't load the data.<br />Try refreshing the page or selecting another entry.",
+  "No data found.": "No data found."
 }
