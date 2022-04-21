@@ -1,4 +1,4 @@
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-sm-12">
       <app-data-card
@@ -14,18 +14,22 @@
       ></app-data-card>
     </div>
   </div>
-</div> -->
+</div>
 
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-12">
       <app-charts
         [title]="'Tasks success by Test'"
         [titleTooltip]="'Tasks success by Test tooltip'"
-        [data]="uxTests$"
-        [type]="'horizontal-bar'"
-        [yAxisLabel]="'UX tests'"
-        [xAxisLabel]="'Task success rate (%)'"
+        [data]="(bubbleChart$ | async) || []"
+        [displayLegend]="'below'"
+        [type]="'bubble'"
+        [xAxisLabel]="'UX test types'"
+        [yAxisLabel]="'Task success rate'"
+        [isPercent]="true"
+        [table]="(participantTasks$ | async) || []"
+        [tableCols]="taskSuccessRateCols"
       ></app-charts>
     </div>
   </div>
@@ -36,9 +40,9 @@
     <div class="col">
       <app-data-table-card
       [data]="(participantTasks$ | async) || []"
-      [cols]="taskSuccessRateCols" 
-      [sort]="false" 
-      [pagination]="false" 
+      [cols]="taskSuccessRateCols"
+      [sort]="false"
+      [pagination]="false"
       [filter]="false"
       [title]="'Tasks success by Test'"
     >
@@ -52,9 +56,9 @@
     <div class="col">
       <app-data-table-card
       [data]="(participantTasks$ | async) || []"
-      [cols]="participantTasksCols" 
-      [sort]="false" 
-      [pagination]="false" 
+      [cols]="participantTasksCols"
+      [sort]="false"
+      [pagination]="false"
       [filter]="false"
       [title]="'Participant tasks'"
     >
@@ -69,8 +73,8 @@
       <app-data-table-card
       [data]="successRate$ || []"
       [cols]="successRateCols"
-      [sort]="false" 
-      [pagination]="false" 
+      [sort]="false"
+      [pagination]="false"
       [filter]="false"
       [title]="'Success rate and scenarios'"
     >

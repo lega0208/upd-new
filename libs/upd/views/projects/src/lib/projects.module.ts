@@ -47,6 +47,7 @@ import { I18nModule } from '@cra-arc/upd/i18n';
       projectsDetailsReducer
     ),
     EffectsModule.forFeature([ProjectsDetailsEffects]),
+    I18nModule,
   ],
   declarations: [
     ProjectsComponent,

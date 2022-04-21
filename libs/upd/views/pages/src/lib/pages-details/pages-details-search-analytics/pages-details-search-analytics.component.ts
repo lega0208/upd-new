@@ -7,7 +7,6 @@ import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { combineLatest } from 'rxjs';
 
-
 @Component({
   selector: 'app-page-details-search-analytics',
   templateUrl: './pages-details-search-analytics.component.html',
@@ -51,44 +50,77 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
   //   { field: 'change', header: 'Comparison' },
   // ] as ColumnConfig[];
 
-  constructor(private pageDetailsService: PagesDetailsFacade, private i18n: I18nFacade) {}
+  constructor(
+    private pageDetailsService: PagesDetailsFacade,
+    private i18n: I18nFacade
+  ) {}
 
   topGSCSearchTermsCols: ColumnConfig[] = [];
-  searchTermsCanadaCols: ColumnConfig[] = []; 
+  searchTermsCanadaCols: ColumnConfig[] = [];
   referrerTypeCols: ColumnConfig[] = [];
 
   ngOnInit(): void {
-    const empty = this.referrerType$.pipe(isEmpty());
-    console.log(empty);
-    empty.subscribe((x) => console.log(x));
-
     this.i18n.service.onLangChange(({ lang }) => {
       this.currentLang = lang as LocaleId;
     });
 
-    combineLatest([
-      this.currentLang$
-    ]).subscribe(([lang]) => {
-      this.topGSCSearchTermsCols = [
-        { field: 'term', header: this.i18n.service.translate('search-terms',lang) },
-        { field: 'clicks', header: this.i18n.service.translate('clicks',lang), pipe: 'number' },
-        { field: 'change', header: this.i18n.service.translate('comparison',lang), pipe: 'percent' },
-        { field: 'impressions', header: this.i18n.service.translate('impressions',lang), pipe: 'number' },
-        { field: 'ctr', header: this.i18n.service.translate('ctr',lang), pipe: 'percent' },
-        { field: 'position', header: this.i18n.service.translate('position',lang) },
-      ],
-      this.searchTermsCanadaCols = [
-        { field: 'term', header: this.i18n.service.translate('search-terms',lang) },
-        { field: 'clicks', header: this.i18n.service.translate('clicks',lang) },
-        { field: 'change', header: this.i18n.service.translate('comparison',lang) },
-      ],
-      this.referrerTypeCols = [
-        { field: 'type', header: this.i18n.service.translate('type', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' },
-        { field: 'change', header: this.i18n.service.translate('comparison', lang) },
-      ];
+    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+      (this.topGSCSearchTermsCols = [
+        {
+          field: 'term',
+          header: this.i18n.service.translate('search-terms', lang),
+        },
+        {
+          field: 'clicks',
+          header: this.i18n.service.translate('clicks', lang),
+          pipe: 'number',
+        },
+        {
+          field: 'change',
+          header: this.i18n.service.translate('comparison', lang),
+          pipe: 'percent',
+        },
+        {
+          field: 'impressions',
+          header: this.i18n.service.translate('impressions', lang),
+          pipe: 'number',
+        },
+        {
+          field: 'ctr',
+          header: this.i18n.service.translate('ctr', lang),
+          pipe: 'percent',
+        },
+        {
+          field: 'position',
+          header: this.i18n.service.translate('position', lang),
+        },
+      ]),
+        (this.searchTermsCanadaCols = [
+          {
+            field: 'term',
+            header: this.i18n.service.translate('search-terms', lang),
+          },
+          {
+            field: 'clicks',
+            header: this.i18n.service.translate('clicks', lang),
+          },
+          {
+            field: 'change',
+            header: this.i18n.service.translate('comparison', lang),
+          },
+        ]),
+        (this.referrerTypeCols = [
+          { field: 'type', header: this.i18n.service.translate('type', lang) },
+          {
+            field: 'value',
+            header: this.i18n.service.translate('visits', lang),
+            pipe: 'number',
+          },
+          {
+            field: 'change',
+            header: this.i18n.service.translate('comparison', lang),
+          },
+        ]);
     });
-
-  } 
-  
+  }
 }

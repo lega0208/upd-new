@@ -39,6 +39,7 @@
         [title]="'d3-dyfwywlf'"
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [data]="dyfChart$ | async"
+        [tableCols]="dyfTableCols"
         [type]="'donut'"
         [tableCols]="dyfTableCols"
       ></app-charts>
@@ -48,6 +49,7 @@
         [title]="'d3-www'"
         titleTooltip="{{ 'tooltip-d3-www' | translate }}"
         [data]="whatWasWrongChart$ | async"
+        [tableCols]="whatWasWrongTableCols"
         [type]="'donut'"
         [tableCols]="whatWasWrongTableCols"
       ></app-charts>

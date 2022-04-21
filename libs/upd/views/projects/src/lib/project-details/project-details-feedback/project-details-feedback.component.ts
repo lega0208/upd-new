@@ -21,7 +21,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   dyfChart$ = this.projectsDetailsService.dyfData$;
   whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig[] = []; 
+  dyfTableCols: ColumnConfig[] = [];
   whatWasWrongTableCols: ColumnConfig[] = [];
 
 

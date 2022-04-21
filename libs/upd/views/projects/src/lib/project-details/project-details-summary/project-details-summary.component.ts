@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
+import { LocaleId } from '@cra-arc/upd/i18n';
+import { I18nFacade } from '@cra-arc/upd/state';
+import { combineLatest } from 'rxjs';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 import { LocaleId } from '@cra-arc/upd/i18n';
@@ -17,6 +20,7 @@ export class ProjectDetailsSummaryComponent {
 
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
+  dateFromLastTest$ = this.projectsDetailsService.dateFromLastTest$;
 
   visits$ = this.projectsDetailsService.visits$;
 

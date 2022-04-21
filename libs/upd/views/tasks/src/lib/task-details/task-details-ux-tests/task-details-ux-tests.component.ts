@@ -23,6 +23,8 @@ export class TaskDetailsUxTestsComponent {
   taskSuccessData$ = this.taskDetailsService.taskSuccessByUxTest$;
 
   totalParticipants$ = this.taskDetailsService.totalParticipants$;
+  taskSuccessByUxTest$ = this.taskDetailsService.taskSuccessByUxTest$;
+  dateFromLastTest$ = this.taskDetailsService.dateFromLastTest$;
 
   avgTaskSuccessFromLastTest$ =
     this.taskDetailsService.avgTaskSuccessFromLastTest$;

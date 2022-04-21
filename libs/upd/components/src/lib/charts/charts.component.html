@@ -61,8 +61,8 @@
           <ng-template #elseConvertLine2>
             <ngx-charts-line-chart
               [ngClass]="barChart[0].series.length > 7 ? 'show4nLabels' : ''"
-              [scheme]="comboBarScheme"
-              [results]="barChart"
+              [scheme]="colourMerge"
+              [results]="chartMerge"
               [animations]="animations"
               [legend]="showLegend"
               [legendTitle]="legendTitle | translate"
@@ -391,6 +391,45 @@
             [tooltipText]="pieTooltipText"
             (select)="onSelect($event)"
           ></ngx-charts-pie-chart>
+        </ng-container>
+
+        <ng-container *ngIf="type === 'bubble'">
+          <ngx-charts-bubble-chart
+            *ngIf="isPercent"
+            [scheme]="colorScheme"
+            [animations]="animations"
+            [results]="data"
+            [xAxis]="showXAxis"
+            [yAxis]="showYAxis"
+            [legend]="showLegend"
+            [legendTitle]="legendTitle | translate"
+            [legendTitle]="legendTitle | translate"
+            [tooltipDisabled]="tooltipDisabled"
+            [xAxisLabel]="xAxisLabel | translate"
+            [yAxisLabel]="yAxisLabel | translate"
+            [legendPosition]="legendPosition"
+            [showXAxisLabel]="showXAxisLabel"
+            [showYAxisLabel]="showYAxisLabel"
+            [xAxisLabel]="xAxisLabel"
+            [yAxisLabel]="yAxisLabel"
+            [xScaleMin]="xScaleMin"
+            [xScaleMax]="xScaleMax"
+            [yScaleMin]="yScaleMin"
+            [yScaleMax]="yScaleMax"
+            [minRadius]="minRadius"
+            [maxRadius]="maxRadius"
+            [yAxisTickFormatting]="yAxisPercentTickFormat"
+            (select)="onSelect($event)"
+          >
+            <ng-template #tooltipTemplate let-model="model">
+              <span class="tooltip-label"
+                >{{ model.series }}: {{ model.name }}</span
+              >
+              <span class="tooltip-val"
+                >{{ (model.value * 100).toFixed(0) }}%</span
+              >
+            </ng-template>
+          </ngx-charts-bubble-chart>
         </ng-container>
 
         <ng-container *ngIf="type === 'gauge'">

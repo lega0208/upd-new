@@ -20,9 +20,9 @@
     <div class="col">
       <app-data-table-card
       [data]="(participantTasks$ | async) || []"
-      [cols]="participantTasksCols" 
-      [sort]="false" 
-      [pagination]="false" 
+      [cols]="participantTasksCols"
+      [sort]="false"
+      [pagination]="false"
       [filter]="false"
       [title]="'Participant tasks'"
     >
