@@ -3,26 +3,36 @@
   "sourceRoot": "libs/data-integrity/src",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nrwl/js:swc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/data-integrity",
         "tsConfig": "libs/data-integrity/tsconfig.lib.json",
         "packageJson": "libs/data-integrity/package.json",
         "main": "libs/data-integrity/src/index.ts",
-        "assets": ["libs/data-integrity/*.md"]
+        "assets": [
+          "libs/data-integrity/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/data-integrity/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/data-integrity/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/data-integrity"],
+      "outputs": [
+        "coverage/libs/data-integrity"
+      ],
       "options": {
         "jestConfig": "libs/data-integrity/jest.config.js",
         "passWithNoTests": true
