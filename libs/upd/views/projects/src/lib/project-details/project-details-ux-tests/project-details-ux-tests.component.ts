@@ -11,6 +11,9 @@ import { combineLatest } from 'rxjs';
   styleUrls: ['./project-details-ux-tests.component.css'],
 })
 export class ProjectDetailsUxTestsComponent {
+  currentLang!: LocaleId;
+  currentLang$ = this.i18n.currentLang$;
+
   bubbleChart$ = this.projectsDetailsService.bubbleChart$;
 
   avgTaskSuccessFromLastTest$ =
@@ -20,30 +23,30 @@ export class ProjectDetailsUxTestsComponent {
   totalParticipants$ = this.projectsDetailsService.totalParticipants$;
 
   participantTasks$ = this.projectsDetailsService.taskSuccessByUxTestDefault$;
-  participantTasksCols = [
-    {
-      field: 'title',
-      header: 'Task list',
-      type: 'link',
-      typeParams: { preLink: '/tasks', link: 'tasks' },
-    },
-  ] as ColumnConfig[];
+  // participantTasksCols = [
+  //   {
+  //     field: 'title',
+  //     header: 'Task list',
+  //     type: 'link',
+  //     typeParams: { preLink: '/tasks', link: 'tasks' },
+  //   },
+  // ] as ColumnConfig[];
 
-  taskSuccessRateCols = [
-    {
-      field: 'title',
-      header: 'Task',
-    },
-    {
-      field: 'testType',
-      header: 'Test type',
-    },
-    {
-      field: 'successRate',
-      header: 'Success rate',
-      pipe: 'percent',
-    },
-  ] as ColumnConfig[];
+  // taskSuccessRateCols = [
+  //   {
+  //     field: 'title',
+  //     header: 'Task',
+  //   },
+  //   {
+  //     field: 'testType',
+  //     header: 'Test type',
+  //   },
+  //   {
+  //     field: 'successRate',
+  //     header: 'Success rate',
+  //     pipe: 'percent',
+  //   },
+  // ] as ColumnConfig[];
 
   uxTests$ = [
     {

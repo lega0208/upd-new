@@ -26,14 +26,14 @@ export class TaskDetailsSummaryComponent implements OnInit {
   taskSuccessByUxTest$ = this.taskDetailsService.taskSuccessByUxTest$;
   taskSuccessByUxTestCols: ColumnConfig[] = [];
 
-  dyfTableCols: ColumnConfig[] = [
-    { field: 'name', header: 'Selection' },
-    { field: 'value', header: 'Visits', pipe: 'number' },
-  ];
-  whatWasWrongTableCols: ColumnConfig[] = [
-    { field: 'name', header: 'What was wrong' },
-    { field: 'value', header: 'Visits', pipe: 'number' },
-  ];
+  // dyfTableCols: ColumnConfig[] = [
+  //   { field: 'name', header: 'Selection' },
+  //   { field: 'value', header: 'Visits', pipe: 'number' },
+  // ];
+  // whatWasWrongTableCols: ColumnConfig[] = [
+  //   { field: 'name', header: 'What was wrong' },
+  //   { field: 'value', header: 'Visits', pipe: 'number' },
+  // ];
 
   currentLang$ = this.i18n.currentLang$;
   currentLang!: LocaleId;

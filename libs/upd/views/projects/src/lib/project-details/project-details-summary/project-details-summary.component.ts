@@ -5,10 +5,6 @@ import { I18nFacade } from '@cra-arc/upd/state';
 import { combineLatest } from 'rxjs';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
-
 @Component({
   selector: 'app-project-details-summary',
   templateUrl: './project-details-summary.component.html',
