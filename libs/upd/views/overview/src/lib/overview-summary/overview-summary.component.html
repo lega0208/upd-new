@@ -37,7 +37,7 @@
         [title]="'d3-visits-compared-to-calls'"
         [displayLegend]="'below'"
         [showRightYAxisLabel]="true"
-        [curveType]="'Natural'"
+        [curveType]="'Catmull Rom'"
         [barChart]="(barChartData$ | async) || []"
         [lineChart]="(calldriversChartData$ | async) || []"
         [chartMerge]="(chartMerge$ | async) || []"
