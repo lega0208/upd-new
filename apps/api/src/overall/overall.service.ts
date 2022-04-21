@@ -64,6 +64,7 @@ export class OverallService {
         params.comparisonDateRange
       ),
       uxTests: await getUxTests(this.uxTestModel),
+      
     } as OverviewData;
 
 
