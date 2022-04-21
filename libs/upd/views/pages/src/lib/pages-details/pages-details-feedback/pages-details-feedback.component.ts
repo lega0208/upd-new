@@ -19,35 +19,39 @@ export class PagesDetailsFeedbackComponent implements OnInit {
   dyfChart$ = this.pageDetailsService.dyfData$;
   whatWasWrongChart$ = this.pageDetailsService.whatWasWrongData$;
 
-  constructor(private pageDetailsService: PagesDetailsFacade, private i18n: I18nFacade) {}
+  constructor(
+    private pageDetailsService: PagesDetailsFacade,
+    private i18n: I18nFacade
+  ) {}
 
   dyfTableCols: ColumnConfig[] = [];
   whatWasWrongTableCols: ColumnConfig[] = [];
 
-
   ngOnInit(): void {
-    const empty = this.dyfChart$.pipe(isEmpty());
-    empty.subscribe((x) => console.log(x));
-
     this.i18n.service.onLangChange(({ lang }) => {
       this.currentLang = lang as LocaleId;
     });
 
-    combineLatest([
-      this.currentLang$
-    ]).subscribe(([lang]) => {
+    combineLatest([this.currentLang$]).subscribe(([lang]) => {
       this.dyfTableCols = [
-        { field: 'name', header: this.i18n.service.translate('Selection', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'name',
+          header: this.i18n.service.translate('Selection', lang),
+        },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
       this.whatWasWrongTableCols = [
         { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
-
     });
-
   }
-
-
 }

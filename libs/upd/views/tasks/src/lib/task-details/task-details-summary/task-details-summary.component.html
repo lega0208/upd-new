@@ -25,12 +25,12 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-      [data]="(visitsByPage$ | async) || []"
-      [cols]="visitsByPageCols"
-      title="Visits by page"
-      tooltip="Visits by page tooltip"
-    >
-    </app-data-table-card>
+        [data]="(visitsByPage$ | async) || []"
+        [cols]="visitsByPageCols"
+        title="Visits by page"
+        tooltip="Visits by page tooltip"
+      >
+      </app-data-table-card>
     </div>
   </div>
 </div>
@@ -42,6 +42,7 @@
         [title]="'Did you find what you were looking for?'"
         [titleTooltip]="'Did you find what you were looking for? tooltip'"
         [data]="dyfChart$ | async"
+        [tableCols]="dyfTableCols"
         [type]="'donut'"
       ></app-charts>
     </div>
@@ -50,6 +51,7 @@
         [title]="'What was wrong?'"
         [titleTooltip]="'What was wrong? tooltip'"
         [data]="whatWasWrongChart$ | async"
+        [tableCols]="whatWasWrongTableCols"
         [type]="'donut'"
       ></app-charts>
     </div>
@@ -60,13 +62,13 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-      [data]="(taskSuccessByUxTest$ | async) || []"
-      [cols]="taskSuccessByUxTestCols"
-      [pagination]="false"
-      title="Task success by UX test"
-      tooltip="Task success by UX test tooltip"
-    >
-    </app-data-table-card>
+        [data]="(taskSuccessByUxTest$ | async) || []"
+        [cols]="taskSuccessByUxTestCols"
+        [pagination]="false"
+        title="Task success by UX test"
+        tooltip="Task success by UX test tooltip"
+      >
+      </app-data-table-card>
     </div>
   </div>
 </div>

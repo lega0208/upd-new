@@ -22,16 +22,16 @@ export class PagesHomeComponent implements OnInit {
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
       this.columns = [
         {
+          field: 'title',
+          header: this.i18n.service.translate('Title', lang),
+          tooltip: 'Title tooltip',
+        },
+        {
           field: 'url',
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
           typeParam: '_id',
           tooltip: 'Url tooltip',
-        },
-        {
-          field: 'title',
-          header: this.i18n.service.translate('Title', lang),
-          tooltip: 'Title tooltip',
         },
         {
           field: 'visits',
