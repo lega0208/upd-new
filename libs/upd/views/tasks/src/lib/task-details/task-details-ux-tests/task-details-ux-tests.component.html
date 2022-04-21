@@ -1,20 +1,16 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-sm-12">
-      <app-data-kpi-card
-        [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
-        [date]="(dateFromLastTest$ | async) || ''"
-        [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
+      <app-data-card
+        [current]="(avgTaskSuccessFromLastTest$ | async | percent: undefined:currentLang) || 0"
         [title]="'Latest success rate'"
-        [tooltip]="'Latest success rate tooltip'"
-      ></app-data-kpi-card>
+      ></app-data-card>
     </div>
 
     <div class="col-lg-6 col-sm-12">
       <app-data-card
         [current]="(totalParticipants$ | async | number) || 0"
         [title]="'Total participants from all tests'"
-        [tooltip]="'Total participants from all tests tooltip'"
       ></app-data-card>
     </div>
   </div>
@@ -25,12 +21,11 @@
     <div class="col-lg-12">
       <app-charts
         [title]="'Tasks success by Test'"
-        [titleTooltip]="'Tasks success by Test tooltip'"
         [data]="(taskSuccessChart$ | async) || []"
         [tableCols]="taskSuccessChartCols"
         [type]="'horizontal-bar'"
         [isPercent]="true"
-        [yAxisLabel]="'UX tests'"
+        [yAxisLabel]="'ux-tests'"
         [xAxisLabel]="'Task success rate (%)'"
       ></app-charts>
     </div>
@@ -46,22 +41,20 @@
         [filter]="false"
         [sort]="false"
         [pagination]="false"
-        title="Success rate and scenarios"
-        tooltip="Success rate and scenarios tooltip"
+        [title]="'Success rate and scenarios'"
       >
       </app-data-table-card>
     </div>
   </div>
 </div>
 
-<div class="container-fluid my-4 gx-0">
+<!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <app-card
         [card-title]="'Documents'"
-        [title-tooltip]="'Documents tooltip'"
       >
       </app-card>
     </div>
   </div>
-</div>
+</div> -->

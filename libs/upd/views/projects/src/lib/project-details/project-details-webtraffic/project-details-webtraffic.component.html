@@ -2,10 +2,9 @@
     <div class="row">
       <div class="col-lg-4 col-sm-12">
         <app-data-card
-          [current]="(visits$ | async | number) || 0"
+          [current]="(visits$ | async | number: undefined: currentLang) || 0"
           [comparison]="0"
           [title]="'Total visits from all pages'"
-          [tooltip]="'Total visits from all pages tooltip'"
         ></app-data-card>
       </div>
     </div>
@@ -17,10 +16,9 @@
         <app-data-table-card
         [data]="(visitsByPage$ | async) || []"
         [cols]="visitsByPageCols"
-      [sort]="false" 
-      [filter]="false"
-      title="Visits by page"
-      tooltip="Visits by page tooltip"
+        [sort]="false" 
+        [filter]="false"
+        [title]="'Visits by page'"
     >
     </app-data-table-card>
 

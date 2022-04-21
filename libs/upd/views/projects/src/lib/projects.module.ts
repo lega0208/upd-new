@@ -38,6 +38,7 @@ import { I18nModule } from '@cra-arc/upd/i18n';
     CommonModule,
     ProjectsRoutingModule,
     UpdComponentsModule,
+    I18nModule,
     ServicesModule,
     StoreModule.forFeature(PROJECTS_HOME_FEATURE_KEY, projectsHomeReducer),
     EffectsModule.forFeature([ProjectsHomeEffects]),

@@ -2,21 +2,24 @@
     <div class="row">
       <div class="col">
         <app-data-card
-          [current]="(gscTotalImpressions$ | async | number) || 0"
+          [current]="(gscTotalImpressions$ | async | number: undefined: currentLang) || 0"
           [comparison]="0"
-          [title]="'Total impressions from Google'"
+          [title]="'total-impressions-google'"
+          [tooltip]="'tooltip-impressions-project-google'"
         ></app-data-card>
       </div>
       <div class="col">
         <app-data-card
-          [current]="(gscTotalCtr$ | async | percent) || 0"
-          [title]="'Click through rate from Google'"
+          [current]="(gscTotalCtr$ | async | percent: undefined: currentLang) || 0"
+          [title]="'ctr-google'"
+          [tooltip]="'tooltip-ctr-google'"
         ></app-data-card>
       </div>
       <div class="col">
         <app-data-card
-          [current]="(gscTotalPosition$ | async | number: '1.0-2') || 0"
-          [title]="'Average rank on Google'"
+          [current]="(gscTotalPosition$ | async | number: '1.0-2': currentLang) || 0"
+          [title]="'avg-rank-google'"
+          [tooltip]="'tooltip-avg-rank-project-google'"
         ></app-data-card>
       </div>
     </div>
@@ -28,8 +31,7 @@
         <app-data-table-card
         [data]="(visitsByPage$ | async) || []"
         [cols]="visitsByPageCols"
-      title="Breakdown by Page - Search from Google"
-      tooltip="Breakdown by Page - Search from Google tooltip"
+        [title]="'Breakdown by Page - Search from Google'"
     >
     </app-data-table-card>
       </div>
