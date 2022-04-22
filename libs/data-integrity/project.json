@@ -3,7 +3,7 @@
   "sourceRoot": "libs/data-integrity/src",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
+      "executor": "@nrwl/node:webpack",
       "outputs": [
         "{options.outputPath}"
       ],
@@ -12,9 +12,18 @@
         "tsConfig": "libs/data-integrity/tsconfig.lib.json",
         "packageJson": "libs/data-integrity/package.json",
         "main": "libs/data-integrity/src/index.ts",
+        "extractLicenses": false,
         "assets": [
-          "libs/data-integrity/*.md"
+
         ]
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "data-integrity:build",
+        "watch": false,
+        "inspect": false
       }
     },
     "lint": {

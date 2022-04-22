@@ -10,17 +10,9 @@
     <div
       class="col-lg-9 col-md-8 col-sm-6 col-6 text-end lang-toggle"
     >
-      <!-- <div class="language-picker-area">
-        <div class="picker-label" ></div>
-        <select #selector (change)="selectLanguage(selector.value)" class="language-picker">
-          <option [value]="en"> {{ 'language.english' | translate }} </option>
-          <option [value]="fr"> {{ 'language.french' | translate }} </option>
-        </select>
-      </div> -->
       <div class="language-picker-area">
         <div class="picker-label" ></div>
-          <a style="cursor:pointer" class="langs" *ngIf="shown" (click)="selectLanguage(en)"> {{ 'language.english' | translate }} </a>
-          <a style="cursor:pointer" class="langs" *ngIf="!shown" (click)="selectLanguage(fr)"> {{ 'language.french' | translate }} </a>
+          <a style="cursor:pointer" class="langs" (click)="selectLanguage(oppositeLang)"> {{ 'opposite.language' | translate }} </a>
       </div>
     </div>
   </div>

@@ -9,14 +9,14 @@ import { I18nFacade } from '@cra-arc/upd/state';
 })
 export class HeaderComponent {
   @Input() lang = EN_CA;
-  en = EN_CA;
-  fr = FR_CA;
-  shown: boolean = false;
 
   constructor(private i18n: I18nFacade) {}
 
+  get oppositeLang() {
+    return this.lang === EN_CA ? FR_CA : EN_CA;
+  }
+
   selectLanguage(value: string) {
     this.i18n.setLang(value as LocaleId);
-    this.shown = ! this.shown;
   }
 }

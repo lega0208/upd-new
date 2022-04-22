@@ -1,9 +1,6 @@
-export * from './lib/data-integrity.service';
-export * from './lib/data-integrity.module';
-
 import { NestFactory } from '@nestjs/core';
-import { DataIntegrityModule } from './lib/data-integrity.module';
-import { DataIntegrityService } from './lib/data-integrity.service';
+import { DataIntegrityModule } from './data-integrity.module';
+import { DataIntegrityService } from './data-integrity.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(DataIntegrityModule);
@@ -20,4 +17,3 @@ async function bootstrap() {
 bootstrap().catch(e => {
   throw e;
 });
-
