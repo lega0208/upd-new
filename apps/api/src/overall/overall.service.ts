@@ -12,7 +12,11 @@ import {
   UxTest,
   UxTestDocument,
 } from '@cra-arc/db';
-import type { PageMetricsModel } from '@cra-arc/types-common';
+import type {
+  PageMetricsModel,
+  ProjectsHomeData,
+  ProjectsHomeProject,
+} from '@cra-arc/types-common';
 import { FilterQuery, Model } from 'mongoose';
 import { ApiParams } from '@cra-arc/upd/services';
 import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
@@ -21,6 +25,44 @@ import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
+
+const projectStatusSwitchExpression = {
+  $switch: {
+    branches: [
+      {
+        case: {
+          $allElementsTrue: {
+            $map: {
+              input: '$statuses',
+              as: 'status',
+              in: { $eq: ['$$status', 'Complete'] },
+            },
+          },
+        },
+        then: 'Complete',
+      },
+      {
+        case: {
+          $in: ['Delayed', '$statuses'],
+        },
+        then: 'Delayed',
+      },
+      {
+        case: {
+          $in: ['In Progress', '$statuses'],
+        },
+        then: 'In Progress',
+      },
+      {
+        case: {
+          $in: ['Planning', '$statuses'],
+        },
+        then: 'Planning',
+      },
+    ],
+    default: 'Unknown',
+  },
+};
 
 @Injectable()
 export class OverallService {
@@ -63,15 +105,96 @@ export class OverallService {
         this.cacheManager,
         params.comparisonDateRange
       ),
-      uxTests: await getUxTests(this.uxTestModel),
-      
+      projects: await getProjects(this.projectModel),
     } as OverviewData;
-
 
     await this.cacheManager.set(cacheKey, results);
 
     return results;
   }
+}
+
+async function getProjects(
+  projectModel: Model<ProjectDocument>
+): Promise<ProjectsHomeData> {
+  const defaultData = {
+    numInProgress: 0,
+    numCompletedLast6Months: 0,
+    totalCompleted: 0,
+    numDelayed: 0,
+  };
+
+  const sixMonthsAgo = dayjs().utc(false).subtract(6, 'months').toDate();
+  const year2018 = dayjs('2018-01-01').utc(false).toDate();
+
+  const projectsData = await projectModel
+    .aggregate<ProjectsHomeProject>()
+    .lookup({
+      from: 'ux_tests',
+      let: { project_id: '$_id' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ['$project', '$$project_id'],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            cops: {
+              $max: '$cops',
+            },
+            startDate: {
+              $min: '$date',
+            },
+            launchDate: {
+              $max: '$launch_date',
+            },
+            avgSuccessRate: {
+              $avg: '$success_rate',
+            },
+            statuses: {
+              $addToSet: '$status',
+            },
+            totalUsers: {
+              $sum: '$total_users',
+            },
+            testType: {
+              $addToSet: '$test_type',
+            },
+          },
+        },
+        {
+          $addFields: {
+            status: projectStatusSwitchExpression,
+          },
+        },
+      ],
+      as: 'tests_aggregated',
+    })
+    .unwind('$tests_aggregated')
+    .replaceRoot({
+      $mergeObjects: ['$$ROOT', '$tests_aggregated', { _id: '$_id' }],
+    })
+    .project({
+      title: 1,
+      cops: 1,
+      startDate: 1,
+      launchDate: 1,
+      avgSuccessRate: 1,
+      status: 1,
+      totalUsers: 1,
+      testType: 1,
+    });
+
+  const results = {
+    ...defaultData,
+    projects: projectsData,
+  };
+
+  return results;
 }
 
 async function getUxTests(
@@ -160,7 +283,6 @@ async function getOverviewMetrics(
   cacheManager: Cache,
   dateRange: string
 ): Promise<OverviewAggregatedData> {
-
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
   const dateQuery: FilterQuery<Date> = {};

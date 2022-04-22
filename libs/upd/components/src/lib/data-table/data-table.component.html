@@ -39,16 +39,16 @@
           <div class="text-nowrap">
             <ng-container *ngIf="col.tooltip">
               <span
-                class="p-column-title"
+                class="p-column-title datatable-headers"
                 [class.card-tooltip]="col.tooltip"
                 [ngbPopover]="col.tooltip"
                 placement="end"
               >
-                <strong>{{ col.header }}</strong>
+                {{ col.header }}
               </span>
             </ng-container>
             <ng-container *ngIf="!col.tooltip">
-              <strong>{{ col.header }}</strong>
+              <span class="datatable-headers">{{ col.header }}</span>
             </ng-container>
             <p-sortIcon [field]="col.field"></p-sortIcon>
           </div>
@@ -58,16 +58,16 @@
         ><th *ngFor="let col of columns">
           <ng-container *ngIf="col.tooltip">
             <span
-              class="p-column-title"
+              class="p-column-title datatable-headers"
               [class.card-tooltip]="col.tooltip"
               [ngbPopover]="col.tooltip"
               placement="end"
             >
-              <strong>{{ col.header }}</strong>
+            {{ col.header }}
             </span>
           </ng-container>
           <ng-container *ngIf="!col.tooltip">
-            <strong>{{ col.header }}</strong>
+            <span class="datatable-headers">{{ col.header }}</span>
           </ng-container>
         </th></ng-template
       >
@@ -77,11 +77,11 @@
     <tr>
       <td *ngFor="let col of columns">
         <span
-          class="p-column-title"
+          class="p-column-title datatable-headers"
           [ngbPopover]="col.tooltip"
           placement="end"
           [class.card-tooltip]="col.tooltip"
-          ><strong>{{ col.header }}</strong></span
+          >{{ col.header }}</span
         >
         <app-data-table-styles [config]="col" [data]="rowData">
         </app-data-table-styles>
@@ -90,7 +90,7 @@
   </ng-template>
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td attr.colspan="{{ cols.length }}">No data found.</td>
+      <td attr.colspan="{{ cols.length }}" translate>No data found.</td>
     </tr>
   </ng-template>
 </p-table>

@@ -445,3 +445,19 @@ margin: 0px 20px 0px 20px;
 .page_header span {
   cursor: pointer !important;
 }
+
+.datatable-headers {
+  color: #000 !important;
+  /* font-weight: 600; */
+  
+}
+
+.alert-info {
+  color:#2E5EA7 !important;
+  background-color: #E3F2FD;
+  border-color: #e5e5e5;
+}
+
+/* .alert {
+  padding: 0;
+} */

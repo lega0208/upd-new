@@ -2,9 +2,7 @@
   <div class="row">
     <div class="col-lg-4 col-sm-12">
       <app-data-card
-        [current]="
-          (uniqueVisitors$ | async | number: undefined:currentLang) || 0
-        "
+        [current]="(uniqueVisitors$ | async) || 0"
         [comparison]="(uniqueVisitorsPercentChange$ | async) || 0"
         [title]="'unique-visitors'"
         [tooltip]="'tooltip-unique-visitors'"
@@ -12,7 +10,7 @@
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
-        [current]="(visits$ | async | number: undefined:currentLang) || 0"
+        [current]="(visits$ | async) || 0"
         [comparison]="(visitsPercentChange$ | async) || 0"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
@@ -20,7 +18,7 @@
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
-        [current]="(pageViews$ | async | number: undefined:currentLang) || 0"
+        [current]="(pageViews$ | async) || 0"
         [comparison]="(pageViewsPercentChange$ | async) || 0"
         [title]="'page-views'"
         [tooltip]="'tooltip-page-views'"

@@ -64,13 +64,15 @@ export class ProjectsHomeComponent implements OnInit {
   //     pipe: 'percent',
   //   }
   // ];
-  
+
   columns: ColumnConfig[] = [];
 
   searchFields = this.columns.map((col) => col.field);
 
-
-  constructor(private readonly projectsHomeService: ProjectsHomeFacade, private i18n: I18nFacade) {}
+  constructor(
+    private readonly projectsHomeService: ProjectsHomeFacade,
+    private i18n: I18nFacade
+  ) {}
 
   ngOnInit() {
     this.projectsHomeService.init();
@@ -98,7 +100,6 @@ export class ProjectsHomeComponent implements OnInit {
         {
           field: 'startDate',
           header: this.i18n.service.translate('Start date', lang),
-          pipe: 'date',
         },
         // {
         //   field: 'launchDate',
@@ -107,9 +108,12 @@ export class ProjectsHomeComponent implements OnInit {
         // },
         {
           field: 'avgSuccessRate',
-          header: this.i18n.service.translate('Average test success rate', lang),
+          header: this.i18n.service.translate(
+            'Average test success rate',
+            lang
+          ),
           pipe: 'percent',
-        }
+        },
       ];
     });
   }
