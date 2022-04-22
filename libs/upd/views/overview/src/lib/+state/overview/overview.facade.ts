@@ -35,9 +35,9 @@ export class OverviewFacade {
     mapToPercentChange('visitors')
   );
 
-  visits$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => { return (data?.dateRangeData?.visits)?.toLocaleString(lang);})
-);
+  visits$ = this.overviewData$.pipe(
+    map((overviewData) => overviewData?.dateRangeData?.visits)
+  );
   visitsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('visits'));
 
   views$ = this.overviewData$.pipe(
@@ -420,7 +420,7 @@ export class OverviewFacade {
 
       //  start = dayjs(startDate).add(cnt, 'days').utc(false).locale(lang).format(dateFormat);
       //     }
-        
+
         return {
           name: callDate,
           value: calls,
