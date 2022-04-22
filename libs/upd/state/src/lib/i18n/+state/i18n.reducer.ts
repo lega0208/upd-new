@@ -1,19 +1,34 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
 import * as I18nActions from './i18n.actions';
-import { LocaleId } from '@cra-arc/upd/i18n';
+import { EN_CA, FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 
 export const I18N_FEATURE_KEY = 'i18n';
 
 export interface I18nState {
-  currentLang: LocaleId,
+  currentLang: LocaleId;
 }
 
 export interface I18nPartialState {
   readonly [I18N_FEATURE_KEY]: I18nState;
 }
 
-const getInitialLang = () => (/^fr/.test(navigator.language) ? 'fr-CA' : 'en-CA') as LocaleId;
+// todo: add localStorage
+const getInitialLang = () => {
+  if (location.pathname.slice(1).startsWith('fr')) {
+    return FR_CA
+  }
+
+  if (location.pathname.slice(1).startsWith('en')) {
+    return EN_CA;
+  }
+
+  if (navigator.language.startsWith('fr')) {
+    return FR_CA;
+  }
+
+  return EN_CA;
+}
 
 export const i18nInitialState: I18nState = {
   currentLang: getInitialLang(),
@@ -21,7 +36,9 @@ export const i18nInitialState: I18nState = {
 
 const reducer = createReducer(
   i18nInitialState,
-  on(I18nActions.setLang, (state, { lang }) => ({ currentLang: lang })),
+  on(I18nActions.setLang, (state, { lang }) =>
+    lang === state.currentLang ? state : { currentLang: lang }
+  )
 );
 
 export function i18nReducer(state: I18nState | undefined, action: Action) {

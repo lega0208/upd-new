@@ -40,8 +40,8 @@ export class OverviewFacade {
 );
   visitsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('visits'));
 
-  views$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => { return (data?.dateRangeData?.pageViews)?.toLocaleString(lang);})
+  views$ = this.overviewData$.pipe(
+    map((overviewData) => overviewData?.dateRangeData?.pageViews)
 );
 
   viewsPercentChange$ = this.overviewData$.pipe(

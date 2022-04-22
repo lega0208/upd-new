@@ -1,14 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { LocaleId } from '@cra-arc/upd/i18n';
+import { Component, Input } from '@angular/core';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-data-card',
   templateUrl: './data-card.component.html',
   styleUrls: ['./data-card.component.scss'],
 })
-export class DataCardComponent implements OnInit {
+export class DataCardComponent {
   @Input() current: string | number = 0;
   @Input() comparison = 0;
   @Input() date!: Date | string;
@@ -16,17 +15,10 @@ export class DataCardComponent implements OnInit {
   @Input() title = '';
   @Input() tooltip = '';
   currentLang$ = this.i18n.currentLang$;
-  currentLang!: LocaleId;
 
-  ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
-      this.current.toLocaleString(lang);
-    });
-  }
+  current$ = this.currentLang$.pipe(
+    map((lang) => this.current.toLocaleString(lang))
+  );
 
   constructor(public i18n: I18nFacade) {}
 }

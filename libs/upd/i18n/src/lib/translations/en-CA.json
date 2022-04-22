@@ -2,6 +2,7 @@
   "app.title": "Usability Performance Dashboard",
   "language.english": "Anglais",
   "language.french": "Français",
+  "opposite.language": "Français",
   "menu-overview": "Overview",
   "menu-pages": "Pages",
   "menu-tasks": "Tasks",

@@ -10,7 +10,8 @@
     "build": "nx run-many --target=build --projects=api,upd --parallel --prod",
     "db-updater": "nx serve db-updater",
     "test": "nx test",
-    "analyze-upd-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json"
+    "analyze-upd-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json",
+    "data-checks": "nx serve data-integrity"
   },
   "private": true,
   "dependencies": {

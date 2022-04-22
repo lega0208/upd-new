@@ -1,5 +1,5 @@
 <div class="container vh-100">
-  <app-header [lang]="currentLang"></app-header>
+  <app-header [lang]="(currentLang$ | async) || en"></app-header>
   <app-sidebar></app-sidebar>
   <h1 class="visually-hidden">{{ 'app.title' | translate }}</h1>
   <router-outlet></router-outlet>

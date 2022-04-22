@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@cra-arc/api-interfaces": ["libs/api-interfaces/src/index.ts"],
+      "@cra-arc/data-integrity": ["libs/data-integrity/src/index.ts"],
       "@cra-arc/db": ["libs/db/src/index.ts"],
       "@cra-arc/db-update": ["libs/db-update/src/index.ts"],
       "@cra-arc/external-data": ["libs/external-data/src/index.ts"],

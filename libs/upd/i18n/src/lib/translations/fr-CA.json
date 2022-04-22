@@ -2,6 +2,7 @@
   "app.title": "Tableau de bord de la convivialité et du rendement",
   "language.english": "English",
   "language.french": "French",
+  "opposite.language": "English",
   "menu-overview": "Aperçu",
   "menu-pages": "Pages",
   "menu-tasks": "Tâches",
