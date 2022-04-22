@@ -28,16 +28,16 @@ export class OverviewFacade {
   dateRangeSelected$ = this.store.pipe(select(selectDatePeriodSelection));
   overviewData$ = this.store.pipe(select(OverviewSelectors.getOverviewData));
 
-  visitors$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.visitors)
+  visitors$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+      map(([data, lang]) => { return (data?.dateRangeData?.visitors)?.toLocaleString(lang);})
   );
   visitorsPercentChange$ = this.overviewData$.pipe(
     mapToPercentChange('visitors')
   );
 
-  visits$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.visits)
-  );
+  visits$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => { return (data?.dateRangeData?.visits)?.toLocaleString(lang);})
+);
   visitsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('visits'));
 
   views$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
@@ -90,6 +90,148 @@ export class OverviewFacade {
           .format(dateFormat),
       }));
       return [...(projects || [])];
+    })
+  );
+
+  calldriversChart$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
+      );
+
+      const dataEnquiryLine = [
+        {
+          name: this.i18n.service.translate('d3-be', lang),
+          value: data?.dateRangeData?.enquiryLineBE || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-benefits', lang),
+          value: data?.dateRangeData?.enquiryLineBenefits || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-c4', lang),
+          value: data?.dateRangeData?.enquiryLineC4 || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-c9', lang),
+          value: data?.dateRangeData?.enquiryLineC9 || 0
+        },
+        {
+          name: this.i18n.service.translate('d3-ITE', lang),
+          value: data?.dateRangeData?.enquiryLineITE || 0
+        },
+        {
+          name: this.i18n.service.translate('d3-e-Services', lang),
+          value: data?.dateRangeData?.enquiryLineEService || 0
+        },
+      ];
+
+      const comparisonDataEnquiryLine = [
+        {
+          name: this.i18n.service.translate('d3-be', lang),
+          value: data?.comparisonDateRangeData?.enquiryLineBE || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-benefits', lang),
+          value: data?.comparisonDateRangeData?.enquiryLineBenefits || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-c4', lang),
+          value: data?.comparisonDateRangeData?.enquiryLineC4 || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-c9', lang),
+          value: data?.comparisonDateRangeData?.enquiryLineC9 || 0
+        },
+        {
+          name: this.i18n.service.translate('d3-ITE', lang),
+          value: data?.comparisonDateRangeData?.enquiryLineITE || 0
+        },
+        {
+          name: this.i18n.service.translate('d3-e-Services', lang),
+          value: data?.comparisonDateRangeData?.enquiryLineEService || 0
+        },
+      ];
+
+      const isCurrZero = dataEnquiryLine.every((v) => v.value === 0);
+      const isPrevZero = comparisonDataEnquiryLine.every((v) => v.value === 0);
+
+      if (isCurrZero && isPrevZero) {
+        return [] as MultiSeries;
+      }
+
+      const dataEnquiryLineFinal = dataEnquiryLine.filter((v) => v.value > 0);
+      const comparisonDataEnquiryLineFinal = comparisonDataEnquiryLine.filter((v) => v.value > 0);
+
+      const barChartData: MultiSeries = [
+        {
+          name: dateRangeLabel,
+          series: dataEnquiryLineFinal,
+        },
+        {
+          name: comparisonDateRangeLabel,
+          series: comparisonDataEnquiryLineFinal,
+        },
+      ];
+
+      return barChartData;
+    })
+  );
+
+  calldriversTable$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+      const currBE = data?.dateRangeData?.enquiryLineBE;
+      const currBenefits = data?.dateRangeData?.enquiryLineBenefits;
+      const currC4 = data?.dateRangeData?.enquiryLineC4;
+      const currC9 = data?.dateRangeData?.enquiryLineC9;
+      const currITE = data?.dateRangeData?.enquiryLineITE;
+      const currEService = data?.dateRangeData?.enquiryLineEService;
+
+      const prevBE = data?.comparisonDateRangeData?.enquiryLineBE;
+      const prevBenefits = data?.comparisonDateRangeData?.enquiryLineBenefits;
+      const prevC4 = data?.comparisonDateRangeData?.enquiryLineC4;
+      const prevC9 = data?.comparisonDateRangeData?.enquiryLineC9;
+      const prevITE = data?.comparisonDateRangeData?.enquiryLineITE;
+      const prevEService = data?.comparisonDateRangeData?.enquiryLineEService;
+
+      const dataEnquiryLine = [
+        {
+          name: this.i18n.service.translate('d3-be', lang),
+          currValue: currBE || 0,
+          prevValue: prevBE || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-benefits', lang),
+          currValue: currBenefits || 0,
+          prevValue: prevBenefits || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-c4', lang),
+          currValue: currC4 || 0,
+          prevValue: prevC4 || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-c9', lang),
+          currValue: currC9 || 0,
+          prevValue: prevC9 || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-ITE', lang),
+          currValue: currITE || 0,
+          prevValue: prevITE || 0,
+        },
+        {
+          name: this.i18n.service.translate('d3-e-Services', lang),
+          currValue: currEService || 0,
+          prevValue: prevEService || 0,
+        },
+      ];
+
+      return dataEnquiryLine.filter((v) => v.currValue > 0 && v.prevValue > 0);
+
     })
   );
 
@@ -254,11 +396,33 @@ export class OverviewFacade {
       const comparisonCalldriversByDay =
         data?.comparisonDateRangeData?.calldriversByDay || [];
 
+        const [startDate, endDate] = data.dateRange.split('/').map((d) => new Date(d));
+        const [prevStartDate, prevEndDate] = (data.comparisonDateRange || '')
+          .split('/')
+          .map((d) => new Date(d));
+
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
 
-      const dateRangeSeries = calldriversByDay.map(({ date, calls }) => {
+      const diff = dayjs(endDate).diff(dayjs(startDate), 'day');
+
+      let cnt = 0;
+
+      const dateRangeSeries = calldriversByDay.map(({ date, calls }, i) => {
+      //   let start = dayjs(startDate).add(i, 'days').utc(false).locale(lang).format(dateFormat);
+      const callDate = dayjs(date).utc(false).locale(lang).format(dateFormat);
+
+      //   while (start !== callDate) {
+      //       dateRangeSeries[cnt] = {
+      //         name: start,
+      //         value: 0,
+      //       };
+      //       cnt += 1
+
+      //  start = dayjs(startDate).add(cnt, 'days').utc(false).locale(lang).format(dateFormat);
+      //     }
+        
         return {
-          name: dayjs(date).utc(false).locale(lang).format(dateFormat),
+          name: callDate,
           value: calls,
         };
       });

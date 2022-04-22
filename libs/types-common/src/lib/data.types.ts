@@ -109,8 +109,15 @@ export interface OverviewAggregatedData {
   fwylf_hard_to_understand: number;
   fwylf_other: number;
   fwylf_cant_find_info: number;
+  enquiryLineBE: number;
+  enquiryLineBenefits: number;
+  enquiryLineC4: number;
+  enquiryLineC9: number;
+  enquiryLineITE: number;
+  enquiryLineEService: number;
   visitsByDay: { date: Date; visits: number }[];
   calldriversByDay: { date: Date; calls: number }[];
+  calldriversEnquiry: { date: Date; calls: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
 }
