@@ -51,7 +51,9 @@ export class OverviewCalldriversComponent {
     private i18n: I18nFacade
   ) {}
 
-  bar: MultiSeries = [];
+  calldriversChart$ = this.overviewService.calldriversChart$;
+  calldriversTable$ = this.overviewService.calldriversTable$;
+  calldriversCols: ColumnConfig[] = [];
   chartsCols: ColumnConfig[] = [];
 
   ngOnInit() {
@@ -60,29 +62,6 @@ export class OverviewCalldriversComponent {
     );
 
     combineLatest([this.currentLang$, this.dateRangeLabel$, this.comparisonDateRangeLabel$]).subscribe(([lang, dateRange, comparisonDateRange]) => {
-      this.bar = [
-        {
-          name: 'Feb 27-Mar 05',
-          series: [
-            { name: this.i18n.service.translate('d3-benefits', lang), value: 27704 },
-            { name: this.i18n.service.translate('d3-e-Services', lang), value: 275665 },
-            { name: this.i18n.service.translate('d3-ITE', lang), value: 5887 },
-            { name: this.i18n.service.translate('d3-c4', lang), value: 1208 },
-            { name: this.i18n.service.translate('d3-be', lang), value: 87427 }
-          ],
-        },
-        {
-          name: 'Mar 06-Mar 12',
-          series: [
-            { name: this.i18n.service.translate('d3-benefits', lang), value: 22704 },
-            { name: this.i18n.service.translate('d3-e-Services', lang), value: 289665 },
-            { name: this.i18n.service.translate('d3-ITE', lang), value: 8757 },
-            { name: this.i18n.service.translate('d3-c4', lang), value: 3208 },
-            { name: this.i18n.service.translate('d3-be', lang), value: 65027 }
-          ],
-        },
-      ];
-
       this.chartsCols = [
         { field: 'Topic', header: this.i18n.service.translate('topic', lang) },
         {
@@ -94,7 +73,19 @@ export class OverviewCalldriversComponent {
           header: this.i18n.service.translate('Number of calls for', lang, {value: ' Mar 06-Mar 12'})
         },
       ];
-
+      this.calldriversCols = [
+        { field: 'name', header: this.i18n.service.translate('Inquiry line', lang) },
+        {
+          field: 'currValue',
+          header: dateRange,
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: comparisonDateRange,
+          pipe: 'number',
+        },
+      ];
     });
   }
 

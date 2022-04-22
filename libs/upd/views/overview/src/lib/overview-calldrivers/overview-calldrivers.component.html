@@ -9,7 +9,9 @@
         [displayLegend]="'below'"
         [groupPadding]="75"
         [showLegend]="true"
-        [data]="bar"
+        [data]="(calldriversChart$ |async) || []"
+        [table]="calldriversTable$ | async"
+        [tableCols]="calldriversCols"
         [type]="'grouped-bar'"
       ></app-charts>
     </div>

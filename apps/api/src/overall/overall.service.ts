@@ -105,7 +105,7 @@ export class OverallService {
         this.cacheManager,
         params.comparisonDateRange
       ),
-      projects: await getProjects(this.projectModel),
+      projects: await getProjects(this.projectModel, this.uxTestModel),
     } as OverviewData;
 
     await this.cacheManager.set(cacheKey, results);
@@ -115,7 +115,8 @@ export class OverallService {
 }
 
 async function getProjects(
-  projectModel: Model<ProjectDocument>
+  projectModel: Model<ProjectDocument>,
+  uxTestsModel: Model<UxTestDocument>
 ): Promise<ProjectsHomeData> {
   const defaultData = {
     numInProgress: 0,
@@ -126,6 +127,138 @@ async function getProjects(
 
   const sixMonthsAgo = dayjs().utc(false).subtract(6, 'months').toDate();
   const year2018 = dayjs('2018-01-01').utc(false).toDate();
+
+  const uxTest =
+    (
+      await uxTestsModel
+        .aggregate()
+        .group({
+          _id: '$cops',
+          count: { $sum: 1 },
+          countLast6Months: {
+            $sum: {
+              $cond: [{ $gte: ['$date', sixMonthsAgo] }, 1, 0],
+            },
+          },
+          countSince2018: {
+            $sum: {
+              $cond: [{ $gte: ['$date', year2018] }, 1, 0],
+            },
+          },
+        })
+        .group({
+          _id: null,
+          numInProgress: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'In Progress'] }, '$count', 0],
+            },
+          },
+          completedLast6Months: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Complete'] }, '$countLast6Months', 0],
+            },
+          },
+          completedSince2018: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Complete'] }, '$countSince2018', 0],
+            },
+          },
+          copsCompletedSince2018: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', true] }, '$countSince2018', 0],
+            },
+          },
+          totalCompleted: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Complete'] }, '$count', 0],
+            },
+          },
+          numDelayed: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Delayed'] }, '$count', 0],
+            },
+          },
+        })
+        .project({
+          _id: 0,
+          copsCompletedSince2018: 1,
+        })
+        .exec()
+    )[0] || defaultData;
+
+    const aggregatedData =
+      (
+        await uxTestsModel
+          .aggregate<Omit<ProjectsHomeData, 'projects'>>()
+          .group({
+            _id: '$project',
+            statuses: {
+              $addToSet: '$status',
+            },
+            date: { $min: '$date' },
+          })
+          .project({
+            last6Months: {
+              $gte: ['$date', sixMonthsAgo],
+            },
+            since2018: {
+              $gte: ['$date', year2018],
+            },
+            status: projectStatusSwitchExpression,
+          })
+          .sort({ status: 1 })
+          .group({
+            _id: '$status',
+            count: { $sum: 1 },
+            countLast6Months: {
+              $sum: {
+                $cond: [{ $gte: ['$date', sixMonthsAgo] }, 1, 0],
+              },
+            },
+            countSince2018: {
+              $sum: {
+                $cond: [{ $gte: ['$date', year2018] }, 1, 0],
+              },
+            },
+          })
+          .group({
+            _id: null,
+            numInProgress: {
+              $sum: {
+                $cond: [{ $eq: ['$_id', 'In Progress'] }, '$count', 0],
+              },
+            },
+            completedLast6Months: {
+              $sum: {
+                $cond: [{ $eq: ['$_id', 'Complete'] }, '$countLast6Months', 0],
+              },
+            },
+            completedSince2018: {
+              $sum: {
+                $cond: [{ $eq: ['$_id', 'Complete'] }, '$countSince2018', 0],
+              }
+            },
+            totalCompleted: {
+              $sum: {
+                $cond: [{ $eq: ['$_id', 'Complete'] }, '$count', 0],
+              },
+            },
+            numDelayed: {
+              $sum: {
+                $cond: [{ $eq: ['$_id', 'Delayed'] }, '$count', 0],
+              },
+            },
+          })
+          .project({
+            _id: 0,
+            numInProgress: 1,
+            completedSince2018 : 1,
+            numCompletedLast6Months: 1,
+            totalCompleted: 1,
+            numDelayed: 1,
+          })
+          .exec()
+      )[0] || defaultData;
 
   const projectsData = await projectModel
     .aggregate<ProjectsHomeProject>()
@@ -190,7 +323,8 @@ async function getProjects(
     });
 
   const results = {
-    ...defaultData,
+    ...aggregatedData,
+    ...uxTest,
     projects: projectsData,
   };
 
@@ -312,6 +446,54 @@ async function getOverviewMetrics(
     .sort({ date: 1 })
     .exec();
 
+    const calldriversEnquiry = await calldriversModel
+    .aggregate()
+    .match({ date: dateQuery })
+    .group({
+      _id: null,
+      enquiryLineBE: {
+        $sum: {
+          $cond: [{ $eq: ['$enquiry_line', 'BE'] }, '$calls', 0],
+        },
+      },
+      enquiryLineBenefits: {
+        $sum: {
+          $cond: [{ $eq: ['$enquiry_line', 'Benefits'] }, '$calls', 0],
+        },
+      },
+      enquiryLineC4: {
+        $sum: {
+          $cond: [{ $eq: ['$enquiry_line', 'C4 - Identity Theft'] }, '$calls', 0],
+        },
+      },
+      enquiryLineC9: {
+        $sum: {
+          $cond: [{ $eq: ['$enquiry_line', 'C9 - My Account Lockout'] }, '$calls', 0],
+        },
+      },
+      enquiryLineITE: {
+        $sum: {
+          $cond: [{ $eq: ['$enquiry_line', 'ITE'] }, '$calls', 0],
+        },
+      },
+      enquiryLineEService: {
+        $sum: {
+          $cond: [{ $eq: ['$enquiry_line', 'e-Services Help Desk'] }, '$calls', 0],
+        },
+      },
+
+    })
+    .project({
+      _id: 0,
+      enquiryLineBE: 1,
+      enquiryLineBenefits: 1,
+      enquiryLineC4: 1,
+      enquiryLineC9 : 1,
+      enquiryLineITE: 1,
+      enquiryLineEService: 1,
+    })
+    .exec();
+
   const topPagesVisited = await PageMetricsModel.aggregate()
     .sort({ date: 1, url: 1 })
     .match({ date: dateQuery })
@@ -388,6 +570,7 @@ async function getOverviewMetrics(
   return {
     visitsByDay,
     calldriversByDay,
+    ...calldriversEnquiry[0],
     ...aggregatedMetrics[0],
     topPagesVisited,
     top10GSC,
