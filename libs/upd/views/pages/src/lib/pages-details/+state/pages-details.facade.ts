@@ -244,35 +244,35 @@ export class PagesDetailsFacade {
 
       const dataByDeviceType = [
         {
-          name: 'Desktop',
+          name: this.i18n.service.translate('Desktop', lang),
           value: data?.dateRangeData?.visits_device_desktop || 0,
         },
         {
-          name: 'Mobile',
+          name: this.i18n.service.translate('Mobile', lang),
           value: data?.dateRangeData?.visits_device_mobile || 0,
         },
         {
-          name: 'Tablet',
+          name: this.i18n.service.translate('Tablet', lang),
           value: data?.dateRangeData?.visits_device_tablet || 0,
         },
-        { name: 'Other', value: data?.dateRangeData?.visits_device_other || 0 },
+        { name: this.i18n.service.translate('Other', lang), value: data?.dateRangeData?.visits_device_other || 0 },
       ];
 
       const comparisonDataByDeviceType = [
         {
-          name: 'Desktop',
+          name: this.i18n.service.translate('Desktop', lang),
           value: data?.comparisonDateRangeData?.visits_device_desktop || 0,
         },
         {
-          name: 'Mobile',
+          name: this.i18n.service.translate('Mobile', lang),
           value: data?.comparisonDateRangeData?.visits_device_mobile || 0,
         },
         {
-          name: 'Tablet',
+          name: this.i18n.service.translate('Tablet', lang),
           value: data?.comparisonDateRangeData?.visits_device_tablet || 0,
         },
         {
-          name: 'Other',
+          name: this.i18n.service.translate('Other', lang),
           value: data?.comparisonDateRangeData?.visits_device_other || 0,
         },
       ];
@@ -418,26 +418,26 @@ export class PagesDetailsFacade {
     })
   );
 
-  referrerType$ = this.pagesDetailsData$.pipe(
-    map((data) => {
+  referrerType$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
       const dataByReferrerType = [
         {
-          type: 'Other Web Sites',
+          type: this.i18n.service.translate('Other Web Sites', lang),
           value: data?.dateRangeData?.visits_referrer_other || 0,
           change: 0,
         },
         {
-          type: 'Search Engines',
+          type: this.i18n.service.translate('Search Engines', lang),
           value: data?.dateRangeData?.visits_referrer_searchengine || 0,
           change: 0,
         },
         {
-          type: 'Typed/Bookmarked',
+          type: this.i18n.service.translate('Typed/Bookmarked', lang),
           value: data?.dateRangeData?.visits_referrer_typed_bookmarked || 0,
           change: 0,
         },
         {
-          type: 'Social Networks',
+          type: this.i18n.service.translate('Social Networks', lang),
           value: data?.dateRangeData?.visits_referrer_social || 0,
           change: 0,
         },
@@ -453,76 +453,76 @@ export class PagesDetailsFacade {
     })
   );
 
-  visitorLocation$ = this.pagesDetailsData$.pipe(
-    map((data) => {
+  visitorLocation$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
       const dataByLocation = [
         {
-          province: 'Alberta',
+          province: this.i18n.service.translate('Alberta', lang),
           value: data?.dateRangeData?.visits_geo_ab || 0,
           change: 0,
         },
         {
-          province: 'British Columbia',
+          province: this.i18n.service.translate('British Columbia', lang),
           value: data?.dateRangeData?.visits_geo_bc || 0,
           change: 0,
         },
         {
-          province: 'Manitoba',
+          province: this.i18n.service.translate('Manitoba', lang),
           value: data?.dateRangeData?.visits_geo_mb || 0,
           change: 0,
         },
         {
-          province: 'New Brunswick',
+          province: this.i18n.service.translate('New Brunswick', lang),
           value: data?.dateRangeData?.visits_geo_nb || 0,
           change: 0,
         },
         {
-          province: 'Newfoundland and Labrador',
+          province: this.i18n.service.translate('Newfoundland and Labrador', lang),
           value: data?.dateRangeData?.visits_geo_nl || 0,
           change: 0,
         },
         {
-          province: 'Nova Scotia',
+          province: this.i18n.service.translate('Nova Scotia', lang),
           value: data?.dateRangeData?.visits_geo_ns || 0,
           change: 0,
         },
         {
-          province: 'Northwest Territories',
+          province: this.i18n.service.translate('Northwest Territories', lang),
           value: data?.dateRangeData?.visits_geo_nt || 0,
           change: 0,
         },
         {
-          province: 'Nunavut',
+          province: this.i18n.service.translate('Nunavut', lang),
           value: data?.dateRangeData?.visits_geo_nu || 0,
           change: 0,
         },
         {
-          province: 'Ontario',
+          province: this.i18n.service.translate('Ontario', lang),
           value: data?.dateRangeData?.visits_geo_on || 0,
           change: 0,
         },
         {
-          province: 'Prince Edward Island',
+          province: this.i18n.service.translate('Prince Edward Island', lang),
           value: data?.dateRangeData?.visits_geo_pe || 0,
           change: 0,
         },
         {
-          province: 'Quebec',
+          province: this.i18n.service.translate('Quebec', lang),
           value: data?.dateRangeData?.visits_geo_qc || 0,
           change: 0,
         },
         {
-          province: 'Sakatchewan',
+          province: this.i18n.service.translate('Sakatchewan', lang),
           value: data?.dateRangeData?.visits_geo_sk || 0,
           change: 0,
         },
         {
-          province: 'Yukon',
+          province: this.i18n.service.translate('Yukon', lang),
           value: data?.dateRangeData?.visits_geo_yt || 0,
           change: 0,
         },
         {
-          province: 'Outside Canada',
+          province: this.i18n.service.translate('Outside Canada', lang),
           value: data?.dateRangeData?.visits_geo_outside_canada || 0,
           change: 0,
         },
