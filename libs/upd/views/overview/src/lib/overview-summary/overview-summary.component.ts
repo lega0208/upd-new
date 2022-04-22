@@ -14,7 +14,6 @@ export class OverviewSummaryComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
-  colourMerge$ = this.overviewService.colours$;
   chartMerge$ = this.overviewService.chartMerge$;
 
   loaded$ = this.overviewService.loaded$;
@@ -97,18 +96,18 @@ export class OverviewSummaryComponent implements OnInit {
       ];
       this.barTableCols = [
         { field: 'name', header: this.i18n.service.translate('Dates', lang) },
-        //{ field: 'currValue', header: `Visits for ${this.dateRangeLabel$}`, pipe: 'number' },
         {
           field: 'currValue',
-          header: this.i18n.service.translate(`Visits for ${dateRange}`, lang),
+          header: this.i18n.service.translate('Visits for ', lang, {
+            value: dateRange,
+          }),
           pipe: 'number',
         },
         {
           field: 'prevValue',
-          header: this.i18n.service.translate(
-            `Visits for ${comparisonDateRange}`,
-            lang
-          ),
+          header: this.i18n.service.translate('Visits for ', lang, {
+            value: comparisonDateRange,
+          }),
           pipe: 'number',
         },
       ];

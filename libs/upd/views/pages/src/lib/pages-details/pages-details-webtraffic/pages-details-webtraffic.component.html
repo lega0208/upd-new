@@ -1,22 +1,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <ng-container
-        *ngIf="(visitsByDay$ | async)?.length === 0; else elseVisitsByDay"
-      >
-        <app-card
-          [card-title]="'visits'"
-        >
-          <p translate='nodata-visits-by-day'></p>
-        </app-card>
-      </ng-container>
-      <ng-template #elseVisitsByDay>
-        <app-charts
-          type="line"
-          [title]="'visits'"
-          [data]="(visitsByDay$ | async) || []"
-        ></app-charts>
-      </ng-template>
+      <app-charts
+        type="line"
+        [title]="'visits'"
+        [data]="(visitsByDay$ | async) || []"
+        [table]="(barTable$ | async) || []"
+        [tableCols]="barTableCols"
+      ></app-charts>
     </div>
   </div>
 </div>

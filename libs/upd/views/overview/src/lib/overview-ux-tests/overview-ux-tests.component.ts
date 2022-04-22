@@ -10,18 +10,11 @@ import { combineLatest } from 'rxjs';
   templateUrl: './overview-ux-tests.component.html',
   styleUrls: ['./overview-ux-tests.component.css'],
 })
-export class OverviewUxTestsComponent {
+export class OverviewUxTestsComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
-  uxChartData = uxChart;
-  // uxChartCols: ColumnConfig[] = [
-  //   { field: 'UX projects', header: 'UX projects' },
-  //   { field: 'Test', header: 'Test' },
-  //   { field: 'Date', header: 'Date' },
-  //   { field: 'Score', header: 'Score' },
-  //   { field: 'Participants', header: 'Participants' },
-  // ];
+  uxChartData = this.overviewService.projectsList$;
 
   testsCompleted = 36;
   tasksTested = 254;
@@ -39,18 +32,30 @@ export class OverviewUxTestsComponent {
   uxChartCols: ColumnConfig[] = [];
 
   ngOnInit() {
-
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
-      
-
       this.uxChartCols = [
-        { field: 'UX projects', header: this.i18n.service.translate('ux_projects', lang) },
-        { field: 'Test', header: this.i18n.service.translate('Test', lang) },
-        { field: 'Date', header: this.i18n.service.translate('date', lang) },
-        { field: 'Score', header: this.i18n.service.translate('Score', lang) },
-        { field: 'Participants', header: this.i18n.service.translate('number_of_participants', lang) },
+        {
+          field: 'title',
+          header: this.i18n.service.translate('ux_projects', lang),
+        },
+        {
+          field: 'testType',
+          header: this.i18n.service.translate('Test', lang),
+        },
+        {
+          field: 'startDate',
+          header: this.i18n.service.translate('date', lang),
+        },
+        {
+          field: 'avgSuccessRate',
+          header: this.i18n.service.translate('Score', lang),
+          pipe: 'percent',
+        },
+        {
+          field: 'totalUsers',
+          header: this.i18n.service.translate('number_of_participants', lang),
+        },
       ];
-
     });
   }
 }

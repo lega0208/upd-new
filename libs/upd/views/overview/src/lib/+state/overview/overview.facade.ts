@@ -7,8 +7,8 @@ import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 
-import { MultiSeries, ScaleType, SingleSeries } from '@amonsour/ngx-charts';
-import { LocaleId } from '@cra-arc/upd/i18n';
+import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
+import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import * as OverviewActions from './overview.actions';
@@ -38,11 +38,13 @@ export class OverviewFacade {
   visits$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.visits)
   );
+);
   visitsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('visits'));
 
-  views$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.pageViews)
-  );
+  views$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => { return (data?.dateRangeData?.pageViews)?.toLocaleString(lang);})
+);
+
   viewsPercentChange$ = this.overviewData$.pipe(
     mapToPercentChange('pageViews')
   );
@@ -76,6 +78,20 @@ export class OverviewFacade {
 
   top10GSC$ = this.overviewData$.pipe(
     map((data) => data?.dateRangeData?.top10GSC)
+  );
+
+  projectsList$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+      const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
+      const projects = data?.projects?.projects.map((d) => ({
+        ...d,
+        startDate: dayjs(d.startDate)
+          .utc(false)
+          .locale(lang)
+          .format(dateFormat),
+      }));
+      return [...(projects || [])];
+    })
   );
 
   isChartDataOver31Days$ = this.overviewData$.pipe(
@@ -239,10 +255,6 @@ export class OverviewFacade {
       const comparisonCalldriversByDay =
         data?.comparisonDateRangeData?.calldriversByDay || [];
 
-      if (!calldriversByDay.length || !comparisonCalldriversByDay.length) {
-        return [] as MultiSeries;
-      }
-
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
 
       const dateRangeSeries = calldriversByDay.map(({ date, calls }) => {
@@ -252,14 +264,39 @@ export class OverviewFacade {
         };
       });
 
-      const isOver =
-          dateRangePeriod !== 'weekly' ? 1 : 0;
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
+      );
 
-      const comparisonCallDrivers = isOver ? calldriversByDay : comparisonCalldriversByDay;
+      if (!calldriversByDay.length || !comparisonCalldriversByDay.length) {
+        return [
+          {
+            name: `${this.i18n.service.translate(
+              'calls',
+              lang
+            )} ${comparisonDateRangeLabel}`,
+            series: [],
+          },
+          {
+            name: `${this.i18n.service.translate(
+              'calls',
+              lang
+            )} ${dateRangeLabel}`,
+            series: [],
+          },
+        ] as MultiSeries;
+      }
+
+      const isOver = dateRangePeriod !== 'weekly' ? 1 : 0;
+
+      const comparisonCallDrivers = isOver
+        ? calldriversByDay
+        : comparisonCalldriversByDay;
 
       const comparisonDateRangeSeries = comparisonCalldriversByDay.map(
         ({ calls }, i) => {
-          
           return {
             name: dayjs(comparisonCallDrivers[i]?.date)
               .utc(false)
@@ -270,36 +307,24 @@ export class OverviewFacade {
         }
       );
 
-      const dateLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
-      const comparisonDateLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange || '',
-        lang
-      );
-
       return [
         {
-          name: `${this.i18n.service.translate('calls', lang)} ${dateLabel}`,
+          name: `${this.i18n.service.translate(
+            'calls',
+            lang
+          )} ${dateRangeLabel}`,
           series: dateRangeSeries,
         },
         {
           name: `${this.i18n.service.translate(
             'calls',
             lang
-          )} ${comparisonDateLabel}`,
+          )} ${comparisonDateRangeLabel}`,
           series: comparisonDateRangeSeries,
         },
       ];
     })
   );
-
-  colours$ = [
-    {
-      name: 'cool',
-      selectable: true,
-      group: ScaleType.Ordinal,
-      domain: ['#2E5EA7', '#B5C2CC', '#f37d35', '#fbbc4d'],
-    },
-  ];
 
   chartMerge$ = combineLatest([
     this.dateRangeSelected$,
