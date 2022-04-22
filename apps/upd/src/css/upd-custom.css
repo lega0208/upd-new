@@ -448,5 +448,16 @@ margin: 0px 20px 0px 20px;
 
 .datatable-headers {
   color: #000 !important;
-  font-weight: bold;
+  /* font-weight: 600; */
+  
 }
+
+.alert-info {
+  color:#2E5EA7 !important;
+  background-color: #E3F2FD;
+  border-color: #e5e5e5;
+}
+
+/* .alert {
+  padding: 0;
+} */
