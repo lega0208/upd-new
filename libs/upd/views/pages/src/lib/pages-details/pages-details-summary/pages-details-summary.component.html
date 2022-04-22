@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col">
       <app-data-card
-        [current]="(visitors$ | async | number: undefined: currentLang) || 0"
+        [current]="(visitors$ | async | number: undefined:currentLang) || 0"
         [comparison]="(visitorsPercentChange$ | async) || 0"
         [title]="'unique-visitors'"
         [tooltip]="'tooltip-unique-visitors'"
@@ -11,7 +11,7 @@
 
     <div class="col">
       <app-data-card
-        [current]="(visits$ | async | number: undefined: currentLang) || 0"
+        [current]="(visits$ | async | number: undefined:currentLang) || 0"
         [comparison]="(visitsPercentChange$ | async) || 0"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
@@ -20,7 +20,7 @@
 
     <div class="col">
       <app-data-card
-        [current]="(pageViews$ | async | number: undefined: currentLang) || 0"
+        [current]="(pageViews$ | async | number: undefined:currentLang) || 0"
         [comparison]="(pageViewsPercentChange$ | async) || 0"
         [title]="'page-views'"
         [tooltip]="'tooltip-page-views'"
@@ -32,25 +32,15 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <ng-container
-        *ngIf="(visitsByDeviceType$ | async)?.length === 0; else elseDeviceType"
-      >
-        <app-card
-          [card-title]="'d3-visits-by-device-type'"
-          title-tooltip="{{ 'tooltip-d3-visits-by-device-type' | translate }}"
-        >
-          <p translate='nodata-device-type'></p>
-        </app-card>
-      </ng-container>
-      <ng-template #elseDeviceType>
-        <app-charts
-          type="grouped-bar"
-          [title]="'d3-visits-by-device-type'"
-          titleTooltip="{{ 'tooltip-d3-visits-by-device-type' | translate }}"
-          [data]="visitsByDeviceType$ | async"
-          [showLegend]="true"
-        ></app-charts>
-      </ng-template>
+      <app-charts
+        type="grouped-bar"
+        [title]="'d3-visits-by-device-type'"
+        titleTooltip="{{ 'tooltip-d3-visits-by-device-type' | translate }}"
+        [data]="visitsByDeviceType$ | async"
+        [table]="visitsByDeviceTypeTable$ | async"
+        [tableCols]="visitsByDeviceTypeCols"
+        [showLegend]="true"
+      ></app-charts>
     </div>
   </div>
 </div>
@@ -58,22 +48,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <ng-container
-        *ngIf="(visitsByDay$ | async)?.length === 0; else elseVisitsByDay"
-      >
-        <app-card
-          [card-title]="'visits'"
-        >
-          <p translate='nodata-visits-by-day'></p>
-        </app-card>
-      </ng-container>
-      <ng-template #elseVisitsByDay>
-        <app-charts
-          type="line"
-          [title]="'visits'"
-          [data]="(visitsByDay$ | async) || []"
-        ></app-charts>
-      </ng-template>
+      <app-charts
+        type="line"
+        [title]="'visits'"
+        [table]="(barTable$ | async) || []"
+        [tableCols]="barTableCols"
+        [data]="(visitsByDay$ | async) || []"
+      ></app-charts>
     </div>
   </div>
 </div>

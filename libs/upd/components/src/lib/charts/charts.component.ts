@@ -173,7 +173,8 @@ export class ChartsComponent implements OnInit {
   get hasData() {
     return !(
       this.data.length === 0 &&
-      (this.barChart?.length === 0 && this.lineChart?.length === 0)
+      this.barChart?.length === 0 &&
+      this.lineChart?.length === 0
     );
   }
 

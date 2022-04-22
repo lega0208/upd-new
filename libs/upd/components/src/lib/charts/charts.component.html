@@ -4,7 +4,9 @@
   [h]="!hasData ? 100 : 0"
 >
   <ng-container *ngIf="!hasData; else elseBlock">
-    <p>{{ title | translate }} <span [translate]="'nodata-available'"></span></p>
+    <p>
+      {{ title | translate }} <span [translate]="'nodata-available'"></span>
+    </p>
   </ng-container>
   <ng-template #elseBlock>
     <div class="vh-45">
@@ -94,10 +96,11 @@
               (select)="onSelect($event)"
             >
               <!-- <ng-template #seriesTooltipTemplate let-model="model">
+                
               <div class="area-tooltip-container">
             <div *ngFor="let tooltip of model;  let i = index" class="tooltip-item">
               <span class="tooltip-item-color" [style.background-color]="tooltip.color"></span>
-              <ng-container *ngIf="i===1; else elseBlock">
+              <ng-container *ngIf="i===1 || i===3; else elseBlock">
               {{ dayjs(tooltip.name).subtract(3, 'month').format('MMM DD YYYY') }} :
             </ng-container>
             <ng-template #elseBlock>

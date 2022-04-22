@@ -40,6 +40,22 @@ export class PagesDetailsFacade {
 
   currentLang$ = this.i18n.currentLang$;
 
+  dateRange$ = this.store.pipe(map((data) => data?.data.dateRange));
+
+  dateRangeLabel$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)));
+
+  comparisonDateRangeLabel$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) =>
+      getWeeklyDatesLabel(data.comparisonDateRange || '', lang)
+    )
+  );
+
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
 
@@ -180,9 +196,11 @@ export class PagesDetailsFacade {
         startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
       }
 
-      const visitsByDayData: MultiSeries = [
+      let visitsByDayData: MultiSeries = [];
+
+      visitsByDayData = [
         {
-          name: data?.dateRange,
+          name: dateRangeLabel,
           series: dateRangeSeries.map(({ value }, i) => ({
             name: dayjs(dateRangeDates[i])
               .utc(false)
@@ -198,7 +216,7 @@ export class PagesDetailsFacade {
         typeof data?.comparisonDateRange === 'string'
       ) {
         visitsByDayData.push({
-          name: data?.comparisonDateRange,
+          name: comparisonDateRangeLabel,
           series: comparisonDateRangeSeries.map(({ value }, i) => ({
             name: dayjs(dateRangeDates[i])
               .utc(false)
@@ -213,9 +231,17 @@ export class PagesDetailsFacade {
     })
   );
 
-  visitsByDeviceType$ = this.pagesDetailsData$.pipe(
-    // todo: utility function for converting to MultiSeries/other chart types
-    map((data) => {
+  visitsByDeviceType$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
+      );
+
       const dataByDeviceType = [
         {
           name: 'Desktop',
@@ -260,16 +286,135 @@ export class PagesDetailsFacade {
 
       const barChartData: MultiSeries = [
         {
-          name: data?.dateRange || '', // todo: formatted date range labels
+          name: dateRangeLabel,
           series: dataByDeviceType,
         },
         {
-          name: data?.comparisonDateRange || '',
+          name: comparisonDateRangeLabel,
           series: comparisonDataByDeviceType,
         },
       ];
 
       return barChartData;
+    })
+  );
+
+  barTable$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+      const visitsByDay = data?.dateRangeData?.visitsByDay;
+      const comparisonVisitsByDay =
+        data?.comparisonDateRangeData?.visitsByDay || [];
+      const days = visitsByDay?.length || 0;
+      const prevDays = comparisonVisitsByDay?.length || 0;
+      const maxDays = Math.max(days, prevDays);
+      const granularity = Math.ceil(days / 7);
+      const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
+      let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
+      let [prevStartDate] = (data.comparisonDateRange || '')
+        .split('/')
+        .map((d) => new Date(d));
+
+      if (!visitsByDay) {
+        return [] as MultiSeries;
+      }
+
+      const dateRangeSeries = visitsByDay.map(({ date, visits }) => ({
+        date,
+        visits,
+      }));
+      const comparisonDateRangeSeries = comparisonVisitsByDay.map(
+        ({ visits }) => ({
+          visits,
+        })
+      );
+
+      let dayCount = 0;
+
+      while (dayCount < maxDays) {
+        const prevMonthDays = getMonthlyDays(prevStartDate);
+        const currMonthDays = getMonthlyDays(startDate);
+
+        if (currMonthDays > prevMonthDays) {
+          // if the current month has more days than the previous month,
+          // we need to pad the previous month with zeros
+
+          const daysToPad = currMonthDays - prevMonthDays;
+          comparisonDateRangeSeries.splice(
+            dayCount + prevMonthDays,
+            0,
+            ...Array(daysToPad).fill({
+              date: '*',
+              visits: 0,
+            })
+          );
+
+          dayCount += currMonthDays;
+        } else {
+          // if the current month has less days than the previous month,
+          // we need to pad the current month with zeros
+
+          const daysToPad = prevMonthDays - currMonthDays;
+
+          dateRangeSeries.splice(
+            dayCount + currMonthDays,
+            0,
+            ...Array(daysToPad).fill({
+              date: '*',
+              visits: 0,
+            })
+          );
+
+          dayCount += prevMonthDays;
+        }
+
+        prevStartDate = dayjs(prevStartDate)
+          .utc(false)
+          .add(1, 'month')
+          .toDate();
+        startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
+      }
+
+      const dateRangeDates = dateRangeSeries.map(({ date }) => date);
+
+      const visitsByDayData = dateRangeDates.map((date, i) => {
+        return {
+          name: dayjs(date).utc(false).locale(lang).format(dateFormat),
+          currValue: dateRangeSeries[i]?.visits || 0,
+          prevValue: comparisonDateRangeSeries[i]?.visits || 0,
+        };
+      });
+
+      return visitsByDayData;
+    })
+  );
+
+  visitsByDeviceTypeTable$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      return [
+        {
+          name: this.i18n.service.translate('Desktop', lang),
+          currValue: data?.dateRangeData?.visits_device_desktop || 0,
+          prevValue: data?.comparisonDateRangeData?.visits_device_desktop || 0,
+        },
+        {
+          name: this.i18n.service.translate('Mobile', lang),
+          currValue: data?.dateRangeData?.visits_device_mobile || 0,
+          prevValue: data?.comparisonDateRangeData?.visits_device_mobile || 0,
+        },
+        {
+          name: this.i18n.service.translate('Tablet', lang),
+          currValue: data?.dateRangeData?.visits_device_tablet || 0,
+          prevValue: data?.comparisonDateRangeData?.visits_device_tablet || 0,
+        },
+        {
+          name: this.i18n.service.translate('Other', lang),
+          currValue: data?.dateRangeData?.visits_device_other || 0,
+          prevValue: data?.comparisonDateRangeData?.visits_device_other || 0,
+        },
+      ];
     })
   );
 
@@ -396,12 +541,15 @@ export class PagesDetailsFacade {
   //   mapObjectArraysWithPercentChange('root', 'visits')
   // );
 
-  dyfData$ = this.pagesDetailsData$.pipe(
+  dyfData$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
-    map((data) => {
+    map(([data, lang]) => {
+      const yes = this.i18n.service.translate('yes', lang);
+      const no = this.i18n.service.translate('no', lang);
+
       const pieChartData: SingleSeries = [
-        { name: 'Yes', value: data?.dateRangeData?.dyf_yes || 0 },
-        { name: 'No', value: data?.dateRangeData?.dyf_no || 0 },
+        { name: yes, value: data?.dateRangeData?.dyf_yes || 0 },
+        { name: no, value: data?.dateRangeData?.dyf_no || 0 },
       ];
 
       const isZero = pieChartData.every((v) => v.value === 0);
@@ -413,31 +561,36 @@ export class PagesDetailsFacade {
     })
   );
 
-  whatWasWrongData$ = this.pagesDetailsData$.pipe(
+  whatWasWrongData$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
-    map((data) => {
-      const cantFindInfo = data?.dateRangeData?.fwylf_cant_find_info || 0;
-      const otherReason = data?.dateRangeData?.fwylf_other || 0;
-      const hardToUnderstand =
-        data?.dateRangeData?.fwylf_hard_to_understand || 0;
-      const error = data?.dateRangeData?.fwylf_error || 0;
+    map(([data, lang]) => {
+      const cantFindInfo = this.i18n.service.translate(
+        'd3-cant-find-info',
+        lang
+      );
+      const otherReason = this.i18n.service.translate('d3-other', lang);
+      const hardToUnderstand = this.i18n.service.translate(
+        'd3-hard-to-understand',
+        lang
+      );
+      const error = this.i18n.service.translate('d3-error', lang);
 
-      if (!cantFindInfo && !otherReason && !hardToUnderstand && !error) {
-        return [] as SingleSeries;
-      }
       const pieChartData: SingleSeries = [
         {
-          name: 'I can’t find the info',
-          value: cantFindInfo,
+          name: cantFindInfo,
+          value: data?.dateRangeData?.fwylf_cant_find_info || 0,
         },
-        { name: 'Other reason', value: otherReason },
+        { name: otherReason, value: data?.dateRangeData?.fwylf_other || 0 },
         {
-          name: 'Info is hard to understand',
-          value: hardToUnderstand,
+          name: hardToUnderstand,
+          value: data?.dateRangeData?.fwylf_hard_to_understand || 0,
         },
         {
-          name: 'Error/something didn’t work',
-          value: error,
+          name: error,
+          value: data?.dateRangeData?.fwylf_error || 0,
         },
       ];
 

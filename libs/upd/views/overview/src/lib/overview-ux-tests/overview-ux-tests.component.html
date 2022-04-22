@@ -51,7 +51,7 @@
         [filter]="false"
         [sort]="true"
         [pagination]="false"
-        [data]="uxChartData"
+        [data]="(uxChartData | async) || []"
         [cols]="uxChartCols"
         [title]="'Recent testing scores by project'"
       >

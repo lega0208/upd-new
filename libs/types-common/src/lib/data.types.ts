@@ -113,7 +113,6 @@ export interface OverviewAggregatedData {
   calldriversByDay: { date: Date; calls: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
-  uxTest: OverviewUxData;
 }
 
 export interface OverviewUxData {
@@ -123,7 +122,9 @@ export interface OverviewUxData {
   numDelayed: number;
 }
 
-export type OverviewData = ViewData<OverviewAggregatedData>;
+export interface OverviewData extends ViewData<OverviewAggregatedData> {
+  projects?: ProjectsHomeData;
+}
 
 export interface TasksHomeAggregatedData {
   _id: string;
