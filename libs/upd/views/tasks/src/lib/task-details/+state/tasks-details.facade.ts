@@ -42,7 +42,7 @@ export class TasksDetailsFacade {
   );
 
   visits$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visits)
+    map((data) => data?.dateRangeData?.visits || 0)
   );
   visitsPercentChange$ = this.tasksDetailsData$.pipe(
     mapToPercentChange('visits')
@@ -143,28 +143,28 @@ export class TasksDetailsFacade {
   );
 
   gscTotalClicks$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalClicks)
+    map((data) => data?.dateRangeData?.gscTotalClicks || 0)
   );
   gscTotalClicksPercentChange$ = this.tasksDetailsData$.pipe(
     mapToPercentChange('gscTotalClicks')
   );
 
   gscTotalImpressions$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalImpressions)
+    map((data) => data?.dateRangeData?.gscTotalImpressions || 0)
   );
   gscTotalImpressionsPercentChange$ = this.tasksDetailsData$.pipe(
     mapToPercentChange('gscTotalImpressions')
   );
 
   gscTotalCtr$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalCtr)
+    map((data) => data?.dateRangeData?.gscTotalCtr || 0)
   );
   gscTotalCtrPercentChange$ = this.tasksDetailsData$.pipe(
     mapToPercentChange('gscTotalCtr')
   );
 
   gscTotalPosition$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalPosition)
+    map((data) => data?.dateRangeData?.gscTotalPosition || 0)
   );
   gscTotalPositionPercentChange$ = this.tasksDetailsData$.pipe(
     mapToPercentChange('gscTotalPosition')
@@ -206,7 +206,7 @@ function mapToPercentChange(
 ) {
   return map((data: TaskDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
-      return;
+      return 0;
     }
 
     const current = data?.dateRangeData[propName as DateRangeDataIndexKey];
@@ -214,7 +214,7 @@ function mapToPercentChange(
       data?.comparisonDateRangeData[propName as DateRangeDataIndexKey];
 
     if (!current || !previous) {
-      return;
+      return 0;
     }
 
     return percentChange(current, previous);

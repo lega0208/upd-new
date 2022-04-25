@@ -2,24 +2,26 @@
   <div class="row">
     <div class="col">
       <app-data-card
-        [current]="(gscImpressions$ | async | number: undefined:currentLang) || 0"
-        [comparison]="(gscImpressionsPercentChange$ | async) || 0"
+        [current$]="gscImpressions$"
+        [comparison$]="gscImpressionsPercentChange$"
         [title]="'total-impressions-google'"
         [tooltip]="'tooltip-total-impressions-google'"
       ></app-data-card>
     </div>
     <div class="col">
       <app-data-card
-        [current]="(gscCTR$ | async | percent: undefined:currentLang) || 0"
-        [comparison]="(gscCTRPercentChange$ | async) || 0"
+        [current$]="gscCTR$"
+        [pipe]="'percent'"
+        [comparison$]="gscCTRPercentChange$"
         [title]="'ctr-google'"
         [tooltip]="'tooltip-ctr-google'"
       ></app-data-card>
     </div>
     <div class="col">
       <app-data-card
-        [current]="(gscAverage$ | async | number: '1.0-2': currentLang) || 0"
-        [comparison]="(gscAveragePercentChange$ | async) || 0"
+        [current$]="gscAverage$"
+        [pipeParams]="'1.0-2'"
+        [comparison$]="gscAveragePercentChange$"
         [title]="'avg-rank-google'"
         [tooltip]="'tooltip-avg-rank-google'"
       ></app-data-card>

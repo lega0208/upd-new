@@ -2,14 +2,15 @@
   <div class="row">
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(avgTaskSuccessFromLastTest$ | async | percent: undefined:currentLang) || 0"
+        [current$]="avgTaskSuccessFromLastTest$"
+        [pipe]="'percent'"
         [title]="'Latest success rate'"
       ></app-data-card>
     </div>
 
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(totalParticipants$ | async | number) || 0"
+        [current$]="totalParticipants$"
         [title]="'Total participants from all tests'"
       ></app-data-card>
     </div>

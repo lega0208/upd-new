@@ -3,7 +3,7 @@ import { ColumnConfig } from '@cra-arc/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { combineLatest } from 'rxjs';
+import { combineLatest, of } from 'rxjs';
 
 @Component({
   selector: 'app-overview-ux-tests',
@@ -16,13 +16,13 @@ export class OverviewUxTestsComponent implements OnInit {
 
   uxChartData = this.overviewService.projectsList$;
 
-  testsCompleted = 36;
-  tasksTested = 254;
-  participantsTested = 1710;
+  testsCompleted = of(36);
+  tasksTested = of(254);
+  participantsTested = of(1710);
 
-  testsConducted = 28;
-  testsConductedLastQuarter = 4;
-  COPSTests = 21;
+  testsConducted = of(28);
+  testsConductedLastQuarter = of(4);
+  COPSTests = of(21);
 
   constructor(
     private overviewService: OverviewFacade,

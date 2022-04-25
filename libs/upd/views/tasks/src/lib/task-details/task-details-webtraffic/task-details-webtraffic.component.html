@@ -2,8 +2,8 @@
   <div class="row">
     <div class="col-lg-4 col-sm-12">
       <app-data-card
-        [current]="(visits$ | async | number: undefined: currentLang) || 0"
-        [comparison]="(visitsPercentChange$ | async) || 0"
+        [current$]="visits$"
+        [comparison$]="visitsPercentChange$"
         [title]="'Total visits from all pages'"
       ></app-data-card>
     </div>

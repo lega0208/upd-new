@@ -1,5 +1,5 @@
 <app-card [card-title]="title" [title-tooltip]="tooltip" [h]="100">
-  <ng-container *ngIf="current === 0 || current === '0' || current === '0%'; else elseBlock">
+  <ng-container *ngIf="(current$ | async) === 0; else elseBlock">
     <div class="container-fluid p-0">
       <div class="row row-no-gutters">
         <div class="col">
@@ -16,19 +16,15 @@
       <div class="row row-no-gutters">
         <div class="col">
           <p class="h3 w-100">
-            {{ current$ | async }}
+            {{ currentFormatted$ | async }}
           </p>
         </div>
         <div class="col ml-auto">
           <span
-            [ngClass]="{
-              'text-success': comparison > 0,
-              'text-danger': comparison < 0,
-              hidden: comparison === 0
-            }"
+            [ngClass]="comparisonClass"
             class="h3 float-end"
           >
-            {{ comparison | percent: undefined:i18n.service.currentLang }}
+            {{ comparisonFormatted$ | async }}
           </span>
         </div>
       </div>

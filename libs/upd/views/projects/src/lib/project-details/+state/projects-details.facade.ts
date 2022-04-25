@@ -58,7 +58,7 @@ export class ProjectsDetailsFacade {
   );
 
   visits$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visits)
+    map((data) => data?.dateRangeData?.visits || 0)
   );
   visitsPercentChange$ = this.projectsDetailsData$.pipe(
     mapToPercentChange('visits')
@@ -143,28 +143,28 @@ export class ProjectsDetailsFacade {
   );
 
   gscTotalClicks$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalClicks)
+    map((data) => data?.dateRangeData?.gscTotalClicks || 0)
   );
   gscTotalClicksPercentChange$ = this.projectsDetailsData$.pipe(
     mapToPercentChange('gscTotalClicks')
   );
 
   gscTotalImpressions$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalImpressions)
+    map((data) => data?.dateRangeData?.gscTotalImpressions || 0)
   );
   gscTotalImpressionsPercentChange$ = this.projectsDetailsData$.pipe(
     mapToPercentChange('gscTotalImpressions')
   );
 
   gscTotalCtr$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalCtr)
+    map((data) => data?.dateRangeData?.gscTotalCtr || 0)
   );
   gscTotalCtrPercentChange$ = this.projectsDetailsData$.pipe(
     mapToPercentChange('gscTotalCtr')
   );
 
   gscTotalPosition$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalPosition)
+    map((data) => data?.dateRangeData?.gscTotalPosition || 0)
   );
   gscTotalPositionPercentChange$ = this.projectsDetailsData$.pipe(
     mapToPercentChange('gscTotalPosition')
@@ -238,7 +238,7 @@ function mapToPercentChange(
 ) {
   return map((data: ProjectsDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
-      return;
+      return 0;
     }
 
     const current = data?.dateRangeData[propName as DateRangeDataIndexKey];
@@ -246,7 +246,7 @@ function mapToPercentChange(
       data?.comparisonDateRangeData[propName as DateRangeDataIndexKey];
 
     if (!current || !previous) {
-      return;
+      return 0;
     }
 
     return percentChange(current, previous);

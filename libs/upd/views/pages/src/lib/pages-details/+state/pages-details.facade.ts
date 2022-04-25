@@ -60,42 +60,42 @@ export class PagesDetailsFacade {
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
 
   visitors$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visitors)
+    map((data) => data?.dateRangeData?.visitors || 0)
   );
   visitorsPercentChange$ = this.pagesDetailsData$.pipe(
     mapToPercentChange('visitors')
   );
 
   visits$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visits)
+    map((data) => data?.dateRangeData?.visits || 0)
   );
   visitsPercentChange$ = this.pagesDetailsData$.pipe(
     mapToPercentChange('visits')
   );
 
   pageViews$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.views)
+    map((data) => data?.dateRangeData?.views || 0)
   );
   pageViewsPercentChange$ = this.pagesDetailsData$.pipe(
     mapToPercentChange('views')
   );
 
   impressions$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gsc_total_impressions)
+    map((data) => data?.dateRangeData?.gsc_total_impressions || 0)
   );
   impressionsPercentChange$ = this.pagesDetailsData$.pipe(
     mapToPercentChange('gsc_total_impressions')
   );
 
   ctr$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gsc_total_ctr)
+    map((data) => data?.dateRangeData?.gsc_total_ctr || 0)
   );
   ctrPercentChange$ = this.pagesDetailsData$.pipe(
     mapToPercentChange('gsc_total_ctr')
   );
 
   avgRank$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gsc_total_position)
+    map((data) => data?.dateRangeData?.gsc_total_position || 0)
   );
   avgRankPercentChange$ = this.pagesDetailsData$.pipe(
     mapToPercentChange('gsc_total_position')
@@ -646,7 +646,7 @@ function mapToPercentChange(
 ) {
   return map((data: PageDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
-      return;
+      return 0;
     }
 
     const current = data?.dateRangeData[propName as DateRangeDataIndexKey];
@@ -654,7 +654,7 @@ function mapToPercentChange(
       data?.comparisonDateRangeData[propName as DateRangeDataIndexKey];
 
     if (!current || !previous) {
-      return;
+      return 0;
     }
 
     return percentChange(current, previous);

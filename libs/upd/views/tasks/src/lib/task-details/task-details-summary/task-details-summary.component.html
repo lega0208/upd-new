@@ -11,8 +11,8 @@
 
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(visits$ | async | number: undefined: currentLang) || 0"
-        [comparison]="(visitsPercentChange$ | async) || 0"
+        [current$]="visits$"
+        [comparison$]="visitsPercentChange$"
         [title]="'Total visits from all pages'"
       ></app-data-card>
     </div>
@@ -41,7 +41,6 @@
         [data]="dyfChart$ | async"
         [tableCols]="dyfTableCols"
         [type]="'donut'"
-        [tableCols]="dyfTableCols"
       ></app-charts>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
@@ -51,7 +50,6 @@
         [data]="whatWasWrongChart$ | async"
         [tableCols]="whatWasWrongTableCols"
         [type]="'donut'"
-        [tableCols]="whatWasWrongTableCols"
       ></app-charts>
     </div>
   </div>

@@ -19,6 +19,7 @@ export class OverviewSummaryComponent implements OnInit {
   loaded$ = this.overviewService.loaded$;
   loading$ = this.overviewService.loading$;
   error$ = this.overviewService.error$;
+
   uniqueVisitors$ = this.overviewService.visitors$;
   uniqueVisitorsPercentChange$ = this.overviewService.visitorsPercentChange$;
 
@@ -66,10 +67,6 @@ export class OverviewSummaryComponent implements OnInit {
   taskSurveyCols: ColumnConfig[] = [];
 
   ngOnInit() {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
     combineLatest([
       this.currentLang$,
       this.dateRangeLabel$,

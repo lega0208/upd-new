@@ -1,4 +1,4 @@
-  
+
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-sm-12">
@@ -12,7 +12,7 @@
 
     <div class="col-lg-6 col-sm-12">
       <app-data-card
-        [current]="(totalParticipants$ | async | number) || 0"
+        [current$]="totalParticipants$"
         [title]="'Total participants from all tests'"
       ></app-data-card>
     </div>
@@ -59,8 +59,8 @@
       <app-data-table-card
       [data]="successRate$ || []"
       [cols]="successRateCols"
-      [sort]="false" 
-      [pagination]="false" 
+      [sort]="false"
+      [pagination]="false"
       [filter]="false"
       title="Success rate and scenarios"
       tooltip="Success rate and scenarios tooltip"

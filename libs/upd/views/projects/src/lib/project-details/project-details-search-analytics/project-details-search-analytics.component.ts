@@ -17,6 +17,8 @@ export class ProjectDetailsSearchAnalyticsComponent implements OnInit {
   gscTotalClicks$ = this.projectsDetailsService.gscTotalClicks$;
 
   gscTotalImpressions$ = this.projectsDetailsService.gscTotalImpressions$;
+  gscTotalImpressionsPercentChange$ = this.projectsDetailsService.gscTotalImpressionsPercentChange$;
+
   gscTotalCtr$ = this.projectsDetailsService.gscTotalCtr$;
   gscTotalPosition$ = this.projectsDetailsService.gscTotalPosition$;
 

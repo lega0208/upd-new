@@ -68,6 +68,7 @@ export class I18nEffects {
                 ],
                 {
                   replaceUrl: true,
+                  queryParamsHandling: 'merge',
                 }
               )
             );

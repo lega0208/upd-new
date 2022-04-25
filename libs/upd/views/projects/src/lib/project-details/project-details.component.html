@@ -1,8 +1,13 @@
-<div class="back_link"><span class="material-icons align-top">west</span> <a [routerLink]="'/projects'" [translate]="'menu-projects'"></a></div>
+<div class="back_link">
+  <span class="material-icons align-top">west</span>
+  <a [routerLink]="['/', langLink, 'projects']" [translate]="'menu-projects'"></a>
+</div>
 <h2 class="h3 pt-2 pb-2" data-i18n="task-title">
   <span [translate]="'project'"></span>: {{ title$ | async }}
   <span class="h5 d-inline-block mb-0 align-top ms-1">
-    <app-project-status-label [statusText]="(status$ | async) || 'Unknown'"></app-project-status-label>
+    <app-project-status-label
+      [statusText]="(status$ | async) || 'Unknown'"
+    ></app-project-status-label>
   </span>
 </h2>
 

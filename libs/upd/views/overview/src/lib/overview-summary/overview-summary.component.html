@@ -2,24 +2,24 @@
   <div class="row">
     <div class="col-lg-4 col-sm-12">
       <app-data-card
-        [current]="(uniqueVisitors$ | async) || 0"
-        [comparison]="(uniqueVisitorsPercentChange$ | async) || 0"
+        [current$]="uniqueVisitors$"
+        [comparison$]="uniqueVisitorsPercentChange$"
         [title]="'unique-visitors'"
         [tooltip]="'tooltip-unique-visitors'"
       ></app-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
-        [current]="(visits$ | async) || 0"
-        [comparison]="(visitsPercentChange$ | async) || 0"
+        [current$]="visits$"
+        [comparison$]="visitsPercentChange$"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
       ></app-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
-        [current]="(pageViews$ | async) || 0"
-        [comparison]="(pageViewsPercentChange$ | async) || 0"
+        [current$]="pageViews$"
+        [comparison$]="pageViewsPercentChange$"
         [title]="'page-views'"
         [tooltip]="'tooltip-page-views'"
       ></app-data-card>
@@ -51,26 +51,26 @@
   <div class="row">
     <div class="col-lg-4 col-sm-12">
       <app-data-card
-        [current]="
-          (gscImpressions$ | async | number: undefined:currentLang) || 0
-        "
-        [comparison]="(gscImpressionsPercentChange$ | async) || 0"
+        [current$]="gscImpressions$"
+        [comparison$]="gscImpressionsPercentChange$"
         [title]="'total-impressions-google'"
         [tooltip]="'tooltip-total-impressions-google'"
       ></app-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
-        [current]="(gscCTR$ | async | percent: undefined:currentLang) || 0"
-        [comparison]="(gscCTRPercentChange$ | async) || 0"
+        [current$]="gscCTR$"
+        [pipe]="'percent'"
+        [comparison$]="gscCTRPercentChange$"
         [title]="'ctr-google'"
         [tooltip]="'tooltip-ctr-google'"
       ></app-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <app-data-card
-        [current]="(gscAverage$ | async | number: '1.0-2':currentLang) || 0"
-        [comparison]="(gscAveragePercentChange$ | async) || 0"
+        [current$]="gscAverage$"
+        [pipeParams]="'1.0-2'"
+        [comparison$]="gscAveragePercentChange$"
         [title]="'avg-rank-google'"
         [tooltip]="'tooltip-avg-rank-google'"
       ></app-data-card>

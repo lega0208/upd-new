@@ -15,6 +15,7 @@ export class ProjectDetailsWebtrafficComponent implements OnInit {
   currentLang!: LocaleId;
 
   visits$ = this.projectsDetailsService.visits$;
+  visitsPercentChange$ = this.projectsDetailsService.visitsPercentChange$;
 
   visitsByPage$ = this.projectsDetailsService.visitsByPageWithPercentChange$;
   visitsByPageCols: ColumnConfig[] = [];

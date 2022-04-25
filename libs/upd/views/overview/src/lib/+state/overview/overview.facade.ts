@@ -28,20 +28,20 @@ export class OverviewFacade {
   dateRangeSelected$ = this.store.pipe(select(selectDatePeriodSelection));
   overviewData$ = this.store.pipe(select(OverviewSelectors.getOverviewData));
 
-  visitors$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-      map(([data, lang]) => { return (data?.dateRangeData?.visitors)?.toLocaleString(lang);})
+  visitors$ = this.overviewData$.pipe(
+    map((overviewData) => overviewData?.dateRangeData?.visitors || 0)
   );
   visitorsPercentChange$ = this.overviewData$.pipe(
     mapToPercentChange('visitors')
   );
 
   visits$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.visits)
+    map((overviewData) => overviewData?.dateRangeData?.visits || 0)
   );
   visitsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('visits'));
 
   views$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.pageViews)
+    map((overviewData) => overviewData?.dateRangeData?.pageViews || 0)
 );
 
   viewsPercentChange$ = this.overviewData$.pipe(
@@ -49,19 +49,19 @@ export class OverviewFacade {
   );
 
   impressions$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.impressions)
+    map((overviewData) => overviewData?.dateRangeData?.impressions || 0)
   );
   impressionsPercentChange$ = this.overviewData$.pipe(
     mapToPercentChange('impressions')
   );
 
   ctr$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.ctr)
+    map((overviewData) => overviewData?.dateRangeData?.ctr || 0)
   );
   ctrPercentChange$ = this.overviewData$.pipe(mapToPercentChange('ctr'));
 
   avgRank$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.position)
+    map((overviewData) => overviewData?.dateRangeData?.position || 0)
   );
   avgRankPercentChange$ = this.overviewData$.pipe(
     mapToPercentChange('position')
@@ -706,7 +706,7 @@ function mapToPercentChange(
 ) {
   return map((data: OverviewData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
-      return;
+      return 0;
     }
 
     const current = data?.dateRangeData[propName as DateRangeDataIndexKey];
@@ -714,7 +714,7 @@ function mapToPercentChange(
       data?.comparisonDateRangeData[propName as DateRangeDataIndexKey];
 
     if (!current || !previous) {
-      return;
+      return 0;
     }
 
     return percentChange(current, previous);

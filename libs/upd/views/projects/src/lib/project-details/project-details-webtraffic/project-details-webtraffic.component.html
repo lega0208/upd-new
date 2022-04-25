@@ -2,21 +2,21 @@
     <div class="row">
       <div class="col-lg-4 col-sm-12">
         <app-data-card
-          [current]="(visits$ | async | number: undefined: currentLang) || 0"
-          [comparison]="0"
+          [current$]="visits$"
+          [comparison$]="visitsPercentChange$"
           [title]="'Total visits from all pages'"
         ></app-data-card>
       </div>
     </div>
   </div>
-  
+
   <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
         <app-data-table-card
         [data]="(visitsByPage$ | async) || []"
         [cols]="visitsByPageCols"
-        [sort]="false" 
+        [sort]="false"
         [filter]="false"
         [title]="'Visits by page'"
     >
@@ -25,4 +25,3 @@
       </div>
     </div>
   </div>
-  

@@ -5,6 +5,7 @@ import { ProjectsDetailsFacade } from './+state/projects-details.facade';
 
 import { I18nFacade } from '@cra-arc/upd/state';
 import { combineLatest } from 'rxjs';
+import { EN_CA } from '@cra-arc/upd/i18n';
 
 @Component({
   selector: 'app-project-details',
@@ -13,33 +14,22 @@ import { combineLatest } from 'rxjs';
 })
 export class ProjectDetailsComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
+  langLink = 'en';
 
   title$ = this.projectsDetailsService.title$;
   status$ = this.projectsDetailsService.status$ as Observable<ProjectStatus>;
   loaded$ = this.projectsDetailsService.loaded$;
 
-  // navTabs: { href: string; title: string }[] = [
-  //   { href: 'summary', title: 'Summary' },
-  //   { href: 'webtraffic', title: 'Web Traffic' },
-  //   { href: 'searchanalytics', title: 'Search Analytics' },
-  //   { href: 'pagefeedback', title: 'Page Feedback' },
-  //   { href: 'calldrivers', title: 'Call Drivers' },
-  //   { href: 'uxtests', title: 'UX Tests' },
-  //   { href: 'details', title: 'Details' },
-  // ];
-
   navTabs: { href: string; title: string }[] = [];
 
-  data$ = this.projectsDetailsService.projectsDetailsData$;
+
 
   constructor(private readonly projectsDetailsService: ProjectsDetailsFacade, public i18n: I18nFacade) {}
 
   ngOnInit() {
     this.projectsDetailsService.init();
-    
-    combineLatest([
-      this.currentLang$
-    ]).subscribe(([lang]) => {
+
+    this.currentLang$.subscribe((lang) => {
       this.navTabs = [
         { href: 'summary', title: this.i18n.service.translate('tab-summary', lang) },
         { href: 'webtraffic', title: this.i18n.service.translate('tab-webtraffic', lang) },
@@ -49,6 +39,8 @@ export class ProjectDetailsComponent implements OnInit {
         { href: 'uxtests', title: this.i18n.service.translate('tab-uxtests', lang) },
         // { href: 'details', title: this.i18n.service.translate('tab-details', lang) },
       ];
+
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
     });
   }
 }
