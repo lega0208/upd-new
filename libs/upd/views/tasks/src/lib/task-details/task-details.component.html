@@ -1,4 +1,7 @@
-<div class="back_link"><span class="material-icons align-top">west</span> <a [routerLink]="'/tasks'" [translate]="'menu-tasks'"></a></div>
+<div class="back_link">
+  <span class="material-icons align-top">west</span> 
+  <a [routerLink]="['/', langLink, 'tasks']" [translate]="'menu-tasks'"></a>
+</div>
 
 <app-loading-spinner
   *ngIf="(loading$ | async) && (title$ | async) !== ''; else elseBlock"

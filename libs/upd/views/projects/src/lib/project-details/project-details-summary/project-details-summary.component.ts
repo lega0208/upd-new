@@ -4,6 +4,7 @@ import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { combineLatest } from 'rxjs';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
+import { EN_CA } from '@cra-arc/upd/i18n';
 
 @Component({
   selector: 'app-project-details-summary',
@@ -13,6 +14,7 @@ import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 export class ProjectDetailsSummaryComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
+  langLink = 'en';
 
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
@@ -37,13 +39,14 @@ export class ProjectDetailsSummaryComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+    this.currentLang$.subscribe((lang) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.participantTasksCols = [
         {
           field: 'title',
           header: this.i18n.service.translate('Task list', lang),
           type: 'link',
-          typeParams: { preLink: '/tasks', link: 'tasks' },
+          typeParams: { preLink: '/' + this.langLink + '/tasks', link: 'tasks' },
         }
       ];
       this.dyfTableCols = [
