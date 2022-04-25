@@ -72,11 +72,13 @@
   "d3-error": "Error/something didn't work",
   "d3-other": "Other reason",
   "d3-tcbil": "Total calls by inquiry line",
-  "d3-ITE": "ITE",
+  "d3-ITE": "Individual Tax Enquiries (ITE)",
   "d3-e-Services": "e-Services Help Desk",
   "d3-benefits": "Benefits",
-  "d3-be": "BE",
+  "d3-be": "Business Enquiries (BE)",
   "d3-c4": "C4 - Identity Theft",
+  "d3-c9": "C9 - My Account Lockout",
+  "call-drivers-disclaimer": "This report presents call topic results for the main agent queues based on a random sample of calls.",
   "top10-pages-visited": "Top 10 pages visited",
 
   "rank": "Rank",
@@ -245,5 +247,6 @@
   "Other": "Other",
   "UX test types": "UX test types",
   "Baseline": "Baseline",
-  "Validation": "Validation"
+  "Validation": "Validation",
+  "Loading Data": "Loading Data"
 }

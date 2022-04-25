@@ -72,11 +72,13 @@
   "d3-error": "Erreur/quelque chose n'a pas fonctionné",
   "d3-other": "Autre raison",
   "d3-tcbil": "Nombre total des appels par ligne de renseignements",
-  "d3-ITE": "DRIP",
-  "d3-e-Services": "Centre d'assistance des services en ligne",
+  "d3-ITE": "Demandes de renseignements sur l'impôt des particuliers (DRIP)",
+  "d3-e-Services": "Services électroniques - bureau d'aide",
   "d3-benefits": "Prestations",
-  "d3-be": "DRE",
+  "d3-be": "Demande de renseignements aux entreprises (DRE)",
   "d3-c4": "C4 - Vol d'identité",
+  "d3-c9": "C9 - Verrouillage de mon compte", 
+  "call-drivers-disclaimer": "Ce rapport présente les résultats des sujets d'appel pour les principales files d'attente d'agents sur la base d'un échantillon aléatoire d'appels.",
   "top10-pages-visited": "Dix pages les plus visitées",
 
   "rank": "Classement",
@@ -245,5 +247,6 @@
   "Other": "Autre",
   "UX test types": "Types de tests UX",
   "Baseline": "Base de référence",
-  "Validation": "Validation"
+  "Validation": "Validation",
+  "Loading Data": "Chargement des données"
 }

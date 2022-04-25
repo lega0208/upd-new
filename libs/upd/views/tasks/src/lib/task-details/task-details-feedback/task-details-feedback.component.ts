@@ -4,6 +4,7 @@ import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { combineLatest } from 'rxjs';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
+import { EN_CA } from '@cra-arc/upd/i18n';
 
 @Component({
   selector: 'app-task-details-feedback',
@@ -13,6 +14,7 @@ import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 export class TaskDetailsFeedbackComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
+  langLink = 'en';
 
   visitsByPage$ =
     this.taskDetailsService.visitsByPageFeedbackWithPercentChange$;
@@ -29,29 +31,29 @@ export class TaskDetailsFeedbackComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
-    combineLatest([
-      this.currentLang$
-    ]).subscribe(([lang]) => {
+    this.currentLang$.subscribe((lang) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
+
       this.visitsByPageCols = [
         {
           field: 'url',
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
-          typeParams: { preLink: '/pages', link: '_id' },
+          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
         },
         {
           field: 'dyfYes',
           header: this.i18n.service.translate('yes', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: { preLink: '/pages', link: '_id', postLink: 'pagefeedback' },
+          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id', postLink: 'pagefeedback' },
         },
         {
           field: 'dyfNo',
           header: this.i18n.service.translate('No', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: { preLink: '/pages', link: '_id', postLink: 'pagefeedback' },
+          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id', postLink: 'pagefeedback' },
         },
         { field: '0', header: this.i18n.service.translate('comparison-for-No-answer', lang), pipe: 'percent' },
         { field: '0', header: this.i18n.service.translate('% of visitors who left feedback', lang), pipe: 'percent' },

@@ -4,6 +4,7 @@ import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { combineLatest } from 'rxjs';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
+import { EN_CA } from '@cra-arc/upd/i18n';
 
 @Component({
   selector: 'app-task-details-summary',
@@ -37,6 +38,7 @@ export class TaskDetailsSummaryComponent implements OnInit {
 
   currentLang$ = this.i18n.currentLang$;
   currentLang!: LocaleId;
+  langLink = 'en';
 
   visitsByPageCols: ColumnConfig[] = [];
   dyfTableCols: ColumnConfig[] = [];
@@ -47,13 +49,14 @@ export class TaskDetailsSummaryComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+    this.currentLang$.subscribe((lang) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.visitsByPageCols = [
         {
           field: 'title',
           header: this.i18n.service.translate('page-title', lang),
           type: 'link',
-          typeParams: { preLink: '/pages', link: '_id' },
+          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
         },
         {
           field: 'url',

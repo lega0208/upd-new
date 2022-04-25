@@ -3,6 +3,7 @@ import { TasksDetailsFacade } from './+state/tasks-details.facade';
 
 import { I18nFacade } from '@cra-arc/upd/state';
 import { combineLatest } from 'rxjs';
+import { EN_CA } from '@cra-arc/upd/i18n';
 
 @Component({
   selector: 'app-task-details',
@@ -11,6 +12,7 @@ import { combineLatest } from 'rxjs';
 })
 export class TaskDetailsComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
+  langLink = 'en';
 
   title$ = this.taskDetailsService.title$;
   error$ = this.taskDetailsService.error$;
@@ -35,9 +37,7 @@ export class TaskDetailsComponent implements OnInit {
   ngOnInit() {
     this.taskDetailsService.init();
     
-    combineLatest([
-      this.currentLang$
-    ]).subscribe(([lang]) => {
+    this.currentLang$.subscribe((lang) => {
       this.navTabs = [
         { href: 'summary', title: this.i18n.service.translate('tab-summary', lang) },
         { href: 'webtraffic', title: this.i18n.service.translate('tab-webtraffic', lang) },
@@ -46,6 +46,8 @@ export class TaskDetailsComponent implements OnInit {
         { href: 'calldrivers', title: this.i18n.service.translate('tab-calldrivers', lang) },
         { href: 'uxtests', title: this.i18n.service.translate('tab-uxtests', lang) },
       ];
+
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
     });
   }
 }

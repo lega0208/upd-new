@@ -4,6 +4,7 @@ import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { combineLatest } from 'rxjs';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
+import { EN_CA } from '@cra-arc/upd/i18n';
 
 @Component({
   selector: 'app-task-details-search-analytics',
@@ -13,6 +14,7 @@ import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 export class TaskDetailsSearchAnalyticsComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
+  langLink = 'en';
 
   gscTotalClicks$ = this.taskDetailsService.gscTotalClicks$;
 
@@ -33,27 +35,28 @@ export class TaskDetailsSearchAnalyticsComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+    this.currentLang$.subscribe((lang) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.visitsByPageCols = [
         {
           field: 'url',
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
-          typeParams: { preLink: '/pages', link: '_id' },
+          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
         },
         {
           field: 'gscTotalClicks',
           header: this.i18n.service.translate('clicks', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: { preLink: '/pages', link: '_id', postLink: 'searchanalytics' },
+          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id', postLink: 'searchanalytics' },
         },
         {
           field: 'gscTotalImpressions',
           header: this.i18n.service.translate('impressions', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: { preLink: '/pages', link: '_id', postLink: 'searchanalytics' },
+          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id', postLink: 'searchanalytics' },
         },
         {
           field: 'gscTotalCtr',
