@@ -1,7 +1,7 @@
 <div class="container vh-100">
   <app-header [lang]="(currentLang$ | async) || en"></app-header>
   <app-sidebar></app-sidebar>
-  <h1 class="visually-hidden">{{ 'app.title' | translate }}</h1>
+  <h1 class="visually-hidden">{{ title }}</h1>
   <router-outlet></router-outlet>
   <footer class="mt-4">
     <div class="d-flex flex-row-reverse mt-auto pb-4">

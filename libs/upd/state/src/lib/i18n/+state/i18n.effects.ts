@@ -50,9 +50,7 @@ export class I18nEffects {
           }
 
           if (!routeLang || routeLang !== localeIdToLang[lang]) {
-            const currentUrl = this.router.url;
-
-            if (!location.pathname || currentUrl === '/') {
+            if (!location.pathname || location.pathname === '/') {
               return of(this.router.navigate([`/${localeIdToLang[lang]}/`], {
                 replaceUrl: true,
               }));
@@ -61,7 +59,7 @@ export class I18nEffects {
             return of(
               this.router.navigate(
                 [
-                  currentUrl.replace(
+                  location.pathname.replace(
                     /\/(en|fr)\//i,
                     `/${localeIdToLang[lang]}/`
                   ),

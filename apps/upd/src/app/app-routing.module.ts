@@ -4,6 +4,11 @@ import { AppComponent } from './app.component';
 
 const routes: Routes = [
   {
+    path: '',
+    redirectTo: 'overview',
+    pathMatch: 'full'
+  },
+  {
     path: 'overview',
     loadChildren: () =>
       import('@cra-arc/upd/views/overview').then(
