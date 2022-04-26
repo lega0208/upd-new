@@ -58,10 +58,10 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
         },
         {
           field: 'percentChange',
-          header: this.i18n.service.translate('comparison', lang),
+          header: this.i18n.service.translate('comparison-for-No-answer', lang),
           pipe: 'percent',
         },
-        { field: '0', header: this.i18n.service.translate('comparison-for-No-answer', lang), pipe: 'percent' },
+        // { field: '0', header: this.i18n.service.translate('comparison-for-No-answer', lang), pipe: 'percent' },
         { field: '0', header: this.i18n.service.translate('% of visitors who left feedback', lang), pipe: 'percent' },
       ],
       this.dyfTableCols = [
