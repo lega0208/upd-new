@@ -99,8 +99,7 @@ export class ProjectsHomeComponent implements OnInit {
         },
         {
           field: 'startDate',
-          header: this.i18n.service.translate('Start date', lang),
-          pipe: 'date',
+          header: this.i18n.service.translate('Start date', lang)
         },
         // {
         //   field: 'launchDate',

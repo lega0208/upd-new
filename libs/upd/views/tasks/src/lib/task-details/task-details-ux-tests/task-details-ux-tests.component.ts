@@ -67,7 +67,7 @@ export class TaskDetailsUxTestsComponent {
         { field: 'scenario', header: this.i18n.service.translate('Scenario', lang) },
         { field: 'result', header: this.i18n.service.translate('Result', lang) },
         { field: 'successRate', header: this.i18n.service.translate('success-rate', lang), pipe: 'percent' },
-        { field: 'date', header: this.i18n.service.translate('Date', lang), pipe: 'date', pipeParam: 'MMM d, y' as ColumnConfigPipe },
+        { field: 'date', header: this.i18n.service.translate('Date', lang) },
       ];
     });
   }
