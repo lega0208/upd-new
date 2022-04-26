@@ -64,8 +64,8 @@ export class TaskDetailsUxTestsComponent {
       ];
       this.taskSuccessDataCols = [
         { field: 'title', header: this.i18n.service.translate('Title', lang) },
-        { field: 'scenario', header: this.i18n.service.translate('Scenario', lang) },
-        { field: 'result', header: this.i18n.service.translate('Result', lang) },
+        // { field: 'scenario', header: this.i18n.service.translate('Scenario', lang) },
+        // { field: 'result', header: this.i18n.service.translate('Result', lang) },
         { field: 'successRate', header: this.i18n.service.translate('success-rate', lang), pipe: 'percent' },
         { field: 'date', header: this.i18n.service.translate('Date', lang) },
       ];

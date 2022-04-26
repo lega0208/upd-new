@@ -25,11 +25,14 @@
 
 <ng-container *ngIf="hasType && config.typeParams">
   <ng-container *ngIf="config.typeParams.external">
+    <span class="material-icons" style="font-size: 18px; vertical-align: middle;">
+      wysiwyg
+    </span>
     <a
       *ngIf="config.type === 'link'"
       [href]="'https://' + data[config.typeParams.link]"
     >
-      {{ data[config.field] }}
+      {{ data[config.field] }} 
     </a>
   </ng-container>
   <ng-container *ngIf="!config.typeParams.external">
