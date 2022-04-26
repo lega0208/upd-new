@@ -1,11 +1,13 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
 import { PageMetrics, Project, Task, UxTest } from '@cra-arc/db';
-import type {
-  PageMetricsModel,
+import {
+  CallDriver,
+  CallDriverDocument,
   ProjectDocument,
+  PageMetricsModel,
   TaskDocument,
   TaskDetailsData,
   TasksHomeData,
@@ -22,6 +24,8 @@ export class TasksService {
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
+    @InjectModel(CallDriver.name)
+    private calldriversModel: Model<CallDriverDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -113,20 +117,26 @@ export class TasksService {
       .map((page) => ('url' in page && page.url) || '')
       .filter((url) => !!url);
 
+    const taskTpcId = task.tpc_ids;
+
     const returnData: TaskDetailsData = {
       _id: task._id.toString(),
       title: task.title,
       dateRange: params.dateRange,
       dateRangeData: await getTaskAggregatedData(
         this.pageMetricsModel,
+        this.calldriversModel,
         params.dateRange,
-        taskUrls
+        taskUrls,
+        taskTpcId
       ),
       comparisonDateRange: params.comparisonDateRange,
       comparisonDateRangeData: await getTaskAggregatedData(
         this.pageMetricsModel,
+        this.calldriversModel,
         params.comparisonDateRange,
-        taskUrls
+        taskUrls,
+        taskTpcId
       ),
       taskSuccessByUxTest: [],
       avgTaskSuccessFromLastTest: 1, // todo: better handle N/A
@@ -167,10 +177,16 @@ export class TasksService {
 
 async function getTaskAggregatedData(
   pageMetricsModel: PageMetricsModel,
+  calldriversModel: Model<CallDriverDocument>,
   dateRange: string,
-  pageUrls: string[]
+  pageUrls: string[],
+  calldriversTpcId: number[]
 ): Promise<Omit<TaskDetailsAggregatedData, 'avgTaskSuccess'>> {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+  const dateQuery: FilterQuery<Date> = {};
+
+  dateQuery.$gte = new Date(startDate);
+  dateQuery.$lte = new Date(endDate);
 
   const results = await pageMetricsModel
     .aggregate<TaskDetailsAggregatedData>()
@@ -209,7 +225,7 @@ async function getTaskAggregatedData(
     })
     // .addFields({ _id: '$page' })
     .project({ page: 0 })
-    .sort( { title: 1 })
+    .sort({ title: 1 })
     .group({
       _id: 'null',
       visits: { $sum: '$visits' },
@@ -228,5 +244,36 @@ async function getTaskAggregatedData(
     .project({ _id: 0 })
     .exec();
 
-  return results[0];
+    const calldriversEnquiry = await calldriversModel
+    .aggregate()
+    .match({ 
+      tpc_id: { $in: calldriversTpcId },date: dateQuery })
+    .group({
+      _id: '$enquiry_line',
+      sum: { $sum: '$calls' },
+      doc: { $push: '$$ROOT' },
+    })
+    .replaceRoot({
+      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
+    })
+    .sort({ enquiry_line: 'asc' })
+    .project({
+      _id: 0,
+      doc: 0,
+      airtable_id: 0,
+      date: 0,
+      calls: 0,
+      tpc_id: 0,
+      topic: 0,
+      subtopic: 0,
+      sub_subtopic: 0,
+      impact: 0,
+      __v: 0,
+    })
+    .exec();
+
+  return {
+    ...results[0],
+    calldriversEnquiry,
+  };
 }
