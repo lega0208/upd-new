@@ -15,9 +15,15 @@ import { percentChange, PickByType } from '@cra-arc/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import { TasksDetailsState } from './tasks-details.reducer';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
-import { SingleSeries } from '@amonsour/ngx-charts';
+import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
+import dayjs from 'dayjs/esm';
+import utc from 'dayjs/esm/plugin/utc';
+import 'dayjs/esm/locale/en-ca';
+import 'dayjs/esm/locale/fr-ca';
+
+dayjs.extend(utc);
 
 @Injectable()
 export class TasksDetailsFacade {
@@ -68,6 +74,114 @@ export class TasksDetailsFacade {
 
   visitsByPageFeedbackWithPercentChange$ = this.tasksDetailsData$.pipe(
     mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo')
+  );
+
+  dateRangeLabel$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)));
+
+  comparisonDateRangeLabel$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) =>
+      getWeeklyDatesLabel(data.comparisonDateRange || '', lang)
+    )
+  );
+
+  calldriversChart$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
+      );
+
+      const dataEnquiryLine = (
+        data?.dateRangeData?.calldriversEnquiry || []
+      ).map((d) => ({
+        name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
+        value: d.sum,
+      }));
+
+      const comparisonDataEnquiryLine = (
+        data?.comparisonDateRangeData?.calldriversEnquiry || []
+      ).map((d) => ({
+        name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
+        value: d.sum,
+      }));
+
+      const isCurrZero = dataEnquiryLine.every((v) => v.value === 0);
+      const isPrevZero = comparisonDataEnquiryLine.every((v) => v.value === 0);
+
+      if (isCurrZero && isPrevZero) {
+        return [] as MultiSeries;
+      }
+
+      const dataEnquiryLineFinal = dataEnquiryLine.filter((v) => v.value > 0);
+      const comparisonDataEnquiryLineFinal = comparisonDataEnquiryLine.filter(
+        (v) => v.value > 0
+      );
+
+      const barChartData: MultiSeries = [
+        {
+          name: dateRangeLabel,
+          series: dataEnquiryLineFinal,
+        },
+        {
+          name: comparisonDateRangeLabel,
+          series: comparisonDataEnquiryLineFinal,
+        },
+      ];
+
+      return barChartData;
+    })
+  );
+
+  calldriversTable$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const dateRange = data?.dateRangeData?.calldriversEnquiry || [];
+      const comparisonDateRange =
+        data?.comparisonDateRangeData?.calldriversEnquiry || [];
+
+      const dataEnquiryLine = dateRange.map((d, i) => {
+        let prevVal = NaN;
+        comparisonDateRange.map((cd, i) => {
+          if (d.enquiry_line === cd.enquiry_line) {
+            prevVal = cd.sum;
+          }
+        });
+        return {
+          name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
+          currValue: d.sum,
+          prevValue: prevVal,
+        };
+      });
+
+      comparisonDateRange.map((d, i) => {
+        let currVal = 0;
+        dateRange.map((cd, i) => {
+          if (d.enquiry_line === cd.enquiry_line) {
+            currVal = cd.sum;
+          }
+        });
+        if (currVal === 0) {
+          dataEnquiryLine.push({
+            name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
+            currValue: 0,
+            prevValue: d.sum,
+          });
+        }
+      });
+      return dataEnquiryLine.filter((v) => v.currValue > 0 || v.prevValue > 0);
+    })
   );
 
   dyfData$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
@@ -217,6 +331,20 @@ export class TasksDetailsFacade {
   }
 }
 
+const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  const formattedStartDate = dayjs(startDate)
+    .utc(false)
+    .locale(lang)
+    .format('MMM D');
+  const formattedEndDate = dayjs(endDate)
+    .utc(false)
+    .locale(lang)
+    .format('MMM D');
+
+  return `${formattedStartDate}-${formattedEndDate}`;
+};
 type DateRangeDataIndexKey = keyof TaskDetailsAggregatedData &
   keyof PickByType<TaskDetailsAggregatedData, number>;
 

@@ -84,13 +84,20 @@ export class TaskDetailsCalldriversComponent {
 
   bar: MultiSeries = [];
   chartsCols: ColumnConfig[] = [];
+  calldriversChart$ = this.taskDetailsService.calldriversChart$;
+  calldriversTable$ = this.taskDetailsService.calldriversTable$;
+  calldriversCols: ColumnConfig[] = [];
+
+
+  dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
+  comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
 
   ngOnInit() {
     this.i18n.service.onLangChange(
       ({ lang }) => { this.currentLang = lang as LocaleId; }
     );
 
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+    combineLatest([this.currentLang$, this.dateRangeLabel$, this.comparisonDateRangeLabel$]).subscribe(([lang, dateRange, comparisonDateRange]) => {
       this.bar = [
         {
           name: 'Feb 27-Mar 05',
@@ -122,6 +129,19 @@ export class TaskDetailsCalldriversComponent {
         {
           field: this.i18n.service.translate('Number of calls for', lang, {value: ' Mar 06-Mar 12'}),
           header: this.i18n.service.translate('Number of calls for', lang, {value: ' Mar 06-Mar 12'})
+        },
+      ];
+      this.calldriversCols = [
+        { field: 'name', header: this.i18n.service.translate('Inquiry line', lang) },
+        {
+          field: 'currValue',
+          header: dateRange,
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: comparisonDateRange,
+          pipe: 'number',
         },
       ];
     });

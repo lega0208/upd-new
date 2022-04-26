@@ -11,6 +11,8 @@ import {
   TaskDocument,
   UxTest,
   UxTestDocument,
+  Feedback,
+  FeedbackDocument,
 } from '@cra-arc/db';
 import type {
   PageMetricsModel,
@@ -74,6 +76,7 @@ export class OverallService {
     @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>,
     @InjectModel(CallDriver.name)
     private calldriversModel: Model<CallDriverDocument>,
+    @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -95,6 +98,7 @@ export class OverallService {
         this.overallModel,
         this.pageMetricsModel,
         this.calldriversModel,
+        this.feedbackModel,
         this.cacheManager,
         params.dateRange
       ),
@@ -102,6 +106,7 @@ export class OverallService {
         this.overallModel,
         this.pageMetricsModel,
         this.calldriversModel,
+        this.feedbackModel,
         this.cacheManager,
         params.comparisonDateRange
       ),
@@ -186,79 +191,79 @@ async function getProjects(
         .exec()
     )[0] || defaultData;
 
-    const aggregatedData =
-      (
-        await uxTestsModel
-          .aggregate<Omit<ProjectsHomeData, 'projects'>>()
-          .group({
-            _id: '$project',
-            statuses: {
-              $addToSet: '$status',
+  const aggregatedData =
+    (
+      await uxTestsModel
+        .aggregate<Omit<ProjectsHomeData, 'projects'>>()
+        .group({
+          _id: '$project',
+          statuses: {
+            $addToSet: '$status',
+          },
+          date: { $min: '$date' },
+        })
+        .project({
+          last6Months: {
+            $gte: ['$date', sixMonthsAgo],
+          },
+          since2018: {
+            $gte: ['$date', year2018],
+          },
+          status: projectStatusSwitchExpression,
+        })
+        .sort({ status: 1 })
+        .group({
+          _id: '$status',
+          count: { $sum: 1 },
+          countLast6Months: {
+            $sum: {
+              $cond: [{ $gte: ['$date', sixMonthsAgo] }, 1, 0],
             },
-            date: { $min: '$date' },
-          })
-          .project({
-            last6Months: {
-              $gte: ['$date', sixMonthsAgo],
+          },
+          countSince2018: {
+            $sum: {
+              $cond: [{ $gte: ['$date', year2018] }, 1, 0],
             },
-            since2018: {
-              $gte: ['$date', year2018],
+          },
+        })
+        .group({
+          _id: null,
+          numInProgress: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'In Progress'] }, '$count', 0],
             },
-            status: projectStatusSwitchExpression,
-          })
-          .sort({ status: 1 })
-          .group({
-            _id: '$status',
-            count: { $sum: 1 },
-            countLast6Months: {
-              $sum: {
-                $cond: [{ $gte: ['$date', sixMonthsAgo] }, 1, 0],
-              },
+          },
+          completedLast6Months: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Complete'] }, '$countLast6Months', 0],
             },
-            countSince2018: {
-              $sum: {
-                $cond: [{ $gte: ['$date', year2018] }, 1, 0],
-              },
+          },
+          completedSince2018: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Complete'] }, '$countSince2018', 0],
             },
-          })
-          .group({
-            _id: null,
-            numInProgress: {
-              $sum: {
-                $cond: [{ $eq: ['$_id', 'In Progress'] }, '$count', 0],
-              },
+          },
+          totalCompleted: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Complete'] }, '$count', 0],
             },
-            completedLast6Months: {
-              $sum: {
-                $cond: [{ $eq: ['$_id', 'Complete'] }, '$countLast6Months', 0],
-              },
+          },
+          numDelayed: {
+            $sum: {
+              $cond: [{ $eq: ['$_id', 'Delayed'] }, '$count', 0],
             },
-            completedSince2018: {
-              $sum: {
-                $cond: [{ $eq: ['$_id', 'Complete'] }, '$countSince2018', 0],
-              }
-            },
-            totalCompleted: {
-              $sum: {
-                $cond: [{ $eq: ['$_id', 'Complete'] }, '$count', 0],
-              },
-            },
-            numDelayed: {
-              $sum: {
-                $cond: [{ $eq: ['$_id', 'Delayed'] }, '$count', 0],
-              },
-            },
-          })
-          .project({
-            _id: 0,
-            numInProgress: 1,
-            completedSince2018 : 1,
-            numCompletedLast6Months: 1,
-            totalCompleted: 1,
-            numDelayed: 1,
-          })
-          .exec()
-      )[0] || defaultData;
+          },
+        })
+        .project({
+          _id: 0,
+          numInProgress: 1,
+          completedSince2018: 1,
+          numCompletedLast6Months: 1,
+          totalCompleted: 1,
+          numDelayed: 1,
+        })
+        .exec()
+    )[0] || defaultData;
 
   const projectsData = await projectModel
     .aggregate<ProjectsHomeProject>()
@@ -414,6 +419,7 @@ async function getOverviewMetrics(
   overallModel: Model<OverallDocument>,
   PageMetricsModel: PageMetricsModel,
   calldriversModel: Model<CallDriverDocument>,
+  feedbackModel: Model<FeedbackDocument>,
   cacheManager: Cache,
   dateRange: string
 ): Promise<OverviewAggregatedData> {
@@ -446,51 +452,30 @@ async function getOverviewMetrics(
     .sort({ date: 1 })
     .exec();
 
-    const calldriversEnquiry = await calldriversModel
+  const calldriversEnquiry = await calldriversModel
     .aggregate()
     .match({ date: dateQuery })
     .group({
-      _id: null,
-      enquiryLineBE: {
-        $sum: {
-          $cond: [{ $eq: ['$enquiry_line', 'BE'] }, '$calls', 0],
-        },
-      },
-      enquiryLineBenefits: {
-        $sum: {
-          $cond: [{ $eq: ['$enquiry_line', 'Benefits'] }, '$calls', 0],
-        },
-      },
-      enquiryLineC4: {
-        $sum: {
-          $cond: [{ $eq: ['$enquiry_line', 'C4 - Identity Theft'] }, '$calls', 0],
-        },
-      },
-      enquiryLineC9: {
-        $sum: {
-          $cond: [{ $eq: ['$enquiry_line', 'C9 - My Account Lockout'] }, '$calls', 0],
-        },
-      },
-      enquiryLineITE: {
-        $sum: {
-          $cond: [{ $eq: ['$enquiry_line', 'ITE'] }, '$calls', 0],
-        },
-      },
-      enquiryLineEService: {
-        $sum: {
-          $cond: [{ $eq: ['$enquiry_line', 'e-Services Help Desk'] }, '$calls', 0],
-        },
-      },
-
+      _id: '$enquiry_line',
+      sum: { $sum: '$calls' },
+      doc: { $push: '$$ROOT' },
     })
+    .replaceRoot({
+      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
+    })
+    .sort({ enquiry_line: 'asc' })
     .project({
       _id: 0,
-      enquiryLineBE: 1,
-      enquiryLineBenefits: 1,
-      enquiryLineC4: 1,
-      enquiryLineC9 : 1,
-      enquiryLineITE: 1,
-      enquiryLineEService: 1,
+      doc: 0,
+      airtable_id: 0,
+      date: 0,
+      calls: 0,
+      tpc_id: 0,
+      topic: 0,
+      subtopic: 0,
+      sub_subtopic: 0,
+      impact: 0,
+      __v: 0,
     })
     .exec();
 
@@ -524,6 +509,33 @@ async function getOverviewMetrics(
     })
     .sort({ clicks: -1 })
     .limit(10)
+    .exec();
+
+  const totalFeedback = await feedbackModel
+    .aggregate()
+    .sort({ date: 1 })
+    .match({ date: dateQuery })
+    .group({
+      _id: '$main_section',
+      sum: { $sum: 1 },
+      doc: { $push: '$$ROOT' },
+    })
+    .replaceRoot({
+      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
+    })
+    .sort({ main_section: 'asc' })
+    .project({
+      _id: 0,
+      doc: 0,
+      airtable_id: 0,
+      date: 0,
+      whats_wrong: 0,
+      tags: 0,
+      status: 0,
+      theme: 0,
+      url: 0,
+      __v: 0,
+    })
     .exec();
 
   const aggregatedMetrics = await overallModel
@@ -570,8 +582,9 @@ async function getOverviewMetrics(
   return {
     visitsByDay,
     calldriversByDay,
-    ...calldriversEnquiry[0],
+    calldriversEnquiry,
     ...aggregatedMetrics[0],
+    totalFeedback,
     topPagesVisited,
     top10GSC,
   };

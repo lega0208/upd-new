@@ -71,20 +71,26 @@ export class PagesDetailsSummaryComponent implements OnInit {
           header: this.i18n.service.translate('search-term', lang),
         },
         {
-          field: 'change',
-          header: this.i18n.service.translate('comparison', lang),
-          pipe: 'percent'
-        },
-        {
           field: 'impressions',
           header: this.i18n.service.translate('impressions', lang),
-          pipe: 'number'
+          pipe: 'number',
+          pipeParam: '1.0-2',
         },
-        { field: 'ctr', header: this.i18n.service.translate('ctr', lang), pipe: 'percent' },
+        {
+          field: 'change',
+          header: this.i18n.service.translate('comparison', lang),
+          pipe: 'percent',
+        },
+        {
+          field: 'ctr',
+          header: this.i18n.service.translate('ctr', lang),
+          pipe: 'percent',
+        },
         {
           field: 'position',
           header: this.i18n.service.translate('position', lang),
-          pipe: 'number'
+          pipe: 'number',
+          pipeParam: '1.0-2',
         },
       ];
       this.barTableCols = [

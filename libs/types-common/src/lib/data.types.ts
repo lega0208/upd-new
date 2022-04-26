@@ -117,9 +117,10 @@ export interface OverviewAggregatedData {
   enquiryLineEService: number;
   visitsByDay: { date: Date; visits: number }[];
   calldriversByDay: { date: Date; calls: number }[];
-  calldriversEnquiry: { date: Date; calls: number }[];
+  calldriversEnquiry: { enquiry_line: string; sum: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
+  totalFeedback: { date: Date; feedback: number }[];
 }
 
 export interface OverviewUxData {
@@ -155,6 +156,7 @@ export interface TaskDetailsMetrics {
   gscTotalImpressions: number;
   gscTotalCtr: number;
   gscTotalPosition: number;
+  calldriversEnquiry: { enquiry_line: string; sum: number }[];
 }
 
 export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
