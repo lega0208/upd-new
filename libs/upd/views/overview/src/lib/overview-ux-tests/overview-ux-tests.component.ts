@@ -13,6 +13,7 @@ import { combineLatest, of } from 'rxjs';
 export class OverviewUxTestsComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
+  langLink = 'en';
 
   uxChartData = this.overviewService.projectsList$;
 
@@ -32,11 +33,15 @@ export class OverviewUxTestsComponent implements OnInit {
   uxChartCols: ColumnConfig[] = [];
 
   ngOnInit() {
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+    this.currentLang$.subscribe((lang) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
+
       this.uxChartCols = [
         {
           field: 'title',
           header: this.i18n.service.translate('ux_projects', lang),
+          type: 'link',
+          typeParams: { preLink: '/' + this.langLink + '/projects', link: '_id' },
         },
         {
           field: 'testType',
