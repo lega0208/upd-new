@@ -19,8 +19,8 @@
     <span id="page_project">
       <span id="view_url" (click)="toggleUrl()">
         <span class="material-icons align-top">link</span>
-        <ng-container *ngIf="!showUrl">View</ng-container>
-        <ng-container *ngIf="showUrl">Hide</ng-container> URL
+        <span class="m-0" translate><ng-container *ngIf="!showUrl"> View URL</ng-container></span>
+        <span class="m-0" translate><ng-container *ngIf="showUrl"> Hide URL</ng-container></span>
       </span>
       <span
         id="copy_url"

@@ -70,7 +70,8 @@ export class TaskDetailsSummaryComponent implements OnInit {
       this.taskSuccessByUxTestCols = [
         { field: 'title', header: this.i18n.service.translate('ux-test', lang), },
         { field: '0', header: this.i18n.service.translate('project', lang) },
-        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date', pipeParam: 'YYYY-MM-dd' },
+        //{ field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date', pipeParam: 'YYYY-MM-dd' },
+        { field: 'date', header: this.i18n.service.translate('date', lang) },
         { field: 'testType', header: this.i18n.service.translate('test-type', lang) },
         { field: 'successRate', header: this.i18n.service.translate('success-rate', lang), pipe: 'percent' },
       ];

@@ -6,13 +6,18 @@ import {
 import { select, Store } from '@ngrx/store';
 import { combineLatest, debounceTime, map, reduce } from 'rxjs';
 
+import dayjs from 'dayjs/esm';
+import utc from 'dayjs/esm/plugin/utc';
+import 'dayjs/esm/locale/en-ca';
+import 'dayjs/esm/locale/fr-ca';
+
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import { TasksDetailsState } from './tasks-details.reducer';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { LocaleId } from '@cra-arc/upd/i18n';
+import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
@@ -285,8 +290,22 @@ export class TasksDetailsFacade {
     mapToPercentChange('gscTotalPosition')
   );
 
-  taskSuccessByUxTest$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.taskSuccessByUxTest)
+  // taskSuccessByUxTest$ = this.tasksDetailsData$.pipe(
+  //   map((data) => data?.taskSuccessByUxTest)
+  // );
+  taskSuccessByUxTest$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+    const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
+    const taskSuccessByUxTest = data?.taskSuccessByUxTest?.map((d) => ({
+      ...d,
+      date: dayjs(d.date)
+        .utc(false)
+        .locale(lang)
+        .format(dateFormat),
+    }));
+    return [...(taskSuccessByUxTest || [])]; 
+    //data?.taskSuccessByUxTest)
+    })
   );
 
   totalParticipants$ = this.tasksDetailsData$.pipe(

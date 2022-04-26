@@ -93,6 +93,7 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
         {
           field: 'position',
           header: this.i18n.service.translate('position', lang),
+          pipe: 'number',
         },
       ]),
         (this.searchTermsCanadaCols = [
