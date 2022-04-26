@@ -5,6 +5,8 @@ import { Cache } from 'cache-manager';
 import { PageMetrics, Project, Task, UxTest } from '@cra-arc/db';
 import {
   CallDriver,
+} from '@cra-arc/types-common';
+import type {
   CallDriverDocument,
   ProjectDocument,
   PageMetricsModel,
@@ -13,7 +15,7 @@ import {
   TasksHomeData,
   TaskDetailsAggregatedData,
   UxTestDocument,
-} from '@cra-arc/types-common';
+} from '@cra-arc/types-common'
 import type { ApiParams } from '@cra-arc/upd/services';
 import { TasksHomeAggregatedData } from '@cra-arc/types-common';
 
@@ -246,7 +248,7 @@ async function getTaskAggregatedData(
 
     const calldriversEnquiry = await calldriversModel
     .aggregate()
-    .match({ 
+    .match({
       tpc_id: { $in: calldriversTpcId },date: dateQuery })
     .group({
       _id: '$enquiry_line',
