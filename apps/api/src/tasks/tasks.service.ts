@@ -3,9 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
 import { PageMetrics, Project, Task, UxTest } from '@cra-arc/db';
-import {
-  CallDriver,
-} from '@cra-arc/types-common';
+import { CallDriver } from '@cra-arc/types-common';
 import type {
   CallDriverDocument,
   ProjectDocument,
@@ -15,7 +13,7 @@ import type {
   TasksHomeData,
   TaskDetailsAggregatedData,
   UxTestDocument,
-} from '@cra-arc/types-common'
+} from '@cra-arc/types-common';
 import type { ApiParams } from '@cra-arc/upd/services';
 import { TasksHomeAggregatedData } from '@cra-arc/types-common';
 
@@ -81,9 +79,40 @@ export class TasksService {
       .sort({ title: 'asc' })
       .exec();
 
+    const tasksWithoutMetrics = (
+      await this.taskModel
+        .find(
+          {
+            _id: { $nin: tasksData.map((task) => task._id) },
+          },
+          {
+            title: 1,
+            group: 1,
+            topic: 1,
+            subtopic: 1,
+          }
+        )
+        .sort({ title: 1 })
+        .lean()
+        .exec()
+    ).map((task) => ({
+      ...task,
+      visits: 0,
+    })) as TasksHomeAggregatedData[];
+
+    const tasks = [...tasksData, ...tasksWithoutMetrics].sort((a, b) => {
+      if (a.title < b.title) {
+        return -1;
+      }
+      if (a.title > b.title) {
+        return 1;
+      }
+      return 0;
+    });
+
     const results = {
       dateRange,
-      dateRangeData: tasksData,
+      dateRangeData: tasks,
     };
 
     await this.cacheManager.set(cacheKey, results);
@@ -185,10 +214,11 @@ async function getTaskAggregatedData(
   calldriversTpcId: number[]
 ): Promise<Omit<TaskDetailsAggregatedData, 'avgTaskSuccess'>> {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
-  const dateQuery: FilterQuery<Date> = {};
 
-  dateQuery.$gte = new Date(startDate);
-  dateQuery.$lte = new Date(endDate);
+  const dateQuery: FilterQuery<Date> = {
+    $gte: startDate,
+    $lte: endDate,
+  };
 
   const results = await pageMetricsModel
     .aggregate<TaskDetailsAggregatedData>()
@@ -246,10 +276,12 @@ async function getTaskAggregatedData(
     .project({ _id: 0 })
     .exec();
 
-    const calldriversEnquiry = await calldriversModel
+  const calldriversEnquiry = await calldriversModel
     .aggregate()
     .match({
-      tpc_id: { $in: calldriversTpcId },date: dateQuery })
+      tpc_id: { $in: calldriversTpcId },
+      date: dateQuery,
+    })
     .group({
       _id: '$enquiry_line',
       sum: { $sum: '$calls' },
