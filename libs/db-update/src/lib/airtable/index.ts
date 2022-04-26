@@ -281,13 +281,13 @@ export async function updateUxData() {
           url: page.url,
         },
         $addToSet: {
-          tasks: { $each: page.tasks || [] },
-          projects: { $each: page.projects || [] },
-          ux_tests: { $each: page.ux_tests || [] },
           all_urls: page.url,
         },
         $set: {
           airtable_id: page.airtable_id,
+          tasks: page.tasks || [],
+          projects: page.projects || [],
+          ux_tests: page.ux_tests || [],
         },
         $unset: {
           lastModified: true,

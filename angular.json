@@ -3,6 +3,7 @@
   "projects": {
     "api": "apps/api",
     "data-integrity": "libs/data-integrity",
+    "data-integrity-runner": "apps/data-integrity-runner",
     "db": "libs/db",
     "db-update": "libs/db-update",
     "db-updater": "apps/db-updater",

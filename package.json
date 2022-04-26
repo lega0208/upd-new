@@ -11,7 +11,7 @@
     "db-updater": "nx serve db-updater",
     "test": "nx test",
     "analyze-upd-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json",
-    "data-checks": "nx serve data-integrity"
+    "data-integrity": "nx serve data-integrity-runner"
   },
   "private": true,
   "dependencies": {

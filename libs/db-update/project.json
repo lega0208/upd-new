@@ -3,6 +3,19 @@
   "sourceRoot": "libs/db-update/src",
   "projectType": "library",
   "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/libs/db-update",
+        "tsConfig": "libs/db-update/tsconfig.lib.json",
+        "packageJson": "libs/db-update/package.json",
+        "main": "libs/db-update/src/index.ts",
+        "extractLicenses": false
+      }
+    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],

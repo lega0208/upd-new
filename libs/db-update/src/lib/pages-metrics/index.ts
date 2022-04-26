@@ -184,8 +184,8 @@ export async function addRefsToPageMetrics() {
   }
   const pageMetricsModel = getPageMetricsModel();
 
-  // We can only associate metrics with pages from airtable, otherwise they can't be mapped to tasks/tests/projects
-  // Iterate through pages w/ airtable_id and add refs to metric docs w/ url in all_urls
+  // We can only associate metrics with pages from airtable if we want to map them to tasks/tests/projects
+  // -> Iterate through pages w/ airtable_id and add refs to metric docs w/ url in all_urls
   const pages = (await pageModel.find({
     airtable_id: { $exists: true },
   })) as Page[];
@@ -203,9 +203,57 @@ export async function addRefsToPageMetrics() {
       },
     },
   }));
+  const airtablePageResults = await pageMetricsModel.bulkWrite(bulkWriteOps);
 
-  const results = await pageMetricsModel.bulkWrite(bulkWriteOps);
+  console.log(airtablePageResults);
 
-  console.log('Results: ', results);
+  // Now for metrics that don't have refs, add a page ref if it's in the page's all_urls
+  const metricsUrls = await pageMetricsModel
+    .distinct('url', { page: { $exists: false } })
+    .exec();
+
+  const nonAirtableBulkWriteOps = [];
+
+  while (metricsUrls.length !== 0) {
+    const batch = metricsUrls.splice(0, 1000);
+
+    const batchMatches = await pageModel.find({
+      all_urls: { $elemMatch: { $in: batch } },
+    });
+
+    if (batchMatches.length === 0) {
+      continue;
+    }
+
+    for (const url of batch) {
+      const matchingPage = (await pageModel
+        .findOne(
+          {
+            all_urls: {
+              $elemMatch: { $eq: url },
+            },
+          },
+          { _id: 1, url: 1 }
+        )
+        .lean()) as Page;
+
+      if (matchingPage) {
+        nonAirtableBulkWriteOps.push({
+          updateMany: {
+            filter: { url },
+            update: {
+              $set: {
+                page: matchingPage._id,
+              },
+            },
+          },
+        });
+      }
+    }
+  }
+
+  const results = await pageMetricsModel.bulkWrite(nonAirtableBulkWriteOps);
+
+  console.log(results);
   console.log('Successfully added references to Page Metrics');
 }

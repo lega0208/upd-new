@@ -3,6 +3,19 @@
   "sourceRoot": "libs/external-data/src",
   "projectType": "library",
   "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/libs/external-data",
+        "tsConfig": "libs/external-data/tsconfig.lib.json",
+        "packageJson": "libs/external-data/package.json",
+        "main": "libs/external-data/src/index.ts",
+        "extractLicenses": false
+      }
+    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],

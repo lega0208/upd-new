@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Page, PageMetrics } from '@cra-arc/types-common';
 import type { PageDocument, PageMetricsModel } from '@cra-arc/types-common';
 import { outputCsv } from './utils';
+import { DbUpdateService } from '@cra-arc/db-update';
 
 /*
  * Things to address:
@@ -27,7 +28,8 @@ import { outputCsv } from './utils';
 export class DataIntegrityService {
   constructor(
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>
+    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
+    private dbUpdateService: DbUpdateService
   ) {}
 
   // todo: implement this
@@ -45,7 +47,23 @@ export class DataIntegrityService {
 
   // Figure out what data needs filling and the strategy for filling it
   async fillMissingData() {
-    return '';
+    // todo: replace with logic to find dates with missing data
+    const bulkInsertOps = [];
+
+    const datesToFill = [
+      '2020-09-09',
+      '2021-08-12',
+      '2021-09-17',
+      '2021-10-21',
+      '2021-11-09',
+      '2021-11-30',
+      '2021-12-05',
+    ];
+
+    const metrics = await this.dbUpdateService.getPageMetrics(datesToFill);
+
+    await this.dbUpdateService.upsertPageMetrics(metrics);
+
   }
 
   async findInvalidUrls(outputFilePath?: string) {

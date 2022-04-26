@@ -2,7 +2,7 @@ import { fetchAndMergeOverallMetrics, updateOverallMetrics } from './overall-met
 import { updatePages } from './pages';
 import { toQueryFormat } from '@cra-arc/external-data';
 import { writeFile } from 'node:fs/promises';
-import { addAAPageMetrics, fetchAndMergePageMetrics } from './pages-metrics';
+import { addAAPageMetrics, addRefsToPageMetrics, fetchAndMergePageMetrics } from './pages-metrics';
 import { getAndPrepareUxData, updateUxData } from './airtable';
 import {
   getDbConnectionString,
@@ -14,7 +14,7 @@ import {
   Project,
   UxTest,
 } from '@cra-arc/db';
-import { connect, Types } from 'mongoose';
+import { connect, Types, disconnect } from 'mongoose';
 import { updateCalldriverData } from './airtable/calldrivers';
 
 // need to set a bigger timout because AA is super slow :)
@@ -22,18 +22,18 @@ jest.setTimeout(30 * 60 * 1000);
 
 describe('woweee', () => {
   it('should update', async () => {
-    const dateRange = {
-      start: toQueryFormat('2020-12-01'),
-      end: toQueryFormat('2021-12-03'),
-    }
 
-    const results = await addAAPageMetrics(dateRange);
+    const results = await addRefsToPageMetrics();
     // console.log(results[0]);
     // const results = await updateOverallMetrics();
     // const results = await fetchAndMergePageMetrics(dateRange);
     // await writeFile('../fat-results.json', JSON.stringify(results, null, 2));
     expect(results).toBeDefined();
   })
+
+  afterAll(async () => {
+    await disconnect();
+  });
   // it('should update UX data', async () => {
   //   const results = await updateUxData();
   //   // await writeFile('big_AT_results.json', JSON.stringify(results, null, 2), 'utf8');
