@@ -18,10 +18,6 @@ import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
-import dayjs from 'dayjs/esm';
-import utc from 'dayjs/esm/plugin/utc';
-import 'dayjs/esm/locale/en-ca';
-import 'dayjs/esm/locale/fr-ca';
 
 dayjs.extend(utc);
 
