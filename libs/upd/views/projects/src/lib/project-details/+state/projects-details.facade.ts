@@ -210,7 +210,7 @@ export class ProjectsDetailsFacade {
 
       const taskSeries = taskSuccessByUxData.map(
         ({ success_rate, test_type }) => {
-          if (!success_rate) {
+          if (!success_rate && success_rate !== 0) {
             return null;
           }
 
@@ -242,7 +242,7 @@ export class ProjectsDetailsFacade {
             })
             .join('; ');
 
-          if (!series) {
+          if (!series[0]) {
             return null;
           }
 
@@ -251,8 +251,9 @@ export class ProjectsDetailsFacade {
             series,
           };
         })
-        .filter((taskValues) => taskValues) as BubbleChartMultiSeries;
-    })
+        .filter((taskValues) => !!taskValues) as BubbleChartMultiSeries;
+    }),
+    tap((data) => console.log(data)),
   );
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}

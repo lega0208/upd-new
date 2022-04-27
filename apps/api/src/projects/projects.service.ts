@@ -286,7 +286,7 @@ export class ProjectsService {
 
       const tasks =
         uxTest.tasks.length > 1
-          ? uxTest.tasks.join('; ')
+          ? uxTest.tasks.map((task) => task._doc.title).join('; ')
           : uxTest.tasks[0].title;
 
       return {
