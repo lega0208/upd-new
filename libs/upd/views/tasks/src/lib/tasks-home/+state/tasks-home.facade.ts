@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { map } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 
 import { TasksHomeState } from './tasks-home.reducer';
 import * as TasksHomeActions from './tasks-home.actions';
 import * as TasksHomeSelectors from './tasks-home.selectors';
+import { I18nFacade } from '@cra-arc/upd/state';
 
 @Injectable()
 export class TasksHomeFacade {
@@ -14,12 +15,23 @@ export class TasksHomeFacade {
    */
   loaded$ = this.store.pipe(select(TasksHomeSelectors.getTasksHomeLoaded));
   tasksHomeData$ = this.store.pipe(select(TasksHomeSelectors.getTasksHomeData));
-  tasksHomeTableData$ = this.tasksHomeData$.pipe(
-    map((tasksHomeData) => tasksHomeData?.dateRangeData || [])
+  tasksHomeTableData$ = combineLatest([
+    this.tasksHomeData$,
+    this.i18n.currentLang$,
+  ]).pipe(
+    map(([tasksHomeData, lang]) => {
+      return (tasksHomeData?.dateRangeData || []).map((row) => ({
+        ...row,
+        title: this.i18n.service.translate(row.title, lang),
+      }));
+    })
   );
   error$ = this.store.pipe(select(TasksHomeSelectors.getTasksHomeError));
 
-  constructor(private readonly store: Store<TasksHomeState>) {}
+  constructor(
+    private readonly store: Store<TasksHomeState>,
+    private i18n: I18nFacade
+  ) {}
 
   /**
    * Use the initialization action to perform one
