@@ -1,6 +1,6 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-    <div class="col-lg-6 col-sm-12">
+    <div class="col-xl-3 col-lg-4 col-12">
       <app-data-card
         [current$]="avgTaskSuccessFromLastTest$"
         [pipe]="'percent'"
@@ -8,12 +8,13 @@
       ></app-data-card>
     </div>
 
-    <div class="col-lg-6 col-sm-12">
+    <div class="col-xl-3 col-lg-4 col-12">
       <app-data-card
         [current$]="totalParticipants$"
         [title]="'Total participants from all tests'"
       ></app-data-card>
     </div>
+    <div class="col-auto"></div>
   </div>
 </div>
 

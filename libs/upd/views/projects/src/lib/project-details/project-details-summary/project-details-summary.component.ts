@@ -22,7 +22,7 @@ export class ProjectDetailsSummaryComponent implements OnInit {
 
   visits$ = this.projectsDetailsService.visits$;
 
-  participantTasks$ = this.projectsDetailsService.taskSuccessByUxTestDefault$;
+  participantTasks$ = this.projectsDetailsService.projectTasks$;
 
 
   dyfChart$ = this.projectsDetailsService.dyfData$;
@@ -46,7 +46,7 @@ export class ProjectDetailsSummaryComponent implements OnInit {
           field: 'title',
           header: this.i18n.service.translate('Task list', lang),
           type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/tasks', link: 'tasks' },
+          typeParams: { preLink: '/' + this.langLink + '/tasks', link: '_id' },
         }
       ];
       this.dyfTableCols = [

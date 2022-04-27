@@ -14,6 +14,8 @@ import 'dayjs/esm/locale/fr-ca';
 import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
 
+dayjs.extend(utc);
+
 @Injectable()
 export class ProjectsHomeFacade {
   /**
@@ -42,7 +44,7 @@ export class ProjectsHomeFacade {
         .locale(lang)
         .format(dateFormat),
     }));
-    return [...(projectsHome || [])]; 
+    return [...(projectsHome || [])];
     //data?.taskSuccessByUxTest)
     })
   );

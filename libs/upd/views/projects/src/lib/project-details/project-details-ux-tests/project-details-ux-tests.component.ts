@@ -11,7 +11,7 @@ import { EN_CA } from '@cra-arc/upd/i18n';
   templateUrl: './project-details-ux-tests.component.html',
   styleUrls: ['./project-details-ux-tests.component.css'],
 })
-export class ProjectDetailsUxTestsComponent {
+export class ProjectDetailsUxTestsComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
@@ -21,10 +21,10 @@ export class ProjectDetailsUxTestsComponent {
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
   dateFromLastTest$ = this.projectsDetailsService.dateFromLastTest$;
+  projectTasks$ = this.projectsDetailsService.projectTasks$;
   taskSuccessByUxTest$ = this.projectsDetailsService.taskSuccessByUxTest$;
   totalParticipants$ = this.projectsDetailsService.totalParticipants$;
 
-  participantTasks$ = this.projectsDetailsService.taskSuccessByUxTestDefault$;
   // participantTasksCols = [
   //   {
   //     field: 'title',
@@ -50,28 +50,6 @@ export class ProjectDetailsUxTestsComponent {
   //   },
   // ] as ColumnConfig[];
 
-  uxTests$ = [
-    {
-      name: 'SPR Baseline 3',
-      value: 0.88,
-    },
-  ];
-
-  successRate$ = [
-    {
-      title: 'SPR Baseline 3',
-      scenario: 'Lorem ipsum',
-      result: 0.88,
-      date: 2021 - 10 - 27,
-      participants: 8,
-    },
-  ];
-
-  // successRateCols = [
-  //   { field: 'title', header: 'Task' },
-  //   { field: 'result', header: 'Baseline', pipe: 'percent' },
-  // ] as ColumnConfig[];
-
   constructor(private readonly projectsDetailsService: ProjectsDetailsFacade, private i18n: I18nFacade) {}
 
   participantTasksCols: ColumnConfig[] = [];
@@ -90,20 +68,20 @@ export class ProjectDetailsUxTestsComponent {
           field: 'title',
           header: this.i18n.service.translate('Task list', lang),
           type: 'link',
-          typeParams: { preLink: `/${this.langLink}/tasks`, link: 'tasks' },
+          typeParams: { preLink: `/${this.langLink}/tasks`, link: '_id' },
         }
       ];
       this.taskSuccessRateCols = [
         {
-          field: 'title',
+          field: 'tasks',
           header: this.i18n.service.translate('Task list', lang)
         },
         {
-          field: 'testType',
+          field: 'test_type',
           header: this.i18n.service.translate('test-type', lang)
         },
         {
-          field: 'successRate',
+          field: 'success_rate',
           header: this.i18n.service.translate('success-rate', lang),
           pipe: 'percent',
         }

@@ -174,27 +174,48 @@ export class TasksService {
       dateFromLastTest: new Date(),
     };
 
-    if (task.ux_tests && task.ux_tests.length !== 0) {
-      returnData.taskSuccessByUxTest = task.ux_tests
-        .map(
-          (uxTest) =>
-            typeof uxTest === 'object' && {
-              title: uxTest.title,
-              date: uxTest.date,
-              testType: uxTest.test_type,
-              successRate: uxTest.success_rate,
-              totalUsers: uxTest.total_users,
-            }
-        )
+    const uxTests = (<UxTestDocument[]>task.ux_tests).map((test) =>
+      test.toObject()
+    );
+
+    if (uxTests && uxTests.length !== 0) {
+      returnData.taskSuccessByUxTest = uxTests
+        .map((uxTest) => (
+          typeof uxTest === 'object' && {
+            title: uxTest.title,
+            date: uxTest.date,
+            test_type: uxTest.test_type,
+            success_rate: uxTest.success_rate,
+            total_users: uxTest.total_users,
+          }
+        ))
         .filter((uxTest) => !!uxTest);
 
       // todo: aggregate projects instead of single test
-      const lastUxTest = task.ux_tests.sort(
-        (current, next) => next.date.getTime() - current.date.getTime()
-      )[0];
+      const lastUxTest = uxTests.reduce(
+        (latestTest, test) => {
+          if (latestTest === null) {
+            return test;
+          }
+
+          if (test.date > latestTest.date) {
+            return test;
+          }
+
+          if (
+            test.date.getTime() === latestTest.date.getTime() &&
+            test.success_rate > latestTest.success_rate
+          ) {
+            return test;
+          }
+
+          return latestTest;
+        },
+        null
+      );
 
       returnData.avgTaskSuccessFromLastTest =
-        'success_rate' in lastUxTest ? lastUxTest.success_rate : 1; // todo: better handle nulls
+        typeof lastUxTest === 'object' ? lastUxTest['success_rate'] : null;
 
       returnData.dateFromLastTest =
         'date' in lastUxTest ? lastUxTest.date : new Date(); // todo: better handle nulls

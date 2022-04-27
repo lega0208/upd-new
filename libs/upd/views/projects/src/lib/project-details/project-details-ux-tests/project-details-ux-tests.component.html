@@ -30,7 +30,7 @@
         [xAxisLabel]="'UX test types'"
         [yAxisLabel]="'Task success rate (%)'"
         [isPercent]="true"
-        [table]="(participantTasks$ | async) || []"
+        [table]="(taskSuccessByUxTest$ | async) || []"
         [tableCols]="taskSuccessRateCols"
       ></app-charts>
     </div>
@@ -41,7 +41,7 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-        [data]="(participantTasks$ | async) || []"
+        [data]="(projectTasks$ | async) || []"
         [cols]="participantTasksCols"
         [sort]="false"
         [pagination]="false"

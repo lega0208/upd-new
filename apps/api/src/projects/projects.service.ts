@@ -5,9 +5,9 @@ import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {
-  GscSearchTermMetrics,
   PageMetrics,
   Project,
+  Task,
   UxTest,
   UxTestDocument,
 } from '@cra-arc/db';
@@ -16,12 +16,12 @@ import type {
   PageMetricsModel,
   ProjectsHomeProject,
   ProjectsDetailsData,
+  ProjectStatus,
 } from '@cra-arc/types-common';
 import { ApiParams } from '@cra-arc/upd/services';
 import {
-  OverviewAggregatedData,
   ProjectDetailsAggregatedData,
-  ProjectsHomeData
+  ProjectsHomeData,
 } from '@cra-arc/types-common';
 
 dayjs.extend(utc);
@@ -64,6 +64,25 @@ const projectStatusSwitchExpression = {
   },
 };
 
+const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
+  if (statuses.length === 0) {
+    return 'Unknown';
+  }
+
+  switch (true) {
+    case statuses.every((status) => status === 'Complete'):
+      return 'Complete';
+    case statuses.some((status) => status === 'Delayed'):
+      return 'Delayed';
+    case statuses.some((status) => status === 'In Progress'):
+      return 'In Progress';
+    case statuses.some((status) => status === 'Planning'):
+      return 'Planning';
+    default:
+      return 'Unknown';
+  }
+};
+
 @Injectable()
 export class ProjectsService {
   constructor(
@@ -75,7 +94,9 @@ export class ProjectsService {
 
   async getProjectsHomeData(): Promise<ProjectsHomeData> {
     const cacheKey = `getProjectsHomeData`;
-    const cachedData = await this.cacheManager.store.get<ProjectsHomeData>(cacheKey);
+    const cachedData = await this.cacheManager.store.get<ProjectsHomeData>(
+      cacheKey
+    );
 
     if (cachedData) {
       return cachedData;
@@ -222,96 +243,85 @@ export class ProjectsService {
     }
 
     const cacheKey = `getProjectDetails-${params.id}-${params.dateRange}-${params.comparisonDateRange}`;
-    const cachedData = await this.cacheManager.store.get<ProjectsDetailsData>(cacheKey);
+    const cachedData = await this.cacheManager.store.get<ProjectsDetailsData>(
+      cacheKey
+    );
 
     if (cachedData) {
       return cachedData;
     }
 
-    const projectData = (
-      await this.projectsModel
-        .aggregate<ProjectsDetailsData>()
-        .match({ _id: new Types.ObjectId(params.id) })
-        .lookup({
-          from: 'ux_tests',
-          let: { project_id: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$project', '$$project_id'],
-                },
-              },
-            },
-            {
-              $project: {
-                title: 1,
-                status: { $ifNull: ['$status', 'Unknown'] },
-                date: 1,
-                test_type: { $ifNull: ['$test_type', 'Unknown test type'] },
-                success_rate: 1,
-                tasks: 1,
-                total_users: 1,
-                successful_users: 1,
-                project_lead: 1,
-                vendor: 1,
-              },
-            },
-            {
-              $group: {
-                _id: {
-                  // assuming they're the same "test" if the date, test type, tasks are the same:
-                  title: '$title',
-                  test_type: '$test_type',
-                  date: '$date',
-                  tasks: { $first: '$tasks' },
-                  total_users: '$total_users',
-                  successful_users: '$successful_users',
-                  project_lead: '$project_lead',
-                  vendor: '$vendor',
-                },
-                status: { $first: '$status' },
-                successRate: { $avg: '$success_rate' },
-              },
-            },
-            {
-              $project: {
-                _id: 0,
-                title: '$_id.title',
-                tasks: '$_id.tasks',
-                date: '$_id.date',
-                testType: '$_id.test_type',
-                totalUsers: '$_id.total_users',
-                successfulUsers: '$_id.successful_users',
-                projectLead: '$_id.project_lead',
-                vendor: '$_id.vendor',
-                status: 1,
-                successRate: 1,
-              },
-            },
-            {
-              $sort: { date: -1 },
-            },
-          ],
-          as: 'ux_tests',
-        })
-        .project({
-          title: 1,
-          statuses: '$ux_tests.status',
-          lastTest: { $first: '$ux_tests' },
-          ux_tests: 1,
-        })
-        .project({
-          title: 1,
-          status: projectStatusSwitchExpression,
-          avgTaskSuccessFromLastTest: '$lastTest.successRate',
-          dateFromLastTest: '$lastTest.date',
-          taskSuccessByUxTest: '$ux_tests',
-        })
-        .exec()
-    )[0];
+    const projectId = new Types.ObjectId(params.id);
+
+    const projectDoc = (await this.projectsModel
+      .findById(projectId, { title: 1, tasks: 1, ux_tests: 1 })
+      .populate('tasks', ['_id', 'title'])
+      .populate({
+        path: 'ux_tests',
+        select: '-project -pages',
+        populate: {
+          path: 'tasks',
+          select: '_id title',
+        },
+      })
+      .exec()) as Project;
+
+    const title = projectDoc.title;
+
+    const status = getProjectStatus(
+      (projectDoc.ux_tests as UxTest[])
+        .filter((test) => !(test instanceof Types.ObjectId))
+        .map((test) => test.status as ProjectStatus)
+    );
+
+    const uxTests = projectDoc.ux_tests.map((uxTest) => {
+      uxTest = uxTest._doc;
+
+      if (!('tasks' in uxTest) || !uxTest.tasks.length) {
+        return {
+          ...uxTest,
+          tasks: '',
+        };
+      }
+
+      const tasks =
+        uxTest.tasks.length > 1
+          ? uxTest.tasks.join('; ')
+          : uxTest.tasks[0].title;
+
+      return {
+        ...uxTest,
+        tasks,
+      };
+    }) as (Partial<UxTest> & { tasks: string })[];
+
+    const lastTest = uxTests.reduce((latestTest, test) => {
+      if (latestTest === null) {
+        return test;
+      }
+
+      if (test.date > latestTest.date) {
+        return test;
+      }
+
+      if (
+        test.date === latestTest.date &&
+        test.success_rate > latestTest.success_rate
+      ) {
+        return test;
+      }
+
+      return latestTest;
+    }, null);
+
+    const avgTaskSuccessFromLastTest = lastTest?.success_rate || null;
+
+    const dateFromLastTest = lastTest?.date || null;
+
+    const tasks = projectDoc.tasks as Task[];
 
     const results = {
+      _id: projectDoc._id.toString(),
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
       dateRangeData: await getAggregatedProjectMetrics(
@@ -324,7 +334,12 @@ export class ProjectsService {
         new Types.ObjectId(params.id),
         params.comparisonDateRange
       ),
-      ...projectData,
+      title,
+      status,
+      avgTaskSuccessFromLastTest,
+      dateFromLastTest,
+      taskSuccessByUxTest: uxTests,
+      tasks,
     };
 
     await this.cacheManager.set(cacheKey, results);
@@ -376,7 +391,7 @@ async function getAggregatedProjectMetrics(
         })
         // .addFields({ _id: '$page' })
         .project({ page: 0 })
-        .sort( { title: 1 })
+        .sort({ title: 1 })
         .group({
           _id: null,
           visitsByPage: {

@@ -10,26 +10,12 @@ import { combineLatest } from 'rxjs';
   templateUrl: './project-details-details.component.html',
   styleUrls: ['./project-details-details.component.css'],
 })
-export class ProjectDetailsDetailsComponent {
+export class ProjectDetailsDetailsComponent implements OnInit {
 
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
   memberList$ = this.projectsDetailsService.taskSuccessByUxTest$;
-  // memberListCols = [
-  //   {
-  //     field: 'role',
-  //     header: 'Role',
-  //   },
-  //   {
-  //     field: 'projectLead',
-  //     header: 'Name',
-  //   },
-  //   {
-  //     field: 'vendor',
-  //     header: 'Product',
-  //   }
-  // ] as ColumnConfig[];
 
   memberListCols: ColumnConfig[] = [];
 
@@ -55,6 +41,6 @@ export class ProjectDetailsDetailsComponent {
       ];
     });
   }
-  
+
   constructor(private readonly projectsDetailsService: ProjectsDetailsFacade, private i18n: I18nFacade) {}
 }

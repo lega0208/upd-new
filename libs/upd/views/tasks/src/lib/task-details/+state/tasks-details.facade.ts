@@ -39,7 +39,10 @@ export class TasksDetailsFacade {
   );
 
   currentLang$ = this.i18n.currentLang$;
-  title$ = this.tasksDetailsData$.pipe(map((data) => data.title));
+  title$ = this.tasksDetailsData$.pipe(
+    map((data) => data.title),
+    debounceTime(500),
+  );
 
   avgTaskSuccessFromLastTest$ = this.tasksDetailsData$.pipe(
     map((data) => data.avgTaskSuccessFromLastTest)
@@ -249,10 +252,10 @@ export class TasksDetailsFacade {
 
       if (!taskSuccessByUxTest) return [];
 
-      return taskSuccessByUxTest.map(({ title, successRate }, idx) => {
+      return taskSuccessByUxTest.map(({ title, success_rate }, idx) => {
         return {
           name: `UX Test: ${idx + 1} - ${title}`,
-          value: successRate || 0,
+          value: success_rate || 0,
         };
       });
     })
@@ -299,7 +302,7 @@ export class TasksDetailsFacade {
         .locale(lang)
         .format(dateFormat),
     }));
-    return [...(taskSuccessByUxTest || [])]; 
+    return [...(taskSuccessByUxTest || [])];
     //data?.taskSuccessByUxTest)
     })
   );
@@ -307,7 +310,7 @@ export class TasksDetailsFacade {
   totalParticipants$ = this.tasksDetailsData$.pipe(
     map((data) =>
       data?.taskSuccessByUxTest
-        ?.map((data) => data?.totalUsers)
+        ?.map((data) => data?.total_users)
         .reduce((a, b) => a + b, 0)
     )
   );

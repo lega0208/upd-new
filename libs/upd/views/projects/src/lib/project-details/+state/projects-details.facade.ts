@@ -1,7 +1,7 @@
 import { BubbleChartMultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, map, tap } from 'rxjs';
 
 import * as ProjectsDetailsActions from './projects-details.actions';
 import { ProjectsDetailsState } from './projects-details.reducer';
@@ -40,20 +40,18 @@ export class ProjectsDetailsFacade {
     map((data) => data?.dateFromLastTest)
   );
 
-  taskSuccessByUxTestDefault$ = combineLatest([
+  projectTasks$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,
   ]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
-      const taskSuccessByUxTest = data?.taskSuccessByUxTest;
+      const tasks = data?.tasks.map((task) => ({
+        ...task,
+        title: this.i18n.service.translate(task.title, lang) || task.title,
+      }));
 
-      return taskSuccessByUxTest.map((taskSuccess, i) => {
-        return {
-          ...taskSuccess,
-          title: `Task ${i + 1}`,
-        };
-      });
+      return [...(tasks || [])];
     })
   );
 
@@ -170,51 +168,90 @@ export class ProjectsDetailsFacade {
     mapToPercentChange('gscTotalPosition')
   );
 
-  taskSuccessByUxTest$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.taskSuccessByUxTest)
+  taskSuccessByUxTest$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const uxTests = data?.taskSuccessByUxTest;
+
+      if (!uxTests) {
+        return [];
+      }
+
+      return uxTests.map((uxTest) => {
+        return {
+          ...uxTest,
+          test_type: this.i18n.service.translate(uxTest.test_type || '', lang),
+          tasks: uxTest.tasks
+            .split('; ')
+            .map((task) => this.i18n.service.translate(task, lang) || task)
+            .join('; '),
+        };
+      });
+    })
   );
 
   totalParticipants$ = this.projectsDetailsData$.pipe(
-    map((data) =>
-      data?.taskSuccessByUxTest
-        ?.map((data) => data?.totalUsers)
-        .reduce((a, b) => a + b, 0)
+    map(
+      (data) =>
+        data?.taskSuccessByUxTest
+          ?.map((data) => data?.total_users)
+          .reduce((a = 0, b = 0) => a + b, 0) || 0
     )
   );
 
-  bubbleChart$ = this.projectsDetailsData$.pipe(
-    map((data) => {
-      let taskSuccessByUxData = data?.taskSuccessByUxTest;
-
-      // to be removed when titles are being shown
-      taskSuccessByUxData = taskSuccessByUxData.map((taskSuccess, i) => ({
-        ...taskSuccess,
-        title: `Task ${i + 1}`,
-      }));
+  bubbleChart$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const taskSuccessByUxData = data?.taskSuccessByUxTest;
 
       const taskSeries = taskSuccessByUxData.map(
-        ({ successRate, testType }) => {
-          const success = successRate === null ? 0 : successRate;
+        ({ success_rate, test_type }) => {
+          if (!success_rate) {
+            return null;
+          }
+
+          const i18nTestType = test_type
+            ? this.i18n.service.translate(test_type, lang)
+            : '';
+
           return {
-            name: testType,
-            x: testType,
-            y: success,
+            name: i18nTestType,
+            x: i18nTestType,
+            y: success_rate,
             r: 10,
           };
         }
       );
 
-      const tasks: BubbleChartMultiSeries = taskSuccessByUxData.map(
-        ({ title }, i) => {
+      return taskSuccessByUxData
+        .map(({ tasks, test_type }, i) => {
           const series = [taskSeries[i]];
+
+          const i18nTestType = test_type
+            ? this.i18n.service.translate(test_type, lang)
+            : '';
+
+          const i18nTasks = tasks
+            .split('; ')
+            .map((task) => {
+              return this.i18n.service.translate(task, lang) || task;
+            })
+            .join('; ');
+
+          if (!series) {
+            return null;
+          }
+
           return {
-            name: title,
+            name: `${i18nTasks} – ${i18nTestType}`,
             series,
           };
-        }
-      );
-
-      return tasks;
+        })
+        .filter((taskValues) => taskValues) as BubbleChartMultiSeries;
     })
   );
 

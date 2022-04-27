@@ -1,4 +1,4 @@
-import { Page, PageMetrics, Task } from '@cra-arc/db';
+import { Page, PageMetrics, Task, UxTest } from '@cra-arc/db';
 import type { GscSearchTermMetrics } from '@cra-arc/db';
 
 export {
@@ -170,9 +170,9 @@ export interface TaskDetailsData
   taskSuccessByUxTest: {
     title: string;
     date: Date;
-    testType: string;
-    successRate: number;
-    totalUsers: number;
+    test_type: string;
+    success_rate: number | null;
+    total_users: number;
   }[];
 }
 
@@ -226,13 +226,6 @@ export interface ProjectsDetailsData
   status: ProjectStatus;
   avgTaskSuccessFromLastTest: number;
   dateFromLastTest: Date;
-  taskSuccessByUxTest: {
-    tasks: string[];
-    title: string;
-    date: Date;
-    testType: string;
-    successRate: number;
-    status: string;
-    totalUsers: number;
-  }[];
+  taskSuccessByUxTest: (Partial<UxTest> & { tasks: string })[];
+  tasks: Pick<Task, '_id' | 'title'>[];
 }
