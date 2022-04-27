@@ -11,6 +11,7 @@
   [paginator]="pagination"
   currentPageReportTemplate="{{'dt-paginator' | translate: {first:'{first}', last:'{last}', totalRecords:'{totalRecords}'} }}"
   [globalFilterFields]="searchFields"
+  [sortField]="sortField"
 >
   <ng-template *ngIf="filter || captionTitle" pTemplate="caption">
     <ng-container *ngIf="captionTitle">

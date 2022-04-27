@@ -33,13 +33,11 @@
   <div class="row">
     <div class="col">
       <app-charts
-        type="grouped-bar"
-        [title]="'d3-visits-by-device-type'"
-        titleTooltip="{{ 'tooltip-d3-visits-by-device-type' | translate }}"
-        [data]="visitsByDeviceType$ | async"
-        [table]="visitsByDeviceTypeTable$ | async"
-        [tableCols]="visitsByDeviceTypeCols"
-        [showLegend]="true"
+        type="line"
+        [title]="'visits'"
+        [table]="(barTable$ | async) || []"
+        [tableCols]="barTableCols"
+        [data]="(visitsByDay$ | async) || []"
       ></app-charts>
     </div>
   </div>
@@ -49,11 +47,13 @@
   <div class="row">
     <div class="col">
       <app-charts
-        type="line"
-        [title]="'visits'"
-        [table]="(barTable$ | async) || []"
-        [tableCols]="barTableCols"
-        [data]="(visitsByDay$ | async) || []"
+        type="grouped-bar"
+        [title]="'d3-visits-by-device-type'"
+        titleTooltip="{{ 'tooltip-d3-visits-by-device-type' | translate }}"
+        [data]="visitsByDeviceType$ | async"
+        [table]="visitsByDeviceTypeTable$ | async"
+        [tableCols]="visitsByDeviceTypeCols"
+        [showLegend]="true"
       ></app-charts>
     </div>
   </div>
