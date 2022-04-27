@@ -19,6 +19,7 @@ export class DataTableComponent implements OnInit {
   @Input() searchFields: string[] = [];
   @Input() captionTitle: string = '';
   @Input() loading: boolean = false;
+  @Input() sortField: string = "";
 
   constructor(public translateService: TranslateService) {}
 
