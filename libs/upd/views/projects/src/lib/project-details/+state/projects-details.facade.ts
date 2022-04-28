@@ -15,6 +15,8 @@ import { I18nFacade } from '@cra-arc/upd/state';
 import { FR_CA } from '@cra-arc/upd/i18n';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import 'dayjs/locale/en-ca';
+import 'dayjs/locale/fr-ca';
 
 dayjs.extend(utc);
 
@@ -189,7 +191,7 @@ export class ProjectsDetailsFacade {
       return uxTests.map((uxTest) => {
         return {
           ...uxTest,
-          date: dayjs.utc(uxTest.date).format(dateFormat),
+          date: dayjs.utc(uxTest.date).locale(lang).format(dateFormat),
           test_type: this.i18n.service.translate(uxTest.test_type || '', lang),
           tasks: uxTest.tasks
             .split('; ')

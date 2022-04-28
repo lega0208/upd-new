@@ -4,15 +4,13 @@ import { combineLatest, debounceTime, map } from 'rxjs';
 
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
+import isSameOrBefore from 'dayjs/esm/plugin/isSameOrBefore';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
-import {
-  OverviewAggregatedData,
-  OverviewData
-} from '@cra-arc/types-common';
+import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
 import { percentChange } from '@cra-arc/utils-common';
 import type { PickByType } from '@cra-arc/utils-common';
 import * as OverviewActions from './overview.actions';
@@ -20,6 +18,7 @@ import * as OverviewSelectors from './overview.selectors';
 import { I18nFacade, selectDatePeriodSelection } from '@cra-arc/upd/state';
 
 dayjs.extend(utc);
+dayjs.extend(isSameOrBefore);
 
 @Injectable()
 export class OverviewFacade {
@@ -354,14 +353,59 @@ export class OverviewFacade {
 
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
 
+      const [startDate, endDate] = data.dateRange
+        .split('/')
+        .map((d) => new Date(d));
+      const [prevStartDate, prevEndDate] = (data.comparisonDateRange || '')
+        .split('/')
+        .map((d) => new Date(d));
+
+      let queryDate = dayjs(startDate).utc(false);
+      const end = dayjs(endDate).utc(false);
+      const queries: { day: string; date: string }[] = [];
+
+      while (queryDate.isSameOrBefore(end)) {
+        queries.push({
+          day: dayjs(queryDate).utc(false).format('dddd'),
+          date: dayjs(queryDate).utc(false).format('YYYY-MM-DD'),
+        });
+        queryDate = queryDate.add(1, 'day');
+      }
+
+      const drSeries: { name: string; value: number }[] = [];
+      let cnt = 0;
+
       const dateRangeSeries = calldriversByDay.map(({ date, calls }, i) => {
         const callDate = dayjs(date).utc(false).locale(lang).format(dateFormat);
+        const callDateDay = dayjs(date).utc(false).locale(lang).format('dddd');
+
+        //console.log( queries[cnt], callDateDay, queries[cnt].day===callDateDay );
+
+        if (queries[cnt].day === 'Sunday') {
+          drSeries.push({
+            name: queries[cnt].day,
+            value: 0,
+          });
+          drSeries.push({
+            name: callDateDay,
+            value: calls || 0,
+          });
+        } else {
+          drSeries.push({
+            name: callDateDay,
+            value: calls || 0,
+          });
+        }
+        if (queries[cnt].day !== 'Sunday') cnt++;
+        else cnt += 2;
 
         return {
           name: callDate,
           value: calls,
         };
       });
+
+      //console.log(drSeries);
 
       const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
       const comparisonDateRangeLabel = getWeeklyDatesLabel(

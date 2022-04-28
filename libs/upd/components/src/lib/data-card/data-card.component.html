@@ -4,7 +4,8 @@
       <div class="row row-no-gutters">
         <div class="col">
           <p class="w-100">
-            {{ title | translate }} <span [translate]="'nodata-available'"></span>
+            {{ title | translate }}
+            <span [translate]="'nodata-available'"></span>
           </p>
         </div>
       </div>
@@ -20,10 +21,10 @@
           </p>
         </div>
         <div class="col ml-auto">
-          <span
-            [ngClass]="comparisonClass"
-            class="h3 float-end"
-          >
+          <span [ngClass]="comparisonClass" class="h3 float-end">
+            <span *ngIf="comparisonArrow" class="material-icons">{{
+              comparisonArrow
+            }}</span>
             {{ comparisonFormatted$ | async }}
           </span>
         </div>

@@ -45,6 +45,7 @@ export class DataCardComponent implements OnInit, OnChanges {
   ]).pipe(map(([lang, comparison]) => formatPercent(comparison, lang)));
 
   comparisonClass = 'hidden';
+  comparisonArrow = '';
 
   constructor(private i18n: I18nFacade) {}
 
@@ -52,10 +53,13 @@ export class DataCardComponent implements OnInit, OnChanges {
     this.comparison$.subscribe((comparison) => {
       if (comparison > 0) {
         this.comparisonClass = 'text-success';
+        this.comparisonArrow = 'arrow_upward';
       } else if (comparison < 0) {
+        this.comparisonArrow = 'arrow_downward';
         this.comparisonClass = 'text-danger';
       } else {
         this.comparisonClass = 'hidden';
+        this.comparisonArrow = '';
       }
     });
   }
@@ -79,7 +83,9 @@ export class DataCardComponent implements OnInit, OnChanges {
       this.comparisonFormatted$ = combineLatest([
         this.currentLang$,
         this.comparison$,
-      ]).pipe(map(([lang, comparison]) => formatPercent(comparison, lang)));
+      ]).pipe(
+        map(([lang, comparison]) => formatPercent(Math.abs(comparison), lang))
+      );
     }
   }
 }
