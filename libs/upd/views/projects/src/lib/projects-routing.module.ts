@@ -30,10 +30,10 @@ const routes: Routes = [
             component: ProjectDetailsSearchAnalyticsComponent,
           },
           { path: 'pagefeedback', component: ProjectDetailsFeedbackComponent },
-          {
-            path: 'calldrivers',
-            component: ProjectDetailsCalldriversComponent,
-          },
+          // {
+          //   path: 'calldrivers',
+          //   component: ProjectDetailsCalldriversComponent,
+          // },
           { path: 'uxtests', component: ProjectDetailsUxTestsComponent },
           // { path: 'details', component: ProjectDetailsDetailsComponent },
         ],
