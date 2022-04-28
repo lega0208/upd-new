@@ -115,7 +115,9 @@ export class AirtableClient {
 
     return (await this.selectAll(query)).map(({ id, fields }) => ({
       airtable_id: id,
-      date: dayjs(fields['Date']).utc(true).toDate(),
+      date: fields['Date']
+        ? dayjs.utc(fields['Date']).toDate()
+        : fields['Date'],
       title: fields['UX Research Project Title'].trim(),
       success_rate: fields['Success Rate'],
       test_type: fields['Test Type'],
@@ -230,7 +232,7 @@ export class AirtableClient {
         date: dayjs(fields['Date']).utc(true).toDate(),
         tags: fields['Lookup_tags'],
         status: fields['Status'],
-        whats_wrong: fields['What\'s wrong'],
+        whats_wrong: fields["What's wrong"],
         main_section: fields['Main section'],
         theme: fields['Theme'],
       })) as FeedbackData[];
@@ -245,10 +247,13 @@ export class AirtableClient {
       { filterByFormula }
     );
 
-    const results = (await this.selectAll(query)).map(({ fields }) => ({
-      tpc_id: fields['TPC ID'],
-      tasks: fields['Task'],
-    }) as { tpc_id: number, tasks: string[] });
+    const results = (await this.selectAll(query)).map(
+      ({ fields }) =>
+        ({
+          tpc_id: fields['TPC ID'],
+          tasks: fields['Task'],
+        } as { tpc_id: number; tasks: string[] })
+    );
 
     const tasksTopicsMap = results.reduce((tasksTopicsMap, topicTasks) => {
       for (const task of topicTasks.tasks) {

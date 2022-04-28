@@ -37,8 +37,12 @@ export class SearchAnalyticsClient {
     return this.client.searchanalytics.query(query);
   }
 
-  async getOverallMetrics(dateRange: DateRange, dataState?: DataState) {
-    const dates = datesFromDateRange(dateRange);
+  async getOverallMetrics(dateRange: DateRange | Date, dataState?: DataState) {
+    const dates =
+      dateRange instanceof Date
+        ? [dayjs.utc(dateRange).format('YYYY-MM-DD')]
+        : datesFromDateRange(dateRange);
+
     const promises = [];
 
     for (const date of dates) {
@@ -68,7 +72,7 @@ export class SearchAnalyticsClient {
       .setStartDate(date)
       .setEndDate(date)
       .setFilters([craFilter])
-      .setDataState(options?.dataState || 'final')
+      .setDataState(options?.dataState || 'all')
       .setRowLimit(options?.rowLimit || 1)
       .build();
 
@@ -101,7 +105,7 @@ export class SearchAnalyticsClient {
       .setEndDate(date)
       .addDimensions(['query'])
       .setFilters([craFilter])
-      .setDataState(options?.dataState || 'final')
+      .setDataState(options?.dataState || 'all')
       .setRowLimit(options?.rowLimit || 250)
       .build();
 
@@ -207,7 +211,7 @@ export class SearchAnalyticsClient {
       .setEndDate(date)
       .addDimensions(dimensions)
       .setFilters([pageFilter]) // split into en/fr, experiment with regex to find ways to optimize
-      .setDataState(options?.dataState || 'final')
+      .setDataState(options?.dataState || 'all')
       .setRowLimit(options?.rowLimit || 25000)
       .build();
 
@@ -256,7 +260,7 @@ export class SearchAnalyticsClient {
       .setEndDate(date)
       .addDimensions(dimensions)
       .setFilters([pageFilter])
-      .setDataState(options?.dataState || 'final')
+      .setDataState(options?.dataState || 'all')
       .setRowLimit(options?.rowLimit || 25000)
       .build();
 

@@ -297,7 +297,8 @@ export async function updateUxData() {
       upsert: true,
     },
   }));
-  console.log('Writing pages to db');
+
+  console.log('Writing Pages to db');
   await getPageModel().bulkWrite(pageUpdateOps);
 
   const taskUpdateOps = tasks.map((task) => ({
@@ -307,8 +308,17 @@ export async function updateUxData() {
       upsert: true,
     },
   }));
-  console.log('Writing tasks to db');
-  await getTaskModel().bulkWrite(taskUpdateOps);
+
+  console.log('Writing Tasks to db');
+  const taskModel = getTaskModel();
+  await taskModel.bulkWrite(taskUpdateOps);
+
+  console.log('Pruning old Tasks');
+  const currentTaskAirtableIds = tasks.map((task) => task.airtable_id);
+  const taskPruningResults = await taskModel.deleteMany({
+    airtable_id: { $nin: currentTaskAirtableIds },
+  });
+  console.log(`Pruned ${taskPruningResults.deletedCount} Tasks`);
 
   const uxTestUpdateOps = uxTests.map((uxTest) => ({
     replaceOne: {
@@ -317,8 +327,17 @@ export async function updateUxData() {
       upsert: true,
     },
   }));
+
   console.log('Writing UX tests to db');
-  await getUxTestModel().bulkWrite(uxTestUpdateOps);
+  const uxTestModel = getUxTestModel();
+  await uxTestModel.bulkWrite(uxTestUpdateOps);
+
+  console.log('Pruning old UX tests');
+  const currentUxTestAirtableIds = uxTests.map((uxTest) => uxTest.airtable_id);
+  const uxTestPruningResults = await uxTestModel.deleteMany({
+    airtable_id: { $nin: currentUxTestAirtableIds },
+  });
+  console.log(`Pruned ${uxTestPruningResults.deletedCount} UX tests`);
 
   const projectUpdateOps = projects.map((project) => ({
     replaceOne: {
@@ -327,8 +346,16 @@ export async function updateUxData() {
       upsert: true,
     },
   }));
-  console.log('Writing projects to db');
-  await getProjectModel().bulkWrite(projectUpdateOps);
+  console.log('Writing Projects to db');
+  const projectModel = getProjectModel();
+  await projectModel.bulkWrite(projectUpdateOps);
+
+  console.log('Pruning old Projects');
+  const currentProjectIds = projects.map((project) => project._id);
+  const projectPruningResults = await projectModel.deleteMany({
+    _id: { $nin: currentProjectIds },
+  });
+  console.log(`Pruned ${projectPruningResults.deletedCount} Projects`);
 
   console.log('Successfully updated Airtable data');
 

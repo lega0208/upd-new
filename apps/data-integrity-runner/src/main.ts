@@ -12,7 +12,7 @@ async function bootstrap() {
 
   console.log(`Running data integrity checks...`);
 
-  const results = await dataIntegrityService.fillMissingData();
+  const results = await dataIntegrityService.fillMissingGscOverallMetrics();
 
   console.log(results);
 

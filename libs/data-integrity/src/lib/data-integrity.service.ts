@@ -1,10 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Page, PageMetrics } from '@cra-arc/types-common';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import {
+  Overall,
+  OverallDocument,
+  Page,
+  PageMetrics,
+} from '@cra-arc/types-common';
 import type { PageDocument, PageMetricsModel } from '@cra-arc/types-common';
-import { outputCsv } from './utils';
 import { DbUpdateService } from '@cra-arc/db-update';
+import { outputCsv } from './utils';
+
+dayjs.extend(utc);
 
 /*
  * Things to address:
@@ -27,6 +36,7 @@ import { DbUpdateService } from '@cra-arc/db-update';
 @Injectable()
 export class DataIntegrityService {
   constructor(
+    @InjectModel(Overall.name) private overallModel: Model<OverallDocument>,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
     @InjectModel(Page.name) private pageModel: Model<PageDocument>,
     private dbUpdateService: DbUpdateService
@@ -63,7 +73,40 @@ export class DataIntegrityService {
     const metrics = await this.dbUpdateService.getPageMetrics(datesToFill);
 
     await this.dbUpdateService.upsertPageMetrics(metrics);
+  }
 
+  async findMissingGscOverallMetrics() {
+    const missingDays = (
+      await this.overallModel
+        .find(
+          {
+            gsc_total_impressions: { $exists: false },
+          },
+          {
+            _id: 0,
+            date: 1,
+          }
+        )
+        .lean()
+        .exec()
+    ).map((doc) => doc.date);
+
+    if (missingDays.length === 0) {
+      console.log('Found no days in overall_metrics missing gsc data.');
+    } else {
+      console.log('Found the following days in overall_metrics missing gsc data:');
+      console.log(missingDays);
+    }
+
+    return missingDays;
+  }
+
+  async fillMissingGscOverallMetrics() {
+    console.log('Finding and filling any missing gsc data in overall_metrics...');
+
+    const dates = await this.findMissingGscOverallMetrics();
+
+    return await this.dbUpdateService.upsertOverallGscMetrics(dates);
   }
 
   async findInvalidUrls(outputFilePath?: string) {
