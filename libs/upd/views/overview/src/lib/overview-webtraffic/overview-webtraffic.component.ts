@@ -26,7 +26,8 @@ export class OverviewWebtrafficComponent implements OnInit {
   isChartDataOver31Days$ = this.overviewService.isChartDataOver31Days$;
 
   topPagesData$ = this.overviewService.topPagesVisited$;
-  topPagesWithChangeData$ = this.overviewService.topPagesVisitedWithPercentChange$;
+  topPagesWithChangeData$ =
+    this.overviewService.topPagesVisitedWithPercentChange$;
 
   barChartData$ = this.overviewService.visitsByDay$;
   barTable$ = this.overviewService.barTable$;
@@ -55,7 +56,12 @@ export class OverviewWebtrafficComponent implements OnInit {
       this.comparisonDateRangeLabel$,
     ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
       this.topPagesCols = [
-        { field: '_id', header: this.i18n.service.translate('URL', lang) },
+        {
+          field: '_id',
+          header: this.i18n.service.translate('URL', lang),
+          type: 'link',
+          typeParams: { link: '_id', external: true },
+        },
         {
           field: 'visits',
           header: this.i18n.service.translate('visits', lang),

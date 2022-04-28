@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   TaskDetailsAggregatedData,
-  TaskDetailsData
+  TaskDetailsData,
 } from '@cra-arc/types-common';
 import { select, Store } from '@ngrx/store';
 import { combineLatest, debounceTime, map, reduce } from 'rxjs';
@@ -41,7 +41,17 @@ export class TasksDetailsFacade {
   currentLang$ = this.i18n.currentLang$;
   title$ = this.tasksDetailsData$.pipe(
     map((data) => data.title),
-    debounceTime(500),
+    debounceTime(500)
+  );
+
+  titleHeader$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(
+      ([data, lang]) =>
+        this.i18n.service.translate(data.title, lang) || data.title
+    )
   );
 
   avgTaskSuccessFromLastTest$ = this.tasksDetailsData$.pipe(
@@ -292,18 +302,18 @@ export class TasksDetailsFacade {
   // taskSuccessByUxTest$ = this.tasksDetailsData$.pipe(
   //   map((data) => data?.taskSuccessByUxTest)
   // );
-  taskSuccessByUxTest$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
+  taskSuccessByUxTest$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
     map(([data, lang]) => {
-    const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
-    const taskSuccessByUxTest = data?.taskSuccessByUxTest?.map((d) => ({
-      ...d,
-      date: dayjs(d.date)
-        .utc(false)
-        .locale(lang)
-        .format(dateFormat),
-    }));
-    return [...(taskSuccessByUxTest || [])];
-    //data?.taskSuccessByUxTest)
+      const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
+      const taskSuccessByUxTest = data?.taskSuccessByUxTest?.map((d) => ({
+        ...d,
+        date: dayjs(d.date).utc(false).locale(lang).format(dateFormat),
+      }));
+      return [...(taskSuccessByUxTest || [])];
+      //data?.taskSuccessByUxTest)
     })
   );
 

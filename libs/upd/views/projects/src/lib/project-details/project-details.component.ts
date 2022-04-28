@@ -19,12 +19,13 @@ export class ProjectDetailsComponent implements OnInit {
   title$ = combineLatest([
     this.projectsDetailsService.title$,
     this.currentLang$,
-  ]).pipe(map(([title, lang]) => (title ? this.i18n.service.translate(title, lang) : '')));
+  ]).pipe(
+    map(([title, lang]) =>
+      title ? this.i18n.service.translate(title, lang) : ''
+    )
+  );
 
-  status$ = combineLatest([
-    this.projectsDetailsService.status$ as Observable<ProjectStatus>,
-    this.currentLang$,
-  ]).pipe(map(([status, lang]) => this.i18n.service.translate(status, lang) as ProjectStatus));
+  status$ = this.projectsDetailsService.status$;
   loaded$ = this.projectsDetailsService.loaded$;
 
   navTabs: { href: string; title: string }[] = [];
