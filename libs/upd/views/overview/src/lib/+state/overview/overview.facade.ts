@@ -377,27 +377,7 @@ export class OverviewFacade {
 
       const dateRangeSeries = calldriversByDay.map(({ date, calls }, i) => {
         const callDate = dayjs(date).utc(false).locale(lang).format(dateFormat);
-        const callDateDay = dayjs(date).utc(false).locale(lang).format('dddd');
 
-        //console.log( queries[cnt], callDateDay, queries[cnt].day===callDateDay );
-
-        if (queries[cnt].day === 'Sunday') {
-          drSeries.push({
-            name: queries[cnt].day,
-            value: 0,
-          });
-          drSeries.push({
-            name: callDateDay,
-            value: calls || 0,
-          });
-        } else {
-          drSeries.push({
-            name: callDateDay,
-            value: calls || 0,
-          });
-        }
-        if (queries[cnt].day !== 'Sunday') cnt++;
-        else cnt += 2;
 
         return {
           name: callDate,
