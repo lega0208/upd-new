@@ -16,32 +16,6 @@ export class TasksHomeComponent implements OnInit {
   tasksHomeData$ = this.tasksHomeService.tasksHomeTableData$;
   data$ = this.tasksHomeService.tasksHomeData$
 
-  // columns: ColumnConfig[] = [
-  //   {
-  //     field: 'title',
-  //     header: 'Task',
-  //     type: 'link',
-  //     typeParam: '_id',
-  //     tooltip: 'tooltip',
-  //   },
-  //   {
-  //     field: 'topic',
-  //     header: 'Category',
-  //     tooltip: 'tooltip',
-  //   },
-  //   {
-  //     field: 'subtopic',
-  //     header: 'Sub-category',
-  //     tooltip: 'tooltip',
-  //   },
-  //   {
-  //     field: 'visits',
-  //     header: 'Visits',
-  //     tooltip: 'tooltip',
-  //     pipe: 'number',
-  //   }
-  // ];
-
   columns: ColumnConfig[] = [];
   searchFields = this.columns.map((col) => col.field);
 

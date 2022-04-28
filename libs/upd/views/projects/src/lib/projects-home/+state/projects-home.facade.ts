@@ -30,19 +30,17 @@ export class ProjectsHomeFacade {
   projectsHomeData$ = this.store.pipe(
     select(ProjectsHomeSelectors.getProjectsHomeData)
   );
-  // projectsHomeTableData$ = this.projectsHomeData$.pipe(
-  //   map((data) => [...data.projects])
-  // )
 
   projectsHomeTableData$ = combineLatest([this.projectsHomeData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
     const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
     const projectsHome = data?.projects?.map((d) => ({
       ...d,
-      startDate: dayjs(d.startDate)
-        .utc(false)
+      title: d.title ? this.i18n.service.translate(d.title.replace(/\s+/g, ' '), lang) : '',
+      startDate: d.startDate ? dayjs
+        .utc(d.startDate)
         .locale(lang)
-        .format(dateFormat),
+        .format(dateFormat) : '',
     }));
     return [...(projectsHome || [])];
     //data?.taskSuccessByUxTest)

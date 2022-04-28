@@ -23,48 +23,6 @@ export class ProjectsHomeComponent implements OnInit {
   totalCompleted$ = this.projectsHomeService.totalCompleted$;
   numDelayed$ = this.projectsHomeService.numDelayed$;
 
-  // columns: ColumnConfig[] = [
-  //   {
-  //     field: 'title',
-  //     header: 'Name',
-  //     type: 'link',
-  //     typeParam: '_id',
-  //     tooltip: 'tooltip',
-  //   },
-  //   {
-  //     field: 'cops',
-  //     header: 'Type',
-  //     type: 'label',
-  //     typeParam: 'cops',
-  //     tooltip: 'tooltip',
-  //   },
-  //   {
-  //     field: 'status',
-  //     header: 'Status',
-  //     type: 'label',
-  //     typeParam: 'status',
-  //     tooltip: 'tooltip',
-  //   },
-  //   {
-  //     field: 'startDate',
-  //     header: 'Start date',
-  //     tooltip: 'tooltip',
-  //     pipe: 'date',
-  //   },
-  //   // {
-  //   //   field: 'launchDate',
-  //   //   header: 'Launch date',
-  //   //   tooltip: 'tooltip',
-  //   //   pipe: 'date',
-  //   // },
-  //   {
-  //     field: 'avgSuccessRate',
-  //     header: 'Average test success rate',
-  //     tooltip: 'tooltip',
-  //     pipe: 'percent',
-  //   }
-  // ];
-
   columns: ColumnConfig[] = [];
 
   searchFields = this.columns.map((col) => col.field);
@@ -101,11 +59,6 @@ export class ProjectsHomeComponent implements OnInit {
           field: 'startDate',
           header: this.i18n.service.translate('Start date', lang)
         },
-        // {
-        //   field: 'launchDate',
-        //   header: this.i18n.service.translate('Launch date', lang),
-        //   pipe: 'date',
-        // },
         {
           field: 'avgSuccessRate',
           header: this.i18n.service.translate(

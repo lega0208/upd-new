@@ -36,7 +36,7 @@ export class ProjectsDetailsFacade {
 
   currentLang$ = this.i18n.currentLang$;
 
-  title$ = this.projectsDetailsData$.pipe(map((data) => data?.title));
+  title$ = this.projectsDetailsData$.pipe(map((data) => data?.title.replace(/\s+/g, ' ')));
   status$ = this.projectsDetailsData$.pipe(map((data) => data?.status));
 
   avgTaskSuccessFromLastTest$ = this.projectsDetailsData$.pipe(

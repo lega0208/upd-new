@@ -22,7 +22,10 @@ export class TasksHomeFacade {
     map(([tasksHomeData, lang]) => {
       return (tasksHomeData?.dateRangeData || []).map((row) => ({
         ...row,
-        title: this.i18n.service.translate(row.title, lang),
+        title: row.title ? this.i18n.service.translate(row.title.replace(/\s+/g, ' '), lang) : '',
+        group: row.group ? this.i18n.service.translate(row.group || '', lang) : '',
+        topic: row.topic ? this.i18n.service.translate(row.topic || '', lang) : '',
+        subtopic: row.subtopic ? this.i18n.service.translate(row.subtopic || '', lang) : '',
       }));
     })
   );
