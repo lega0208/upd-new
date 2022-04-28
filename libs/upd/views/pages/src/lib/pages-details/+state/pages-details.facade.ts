@@ -418,30 +418,27 @@ export class PagesDetailsFacade {
     })
   );
 
+  referrerTypePropToKeyMap = {
+    visits_referrer_other: 'Other Web Sites',
+    visits_referrer_searchengine: 'Search Engines',
+    visits_referrer_typed_bookmarked: 'Typed/Bookmarked',
+    visits_referrer_social: 'Social Networks',
+  } as Record<keyof PageAggregatedData, string>
+
   referrerType$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
-      const dataByReferrerType = [
-        {
-          type: this.i18n.service.translate('Other Web Sites', lang),
-          value: data?.dateRangeData?.visits_referrer_other || 0,
-          change: 0,
-        },
-        {
-          type: this.i18n.service.translate('Search Engines', lang),
-          value: data?.dateRangeData?.visits_referrer_searchengine || 0,
-          change: 0,
-        },
-        {
-          type: this.i18n.service.translate('Typed/Bookmarked', lang),
-          value: data?.dateRangeData?.visits_referrer_typed_bookmarked || 0,
-          change: 0,
-        },
-        {
-          type: this.i18n.service.translate('Social Networks', lang),
-          value: data?.dateRangeData?.visits_referrer_social || 0,
-          change: 0,
-        },
-      ];
+      const dataByReferrerType = Object.entries(this.referrerTypePropToKeyMap).map(([prop, refType]) => {
+        const currentVal = (data?.dateRangeData?.[prop as keyof PageAggregatedData] || 0) as number;
+        const previousVal = (data?.comparisonDateRangeData?.[prop as keyof PageAggregatedData] || 0) as number;
+
+        const change = previousVal === 0 ? Infinity : (currentVal - previousVal) / previousVal;
+
+        return {
+          type: this.i18n.service.translate(refType, lang),
+          value: currentVal,
+          change,
+        };
+      });
 
       const isZero = dataByReferrerType.every((v) => v.value === 0);
 
@@ -453,82 +450,40 @@ export class PagesDetailsFacade {
     })
   );
 
+  propToProvinceMap = {
+    visits_geo_ab: 'Alberta',
+    visits_geo_bc: 'British Columbia',
+    visits_geo_mb: 'Manitoba',
+    visits_geo_nb: 'New Brunswick',
+    visits_geo_nl: 'Newfoundland and Labrador',
+    visits_geo_ns: 'Nova Scotia',
+    visits_geo_nt: 'Northwest Territories',
+    visits_geo_nu: 'Nunavut',
+    visits_geo_on: 'Ontario',
+    visits_geo_pe: 'Prince Edward Island',
+    visits_geo_qc: 'Quebec',
+    visits_geo_sk: 'Saskatchewan',
+    visits_geo_yt: 'Yukon',
+    visits_geo_outside_canada: 'Outside Canada',
+  } as Record<keyof PageAggregatedData, string>
+
   visitorLocation$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
-      const dataByLocation = [
-        {
-          province: this.i18n.service.translate('Alberta', lang),
-          value: data?.dateRangeData?.visits_geo_ab || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('British Columbia', lang),
-          value: data?.dateRangeData?.visits_geo_bc || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Manitoba', lang),
-          value: data?.dateRangeData?.visits_geo_mb || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('New Brunswick', lang),
-          value: data?.dateRangeData?.visits_geo_nb || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Newfoundland and Labrador', lang),
-          value: data?.dateRangeData?.visits_geo_nl || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Nova Scotia', lang),
-          value: data?.dateRangeData?.visits_geo_ns || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Northwest Territories', lang),
-          value: data?.dateRangeData?.visits_geo_nt || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Nunavut', lang),
-          value: data?.dateRangeData?.visits_geo_nu || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Ontario', lang),
-          value: data?.dateRangeData?.visits_geo_on || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Prince Edward Island', lang),
-          value: data?.dateRangeData?.visits_geo_pe || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Quebec', lang),
-          value: data?.dateRangeData?.visits_geo_qc || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Sakatchewan', lang),
-          value: data?.dateRangeData?.visits_geo_sk || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Yukon', lang),
-          value: data?.dateRangeData?.visits_geo_yt || 0,
-          change: 0,
-        },
-        {
-          province: this.i18n.service.translate('Outside Canada', lang),
-          value: data?.dateRangeData?.visits_geo_outside_canada || 0,
-          change: 0,
-        },
-      ];
+      const dataByLocation = Object.entries(this.propToProvinceMap).map(([prop, province]) => {
+        const currentVal = (data?.dateRangeData?.[prop as keyof PageAggregatedData] || 0) as number;
+        const previousVal = (data?.comparisonDateRangeData?.[prop as keyof PageAggregatedData] || 0) as number;
+
+        const change = previousVal === 0 ? 0 : (currentVal - previousVal) / previousVal;
+
+        return {
+          province: this.i18n.service.translate(province, lang),
+          value: currentVal,
+          change,
+        };
+      });
 
       const isZero = dataByLocation.every((v) => v.value === 0);
+
       if (isZero) {
         return [];
       }

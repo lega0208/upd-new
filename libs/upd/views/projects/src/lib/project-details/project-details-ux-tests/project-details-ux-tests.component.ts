@@ -25,31 +25,6 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
   taskSuccessByUxTest$ = this.projectsDetailsService.taskSuccessByUxTest$;
   totalParticipants$ = this.projectsDetailsService.totalParticipants$;
 
-  // participantTasksCols = [
-  //   {
-  //     field: 'title',
-  //     header: 'Task list',
-  //     type: 'link',
-  //     typeParams: { preLink: '/tasks', link: 'tasks' },
-  //   },
-  // ] as ColumnConfig[];
-
-  // taskSuccessRateCols = [
-  //   {
-  //     field: 'title',
-  //     header: 'Task',
-  //   },
-  //   {
-  //     field: 'testType',
-  //     header: 'Test type',
-  //   },
-  //   {
-  //     field: 'successRate',
-  //     header: 'Success rate',
-  //     pipe: 'percent',
-  //   },
-  // ] as ColumnConfig[];
-
   constructor(private readonly projectsDetailsService: ProjectsDetailsFacade, private i18n: I18nFacade) {}
 
   participantTasksCols: ColumnConfig[] = [];
@@ -79,6 +54,10 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
         {
           field: 'test_type',
           header: this.i18n.service.translate('test-type', lang)
+        },
+        {
+          field: 'date',
+          header: this.i18n.service.translate('date', lang)
         },
         {
           field: 'success_rate',

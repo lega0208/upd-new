@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   TaskDetailsAggregatedData,
-  TaskDetailsData,
+  TaskDetailsData
 } from '@cra-arc/types-common';
 import { select, Store } from '@ngrx/store';
 import { combineLatest, debounceTime, map, reduce } from 'rxjs';
@@ -64,15 +64,15 @@ export class TasksDetailsFacade {
   );
 
   visitsByPageWithPercentChange$ = this.tasksDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'visits')
+    mapObjectArraysWithPercentChange('visitsByPage', 'visits', '_id')
   );
 
   visitsByPageGSCWithPercentChange$ = this.tasksDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'gscTotalClicks')
+    mapObjectArraysWithPercentChange('visitsByPage', 'gscTotalClicks', '_id')
   );
 
   visitsByPageFeedbackWithPercentChange$ = this.tasksDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo')
+    mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo', '_id')
   );
 
   dateRangeLabel$ = combineLatest([
@@ -370,15 +370,18 @@ function mapToPercentChange(
 
 function mapObjectArraysWithPercentChange(
   propName: keyof TaskDetailsAggregatedData,
-  propPath: string
+  propPath: string,
+  sortPath?: string
 ) {
   return map((data: TaskDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
       return;
     }
 
-    const current = data?.dateRangeData[propName];
-    const previous = data?.comparisonDateRangeData[propName];
+    const current = [...((data?.dateRangeData?.[propName] || []) as any[])];
+    const previous = [
+      ...((data?.comparisonDateRangeData?.[propName] || []) as any[]),
+    ];
 
     if (!current || !previous) {
       return;
@@ -392,6 +395,21 @@ function mapObjectArraysWithPercentChange(
       current.length === previous.length;
 
     if (propsAreValidArrays) {
+      const sortBy = (a: any, b: any) => {
+        if (sortPath && a[sortPath] instanceof Date) {
+          return a[sortPath] - b[sortPath];
+        }
+
+        if (sortPath && typeof a[sortPath] === 'string') {
+          return a[sortPath].localeCompare(b[sortPath]);
+        }
+
+        return 0;
+      };
+
+      current.sort(sortBy);
+      previous.sort(sortBy);
+
       return current.map((val: any, i) => ({
         ...val,
         percentChange: percentChange(

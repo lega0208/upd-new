@@ -27,15 +27,6 @@ export class TaskDetailsSummaryComponent implements OnInit {
   taskSuccessByUxTest$ = this.taskDetailsService.taskSuccessByUxTest$;
   taskSuccessByUxTestCols: ColumnConfig[] = [];
 
-  // dyfTableCols: ColumnConfig[] = [
-  //   { field: 'name', header: 'Selection' },
-  //   { field: 'value', header: 'Visits', pipe: 'number' },
-  // ];
-  // whatWasWrongTableCols: ColumnConfig[] = [
-  //   { field: 'name', header: 'What was wrong' },
-  //   { field: 'value', header: 'Visits', pipe: 'number' },
-  // ];
-
   currentLang$ = this.i18n.currentLang$;
   currentLang!: LocaleId;
   langLink = 'en';
@@ -51,6 +42,7 @@ export class TaskDetailsSummaryComponent implements OnInit {
 
     this.currentLang$.subscribe((lang) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+
       this.visitsByPageCols = [
         {
           field: 'title',
@@ -64,24 +56,54 @@ export class TaskDetailsSummaryComponent implements OnInit {
           type: 'link',
           typeParams: { link: 'url', external: true },
         },
-        { field: 'visits', header: this.i18n.service.translate('visits', lang), pipe: 'number' },
-        { field: 'change', header: this.i18n.service.translate('%-change', lang), pipe: 'percent' },
+        {
+          field: 'visits',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
+        {
+          field: 'percentChange',
+          header: this.i18n.service.translate('%-change', lang),
+          pipe: 'percent',
+        },
       ];
+
       this.taskSuccessByUxTestCols = [
-        { field: 'title', header: this.i18n.service.translate('ux-test', lang), },
-        { field: '0', header: this.i18n.service.translate('project', lang) },
-        //{ field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date', pipeParam: 'YYYY-MM-dd' },
+        {
+          field: 'title',
+          header: this.i18n.service.translate('ux-test', lang),
+        },
         { field: 'date', header: this.i18n.service.translate('date', lang) },
-        { field: 'test_type', header: this.i18n.service.translate('test-type', lang) },
-        { field: 'success_rate', header: this.i18n.service.translate('success-rate', lang), pipe: 'percent' },
+        {
+          field: 'test_type',
+          header: this.i18n.service.translate('test-type', lang),
+        },
+        {
+          field: 'success_rate',
+          header: this.i18n.service.translate('success-rate', lang),
+          pipe: 'percent',
+        },
       ];
+
       this.dyfTableCols = [
-        { field: 'name', header: this.i18n.service.translate('Selection', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'name',
+          header: this.i18n.service.translate('Selection', lang),
+        },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
+
       this.whatWasWrongTableCols = [
         { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
     });
   }

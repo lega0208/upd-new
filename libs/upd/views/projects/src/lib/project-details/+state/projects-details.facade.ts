@@ -12,6 +12,11 @@ import {
 } from '@cra-arc/types-common';
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import { I18nFacade } from '@cra-arc/upd/state';
+import { FR_CA } from '@cra-arc/upd/i18n';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 @Injectable()
 export class ProjectsDetailsFacade {
@@ -67,15 +72,15 @@ export class ProjectsDetailsFacade {
   );
 
   visitsByPageWithPercentChange$ = this.projectsDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'visits')
+    mapObjectArraysWithPercentChange('visitsByPage', 'visits', '_id')
   );
 
   visitsByPageGSCWithPercentChange$ = this.projectsDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'gscTotalClicks')
+    mapObjectArraysWithPercentChange('visitsByPage', 'gscTotalClicks', '_id')
   );
 
   visitsByPageFeedbackWithPercentChange$ = this.projectsDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo')
+    mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo', '_id')
   );
 
   dyfData$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
@@ -179,9 +184,12 @@ export class ProjectsDetailsFacade {
         return [];
       }
 
+      const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
+
       return uxTests.map((uxTest) => {
         return {
           ...uxTest,
+          date: dayjs.utc(uxTest.date).format(dateFormat),
           test_type: this.i18n.service.translate(uxTest.test_type || '', lang),
           tasks: uxTest.tasks
             .split('; ')
@@ -253,7 +261,7 @@ export class ProjectsDetailsFacade {
         })
         .filter((taskValues) => !!taskValues) as BubbleChartMultiSeries;
     }),
-    tap((data) => console.log(data)),
+    tap((data) => console.log(data))
   );
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
@@ -293,15 +301,18 @@ function mapToPercentChange(
 
 function mapObjectArraysWithPercentChange(
   propName: keyof ProjectDetailsAggregatedData,
-  propPath: string
+  propPath: string,
+  sortPath?: string
 ) {
   return map((data: ProjectsDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
       return;
     }
 
-    const current = data?.dateRangeData[propName];
-    const previous = data?.comparisonDateRangeData[propName];
+    const current = [...((data?.dateRangeData?.[propName] || []) as any[])];
+    const previous = [
+      ...((data?.comparisonDateRangeData?.[propName] || []) as any[]),
+    ];
 
     if (!current || !previous) {
       return;
@@ -315,6 +326,24 @@ function mapObjectArraysWithPercentChange(
       current.length === previous.length;
 
     if (propsAreValidArrays) {
+      const sortBy = (a: any, b: any) => {
+        if (sortPath && a[sortPath] instanceof Date) {
+          return a[sortPath] - b[sortPath];
+        }
+
+        if (sortPath && typeof a[sortPath] === 'string') {
+          return a[sortPath].localeCompare(b[sortPath]);
+        }
+
+        return 0;
+      };
+
+      current.sort(sortBy);
+      previous.sort(sortBy);
+
+      console.log(current);
+      console.log(previous);
+
       return current.map((val: any, i) => ({
         ...val,
         percentChange: percentChange(

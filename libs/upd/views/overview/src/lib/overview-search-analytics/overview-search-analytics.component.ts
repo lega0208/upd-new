@@ -52,7 +52,7 @@ export class OverviewSearchAnalyticsComponent {
       this.GSCSearchTermsCols = [
         { field: '_id', header: this.i18n.service.translate('search-terms', lang) },
         { field: 'clicks', header: this.i18n.service.translate('clicks', lang), pipe: 'number' },
-        { field: 'Comparison', header: this.i18n.service.translate('comparison', lang) },
+        { field: 'percentChange', header: this.i18n.service.translate('comparison', lang), pipe: 'percent' },
         { field: 'impressions', header: this.i18n.service.translate('impressions', lang), pipe: 'number' },
         { field: 'ctr', header: this.i18n.service.translate('ctr', lang), pipe: 'percent' },
         {

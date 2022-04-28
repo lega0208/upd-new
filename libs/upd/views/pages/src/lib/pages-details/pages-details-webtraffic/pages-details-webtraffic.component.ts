@@ -41,7 +41,7 @@ export class PagesDetailsWebtrafficComponent implements OnInit {
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
     ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
-      (this.visitorLocationCols = [
+      this.visitorLocationCols = [
         {
           field: 'province',
           header: this.i18n.service.translate('province', lang),
@@ -54,33 +54,37 @@ export class PagesDetailsWebtrafficComponent implements OnInit {
         {
           field: 'change',
           header: this.i18n.service.translate('comparison', lang),
+          pipe: 'percent',
         },
-      ]),
-        (this.whatVisitorsClickedOnCols = [
-          { field: 'text', header: this.i18n.service.translate('text', lang) },
-          {
-            field: 'clicks',
-            header: this.i18n.service.translate('clicks', lang),
-          },
-          {
-            field: 'change',
-            header: this.i18n.service.translate('comparison', lang),
-          },
-        ]),
-        (this.whereVisitorsCameFromCols = [
-          {
-            field: 'url',
-            header: this.i18n.service.translate('previous-page-url', lang),
-          },
-          {
-            field: 'visits',
-            header: this.i18n.service.translate('visits', lang),
-          },
-          {
-            field: 'change',
-            header: this.i18n.service.translate('comparison', lang),
-          },
-        ]);
+      ];
+
+      this.whatVisitorsClickedOnCols = [
+        { field: 'text', header: this.i18n.service.translate('text', lang) },
+        {
+          field: 'clicks',
+          header: this.i18n.service.translate('clicks', lang),
+        },
+        {
+          field: 'change',
+          header: this.i18n.service.translate('comparison', lang),
+        },
+      ];
+
+      this.whereVisitorsCameFromCols = [
+        {
+          field: 'url',
+          header: this.i18n.service.translate('previous-page-url', lang),
+        },
+        {
+          field: 'visits',
+          header: this.i18n.service.translate('visits', lang),
+        },
+        {
+          field: 'change',
+          header: this.i18n.service.translate('comparison', lang),
+        },
+      ];
+
       this.barTableCols = [
         { field: 'name', header: this.i18n.service.translate('Dates', lang) },
         {

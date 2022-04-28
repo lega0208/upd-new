@@ -304,19 +304,15 @@ export class ProjectsService {
         return test;
       }
 
-      if (
-        test.date === latestTest.date &&
-        test.success_rate > latestTest.success_rate
-      ) {
-        return test;
-      }
-
       return latestTest;
     }, null);
 
-    const avgTaskSuccessFromLastTest = lastTest?.success_rate || null;
+    const dateFromLastTest: Date | void = lastTest?.date || null;
 
-    const dateFromLastTest = lastTest?.date || null;
+    const avgTaskSuccessFromLastTest = getAvgSuccessFromLastTests(
+      dateFromLastTest,
+      uxTests
+    );
 
     const tasks = projectDoc.tasks as Task[];
 
@@ -412,5 +408,71 @@ async function getAggregatedProjectMetrics(
         .project({ _id: 0 })
         .exec()
     )[0]
+  );
+}
+
+function getAvgSuccessFromLastTests(
+  lastTestDate: Date | void,
+  uxTests: Partial<UxTest>[]
+) {
+  const lastTests = uxTests.filter(
+    (test) =>
+      test.date &&
+      lastTestDate instanceof Date &&
+      test.date.getTime() === lastTestDate.getTime()
+  );
+
+  const lastTestsByType = lastTests.reduce((acc, test) => {
+    if (!test.test_type) {
+      return acc;
+    }
+
+    if (!(test.test_type in acc)) {
+      acc[test.test_type] = [];
+    }
+
+    acc[test.test_type].push(test);
+
+    return acc;
+  }, {} as { [key: string]: Partial<UxTest>[] });
+
+  const testTypes = Object.keys(lastTestsByType);
+
+  // If there are no tests, return null
+  if (testTypes.length === 0) {
+    return null;
+  }
+
+  // If there are validation tests, take these as the "latest test"
+  if (lastTestsByType['Validation']) {
+    return (
+      lastTestsByType['Validation']
+        .map((test) => test.success_rate)
+        .reduce((total, success_rate) => total + success_rate, 0) /
+      lastTestsByType['Validation'].length
+    );
+  }
+
+  // Otherwise use baseline tests
+  if (lastTestsByType['Baseline']) {
+    return (
+      lastTestsByType['Baseline']
+        .map((test) => test.success_rate)
+        .reduce((total, success_rate) => total + success_rate, 0) /
+      lastTestsByType['Baseline'].length
+    );
+  }
+
+  // If no validation or baseline tests, use whatever we have
+  const allTests = testTypes.reduce(
+    (acc, key) => acc.concat(lastTestsByType[key]),
+    [] as Partial<UxTest>[]
+  );
+
+  return (
+    allTests
+      .map((test) => test.success_rate)
+      .reduce((total, success_rate) => total + success_rate, 0) /
+    allTests.length
   );
 }

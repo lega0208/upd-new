@@ -27,28 +27,10 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
   avgRankGSCPercentChange$ = this.pageDetailsService.avgRankPercentChange$;
 
   topGSCSearchTerms$ = this.pageDetailsService.top25GSCSearchTerms$;
-  // topGSCSearchTermsCols = [
-  //   { field: 'term', header: 'Search terms' },
-  //   { field: 'clicks', header: 'Clicks', pipe: 'number' },
-  //   { field: 'change', header: 'Comparison', pipe: 'percent' },
-  //   { field: 'impressions', header: 'Impressions', pipe: 'number' },
-  //   { field: 'ctr', header: 'CTR (click through rate)', pipe: 'percent' },
-  //   { field: 'position', header: 'Position' },
-  // ] as ColumnConfig[];
 
   searchTermsCanada$ = this.pageDetailsService.topSearchTermsIncrease$;
-  // searchTermsCanadaCols = [
-  //   { field: 'term', header: 'Search terms' },
-  //   { field: 'clicks', header: 'Clicks' },
-  //   { field: 'change', header: 'Comparison' },
-  // ] as ColumnConfig[];
 
   referrerType$ = this.pageDetailsService.referrerType$;
-  // referrerTypeCols = [
-  //   { field: 'type', header: 'Type' },
-  //   { field: 'value', header: 'Visits', pipe: 'number' },
-  //   { field: 'change', header: 'Comparison' },
-  // ] as ColumnConfig[];
 
   constructor(
     private pageDetailsService: PagesDetailsFacade,
@@ -65,7 +47,7 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
     });
 
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
-      (this.topGSCSearchTermsCols = [
+      this.topGSCSearchTermsCols = [
         {
           field: 'term',
           header: this.i18n.service.translate('search-terms', lang),
@@ -95,33 +77,36 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
           header: this.i18n.service.translate('position', lang),
           pipe: 'number',
         },
-      ]),
-        (this.searchTermsCanadaCols = [
-          {
-            field: 'term',
-            header: this.i18n.service.translate('search-terms', lang),
-          },
-          {
-            field: 'clicks',
-            header: this.i18n.service.translate('clicks', lang),
-          },
-          {
-            field: 'change',
-            header: this.i18n.service.translate('comparison', lang),
-          },
-        ]),
-        (this.referrerTypeCols = [
-          { field: 'type', header: this.i18n.service.translate('type', lang) },
-          {
-            field: 'value',
-            header: this.i18n.service.translate('visits', lang),
-            pipe: 'number',
-          },
-          {
-            field: 'change',
-            header: this.i18n.service.translate('comparison', lang),
-          },
-        ]);
+      ];
+
+      this.searchTermsCanadaCols = [
+        {
+          field: 'term',
+          header: this.i18n.service.translate('search-terms', lang),
+        },
+        {
+          field: 'clicks',
+          header: this.i18n.service.translate('clicks', lang),
+        },
+        {
+          field: 'change',
+          header: this.i18n.service.translate('comparison', lang),
+        },
+      ];
+
+      this.referrerTypeCols = [
+        { field: 'type', header: this.i18n.service.translate('type', lang) },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
+        {
+          field: 'change',
+          header: this.i18n.service.translate('comparison', lang),
+          pipe: 'percent',
+        },
+      ];
     });
   }
 }

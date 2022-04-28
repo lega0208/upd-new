@@ -68,7 +68,7 @@ export class TaskDetailsSearchAnalyticsComponent implements OnInit {
           header: this.i18n.service.translate('position', lang),
           pipe: 'number',
         },
-        { field: '0', header: this.i18n.service.translate('comparison-for-clicks', lang), pipe: 'percent' },
+        // { field: 'percentChange', header: this.i18n.service.translate('comparison-for-clicks', lang), pipe: 'percent' },
       ];
     });
   }

@@ -23,7 +23,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   dyfChart$ = this.taskDetailsService.dyfData$;
   whatWasWrongChart$ = this.taskDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig[] = []; 
+  dyfTableCols: ColumnConfig[] = [];
   whatWasWrongTableCols: ColumnConfig[] = [];
 
   ngOnInit(): void {
@@ -39,32 +39,52 @@ export class TaskDetailsFeedbackComponent implements OnInit {
           field: 'url',
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
+          typeParams: { preLink: `/${this.langLink}/pages`, link: '_id' },
         },
         {
           field: 'dyfYes',
           header: this.i18n.service.translate('yes', lang),
           pipe: 'number',
-          type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id', postLink: 'pagefeedback' },
         },
         {
           field: 'dyfNo',
           header: this.i18n.service.translate('No', lang),
           pipe: 'number',
-          type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id', postLink: 'pagefeedback' },
         },
-        { field: '0', header: this.i18n.service.translate('comparison-for-No-answer', lang), pipe: 'percent' },
-        { field: '0', header: this.i18n.service.translate('% of visitors who left feedback', lang), pipe: 'percent' },
-      ],
-      this.dyfTableCols = [
-        { field: 'name', header: this.i18n.service.translate('Selection', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        // {
+        //   field: '0',
+        //   header: this.i18n.service.translate('comparison-for-No-answer', lang),
+        //   pipe: 'percent',
+        // },
+        // {
+        //   field: '0',
+        //   header: this.i18n.service.translate(
+        //     '% of visitors who left feedback',
+        //     lang
+        //   ),
+        //   pipe: 'percent',
+        // },
       ];
+
+      this.dyfTableCols = [
+        {
+          field: 'name',
+          header: this.i18n.service.translate('Selection', lang),
+        },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
+      ];
+
       this.whatWasWrongTableCols = [
         { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
     });
   }

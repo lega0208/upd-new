@@ -9,8 +9,12 @@ import 'dayjs/esm/locale/fr-ca';
 
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
-import { percentChange, PickByType } from '@cra-arc/utils-common';
+import {
+  OverviewAggregatedData,
+  OverviewData
+} from '@cra-arc/types-common';
+import { percentChange } from '@cra-arc/utils-common';
+import type { PickByType } from '@cra-arc/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
 import { I18nFacade, selectDatePeriodSelection } from '@cra-arc/upd/state';
@@ -72,11 +76,11 @@ export class OverviewFacade {
   );
 
   topPagesVisitedWithPercentChange$ = this.overviewData$.pipe(
-    mapObjectArraysWithPercentChange('topPagesVisited', 'visits')
+    mapObjectArraysWithPercentChange('topPagesVisited', 'visits', 'url')
   );
 
   top10GSC$ = this.overviewData$.pipe(
-    map((data) => data?.dateRangeData?.top10GSC)
+    mapObjectArraysWithPercentChange('top10GSC', 'clicks')
   );
 
   projectsList$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
@@ -348,32 +352,10 @@ export class OverviewFacade {
       const comparisonCalldriversByDay =
         data?.comparisonDateRangeData?.calldriversByDay || [];
 
-      const [startDate, endDate] = data.dateRange
-        .split('/')
-        .map((d) => new Date(d));
-      const [prevStartDate, prevEndDate] = (data.comparisonDateRange || '')
-        .split('/')
-        .map((d) => new Date(d));
-
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
 
-      const diff = dayjs(endDate).diff(dayjs(startDate), 'day');
-
-      let cnt = 0;
-
       const dateRangeSeries = calldriversByDay.map(({ date, calls }, i) => {
-        //   let start = dayjs(startDate).add(i, 'days').utc(false).locale(lang).format(dateFormat);
         const callDate = dayjs(date).utc(false).locale(lang).format(dateFormat);
-
-        //   while (start !== callDate) {
-        //       dateRangeSeries[cnt] = {
-        //         name: start,
-        //         value: 0,
-        //       };
-        //       cnt += 1
-
-        //  start = dayjs(startDate).add(cnt, 'days').utc(false).locale(lang).format(dateFormat);
-        //     }
 
         return {
           name: callDate,
@@ -677,15 +659,18 @@ function mapToPercentChange(
 
 function mapObjectArraysWithPercentChange(
   propName: keyof OverviewAggregatedData,
-  propPath: string
+  propPath: string,
+  sortPath?: string
 ) {
   return map((data: OverviewData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
       return;
     }
 
-    const current = data?.dateRangeData[propName];
-    const previous = data?.comparisonDateRangeData[propName];
+    const current = [...((data?.dateRangeData?.[propName] || []) as any[])];
+    const previous = [
+      ...((data?.comparisonDateRangeData?.[propName] || []) as any[]),
+    ];
 
     if (!current || !previous) {
       return;
@@ -699,6 +684,21 @@ function mapObjectArraysWithPercentChange(
       current.length === previous.length;
 
     if (propsAreValidArrays) {
+      const sortBy = (a: any, b: any) => {
+        if (sortPath && a[sortPath] instanceof Date) {
+          return a[sortPath] - b[sortPath];
+        }
+
+        if (sortPath && typeof a[sortPath] === 'string') {
+          return a[sortPath].localeCompare(b[sortPath]);
+        }
+
+        return 0;
+      };
+
+      current.sort(sortBy);
+      previous.sort(sortBy);
+
       return current.map((val: any, i) => ({
         ...val,
         percentChange: percentChange(
