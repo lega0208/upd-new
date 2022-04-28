@@ -1,7 +1,7 @@
 import { BubbleChartMultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { combineLatest, map, tap } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 
 import * as ProjectsDetailsActions from './projects-details.actions';
 import { ProjectsDetailsState } from './projects-details.reducer';
@@ -13,10 +13,10 @@ import {
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { FR_CA } from '@cra-arc/upd/i18n';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import 'dayjs/locale/en-ca';
-import 'dayjs/locale/fr-ca';
+import dayjs from 'dayjs/esm';
+import utc from 'dayjs/esm/plugin/utc';
+import 'dayjs/esm/locale/en-ca';
+import 'dayjs/esm/locale/fr-ca';
 
 dayjs.extend(utc);
 
@@ -262,8 +262,7 @@ export class ProjectsDetailsFacade {
           };
         })
         .filter((taskValues) => !!taskValues) as BubbleChartMultiSeries;
-    }),
-    tap((data) => console.log(data))
+    })
   );
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}

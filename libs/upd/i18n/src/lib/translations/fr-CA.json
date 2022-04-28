@@ -1,5 +1,5 @@
 {
-  "app.title": "Tableau de bord de la convivialité et du rendement",
+  "app.title": "Tableau de bord des performances de convivialité",
   "language.english": "English",
   "language.french": "French",
   "opposite.language": "English",
@@ -8,7 +8,7 @@
   "menu-tasks": "Tâches",
   "menu-projects": "Projets",
   "menu-feedback": "Rétroaction",
-  "feedback-mailto": "mailto:DUAADCG@cra-arc.gc.ca?subject=Commentaires pour Tableau de bord de la convivialité et du rendement&body=",
+  "feedback-mailto": "mailto:DUAADCG@cra-arc.gc.ca?subject=Commentaires pour Tableau de bord des performances de convivialité&body=",
   "menu-collapsemenu": "Réduire le menu",
   "menu-expandmenu": "Agrandir le menu",
   "tab-summary": "Résumé",
@@ -453,7 +453,7 @@
   "---END-TASKS---": "--------------------------END TASK TRANSLATION------------------------------------",
   "---TASKS-TOPICS---": "---------------TASK TOPICS and SUB TOPICS (categories and sub-categories------------------",
   "Benefits": "Prestations",
-  "Business": "Entreprises", 
+  "Business": "Entreprises",
   "Business Number": "Numéro d'entreprise",
   "Taxes": "Impôts",
   "Charities and Giving": "Organismes de bienfaisance et dons",
@@ -475,7 +475,7 @@
   "Register an entity or representative": "Inscrire une entité ou un représentant",
   "Understand my tax obligations": "Comprendre mes obligations fiscales",
   "Understanding my entitlements (benefits and credits)": "Comprendre mes droits de recevoir (prestations et crédits)",
-  "Feedback for UPD (Usability Performance Dashboard)": "Rétroaction pour le tableau de bord du rendement en matière de convivialité",
+  "Feedback for UPD (Usability Performance Dashboard)": "Rétroaction pour le Tableau de bord des performances de convivialité",
   "Claim": "Demande",
   "File": "Dossier",
   "Report": "Rapport"

@@ -87,8 +87,8 @@ export class OverviewFacade {
       const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
       const projects = data?.projects?.projects.map((d) => ({
         ...d,
-        startDate: dayjs(d.startDate)
-          .utc(false)
+        startDate: dayjs
+          .utc(d.startDate)
           .locale(lang)
           .format(dateFormat),
       }));
@@ -284,11 +284,11 @@ export class OverviewFacade {
           dayCount += prevMonthDays;
         }
 
-        prevStartDate = dayjs(prevStartDate)
-          .utc(false)
+        prevStartDate = dayjs
+          .utc(prevStartDate)
           .add(1, 'month')
           .toDate();
-        startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
+        startDate = dayjs.utc(startDate).add(1, 'month').toDate();
       }
 
       let visitsByDayData: MultiSeries = [];
@@ -298,8 +298,8 @@ export class OverviewFacade {
           {
             name: dateRangeLabel,
             series: dateRangeSeries.map(({ value }, i) => ({
-              name: dayjs(dateRangeDates[i])
-                .utc(false)
+              name: dayjs
+                .utc(dateRangeDates[i])
                 .locale(lang)
                 .format(dateFormat),
               value: value || 0,
@@ -314,8 +314,8 @@ export class OverviewFacade {
           visitsByDayData.push({
             name: comparisonDateRangeLabel,
             series: comparisonDateRangeSeries.map(({ value }, i) => ({
-              name: dayjs(dateRangeDates[i])
-                .utc(false)
+              name: dayjs
+                .utc(dateRangeDates[i])
                 .locale(lang)
                 .format(dateFormat),
               value: value || 0,
@@ -331,7 +331,7 @@ export class OverviewFacade {
           }
 
           return {
-            name: dayjs(date).utc(false).locale(lang).format(dateFormat),
+            name: dayjs.utc(date).locale(lang).format(dateFormat),
             series,
           };
         });
@@ -360,14 +360,14 @@ export class OverviewFacade {
         .split('/')
         .map((d) => new Date(d));
 
-      let queryDate = dayjs(startDate).utc(false);
-      const end = dayjs(endDate).utc(false);
+      let queryDate = dayjs.utc(startDate);
+      const end = dayjs.utc(endDate);
       const queries: { day: string; date: string }[] = [];
 
       while (queryDate.isSameOrBefore(end)) {
         queries.push({
-          day: dayjs(queryDate).utc(false).format('dddd'),
-          date: dayjs(queryDate).utc(false).format('YYYY-MM-DD'),
+          day: dayjs.utc(queryDate).format('dddd'),
+          date: dayjs.utc(queryDate).format('YYYY-MM-DD'),
         });
         queryDate = queryDate.add(1, 'day');
       }
@@ -376,7 +376,7 @@ export class OverviewFacade {
       let cnt = 0;
 
       const dateRangeSeries = calldriversByDay.map(({ date, calls }, i) => {
-        const callDate = dayjs(date).utc(false).locale(lang).format(dateFormat);
+        const callDate = dayjs.utc(date).locale(lang).format(dateFormat);
 
 
         return {
@@ -421,8 +421,8 @@ export class OverviewFacade {
       const comparisonDateRangeSeries = comparisonCalldriversByDay.map(
         ({ calls }, i) => {
           return {
-            name: dayjs(comparisonCallDrivers[i]?.date)
-              .utc(false)
+            name: dayjs
+              .utc(comparisonCallDrivers[i]?.date)
               .locale(lang)
               .format(dateFormat),
             value: calls,
@@ -533,18 +533,18 @@ export class OverviewFacade {
           dayCount += prevMonthDays;
         }
 
-        prevStartDate = dayjs(prevStartDate)
-          .utc(false)
+        prevStartDate = dayjs
+          .utc(prevStartDate)
           .add(1, 'month')
           .toDate();
-        startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
+        startDate = dayjs.utc(startDate).add(1, 'month').toDate();
       }
 
       const dateRangeDates = dateRangeSeries.map(({ date }) => date);
 
       const visitsByDayData = dateRangeDates.map((date, i) => {
         return {
-          name: dayjs(date).utc(false).locale(lang).format(dateFormat),
+          name: dayjs.utc(date).locale(lang).format(dateFormat),
           currValue: dateRangeSeries[i]?.visits || 0,
           prevValue: comparisonDateRangeSeries[i]?.visits || 0,
         };
@@ -641,12 +641,12 @@ export class OverviewFacade {
 const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-  const formattedStartDate = dayjs(startDate)
-    .utc(false)
+  const formattedStartDate = dayjs
+    .utc(startDate)
     .locale(lang)
     .format('MMM D');
-  const formattedEndDate = dayjs(endDate)
-    .utc(false)
+  const formattedEndDate = dayjs
+    .utc(endDate)
     .locale(lang)
     .format('MMM D');
 
@@ -654,7 +654,7 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
 };
 
 const getMonthlyDays = (date: Date) => {
-  return dayjs(date).utc(false).daysInMonth();
+  return dayjs.utc(date).daysInMonth();
 };
 
 type DateRangeDataIndexKey = keyof OverviewAggregatedData &
