@@ -3,7 +3,10 @@
     <div class="container-fluid p-0">
       <div class="row row-no-gutters">
         <div class="col">
-          <p class="w-100">{{'task-not-tested' | translate }}</p>
+          <p class="w-100" *ngIf="project; else elseBlock2">{{'tasks-not-tested' | translate }}</p>
+          <ng-template #elseBlock2>
+            <p class="w-100">{{'task-not-tested' | translate }}</p>
+          </ng-template>
         </div>
       </div>
     </div>

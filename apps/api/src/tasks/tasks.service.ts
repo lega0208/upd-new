@@ -170,7 +170,7 @@ export class TasksService {
         taskTpcId
       ),
       taskSuccessByUxTest: [],
-      avgTaskSuccessFromLastTest: 1, // todo: better handle N/A
+      avgTaskSuccessFromLastTest: 0, // todo: better handle N/A
       dateFromLastTest: new Date(),
     };
 

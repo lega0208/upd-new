@@ -1,11 +1,12 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-xl-3 col-lg-4 col-12">
-      <app-data-card
-        [current$]="avgTaskSuccessFromLastTest$"
-        [pipe]="'percent'"
-        [title]="'Latest success rate'"
-      ></app-data-card>
+      <app-data-kpi-card
+        [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
+        [date]="(dateFromLastTest$ | async) || ''"
+        [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
+        [title]="'Average task success from last UX test'"
+      ></app-data-kpi-card>
     </div>
 
     <div class="col-xl-3 col-lg-4 col-12">

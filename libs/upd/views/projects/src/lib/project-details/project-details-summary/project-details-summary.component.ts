@@ -19,7 +19,8 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
   dateFromLastTest$ = this.projectsDetailsService.dateFromLastTest$;
-
+  taskSuccessByUxTest$ = this.projectsDetailsService.taskSuccessByUxTest$;
+  
   visits$ = this.projectsDetailsService.visits$;
 
   participantTasks$ = this.projectsDetailsService.projectTasks$;
