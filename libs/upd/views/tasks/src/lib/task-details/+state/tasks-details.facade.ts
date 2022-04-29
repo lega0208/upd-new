@@ -50,7 +50,7 @@ export class TasksDetailsFacade {
   ]).pipe(
     map(
       ([data, lang]) =>
-        this.i18n.service.translate(data.title, lang) || data.title
+        data.title ? this.i18n.service.translate(data.title, lang) : data.title
     )
   );
 
@@ -310,7 +310,7 @@ export class TasksDetailsFacade {
       const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
       const taskSuccessByUxTest = data?.taskSuccessByUxTest?.map((d) => ({
         ...d,
-        date: dayjs(d.date).utc(false).locale(lang).format(dateFormat),
+        date: dayjs.utc(d.date).locale(lang).format(dateFormat),
       }));
       return [...(taskSuccessByUxTest || [])];
       //data?.taskSuccessByUxTest)

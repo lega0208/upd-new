@@ -4,16 +4,22 @@ import { LocaleId } from './i18n.types';
 import { registerLocaleData } from '@angular/common';
 import localeEnCa from '@angular/common/locales/en-CA';
 import localeFrCa from '@angular/common/locales/fr-CA';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class I18nService {
-  constructor(private readonly translateService: TranslateService) { }
+  constructor(private readonly translateService: TranslateService) {}
 
   get currentLang() {
     return this.translateService.currentLang;
+  }
+
+  async get(key: string | string[], interpolateParams?: object) {
+    return firstValueFrom<string | Record<string, string>>(
+      this.translateService.get(key, interpolateParams)
+    );
   }
 
   setupI18n() {
@@ -38,9 +44,9 @@ export class I18nService {
     console.log('Setting lang to: ', lang);
     return this.translateService.use(lang);
   }
-  
+
   translate(key: string, lang: LocaleId, interpolateParams?: object): string {
-    this.translateService.use(lang)
+    this.translateService.use(lang);
     return this.translateService.instant(key, interpolateParams);
   }
 

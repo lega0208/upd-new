@@ -18,22 +18,9 @@ export class OverviewFeedbackComponent {
   currentLang$ = this.i18n.currentLang$;
 
   taskSurvey = taskSurvey;
-  // taskSurveyCols: ColumnConfig[] = [
-  //   { field: 'task', header: 'Task' },
-  //   { field: 'completion', header: 'Task Success Survey Completed' },
-  // ];
 
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
-
-  // dyfTableCols: ColumnConfig[] = [
-  //   { field: 'name', header: 'Selection' },
-  //   { field: 'value', header: 'Visits', pipe: 'number' },
-  // ]
-  // whatWasWrongTableCols: ColumnConfig[] = [
-  //   { field: 'name', header: 'What was wrong' },
-  //   { field: 'value', header: 'Visits', pipe: 'number' },
-  // ]
 
   dyfTableCols: ColumnConfig[] = [];
   whatWasWrongTableCols: ColumnConfig[] = [];

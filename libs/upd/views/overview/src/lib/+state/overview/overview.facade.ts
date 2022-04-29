@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { combineLatest, debounceTime, map } from 'rxjs';
+import { combineLatest, debounceTime, map, mergeMap, of, tap } from 'rxjs';
 
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
@@ -82,16 +82,51 @@ export class OverviewFacade {
     mapObjectArraysWithPercentChange('top10GSC', 'clicks')
   );
 
-  projectsList$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => {
+  projects$ = this.overviewData$.pipe(
+    map((data) => data?.projects?.projects || [])
+  );
+  testTypeTranslations$ = combineLatest([this.projects$, this.currentLang$]).pipe(
+    mergeMap(([projects]) => {
+      const splitTestTypes = projects.flatMap((project) => project.testType);
+      console.log(splitTestTypes);
+
+      const testTypes = [...new Set<string>(splitTestTypes)];
+
+      console.log(testTypes);
+
+      return testTypes.length > 0 ? this.i18n.service.get(testTypes) : of({});
+    })
+  );
+
+  projectsList$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+    this.testTypeTranslations$,
+  ]).pipe(
+    map(([data, lang, testTypeTranslations]) => {
       const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
-      const projects = data?.projects?.projects.map((d) => ({
-        ...d,
-        startDate: dayjs
-          .utc(d.startDate)
-          .locale(lang)
-          .format(dateFormat),
-      }));
+      console.log(testTypeTranslations);
+
+      const projects = data?.projects?.projects.map((data) => {
+        const testType = (data.testType || []).map((testType: string) => {
+          return (
+            (testTypeTranslations as Record<string, string>)[testType] ||
+            testType
+          );
+        });
+
+        return {
+          ...data,
+          title: data.title
+            ? this.i18n.service.translate(data.title.replace(/\s+/g, ' '), lang)
+            : '',
+          testType: testType.sort().join(', '),
+          startDate: data.startDate
+            ? dayjs.utc(data.startDate).locale(lang).format(dateFormat)
+            : '',
+        };
+      });
+
       return [...(projects || [])];
     })
   );
@@ -284,10 +319,7 @@ export class OverviewFacade {
           dayCount += prevMonthDays;
         }
 
-        prevStartDate = dayjs
-          .utc(prevStartDate)
-          .add(1, 'month')
-          .toDate();
+        prevStartDate = dayjs.utc(prevStartDate).add(1, 'month').toDate();
         startDate = dayjs.utc(startDate).add(1, 'month').toDate();
       }
 
@@ -377,7 +409,6 @@ export class OverviewFacade {
 
       const dateRangeSeries = calldriversByDay.map(({ date, calls }, i) => {
         const callDate = dayjs.utc(date).locale(lang).format(dateFormat);
-
 
         return {
           name: callDate,
@@ -533,10 +564,7 @@ export class OverviewFacade {
           dayCount += prevMonthDays;
         }
 
-        prevStartDate = dayjs
-          .utc(prevStartDate)
-          .add(1, 'month')
-          .toDate();
+        prevStartDate = dayjs.utc(prevStartDate).add(1, 'month').toDate();
         startDate = dayjs.utc(startDate).add(1, 'month').toDate();
       }
 
@@ -641,14 +669,8 @@ export class OverviewFacade {
 const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-  const formattedStartDate = dayjs
-    .utc(startDate)
-    .locale(lang)
-    .format('MMM D');
-  const formattedEndDate = dayjs
-    .utc(endDate)
-    .locale(lang)
-    .format('MMM D');
+  const formattedStartDate = dayjs.utc(startDate).locale(lang).format('MMM D');
+  const formattedEndDate = dayjs.utc(endDate).locale(lang).format('MMM D');
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };

@@ -9,15 +9,6 @@ import { combineLatest } from 'rxjs';
   templateUrl: './overview.component.html',
 })
 export class OverviewComponent implements OnInit {
-  // navTabs: { href: string; title: string }[] = [
-  //   { href: 'summary', title: 'Summary' },
-  //   { href: 'webtraffic', title: 'Web Traffic' },
-  //   { href: 'searchanalytics', title: 'Search Analytics' },
-  //   { href: 'pagefeedback', title: 'Page Feedback' },
-  //   { href: 'calldrivers', title: 'Call drivers' },
-  //   { href: 'uxtests', title: 'UX tests' },
-  // ];
-
   navTabs: { href: string; title: string }[] = []
 
   currentLang$ = this.i18n.currentLang$;
@@ -36,7 +27,7 @@ export class OverviewComponent implements OnInit {
         { href: 'webtraffic', title: this.i18n.service.translate('tab-webtraffic', lang) },
         { href: 'searchanalytics', title: this.i18n.service.translate('tab-searchanalytics', lang) },
         { href: 'pagefeedback', title: this.i18n.service.translate('tab-pagefeedback', lang) },
-        { href: 'calldrivers', title: this.i18n.service.translate('tab-calldrivers', lang) },
+        // { href: 'calldrivers', title: this.i18n.service.translate('tab-calldrivers', lang) },
         { href: 'uxtests', title: this.i18n.service.translate('tab-uxtests', lang) },
       ];
     });

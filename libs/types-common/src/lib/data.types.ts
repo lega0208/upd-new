@@ -131,7 +131,7 @@ export interface OverviewUxData {
 }
 
 export interface OverviewData extends ViewData<OverviewAggregatedData> {
-  projects?: ProjectsHomeData;
+  projects?: ProjectsHomeData & { testType?: Record<number, string> };
 }
 
 export interface TasksHomeAggregatedData {
@@ -188,6 +188,7 @@ export type ProjectStatus =
   | 'Unknown';
 
 export interface ProjectsHomeProject {
+  testType: any;
   _id: string;
   title: string;
   cops: boolean;

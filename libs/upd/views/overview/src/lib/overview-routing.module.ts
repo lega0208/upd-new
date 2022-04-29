@@ -19,7 +19,7 @@ const routes: Routes = [
       { path: 'webtraffic', component: OverviewWebtrafficComponent },
       { path: 'searchanalytics', component: OverviewSearchAnalyticsComponent },
       { path: 'pagefeedback', component: OverviewFeedbackComponent },
-      { path: 'calldrivers', component: OverviewCalldriversComponent },
+      // { path: 'calldrivers', component: OverviewCalldriversComponent },
       { path: 'uxtests', component: OverviewUxTestsComponent },
     ],
   },
