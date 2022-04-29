@@ -13,6 +13,7 @@ export class DataKpiCardComponent {
   @Input() numUxTests = 0;
   @Input() title = '';
   @Input() tooltip = '';
+  @Input() project = false;
 
   constructor(public i18n: I18nService) {}
 }

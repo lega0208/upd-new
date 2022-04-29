@@ -7,6 +7,7 @@
         [date]="(dateFromLastTest$ | async) || ''"
         [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
         [title]="'Average task success from last UX test'"
+        [project]="true"
       ></app-data-kpi-card>
     </div>
 
