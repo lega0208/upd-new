@@ -4,7 +4,7 @@ import {
   TaskDetailsData,
 } from '@cra-arc/types-common';
 import { select, Store } from '@ngrx/store';
-import { combineLatest, debounceTime, map, reduce } from 'rxjs';
+import { combineLatest, debounceTime, map, reduce, tap } from 'rxjs';
 
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
@@ -31,8 +31,7 @@ export class TasksDetailsFacade {
     select(TasksDetailsSelectors.selectTasksDetailsLoaded)
   );
   loading$ = this.store.pipe(
-    select(TasksDetailsSelectors.selectTasksDetailsLoading),
-    debounceTime(500)
+    select(TasksDetailsSelectors.selectTasksDetailsLoading)
   );
   tasksDetailsData$ = this.store.pipe(
     select(TasksDetailsSelectors.selectTasksDetailsData)
@@ -41,7 +40,7 @@ export class TasksDetailsFacade {
   currentLang$ = this.i18n.currentLang$;
   title$ = this.tasksDetailsData$.pipe(
     map((data) => data.title),
-    debounceTime(500)
+    debounceTime(250)
   );
 
   titleHeader$ = combineLatest([

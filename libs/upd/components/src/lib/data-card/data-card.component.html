@@ -1,5 +1,5 @@
 <app-card [card-title]="title" [title-tooltip]="tooltip" [h]="100">
-  <ng-container *ngIf="(current$ | async) === 0; else elseBlock">
+  <ng-container *ngIf="(current$ | async) === null || (current$ | async) === undefined; else elseBlock">
     <div class="container-fluid p-0">
       <div class="row row-no-gutters">
         <div class="col">

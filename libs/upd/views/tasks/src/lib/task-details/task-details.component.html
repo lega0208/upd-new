@@ -1,10 +1,10 @@
 <div class="back_link">
-  <span class="material-icons align-top">west</span> 
+  <span class="material-icons align-top">west</span>
   <a [routerLink]="['/', langLink, 'tasks']" [translate]="'menu-tasks'"></a>
 </div>
 
 <app-loading-spinner
-  *ngIf="(loading$ | async) && (title$ | async) !== ''; else elseBlock"
+  *ngIf="(loading$ | async); else elseBlock"
 ></app-loading-spinner>
 
 <ng-template #elseBlock>

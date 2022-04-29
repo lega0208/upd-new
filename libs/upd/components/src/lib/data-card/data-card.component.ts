@@ -6,7 +6,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { formatNumber, formatPercent } from '@angular/common';
-import { combineLatest, map, of } from 'rxjs';
+import { combineLatest, map, Observable, of } from 'rxjs';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { EN_CA } from '@cra-arc/upd/i18n';
 
@@ -65,10 +65,10 @@ export class DataCardComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['current$']) {
+    if (changes['current$'] && changes['current$'].currentValue) {
       this.currentFormatted$ = combineLatest([
         this.currentLang$,
-        this.current$,
+        changes['current$'].currentValue as Observable<number>,
       ]).pipe(
         map(([lang, current]) => {
           if (this.pipe === 'percent') {
