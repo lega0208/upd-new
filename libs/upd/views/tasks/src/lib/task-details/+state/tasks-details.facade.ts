@@ -310,10 +310,11 @@ export class TasksDetailsFacade {
       const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
       const taskSuccessByUxTest = data?.taskSuccessByUxTest?.map((d) => ({
         ...d,
+        title: d.title ? this.i18n.service.translate(d.title, lang) : d.title,
+        test_type: d.test_type ? this.i18n.service.translate(d.test_type, lang) : d.test_type,
         date: dayjs.utc(d.date).locale(lang).format(dateFormat),
       }));
       return [...(taskSuccessByUxTest || [])];
-      //data?.taskSuccessByUxTest)
     })
   );
 
@@ -383,6 +384,7 @@ function mapObjectArraysWithPercentChange(
   propPath: string,
   sortPath?: string
 ) {
+
   return map((data: TaskDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
       return;
@@ -429,6 +431,6 @@ function mapObjectArraysWithPercentChange(
       }));
     }
 
-    throw Error('Invalid data arrays in mapObjectArraysWithPercentChange');
+    return [];
   });
 }

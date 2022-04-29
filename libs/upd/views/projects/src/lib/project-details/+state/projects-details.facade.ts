@@ -192,10 +192,10 @@ export class ProjectsDetailsFacade {
         return {
           ...uxTest,
           date: dayjs.utc(uxTest.date).locale(lang).format(dateFormat),
-          test_type: this.i18n.service.translate(uxTest.test_type || '', lang),
+          test_type: uxTest.test_type ? this.i18n.service.translate(uxTest.test_type, lang) : uxTest.test_type,
           tasks: uxTest.tasks
             .split('; ')
-            .map((task) => this.i18n.service.translate(task, lang) || task)
+            .map((task) => task ? this.i18n.service.translate(task, lang) : task)
             .join('; '),
         };
       });
@@ -248,7 +248,7 @@ export class ProjectsDetailsFacade {
           const i18nTasks = tasks
             .split('; ')
             .map((task) => {
-              return this.i18n.service.translate(task, lang) || task;
+              return task ? this.i18n.service.translate(task, lang) : task;
             })
             .join('; ');
 
@@ -257,7 +257,7 @@ export class ProjectsDetailsFacade {
           }
 
           return {
-            name: `${i18nTasks} – ${i18nTestType}`,
+            name: i18nTasks ? `${i18nTasks} – ${i18nTestType}` : `${i18nTestType} ${i + 1}`,
             series,
           };
         })

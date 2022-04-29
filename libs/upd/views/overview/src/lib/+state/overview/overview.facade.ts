@@ -15,7 +15,7 @@ import { percentChange } from '@cra-arc/utils-common';
 import type { PickByType } from '@cra-arc/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
-import { I18nFacade, selectDatePeriodSelection } from '@cra-arc/upd/state';
+import { I18nFacade, selectDatePeriodSelection, selectUrl } from '@cra-arc/upd/state';
 
 dayjs.extend(utc);
 dayjs.extend(isSameOrBefore);
@@ -30,6 +30,8 @@ export class OverviewFacade {
   );
   dateRangeSelected$ = this.store.pipe(select(selectDatePeriodSelection));
   overviewData$ = this.store.pipe(select(OverviewSelectors.getOverviewData));
+
+  currentRoute$ = this.store.pipe(select(selectUrl));
 
   visitors$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.visitors || 0)

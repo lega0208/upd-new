@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { OverviewFacade } from './+state/overview/overview.facade';
 
 import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
+import { combineLatest, tap } from 'rxjs';
 
 @Component({
   selector: 'app-overview',
@@ -13,6 +13,7 @@ export class OverviewComponent implements OnInit {
 
   currentLang$ = this.i18n.currentLang$;
   loading$ = this.overviewService.loading$;
+  currentRoute$ = this.overviewService.currentRoute$;
 
   constructor(private overviewService: OverviewFacade, private i18n: I18nFacade) {}
 
