@@ -194,7 +194,7 @@ export class TasksService {
       // todo: aggregate projects instead of single test
       const lastUxTest = uxTests.reduce(
         (latestTest, test) => {
-          if (latestTest === null) {
+          if (!latestTest || !latestTest.date) {
             return test;
           }
 
