@@ -188,6 +188,7 @@ export class TasksService {
               test_type: uxTest.test_type,
               success_rate: uxTest.success_rate,
               total_users: uxTest.total_users,
+              scenario: uxTest.scenario,
             }
         )
         .filter((uxTest) => !!uxTest)

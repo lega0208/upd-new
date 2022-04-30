@@ -9,12 +9,12 @@
       ></app-data-card>
     </div>
 
-    <!-- <div class="col-lg-3 col-sm-12">
+    <div class="col-lg-3 col-sm-12">
       <app-data-card
-        [current]="(numCompletedLast6Months$ | async | number) || 0"
-        [title]="'Projects completed (last 6 months)'"
+        [current$]="numPlanning$"
+        [title]="'Projects in planning'"
       ></app-data-card>
-    </div> -->
+    </div>
 
     <div class="col-lg-3 col-sm-12">
       <app-data-card
