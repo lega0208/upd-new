@@ -58,6 +58,23 @@
               [curve]="curve"
               (select)="onSelect($event)"
             >
+            <ng-template #tooltipTemplate let-model="model">
+              <span class="tooltip-label"
+                >{{ model.series }} • {{ model.name }}</span
+              >
+              <span class="tooltip-val">{{
+                model.value.toLocaleString(lang)
+              }}</span>
+            </ng-template>
+            <ng-template #seriesTooltipTemplate let-model="model">
+              {{ model[0].name }}
+              <div *ngFor="let tooltip of model;  let i = index" class="tooltip-item">
+                
+                <span class="tooltip-item-color" [style.background-color]="tooltip.color"></span>
+                {{ tooltip.label }}
+              {{ tooltip.series }}: {{ tooltip.value.toLocaleString(lang) }}
+              </div>
+              </ng-template>
             </combo-grouped-vertical-bar-line-chart>
           </ng-container>
           <ng-template #elseConvertLine2>
@@ -96,20 +113,36 @@
               (select)="onSelect($event)"
             >
               <!-- <ng-template #seriesTooltipTemplate let-model="model">
-
               <div class="area-tooltip-container">
             <div *ngFor="let tooltip of model;  let i = index" class="tooltip-item">
               <span class="tooltip-item-color" [style.background-color]="tooltip.color"></span>
               <ng-container *ngIf="i===1 || i===3; else elseBlock">
-              {{ dayjs(tooltip.name).subtract(3, 'month').format('MMM DD YYYY') }} :
+              {{ dayjs(tooltip.name).subtract(3, 'month').locale(lang).format('MMM DD YYYY') }} :
             </ng-container>
             <ng-template #elseBlock>
-              {{ dayjs(tooltip.name).format('MMM DD YYYY') }} :
+              {{ dayjs(tooltip.name).locale(lang).format('MMM DD YYYY') }} :
             </ng-template>
               {{tooltip.value.toLocaleString(lang)}}
           </div>
           </div>
             </ng-template> -->
+            <ng-template #tooltipTemplate let-model="model">
+              <span class="tooltip-label"
+                >{{ model.series }} • {{ model.name }}</span
+              >
+              <span class="tooltip-val">{{
+                model.value.toLocaleString(lang)
+              }}</span>
+            </ng-template>
+            <ng-template #seriesTooltipTemplate let-model="model">
+              {{ model[0].name }}
+              <div *ngFor="let tooltip of model;  let i = index" class="tooltip-item">
+                
+                <span class="tooltip-item-color" [style.background-color]="tooltip.color"></span>
+                {{ tooltip.label }}
+              {{ tooltip.series }}: {{ tooltip.value.toLocaleString(lang) }}
+              </div>
+              </ng-template>
             </ngx-charts-line-chart>
           </ng-template>
         </ng-container>
@@ -148,7 +181,25 @@
             [maxYAxisTickLength]="maxYAxisTickLength"
             [yAxisTickFormatting]="yAxisTickFormat"
             (select)="onSelect($event)"
-          ></ngx-charts-line-chart>
+          >
+          <ng-template #tooltipTemplate let-model="model">
+            <span class="tooltip-label"
+              >{{ model.series }} • {{ model.name }}</span
+            >
+            <span class="tooltip-val">{{
+              model.value.toLocaleString(lang)
+            }}</span>
+          </ng-template>
+          <ng-template #seriesTooltipTemplate let-model="model">
+            {{ model[0].name }}
+            <div *ngFor="let tooltip of model;  let i = index" class="tooltip-item">
+              
+              <span class="tooltip-item-color" [style.background-color]="tooltip.color"></span>
+              {{ tooltip.label }}
+            {{ tooltip.series }}: {{ tooltip.value.toLocaleString(lang) }}
+            </div>
+            </ng-template>
+        </ngx-charts-line-chart>
         </ng-container>
 
         <ng-container *ngIf="type === 'bar'">
@@ -185,7 +236,7 @@
             <ng-template #tooltipTemplate let-model="model">
               <span class="tooltip-label">{{ model.label }}</span>
               <span class="tooltip-val">{{
-                model.value.toLocaleString()
+                model.value.toLocaleString(lang)
               }}</span>
             </ng-template>
           </ngx-charts-bar-vertical>
@@ -230,7 +281,7 @@
                   >{{ model.series }} • {{ model.label }}</span
                 >
                 <span class="tooltip-val">{{
-                  model.value.toLocaleString()
+                  model.value.toLocaleString(lang)
                 }}</span>
               </ng-template>
             </ngx-charts-bar-vertical-2d>
@@ -270,7 +321,25 @@
               [maxYAxisTickLength]="maxYAxisTickLength"
               [yAxisTickFormatting]="yAxisTickFormat"
               (select)="onSelect($event)"
-            ></ngx-charts-line-chart>
+            >
+            <ng-template #tooltipTemplate let-model="model">
+              <span class="tooltip-label"
+                >{{ model.series }} • {{ model.name }}</span
+              >
+              <span class="tooltip-val">{{
+                model.value.toLocaleString(lang)
+              }}</span>
+            </ng-template>
+            <ng-template #seriesTooltipTemplate let-model="model">
+              {{ model[0].name }}
+              <div *ngFor="let tooltip of model;  let i = index" class="tooltip-item">
+                
+                <span class="tooltip-item-color" [style.background-color]="tooltip.color"></span>
+                {{ tooltip.label }}
+              {{ tooltip.series }}: {{ tooltip.value.toLocaleString(lang) }}
+              </div>
+              </ng-template>
+          </ngx-charts-line-chart>
           </ng-template>
         </ng-container>
 
@@ -339,7 +408,7 @@
             <ng-template #tooltipTemplate let-model="model">
               <span class="tooltip-label">{{ model.label }}</span>
               <span class="tooltip-val"
-                >{{ (model.value * 100).toFixed(0) }}%</span
+                >{{ (model.value * 100).toLocaleString(lang, {maximumFractionDigits:0}) }}%</span
               >
             </ng-template>
           </ngx-charts-bar-horizontal>
@@ -373,6 +442,14 @@
             [xAxisTickFormatting]="xAxisTickFormat"
             (select)="onSelect($event)"
           >
+          <ng-template #tooltipTemplate let-model="model">
+            <span class="tooltip-label"
+              >{{ model.series }} • {{ model.name }}</span
+            >
+            <span class="tooltip-val">{{
+              model.value.toLocaleString(lang)
+            }}</span>
+          </ng-template>
           </ngx-charts-bar-horizontal>
         </ng-container>
         <ng-container
@@ -393,7 +470,16 @@
             [tooltipDisabled]="tooltipDisabled"
             [tooltipText]="pieTooltipText"
             (select)="onSelect($event)"
-          ></ngx-charts-pie-chart>
+          >
+          <ng-template #tooltipTemplate let-model="model">
+            <span class="tooltip-label"
+              >{{ model.name }}</span
+            >
+            <span class="tooltip-val">{{
+              model.value.toLocaleString(lang)
+            }}</span>
+          </ng-template>
+        </ngx-charts-pie-chart>
         </ng-container>
 
         <ng-container *ngIf="type === 'bubble'">
@@ -421,14 +507,12 @@
             [yAxisTickFormatting]="yAxisPercentTickFormat"
             (select)="onSelect($event)"
           >
-            <ng-template #tooltipTemplate let-model="model">
-              <span class="tooltip-label"
-                >{{ model.series }}: {{ model.name }}</span
-              >
-              <span class="tooltip-val"
-                >{{ (model.value * 100).toFixed(0) }}%</span
-              >
-            </ng-template>
+          <ng-template #tooltipTemplate let-model="model">
+            <span class="tooltip-label">{{ model.series }}: {{ model.name }}</span>
+            <span class="tooltip-val"
+              >{{ (model.value * 100).toLocaleString(lang, {maximumFractionDigits:0}) }}%</span
+            >
+          </ng-template>
           </ngx-charts-bubble-chart>
         </ng-container>
 

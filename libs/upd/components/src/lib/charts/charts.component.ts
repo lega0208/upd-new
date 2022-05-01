@@ -8,7 +8,6 @@ import {
   SingleSeries,
   MultiSeries,
 } from '@amonsour/ngx-charts';
-import dayjs from 'dayjs';
 import { CurveFactory } from 'd3-shape';
 import localeData from 'dayjs/plugin/localeData';
 import { curves, Curves, ChartTypes } from './types';
@@ -16,6 +15,10 @@ import { ColumnConfig } from '../data-table-styles/types';
 import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { Observable, of } from 'rxjs';
 import { I18nFacade } from '@cra-arc/upd/state';
+import dayjs from 'dayjs/esm';
+import utc from 'dayjs/esm/plugin/utc';
+import 'dayjs/esm/locale/en-ca';
+import 'dayjs/esm/locale/fr-ca';
 
 @Component({
   selector: 'app-charts',
@@ -24,14 +27,15 @@ import { I18nFacade } from '@cra-arc/upd/state';
 })
 export class ChartsComponent implements OnInit {
   view?: [number, number];
-  @Input() lang!: LocaleId;
+  lang = 'en';
+  langLink = 'en';
   @Input() convertToLine = false;
 
   dayjs = dayjs;
 
   @Input() title = '';
   @Input() titleTooltip = '';
-  @Input() currentLang$: Observable<LocaleId> = of(EN_CA);
+  @Input() currentLang$ = this.i18n.currentLang$;
   @Input() animations = true;
   @Input() type: ChartTypes = 'pie';
   @Input() width = 1020;
@@ -153,8 +157,12 @@ export class ChartsComponent implements OnInit {
       this.applyDimensions();
     }
 
-    this.currentLang$.subscribe((nextLang) => {
-      this.lang = nextLang;
+    this.i18n.service.onLangChange(({ lang }) => {
+      this.lang = lang as LocaleId;
+    });
+
+    this.currentLang$.subscribe((lang) => {
+      this.lang = lang === EN_CA ? 'en' : 'fr';
     });
 
     if (this.isPercent && this.type === 'horizontal-bar') {
@@ -249,19 +257,35 @@ export class ChartsComponent implements OnInit {
   }
 
   yLeftTickFormat(data: number) {
-    return (data / 1000).toLocaleString(this.lang);
+    return (data / 1000);
   }
 
   yRightTickFormat(data: number) {
-    return (data / 1000).toLocaleString(this.lang);
+    return (data / 1000);
   }
 
   xAxisTickFormat(data: number) {
-    return (data / 1000).toLocaleString(this.lang);
+    return (data / 1000);
   }
 
   xAxisPercentTickFormat(data: number) {
     return `${data * 100}%`;
+  }
+
+  yLeftTickFormatFR(data: number) {
+    return (data / 1000).toLocaleString('fr-CA');
+  }
+
+  yRightTickFormatFR(data: number) {
+    return (data / 1000).toLocaleString('fr-CA');
+  }
+
+  xAxisTickFormatFR(data: number) {
+    return (data / 1000).toLocaleString('fr-CA');
+  }
+
+  xAxisPercentTickFormatFR(data: number) {
+    return `${data * 100} %`;
   }
 
   yAxisTickFormat(data: number) {
@@ -270,6 +294,10 @@ export class ChartsComponent implements OnInit {
 
   yAxisPercentTickFormat(data: number) {
     return `${data * 100}%`;
+  }
+
+  yAxisPercentTickFormatFR(data: number) {
+    return `${data * 100} %`;
   }
 
   getGaugeMin() {
