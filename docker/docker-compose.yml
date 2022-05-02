@@ -39,7 +39,7 @@ services:
     ports:
       - "9001"
     depends_on:
-      - db
+      - mongodb
   mongodb:
     image: mongo:4.4
     container_name: upd_mongo

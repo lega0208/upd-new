@@ -11,7 +11,7 @@
     "db-updater": "nx serve db-updater",
     "deploy": "git pull && npm i && npm run build && cd docker && docker-compose build && docker-compose up -d",
     "test": "nx test",
-    "analyze-upd-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json",
+    "analyze-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json",
     "data-integrity": "nx serve data-integrity-runner"
   },
   "private": true,
