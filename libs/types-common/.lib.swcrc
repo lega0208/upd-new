@@ -20,6 +20,7 @@
     "noInterop": true
   },
   "exclude": [
+    "jest.config.js",
     "./src/**/.*.spec.ts$",
     "./**/.*.spec.ts$",
     "./src/**/jest-setup.ts$",

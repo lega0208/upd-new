@@ -1,6 +1,6 @@
 module.exports = {
-  displayName: 'db-updater',
-  preset: '../../jest.preset.js',
+  displayName: 'data-integrity',
+
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.spec.json',
@@ -11,5 +11,6 @@ module.exports = {
     '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/apps/db-updater',
+  coverageDirectory: '../../coverage/libs/data-integrity',
+  preset: '../../jest.preset.ts',
 };

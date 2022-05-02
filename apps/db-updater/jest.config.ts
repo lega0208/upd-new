@@ -1,6 +1,6 @@
 module.exports = {
-  displayName: 'api',
-  preset: '../../jest.preset.js',
+  displayName: 'db-updater',
+
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.spec.json',
@@ -11,5 +11,6 @@ module.exports = {
     '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/apps/api',
+  coverageDirectory: '../../coverage/apps/db-updater',
+  preset: '../../jest.preset.ts',
 };

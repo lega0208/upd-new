@@ -43,7 +43,7 @@
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/apps/data-integrity-runner"],
       "options": {
-        "jestConfig": "apps/data-integrity-runner/jest.config.js",
+        "jestConfig": "apps/data-integrity-runner/jest.config.ts",
         "passWithNoTests": true
       }
     }

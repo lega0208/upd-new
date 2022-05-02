@@ -5,9 +5,7 @@
   "targets": {
     "build": {
       "executor": "@nrwl/node:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/external-data",
         "tsConfig": "libs/external-data/tsconfig.lib.json",
@@ -27,7 +25,7 @@
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/libs/external-data"],
       "options": {
-        "jestConfig": "libs/external-data/jest.config.js",
+        "jestConfig": "libs/external-data/jest.config.ts",
         "passWithNoTests": true
       }
     },

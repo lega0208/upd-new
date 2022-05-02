@@ -24,7 +24,7 @@
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/libs/upd/views/tasks"],
       "options": {
-        "jestConfig": "libs/upd/views/tasks/jest.config.js",
+        "jestConfig": "libs/upd/views/tasks/jest.config.ts",
         "passWithNoTests": true
       }
     },

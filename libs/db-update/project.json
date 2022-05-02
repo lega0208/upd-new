@@ -5,9 +5,7 @@
   "targets": {
     "build": {
       "executor": "@nrwl/node:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/db-update",
         "tsConfig": "libs/db-update/tsconfig.lib.json",
@@ -27,7 +25,7 @@
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/libs/db-update"],
       "options": {
-        "jestConfig": "libs/db-update/jest.config.js",
+        "jestConfig": "libs/db-update/jest.config.ts",
         "passWithNoTests": true
       }
     },

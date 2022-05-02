@@ -1,7 +1,8 @@
 {
-  "name": "$name$",
-  "version": "$version$",
+  "name": "db-updater",
+  "version": "0.0.1",
   "dependencies": {
-    $END$
-  }
+    "mongoose": "^6.2.10"
+  },
+  "main": "main.js"
 }

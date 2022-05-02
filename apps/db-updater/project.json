@@ -15,6 +15,15 @@
       "configurations": {
         "production": {
           "optimization": true,
+          "externalDependencies": [
+            "@nestjs/microservices",
+            "@nestjs/websockets/socket-module",
+            "@nestjs/microservices/microservices-module",
+            "class-transformer",
+            "class-validator",
+            "cache-manager",
+            "mongoose"
+          ],
           "extractLicenses": false,
           "inspect": false,
           "fileReplacements": [
@@ -22,8 +31,7 @@
               "replace": "apps/db-updater/src/environments/environment.ts",
               "with": "apps/db-updater/src/environments/environment.prod.ts"
             }
-          ],
-          "generatePackageJson": true
+          ]
         }
       }
     },
@@ -44,7 +52,7 @@
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/apps/db-updater"],
       "options": {
-        "jestConfig": "apps/db-updater/jest.config.js",
+        "jestConfig": "apps/db-updater/jest.config.ts",
         "passWithNoTests": true
       }
     },
