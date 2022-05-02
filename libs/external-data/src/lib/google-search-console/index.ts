@@ -132,10 +132,14 @@ export class SearchAnalyticsClient {
   }
 
   async getPageMetrics(
-    dateRange: DateRange,
+    dateRange: DateRange | Date,
     options?: SearchAnalyticsPageQueryOptions
   ) {
-    const dates = datesFromDateRange(dateRange);
+    const dates =
+      dateRange instanceof Date
+        ? [dayjs.utc(dateRange).format('YYYY-MM-DD')]
+        : datesFromDateRange(dateRange);
+
     const promises = [];
 
     for (const date of dates) {

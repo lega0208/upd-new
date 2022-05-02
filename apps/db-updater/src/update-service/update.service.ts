@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   updateOverallMetrics,
@@ -10,11 +10,14 @@ import {
 } from '@cra-arc/db-update';
 import { withRetry } from '@cra-arc/external-data';
 import { environment } from '../environments/environment';
+import { DataIntegrityService } from '@cra-arc/data-integrity';
 
 @Injectable()
 export class UpdateService {
   private readonly logger = new Logger(UpdateService.name);
   private isRunning = false;
+
+  constructor(private dataIntegrityService: DataIntegrityService) {}
 
   @Cron(
     environment.production
@@ -65,6 +68,10 @@ export class UpdateService {
       await addRefsToPageMetrics().catch((err) =>
         this.logger.error('Error adding refs to Page metrics', err)
       )
+
+      this.logger.log('Finding and filling missing data...');
+      await this.dataIntegrityService.fillMissingGscPageMetrics();
+      await this.dataIntegrityService.fillMissingGscOverallMetrics();
     } catch (error) {
       this.logger.error(error);
     }

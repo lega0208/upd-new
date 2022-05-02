@@ -75,6 +75,38 @@ export class DataIntegrityService {
     await this.dbUpdateService.upsertPageMetrics(metrics);
   }
 
+  async findMissingGscPageMetrics() {
+    const missingDays = (
+      await this.pageMetricsModel
+        .find({
+          url: 'www.canada.ca/en/revenue-agency/services/e-services/represent-a-client.html',
+          gsc_total_impressions: { $exists: false },
+        })
+        .exec()
+    ).map(({ date }) => date);
+
+    if (missingDays.length === 0) {
+      console.log('Found no days in pages_metrics missing gsc data.');
+    } else {
+      console.log(
+        'Found the following days in pages_metrics missing gsc data:'
+      );
+      console.log(missingDays);
+    }
+
+    return missingDays;
+  }
+
+  async fillMissingGscPageMetrics() {
+    console.log(
+      'Finding and filling missing gsc data in pages_metrics...'
+    );
+
+    const dates = await this.findMissingGscPageMetrics();
+
+    return await this.dbUpdateService.upsertGscPageMetrics(dates);
+  }
+
   async findMissingGscOverallMetrics() {
     const missingDays = (
       await this.overallModel
@@ -94,7 +126,9 @@ export class DataIntegrityService {
     if (missingDays.length === 0) {
       console.log('Found no days in overall_metrics missing gsc data.');
     } else {
-      console.log('Found the following days in overall_metrics missing gsc data:');
+      console.log(
+        'Found the following days in overall_metrics missing gsc data:'
+      );
       console.log(missingDays);
     }
 
@@ -102,7 +136,9 @@ export class DataIntegrityService {
   }
 
   async fillMissingGscOverallMetrics() {
-    console.log('Finding and filling any missing gsc data in overall_metrics...');
+    console.log(
+      'Finding and filling any missing gsc data in overall_metrics...'
+    );
 
     const dates = await this.findMissingGscOverallMetrics();
 

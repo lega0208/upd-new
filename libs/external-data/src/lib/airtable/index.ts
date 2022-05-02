@@ -6,7 +6,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { FieldSet, Query } from 'airtable';
 import { QueryParams, SortParameter } from 'airtable/lib/query_params';
 
-import { wait } from '@cra-arc/utils-common';
+import { squishTrim, wait } from '@cra-arc/utils-common';
 import { getATClient, AirTableAPI } from './client';
 import { bases } from './base';
 import {
@@ -90,11 +90,11 @@ export class AirtableClient {
 
     return (await this.selectAll(query)).map(({ id, fields }) => ({
       airtable_id: id,
-      title: fields['Task'],
-      group: fields['Group'],
-      subgroup: fields['Sub-Group'],
-      topic: fields['Topic'],
-      subtopic: fields['Sub Topic'],
+      title: squishTrim(fields['Task']),
+      group: squishTrim(fields['Group']),
+      subgroup: squishTrim(fields['Sub-Group']),
+      topic: squishTrim(fields['Topic']),
+      subtopic: squishTrim(fields['Sub Topic']),
       ux_tests: fields['User Testing Projects'],
       user_type: fields['User Type'],
       pages: fields['Pages 2'],
@@ -118,11 +118,11 @@ export class AirtableClient {
       date: fields['Date']
         ? dayjs.utc(fields['Date']).toDate()
         : fields['Date'],
-      title: fields['UX Research Project Title'].trim(),
+      title: squishTrim(fields['UX Research Project Title']),
       success_rate: fields['Success Rate'],
-      test_type: fields['Test Type'],
+      test_type: squishTrim(fields['Test Type']),
       session_type: Array.isArray(fields['Session Type'])
-        ? fields['Session Type'][0]
+        ? squishTrim(fields['Session Type'][0])
         : undefined,
       scenario: fields['Scenario/Questions'],
       tasks: fields['Task'],
@@ -138,7 +138,7 @@ export class AirtableClient {
       audience: fields['Audience'],
       project_lead: fields['Project Lead'],
       launch_date: fields['Launch Date'],
-      status: fields['Status'],
+      status: squishTrim(fields['Status']),
       cops: fields['COPS'],
     })) as UxTestData[];
   }

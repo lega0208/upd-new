@@ -98,4 +98,30 @@ export class DbUpdateService {
 
     return this.overallModel.bulkWrite(bulkInsertOps);
   }
+
+  async upsertGscPageMetrics(dates: Date[]) {
+    const bulkInsertOps = [];
+
+    const results = (
+      await Promise.all(
+        dates.map((date) => this.gscClient.getPageMetrics(date))
+      )
+    ).flat(2);
+
+    for (const result of results) {
+      bulkInsertOps.push({
+        updateOne: {
+          filter: {
+            url: result.url,
+            date: result.date,
+          },
+          update: {
+            $set: result,
+          },
+        },
+      });
+    }
+
+    return this.pageMetricsModel.bulkWrite(bulkInsertOps, { ordered: false });
+  }
 }

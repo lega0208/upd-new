@@ -6,6 +6,6 @@ import { DataIntegrityService } from './data-integrity.service';
 @Module({
   imports: [DbModule, DbUpdateModule],
   providers: [DataIntegrityService, DbUpdateService],
-  exports: [DataIntegrityService, DbModule, DbUpdateService],
+  exports: [DataIntegrityService, DbModule, DbUpdateModule, DbUpdateService],
 })
 export class DataIntegrityModule {}

@@ -12,9 +12,11 @@ async function bootstrap() {
 
   console.log(`Running data integrity checks...`);
 
-  const results = await dataIntegrityService.fillMissingGscOverallMetrics();
+  const gscPageResults = await dataIntegrityService.fillMissingGscPageMetrics();
+  const gscOverallResults = await dataIntegrityService.fillMissingGscOverallMetrics();
 
-  console.log(results);
+  console.log(gscPageResults);
+  console.log(gscOverallResults);
 
   await app.close();
 }

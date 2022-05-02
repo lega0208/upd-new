@@ -3,6 +3,11 @@ export function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Removes double-spaces and trims the string
+export function squishTrim(str: string | void) {
+  return typeof str === 'string' ? str.replace(/\s+/g, ' ').trim() : str;
+}
+
 // Used for measuring function execution time
 //  -credit: https://leefreeman.xyz/2020/05/08/typescript-decorators/
 export function LogTiming(message = '') {

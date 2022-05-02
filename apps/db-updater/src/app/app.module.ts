@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 
+import {
+  DataIntegrityModule,
+  DataIntegrityService,
+} from '@cra-arc/data-integrity';
 import { UpdateService } from '../update-service/update.service';
-import { DataIntegrityModule } from '@cra-arc/data-integrity';
 
 @Module({
   imports: [ScheduleModule.forRoot(), DataIntegrityModule],
-  providers: [UpdateService],
+  providers: [UpdateService, DataIntegrityService],
 })
 export class AppModule {}
