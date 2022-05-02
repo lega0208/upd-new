@@ -155,6 +155,11 @@ export class ProjectsService {
                 $cond: [{ $eq: ['$_id', 'Complete'] }, '$count', 0],
               },
             },
+            numPlanning: {
+              $sum: {
+                $cond: [{ $eq: ['$_id', 'Planning'] }, '$count', 0],
+              },
+            },
             numDelayed: {
               $sum: {
                 $cond: [{ $eq: ['$_id', 'Delayed'] }, '$count', 0],
@@ -164,6 +169,7 @@ export class ProjectsService {
           .project({
             _id: 0,
             numInProgress: 1,
+            numPlanning: 1,
             numCompletedLast6Months: 1,
             totalCompleted: 1,
             numDelayed: 1,

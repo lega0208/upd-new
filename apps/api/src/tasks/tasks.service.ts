@@ -180,39 +180,43 @@ export class TasksService {
 
     if (uxTests && uxTests.length !== 0) {
       returnData.taskSuccessByUxTest = uxTests
-        .map((uxTest) => (
-          typeof uxTest === 'object' && {
-            title: uxTest.title,
-            date: uxTest.date,
-            test_type: uxTest.test_type,
-            success_rate: uxTest.success_rate,
-            total_users: uxTest.total_users,
-          }
-        ))
-        .filter((uxTest) => !!uxTest);
+        .map(
+          (uxTest) =>
+            typeof uxTest === 'object' && {
+              title: uxTest.title,
+              date: uxTest.date,
+              test_type: uxTest.test_type,
+              success_rate: uxTest.success_rate,
+              total_users: uxTest.total_users,
+              scenario: uxTest.scenario,
+            }
+        )
+        .filter((uxTest) => !!uxTest)
+        .sort((a, b) => {
+          if (a.date < b.date) return 1;
+          if (a.date > b.date) return -1;
+          return 0;
+        });
 
       // todo: aggregate projects instead of single test
-      const lastUxTest = uxTests.reduce(
-        (latestTest, test) => {
-          if (!latestTest || !latestTest.date) {
-            return test;
-          }
+      const lastUxTest = uxTests.reduce((latestTest, test) => {
+        if (!latestTest || !latestTest.date) {
+          return test;
+        }
 
-          if (test.date > latestTest.date) {
-            return test;
-          }
+        if (test.date > latestTest.date) {
+          return test;
+        }
 
-          if (
-            test.date.getTime() === latestTest.date.getTime() &&
-            test.success_rate > latestTest.success_rate
-          ) {
-            return test;
-          }
+        if (
+          test.date.getTime() === latestTest.date.getTime() &&
+          test.success_rate > latestTest.success_rate
+        ) {
+          return test;
+        }
 
-          return latestTest;
-        },
-        null
-      );
+        return latestTest;
+      }, null);
 
       returnData.avgTaskSuccessFromLastTest =
         typeof lastUxTest === 'object' ? lastUxTest['success_rate'] : null;

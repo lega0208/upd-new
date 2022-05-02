@@ -1,6 +1,6 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-    <div class="col-xl-4 col-lg-5 col-12">
+    <div class="col-lg-6 col-sm-12">
       <app-data-kpi-card
         [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
         [date]="(dateFromLastTest$ | async) || ''"
@@ -9,7 +9,7 @@
       ></app-data-kpi-card>
     </div>
 
-    <div class="col-xl-4 col-lg-5 col-12">
+    <div class="col-lg-6 col-sm-12">
       <app-data-card
         [current$]="totalParticipants$"
         [title]="'Total participants from all tests'"

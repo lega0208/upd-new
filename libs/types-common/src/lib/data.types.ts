@@ -200,6 +200,7 @@ export interface ProjectsHomeProject {
 
 export interface ProjectsHomeData {
   numInProgress: number;
+  numPlanning: number;
   numCompletedLast6Months: number;
   totalCompleted: number;
   numDelayed: number;

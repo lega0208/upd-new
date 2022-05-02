@@ -19,6 +19,7 @@ export class ProjectsHomeComponent implements OnInit {
   tableData$ = this.projectsHomeService.projectsHomeTableData$;
 
   numInProgress$ = this.projectsHomeService.numInProgress$;
+  numPlanning$ = this.projectsHomeService.numPlanning$;
   numCompletedLast6Months$ = this.projectsHomeService.numCompletedLast6Months$;
   totalCompleted$ = this.projectsHomeService.totalCompleted$;
   numDelayed$ = this.projectsHomeService.numDelayed$;

@@ -50,6 +50,9 @@ export class ProjectsHomeFacade {
   numInProgress$ = this.projectsHomeData$.pipe(
     map((data) => data?.numInProgress)
   );
+  numPlanning$ = this.projectsHomeData$.pipe(
+    map((data) => data?.numPlanning)
+  );
   numCompletedLast6Months$ = this.projectsHomeData$.pipe(
     map((data) => data?.numCompletedLast6Months)
   );
