@@ -21,7 +21,7 @@ export class UpdateService {
 
   @Cron(
     environment.production
-      ? CronExpression.EVERY_DAY_AT_1AM
+      ? CronExpression.EVERY_DAY_AT_10PM
       : CronExpression.EVERY_MINUTE
   )
   async updateDatabase() {

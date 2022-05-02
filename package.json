@@ -7,7 +7,7 @@
     "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2015 browser module main",
     "start": "nx run-many --target=serve --projects=api,upd --parallel=2",
     "dev": "nx run-many --target=serve --projects=api,upd --parallel=2",
-    "build": "nx run-many --target=build --projects=api,upd --parallel --prod",
+    "build": "nx run-many --target=build --projects=api,upd,db-updater --parallel --prod",
     "db-updater": "nx serve db-updater",
     "deploy": "git pull && npm i && npm run build && cd docker && docker-compose build && docker-compose up -d",
     "test": "nx test",
