@@ -34,6 +34,17 @@ services:
         - HTTPS_PROXY=${HTTP_PROXY}
     ports:
       - "9000"
+  db-updater:
+    image: "upd_db-updater"
+    container_name: upd_db-updater
+    restart: unless-stopped
+    build:
+      context: ../
+      dockerfile: docker/performance_db-updater/Dockerfile
+    ports:
+      - "9001"
+    depends_on:
+      - db
   mongodb:
     image: mongo:4.4
     container_name: upd_mongo
