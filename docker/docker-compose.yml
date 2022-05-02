@@ -39,4 +39,4 @@ services:
     container_name: upd_mongo
     restart: unless-stopped
     volumes:
-      - ~/db/data:/data
+      - /datadrive/db/data:/data
