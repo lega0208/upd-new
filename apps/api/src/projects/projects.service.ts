@@ -104,6 +104,7 @@ export class ProjectsService {
 
     const defaultData = {
       numInProgress: 0,
+      numPlanning: 0,
       numCompletedLast6Months: 0,
       totalCompleted: 0,
       numDelayed: 0,
