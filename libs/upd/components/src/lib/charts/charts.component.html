@@ -408,7 +408,7 @@
             <ng-template #tooltipTemplate let-model="model">
               <span class="tooltip-label">{{ model.label }}</span>
               <span class="tooltip-val"
-                >{{ (model.value * 100).toLocaleString(lang, {maximumFractionDigits:0}) }}%</span
+              >{{ model.value | percent:'1.0':lang }}</span
               >
             </ng-template>
           </ngx-charts-bar-horizontal>
@@ -510,7 +510,7 @@
           <ng-template #tooltipTemplate let-model="model">
             <span class="tooltip-label">{{ model.series }}: {{ model.name }}</span>
             <span class="tooltip-val"
-              >{{ (model.value * 100).toLocaleString(lang, {maximumFractionDigits:0}) }}%</span
+              >{{ model.value | percent:'1.0':lang }}</span
             >
           </ng-template>
           </ngx-charts-bubble-chart>

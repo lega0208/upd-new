@@ -15,6 +15,9 @@ import { ColumnConfig } from '../data-table-styles/types';
 import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { Observable, of } from 'rxjs';
 import { I18nFacade } from '@cra-arc/upd/state';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+registerLocaleData(localeFr);
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
@@ -157,10 +160,6 @@ export class ChartsComponent implements OnInit {
       this.applyDimensions();
     }
 
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.lang = lang as LocaleId;
-    });
-
     this.currentLang$.subscribe((lang) => {
       this.lang = lang === EN_CA ? 'en' : 'fr';
     });
@@ -257,35 +256,19 @@ export class ChartsComponent implements OnInit {
   }
 
   yLeftTickFormat(data: number) {
-    return (data / 1000);
+    return (data / 1000).toLocaleString(this.lang);
   }
 
   yRightTickFormat(data: number) {
-    return (data / 1000);
+    return (data / 1000).toLocaleString(this.lang);
   }
 
   xAxisTickFormat(data: number) {
-    return (data / 1000);
+    return (data / 1000).toLocaleString(this.lang);
   }
 
   xAxisPercentTickFormat(data: number) {
-    return `${data * 100}%`;
-  }
-
-  yLeftTickFormatFR(data: number) {
-    return (data / 1000).toLocaleString('fr-CA');
-  }
-
-  yRightTickFormatFR(data: number) {
-    return (data / 1000).toLocaleString('fr-CA');
-  }
-
-  xAxisTickFormatFR(data: number) {
-    return (data / 1000).toLocaleString('fr-CA');
-  }
-
-  xAxisPercentTickFormatFR(data: number) {
-    return `${data * 100} %`;
+    return data * 100;
   }
 
   yAxisTickFormat(data: number) {
@@ -293,11 +276,7 @@ export class ChartsComponent implements OnInit {
   }
 
   yAxisPercentTickFormat(data: number) {
-    return `${data * 100}%`;
-  }
-
-  yAxisPercentTickFormatFR(data: number) {
-    return `${data * 100} %`;
+    return data * 100;
   }
 
   getGaugeMin() {
@@ -309,7 +288,7 @@ export class ChartsComponent implements OnInit {
   }
 
   axisTickFormat(data: number) {
-    return data + '%';
+    return data;
   }
 
   valueFormat(data: number) {
