@@ -11,6 +11,8 @@ COPY dist/apps/db-updater/ .
 
 COPY .env .
 
+COPY keys/ .
+
 EXPOSE 9001
 
 CMD ["pm2-runtime", "main.js"]
