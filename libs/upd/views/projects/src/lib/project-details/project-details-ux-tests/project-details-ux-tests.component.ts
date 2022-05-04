@@ -15,6 +15,7 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
+  baseline = '';
 
   bubbleChart$ = this.projectsDetailsService.bubbleChart$;
 
@@ -23,9 +24,13 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
   dateFromLastTest$ = this.projectsDetailsService.dateFromLastTest$;
   projectTasks$ = this.projectsDetailsService.projectTasks$;
   taskSuccessByUxTest$ = this.projectsDetailsService.taskSuccessByUxTest$;
+  taskSuccessByUxTestKpi$ = this.projectsDetailsService.taskSuccessByUxTestKpi$;
   totalParticipants$ = this.projectsDetailsService.totalParticipants$;
 
-  constructor(private readonly projectsDetailsService: ProjectsDetailsFacade, private i18n: I18nFacade) {}
+  constructor(
+    private readonly projectsDetailsService: ProjectsDetailsFacade,
+    private i18n: I18nFacade
+  ) {}
 
   participantTasksCols: ColumnConfig[] = [];
   taskSuccessRateCols: ColumnConfig[] = [];
@@ -36,39 +41,76 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
-    this.currentLang$.subscribe((lang) => {
-      this.langLink = lang === EN_CA ? 'en' : 'fr';
-      this.participantTasksCols = [
-        {
-          field: 'title',
-          header: this.i18n.service.translate('Task list', lang),
-          type: 'link',
-          typeParams: { preLink: `/${this.langLink}/tasks`, link: '_id' },
+    combineLatest([this.currentLang$, this.taskSuccessByUxTestKpi$]).subscribe(
+      ([lang, kpiData]) => {
+        this.langLink = lang === EN_CA ? 'en' : 'fr';
+        this.participantTasksCols = [
+          {
+            field: 'title',
+            header: this.i18n.service.translate('Task list', lang),
+            type: 'link',
+            typeParams: { preLink: `/${this.langLink}/tasks`, link: '_id' },
+          },
+        ];
+        this.taskSuccessRateCols = [
+          {
+            field: 'tasks',
+            header: this.i18n.service.translate('Task list', lang),
+          },
+          {
+            field: 'test_type',
+            header: this.i18n.service.translate('test-type', lang),
+          },
+          {
+            field: 'date',
+            header: this.i18n.service.translate('date', lang),
+          },
+          {
+            field: 'success_rate',
+            header: this.i18n.service.translate('success-rate', lang),
+            pipe: 'percent',
+          },
+        ];
+
+        this.successRateCols = [
+          { field: 'task', header: this.i18n.service.translate('task', lang) },
+        ];
+        if (kpiData.some((d) => d.Baseline >= 0)) {
+          this.successRateCols.push({
+            field: 'Baseline',
+            header: this.i18n.service.translate('Baseline', lang),
+            pipe: 'percent',
+          });
         }
-      ];
-      this.taskSuccessRateCols = [
-        {
-          field: 'tasks',
-          header: this.i18n.service.translate('Task list', lang)
-        },
-        {
-          field: 'test_type',
-          header: this.i18n.service.translate('test-type', lang)
-        },
-        {
-          field: 'date',
-          header: this.i18n.service.translate('date', lang)
-        },
-        {
-          field: 'success_rate',
-          header: this.i18n.service.translate('success-rate', lang),
-          pipe: 'percent',
+        if (kpiData.some((d) => d.Exploratory >= 0)) {
+          this.successRateCols.push({
+            field: 'Exploratory',
+            header: this.i18n.service.translate('Exploratory', lang),
+            pipe: 'percent',
+          });
         }
-      ];
-      this.successRateCols = [
-        { field: 'title', header: this.i18n.service.translate('Task', lang) },
-        { field: 'result', header: this.i18n.service.translate('Baseline', lang), pipe: 'percent' },
-      ];
-    });
+        if (kpiData.some((d) => d['Spot Check'] >= 0)) {
+          this.successRateCols.push({
+            field: 'Spot Check',
+            header: this.i18n.service.translate('Spot Check', lang),
+            pipe: 'percent',
+          });
+        }
+        if (kpiData.some((d) => d.Validation >= 0)) {
+          this.successRateCols.push({
+            field: 'Validation',
+            header: this.i18n.service.translate('Validation', lang),
+            pipe: 'percent',
+          });
+        }
+        if (kpiData.some((d) => d.change >= 0)) {
+          this.successRateCols.push({
+            field: 'change',
+            header: this.i18n.service.translate('comparison', lang),
+            pipe: 'percent',
+          });
+        }
+      }
+    );
   }
 }
