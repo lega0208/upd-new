@@ -18,6 +18,7 @@ export class DataTableCardComponent implements OnInit {
   @Input() cols: ColumnConfig[] = [];
   @Input() searchFields: string[] = [];
   @Input() captionTitle: string = '';
+  @Input() kpi = false;
 
   @Input() title = '';
   @Input() tooltip = '';

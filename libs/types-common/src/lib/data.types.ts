@@ -231,3 +231,12 @@ export interface ProjectsDetailsData
   taskSuccessByUxTest: (Partial<UxTest> & { tasks: string })[];
   tasks: Pick<Task, '_id' | 'title'>[];
 }
+
+export interface TaskKpi {
+  task: string;
+  Baseline: number;
+  Validation: number;
+  Exploratory: number;
+  'Spot Check': number;
+  change: number;
+}
