@@ -1,0 +1,55 @@
+import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
+import { AirtableClient, DateRange, DateType } from '@cra-arc/external-data';
+import { InjectModel } from '@nestjs/mongoose';
+import { CallDriver, CallDriverDocument } from '@cra-arc/db';
+import { Model, Types } from 'mongoose';
+import dayjs from 'dayjs';
+
+@Injectable()
+export class CalldriversService {
+  constructor(
+    @Inject(AirtableClient.name) private airtableClient: AirtableClient,
+    private logger: ConsoleLogger,
+    @InjectModel(CallDriver.name)
+    private calldriverModel: Model<CallDriverDocument>,
+  ) {}
+
+  async updateCalldrivers(endDate?: DateType) {
+    this.logger.log('Updating calldrivers...');
+
+    const latestDataDate =
+      (
+        (await this.calldriverModel
+          .findOne({})
+          .sort({ date: -1 })
+          .lean()) as CallDriver
+      )?.date || '2021-01-01';
+
+    const dateRange = {
+      start: dayjs(latestDataDate).utc(false).add(1, 'day') as DateType,
+      end: (endDate || dayjs().utc(true).subtract(1, 'day')) as DateType,
+    } as DateRange;
+
+    const calldriversData: CallDriver[] = (
+      await this.airtableClient.getCalldrivers(dateRange)
+    ).map(
+      (calldriverData) =>
+        ({
+          _id: new Types.ObjectId(),
+          calls: 0,
+          impact: 0,
+          tpc_id: 999999,
+          ...calldriverData,
+        } as CallDriver)
+    );
+
+    if (calldriversData.length === 0) {
+      this.logger.log('Calldrivers already up-to-date.');
+      return;
+    }
+
+    await this.calldriverModel.insertMany(calldriversData);
+
+    this.logger.log(`Successfully inserted ${calldriversData.length} Calldriver documents.`);
+  }
+}

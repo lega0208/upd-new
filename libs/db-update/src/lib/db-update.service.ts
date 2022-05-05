@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import dayjs from 'dayjs';
@@ -10,9 +10,19 @@ import {
   PageMetrics,
 } from '@cra-arc/types-common';
 import type { PageDocument, PageMetricsModel } from '@cra-arc/types-common';
-import { queryDateFormat, SearchAnalyticsClient } from '@cra-arc/external-data';
+import {
+  DateType,
+  queryDateFormat,
+  SearchAnalyticsClient,
+  withRetry,
+} from '@cra-arc/external-data';
 import { wait } from '@cra-arc/utils-common';
-import { fetchAndMergePageMetrics } from './pages-metrics';
+import { CalldriversService } from './airtable/calldrivers.service';
+import { FeedbackService } from './airtable/feedback.service';
+import { AirtableService } from './airtable/airtable.service';
+import { OverallMetricsService } from './overall-metrics/overall-metrics.service';
+import { PageUpdateService } from './pages/pages.service';
+import { PageMetricsService } from './pages-metrics/page-metrics.service';
 
 dayjs.extend(utc);
 
@@ -21,19 +31,91 @@ export class DbUpdateService {
   constructor(
     @Inject(SearchAnalyticsClient.name)
     private gscClient: SearchAnalyticsClient,
-    @InjectModel(Overall.name) private overallModel: Model<OverallDocument>,
+    private logger: ConsoleLogger,
+    private airtableService: AirtableService,
+    private calldriversService: CalldriversService,
+    private feedbackService: FeedbackService,
+    private overallMetricsService: OverallMetricsService,
+    private pagesService: PageUpdateService,
+    private pageMetricsService: PageMetricsService,
+    @InjectModel(Overall.name)
+    private overallMetricsModel: Model<OverallDocument>,
     @InjectModel(Page.name) private pageModel: Model<PageDocument>,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel
   ) {}
+
+  async updateAll() {
+    this.logger.log('Starting database updates...');
+
+    try {
+      // Make sure not to run updates for the same data sources at
+      //  the same time, or else we'll hit the rate limit
+      await Promise.allSettled([
+        withRetry(
+          this.overallMetricsService.updateOverallMetrics.bind(this.overallMetricsService),
+          4,
+          1000
+        )().catch((err) =>
+          this.logger.error('Error updating overall metrics', err)
+        ),
+        withRetry(this.updateUxData.bind(this), 4, 1000)().catch((err) =>
+          this.logger.error('Error updating UX data', err)
+        ),
+      ]);
+
+      await withRetry(this.updateFeedback.bind(this), 4, 1000)().catch(
+        (err) => this.logger.error('Error updating Feedback data', err)
+      );
+
+      await Promise.allSettled([
+        withRetry(this.calldriversService.updateCalldrivers.bind(this.calldriversService), 4, 1000)().catch(
+          (err) => this.logger.error('Error updating Calldrivers data', err)
+        ),
+        withRetry(this.pagesService.updatePages.bind(this.pagesService), 4, 1000)().catch((err) =>
+          this.logger.error('Error updating Page data', err)
+        ),
+      ]);
+
+      await this.pagesService.consolidateDuplicatePages();
+
+      await withRetry(
+        this.pageMetricsService.updatePageMetrics.bind(this.pageMetricsService),
+        4,
+        1000
+      )().catch((err) =>
+        this.logger.error('Error updating Page Metrics data', err)
+      );
+
+      await this.pageMetricsService.addRefsToPageMetrics();
+
+      this.logger.log('Database updates completed.');
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  async updateUxData() {
+    return this.airtableService.updateUxData();
+  }
+
+  async updateCalldrivers(endDate?: DateType) {
+    return this.calldriversService.updateCalldrivers(endDate);
+  }
+
+  async updateFeedback(endDate?: DateType) {
+    return this.feedbackService.updateFeedbackData(endDate);
+  }
 
   async getSingleDayMetrics(date: string) {
     const dateRange = {
       start: dayjs(date).utc(false).startOf('day').format(queryDateFormat),
       end: dayjs.utc(date).add(1, 'day').format(queryDateFormat),
     };
-    console.log(`Getting metrics for ${dateRange.start} to ${dateRange.end}`);
+    this.logger.log(
+      `Getting metrics for ${dateRange.start} to ${dateRange.end}`
+    );
 
-    return (await fetchAndMergePageMetrics(dateRange)) as PageMetrics[];
+    return (await this.pageMetricsService.fetchAndMergePageMetrics(dateRange)) as PageMetrics[];
   }
 
   async getPageMetrics(dates: string[]): Promise<PageMetrics[]> {
@@ -96,7 +178,7 @@ export class DbUpdateService {
       });
     }
 
-    return this.overallModel.bulkWrite(bulkInsertOps);
+    return this.overallMetricsModel.bulkWrite(bulkInsertOps);
   }
 
   async upsertGscPageMetrics(dates: Date[]) {

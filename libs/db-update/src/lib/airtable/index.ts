@@ -1,5 +1,5 @@
 import { connect, Document, Model, Types } from 'mongoose';
-import { WithObjectId } from '@cra-arc/utils-common'
+import { WithObjectId } from '@cra-arc/utils-common';
 import {
   AirtableClient,
   PageData,
@@ -18,25 +18,12 @@ import {
   getDbConnectionString,
 } from '@cra-arc/db';
 import { assertHasUrl, assertObjectId } from './utils';
+import type { UxApiDataType, UxData, UxApiData } from './types';
 
 export * from './calldrivers';
 export * from './feedback';
 export * from './duplicate-pages';
-
-export type UxApiDataType = TaskData | UxTestData | PageData;
-export interface UxApiData {
-  tasksData: TaskData[];
-  uxTestData: UxTestData[];
-  pageData: PageData[];
-  tasksTopicsMap: Record<string, number[]>;
-}
-export type UxDataType = Task | UxTest | Page | Project;
-export interface UxData {
-  tasks: Task[];
-  uxTests: UxTest[];
-  pages: Page[];
-  projects: Project[];
-}
+export * from './types';
 
 export async function getUxData(): Promise<UxApiData> {
   const client = new AirtableClient();
@@ -230,7 +217,7 @@ export async function getAndPrepareUxData(): Promise<UxData> {
       pages: (task.pages || []).map((pageAirtableId) =>
         airtableIdToObjectIdMaps.pages.get(pageAirtableId)
       ),
-      tpc_ids
+      tpc_ids,
     } as Task;
   });
 
@@ -292,7 +279,7 @@ export async function updateUxData() {
         $unset: {
           lastModified: true,
           lastChecked: true,
-        }
+        },
       },
       upsert: true,
     },

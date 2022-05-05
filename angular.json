@@ -3,8 +3,8 @@
   "projects": {
     "api": "apps/api",
     "data-integrity": "libs/data-integrity",
-    "data-integrity-runner": "apps/data-integrity-runner",
     "db": "libs/db",
+    "db-cli": "apps/db-cli",
     "db-update": "libs/db-update",
     "db-updater": "apps/db-updater",
     "external-data": "libs/external-data",

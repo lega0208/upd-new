@@ -1,14 +1,6 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import {
-  updateOverallMetrics,
-  updateUxData,
-  updateCalldriverData,
-  updatePages,
-  updatePageMetrics,
-  updateFeedbackData, consolidateDuplicatePages, addRefsToPageMetrics
-} from '@cra-arc/db-update';
-import { withRetry } from '@cra-arc/external-data';
+import { DbUpdateService } from '@cra-arc/db-update';
 import { environment } from '../environments/environment';
 import { DataIntegrityService } from '@cra-arc/data-integrity';
 
@@ -17,7 +9,10 @@ export class UpdateService {
   private readonly logger = new Logger(UpdateService.name);
   private isRunning = false;
 
-  constructor(private dataIntegrityService: DataIntegrityService) {}
+  constructor(
+    private dataIntegrityService: DataIntegrityService,
+    private dbUpdateService: DbUpdateService
+  ) {}
 
   @Cron(
     environment.production
@@ -29,49 +24,13 @@ export class UpdateService {
       return;
     }
 
-    this.logger.log('Starting database updates...');
-    this.isRunning = true;
-
     try {
-      // Make sure not to run updates for the same data sources at
-      //  the same time, or else we'll hit the rate limit
-      await Promise.allSettled([
-        withRetry(updateOverallMetrics, 4, 1000)().catch((err) =>
-          this.logger.error('Error updating overall metrics', err)
-        ),
-        withRetry(updateUxData, 4, 1000)().catch((err) =>
-          this.logger.error('Error updating UX data', err)
-        ),
-      ]);
+      this.isRunning = true;
 
-      await withRetry(updateFeedbackData, 4, 1000)().catch((err) =>
-        this.logger.error('Error updating Feedback data', err)
-      );
+      await this.dbUpdateService.updateAll();
 
-      await Promise.allSettled([
-        withRetry(updateCalldriverData, 4, 1000)().catch((err) =>
-          this.logger.error('Error updating Calldrivers data', err)
-        ),
-        withRetry(updatePages, 4, 1000)().catch((err) =>
-          this.logger.error('Error updating Page data', err)
-        ),
-      ]);
-
-      await consolidateDuplicatePages().catch((err) =>
-        this.logger.error('Error consolidating duplicate Pages', err)
-      );
-
-      await withRetry(updatePageMetrics, 4, 1000)().catch((err) =>
-        this.logger.error('Error updating Page metrics data', err)
-      );
-
-      await addRefsToPageMetrics().catch((err) =>
-        this.logger.error('Error adding refs to Page metrics', err)
-      )
-
-      this.logger.log('Finding and filling missing data...');
-      await this.dataIntegrityService.fillMissingGscPageMetrics();
-      await this.dataIntegrityService.fillMissingGscOverallMetrics();
+      await this.dataIntegrityService.fillMissingData();
+      await this.dataIntegrityService.cleanPageUrls();
     } catch (error) {
       this.logger.error(error);
     }

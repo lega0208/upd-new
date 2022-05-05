@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import dayjs from 'dayjs';
@@ -39,7 +39,8 @@ export class DataIntegrityService {
     @InjectModel(Overall.name) private overallModel: Model<OverallDocument>,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
     @InjectModel(Page.name) private pageModel: Model<PageDocument>,
-    private dbUpdateService: DbUpdateService
+    private dbUpdateService: DbUpdateService,
+    private readonly logger: ConsoleLogger,
   ) {}
 
   // todo: implement this
@@ -55,24 +56,28 @@ export class DataIntegrityService {
     return this.pageMetricsModel.deleteMany({ url: { $exists: false } });
   }
 
-  // Figure out what data needs filling and the strategy for filling it
-  async fillMissingData() {
-    // todo: replace with logic to find dates with missing data
-    const bulkInsertOps = [];
+  async findMissingMetrics() {
+    return []; // todo: implement this
+  }
 
-    const datesToFill = [
-      '2020-09-09',
-      '2021-08-12',
-      '2021-09-17',
-      '2021-10-21',
-      '2021-11-09',
-      '2021-11-30',
-      '2021-12-05',
-    ];
-
-    const metrics = await this.dbUpdateService.getPageMetrics(datesToFill);
+  // both AA & GSC
+  async fillMissingMetrics() {
+    const missingDates = await this.findMissingMetrics();
+    const metrics = await this.dbUpdateService.getPageMetrics(missingDates);
 
     await this.dbUpdateService.upsertPageMetrics(metrics);
+  }
+
+  // Can be made a bit more efficient later by checking for what's missing and calling the appropriate method(s)
+  async fillMissingData() {
+    this.logger.log('Finding and filling missing data...');
+    const gscPageResults = await this.fillMissingGscPageMetrics();
+    this.logger.log('Results for GSC pages:', gscPageResults);
+
+    const gscOverallResults = await this.fillMissingGscOverallMetrics();
+    this.logger.log('Results for GSC overall:', gscOverallResults);
+
+    // todo: add more (i.e. AA, GSC search terms, etc.)
   }
 
   async findMissingGscPageMetrics() {
@@ -86,19 +91,19 @@ export class DataIntegrityService {
     ).map(({ date }) => date);
 
     if (missingDays.length === 0) {
-      console.log('Found no days in pages_metrics missing gsc data.');
+      this.logger.log('Found no days in pages_metrics missing gsc data.');
     } else {
-      console.log(
+      this.logger.log(
         'Found the following days in pages_metrics missing gsc data:'
       );
-      console.log(missingDays);
+      this.logger.log(missingDays);
     }
 
     return missingDays;
   }
 
   async fillMissingGscPageMetrics() {
-    console.log(
+    this.logger.log(
       'Finding and filling missing gsc data in pages_metrics...'
     );
 
@@ -124,19 +129,19 @@ export class DataIntegrityService {
     ).map((doc) => doc.date);
 
     if (missingDays.length === 0) {
-      console.log('Found no days in overall_metrics missing gsc data.');
+      this.logger.log('Found no days in overall_metrics missing gsc data.');
     } else {
-      console.log(
+      this.logger.log(
         'Found the following days in overall_metrics missing gsc data:'
       );
-      console.log(missingDays);
+      this.logger.log(missingDays);
     }
 
     return missingDays;
   }
 
   async fillMissingGscOverallMetrics() {
-    console.log(
+    this.logger.log(
       'Finding and filling any missing gsc data in overall_metrics...'
     );
 
@@ -154,25 +159,50 @@ export class DataIntegrityService {
 
     if (outputFilePath) {
       await outputCsv(outputFilePath, maybeInvalidPages as any[]);
-      console.log(`Invalid URLs written to ${outputFilePath}`);
+      this.logger.log(`Invalid URLs written to ${outputFilePath}`);
     } else {
-      console.log('Invalid pages results: ', maybeInvalidPages);
+      this.logger.log('Invalid pages results: ', maybeInvalidPages);
       return maybeInvalidPages;
     }
   }
 
-  async generateMissingDataCsv() {
-    // high-level:
-    // -For each date: (of pages that are present, and also separately for pages from Airtable)
-    //    - For each page:
-    //    -
-    //      - which pages are missing gsc data?
-    //      - which pages are missing AA data?
-    //      - which pages have a page ref
-    //        -is the ref valid?
-    //      - which pages have other AT refs?
-    //        -how many refs are invalid?
+  async cleanPageUrls() {
+    this.logger.log('Cleaning page urls...');
 
+    await this.pageModel.updateMany(
+      { url: /^https/i },
+      [
+        {
+          $set: {
+            url: {
+              $replaceOne: {
+                input: '$url',
+                find: 'https://',
+                replacement: '',
+              }
+            },
+            all_urls: {
+              $map: {
+                input: { $ifNull: ['$all_urls', []] },
+                as: 'url',
+                in: {
+                  $replaceOne: {
+                    input: '$$url',
+                    find: 'https://',
+                    replacement: '',
+                  }
+                }
+              }
+            }
+          },
+        },
+      ]
+    );
+
+    this.logger.log('Finished cleaning page urls.');
+  }
+
+  async generateMissingDataCsv() {
     const years = [2020, 2021, 2022];
 
     for (const year of years) {
