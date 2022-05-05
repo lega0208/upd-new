@@ -27,7 +27,7 @@ export class DbChecksCommand implements CommandRunner {
 
 @Command({
   name: 'run',
-  arguments: '<task>',
+  arguments: '[task]',
   subCommands: [DbChecksCommand, UpdateCommand],
   description: 'Run database scripts',
   options: {

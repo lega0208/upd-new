@@ -16,6 +16,16 @@
         "production": {
           "optimization": true,
           "extractLicenses": false,
+          "generatePackageJson": true,
+          "externalDependencies": [
+            "@nestjs/microservices",
+            "@nestjs/websockets/socket-module",
+            "@nestjs/microservices/microservices-module",
+            "class-transformer",
+            "class-validator",
+            "cache-manager",
+            "mongoose"
+          ],
           "inspect": false,
           "fileReplacements": [
             {

@@ -7,7 +7,6 @@ import {
   Question,
 } from 'nest-commander';
 import { DbUpdateService } from '@cra-arc/db-update';
-import { ConsoleLogger } from '@nestjs/common';
 import { DataIntegrityService } from '@cra-arc/data-integrity';
 
 @QuestionSet({ name: 'update' })
@@ -27,6 +26,9 @@ export class UpdateQuestions {
 @SubCommand({
   name: 'update',
   description: 'Update the database',
+  options: {
+    isDefault: true,
+  }
 })
 export class UpdateCommand implements CommandRunner {
   constructor(
