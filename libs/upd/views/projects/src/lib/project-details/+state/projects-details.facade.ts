@@ -9,6 +9,7 @@ import * as ProjectsDetailsSelectors from './projects-details.selectors';
 import {
   ProjectDetailsAggregatedData,
   ProjectsDetailsData,
+  TaskKpi,
 } from '@cra-arc/types-common';
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import { I18nFacade } from '@cra-arc/upd/state';
@@ -36,7 +37,9 @@ export class ProjectsDetailsFacade {
 
   currentLang$ = this.i18n.currentLang$;
 
-  title$ = this.projectsDetailsData$.pipe(map((data) => data?.title.replace(/\s+/g, ' ')));
+  title$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.title.replace(/\s+/g, ' '))
+  );
   status$ = this.projectsDetailsData$.pipe(map((data) => data?.status));
 
   avgTaskSuccessFromLastTest$ = this.projectsDetailsData$.pipe(
@@ -192,13 +195,133 @@ export class ProjectsDetailsFacade {
         return {
           ...uxTest,
           date: dayjs.utc(uxTest.date).locale(lang).format(dateFormat),
-          test_type: uxTest.test_type ? this.i18n.service.translate(uxTest.test_type, lang) : uxTest.test_type,
+          test_type: uxTest.test_type
+            ? this.i18n.service.translate(uxTest.test_type, lang)
+            : uxTest.test_type,
           tasks: uxTest.tasks
             .split('; ')
-            .map((task) => task ? this.i18n.service.translate(task, lang) : task)
+            .map((task) =>
+              task ? this.i18n.service.translate(task, lang) : task
+            )
             .join('; '),
         };
       });
+    })
+  );
+  taskSuccessByUxTestKpi$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const uxTests = data?.taskSuccessByUxTest;
+
+      if (!uxTests) {
+        return [];
+      }
+
+      // get unique tasks from all ux tests and create an array including the avg success rate by task
+      const tasks = uxTests
+        ?.map((uxTest) => uxTest?.tasks?.split('; '))
+        .reduce((acc, val) => acc.concat(val), [])
+        .filter((v, i, a) => a.indexOf(v) === i);
+
+      // create an array of success_rate for each test_type and task combination
+      const taskSuccess = tasks?.map((task, i) => {
+        const successRate = uxTests?.map((uxTest) => {
+          const taskSuccessRate = uxTest?.tasks
+            ?.split('; ')
+            .find((t) => t === task);
+
+          return {
+            successRate: taskSuccessRate ? uxTest?.success_rate : null,
+            date: uxTest?.date,
+            testType: uxTest?.test_type,
+          };
+        });
+        return {
+          task,
+          date: successRate?.map((v) => v.date),
+          success_rate: successRate
+            ?.map((success) => {
+              return {
+                ...success,
+              };
+            })
+            .filter(({ successRate }) => successRate !== null),
+        };
+      });
+
+      const taskSuccessByUxTestKpi = taskSuccess?.map((task) => {
+        const taskSuccessByUxTestKpi = task.success_rate
+          ?.map((success) => {
+            return {
+              test_type: success.testType,
+              success_rate: success.successRate,
+            };
+          })
+          .reduce((acc, val) => acc.concat(val), [] as any[])
+          .reduce((acc, val) => {
+            if (acc[val.test_type]) {
+              acc[val.test_type].success_rate += val.success_rate;
+              acc[val.test_type].count += 1;
+            } else {
+              acc[val.test_type] = {
+                test_type: val.test_type,
+                success_rate: val.success_rate,
+                count: 1,
+              };
+            }
+            return acc;
+          }, {} as any);
+
+        const taskSuccessByUxTestKpiAvg = Object.keys(
+          taskSuccessByUxTestKpi
+        ).map((testType) => {
+          const successRate =
+            taskSuccessByUxTestKpi[testType].success_rate /
+            (taskSuccessByUxTestKpi[testType].count || 1);
+
+          return {
+            // test_type: testType,
+            // avg_success_rate: successRate,
+            [testType]: successRate,
+          };
+        });
+
+        return {
+          task: task.task
+            ? this.i18n.service.translate(task.task, lang)
+            : task.task,
+          ...taskSuccessByUxTestKpiAvg.reduce((a, b) => {
+            return {
+              ...a,
+              ...b,
+            };
+          }, {}),
+        } as TaskKpi;
+      });
+
+      // divide baseline by validation to get the change in success rate
+      const taskSuccessByUxTestKpiChange = taskSuccessByUxTestKpi?.map(
+        (task) => {
+          const validation = task.Validation;
+          const baseline = task.Baseline;
+          const change = validation - baseline;
+          let isChange = false;
+
+          if (change >= 0.2) isChange = true;
+
+          return {
+            ...task,
+            change,
+            isChange,
+          };
+        }
+      );
+
+      console.log(taskSuccessByUxTestKpi);
+
+      return taskSuccessByUxTestKpiChange;
     })
   );
 
@@ -257,7 +380,9 @@ export class ProjectsDetailsFacade {
           }
 
           return {
-            name: i18nTasks ? `${i18nTasks} – ${i18nTestType}` : `${i18nTestType} ${i + 1}`,
+            name: i18nTasks
+              ? `${i18nTasks} – ${i18nTestType}`
+              : `${i18nTestType} ${i + 1}`,
             series,
           };
         })
