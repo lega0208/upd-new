@@ -22,6 +22,8 @@ COPY .env .
 
 COPY keys/ .
 
+COPY keys db-cli/
+
 EXPOSE 9001
 
 CMD ["pm2-runtime", "main.js"]
