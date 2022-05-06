@@ -20,9 +20,9 @@ COPY dist/apps/db-cli/ db-cli/
 
 COPY .env .
 
-COPY keys/ .
+COPY keys keys/
 
-COPY keys db-cli/
+COPY keys db-cli/keys/
 
 EXPOSE 9001
 
