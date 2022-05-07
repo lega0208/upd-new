@@ -194,24 +194,24 @@ describe('AirTable', () => {
 
     console.log(results);
   });
-
-  it('should find a task', async () => {
-    const client = new AirtableClient();
-    const results = await client.findTask('recIDdp2y3RQkzqy7');
-
-    console.log(results);
-  });
-
-  it('should grab all data from the start/end dates and call drivers bases/tables, and parse them into 1 array', async () => {
-    const client = new AirtableClient();
-    const results = await client.getCallDriver({
-      start: '2021-11-30',
-      end: '2021-12-01',
-    });
-
-    console.log(results);
-    console.log(results.length);
-  });
+  //
+  // it('should find a task', async () => {
+  //   const client = new AirtableClient();
+  //   const results = await client.findTask('recIDdp2y3RQkzqy7');
+  //
+  //   console.log(results);
+  // });
+  //
+  // it('should grab all data from the start/end dates and call drivers bases/tables, and parse them into 1 array', async () => {
+  //   const client = new AirtableClient();
+  //   const results = await client.getCallDriver({
+  //     start: '2021-11-30',
+  //     end: '2021-12-01',
+  //   });
+  //
+  //   console.log(results);
+  //   console.log(results.length);
+  // });
 });
 
 describe.skip('rate-limiting', () => {

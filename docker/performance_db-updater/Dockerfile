@@ -22,6 +22,8 @@ COPY .env .
 
 COPY keys keys/
 
+COPY .env db-cli/
+
 COPY keys db-cli/keys/
 
 EXPOSE 9001

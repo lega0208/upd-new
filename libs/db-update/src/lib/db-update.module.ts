@@ -1,4 +1,5 @@
 import { ConsoleLogger, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { DbModule } from '@cra-arc/db';
 import {
   AdobeAnalyticsClient,
@@ -14,7 +15,12 @@ import { PageUpdateService } from './pages/pages.service';
 import { PageMetricsService } from './pages-metrics/page-metrics.service';
 
 @Module({
-  imports: [DbModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    DbModule,
+  ],
   providers: [
     DbUpdateService,
     ConsoleLogger,

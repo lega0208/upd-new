@@ -7,9 +7,15 @@ import {
 } from '@cra-arc/data-integrity';
 import { DbUpdateModule } from '@cra-arc/db-update';
 import { UpdateService } from '../update-service/update.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), DataIntegrityModule, DbUpdateModule],
+  imports: [
+    ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
+    DataIntegrityModule,
+    DbUpdateModule,
+  ],
   providers: [UpdateService, DataIntegrityService, ConsoleLogger],
 })
 export class AppModule {}
