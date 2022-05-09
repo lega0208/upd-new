@@ -32,7 +32,7 @@
       *ngIf="config.type === 'link'"
       [href]="'https://' + data[config.typeParams.link]"
     >
-      {{ data[config.field] }} 
+      {{ data[config.field] }}
     </a>
   </ng-container>
   <ng-container *ngIf="!config.typeParams.external">
@@ -58,6 +58,10 @@
       {{ data[config.field] }}
     </a>
   </ng-container>
+</ng-container>
+
+<ng-container *ngIf="hasPipe && config.type === 'comparison'">
+  <span [ngClass]="comparisonClassMap">{{ numberVal }}</span>
 </ng-container>
 
 <ng-container *ngIf="hasPipe && !hasType">

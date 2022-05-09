@@ -16,7 +16,7 @@
         <app-data-table-card
         [data]="(visitsByPage$ | async) || []"
         [cols]="visitsByPageCols"
-        [sort]="false"
+        [sort]="true"
         [filter]="false"
         [title]="'Visits by page'"
     >

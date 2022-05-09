@@ -15,10 +15,11 @@
       "configurations": {
         "production": {
           "optimization": true,
+          "externalDependencies": "all",
           "extractLicenses": false,
           "generatePackageJson": true,
-          "externalDependencies": "all",
           "inspect": false,
+          "webpackConfig": ["apps/db-cli/webpack.config.js"],
           "fileReplacements": [
             {
               "replace": "apps/db-cli/src/environments/environment.ts",

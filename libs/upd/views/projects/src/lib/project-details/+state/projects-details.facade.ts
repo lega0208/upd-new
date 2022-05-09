@@ -9,7 +9,7 @@ import * as ProjectsDetailsSelectors from './projects-details.selectors';
 import {
   ProjectDetailsAggregatedData,
   ProjectsDetailsData,
-  TaskKpi,
+  TaskKpi, VisitsByPage
 } from '@cra-arc/types-common';
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import { I18nFacade } from '@cra-arc/upd/state';
@@ -77,15 +77,15 @@ export class ProjectsDetailsFacade {
   );
 
   visitsByPageWithPercentChange$ = this.projectsDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'visits', '_id')
+    mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits')
   );
 
   visitsByPageGSCWithPercentChange$ = this.projectsDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'gscTotalClicks', '_id')
+    mapPageMetricsArraysWithPercentChange('visitsByPage', 'gscTotalClicks')
   );
 
   visitsByPageFeedbackWithPercentChange$ = this.projectsDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo', '_id')
+    mapPageMetricsArraysWithPercentChange('visitsByPage', 'dyfNo')
   );
 
   dyfData$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
@@ -440,10 +440,6 @@ function mapObjectArraysWithPercentChange(
       ...((data?.comparisonDateRangeData?.[propName] || []) as any[]),
     ];
 
-    if (!current || !previous) {
-      return;
-    }
-
     const propsAreValidArrays =
       Array.isArray(current) &&
       Array.isArray(previous) &&
@@ -480,5 +476,46 @@ function mapObjectArraysWithPercentChange(
     }
 
     throw Error('Invalid data arrays in mapObjectArraysWithPercentChange');
+  });
+}
+function mapPageMetricsArraysWithPercentChange(
+  propName: keyof ProjectDetailsAggregatedData,
+  propPath: string,
+) {
+  return map((data: ProjectsDetailsData) => {
+    if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
+      return;
+    }
+
+    const current = [...((data?.dateRangeData?.[propName] || []) as any[])];
+    const previous = [
+      ...((data?.comparisonDateRangeData?.[propName] || []) as any[]),
+    ];
+
+    const currentMetricsByPage = current.reduce((metricsByPage, page: VisitsByPage) => {
+      metricsByPage[page._id] = {
+        ...page,
+      };
+
+      return metricsByPage;
+    }, {} as { [pageId: string]: Record<string, number> });
+
+    const previousMetricsByPage = previous.reduce((metricsByPage, page: VisitsByPage) => {
+      metricsByPage[page._id] = {
+        ...page,
+      };
+
+      return metricsByPage;
+    }, {} as { [pageId: string]: Record<string, number> });
+
+    return Object.keys(currentMetricsByPage).map((pageId: string) => {
+      const currentMetrics = currentMetricsByPage[pageId];
+      const previousMetrics = previousMetricsByPage[pageId];
+
+      return {
+        ...currentMetrics,
+        percentChange: previousMetrics ? percentChange(currentMetrics[propPath], previousMetrics[propPath]) : null,
+      }
+    });
   });
 }

@@ -124,13 +124,17 @@ export interface OverviewAggregatedData {
 }
 
 export interface OverviewUxData {
-  numInProgress: number;
-  numCompletedLast6Months: number;
-  totalCompleted: number;
-  numDelayed: number;
+  testsCompletedSince2018: number;
+  tasksTestedSince2018: number;
+  participantsTestedSince2018: number;
+  testsConductedLastFiscal: number;
+  testsConductedLastQuarter: number;
+  copsTestsCompletedSince2018: number;
 }
 
-export interface OverviewData extends ViewData<OverviewAggregatedData> {
+export interface OverviewData
+  extends ViewData<OverviewAggregatedData>,
+    OverviewUxData {
   projects?: ProjectsHomeData & { testType?: Record<number, string> };
 }
 
@@ -207,6 +211,13 @@ export interface ProjectsHomeData {
   projects: ProjectsHomeProject[];
 }
 
+export interface VisitsByPage {
+  _id: string;
+  url: string;
+  title: string;
+  visits: number;
+}
+
 export interface ProjectDetailsAggregatedData {
   visits: number;
   dyfYes: number;
@@ -220,7 +231,7 @@ export interface ProjectDetailsAggregatedData {
   gscTotalCtr: number;
   gscTotalPosition: number;
   gscSearchTerms: GscSearchTermMetrics;
-  visitsByPage: { _id: string; url: string; title: string; visits: number }[];
+  visitsByPage: VisitsByPage[];
 }
 
 export interface ProjectsDetailsData

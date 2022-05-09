@@ -455,6 +455,7 @@ function getAvgSuccessFromLastTests(
     return (
       lastTestsByType['Validation']
         .map((test) => test.success_rate)
+        .filter((successRate) => successRate !== undefined && successRate !== null)
         .reduce((total, success_rate) => total + success_rate, 0) /
       lastTestsByType['Validation'].length
     );
