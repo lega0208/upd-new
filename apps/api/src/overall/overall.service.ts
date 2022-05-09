@@ -1,5 +1,10 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Cache } from 'cache-manager';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import quarterOfYear from 'dayjs/plugin/quarterOfYear';
+import { FilterQuery, Model } from 'mongoose';
 import {
   CallDriver,
   CallDriverDocument,
@@ -13,21 +18,20 @@ import {
   UxTestDocument,
   Feedback,
   FeedbackDocument,
+  PageMetrics,
 } from '@cra-arc/db';
 import type {
   PageMetricsModel,
   ProjectsHomeData,
   ProjectsHomeProject,
+  OverviewAggregatedData,
+  OverviewData,
+  OverviewUxData,
 } from '@cra-arc/types-common';
-import { FilterQuery, Model } from 'mongoose';
 import { ApiParams } from '@cra-arc/upd/services';
-import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
-import { PageMetrics } from '@cra-arc/types-common';
-import { Cache } from 'cache-manager';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
+dayjs.extend(quarterOfYear);
 
 const projectStatusSwitchExpression = {
   $switch: {
@@ -92,6 +96,10 @@ export class OverallService {
       return cachedData;
     }
 
+    const testsSince2018 = await this.uxTestModel.find({
+      date: { $gte: new Date('2018-01-01') },
+    });
+
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -112,6 +120,7 @@ export class OverallService {
         params.comparisonDateRange
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
+      ...await getUxData(testsSince2018),
     } as OverviewData;
 
     await this.cacheManager.set(cacheKey, results);
@@ -588,5 +597,56 @@ async function getOverviewMetrics(
     totalFeedback,
     topPagesVisited,
     top10GSC,
+  };
+}
+
+async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
+  const testsCompleted = uxTests.filter((test) => test.status === 'Complete');
+
+  const testsCompletedSince2018 = testsCompleted.length;
+
+  const copsTestsCompletedSince2018 = testsCompleted.filter(
+    (test) => test.cops
+  ).length;
+
+  const tasksTestedSince2018 = testsCompleted
+    .filter((test) => test.tasks?.length > 0)
+    .map((test) => test.tasks)
+    .flat();
+  const numUniqueTasksTestedSince2018 = new Set(tasksTestedSince2018).size;
+
+  const participantsTestedSince2018 = testsCompleted.reduce(
+    (total, test) => total + (test.total_users || 0),
+    0
+  );
+
+  // todo: make dynamic
+  const lastFiscal = {
+    start: new Date('2021-04-01'),
+    end: new Date('2022-03-31'),
+  };
+  const testsConductedLastFiscal = testsCompleted.filter(
+    (test) => test.date >= lastFiscal.start && test.date <= lastFiscal.end
+  ).length;
+
+  const lastQuarterStart = dayjs
+    .utc()
+    .subtract(1, 'quarter')
+    .startOf('quarter');
+  const lastQuarterEnd = lastQuarterStart.endOf('quarter');
+
+  const testsConductedLastQuarter = testsCompleted.filter(
+    (test) =>
+      test.date >= lastQuarterStart.toDate() &&
+      test.date <= lastQuarterEnd.toDate()
+  ).length;
+
+  return {
+    testsCompletedSince2018,
+    tasksTestedSince2018: numUniqueTasksTestedSince2018,
+    participantsTestedSince2018,
+    testsConductedLastFiscal,
+    testsConductedLastQuarter,
+    copsTestsCompletedSince2018,
   };
 }

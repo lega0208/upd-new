@@ -659,6 +659,25 @@ export class OverviewFacade {
     })
   );
 
+  uxTestsCompleted$ = this.overviewData$.pipe(
+    map((data) => data.testsCompletedSince2018)
+  );
+  uxTasksTested$ = this.overviewData$.pipe(
+    map((data) => data.tasksTestedSince2018)
+  );
+  uxParticipantsTested$ = this.overviewData$.pipe(
+    map((data) => data.participantsTestedSince2018)
+  );
+  uxTestsConductedLastFiscal$ = this.overviewData$.pipe(
+    map((data) => data.testsConductedLastFiscal)
+  );
+  uxTestsConductedLastQuarter$ = this.overviewData$.pipe(
+    map((data) => data.testsConductedLastQuarter)
+  );
+  uxCopsTestsCompleted$ = this.overviewData$.pipe(
+    map((data) => data.copsTestsCompletedSince2018)
+  );
+
   error$ = this.store.pipe(select(OverviewSelectors.getOverviewError));
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}

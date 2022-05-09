@@ -21,6 +21,12 @@ export const initialState: OverviewState = {
   data: {
     dateRange: '',
     comparisonDateRange: '',
+    tasksTestedSince2018: 0,
+    testsConductedLastQuarter: 0,
+    testsConductedLastFiscal: 0,
+    copsTestsCompletedSince2018: 0,
+    participantsTestedSince2018: 0,
+    testsCompletedSince2018: 0,
   },
   loaded: false,
   loading: false,

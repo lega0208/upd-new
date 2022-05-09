@@ -124,13 +124,15 @@ export interface OverviewAggregatedData {
 }
 
 export interface OverviewUxData {
-  numInProgress: number;
-  numCompletedLast6Months: number;
-  totalCompleted: number;
-  numDelayed: number;
+  testsCompletedSince2018: number;
+  tasksTestedSince2018: number;
+  participantsTestedSince2018: number;
+  testsConductedLastFiscal: number;
+  testsConductedLastQuarter: number;
+  copsTestsCompletedSince2018: number;
 }
 
-export interface OverviewData extends ViewData<OverviewAggregatedData> {
+export interface OverviewData extends ViewData<OverviewAggregatedData>, OverviewUxData {
   projects?: ProjectsHomeData & { testType?: Record<number, string> };
 }
 
