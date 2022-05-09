@@ -52,7 +52,7 @@ export class OverviewUxTestsComponent implements OnInit {
         },
         {
           field: 'avgSuccessRate',
-          header: this.i18n.service.translate('Score', lang),
+          header: this.i18n.service.translate('score', lang),
           pipe: 'percent',
         },
         {
