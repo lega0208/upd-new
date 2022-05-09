@@ -148,7 +148,7 @@
   "cops-completed-since2018":	"Tests POC terminés depuis 2018",
   "test": "Test",
   "score": "Résultat",
-  "Recent testing scores by project": "Scores de test récents par projet",
+  "Recent testing scores by project": "Résultats de test récents par projet",
   "pages-home-notification": "Le tableau suivant contient les pages principales par nombre de visites pour la plage de dates sélectionnée",
   "nodata-device-type": "Les données sur le type d'appareil ne sont pas disponibles pour cette plage de dates.",
   "nodata-visits-by-day": "Les données sur les visites ne sont pas disponibles pour cette plage de dates.",
