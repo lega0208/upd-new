@@ -255,23 +255,23 @@ export class ChartsComponent implements OnInit {
     return { min: `${min}`, max: `${max}` };
   }
 
-  yLeftTickFormat(data: number) {
+  yLeftTickFormat = (data: number) => {
     return (data / 1000).toLocaleString(this.lang);
   }
 
-  yRightTickFormat(data: number) {
+  yRightTickFormat = (data: number) => {
     return (data / 1000).toLocaleString(this.lang);
   }
 
-  xAxisTickFormat(data: number) {
+  xAxisTickFormat = (data: number) => {
     return (data / 1000).toLocaleString(this.lang);
   }
-
+  
   xAxisPercentTickFormat(data: number) {
     return data * 100;
   }
 
-  yAxisTickFormat(data: number) {
+  yAxisTickFormat = (data: number) => {
     return (data / 1000).toLocaleString(this.lang);
   }
 
