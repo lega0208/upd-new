@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 import { EN_CA } from '@cra-arc/upd/i18n';
 
@@ -46,6 +45,7 @@ export class ProjectDetailsWebtrafficComponent implements OnInit {
           {
             field: 'percentChange',
             header: this.i18n.service.translate('comparison', lang),
+            type: 'comparison',
             pipe: 'percent',
           }
         ];

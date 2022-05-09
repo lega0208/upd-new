@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ColumnConfig, ColumnConfigPipe } from './types';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { ProjectStatus } from '@cra-arc/types-common';
@@ -13,7 +13,7 @@ registerLocaleData(localeFrCa);
   styleUrls: ['./data-table-styles.component.scss'],
   providers: [PercentPipe, DecimalPipe, DatePipe],
 })
-export class DataTableStylesComponent implements OnInit {
+export class DataTableStylesComponent implements OnInit, OnChanges {
   @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() href: string = '';
   @Input() data: Record<string, number | string> = {};
@@ -25,6 +25,11 @@ export class DataTableStylesComponent implements OnInit {
   hasType = false;
   hasPipe = false;
   currentLang = this.i18n.service.currentLang;
+
+  comparisonClassMap = {
+    'text-danger': this.data[this.config.field] < 0,
+    'text-success': this.data[this.config.field] > 0,
+  };
 
   ngOnInit() {
     this.hasType = !!this.config.type;
@@ -43,6 +48,15 @@ export class DataTableStylesComponent implements OnInit {
       this.isProjectLabel = true;
 
     this.projectLabel = this.data[this.config.field] as ProjectStatus;
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['data']) {
+      this.comparisonClassMap = {
+        'text-danger': this.data[this.config.field] < 0,
+        'text-success': this.data[this.config.field] > 0,
+      };
+    }
   }
 
   configurePipe(data: number, pipe?: ColumnConfigPipe, pipeParam?: string) {
