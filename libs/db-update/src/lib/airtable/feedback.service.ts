@@ -22,7 +22,7 @@ export class FeedbackService {
   async updateFeedbackData(endDate?: DateType) {
     this.logger.log('Updating Feedback data');
 
-    const latestDataDate: Date = await this.feedbackModel
+    const latestDataDate: Date | null = await this.feedbackModel
       .findOne({}, { date: 1 })
       .sort({ date: -1 })
       .transform((doc) => doc?.get('date'));
@@ -52,5 +52,15 @@ export class FeedbackService {
     return await this.feedbackModel
       .insertMany(feedbackData)
       .then(() => this.logger.log('Successfully updated Feedback data'));
+  }
+
+  async repopulateFeedback() {
+    this.logger.log('Repopulating Feedback data... This may take several minutes.');
+
+    await this.feedbackModel.deleteMany({});
+
+    await this.updateFeedbackData();
+
+    this.logger.log('Finished repopulating Feedback data.');
   }
 }

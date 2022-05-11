@@ -9,14 +9,14 @@ import {
 import { DbUpdateService } from '@cra-arc/db-update';
 import { DataIntegrityService } from '@cra-arc/data-integrity';
 
-@QuestionSet({ name: 'update' })
+@QuestionSet({ name: 'repopulate' })
 export class UpdateQuestions {
   @Question({
-    message: 'Perform all updates or Calldrivers only?',
+    message: 'What collection would you like to repopulate?',
     name: 'target',
     type: 'list',
-    choices: ['all', 'calldrivers'],
-    default: 'all',
+    choices: ['feedback'],
+    default: 'feedback',
   })
   parseUpdate(str: string): string {
     return str;
@@ -24,11 +24,8 @@ export class UpdateQuestions {
 }
 
 @SubCommand({
-  name: 'update',
-  description: 'Update the database',
-  options: {
-    isDefault: true,
-  }
+  name: 'repopulate',
+  description: 'Repopulate a database collection',
 })
 export class UpdateCommand implements CommandRunner {
   constructor(
@@ -43,44 +40,23 @@ export class UpdateCommand implements CommandRunner {
       options?.calldrivers ||
       options?.all ||
       (
-        await this.inquirerService.prompt<{ target: string }>('update', {
+        await this.inquirerService.prompt<{ target: string }>('repopulate', {
           ...options,
         })
       ).target;
 
-    if (/calldrivers/i.test(target)) {
-      await this.dbUpdateService.updateCalldrivers();
+    if (/^feedback$/i.test(target)) {
+      await this.dbUpdateService.repopulateFeedback();
       return;
     }
-
-    await this.dbUpdateService.updateAll();
-    await this.dataIntegrityService.fillMissingData();
-    await this.dataIntegrityService.cleanPageUrls();
   }
 
   @Option({
-    flags: '-t, --target <target>',
-    description: 'The target for updates (all updates or calldrivers-only)',
-  })
-  parseTarget(str: string) {
-    return str;
-  }
-
-  @Option({
-    flags: '-a, --all',
-    description: 'Set the target for updates to "all"',
+    flags: '-fb, --feedback',
+    description: 'Repopulate the feedback collection',
     defaultValue: false,
   })
-  parseAll(all: boolean) {
-    return all && 'all';
-  }
-
-  @Option({
-    flags: '-cd, --calldrivers',
-    description: 'Set the target for updates to "calldrivers"',
-    defaultValue: false,
-  })
-  parseCalldrivers(calldrivers: boolean) {
-    return calldrivers && 'calldrivers';
+  parseFeedback(feedback: boolean) {
+    return feedback && 'feedback';
   }
 }

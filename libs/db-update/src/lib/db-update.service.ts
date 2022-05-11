@@ -206,4 +206,8 @@ export class DbUpdateService {
 
     return this.pageMetricsModel.bulkWrite(bulkInsertOps, { ordered: false });
   }
+
+  async repopulateFeedback() {
+    return await this.feedbackService.repopulateFeedback();
+  }
 }
