@@ -5,6 +5,8 @@ import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {
+  Feedback,
+  Page,
   PageMetrics,
   Project,
   Task,
@@ -12,17 +14,19 @@ import {
   UxTestDocument,
 } from '@cra-arc/db';
 import type {
+  FeedbackDocument,
+  PageDocument,
   ProjectDocument,
   PageMetricsModel,
   ProjectsHomeProject,
   ProjectsDetailsData,
   ProjectStatus,
-} from '@cra-arc/types-common';
-import { ApiParams } from '@cra-arc/upd/services';
-import {
+  FeedbackComment,
   ProjectDetailsAggregatedData,
   ProjectsHomeData,
 } from '@cra-arc/types-common';
+import { ApiParams } from '@cra-arc/upd/services';
+import { dateRangeSplit } from '@cra-arc/utils-common/date';
 
 dayjs.extend(utc);
 
@@ -89,6 +93,8 @@ export class ProjectsService {
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
     @InjectModel(Project.name) private projectsModel: Model<ProjectDocument>,
     @InjectModel(UxTest.name) private uxTestsModel: Model<UxTestDocument>,
+    @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>,
+    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -260,7 +266,11 @@ export class ProjectsService {
 
     const projectId = new Types.ObjectId(params.id);
 
-    const projectDoc = (await this.projectsModel
+    const projectDoc = await this.projectsModel.findById(projectId);
+
+    const projectUrls = await getUniqueProjectUrls(projectDoc);
+
+    const populatedProjectDoc = (await this.projectsModel
       .findById(projectId, { title: 1, tasks: 1, ux_tests: 1 })
       .populate('tasks', ['_id', 'title'])
       .populate({
@@ -273,15 +283,15 @@ export class ProjectsService {
       })
       .exec()) as Project;
 
-    const title = projectDoc.title;
+    const title = populatedProjectDoc.title;
 
     const status = getProjectStatus(
-      (projectDoc.ux_tests as UxTest[])
+      (populatedProjectDoc.ux_tests as UxTest[])
         .filter((test) => !(test instanceof Types.ObjectId))
         .map((test) => test.status as ProjectStatus)
     );
 
-    const uxTests = projectDoc.ux_tests.map((uxTest) => {
+    const uxTests = populatedProjectDoc.ux_tests.map((uxTest) => {
       uxTest = uxTest._doc;
 
       if (!('tasks' in uxTest) || !uxTest.tasks.length) {
@@ -321,21 +331,25 @@ export class ProjectsService {
       uxTests
     );
 
-    const tasks = projectDoc.tasks as Task[];
+    const tasks = populatedProjectDoc.tasks as Task[];
 
     const results = {
-      _id: projectDoc._id.toString(),
+      _id: populatedProjectDoc._id.toString(),
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
       dateRangeData: await getAggregatedProjectMetrics(
         this.pageMetricsModel,
+        this.feedbackModel,
         new Types.ObjectId(params.id),
-        params.dateRange
+        params.dateRange,
+        projectUrls
       ),
       comparisonDateRangeData: await getAggregatedProjectMetrics(
         this.pageMetricsModel,
+        this.feedbackModel,
         new Types.ObjectId(params.id),
-        params.comparisonDateRange
+        params.comparisonDateRange,
+        projectUrls
       ),
       title,
       status,
@@ -343,6 +357,11 @@ export class ProjectsService {
       dateFromLastTest,
       taskSuccessByUxTest: uxTests,
       tasks,
+      feedbackComments: await getProjectFeedbackComments(
+        params.dateRange,
+        projectUrls,
+        this.feedbackModel
+      ),
     };
 
     await this.cacheManager.set(cacheKey, results);
@@ -353,69 +372,91 @@ export class ProjectsService {
 
 async function getAggregatedProjectMetrics(
   pageMetricsModel: PageMetricsModel,
+  feedbackModel: Model<FeedbackDocument>,
   id: Types.ObjectId,
-  dateRange: string
+  dateRange: string,
+  projectUrls: string[]
 ): Promise<ProjectDetailsAggregatedData> {
-  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+  const [startDate, endDate] = dateRangeSplit(dateRange);
 
-  return (
-    (
-      await pageMetricsModel
-        .aggregate<ProjectDetailsAggregatedData>()
-        .sort({ date: 1, projects: 1 })
-        .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
-        .group({
-          _id: '$url',
-          page: { $first: '$page' },
-          visits: { $sum: '$visits' },
-          dyfYes: { $sum: '$dyf_yes' },
-          dyfNo: { $sum: '$dyf_no' },
-          fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
-          fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
-          fwylfOther: { $sum: '$fwylf_other' },
-          fwylfError: { $sum: '$fwylf_error' },
-          gscTotalClicks: { $sum: '$gsc_total_clicks' },
-          gscTotalImpressions: { $sum: '$gsc_total_impressions' },
-          gscTotalCtr: { $avg: '$gsc_total_ctr' },
-          gscTotalPosition: { $avg: '$gsc_total_position' },
-        })
-        .lookup({
-          from: 'pages',
-          localField: 'page',
-          foreignField: '_id',
-          as: 'page',
-        })
-        .unwind('$page')
-        .replaceRoot({
-          $mergeObjects: [
-            '$$ROOT',
-            { _id: '$page._id', title: '$page.title', url: '$page.url' },
-          ],
-        })
-        // .addFields({ _id: '$page' })
-        .project({ page: 0 })
-        .sort({ title: 1 })
-        .group({
-          _id: null,
-          visitsByPage: {
-            $push: '$$ROOT',
-          },
-          visits: { $sum: '$visits' },
-          dyfYes: { $sum: '$dyfYes' },
-          dyfNo: { $sum: '$dyfNo' },
-          fwylfCantFindInfo: { $sum: '$fwylfCantFindInfo' },
-          fwylfHardToUnderstand: { $sum: '$fwylfHardToUnderstand' },
-          fwylfOther: { $sum: '$fwylfOther' },
-          fwylfError: { $sum: '$fwylfError' },
-          gscTotalClicks: { $sum: '$gscTotalClicks' },
-          gscTotalImpressions: { $sum: '$gscTotalImpressions' },
-          gscTotalCtr: { $avg: '$gscTotalCtr' },
-          gscTotalPosition: { $avg: '$gscTotalPosition' },
-        })
-        .project({ _id: 0 })
-        .exec()
-    )[0]
-  );
+  const feedbackByTags = await feedbackModel
+    .aggregate<{ tag: string; numComments: number }>()
+    .match({
+      url: { $in: projectUrls },
+      date: { $gte: startDate, $lte: endDate },
+    })
+    .unwind('$tags')
+    .group({
+      _id: '$tags',
+      numComments: { $sum: 1 },
+    })
+    .project({
+      _id: 0,
+      tag: '$_id',
+      numComments: 1,
+    });
+
+  const projectMetrics = (
+    await pageMetricsModel
+      .aggregate<ProjectDetailsAggregatedData>()
+      .sort({ date: 1, projects: 1 })
+      .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
+      .group({
+        _id: '$url',
+        page: { $first: '$page' },
+        visits: { $sum: '$visits' },
+        dyfYes: { $sum: '$dyf_yes' },
+        dyfNo: { $sum: '$dyf_no' },
+        fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
+        fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
+        fwylfOther: { $sum: '$fwylf_other' },
+        fwylfError: { $sum: '$fwylf_error' },
+        gscTotalClicks: { $sum: '$gsc_total_clicks' },
+        gscTotalImpressions: { $sum: '$gsc_total_impressions' },
+        gscTotalCtr: { $avg: '$gsc_total_ctr' },
+        gscTotalPosition: { $avg: '$gsc_total_position' },
+      })
+      .lookup({
+        from: 'pages',
+        localField: 'page',
+        foreignField: '_id',
+        as: 'page',
+      })
+      .unwind('$page')
+      .replaceRoot({
+        $mergeObjects: [
+          '$$ROOT',
+          { _id: '$page._id', title: '$page.title', url: '$page.url' },
+        ],
+      })
+      // .addFields({ _id: '$page' })
+      .project({ page: 0 })
+      .sort({ title: 1 })
+      .group({
+        _id: null,
+        visitsByPage: {
+          $push: '$$ROOT',
+        },
+        visits: { $sum: '$visits' },
+        dyfYes: { $sum: '$dyfYes' },
+        dyfNo: { $sum: '$dyfNo' },
+        fwylfCantFindInfo: { $sum: '$fwylfCantFindInfo' },
+        fwylfHardToUnderstand: { $sum: '$fwylfHardToUnderstand' },
+        fwylfOther: { $sum: '$fwylfOther' },
+        fwylfError: { $sum: '$fwylfError' },
+        gscTotalClicks: { $sum: '$gscTotalClicks' },
+        gscTotalImpressions: { $sum: '$gscTotalImpressions' },
+        gscTotalCtr: { $avg: '$gscTotalCtr' },
+        gscTotalPosition: { $avg: '$gscTotalPosition' },
+      })
+      .project({ _id: 0 })
+      .exec()
+  )[0];
+
+  return {
+    ...projectMetrics,
+    feedbackByTags,
+  };
 }
 
 function getAvgSuccessFromLastTests(
@@ -455,7 +496,9 @@ function getAvgSuccessFromLastTests(
     return (
       lastTestsByType['Validation']
         .map((test) => test.success_rate)
-        .filter((successRate) => successRate !== undefined && successRate !== null)
+        .filter(
+          (successRate) => successRate !== undefined && successRate !== null
+        )
         .reduce((total, success_rate) => total + success_rate, 0) /
       lastTestsByType['Validation'].length
     );
@@ -483,4 +526,35 @@ function getAvgSuccessFromLastTests(
       .reduce((total, success_rate) => total + success_rate, 0) /
     allTests.length
   );
+}
+
+async function getProjectFeedbackComments(
+  dateRange: string,
+  projectUrls: string[],
+  feedbackModel: Model<FeedbackDocument>
+): Promise<FeedbackComment[]> {
+  const [startDate, endDate] = dateRangeSplit(dateRange);
+
+  return (
+    (await feedbackModel.find({
+      url: { $in: projectUrls },
+      date: { $gte: startDate, $lte: endDate },
+    })) || []
+  ).map((feedback) => ({
+    date: feedback.date,
+    url: feedback.url,
+    tag: feedback.tags?.length ? feedback.tags[0] : '',
+    whats_wrong: feedback.whats_wrong || '',
+    comment: feedback.comment,
+  }));
+}
+
+async function getUniqueProjectUrls(
+  project: ProjectDocument
+): Promise<string[]> {
+  const projectPageUrls = ((await project.populate('pages')).pages || []).map(
+    (page) => 'url' in page && [page.url, ...(page.all_urls || [])]
+  );
+
+  return [...new Set(projectPageUrls.flat())];
 }

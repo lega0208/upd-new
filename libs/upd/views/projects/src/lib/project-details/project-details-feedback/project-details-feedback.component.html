@@ -4,7 +4,7 @@
       <app-charts
         [title]="'d3-dyfwywlf'"
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
-        [data]="(dyfChart$ | async)"
+        [data]="dyfChart$ | async"
         [type]="'donut'"
         [tableCols]="dyfTableCols"
       ></app-charts>
@@ -13,7 +13,7 @@
       <app-charts
         [title]="'d3-www'"
         titleTooltip="{{ 'tooltip-d3-www' | translate }}"
-        [data]="(whatWasWrongChart$ | async)"
+        [data]="whatWasWrongChart$ | async"
         [type]="'donut'"
         [tableCols]="whatWasWrongTableCols"
       ></app-charts>
@@ -25,12 +25,11 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-      [data]="(visitsByPage$ | async) || []"
-      [cols]="visitsByPageCols"
-      [title]="'Breakdown by Page - Did you find what you were looking for?'"
-    >
-    </app-data-table-card>
-
+        [data]="(visitsByPage$ | async) || []"
+        [cols]="visitsByPageCols"
+        [title]="'Breakdown by Page - Did you find what you were looking for?'"
+      >
+      </app-data-table-card>
     </div>
   </div>
 </div>
@@ -38,11 +37,16 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'total-feedback-by-page'"
-      >
-        <p [translate]="'nodata-pagefeedback'"></p>
-      </app-card>
+      <app-charts
+        type="grouped-bar"
+        [title]="'total-feedback-by-page'"
+        [data]="(feedbackByTagsBarChartData$ | async) || []"
+        [displayLegend]="'below'"
+        [showLegend]="true"
+        [tableCols]="feedbackByTagsTableCols"
+        [table]="feedbackByTagsTable$ | async"
+
+      ></app-charts>
     </div>
   </div>
 </div>
@@ -50,11 +54,11 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-      [card-title]="'feedback-by-tags'"
-      >
-        <p [translate]="'nodata-pagefeedback'"></p>
-      </app-card>
+      <app-data-table-card
+        [title]="'feedback-by-tags'"
+        [data]="(feedbackComments$ | async) || []"
+        [cols]="feedbackCommentsCols"
+      ></app-data-table-card>
     </div>
   </div>
 </div>

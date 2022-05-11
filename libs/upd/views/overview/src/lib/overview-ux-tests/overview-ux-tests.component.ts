@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
-import { OverviewFacade } from '../+state/overview/overview.facade';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { combineLatest, of } from 'rxjs';
+import { OverviewProject } from '@cra-arc/types-common';
+import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
   selector: 'app-overview-ux-tests',
@@ -29,7 +29,7 @@ export class OverviewUxTestsComponent implements OnInit {
     private i18n: I18nFacade
   ) {}
 
-  uxChartCols: ColumnConfig[] = [];
+  uxChartCols: ColumnConfig<OverviewProject>[] = [];
 
   ngOnInit() {
     this.currentLang$.subscribe((lang) => {

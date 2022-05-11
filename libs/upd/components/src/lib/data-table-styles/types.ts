@@ -1,7 +1,9 @@
+import type { OptionalKeyOf } from '@cra-arc/utils-common'
+
 export type ColumnConfigPipe = 'percent' | 'number' | 'date';
 
-export interface ColumnConfig {
-  field: string;
+export interface ColumnConfig<T = any> {
+  field: OptionalKeyOf<T>;
   header: string;
   type?: string;
   typeParam?: string;

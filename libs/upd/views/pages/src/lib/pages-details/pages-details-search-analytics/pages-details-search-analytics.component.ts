@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { ColumnConfig } from '@cra-arc/upd-components';
-import { isEmpty } from 'rxjs/operators';
 
-import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
+import { GetTableProps } from '@cra-arc/utils-common';
+
+type GscSearchTermsColTypes = GetTableProps<PagesDetailsSearchAnalyticsComponent, 'topGSCSearchTerms$'>
+type ReferrerTypeColTypes = GetTableProps<PagesDetailsSearchAnalyticsComponent, 'referrerType$'>
 
 @Component({
   selector: 'app-page-details-search-analytics',
@@ -32,21 +34,22 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
 
   referrerType$ = this.pageDetailsService.referrerType$;
 
+
   constructor(
     private pageDetailsService: PagesDetailsFacade,
     private i18n: I18nFacade
   ) {}
 
-  topGSCSearchTermsCols: ColumnConfig[] = [];
+  topGSCSearchTermsCols: ColumnConfig<GscSearchTermsColTypes>[] = [];
   searchTermsCanadaCols: ColumnConfig[] = [];
-  referrerTypeCols: ColumnConfig[] = [];
+  referrerTypeCols: ColumnConfig<ReferrerTypeColTypes>[] = [];
 
   ngOnInit(): void {
     this.i18n.service.onLangChange(({ lang }) => {
       this.currentLang = lang as LocaleId;
     });
 
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+    this.currentLang$.subscribe((lang) => {
       this.topGSCSearchTermsCols = [
         {
           field: 'term',

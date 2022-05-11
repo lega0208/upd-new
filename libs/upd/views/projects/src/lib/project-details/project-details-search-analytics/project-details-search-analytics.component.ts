@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
+import { map } from 'rxjs';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { map } from 'rxjs';
-import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 import { EN_CA } from '@cra-arc/upd/i18n';
+import { GetTableProps } from '@cra-arc/utils-common';
+import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
+
+
+type VisitsByPageColTypes = GetTableProps<ProjectDetailsSearchAnalyticsComponent, 'visitsByPage$'>
 
 @Component({
   selector: 'app-project-details-search-analytics',
@@ -36,7 +40,7 @@ export class ProjectDetailsSearchAnalyticsComponent implements OnInit {
           )
       )
     );
-  visitsByPageCols: ColumnConfig[] = [];
+  visitsByPageCols: ColumnConfig<VisitsByPageColTypes>[] = [];
 
   ngOnInit(): void {
     this.i18n.service.onLangChange(({ lang }) => {

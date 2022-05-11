@@ -1,18 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { combineLatest } from 'rxjs';
+import { ColumnConfig } from '@cra-arc/upd-components';
+import { I18nFacade } from '@cra-arc/upd/state';
+import { LocaleId } from '@cra-arc/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { Metrics } from '../query';
-import { ColumnConfig } from '@cra-arc/upd-components';
-
-import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-overview-search-analytics',
   templateUrl: './overview-search-analytics.component.html',
   styleUrls: ['./overview-search-analytics.component.css'],
 })
-export class OverviewSearchAnalyticsComponent {
+export class OverviewSearchAnalyticsComponent implements OnInit{
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
@@ -25,13 +24,12 @@ export class OverviewSearchAnalyticsComponent {
   gscAverage$ = this.overviewService.avgRank$;
   gscAveragePercentChange$ = this.overviewService.avgRankPercentChange$;
 
-  gscMetrics: Metrics[] = [];
-
   CanSearchTerms = canSearchTerms;
   GSCSearchTerms$ = this.overviewService.top10GSC$;
 
+
   CanSearchTermsCols: ColumnConfig[] = [];
-  GSCSearchTermsCols: ColumnConfig[] = [];
+  GSCSearchTermsCols: ColumnConfig<GscSearchTermsRow>[] = [];
 
   constructor(
     private overviewService: OverviewFacade,
@@ -62,10 +60,19 @@ export class OverviewSearchAnalyticsComponent {
           pipeParam: '1.0-2',
         }
       ];
-
     });
   }
 }
+
+interface GscSearchTermsRow {
+  _id: string;
+  clicks: number;
+  percentChange: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+}
+
 const canSearchTerms = [{"Search terms":"Arnage","Clicks":5545,"Comparison":0.8},
 {"Search terms":"Cooper","Clicks":2381,"Comparison":0.5},
 {"Search terms":"GS","Clicks":4183,"Comparison":0.32},

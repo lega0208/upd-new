@@ -4,7 +4,7 @@ import { ColumnConfig } from '@cra-arc/upd-components';
 
 import { I18nFacade } from '@cra-arc/upd/state';
 import { LocaleId } from '@cra-arc/upd/i18n';
-import { combineLatest } from 'rxjs';
+import { ProjectsHomeProject } from '@cra-arc/types-common';
 
 @Component({
   selector: 'app-projects-home',
@@ -24,7 +24,7 @@ export class ProjectsHomeComponent implements OnInit {
   totalCompleted$ = this.projectsHomeService.totalCompleted$;
   numDelayed$ = this.projectsHomeService.numDelayed$;
 
-  columns: ColumnConfig[] = [];
+  columns: ColumnConfig<ProjectsHomeProject>[] = [];
 
   searchFields = this.columns.map((col) => col.field);
 
@@ -36,7 +36,7 @@ export class ProjectsHomeComponent implements OnInit {
   ngOnInit() {
     this.projectsHomeService.init();
 
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+    this.currentLang$.subscribe((lang) => {
       this.columns = [
         {
           field: 'title',

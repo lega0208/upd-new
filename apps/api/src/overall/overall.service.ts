@@ -23,10 +23,10 @@ import {
 import type {
   PageMetricsModel,
   ProjectsHomeData,
-  ProjectsHomeProject,
   OverviewAggregatedData,
   OverviewData,
   OverviewUxData,
+  OverviewProjectData
 } from '@cra-arc/types-common';
 import { ApiParams } from '@cra-arc/upd/services';
 
@@ -276,7 +276,7 @@ async function getProjects(
     )[0] || defaultData;
 
   const projectsData = await projectModel
-    .aggregate<ProjectsHomeProject>()
+    .aggregate<OverviewProjectData>()
     .lookup({
       from: 'ux_tests',
       let: { project_id: '$_id' },

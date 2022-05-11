@@ -31,6 +31,7 @@
       "@cra-arc/upd/views/tasks": ["libs/upd/views/tasks/src/index.ts"],
       "@cra-arc/utils-common": ["libs/utils-common/src/index.ts"],
       "@cra-arc/utils-common/math": ["libs/utils-common/src/lib/math/index.ts"],
+      "@cra-arc/utils-common/date": ["libs/utils-common/src/lib/date/index.ts"],
       "@cra-arc/utils-common/types": [
         "libs/utils-common/src/lib/types/index.ts"
       ]

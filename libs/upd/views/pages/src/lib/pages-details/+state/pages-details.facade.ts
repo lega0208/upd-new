@@ -5,7 +5,7 @@ import { map, debounceTime, combineLatest } from 'rxjs';
 import { percentChange } from '@cra-arc/utils-common';
 import type { PickByType } from '@cra-arc/utils-common';
 import { PagesDetailsState } from './pages-details.reducer';
-import { PageAggregatedData, PageDetailsData } from '@cra-arc/types-common';
+import { GscSearchTermMetrics, PageAggregatedData, PageDetailsData } from '@cra-arc/types-common';
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
@@ -315,7 +315,7 @@ export class PagesDetailsFacade {
         .map((d) => new Date(d));
 
       if (!visitsByDay) {
-        return [] as MultiSeries;
+        return [] as { name: string; currValue: number; prevValue: number; }[];
       }
 
       const dateRangeSeries = visitsByDay.map(({ date, visits }) => ({
@@ -443,7 +443,7 @@ export class PagesDetailsFacade {
       const isZero = dataByReferrerType.every((v) => v.value === 0);
 
       if (isZero) {
-        return [] as MultiSeries;
+        return [] as typeof dataByReferrerType;
       }
 
       return dataByReferrerType;
@@ -567,7 +567,7 @@ export class PagesDetailsFacade {
   );
 
   top25GSCSearchTerms$ = this.pagesDetailsData$.pipe(
-    map((data) => [...(data?.top25GSCSearchTerms || [])])
+    map((data) => [...(data?.top25GSCSearchTerms || [])] as (GscSearchTermMetrics & { change: number })[])
   );
 
   error$ = this.store.pipe(

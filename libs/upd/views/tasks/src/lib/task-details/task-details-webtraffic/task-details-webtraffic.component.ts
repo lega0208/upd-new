@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 import { EN_CA } from '@cra-arc/upd/i18n';
 
@@ -28,6 +27,10 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
+    this.visitsByPage$.subscribe((visitsByPage) => {
+      console.log(visitsByPage);
+    })
+
     this.currentLang$.subscribe((lang) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.visitsByPageCols = [
@@ -44,7 +47,7 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
           typeParams: { link: 'url', external: true },
         },
         { field: 'visits', header: this.i18n.service.translate('visits', lang), pipe: 'number' },
-        { field: 'change', header: this.i18n.service.translate('%-change', lang), pipe: 'percent' },
+        { field: 'percentChange', header: this.i18n.service.translate('%-change', lang), pipe: 'percent', type: 'comparison' },
       ];
     });
   }

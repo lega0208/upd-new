@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { TasksHomeFacade } from './+state/tasks-home.facade';
-import { ColumnConfig } from '@cra-arc/upd-components';
-
-import { I18nFacade } from '@cra-arc/upd/state';
 import { combineLatest } from 'rxjs';
+
+import { ColumnConfig } from '@cra-arc/upd-components';
+import { I18nFacade } from '@cra-arc/upd/state';
+import { TasksHomeAggregatedData } from '@cra-arc/types-common';
+import { TasksHomeFacade } from './+state/tasks-home.facade';
 
 @Component({
   selector: 'app-tasks-home',
@@ -14,9 +15,8 @@ export class TasksHomeComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
 
   tasksHomeData$ = this.tasksHomeService.tasksHomeTableData$;
-  data$ = this.tasksHomeService.tasksHomeData$
 
-  columns: ColumnConfig[] = [];
+  columns: ColumnConfig<TasksHomeAggregatedData>[] = [];
   searchFields = this.columns.map((col) => col.field);
 
   constructor(private readonly tasksHomeService: TasksHomeFacade, private i18n: I18nFacade) {}

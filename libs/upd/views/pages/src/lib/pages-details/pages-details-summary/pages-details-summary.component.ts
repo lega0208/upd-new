@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { PagesDetailsFacade } from '../+state/pages-details.facade';
-
-//import { TranslateService } from '@ngx-translate/core';
-import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { combineLatest } from 'rxjs';
+import { LocaleId } from '@cra-arc/upd/i18n';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
+import { GetTableProps } from '@cra-arc/utils-common';
+import { PagesDetailsFacade } from '../+state/pages-details.facade';
+
+type BarTableColTypes = GetTableProps<PagesDetailsSummaryComponent, 'barTable$'>
+type VisitsByDeviceColTypes = GetTableProps<PagesDetailsSummaryComponent, 'visitsByDeviceTypeTable$'>
 
 @Component({
   selector: 'app-page-details-summary',
@@ -42,14 +44,13 @@ export class PagesDetailsSummaryComponent implements OnInit {
   comparisonDateRangeLabel$ = this.pageDetailsService.comparisonDateRangeLabel$;
 
   barTable$ = this.pageDetailsService.barTable$;
-  barTableCols: ColumnConfig[] = [];
+  barTableCols: ColumnConfig<BarTableColTypes>[] = [];
 
   visitsByDeviceTypeTable$ = this.pageDetailsService.visitsByDeviceTypeTable$;
-  visitsByDeviceTypeCols: ColumnConfig[] = [];
+  visitsByDeviceTypeCols: ColumnConfig<VisitsByDeviceColTypes>[] = [];
 
   constructor(
     private pageDetailsService: PagesDetailsFacade,
-    //public translateService: TranslateService,
     private i18n: I18nFacade
   ) {}
 

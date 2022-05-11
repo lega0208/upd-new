@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { PagesDetailsFacade } from '../+state/pages-details.facade';
-import { ColumnConfig } from '@cra-arc/upd-components';
-
-import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
 import { combineLatest } from 'rxjs';
+import { ColumnConfig } from '@cra-arc/upd-components';
+import { LocaleId } from '@cra-arc/upd/i18n';
+import { I18nFacade } from '@cra-arc/upd/state';
+import { GetTableProps } from '@cra-arc/utils-common';
+import { PagesDetailsFacade } from '../+state/pages-details.facade';
+
+type VisitorLocationColTypes = GetTableProps<PagesDetailsWebtrafficComponent, 'visitorLocation$'>
+type BarTableColTypes = GetTableProps<PagesDetailsWebtrafficComponent, 'barTable$'>
 
 @Component({
   selector: 'app-page-details-webtraffic',
@@ -17,16 +20,12 @@ export class PagesDetailsWebtrafficComponent implements OnInit {
 
   visitsByDay$ = this.pageDetailsService.visitsByDay$;
 
-  whereVisitorsCameFrom$ = this.pageDetailsService.topSearchTermsIncrease$;
-  whatVisitorsClickedOn$ = this.pageDetailsService.topSearchTermsIncrease$;
   visitorLocation$ = this.pageDetailsService.visitorLocation$;
 
-  visitorLocationCols: ColumnConfig[] = [];
-  whatVisitorsClickedOnCols: ColumnConfig[] = [];
-  whereVisitorsCameFromCols: ColumnConfig[] = [];
+  visitorLocationCols: ColumnConfig<VisitorLocationColTypes>[] = [];
 
   barTable$ = this.pageDetailsService.barTable$;
-  barTableCols: ColumnConfig[] = [];
+  barTableCols: ColumnConfig<BarTableColTypes>[] = [];
 
   dateRangeLabel$ = this.pageDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.pageDetailsService.comparisonDateRangeLabel$;
@@ -55,33 +54,6 @@ export class PagesDetailsWebtrafficComponent implements OnInit {
           field: 'change',
           header: this.i18n.service.translate('comparison', lang),
           pipe: 'percent',
-        },
-      ];
-
-      this.whatVisitorsClickedOnCols = [
-        { field: 'text', header: this.i18n.service.translate('text', lang) },
-        {
-          field: 'clicks',
-          header: this.i18n.service.translate('clicks', lang),
-        },
-        {
-          field: 'change',
-          header: this.i18n.service.translate('comparison', lang),
-        },
-      ];
-
-      this.whereVisitorsCameFromCols = [
-        {
-          field: 'url',
-          header: this.i18n.service.translate('previous-page-url', lang),
-        },
-        {
-          field: 'visits',
-          header: this.i18n.service.translate('visits', lang),
-        },
-        {
-          field: 'change',
-          header: this.i18n.service.translate('comparison', lang),
         },
       ];
 

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { LocaleId } from '@cra-arc/upd/i18n';
 import { combineLatest } from 'rxjs';
 
 @Component({
@@ -42,8 +42,8 @@ export class OverviewWebtrafficComponent implements OnInit {
     private i18n: I18nFacade
   ) {}
 
-  topPagesCols: ColumnConfig[] = [];
-  barTableCols: ColumnConfig[] = [];
+  topPagesCols: ColumnConfig<{ _id: string; visits: number; percentChange: number }>[] = [];
+  barTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: number }>[] = [];
 
   ngOnInit() {
     this.i18n.service.onLangChange(({ lang }) => {

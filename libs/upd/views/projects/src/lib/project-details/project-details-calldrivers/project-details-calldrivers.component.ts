@@ -1,42 +1,20 @@
 import { MultiSeries } from '@amonsour/ngx-charts';
 import { Component, OnInit } from '@angular/core';
+import { combineLatest } from 'rxjs';
 import { ColumnConfig } from '@cra-arc/upd-components';
-import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
+import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 @Component({
   selector: 'app-project-details-calldrivers',
   templateUrl: './project-details-calldrivers.component.html',
   styleUrls: ['./project-details-calldrivers.component.css'],
 })
-export class ProjectDetailsCalldriversComponent {
+export class ProjectDetailsCalldriversComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
-  // bar: MultiSeries = [
-  //   {
-  //     name: 'Feb 27-Mar 05',
-  //     series: [
-  //       { name: 'Benefits', value: 27704 },
-  //       { name: 'e-Services Help Desk', value: 275665 },
-  //       { name: 'ITE', value: 5887 },
-  //       { name: 'C4 - Identity Theft', value: 1208 },
-  //       { name: 'BE', value: 87427 },
-  //     ],
-  //   },
-  //   {
-  //     name: 'Mar 06-Mar 12',
-  //     series: [
-  //       { name: 'Benefits', value: 24704 },
-  //       { name: 'e-Services Help Desk', value: 277665 },
-  //       { name: 'ITE', value: 6255 },
-  //       { name: 'C4 - Identity Theft', value: 201 },
-  //       { name: 'BE', value: 81427 },
-  //     ],
-  //   },
-  // ];
   charts = [
     {
       Topic: 'Electronic Services',
@@ -64,17 +42,6 @@ export class ProjectDetailsCalldriversComponent {
       'Number of calls for Mar 06-Mar 12': '22,806',
     },
   ];
-  // chartsCols: ColumnConfig[] = [
-  //   { field: 'Topic', header: 'Topic' },
-  //   {
-  //     field: 'Number of calls for Feb 27-Mar 05',
-  //     header: 'Number of calls for Feb 27-Mar 05',
-  //   },
-  //   {
-  //     field: 'Number of calls for Mar 06-Mar 12',
-  //     header: 'Number of calls for Mar 06-Mar 12',
-  //   },
-  // ];
 
   constructor(private readonly projectsDetailsService: ProjectsDetailsFacade, private i18n: I18nFacade) {}
 

@@ -24,15 +24,15 @@ export class PagesDetailsFeedbackComponent implements OnInit {
     private i18n: I18nFacade
   ) {}
 
-  dyfTableCols: ColumnConfig[] = [];
-  whatWasWrongTableCols: ColumnConfig[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; value: number; }>[] = [];
+  whatWasWrongTableCols: ColumnConfig<{ name: string; value: number; }>[] = [];
 
   ngOnInit(): void {
     this.i18n.service.onLangChange(({ lang }) => {
       this.currentLang = lang as LocaleId;
     });
 
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+    this.currentLang$.subscribe((lang) => {
       this.dyfTableCols = [
         {
           field: 'name',

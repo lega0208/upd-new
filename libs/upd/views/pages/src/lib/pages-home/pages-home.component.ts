@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { PagesHomeFacade } from './+state/pages-home.facade';
+import { combineLatest } from 'rxjs';
 
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
+import { PagesHomeAggregatedData } from '@cra-arc/types-common';
+import { PagesHomeFacade } from './+state/pages-home.facade';
 
 @Component({
   selector: 'app-pages-home',
@@ -16,7 +17,7 @@ export class PagesHomeComponent implements OnInit {
 
   currentLang$ = this.i18n.currentLang$;
 
-  columns: ColumnConfig[] = [];
+  columns: ColumnConfig<PagesHomeAggregatedData>[] = [];
 
   ngOnInit() {
     combineLatest([this.currentLang$]).subscribe(([lang]) => {

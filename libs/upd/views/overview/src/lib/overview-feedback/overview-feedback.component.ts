@@ -13,7 +13,7 @@ import { combineLatest } from 'rxjs';
   templateUrl: './overview-feedback.component.html',
   styleUrls: ['./overview-feedback.component.css'],
 })
-export class OverviewFeedbackComponent {
+export class OverviewFeedbackComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
@@ -22,9 +22,9 @@ export class OverviewFeedbackComponent {
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig[] = [];
-  whatWasWrongTableCols: ColumnConfig[] = [];
-  taskSurveyCols: ColumnConfig[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
+  whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
+  taskSurveyCols: ColumnConfig<{ task: string; completion: number }>[] = [];
 
   constructor(
     private overviewService: OverviewFacade,

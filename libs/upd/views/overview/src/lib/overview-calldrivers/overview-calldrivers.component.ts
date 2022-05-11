@@ -1,17 +1,16 @@
-import { Component } from '@angular/core';
-import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
+import { Component, OnInit } from '@angular/core';
+import { combineLatest } from 'rxjs';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { I18nFacade } from '@cra-arc/upd/state';
+import { LocaleId } from '@cra-arc/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
-import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-overview-calldrivers',
   templateUrl: './overview-calldrivers.component.html',
   styleUrls: ['./overview-calldrivers.component.css'],
 })
-export class OverviewCalldriversComponent {
+export class OverviewCalldriversComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
@@ -53,7 +52,7 @@ export class OverviewCalldriversComponent {
 
   calldriversChart$ = this.overviewService.calldriversChart$;
   calldriversTable$ = this.overviewService.calldriversTable$;
-  calldriversCols: ColumnConfig[] = [];
+  calldriversCols: ColumnConfig<{ name: string; currValue: number; prevValue: number }>[] = [];
   chartsCols: ColumnConfig[] = [];
 
   ngOnInit() {

@@ -21,6 +21,7 @@ export type {
   TaskDocument,
   ProjectDocument,
   GscSearchTermMetrics,
+  FeedbackDocument,
 } from '@cra-arc/db';
 
 export interface ViewData<T> {
@@ -132,10 +133,16 @@ export interface OverviewUxData {
   copsTestsCompletedSince2018: number;
 }
 
+export type OverviewProject = ProjectsHomeProject & { testType?: string[]; totalUsers: number };
+
+export interface OverviewProjectData extends Omit<ProjectsHomeData, 'projects'> {
+  projects: OverviewProject[];
+}
+
 export interface OverviewData
   extends ViewData<OverviewAggregatedData>,
     OverviewUxData {
-  projects?: ProjectsHomeData & { testType?: Record<number, string> };
+  projects?: OverviewProjectData;
 }
 
 export interface TasksHomeAggregatedData {
@@ -192,7 +199,6 @@ export type ProjectStatus =
   | 'Unknown';
 
 export interface ProjectsHomeProject {
-  testType: any;
   _id: string;
   title: string;
   cops: boolean;
@@ -232,6 +238,7 @@ export interface ProjectDetailsAggregatedData {
   gscTotalPosition: number;
   gscSearchTerms: GscSearchTermMetrics;
   visitsByPage: VisitsByPage[];
+  feedbackByTags: { tag: string; numComments: number }[];
 }
 
 export interface ProjectsDetailsData
@@ -241,6 +248,15 @@ export interface ProjectsDetailsData
   dateFromLastTest: Date;
   taskSuccessByUxTest: (Partial<UxTest> & { tasks: string })[];
   tasks: Pick<Task, '_id' | 'title'>[];
+  feedbackComments: FeedbackComment[];
+}
+
+export interface FeedbackComment {
+  url: string;
+  date: Date;
+  tag: string;
+  whats_wrong: string;
+  comment: string;
 }
 
 export interface TaskKpi {

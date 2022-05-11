@@ -17,6 +17,12 @@ export class Feedback {
   @Prop({ type: Date, required: true, index: true })
   date: Date = new Date(0);
 
+  @Prop({ type: String })
+  lang = '';
+
+  @Prop({ type: String })
+  comment = '';
+
   @Prop({ type: [String] })
   tags?: string[] = [];
 

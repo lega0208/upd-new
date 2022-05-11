@@ -98,7 +98,7 @@ export class AirtableClient {
       subtopic: squishTrim(fields['Sub Topic']),
       ux_tests: fields['User Testing Projects'],
       user_type: fields['User Type'],
-      pages: fields['Pages 2'],
+      pages: fields['Pages'],
     })) as TaskData[];
   }
 
@@ -230,7 +230,9 @@ export class AirtableClient {
       .map(({ id, fields }) => ({
         airtable_id: id,
         url: fields['URL'].replace(/^https:\/\//i, ''),
-        date: dayjs(fields['Date']).utc(true).toDate(),
+        date: dayjs.utc(fields['Date']).toDate(),
+        lang: fields['Lang'],
+        comment: fields['Comment'],
         tags: fields['Lookup_tags'],
         status: fields['Status'],
         whats_wrong: fields["What's wrong"],

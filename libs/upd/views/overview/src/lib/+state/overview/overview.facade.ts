@@ -89,7 +89,7 @@ export class OverviewFacade {
   );
   testTypeTranslations$ = combineLatest([this.projects$, this.currentLang$]).pipe(
     mergeMap(([projects]) => {
-      const splitTestTypes = projects.flatMap((project) => project.testType);
+      const splitTestTypes = projects.flatMap((project) => project.testType || []);
       console.log(splitTestTypes);
 
       const testTypes = [...new Set<string>(splitTestTypes)];

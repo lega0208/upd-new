@@ -1,10 +1,18 @@
 import { Component, OnInit } from '@angular/core';
+import { combineLatest } from 'rxjs';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
-import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 import { EN_CA } from '@cra-arc/upd/i18n';
+import { GetTableProps } from '@cra-arc/utils-common';
+import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
+
+
+type VisitsByPageColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'visitsByPage$'>
+type DyfTableColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'dyfChart$'>
+type WhatWasWrongColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'whatWasWrongChart$'>
+type FeedbackCommentsColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'feedbackComments$'>
+type FeedbackByTagsColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'feedbackByTagsTable$'>
 
 @Component({
   selector: 'app-project-details-feedback',
@@ -18,13 +26,24 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
 
   visitsByPage$ =
     this.projectsDetailsService.visitsByPageFeedbackWithPercentChange$;
-  visitsByPageCols: ColumnConfig[] = [];
+  visitsByPageCols: ColumnConfig<VisitsByPageColTypes>[] = [];
 
   dyfChart$ = this.projectsDetailsService.dyfData$;
   whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig[] = [];
-  whatWasWrongTableCols: ColumnConfig[] = [];
+  dyfTableCols: ColumnConfig<DyfTableColTypes>[] = [];
+  whatWasWrongTableCols: ColumnConfig<WhatWasWrongColTypes>[] = [];
+
+  feedbackByTagsBarChartData$ = this.projectsDetailsService.feedbackByTagsBarChart$;
+
+  feedbackComments$ = this.projectsDetailsService.feedbackComments$;
+  feedbackCommentsCols: ColumnConfig<FeedbackCommentsColTypes>[] = [];
+
+  feedbackByTagsTable$ = this.projectsDetailsService.feedbackByTagsTable$;
+  feedbackByTagsTableCols: ColumnConfig<FeedbackByTagsColTypes>[] = [];
+
+  dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
+  comparisonDateRangeLabel$ = this.projectsDetailsService.comparisonDateRangeLabel$;
 
   constructor(
     private readonly projectsDetailsService: ProjectsDetailsFacade,
@@ -36,7 +55,11 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
-    this.currentLang$.subscribe((lang) => {
+    combineLatest([
+      this.dateRangeLabel$,
+      this.comparisonDateRangeLabel$,
+      this.currentLang$,
+    ]).subscribe(([dateRange, comparisonDateRange, lang]) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
 
       this.visitsByPageCols = [
@@ -100,6 +123,41 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
         {
           field: 'value',
           header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
+      ];
+
+      this.feedbackCommentsCols = [
+        { field: 'url', header: this.i18n.service.translate('URL', lang) },
+        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date' },
+        { field: 'tag', header: this.i18n.service.translate('tags', lang) },
+        { field: 'whats_wrong', header: this.i18n.service.translate('d3-www', lang) },
+        { field: 'comment', header: this.i18n.service.translate('comment', lang) },
+      ];
+
+      this.feedbackByTagsTableCols = [
+        { field: 'tag', header: this.i18n.service.translate('category', lang) },
+        {
+          field: 'numComments',
+          header: this.i18n.service.translate('# of comments', lang),
+          pipe: 'number',
+        },
+      ];
+
+      this.feedbackByTagsTableCols = [
+        { field: 'tag', header: this.i18n.service.translate('category', lang) },
+        {
+          field: 'currValue',
+          header: this.i18n.service.translate('# of comments for ', lang, {
+            value: dateRange,
+          }),
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: this.i18n.service.translate('# of comments for ', lang, {
+            value: comparisonDateRange,
+          }),
           pipe: 'number',
         },
       ];

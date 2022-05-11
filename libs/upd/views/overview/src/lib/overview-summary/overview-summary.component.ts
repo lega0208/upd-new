@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { LocaleId } from '@cra-arc/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { combineLatest } from 'rxjs';
 
@@ -61,9 +61,9 @@ export class OverviewSummaryComponent implements OnInit {
     private i18n: I18nFacade
   ) {}
 
-  dyfTableCols: ColumnConfig[] = [];
-  whatWasWrongTableCols: ColumnConfig[] = [];
-  barTableCols: ColumnConfig[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; value: string; }>[] = [];
+  whatWasWrongTableCols: ColumnConfig<{ name: string; value: string; }>[] = [];
+  barTableCols: ColumnConfig<{ name: string; currValue: string; prevValue: string; }>[] = [];
   taskSurveyCols: ColumnConfig[] = [];
 
   ngOnInit() {

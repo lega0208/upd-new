@@ -9,11 +9,12 @@ import * as ProjectsDetailsSelectors from './projects-details.selectors';
 import {
   ProjectDetailsAggregatedData,
   ProjectsDetailsData,
-  TaskKpi, VisitsByPage
+  TaskKpi,
+  VisitsByPage,
 } from '@cra-arc/types-common';
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { FR_CA } from '@cra-arc/upd/i18n';
+import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
@@ -319,8 +320,6 @@ export class ProjectsDetailsFacade {
         }
       );
 
-      console.log(taskSuccessByUxTestKpi);
-
       return taskSuccessByUxTestKpiChange;
     })
   );
@@ -387,6 +386,74 @@ export class ProjectsDetailsFacade {
           };
         })
         .filter((taskValues) => !!taskValues) as BubbleChartMultiSeries;
+    })
+  );
+
+  feedbackComments$ = this.projectsDetailsData$.pipe(
+    map((data) => [...data.feedbackComments])
+  );
+
+  feedbackByTags$ = this.projectsDetailsData$.pipe(
+    map((data) => data.dateRangeData?.feedbackByTags)
+  );
+
+  feedbackByTagsPrevious$ = this.projectsDetailsData$.pipe(
+    map((data) => data.dateRangeData?.feedbackByTags)
+  );
+
+  feedbackByTagsBarChart$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
+      const feedbackByTagsPrevious =
+        data.comparisonDateRangeData?.feedbackByTags || [];
+
+      const dateRange = data.dateRange;
+      const comparisonDateRange = data.comparisonDateRange;
+
+      const currentSeries = {
+        name: getWeeklyDatesLabel(dateRange, lang),
+        series: feedbackByTags.map((feedback) => ({
+          name: feedback.tag,
+          value: feedback.numComments,
+        })),
+      };
+
+      const previousSeries = {
+        name: getWeeklyDatesLabel(comparisonDateRange || '', lang),
+        series: feedbackByTagsPrevious.map((feedback) => ({
+          name: feedback.tag,
+          value: feedback.numComments,
+        })),
+      };
+
+      return [currentSeries, previousSeries];
+    })
+  );
+
+  dateRangeLabel$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)));
+
+  comparisonDateRangeLabel$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) =>
+      getWeeklyDatesLabel(data.comparisonDateRange || '', lang)
+    )
+  );
+
+  feedbackByTagsTable$ = this.projectsDetailsData$.pipe(
+    map((data) => {
+      return data.dateRangeData?.feedbackByTags.map((feedback, i) => ({
+        tag: feedback.tag,
+        currValue: feedback.numComments,
+        prevValue: data.comparisonDateRangeData?.feedbackByTags?.[i]?.numComments || 0,
+      }))
     })
   );
 
@@ -463,9 +530,6 @@ function mapObjectArraysWithPercentChange(
       current.sort(sortBy);
       previous.sort(sortBy);
 
-      console.log(current);
-      console.log(previous);
-
       return current.map((val: any, i) => ({
         ...val,
         percentChange: percentChange(
@@ -480,7 +544,7 @@ function mapObjectArraysWithPercentChange(
 }
 function mapPageMetricsArraysWithPercentChange(
   propName: keyof ProjectDetailsAggregatedData,
-  propPath: string,
+  propPath: string
 ) {
   return map((data: ProjectsDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
@@ -492,21 +556,27 @@ function mapPageMetricsArraysWithPercentChange(
       ...((data?.comparisonDateRangeData?.[propName] || []) as any[]),
     ];
 
-    const currentMetricsByPage = current.reduce((metricsByPage, page: VisitsByPage) => {
-      metricsByPage[page._id] = {
-        ...page,
-      };
+    const currentMetricsByPage = current.reduce(
+      (metricsByPage, page: VisitsByPage) => {
+        metricsByPage[page._id] = {
+          ...page,
+        };
 
-      return metricsByPage;
-    }, {} as { [pageId: string]: Record<string, number> });
+        return metricsByPage;
+      },
+      {} as { [pageId: string]: Record<string, number> }
+    );
 
-    const previousMetricsByPage = previous.reduce((metricsByPage, page: VisitsByPage) => {
-      metricsByPage[page._id] = {
-        ...page,
-      };
+    const previousMetricsByPage = previous.reduce(
+      (metricsByPage, page: VisitsByPage) => {
+        metricsByPage[page._id] = {
+          ...page,
+        };
 
-      return metricsByPage;
-    }, {} as { [pageId: string]: Record<string, number> });
+        return metricsByPage;
+      },
+      {} as { [pageId: string]: Record<string, number> }
+    );
 
     return Object.keys(currentMetricsByPage).map((pageId: string) => {
       const currentMetrics = currentMetricsByPage[pageId];
@@ -514,8 +584,19 @@ function mapPageMetricsArraysWithPercentChange(
 
       return {
         ...currentMetrics,
-        percentChange: previousMetrics ? percentChange(currentMetrics[propPath], previousMetrics[propPath]) : null,
-      }
+        percentChange: previousMetrics
+          ? percentChange(currentMetrics[propPath], previousMetrics[propPath])
+          : null,
+      };
     });
   });
 }
+
+const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  const formattedStartDate = dayjs.utc(startDate).locale(lang).format('MMM D');
+  const formattedEndDate = dayjs.utc(endDate).locale(lang).format('MMM D');
+
+  return `${formattedStartDate}-${formattedEndDate}`;
+};

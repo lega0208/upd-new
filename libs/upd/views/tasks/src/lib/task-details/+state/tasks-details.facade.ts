@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import {
   TaskDetailsAggregatedData,
-  TaskDetailsData,
+  TaskDetailsData, VisitsByPage
 } from '@cra-arc/types-common';
 import { select, Store } from '@ngrx/store';
-import { combineLatest, debounceTime, map, reduce, tap } from 'rxjs';
+import { combineLatest, debounceTime, map } from 'rxjs';
 
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
@@ -13,7 +13,6 @@ import 'dayjs/esm/locale/fr-ca';
 
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
-import { TasksDetailsState } from './tasks-details.reducer';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { I18nFacade } from '@cra-arc/upd/state';
@@ -73,7 +72,7 @@ export class TasksDetailsFacade {
   );
 
   visitsByPageWithPercentChange$ = this.tasksDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'visits', '_id')
+    mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits')
   );
 
   visitsByPageGSCWithPercentChange$ = this.tasksDetailsData$.pipe(
@@ -431,5 +430,55 @@ function mapObjectArraysWithPercentChange(
     }
 
     return [];
+  });
+}
+
+function mapPageMetricsArraysWithPercentChange(
+  propName: keyof TaskDetailsAggregatedData,
+  propPath: string
+) {
+  return map((data: TaskDetailsData) => {
+    if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
+      return;
+    }
+
+    const current = [...((data?.dateRangeData?.[propName] || []) as any[])];
+    const previous = [
+      ...((data?.comparisonDateRangeData?.[propName] || []) as any[]),
+    ];
+
+    const currentMetricsByPage = current.reduce(
+      (metricsByPage, page: VisitsByPage) => {
+        metricsByPage[page._id] = {
+          ...page,
+        };
+
+        return metricsByPage;
+      },
+      {} as { [pageId: string]: Record<string, number> }
+    );
+
+    const previousMetricsByPage = previous.reduce(
+      (metricsByPage, page: VisitsByPage) => {
+        metricsByPage[page._id] = {
+          ...page,
+        };
+
+        return metricsByPage;
+      },
+      {} as { [pageId: string]: Record<string, number> }
+    );
+
+    return Object.keys(currentMetricsByPage).map((pageId: string) => {
+      const currentMetrics = currentMetricsByPage[pageId];
+      const previousMetrics = previousMetricsByPage[pageId];
+
+      return {
+        ...currentMetrics,
+        percentChange: previousMetrics
+          ? percentChange(currentMetrics[propPath], previousMetrics[propPath])
+          : null,
+      };
+    });
   });
 }
