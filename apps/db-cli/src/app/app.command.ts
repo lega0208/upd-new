@@ -2,6 +2,7 @@ import { Command, CommandRunner, SubCommand } from 'nest-commander';
 import { ConsoleLogger } from '@nestjs/common';
 import { DataIntegrityService } from '@cra-arc/data-integrity';
 import { UpdateCommand } from './update.command';
+import { RepopulateCommand } from './repopulate.command';
 
 @SubCommand({
   name: 'db-repair',
@@ -28,7 +29,7 @@ export class DbChecksCommand implements CommandRunner {
 @Command({
   name: 'run',
   arguments: '[task]',
-  subCommands: [DbChecksCommand, UpdateCommand],
+  subCommands: [DbChecksCommand, UpdateCommand, RepopulateCommand],
   description: 'Run database scripts',
   options: {
     isDefault: true,

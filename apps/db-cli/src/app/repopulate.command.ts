@@ -10,7 +10,7 @@ import { DbUpdateService } from '@cra-arc/db-update';
 import { DataIntegrityService } from '@cra-arc/data-integrity';
 
 @QuestionSet({ name: 'repopulate' })
-export class UpdateQuestions {
+export class RepopulateQuestions {
   @Question({
     message: 'What collection would you like to repopulate?',
     name: 'target',
@@ -27,7 +27,7 @@ export class UpdateQuestions {
   name: 'repopulate',
   description: 'Repopulate a database collection',
 })
-export class UpdateCommand implements CommandRunner {
+export class RepopulateCommand implements CommandRunner {
   constructor(
     private readonly inquirerService: InquirerService,
     private dataIntegrityService: DataIntegrityService,
