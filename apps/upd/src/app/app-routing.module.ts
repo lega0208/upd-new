@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AppComponent } from './app.component';
 
 const routes: Routes = [
   {
@@ -14,16 +13,19 @@ const routes: Routes = [
       import('@cra-arc/upd/views/overview').then(
         (module) => module.OverviewModule
       ),
+    data: { animation: 'overview' },
   },
   {
     path: 'pages',
     loadChildren: () =>
       import('@cra-arc/upd/views/pages').then((module) => module.PagesModule),
+    data: { animation: 'pages' },
   },
   {
     path: 'tasks',
     loadChildren: () =>
       import('@cra-arc/upd/views/tasks').then((module) => module.TasksModule),
+    data: { animation: 'tasks' },
   },
   {
     path: 'projects',
@@ -31,6 +33,7 @@ const routes: Routes = [
       import('@cra-arc/upd/views/projects').then(
         (module) => module.ProjectsModule
       ),
+    data: { animation: 'projects' },
   },
   { path: '**', redirectTo: 'overview' },
 ];

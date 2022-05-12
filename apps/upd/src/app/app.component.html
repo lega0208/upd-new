@@ -2,7 +2,9 @@
   <app-header [lang]="(currentLang$ | async) || en"></app-header>
   <app-sidebar></app-sidebar>
   <h1 class="visually-hidden">{{ title }}</h1>
-  <router-outlet></router-outlet>
+  <main [@routeAnimations]="getRouteAnimationData()" style="min-height: 100%">
+    <router-outlet></router-outlet>
+  </main>
   <footer class="mt-4">
     <div class="d-flex flex-row-reverse mt-auto pb-4">
       <div class="col-lg-2 col-md-3 col-sm-4 col-4">
