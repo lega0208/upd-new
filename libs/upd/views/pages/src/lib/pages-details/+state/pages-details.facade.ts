@@ -619,14 +619,16 @@ function mapToPercentChange(
 const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
+  const dateFormat = lang === 'fr-CA' ? 'D MMM' : 'MMM D';
+
   const formattedStartDate = dayjs(startDate)
     .utc(false)
     .locale(lang)
-    .format('MMM D');
+    .format(dateFormat);
   const formattedEndDate = dayjs(endDate)
     .utc(false)
     .locale(lang)
-    .format('MMM D');
+    .format(dateFormat);
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };

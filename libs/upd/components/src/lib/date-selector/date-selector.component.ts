@@ -56,7 +56,7 @@ export class DateSelectorComponent {
 export const dateRangeToDisplayFormat = (date: string, lang: LocaleId) =>
   date
     .split('/')
-    .map((d) => dayjs(d).locale(lang).format('MMM DD'))
+    .map((d) => dayjs(d).locale(lang).format(lang === 'en-CA' ? 'MMM DD' : 'DD MMM'))
     .join(' - ');
 
 export const periodToDisplayFormat = (period: DateRangePeriod) =>

@@ -15,7 +15,7 @@ import { percentChange, PickByType } from '@cra-arc/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { I18nFacade, selectUrl } from '@cra-arc/upd/state';
 import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 
 dayjs.extend(utc);
@@ -41,6 +41,8 @@ export class TasksDetailsFacade {
     map((data) => data.title),
     debounceTime(250)
   );
+
+  currentRoute$ = this.store.pipe(select(selectUrl));
 
   titleHeader$ = combineLatest([
     this.tasksDetailsData$,
@@ -342,14 +344,16 @@ export class TasksDetailsFacade {
 const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
+  const dateFormat = lang === FR_CA ? 'D MMM' : 'MMM D';
+
   const formattedStartDate = dayjs(startDate)
     .utc(false)
     .locale(lang)
-    .format('MMM D');
+    .format(dateFormat);
   const formattedEndDate = dayjs(endDate)
     .utc(false)
     .locale(lang)
-    .format('MMM D');
+    .format(dateFormat);
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };
