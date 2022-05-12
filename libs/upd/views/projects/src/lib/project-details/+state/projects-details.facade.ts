@@ -1,4 +1,8 @@
-import { BubbleChartMultiSeries, SingleSeries } from '@amonsour/ngx-charts';
+import {
+  BubbleChartMultiSeries,
+  MultiSeries,
+  SingleSeries,
+} from '@amonsour/ngx-charts';
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { combineLatest, map } from 'rxjs';
@@ -498,6 +502,62 @@ export class ProjectsDetailsFacade {
       });
     })
   );
+
+  lineTaskChart$ = combineLatest([
+        this.projectsDetailsData$,
+        this.currentLang$,
+      ]).pipe(
+        map(([data, lang]) => {
+  const taskSuccessByUxData = data?.taskSuccessByUxTest;
+
+      const tasks = taskSuccessByUxData
+        ?.map((uxTest) => uxTest?.tasks?.split('; '))
+        .reduce((acc, val) => acc.concat(val), [])
+        .filter((v, i, a) => a.indexOf(v) === i);
+
+      const taskSuccess = tasks
+        ?.map((task, i) => {
+          const successRate = taskSuccessByUxData
+            ?.map((uxTest) => {
+              const taskSuccessRate = uxTest?.tasks
+                ?.split('; ')
+                .find((t) => t === task);
+
+              return {
+                value: taskSuccessRate ? uxTest?.success_rate : null,
+                name: uxTest?.test_type
+                  ? this.i18n.service.translate(uxTest.test_type, lang)
+                  : '',
+                extra: {
+                  date: uxTest?.date, 
+                }
+              };
+            })
+            .filter((v) => v.value !== null && v.value !== undefined)
+            .sort((a, b) => a.name.localeCompare(b.name));
+          return {
+            task,
+            date: successRate?.map((v) => v.extra.date),
+            success_rate: successRate
+              ?.map((success) => {
+                return {
+                  ...success,
+                };
+              })
+              .filter(({ value }) => value !== null),
+          };
+        })
+        .map((task) => ({
+          name: task.task
+            ? this.i18n.service.translate(task.task, lang)
+            : task.task,
+          series: task.success_rate,
+        }))
+        .filter((v) => v.name !== null && v.name !== '');
+
+      return taskSuccess;
+        })
+      );
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
 
