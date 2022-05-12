@@ -101,11 +101,11 @@ export class TasksService {
     })) as TasksHomeAggregatedData[];
 
     const tasks = [...tasksData, ...tasksWithoutMetrics].sort((a, b) => {
-      if (a.title < b.title) {
-        return -1;
-      }
-      if (a.title > b.title) {
+      if (a.visits < b.visits) {
         return 1;
+      }
+      if (a.visits > b.visits) {
+        return -1;
       }
       return 0;
     });
