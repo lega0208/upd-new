@@ -27,8 +27,6 @@ import {
   LegendOptions,
   BarOrientation,
   DataItem,
-  getUniqueXDomainValues,
-  StringOrNumberOrDate,
 } from '@amonsour/ngx-charts';
 import { isPlatformServer } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
@@ -186,11 +184,19 @@ export class ComboGroupedVerticalBarLineChartComponent extends BaseChartComponen
 
     if (!this.yAxis) {
       this.legendSpacing = 0;
-    } else if (this.showRightYAxisLabel && this.yAxis && this.legendPosition == LegendPosition.Right) {
+    } else if (
+      this.showRightYAxisLabel &&
+      this.yAxis &&
+      this.legendPosition == LegendPosition.Right
+    ) {
       this.legendSpacing = 80;
-    } else if (this.showRightYAxisLabel && this.yAxis && this.legendPosition == LegendPosition.Below) {
-        this.legendSpacing = 80;
-      } else {
+    } else if (
+      this.showRightYAxisLabel &&
+      this.yAxis &&
+      this.legendPosition == LegendPosition.Below
+    ) {
+      this.legendSpacing = 80;
+    } else {
       this.legendSpacing = 40;
     }
 

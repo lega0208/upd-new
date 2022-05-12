@@ -17,7 +17,10 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
   langLink = 'en';
   baseline = '';
 
+  lineChart = lineChart;
+
   bubbleChart$ = this.projectsDetailsService.bubbleChart$;
+  lineTaskChart$ = this.projectsDetailsService.lineTaskChart$;
 
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
@@ -114,3 +117,24 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
     );
   }
 }
+
+const lineChart = [
+  {
+    name: 'Finding Child Tax Benefit (CCB) Amount	',
+    series: [
+      {
+        name: 'Baseline',
+        value: 0.25,
+      },
+    ],
+  },
+  {
+    name: 'Change banking information (MyAccount)',
+    series: [
+      {
+        name: 'Baseline',
+        value: 0.5,
+      },
+    ],
+  },
+];

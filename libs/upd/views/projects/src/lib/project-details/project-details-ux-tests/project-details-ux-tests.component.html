@@ -24,12 +24,13 @@
     <div class="col-lg-12">
       <app-charts
         [title]="'Tasks success by Test'"
-        [data]="(bubbleChart$ | async) || []"
-        [displayLegend]="'below'"
-        [type]="'bubble'"
+        [data]="(lineTaskChart$ | async) || []"
+        [type]="'line'"
         [xAxisLabel]="'UX test types'"
         [yAxisLabel]="'Task success rate (%)'"
         [isPercent]="true"
+        [showDataPointCircles]="true"
+        [maxXAxisTickLength]="40"
         [table]="(taskSuccessByUxTest$ | async) || []"
         [tableCols]="taskSuccessRateCols"
       ></app-charts>

@@ -9,7 +9,6 @@ import {
   MultiSeries,
 } from '@amonsour/ngx-charts';
 import { CurveFactory } from 'd3-shape';
-import localeData from 'dayjs/plugin/localeData';
 import { curves, Curves, ChartTypes } from './types';
 import { ColumnConfig } from '../data-table-styles/types';
 import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
@@ -18,10 +17,13 @@ import { I18nFacade } from '@cra-arc/upd/state';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 registerLocaleData(localeFr);
+import * as d3 from 'd3';
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
+
+dayjs.extend(utc);
 
 @Component({
   selector: 'app-charts',
@@ -30,7 +32,7 @@ import 'dayjs/esm/locale/fr-ca';
 })
 export class ChartsComponent implements OnInit {
   view?: [number, number];
-  lang = 'en';
+  lang!: string;
   langLink = 'en';
   @Input() convertToLine = false;
 
@@ -133,6 +135,9 @@ export class ChartsComponent implements OnInit {
   colourMerge!: Color;
   curve?: CurveFactory;
 
+  // line
+  @Input() showDataPointCircles = false;
+
   colorScheme!: Color;
   legendPosition!: LegendPosition;
 
@@ -144,6 +149,7 @@ export class ChartsComponent implements OnInit {
   minRadius = 5;
 
   @Input() isPercent = false;
+  @Input() scaleBy = 1000;
 
   chartData: SingleSeries | MultiSeries | null = [];
   @Input() table: any;
@@ -161,13 +167,13 @@ export class ChartsComponent implements OnInit {
     }
 
     this.currentLang$.subscribe((lang) => {
-      this.lang = lang === EN_CA ? 'en' : 'fr';
+      this.lang = lang === EN_CA ? 'en' : 'fr-ca';
     });
 
     if (this.isPercent && this.type === 'horizontal-bar') {
       this.xScaleMax = 1;
       this.xScaleMin = 0;
-    } else if (this.isPercent && this.type === 'bubble') {
+    } else if (this.isPercent) {
       this.yScaleMax = 1;
       this.yScaleMin = 0;
     }
@@ -247,37 +253,37 @@ export class ChartsComponent implements OnInit {
     `;
   }
 
-  yLeftAxisScale(min: number, max: number) {
-    return { min: `${min}`, max: `${max}` };
-  }
+  yLeftAxisScale = (min: number, max: number) => {
+    return { min: min, max: max };
+  };
 
-  yRightAxisScale(min: number, max: number) {
-    return { min: `${min}`, max: `${max}` };
-  }
+  yRightAxisScale = (min: number, max: number) => {
+    return { min: min, max: max };
+  };
 
   yLeftTickFormat = (data: number) => {
-    return (data / 1000).toLocaleString(this.lang);
-  }
+    return (data / this.scaleBy).toLocaleString(this.lang);
+  };
 
   yRightTickFormat = (data: number) => {
-    return (data / 1000).toLocaleString(this.lang);
-  }
+    return (data / this.scaleBy).toLocaleString(this.lang);
+  };
 
   xAxisTickFormat = (data: number) => {
-    return (data / 1000).toLocaleString(this.lang);
-  }
-  
-  xAxisPercentTickFormat(data: number) {
+    return (data / this.scaleBy).toLocaleString(this.lang);
+  };
+
+  xAxisPercentTickFormat = (data: number) => {
     return data * 100;
-  }
+  };
 
   yAxisTickFormat = (data: number) => {
-    return (data / 1000).toLocaleString(this.lang);
-  }
+    return (data / this.scaleBy).toLocaleString(this.lang);
+  };
 
-  yAxisPercentTickFormat(data: number) {
+  yAxisPercentTickFormat = (data: number) => {
     return data * 100;
-  }
+  };
 
   getGaugeMin() {
     return this.gaugeMin;

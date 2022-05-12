@@ -14,7 +14,7 @@ import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { I18nFacade, selectDatePeriodSelection } from '@cra-arc/upd/state';
 
 dayjs.extend(utc);
 
@@ -41,6 +41,7 @@ export class PagesDetailsFacade {
   currentLang$ = this.i18n.currentLang$;
 
   dateRange$ = this.store.pipe(map((data) => data?.data.dateRange));
+  dateRangeSelected$ = this.store.pipe(select(selectDatePeriodSelection));
 
   dateRangeLabel$ = combineLatest([
     this.pagesDetailsData$,
@@ -104,16 +105,16 @@ export class PagesDetailsFacade {
   visitsByDay$ = combineLatest([
     this.pagesDetailsData$,
     this.currentLang$,
+    this.dateRangeSelected$,
   ]).pipe(
-    map(([data, lang]) => {
+    map(([data, lang, dateRangePeriod]) => {
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
         data?.comparisonDateRangeData?.visitsByDay || [];
       const days = visitsByDay?.length || 0;
       const prevDays = comparisonVisitsByDay?.length || 0;
       const maxDays = Math.max(days, prevDays);
-      const granularity = Math.ceil(days / 7);
-      const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
+      const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
       let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
       let [prevStartDate] = (data.comparisonDateRange || '')
         .split('/')
@@ -122,6 +123,8 @@ export class PagesDetailsFacade {
       if (!visitsByDay) {
         return [] as MultiSeries;
       }
+
+      const isWeekly = dateRangePeriod === 'weekly' ? true : false;
 
       const isCurrZero = visitsByDay.every((v) => v.visits === 0);
       const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
@@ -150,50 +153,52 @@ export class PagesDetailsFacade {
         })
       );
 
-      let dayCount = 0;
+      if (!isWeekly) {
+        let dayCount = 0;
 
-      while (dayCount < maxDays) {
-        const prevMonthDays = getMonthlyDays(prevStartDate);
-        const currMonthDays = getMonthlyDays(startDate);
+        while (dayCount < maxDays) {
+          const prevMonthDays = getMonthlyDays(prevStartDate);
+          const currMonthDays = getMonthlyDays(startDate);
 
-        if (currMonthDays > prevMonthDays) {
-          // if the current month has more days than the previous month,
-          // we need to pad the previous month with zeros
+          if (currMonthDays > prevMonthDays) {
+            // if the current month has more days than the previous month,
+            // we need to pad the previous month with zeros
 
-          const daysToPad = currMonthDays - prevMonthDays;
-          comparisonDateRangeSeries.splice(
-            dayCount + prevMonthDays,
-            0,
-            ...Array(daysToPad).fill({
-              date: '*',
-              visits: 0,
-            })
-          );
+            const daysToPad = currMonthDays - prevMonthDays;
+            comparisonDateRangeSeries.splice(
+              dayCount + prevMonthDays,
+              0,
+              ...Array(daysToPad).fill({
+                date: '*',
+                visits: 0,
+              })
+            );
 
-          dayCount += currMonthDays;
-        } else {
-          // if the current month has less days than the previous month,
-          // we need to pad the current month with zeros
+            dayCount += currMonthDays;
+          } else {
+            // if the current month has less days than the previous month,
+            // we need to pad the current month with zeros
 
-          const daysToPad = prevMonthDays - currMonthDays;
+            const daysToPad = prevMonthDays - currMonthDays;
 
-          dateRangeSeries.splice(
-            dayCount + currMonthDays,
-            0,
-            ...Array(daysToPad).fill({
-              date: '*',
-              visits: 0,
-            })
-          );
+            dateRangeSeries.splice(
+              dayCount + currMonthDays,
+              0,
+              ...Array(daysToPad).fill({
+                date: '*',
+                visits: 0,
+              })
+            );
 
-          dayCount += prevMonthDays;
+            dayCount += prevMonthDays;
+          }
+
+          prevStartDate = dayjs(prevStartDate)
+            .utc(false)
+            .add(1, 'month')
+            .toDate();
+          startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
         }
-
-        prevStartDate = dayjs(prevStartDate)
-          .utc(false)
-          .add(1, 'month')
-          .toDate();
-        startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
       }
 
       let visitsByDayData: MultiSeries = [];
@@ -255,7 +260,10 @@ export class PagesDetailsFacade {
           name: this.i18n.service.translate('Tablet', lang),
           value: data?.dateRangeData?.visits_device_tablet || 0,
         },
-        { name: this.i18n.service.translate('Other', lang), value: data?.dateRangeData?.visits_device_other || 0 },
+        {
+          name: this.i18n.service.translate('Other', lang),
+          value: data?.dateRangeData?.visits_device_other || 0,
+        },
       ];
 
       const comparisonDataByDeviceType = [
@@ -423,15 +431,27 @@ export class PagesDetailsFacade {
     visits_referrer_searchengine: 'Search Engines',
     visits_referrer_typed_bookmarked: 'Typed/Bookmarked',
     visits_referrer_social: 'Social Networks',
-  } as Record<keyof PageAggregatedData, string>
+  } as Record<keyof PageAggregatedData, string>;
 
-  referrerType$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
+  referrerType$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
     map(([data, lang]) => {
-      const dataByReferrerType = Object.entries(this.referrerTypePropToKeyMap).map(([prop, refType]) => {
-        const currentVal = (data?.dateRangeData?.[prop as keyof PageAggregatedData] || 0) as number;
-        const previousVal = (data?.comparisonDateRangeData?.[prop as keyof PageAggregatedData] || 0) as number;
+      const dataByReferrerType = Object.entries(
+        this.referrerTypePropToKeyMap
+      ).map(([prop, refType]) => {
+        const currentVal = (data?.dateRangeData?.[
+          prop as keyof PageAggregatedData
+        ] || 0) as number;
+        const previousVal = (data?.comparisonDateRangeData?.[
+          prop as keyof PageAggregatedData
+        ] || 0) as number;
 
-        const change = previousVal === 0 ? Infinity : (currentVal - previousVal) / previousVal;
+        const change =
+          previousVal === 0
+            ? Infinity
+            : (currentVal - previousVal) / previousVal;
 
         return {
           type: this.i18n.service.translate(refType, lang),
@@ -465,22 +485,32 @@ export class PagesDetailsFacade {
     visits_geo_sk: 'Saskatchewan',
     visits_geo_yt: 'Yukon',
     visits_geo_outside_canada: 'Outside Canada',
-  } as Record<keyof PageAggregatedData, string>
+  } as Record<keyof PageAggregatedData, string>;
 
-  visitorLocation$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
+  visitorLocation$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
     map(([data, lang]) => {
-      const dataByLocation = Object.entries(this.propToProvinceMap).map(([prop, province]) => {
-        const currentVal = (data?.dateRangeData?.[prop as keyof PageAggregatedData] || 0) as number;
-        const previousVal = (data?.comparisonDateRangeData?.[prop as keyof PageAggregatedData] || 0) as number;
+      const dataByLocation = Object.entries(this.propToProvinceMap).map(
+        ([prop, province]) => {
+          const currentVal = (data?.dateRangeData?.[
+            prop as keyof PageAggregatedData
+          ] || 0) as number;
+          const previousVal = (data?.comparisonDateRangeData?.[
+            prop as keyof PageAggregatedData
+          ] || 0) as number;
 
-        const change = previousVal === 0 ? 0 : (currentVal - previousVal) / previousVal;
+          const change =
+            previousVal === 0 ? 0 : (currentVal - previousVal) / previousVal;
 
-        return {
-          province: this.i18n.service.translate(province, lang),
-          value: currentVal,
-          change,
-        };
-      });
+          return {
+            province: this.i18n.service.translate(province, lang),
+            value: currentVal,
+            change,
+          };
+        }
+      );
 
       const isZero = dataByLocation.every((v) => v.value === 0);
 

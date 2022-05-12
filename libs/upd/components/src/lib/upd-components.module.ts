@@ -22,6 +22,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import {
   ComboGroupedVerticalBarLineChartComponent,
   ComboSeriesVerticalComponent,
+  ComboBubbleLineChartComponent,
   ChartsComponent,
 } from './charts';
 import { AlertComponent } from './alert/alert.component';
@@ -60,6 +61,7 @@ import { I18nModule } from '@cra-arc/upd/i18n';
     DateSelectorDropdownComponent,
     ComboGroupedVerticalBarLineChartComponent,
     ComboSeriesVerticalComponent,
+    ComboBubbleLineChartComponent,
     NavTabsComponent,
     DataCardComponent,
     AlertComponent,
@@ -85,6 +87,7 @@ import { I18nModule } from '@cra-arc/upd/i18n';
     DateSelectorDropdownComponent,
     ComboGroupedVerticalBarLineChartComponent,
     ComboSeriesVerticalComponent,
+    ComboBubbleLineChartComponent,
     NavTabsComponent,
     DataCardComponent,
     AlertComponent,
