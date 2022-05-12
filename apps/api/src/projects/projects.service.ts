@@ -313,18 +313,14 @@ export class ProjectsService {
     }) as (Partial<UxTest> & { tasks: string })[];
 
     const lastTest = uxTests.reduce((latestTest, test) => {
-      if (latestTest === null) {
-        return test;
-      }
-
-      if (test.date > latestTest.date) {
+      if (test.date > latestTest?.date || test.success_rate) {
         return test;
       }
 
       return latestTest;
     }, null);
 
-    const dateFromLastTest: Date | void = lastTest?.date || null;
+    const dateFromLastTest: Date | null = lastTest?.date || null;
 
     const avgTaskSuccessFromLastTest = getAvgSuccessFromLastTests(
       dateFromLastTest,
