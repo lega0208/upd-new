@@ -129,20 +129,21 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
 
       this.feedbackCommentsCols = [
         { field: 'url', header: this.i18n.service.translate('URL', lang) },
-        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date' },
+        //{ field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date' },
+        { field: 'date', header: this.i18n.service.translate('date', lang) },
         { field: 'tag', header: this.i18n.service.translate('tags', lang) },
         { field: 'whats_wrong', header: this.i18n.service.translate('d3-www', lang) },
         { field: 'comment', header: this.i18n.service.translate('comment', lang) },
       ];
 
-      this.feedbackByTagsTableCols = [
-        { field: 'tag', header: this.i18n.service.translate('category', lang) },
-        {
-          field: 'numComments',
-          header: this.i18n.service.translate('# of comments', lang),
-          pipe: 'number',
-        },
-      ];
+      // this.feedbackByTagsTableCols = [
+      //   { field: 'tag', header: this.i18n.service.translate('category', lang) },
+      //   {
+      //     field: 'numComments',
+      //     header: this.i18n.service.translate('# of comments', lang),
+      //     pipe: 'number',
+      //   },
+      // ];
 
       this.feedbackByTagsTableCols = [
         { field: 'tag', header: this.i18n.service.translate('category', lang) },

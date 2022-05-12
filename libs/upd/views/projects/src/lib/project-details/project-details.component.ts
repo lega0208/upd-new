@@ -27,7 +27,8 @@ export class ProjectDetailsComponent implements OnInit {
 
   status$ = this.projectsDetailsService.status$;
   loaded$ = this.projectsDetailsService.loaded$;
-
+  currentRoute$ = this.projectsDetailsService.currentRoute$;
+  
   navTabs: { href: string; title: string }[] = [];
 
   constructor(

@@ -18,6 +18,8 @@ export class TaskDetailsComponent implements OnInit {
   error$ = this.taskDetailsService.error$;
   loading$ = this.taskDetailsService.loading$;
 
+  currentRoute$ = this.taskDetailsService.currentRoute$;
+
   // navTabs: { href: string; title: string }[] = [
   //   { href: 'summary', title: 'Summary' },
   //   { href: 'webtraffic', title: 'Web Traffic' },

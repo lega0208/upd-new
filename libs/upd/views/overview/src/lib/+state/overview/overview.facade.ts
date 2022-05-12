@@ -690,8 +690,10 @@ export class OverviewFacade {
 const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-  const formattedStartDate = dayjs.utc(startDate).locale(lang).format('MMM D');
-  const formattedEndDate = dayjs.utc(endDate).locale(lang).format('MMM D');
+  const dateFormat = lang === FR_CA ? 'D MMM' : 'MMM D';
+
+  const formattedStartDate = dayjs.utc(startDate).locale(lang).format(dateFormat);
+  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };

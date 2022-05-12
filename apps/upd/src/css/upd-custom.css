@@ -461,3 +461,16 @@ margin: 0px 20px 0px 20px;
 /* .alert {
   padding: 0;
 } */
+
+.p-datatable-thead > tr > th {
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+.chart-legend .legend-label-text {
+  line-height: 16px !important;
+}
+
+.chart-legend .legend-title-text {
+  line-height: 18px !important;
+}

@@ -12,5 +12,7 @@
 </h2>
 
 <app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
-<app-date-selector></app-date-selector>
+<app-date-selector
+  *ngIf="!((currentRoute$ | async) || '').endsWith('uxtests')"
+  ></app-date-selector>
 <router-outlet></router-outlet>

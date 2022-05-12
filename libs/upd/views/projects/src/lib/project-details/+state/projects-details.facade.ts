@@ -13,12 +13,12 @@ import {
   VisitsByPage,
 } from '@cra-arc/types-common';
 import { percentChange, PickByType } from '@cra-arc/utils-common';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { I18nFacade, selectUrl } from '@cra-arc/upd/state';
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
+import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 
 dayjs.extend(utc);
 
@@ -37,6 +37,8 @@ export class ProjectsDetailsFacade {
   );
 
   currentLang$ = this.i18n.currentLang$;
+
+  currentRoute$ = this.store.pipe(select(selectUrl));
 
   title$ = this.projectsDetailsData$.pipe(
     map((data) => data?.title.replace(/\s+/g, ' '))
@@ -389,8 +391,24 @@ export class ProjectsDetailsFacade {
     })
   );
 
-  feedbackComments$ = this.projectsDetailsData$.pipe(
-    map((data) => [...data.feedbackComments])
+  // feedbackComments$ = this.projectsDetailsData$.pipe(
+  //   map((data) => [...data.feedbackComments])
+  // );
+
+  feedbackComments$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
+      const feedbackComments = data?.feedbackComments?.map((d) => ({
+        ...d,
+        date: dayjs.utc(d.date).locale(lang).format(dateFormat),
+        tag: d.tag ? this.i18n.service.translate(d.tag, lang) : d.tag,
+        whats_wrong: d.whats_wrong ? this.i18n.service.translate(d.whats_wrong, lang) : d.whats_wrong,
+      }));
+      return [...(feedbackComments || [])];
+    })
   );
 
   feedbackByTags$ = this.projectsDetailsData$.pipe(
@@ -416,7 +434,8 @@ export class ProjectsDetailsFacade {
       const currentSeries = {
         name: getWeeklyDatesLabel(dateRange, lang),
         series: feedbackByTags.map((feedback) => ({
-          name: feedback.tag,
+          //name: feedback.tag,
+          name: this.i18n.service.translate(`${feedback.tag}`, lang),
           value: feedback.numComments,
         })),
       };
@@ -424,7 +443,8 @@ export class ProjectsDetailsFacade {
       const previousSeries = {
         name: getWeeklyDatesLabel(comparisonDateRange || '', lang),
         series: feedbackByTagsPrevious.map((feedback) => ({
-          name: feedback.tag,
+          //name: feedback.tag,
+          name: this.i18n.service.translate(`${feedback.tag}`, lang),
           value: feedback.numComments,
         })),
       };
@@ -447,10 +467,28 @@ export class ProjectsDetailsFacade {
     )
   );
 
-  feedbackByTagsTable$ = this.projectsDetailsData$.pipe(
-    map((data) => {
-      return data.dateRangeData?.feedbackByTags.map((feedback, i) => ({
-        tag: feedback.tag,
+  // feedbackByTagsTable$ = combineLatest([
+  //   this.projectsDetailsData$,
+  //   this.currentLang$,
+  // ]).pipe(
+  //   map(([data, lang]) => {
+  //     return data.dateRangeData?.feedbackByTags.map((feedback, i) => ({
+  //       //tag: feedback.tag,
+  //       tag: this.i18n.service.translate(`${feedback.tag}`, lang),
+  //       currValue: feedback.numComments,
+  //       prevValue: data.comparisonDateRangeData?.feedbackByTags?.[i]?.numComments || 0,
+  //     }))
+  //   })
+  // );
+
+  feedbackByTagsTable$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      return data.dateRangeData?.feedbackByTags.map((feedback,i) => ({
+        //tag: feedback.tag,
+        tag: this.i18n.service.translate(`${feedback.tag}`, lang),
         currValue: feedback.numComments,
         prevValue: data.comparisonDateRangeData?.feedbackByTags?.[i]?.numComments || 0,
       }))
@@ -595,8 +633,10 @@ function mapPageMetricsArraysWithPercentChange(
 const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-  const formattedStartDate = dayjs.utc(startDate).locale(lang).format('MMM D');
-  const formattedEndDate = dayjs.utc(endDate).locale(lang).format('MMM D');
+  const dateFormat = lang === 'fr-CA' ? 'D MMM' : 'MMM D';
+
+  const formattedStartDate = dayjs.utc(startDate).locale(lang).format(dateFormat);
+  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };
