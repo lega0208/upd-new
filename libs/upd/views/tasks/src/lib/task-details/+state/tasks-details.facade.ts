@@ -42,7 +42,10 @@ export class TasksDetailsFacade {
     debounceTime(250)
   );
 
-  currentRoute$ = this.store.pipe(select(selectUrl));
+  currentRoute$ = this.store.pipe(
+    select(selectUrl),
+    map((url) => url.replace(/\?.+$/, ''))
+  );
 
   titleHeader$ = combineLatest([
     this.tasksDetailsData$,

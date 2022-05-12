@@ -31,7 +31,10 @@ export class OverviewFacade {
   dateRangeSelected$ = this.store.pipe(select(selectDatePeriodSelection));
   overviewData$ = this.store.pipe(select(OverviewSelectors.getOverviewData));
 
-  currentRoute$ = this.store.pipe(select(selectUrl));
+  currentRoute$ = this.store.pipe(
+    select(selectUrl),
+    map((url) => url.replace(/\?.+$/, ''))
+  );
 
   visitors$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.visitors || 0)
@@ -90,11 +93,8 @@ export class OverviewFacade {
   testTypeTranslations$ = combineLatest([this.projects$, this.currentLang$]).pipe(
     mergeMap(([projects]) => {
       const splitTestTypes = projects.flatMap((project) => project.testType || []);
-      console.log(splitTestTypes);
 
       const testTypes = [...new Set<string>(splitTestTypes)];
-
-      console.log(testTypes);
 
       return testTypes.length > 0 ? this.i18n.service.get(testTypes) : of({});
     })
@@ -107,7 +107,6 @@ export class OverviewFacade {
   ]).pipe(
     map(([data, lang, testTypeTranslations]) => {
       const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
-      console.log(testTypeTranslations);
 
       const projects = data?.projects?.projects.map((data) => {
         const testType = (data.testType || []).map((testType: string) => {

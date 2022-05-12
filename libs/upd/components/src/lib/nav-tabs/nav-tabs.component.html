@@ -4,7 +4,7 @@
       <a
         [routerLinkActive]="['active']"
         [routerLink]="tab.href"
-        attr.data-i18n="tab-{{ tab.href }}"
+        [queryParamsHandling]="'merge'"
         translate="tab-{{ tab.href }}">
 		{{ tab.title }}
       </a>

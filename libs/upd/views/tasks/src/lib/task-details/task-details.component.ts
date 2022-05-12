@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { TasksDetailsFacade } from './+state/tasks-details.facade';
 
 import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest } from 'rxjs';
 import { EN_CA } from '@cra-arc/upd/i18n';
 
 @Component({
@@ -19,15 +18,6 @@ export class TaskDetailsComponent implements OnInit {
   loading$ = this.taskDetailsService.loading$;
 
   currentRoute$ = this.taskDetailsService.currentRoute$;
-
-  // navTabs: { href: string; title: string }[] = [
-  //   { href: 'summary', title: 'Summary' },
-  //   { href: 'webtraffic', title: 'Web Traffic' },
-  //   { href: 'searchanalytics', title: 'Search Analytics' },
-  //   { href: 'pagefeedback', title: 'Page Feedback' },
-  //   { href: 'calldrivers', title: 'Call Drivers' },
-  //   { href: 'uxtests', title: 'UX Tests' },
-  // ];
 
   navTabs: { href: string; title: string }[] = [];
 

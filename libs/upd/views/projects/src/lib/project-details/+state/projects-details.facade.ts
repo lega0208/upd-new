@@ -38,7 +38,10 @@ export class ProjectsDetailsFacade {
 
   currentLang$ = this.i18n.currentLang$;
 
-  currentRoute$ = this.store.pipe(select(selectUrl));
+  currentRoute$ = this.store.pipe(
+    select(selectUrl),
+    map((url) => url.replace(/\?.+$/, ''))
+  );
 
   title$ = this.projectsDetailsData$.pipe(
     map((data) => data?.title.replace(/\s+/g, ' '))
@@ -391,10 +394,6 @@ export class ProjectsDetailsFacade {
     })
   );
 
-  // feedbackComments$ = this.projectsDetailsData$.pipe(
-  //   map((data) => [...data.feedbackComments])
-  // );
-
   feedbackComments$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,
@@ -405,7 +404,9 @@ export class ProjectsDetailsFacade {
         ...d,
         date: dayjs.utc(d.date).locale(lang).format(dateFormat),
         tag: d.tag ? this.i18n.service.translate(d.tag, lang) : d.tag,
-        whats_wrong: d.whats_wrong ? this.i18n.service.translate(d.whats_wrong, lang) : d.whats_wrong,
+        whats_wrong: d.whats_wrong
+          ? this.i18n.service.translate(d.whats_wrong, lang)
+          : d.whats_wrong,
       }));
       return [...(feedbackComments || [])];
     })
@@ -434,7 +435,6 @@ export class ProjectsDetailsFacade {
       const currentSeries = {
         name: getWeeklyDatesLabel(dateRange, lang),
         series: feedbackByTags.map((feedback) => ({
-          //name: feedback.tag,
           name: this.i18n.service.translate(`${feedback.tag}`, lang),
           value: feedback.numComments,
         })),
@@ -443,7 +443,6 @@ export class ProjectsDetailsFacade {
       const previousSeries = {
         name: getWeeklyDatesLabel(comparisonDateRange || '', lang),
         series: feedbackByTagsPrevious.map((feedback) => ({
-          //name: feedback.tag,
           name: this.i18n.service.translate(`${feedback.tag}`, lang),
           value: feedback.numComments,
         })),
@@ -467,31 +466,36 @@ export class ProjectsDetailsFacade {
     )
   );
 
-  // feedbackByTagsTable$ = combineLatest([
-  //   this.projectsDetailsData$,
-  //   this.currentLang$,
-  // ]).pipe(
-  //   map(([data, lang]) => {
-  //     return data.dateRangeData?.feedbackByTags.map((feedback, i) => ({
-  //       //tag: feedback.tag,
-  //       tag: this.i18n.service.translate(`${feedback.tag}`, lang),
-  //       currValue: feedback.numComments,
-  //       prevValue: data.comparisonDateRangeData?.feedbackByTags?.[i]?.numComments || 0,
-  //     }))
-  //   })
-  // );
-
   feedbackByTagsTable$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
-      return data.dateRangeData?.feedbackByTags.map((feedback,i) => ({
-        //tag: feedback.tag,
-        tag: this.i18n.service.translate(`${feedback.tag}`, lang),
-        currValue: feedback.numComments,
-        prevValue: data.comparisonDateRangeData?.feedbackByTags?.[i]?.numComments || 0,
-      }))
+      const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
+      const feedbackByTagsPrevious =
+        data.comparisonDateRangeData?.feedbackByTags || [];
+
+      const allUniqueTags = [
+        ...new Set([
+          ...feedbackByTags.map((d) => d.tag),
+          ...feedbackByTagsPrevious.map((d) => d.tag),
+        ]),
+      ];
+
+      return allUniqueTags.map((tag) => {
+        const currValue =
+          feedbackByTags.find((feedback) => feedback.tag === tag)
+            ?.numComments || 0;
+        const prevValue =
+          feedbackByTagsPrevious.find((feedback) => feedback.tag === tag)
+            ?.numComments || 0;
+
+        return {
+          tag: this.i18n.service.translate(tag, lang),
+          currValue,
+          prevValue,
+        };
+      });
     })
   );
 
@@ -635,7 +639,10 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
 
   const dateFormat = lang === 'fr-CA' ? 'D MMM' : 'MMM D';
 
-  const formattedStartDate = dayjs.utc(startDate).locale(lang).format(dateFormat);
+  const formattedStartDate = dayjs
+    .utc(startDate)
+    .locale(lang)
+    .format(dateFormat);
   const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
 
   return `${formattedStartDate}-${formattedEndDate}`;

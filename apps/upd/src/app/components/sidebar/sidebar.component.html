@@ -1,9 +1,7 @@
 <div class="l-navbar show-n" id="nav-bar">
   <nav class="nav">
     <div>
-      <a class="nav_logo"
-        [routerLink]="[langPath | async]"
-      >
+      <a class="nav_logo" [routerLink]="[langPath | async]" [queryParamsHandling]="'merge'">
         <img
           src="../../../assets/img/upd-logo{{
             (isFr$ | async) ? '-fr' : ''
@@ -15,6 +13,7 @@
         <a
           [routerLink]="[langPath | async, 'overview']"
           [routerLinkActive]="['active']"
+          [queryParamsHandling]="'merge'"
           class="nav_link"
           aria-current="page"
           id="active"
@@ -27,6 +26,7 @@
         <a
           [routerLink]="[langPath | async, 'pages']"
           [routerLinkActive]="['active']"
+          [queryParamsHandling]="'merge'"
           class="nav_link"
         >
           <span class="material-icons nav_icon">layers</span>
@@ -37,6 +37,7 @@
         <a
           [routerLink]="[langPath | async, 'tasks']"
           [routerLinkActive]="['active']"
+          [queryParamsHandling]="'merge'"
           class="nav_link"
         >
           <span class="material-icons nav_icon">assignment</span>
@@ -47,6 +48,7 @@
         <a
           [routerLink]="[langPath | async, 'projects']"
           [routerLinkActive]="['active']"
+          [queryParamsHandling]="'merge'"
           class="nav_link"
         >
           <span class="material-icons nav_icon">folder</span>

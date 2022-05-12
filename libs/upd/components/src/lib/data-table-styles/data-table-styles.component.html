@@ -1,5 +1,9 @@
 <ng-container *ngIf="hasType && config.typeParam">
-  <a *ngIf="config.type === 'link'" [routerLink]="[data[config.typeParam]]">
+  <a
+    *ngIf="config.type === 'link'"
+    [routerLink]="[data[config.typeParam]]"
+    [queryParamsHandling]="'merge'"
+  >
     {{ data[config.field] }}
   </a>
   <ng-container *ngIf="isProjectLabel">
@@ -17,7 +21,7 @@
     [ngClass]="{
       'bg-primary': config.typeParam === 'cops'
     }"
-  translate
+    translate
   >
     COPS
   </span>
@@ -25,7 +29,10 @@
 
 <ng-container *ngIf="hasType && config.typeParams">
   <ng-container *ngIf="config.typeParams.external">
-    <span class="material-icons" style="font-size: 18px; vertical-align: middle;">
+    <span
+      class="material-icons"
+      style="font-size: 18px; vertical-align: middle"
+    >
       wysiwyg
     </span>
     <a
@@ -43,6 +50,7 @@
         data[config.typeParams.link],
         config.typeParams.postLink
       ]"
+      [queryParamsHandling]="'merge'"
     >
       <ng-container *ngIf="config.pipe === 'number'; else elseBlock">
         {{ data[config.field] | number: config.pipeParam:currentLang }}
