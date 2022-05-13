@@ -8,10 +8,10 @@ import { GetTableProps } from '@cra-arc/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 
-type VisitsByPageColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'visitsByPage$'>
+type VisitsByPageColType = GetTableProps<ProjectDetailsFeedbackComponent, 'visitsByPage$'>
 type DyfTableColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'dyfChart$'>
 type WhatWasWrongColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'whatWasWrongChart$'>
-type FeedbackCommentsColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'feedbackComments$'>
+type FeedbackCommentsColType = GetTableProps<ProjectDetailsFeedbackComponent, 'feedbackComments$'>
 type FeedbackByTagsColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'feedbackByTagsTable$'>
 
 @Component({
@@ -26,7 +26,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
 
   visitsByPage$ =
     this.projectsDetailsService.visitsByPageFeedbackWithPercentChange$;
-  visitsByPageCols: ColumnConfig<VisitsByPageColTypes>[] = [];
+  visitsByPageCols: ColumnConfig<VisitsByPageColType>[] = [];
 
   dyfChart$ = this.projectsDetailsService.dyfData$;
   whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
@@ -37,7 +37,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   feedbackByTagsBarChartData$ = this.projectsDetailsService.feedbackByTagsBarChart$;
 
   feedbackComments$ = this.projectsDetailsService.feedbackComments$;
-  feedbackCommentsCols: ColumnConfig<FeedbackCommentsColTypes>[] = [];
+  feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
 
   feedbackByTagsTable$ = this.projectsDetailsService.feedbackByTagsTable$;
   feedbackByTagsTableCols: ColumnConfig<FeedbackByTagsColTypes>[] = [];

@@ -2,7 +2,14 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
-import { PageMetrics, Project, Task, UxTest } from '@cra-arc/db';
+import {
+  Feedback,
+  FeedbackDocument,
+  PageMetrics,
+  Project,
+  Task,
+  UxTest,
+} from '@cra-arc/db';
 import { CallDriver } from '@cra-arc/types-common';
 import type {
   CallDriverDocument,
@@ -16,6 +23,12 @@ import type {
 } from '@cra-arc/types-common';
 import type { ApiParams } from '@cra-arc/upd/services';
 import { TasksHomeAggregatedData } from '@cra-arc/types-common';
+import {
+  getAvgSuccessFromLastTests,
+  getFeedbackComments,
+  getLatestTest,
+  dateRangeSplit, getFeedbackByTags
+} from '@cra-arc/utils-common';
 
 @Injectable()
 export class TasksService {
@@ -24,6 +37,7 @@ export class TasksService {
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
+    @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>,
     @InjectModel(CallDriver.name)
     private calldriversModel: Model<CallDriverDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
@@ -145,7 +159,16 @@ export class TasksService {
       .populate('ux_tests');
 
     const taskUrls = task.pages
-      .map((page) => ('url' in page && page.url) || '')
+      .map((page) => {
+        if ('all_urls' in page && page.all_urls.length) {
+          return page.all_urls;
+        }
+
+        if ('url' in page && page.url) {
+          return page.url;
+        }
+      })
+      .flat()
       .filter((url) => !!url);
 
     const taskTpcId = task.tpc_ids;
@@ -157,6 +180,7 @@ export class TasksService {
       dateRangeData: await getTaskAggregatedData(
         this.pageMetricsModel,
         this.calldriversModel,
+        this.feedbackModel,
         params.dateRange,
         taskUrls,
         taskTpcId
@@ -165,13 +189,15 @@ export class TasksService {
       comparisonDateRangeData: await getTaskAggregatedData(
         this.pageMetricsModel,
         this.calldriversModel,
+        this.feedbackModel,
         params.comparisonDateRange,
         taskUrls,
         taskTpcId
       ),
       taskSuccessByUxTest: [],
-      avgTaskSuccessFromLastTest: 0, // todo: better handle N/A
-      dateFromLastTest: new Date(),
+      avgTaskSuccessFromLastTest: null, // todo: better handle N/A
+      dateFromLastTest: null,
+      feedbackComments: [],
     };
 
     const uxTests = (<UxTestDocument[]>task.ux_tests).map((test) =>
@@ -198,31 +224,15 @@ export class TasksService {
           return 0;
         });
 
-      // todo: aggregate projects instead of single test
-      const lastUxTest = uxTests.reduce((latestTest, test) => {
-        if (!latestTest || !latestTest.date) {
-          return test;
-        }
-
-        if (test.date > latestTest.date) {
-          return test;
-        }
-
-        if (
-          test.date.getTime() === latestTest.date.getTime() &&
-          test.success_rate > latestTest.success_rate
-        ) {
-          return test;
-        }
-
-        return latestTest;
-      }, null);
-
+      returnData.dateFromLastTest = getLatestTest(uxTests)?.date || null;
       returnData.avgTaskSuccessFromLastTest =
-        typeof lastUxTest === 'object' ? lastUxTest['success_rate'] : null;
+        getAvgSuccessFromLastTests(uxTests);
 
-      returnData.dateFromLastTest =
-        'date' in lastUxTest ? lastUxTest.date : new Date(); // todo: better handle nulls
+      returnData.feedbackComments = await getFeedbackComments(
+        params.dateRange,
+        taskUrls,
+        this.feedbackModel
+      );
     }
 
     await this.cacheManager.set(cacheKey, returnData);
@@ -234,11 +244,18 @@ export class TasksService {
 async function getTaskAggregatedData(
   pageMetricsModel: PageMetricsModel,
   calldriversModel: Model<CallDriverDocument>,
+  feedbackModel: Model<FeedbackDocument>,
   dateRange: string,
   pageUrls: string[],
   calldriversTpcId: number[]
-): Promise<Omit<TaskDetailsAggregatedData, 'avgTaskSuccess'>> {
-  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+): Promise<TaskDetailsAggregatedData> {
+  const feedbackByTags = await getFeedbackByTags(
+    dateRange,
+    pageUrls,
+    feedbackModel
+  );
+
+  const [startDate, endDate] = dateRangeSplit(dateRange);
 
   const dateQuery: FilterQuery<Date> = {
     $gte: startDate,
@@ -280,7 +297,6 @@ async function getTaskAggregatedData(
         { _id: '$page._id', title: '$page.title', url: '$page.url' },
       ],
     })
-    // .addFields({ _id: '$page' })
     .project({ page: 0 })
     .sort({ title: 1 })
     .group({
@@ -307,32 +323,26 @@ async function getTaskAggregatedData(
       tpc_id: { $in: calldriversTpcId },
       date: dateQuery,
     })
-    .group({
-      _id: '$enquiry_line',
-      sum: { $sum: '$calls' },
-      doc: { $push: '$$ROOT' },
-    })
-    .replaceRoot({
-      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
-    })
-    .sort({ enquiry_line: 'asc' })
     .project({
       _id: 0,
-      doc: 0,
-      airtable_id: 0,
-      date: 0,
-      calls: 0,
-      tpc_id: 0,
-      topic: 0,
-      subtopic: 0,
-      sub_subtopic: 0,
-      impact: 0,
-      __v: 0,
+      enquiry_line: 1,
+      calls: 1,
     })
+    .group({
+      _id: '$enquiry_line',
+      calls: { $sum: '$calls' },
+    })
+    .project({
+      _id: 0,
+      calls: 1,
+      enquiry_line: '$_id',
+    })
+    .sort({ enquiry_line: 'asc' })
     .exec();
 
   return {
     ...results[0],
     calldriversEnquiry,
+    feedbackByTags,
   };
 }

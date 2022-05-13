@@ -167,11 +167,12 @@ export interface TaskDetailsMetrics {
   gscTotalImpressions: number;
   gscTotalCtr: number;
   gscTotalPosition: number;
-  calldriversEnquiry: { enquiry_line: string; sum: number }[];
+  calldriversEnquiry: { enquiry_line: string; calls: number }[];
 }
 
 export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
   visitsByPage: { _id: string; title: string; visits: number }[];
+  feedbackByTags: { tag: string; numComments: number }[];
 }
 
 export interface TaskDetailsData
@@ -185,6 +186,7 @@ export interface TaskDetailsData
     success_rate: number | null;
     total_users: number;
   }[];
+  feedbackComments: FeedbackComment[];
 }
 
 export type ProjectStatus =

@@ -26,6 +26,7 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     avgTaskSuccessFromLastTest: 0,
     dateFromLastTest: new Date(0),
     taskSuccessByUxTest: [],
+    feedbackComments: []
   },
   loaded: false,
   loading: false,

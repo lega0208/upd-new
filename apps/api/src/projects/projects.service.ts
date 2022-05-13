@@ -11,22 +11,27 @@ import {
   Project,
   Task,
   UxTest,
-  UxTestDocument,
 } from '@cra-arc/db';
 import type {
+  FeedbackComment,
   FeedbackDocument,
   PageDocument,
-  ProjectDocument,
   PageMetricsModel,
-  ProjectsHomeProject,
+  ProjectDocument,
   ProjectsDetailsData,
-  ProjectStatus,
-  FeedbackComment,
   ProjectDetailsAggregatedData,
+  ProjectsHomeProject,
+  ProjectStatus,
   ProjectsHomeData,
+  UxTestDocument,
 } from '@cra-arc/types-common';
 import { ApiParams } from '@cra-arc/upd/services';
 import { dateRangeSplit } from '@cra-arc/utils-common/date';
+import {
+  getAvgSuccessFromLastTests,
+  getFeedbackByTags,
+  getLatestTest,
+} from '@cra-arc/utils-common/data';
 
 dayjs.extend(utc);
 
@@ -312,20 +317,11 @@ export class ProjectsService {
       };
     }) as (Partial<UxTest> & { tasks: string })[];
 
-    const lastTest = uxTests.reduce((latestTest, test) => {
-      if (test.date > latestTest?.date || test.success_rate) {
-        return test;
-      }
-
-      return latestTest;
-    }, null);
+    const lastTest = getLatestTest(uxTests);
 
     const dateFromLastTest: Date | null = lastTest?.date || null;
 
-    const avgTaskSuccessFromLastTest = getAvgSuccessFromLastTests(
-      dateFromLastTest,
-      uxTests
-    );
+    const avgTaskSuccessFromLastTest = getAvgSuccessFromLastTests(uxTests);
 
     const tasks = populatedProjectDoc.tasks as Task[];
 
@@ -375,22 +371,11 @@ async function getAggregatedProjectMetrics(
 ): Promise<ProjectDetailsAggregatedData> {
   const [startDate, endDate] = dateRangeSplit(dateRange);
 
-  const feedbackByTags = await feedbackModel
-    .aggregate<{ tag: string; numComments: number }>()
-    .match({
-      url: { $in: projectUrls },
-      date: { $gte: startDate, $lte: endDate },
-    })
-    .unwind('$tags')
-    .group({
-      _id: '$tags',
-      numComments: { $sum: 1 },
-    })
-    .project({
-      _id: 0,
-      tag: '$_id',
-      numComments: 1,
-    });
+  const feedbackByTags = await getFeedbackByTags(
+    dateRange,
+    projectUrls,
+    feedbackModel
+  );
 
   const projectMetrics = (
     await pageMetricsModel
@@ -453,75 +438,6 @@ async function getAggregatedProjectMetrics(
     ...projectMetrics,
     feedbackByTags,
   };
-}
-
-function getAvgSuccessFromLastTests(
-  lastTestDate: Date | void,
-  uxTests: Partial<UxTest>[]
-) {
-  const lastTests = uxTests.filter(
-    (test) =>
-      test.date &&
-      lastTestDate instanceof Date &&
-      test.date.getTime() === lastTestDate.getTime()
-  );
-
-  const lastTestsByType = lastTests.reduce((acc, test) => {
-    if (!test.test_type) {
-      return acc;
-    }
-
-    if (!(test.test_type in acc)) {
-      acc[test.test_type] = [];
-    }
-
-    acc[test.test_type].push(test);
-
-    return acc;
-  }, {} as { [key: string]: Partial<UxTest>[] });
-
-  const testTypes = Object.keys(lastTestsByType);
-
-  // If there are no tests, return null
-  if (testTypes.length === 0) {
-    return null;
-  }
-
-  // If there are validation tests, take these as the "latest test"
-  if (lastTestsByType['Validation']) {
-    return (
-      lastTestsByType['Validation']
-        .map((test) => test.success_rate)
-        .filter(
-          (successRate) => successRate !== undefined && successRate !== null
-        )
-        .reduce((total, success_rate) => total + success_rate, 0) /
-      lastTestsByType['Validation'].length
-    );
-  }
-
-  // Otherwise use baseline tests
-  if (lastTestsByType['Baseline']) {
-    return (
-      lastTestsByType['Baseline']
-        .map((test) => test.success_rate)
-        .reduce((total, success_rate) => total + success_rate, 0) /
-      lastTestsByType['Baseline'].length
-    );
-  }
-
-  // If no validation or baseline tests, use whatever we have
-  const allTests = testTypes.reduce(
-    (acc, key) => acc.concat(lastTestsByType[key]),
-    [] as Partial<UxTest>[]
-  );
-
-  return (
-    allTests
-      .map((test) => test.success_rate)
-      .reduce((total, success_rate) => total + success_rate, 0) /
-    allTests.length
-  );
 }
 
 async function getProjectFeedbackComments(

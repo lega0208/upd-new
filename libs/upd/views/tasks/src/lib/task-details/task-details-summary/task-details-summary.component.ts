@@ -65,6 +65,7 @@ export class TaskDetailsSummaryComponent implements OnInit {
           field: 'percentChange',
           header: this.i18n.service.translate('%-change', lang),
           pipe: 'percent',
+          type: 'comparison'
         },
       ];
 

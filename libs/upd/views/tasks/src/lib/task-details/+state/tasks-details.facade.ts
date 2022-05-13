@@ -117,14 +117,14 @@ export class TasksDetailsFacade {
         data?.dateRangeData?.calldriversEnquiry || []
       ).map((d) => ({
         name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
-        value: d.sum,
+        value: d.calls,
       }));
 
       const comparisonDataEnquiryLine = (
         data?.comparisonDateRangeData?.calldriversEnquiry || []
       ).map((d) => ({
         name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
-        value: d.sum,
+        value: d.calls,
       }));
 
       const isCurrZero = dataEnquiryLine.every((v) => v.value === 0);
@@ -167,12 +167,12 @@ export class TasksDetailsFacade {
         let prevVal = NaN;
         comparisonDateRange.map((cd, i) => {
           if (d.enquiry_line === cd.enquiry_line) {
-            prevVal = cd.sum;
+            prevVal = cd.calls;
           }
         });
         return {
           name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
-          currValue: d.sum,
+          currValue: d.calls,
           prevValue: prevVal,
         };
       });
@@ -181,14 +181,14 @@ export class TasksDetailsFacade {
         let currVal = 0;
         dateRange.map((cd, i) => {
           if (d.enquiry_line === cd.enquiry_line) {
-            currVal = cd.sum;
+            currVal = cd.calls;
           }
         });
         if (currVal === 0) {
           dataEnquiryLine.push({
             name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
             currValue: 0,
-            prevValue: d.sum,
+            prevValue: d.calls,
           });
         }
       });
@@ -327,6 +327,89 @@ export class TasksDetailsFacade {
         ?.map((data) => data?.total_users)
         .reduce((a, b) => a + b, 0)
     )
+  );
+
+  feedbackComments$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
+      const feedbackComments = data?.feedbackComments?.map((d) => ({
+        ...d,
+        date: d.date && dayjs.utc(d.date).locale(lang).format(dateFormat),
+        tag: d.tag && this.i18n.service.translate(d.tag, lang),
+        whats_wrong: d.whats_wrong
+          ? this.i18n.service.translate(d.whats_wrong, lang)
+          : d.whats_wrong,
+      }));
+      return [...(feedbackComments || [])];
+    })
+  );
+
+  feedbackByTagsBarChart$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
+      const feedbackByTagsPrevious =
+        data.comparisonDateRangeData?.feedbackByTags || [];
+
+      const dateRange = data.dateRange;
+      const comparisonDateRange = data.comparisonDateRange;
+
+      const currentSeries = {
+        name: getWeeklyDatesLabel(dateRange, lang),
+        series: feedbackByTags.map((feedback) => ({
+          name: this.i18n.service.translate(`${feedback.tag}`, lang),
+          value: feedback.numComments,
+        })),
+      };
+
+      const previousSeries = {
+        name: getWeeklyDatesLabel(comparisonDateRange || '', lang),
+        series: feedbackByTagsPrevious.map((feedback) => ({
+          name: this.i18n.service.translate(`${feedback.tag}`, lang),
+          value: feedback.numComments,
+        })),
+      };
+
+      return [currentSeries, previousSeries];
+    })
+  );
+
+  feedbackByTagsTable$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
+      const feedbackByTagsPrevious =
+        data.comparisonDateRangeData?.feedbackByTags || [];
+
+      const allUniqueTags = [
+        ...new Set([
+          ...feedbackByTags.map((d) => d.tag),
+          ...feedbackByTagsPrevious.map((d) => d.tag),
+        ]),
+      ];
+
+      return allUniqueTags.map((tag) => {
+        const currValue =
+          feedbackByTags.find((feedback) => feedback.tag === tag)
+            ?.numComments || 0;
+        const prevValue =
+          feedbackByTagsPrevious.find((feedback) => feedback.tag === tag)
+            ?.numComments || 0;
+
+        return {
+          tag: this.i18n.service.translate(tag, lang),
+          currValue,
+          prevValue,
+        };
+      });
+    })
   );
 
   error$ = this.store.pipe(

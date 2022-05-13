@@ -34,14 +34,18 @@
   </div>
 </div>
 
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'total-feedback-by-page'"
-      >
-        <p [translate]="'nodata-pagefeedback'"></p>
-      </app-card>
+      <app-charts
+        type="grouped-bar"
+        [title]="'total-feedback-by-page'"
+        [data]="(feedbackByTagsBarChartData$ | async) || []"
+        [displayLegend]="'below'"
+        [showLegend]="true"
+        [tableCols]="feedbackByTagsTableCols"
+        [table]="feedbackByTagsTable$ | async"
+      ></app-charts>
     </div>
   </div>
 </div>
@@ -49,11 +53,11 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'feedback-by-tags'"
-      >
-        <p [translate]="'nodata-pagefeedback'"></p>
-      </app-card>
+      <app-data-table-card
+        [title]="'feedback-by-tags'"
+        [data]="(feedbackComments$ | async) || []"
+        [cols]="feedbackCommentsCols"
+      ></app-data-table-card>
     </div>
   </div>
-</div> -->
+</div>

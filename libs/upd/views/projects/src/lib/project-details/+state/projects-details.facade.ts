@@ -406,7 +406,7 @@ export class ProjectsDetailsFacade {
       const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
       const feedbackComments = data?.feedbackComments?.map((d) => ({
         ...d,
-        date: dayjs.utc(d.date).locale(lang).format(dateFormat),
+        date: d.date && dayjs.utc(d.date).locale(lang).format(dateFormat),
         tag: d.tag ? this.i18n.service.translate(d.tag, lang) : d.tag,
         whats_wrong: d.whats_wrong
           ? this.i18n.service.translate(d.whats_wrong, lang)
@@ -529,7 +529,7 @@ export class ProjectsDetailsFacade {
                   ? this.i18n.service.translate(uxTest.test_type, lang)
                   : '',
                 extra: {
-                  date: uxTest?.date, 
+                  date: uxTest?.date,
                 }
               };
             })
