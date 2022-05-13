@@ -557,7 +557,12 @@ export class ProjectsDetailsFacade {
             : task.task,
           series: task.success_rate,
         }))
-        .filter((v) => v.name !== null && v.name !== '') as MultiSeries;
+        .filter((v) => v.name !== null && v.name !== '')
+        .sort((a, b) => {
+          return (a.series).length < (b.series).length ? 1 : -1;
+        }) as MultiSeries;
+
+      console.log('taskSuccess', taskSuccess);
 
       return taskSuccess;
         })
