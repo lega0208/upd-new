@@ -204,7 +204,9 @@
               }}</span>
             </ng-template>
             <ng-template #seriesTooltipTemplate let-model="model">
+              <span class="tooltip-header">
               {{ model[0].name }}
+            </span>
               <div
                 *ngFor="let tooltip of model; let i = index"
                 class="tooltip-item"
