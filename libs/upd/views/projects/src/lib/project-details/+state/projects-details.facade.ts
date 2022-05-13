@@ -562,8 +562,6 @@ export class ProjectsDetailsFacade {
           return (a.series).length < (b.series).length ? 1 : -1;
         }) as MultiSeries;
 
-      console.log('taskSuccess', taskSuccess);
-
       return taskSuccess;
         })
       );
