@@ -534,7 +534,11 @@ export class ProjectsDetailsFacade {
               };
             })
             .filter((v) => v.value !== null && v.value !== undefined)
-            .sort((a, b) => a.name.localeCompare(b.name));
+            .sort((a, b) => {
+              if (a.name > b.name) return 1;
+              if (a.name < b.name) return -1;
+              return 0;
+            });
           return {
             task,
             date: successRate?.map((v) => v.extra.date),
@@ -553,7 +557,7 @@ export class ProjectsDetailsFacade {
             : task.task,
           series: task.success_rate,
         }))
-        .filter((v) => v.name !== null && v.name !== '');
+        .filter((v) => v.name !== null && v.name !== '') as MultiSeries;
 
       return taskSuccess;
         })
