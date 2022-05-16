@@ -2,10 +2,7 @@ import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/cor
 import { ColumnConfig, ColumnConfigPipe } from './types';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { ProjectStatus } from '@cra-arc/types-common';
-import localeFrCa from '@angular/common/locales/fr-CA';
-import { registerLocaleData } from '@angular/common';
 import { I18nFacade } from '@cra-arc/upd/state';
-registerLocaleData(localeFrCa);
 
 @Component({
   selector: 'app-data-table-styles',
@@ -15,7 +12,7 @@ registerLocaleData(localeFrCa);
 })
 export class DataTableStylesComponent implements OnInit, OnChanges {
   @Input() config: ColumnConfig = { field: '', header: '' };
-  @Input() href: string = '';
+  @Input() href = '';
   @Input() data: Record<string, number | string> = {};
 
   numberVal: number | string = 0;
@@ -24,7 +21,6 @@ export class DataTableStylesComponent implements OnInit, OnChanges {
   projectLabel: ProjectStatus = 'Unknown';
   hasType = false;
   hasPipe = false;
-  currentLang = this.i18n.service.currentLang;
 
   comparisonClassMap = {
     'text-danger': this.data[this.config.field] < 0,
@@ -65,10 +61,14 @@ export class DataTableStylesComponent implements OnInit, OnChanges {
     } else if (pipe === 'percent') {
       return this.percentPipe.transform(data, pipeParam, this.currentLang);
     } else if (pipe === 'date') {
-      return this.datePipe.transform(data, pipeParam, this.currentLang);
+      return this.datePipe.transform(data, pipeParam, undefined, this.currentLang);
     }
 
     return data;
+  }
+
+  get currentLang() {
+    return this.i18n.service.currentLang;
   }
 
   constructor(

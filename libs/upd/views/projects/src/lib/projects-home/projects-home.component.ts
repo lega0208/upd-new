@@ -3,7 +3,7 @@ import { ProjectsHomeFacade } from './+state/projects-home.facade';
 import { ColumnConfig } from '@cra-arc/upd-components';
 
 import { I18nFacade } from '@cra-arc/upd/state';
-import { LocaleId } from '@cra-arc/upd/i18n';
+import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { ProjectsHomeProject } from '@cra-arc/types-common';
 
 @Component({
@@ -58,7 +58,9 @@ export class ProjectsHomeComponent implements OnInit {
         },
         {
           field: 'startDate',
-          header: this.i18n.service.translate('Start date', lang)
+          header: this.i18n.service.translate('Start date', lang),
+          pipe: 'date',
+          pipeParam: lang === FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY',
         },
         {
           field: 'avgSuccessRate',
