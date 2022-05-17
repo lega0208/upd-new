@@ -14,7 +14,7 @@ export const selectPagesDetailsLoaded = createSelector(
   (state: PagesDetailsState) => state.loaded
 );
 
-export const getPagesDetailsLoading = createSelector(
+export const selectPagesDetailsLoading = createSelector(
   selectPagesDetailsState,
   (state: PagesDetailsState) => state.loading
 );
@@ -22,11 +22,6 @@ export const getPagesDetailsLoading = createSelector(
 export const selectPagesDetailsError = createSelector(
   selectPagesDetailsState,
   (state: PagesDetailsState) => state.error
-);
-
-export const getPagesDetailsStartSession = createSelector(
-  selectPagesDetailsState,
-  (state: PagesDetailsState) => state.start
 );
 
 export const selectPagesDetailsData = createSelector(

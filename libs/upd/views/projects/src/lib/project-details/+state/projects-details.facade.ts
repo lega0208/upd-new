@@ -403,10 +403,9 @@ export class ProjectsDetailsFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
-      const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
       const feedbackComments = data?.feedbackComments?.map((d) => ({
         ...d,
-        date: d.date && dayjs.utc(d.date).locale(lang).format(dateFormat),
+        date: d.date,
         tag: d.tag ? this.i18n.service.translate(d.tag, lang) : d.tag,
         whats_wrong: d.whats_wrong
           ? this.i18n.service.translate(d.whats_wrong, lang)
@@ -414,14 +413,6 @@ export class ProjectsDetailsFacade {
       }));
       return [...(feedbackComments || [])];
     })
-  );
-
-  feedbackByTags$ = this.projectsDetailsData$.pipe(
-    map((data) => data.dateRangeData?.feedbackByTags)
-  );
-
-  feedbackByTagsPrevious$ = this.projectsDetailsData$.pipe(
-    map((data) => data.dateRangeData?.feedbackByTags)
   );
 
   feedbackByTagsBarChart$ = combineLatest([

@@ -45,6 +45,9 @@
         [showLegend]="true"
         [tableCols]="feedbackByTagsTableCols"
         [table]="feedbackByTagsTable$ | async"
+        [scaleBy]="1"
+        yAxisLabel="# of comments"
+        xAxisLabel="tags"
       ></app-charts>
     </div>
   </div>

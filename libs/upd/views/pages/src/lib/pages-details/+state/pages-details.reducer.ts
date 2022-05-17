@@ -9,7 +9,6 @@ export interface PagesDetailsState {
   data: PageDetailsData;
   loaded: boolean; // has the PagesDetails list been loaded
   loading: boolean; // is the PagesDetails list currently being loaded
-  start: boolean;
   error?: string | null; // last known error (if any)
 }
 
@@ -25,10 +24,10 @@ export const pagesDetailsInitialState: PagesDetailsState = {
     title: '',
     dateRange: '',
     comparisonDateRange: '',
+    feedbackComments: [],
   },
   loading: false,
   loaded: false,
-  start: true,
   error: null,
 };
 

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types } from 'mongoose';
+import { FeedbackComment } from './types';
 
 export type FeedbackDocument = Feedback & Document;
 
@@ -47,4 +48,56 @@ export const feedbackModel = model(Feedback.name, FeedbackSchema);
 
 export function getFeedbackModel(): Model<Document<Feedback>> {
   return feedbackModel;
+}
+
+FeedbackSchema.statics['getCommentsByTag'] = async function (
+  dateRange: string,
+  urls: string[]
+) {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  return this.aggregate<{ tag: string; numComments: number }>()
+    .match({
+      url: { $in: urls },
+      date: { $gte: startDate, $lte: endDate },
+    })
+    .unwind('$tags')
+    .group({
+      _id: '$tags',
+      numComments: { $sum: 1 },
+    })
+    .project({
+      _id: 0,
+      tag: '$_id',
+      numComments: 1,
+    })
+    .exec();
+};
+
+FeedbackSchema.statics['getComments'] = async function (
+  dateRange: string,
+  urls: string[]
+) {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  return (
+    (await this.find({
+      url: { $in: urls },
+      date: { $gte: startDate, $lte: endDate },
+    })) || []
+  ).map((feedback: Feedback) => ({
+    date: feedback.date,
+    url: feedback.url,
+    tag: feedback.tags?.length ? feedback.tags[0] : '',
+    whats_wrong: feedback.whats_wrong || '',
+    comment: feedback.comment,
+  }));
+};
+
+export interface FeedbackModel extends Model<FeedbackDocument> {
+  getComments: (dateRange: string, urls: string[]) => Promise<FeedbackComment[]>;
+  getCommentsByTag: (
+    dateRange: string,
+    urls: string[]
+  ) => Promise<{ tag: string; numComments: number }[]>;
 }

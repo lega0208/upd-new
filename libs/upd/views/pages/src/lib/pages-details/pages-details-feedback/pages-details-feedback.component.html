@@ -21,26 +21,34 @@
   </div>
 </div>
 
-<!-- <div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <app-card
-        [card-title]="'total-feedback-by-page'"
-      >
-        No Page feedback comments/tags for selected date range
-      </app-card>
-    </div>
-  </div>
-</div> -->
-<!-- 
+
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
-        [card-title]="'feedback-by-tags'"
-      >
-        No Page feedback comments/tags for selected date range
-      </app-card>
+      <app-charts
+        type="grouped-bar"
+        [title]="'total-feedback-by-page'"
+        [data]="(feedbackByTagsBarChartData$ | async) || []"
+        [displayLegend]="'below'"
+        [showLegend]="true"
+        [tableCols]="feedbackByTagsTableCols"
+        [table]="feedbackByTagsTable$ | async"
+        [scaleBy]="1"
+        yAxisLabel="# of comments"
+        xAxisLabel="tags"
+      ></app-charts>
     </div>
   </div>
-</div> -->
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <app-data-table-card
+        [title]="'feedback-by-tags'"
+        [data]="(feedbackComments$ | async) || []"
+        [cols]="feedbackCommentsCols"
+      ></app-data-table-card>
+    </div>
+  </div>
+</div>

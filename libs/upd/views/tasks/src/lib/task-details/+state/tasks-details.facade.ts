@@ -1,22 +1,22 @@
 import { Injectable } from '@angular/core';
-import {
-  TaskDetailsAggregatedData,
-  TaskDetailsData, VisitsByPage
-} from '@cra-arc/types-common';
-import { select, Store } from '@ngrx/store';
-import { combineLatest, debounceTime, map } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { combineLatest, map } from 'rxjs';
 
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 
+import { I18nFacade, selectRoute } from '@cra-arc/upd/state';
+import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
+import {
+  TaskDetailsAggregatedData,
+  TaskDetailsData, VisitsByPage
+} from '@cra-arc/types-common';
 import { percentChange, PickByType } from '@cra-arc/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
-import { I18nFacade, selectUrl } from '@cra-arc/upd/state';
-import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 
 dayjs.extend(utc);
 
@@ -26,26 +26,19 @@ export class TasksDetailsFacade {
    * Combine pieces of state using createSelector,
    * and expose them as observables through the facade.
    */
-  loaded$ = this.store.pipe(
-    select(TasksDetailsSelectors.selectTasksDetailsLoaded)
+  loaded$ = this.store.
+    select((TasksDetailsSelectors.selectTasksDetailsLoaded)
   );
-  loading$ = this.store.pipe(
-    select(TasksDetailsSelectors.selectTasksDetailsLoading)
+  loading$ = this.store.
+    select((TasksDetailsSelectors.selectTasksDetailsLoading)
   );
-  tasksDetailsData$ = this.store.pipe(
-    select(TasksDetailsSelectors.selectTasksDetailsData)
+  tasksDetailsData$ = this.store.
+    select((TasksDetailsSelectors.selectTasksDetailsData)
   );
 
   currentLang$ = this.i18n.currentLang$;
-  title$ = this.tasksDetailsData$.pipe(
-    map((data) => data.title),
-    debounceTime(250)
-  );
 
-  currentRoute$ = this.store.pipe(
-    select(selectUrl),
-    map((url) => url.replace(/\?.+$/, ''))
-  );
+  currentRoute$ = this.store.select(selectRoute);
 
   titleHeader$ = combineLatest([
     this.tasksDetailsData$,
@@ -334,10 +327,9 @@ export class TasksDetailsFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
-      const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
       const feedbackComments = data?.feedbackComments?.map((d) => ({
         ...d,
-        date: d.date && dayjs.utc(d.date).locale(lang).format(dateFormat),
+        date: d.date,
         tag: d.tag && this.i18n.service.translate(d.tag, lang),
         whats_wrong: d.whats_wrong
           ? this.i18n.service.translate(d.whats_wrong, lang)
@@ -412,8 +404,8 @@ export class TasksDetailsFacade {
     })
   );
 
-  error$ = this.store.pipe(
-    select(TasksDetailsSelectors.selectTasksDetailsError)
+  error$ = this.store.
+    select((TasksDetailsSelectors.selectTasksDetailsError)
   );
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}

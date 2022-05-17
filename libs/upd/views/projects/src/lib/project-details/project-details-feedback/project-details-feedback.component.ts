@@ -20,7 +20,6 @@ type FeedbackByTagsColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'fe
   styleUrls: ['./project-details-feedback.component.css'],
 })
 export class ProjectDetailsFeedbackComponent implements OnInit {
-  currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
@@ -50,11 +49,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
     private i18n: I18nFacade
   ) {}
 
-  ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
+  ngOnInit() {
     combineLatest([
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
@@ -129,7 +124,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
 
       this.feedbackCommentsCols = [
         { field: 'url', header: this.i18n.service.translate('URL', lang) },
-        { field: 'date', header: this.i18n.service.translate('date', lang) },
+        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date' },
         { field: 'tag', header: this.i18n.service.translate('tags', lang) },
         { field: 'whats_wrong', header: this.i18n.service.translate('d3-www', lang) },
         { field: 'comment', header: this.i18n.service.translate('comment', lang) },

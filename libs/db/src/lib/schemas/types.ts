@@ -21,3 +21,11 @@ export interface GscSearchTermMetrics {
   impressions: number,
   position: number,
 }
+
+export interface FeedbackComment {
+  url: string;
+  date: Date;
+  tag: string;
+  whats_wrong: string;
+  comment: string;
+}

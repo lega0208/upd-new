@@ -1,5 +1,5 @@
 import { Params } from '@angular/router';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { createFeatureSelector, createSelector,  } from '@ngrx/store';
 import { RouterReducerState, getSelectors } from '@ngrx/router-store';
 
 export const selectRouter = createFeatureSelector<RouterReducerState>('router');
@@ -14,6 +14,11 @@ export const {
   selectRouteData,      // select the current route data
   selectUrl,            // select the current url
 } = getSelectors(selectRouter);
+
+export const selectRoute = createSelector(
+  selectUrl,
+  (url) => url.replace(/\?.+$/, '')
+)
 
 export const selectRouteNestedParams = createSelector(
   selectRouter,

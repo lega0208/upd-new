@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
-import { LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade } from '@cra-arc/upd/state';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 import { EN_CA } from '@cra-arc/upd/i18n';
@@ -16,7 +15,6 @@ type FeedbackByTagsColTypes = GetTableProps<TaskDetailsFeedbackComponent, 'feedb
   styleUrls: ['./task-details-feedback.component.css'],
 })
 export class TaskDetailsFeedbackComponent implements OnInit {
-  currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
@@ -41,11 +39,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
 
-  ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
+  ngOnInit() {
     combineLatest([
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
@@ -108,7 +102,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
 
       this.feedbackCommentsCols = [
         { field: 'url', header: this.i18n.service.translate('URL', lang) },
-        { field: 'date', header: this.i18n.service.translate('date', lang) },
+        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date' },
         { field: 'tag', header: this.i18n.service.translate('tags', lang) },
         { field: 'whats_wrong', header: this.i18n.service.translate('d3-www', lang) },
         { field: 'comment', header: this.i18n.service.translate('comment', lang) },

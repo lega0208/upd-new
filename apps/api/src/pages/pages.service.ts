@@ -1,7 +1,7 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cache } from 'cache-manager';
-import { getPageModel, MetricsConfig } from '@cra-arc/db';
+import { Feedback, FeedbackModel, MetricsConfig } from '@cra-arc/db';
 import {
   Page,
   PageAggregatedData,
@@ -10,7 +10,7 @@ import {
   PageMetrics,
   PagesHomeData,
   GscSearchTermMetrics,
-  PagesHomeAggregatedData, TaskDetailsData
+  PagesHomeAggregatedData,
 } from '@cra-arc/types-common';
 import type { PageMetricsModel } from '@cra-arc/types-common';
 import { Model, Types } from 'mongoose';
@@ -19,17 +19,17 @@ import { ApiParams } from '@cra-arc/upd/services';
 @Injectable()
 export class PagesService {
   constructor(
+    @InjectModel(Feedback.name) private feedbackModel: FeedbackModel,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
     @InjectModel(Page.name) private pageModel: Model<PageDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
   async getPagesHomeData(dateRange: string): Promise<PagesHomeData> {
-    const cacheKey =  `getPagesHomeData-${dateRange}`
+    const cacheKey = `getPagesHomeData-${dateRange}`;
     const cachedData = (await this.cacheManager.store.get(
       cacheKey
     )) as PagesHomeAggregatedData[];
-
 
     if (cachedData) {
       return {
@@ -173,6 +173,10 @@ export class PagesService {
           date: data.date,
           visits: data.visits,
         })),
+        feedbackByTags: await this.feedbackModel.getCommentsByTag(
+          params.dateRange,
+          [page.url]
+        ),
       },
       comparisonDateRange: params.comparisonDateRange,
       comparisonDateRangeData: {
@@ -181,10 +185,17 @@ export class PagesService {
           date: data.date,
           visits: data.visits,
         })),
+        feedbackByTags: await this.feedbackModel.getCommentsByTag(
+          params.comparisonDateRange,
+          [page.url]
+        ),
       },
       topSearchTermsIncrease: topIncreasedSearchTerms,
       topSearchTermsDecrease: topDecreasedSearchTerms,
       top25GSCSearchTerms: top25GSCSearchTerms,
+      feedbackComments: await this.feedbackModel.getComments(params.dateRange, [
+        page.url,
+      ]),
     } as PageDetailsData;
 
     await this.cacheManager.set(cacheKey, results);

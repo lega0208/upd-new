@@ -1,4 +1,4 @@
-import { Page, PageMetrics, Task, UxTest } from '@cra-arc/db';
+import { FeedbackComment, Page, PageMetrics, Task, UxTest } from '@cra-arc/db';
 import type { GscSearchTermMetrics } from '@cra-arc/db';
 
 export {
@@ -9,6 +9,7 @@ export {
   UxTest,
   Task,
   Project,
+  Feedback,
 } from '@cra-arc/db';
 
 export type {
@@ -22,6 +23,7 @@ export type {
   ProjectDocument,
   GscSearchTermMetrics,
   FeedbackDocument,
+  FeedbackComment,
 } from '@cra-arc/db';
 
 export interface ViewData<T> {
@@ -86,6 +88,7 @@ export type PageDetailsMetrics = Pick<
 
 export interface PageAggregatedData extends PageDetailsMetrics {
   visitsByDay: { date: Date; visits: number }[];
+  feedbackByTags: { tag: string; numComments: number }[];
 }
 
 export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
@@ -94,6 +97,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   topSearchTermsDecrease?: GscSearchTermMetrics[];
   top25GSCSearchTerms?: GscSearchTermMetrics[];
   tasks?: Task[];
+  feedbackComments: FeedbackComment[];
 }
 
 export interface OverviewAggregatedData {
@@ -133,9 +137,13 @@ export interface OverviewUxData {
   copsTestsCompletedSince2018: number;
 }
 
-export type OverviewProject = ProjectsHomeProject & { testType?: string[]; totalUsers: number };
+export type OverviewProject = ProjectsHomeProject & {
+  testType?: string[];
+  totalUsers: number;
+};
 
-export interface OverviewProjectData extends Omit<ProjectsHomeData, 'projects'> {
+export interface OverviewProjectData
+  extends Omit<ProjectsHomeData, 'projects'> {
   projects: OverviewProject[];
 }
 
@@ -251,14 +259,6 @@ export interface ProjectsDetailsData
   taskSuccessByUxTest: (Partial<UxTest> & { tasks: string })[];
   tasks: Pick<Task, '_id' | 'title'>[];
   feedbackComments: FeedbackComment[];
-}
-
-export interface FeedbackComment {
-  url: string;
-  date: Date;
-  tag: string;
-  whats_wrong: string;
-  comment: string;
 }
 
 export interface TaskKpi {

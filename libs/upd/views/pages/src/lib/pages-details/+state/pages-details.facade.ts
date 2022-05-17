@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { map, debounceTime, combineLatest } from 'rxjs';
 
 import { percentChange } from '@cra-arc/utils-common';
@@ -13,35 +13,27 @@ import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
-import { LocaleId } from '@cra-arc/upd/i18n';
+import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { I18nFacade, selectDatePeriodSelection } from '@cra-arc/upd/state';
 
 dayjs.extend(utc);
 
 @Injectable()
 export class PagesDetailsFacade {
-  /**
-   * Combine pieces of state using createSelector,
-   * and expose them as observables through the facade.
-   */
-  loaded$ = this.store.pipe(
-    select(PagesDetailsSelectors.selectPagesDetailsLoaded)
+  loaded$ = this.store.
+    select((PagesDetailsSelectors.selectPagesDetailsLoaded)
   );
-  loading$ = this.store.pipe(
-    select(PagesDetailsSelectors.getPagesDetailsLoading),
+  loading$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsLoading).pipe(
+
     debounceTime(500)
   );
-  startSession$ = this.store.pipe(
-    select(PagesDetailsSelectors.getPagesDetailsStartSession)
-  );
-  pagesDetailsData$ = this.store.pipe(
-    select(PagesDetailsSelectors.selectPagesDetailsData)
+  pagesDetailsData$ = this.store.
+    select((PagesDetailsSelectors.selectPagesDetailsData)
   );
 
   currentLang$ = this.i18n.currentLang$;
 
-  dateRange$ = this.store.pipe(map((data) => data?.data.dateRange));
-  dateRangeSelected$ = this.store.pipe(select(selectDatePeriodSelection));
+  dateRangeSelected$ = this.store.select((selectDatePeriodSelection));
 
   dateRangeLabel$ = combineLatest([
     this.pagesDetailsData$,
@@ -600,12 +592,94 @@ export class PagesDetailsFacade {
     map((data) => [...(data?.top25GSCSearchTerms || [])] as (GscSearchTermMetrics & { change: number })[])
   );
 
-  error$ = this.store.pipe(
-    select(PagesDetailsSelectors.selectPagesDetailsError)
+  feedbackComments$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const feedbackComments = data?.feedbackComments?.map((d) => ({
+        date: d.date,
+        tag: d.tag && this.i18n.service.translate(d.tag, lang),
+        whats_wrong: d.whats_wrong
+          ? this.i18n.service.translate(d.whats_wrong, lang)
+          : d.whats_wrong,
+        comment: d.comment,
+      }));
+      return [...(feedbackComments || [])];
+    })
+  );
+
+  feedbackByTagsBarChart$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
+      const feedbackByTagsPrevious =
+        data.comparisonDateRangeData?.feedbackByTags || [];
+
+      const dateRange = data.dateRange;
+      const comparisonDateRange = data.comparisonDateRange;
+
+      const currentSeries = {
+        name: getWeeklyDatesLabel(dateRange, lang),
+        series: feedbackByTags.map((feedback) => ({
+          name: this.i18n.service.translate(`${feedback.tag}`, lang),
+          value: feedback.numComments,
+        })),
+      };
+
+      const previousSeries = {
+        name: getWeeklyDatesLabel(comparisonDateRange || '', lang),
+        series: feedbackByTagsPrevious.map((feedback) => ({
+          name: this.i18n.service.translate(`${feedback.tag}`, lang),
+          value: feedback.numComments,
+        })),
+      };
+
+      return [currentSeries, previousSeries];
+    })
+  );
+
+  feedbackByTagsTable$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
+      const feedbackByTagsPrevious =
+        data.comparisonDateRangeData?.feedbackByTags || [];
+
+      const allUniqueTags = [
+        ...new Set([
+          ...feedbackByTags.map((d) => d.tag),
+          ...feedbackByTagsPrevious.map((d) => d.tag),
+        ]),
+      ];
+
+      return allUniqueTags.map((tag) => {
+        const currValue =
+          feedbackByTags.find((feedback) => feedback.tag === tag)
+            ?.numComments || 0;
+        const prevValue =
+          feedbackByTagsPrevious.find((feedback) => feedback.tag === tag)
+            ?.numComments || 0;
+
+        return {
+          tag: this.i18n.service.translate(tag, lang),
+          currValue,
+          prevValue,
+        };
+      });
+    })
+  );
+
+  error$ = this.store.
+    select((PagesDetailsSelectors.selectPagesDetailsError)
   );
 
   constructor(
-    private readonly store: Store<PagesDetailsState>,
+    private readonly store: Store,
     private i18n: I18nFacade
   ) {}
 
@@ -651,12 +725,12 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
 
   const dateFormat = lang === 'fr-CA' ? 'D MMM' : 'MMM D';
 
-  const formattedStartDate = dayjs(startDate)
-    .utc(false)
+  const formattedStartDate = dayjs
+    .utc(startDate)
     .locale(lang)
     .format(dateFormat);
-  const formattedEndDate = dayjs(endDate)
-    .utc(false)
+  const formattedEndDate = dayjs
+    .utc(endDate)
     .locale(lang)
     .format(dateFormat);
 
