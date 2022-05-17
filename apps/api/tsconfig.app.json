@@ -5,7 +5,8 @@
     "module": "commonjs",
     "types": ["node"],
     "emitDecoratorMetadata": true,
-    "target": "es2020"
+    "target": "es2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
   "exclude": ["**/*.spec.ts", "**/*.test.ts", "jest.config.ts"],
   "include": ["**/*.ts"]

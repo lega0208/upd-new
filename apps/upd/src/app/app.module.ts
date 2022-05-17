@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { LocationStrategy } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -19,14 +20,13 @@ import {
   DateSelectionEffects,
   DateSelectionFacade,
   dateSelectionReducer,
-  DATE_SELECTION_FEATURE_KEY,
   i18nReducer,
-  I18N_FEATURE_KEY,
   I18nEffects,
   I18nFacade,
 } from '@cra-arc/upd/state';
 
 import { environment } from '../environments/environment';
+import { PathPreserveQueryLocationStrategy } from '@cra-arc/upd/services';
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidebarComponent],
@@ -51,15 +51,15 @@ import { environment } from '../environments/environment';
       }
     ),
     StoreRouterConnectingModule.forRoot(),
-    EffectsModule.forRoot([]),
+    EffectsModule.forRoot([DateSelectionEffects, I18nEffects]),
 
     !environment.production ? StoreDevtoolsModule.instrument() : [],
-    StoreModule.forFeature(DATE_SELECTION_FEATURE_KEY, dateSelectionReducer),
-    EffectsModule.forFeature([DateSelectionEffects]),
-    StoreModule.forFeature(I18N_FEATURE_KEY, i18nReducer),
-    EffectsModule.forFeature([I18nEffects]),
   ],
-  providers: [DateSelectionFacade, I18nFacade],
+  providers: [
+    DateSelectionFacade,
+    I18nFacade,
+    { provide: LocationStrategy, useClass: PathPreserveQueryLocationStrategy },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
