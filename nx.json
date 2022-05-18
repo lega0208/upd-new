@@ -22,8 +22,7 @@
           "build",
           "lint",
           "test",
-          "e2e",
-          "compodoc"
+          "e2e"
         ],
         "accessToken": "NWZiNDZlNGMtMDhjYS00NTBlLTg0YWMtY2EwMTlmYzk2MTJjfHJlYWQ="
       }
