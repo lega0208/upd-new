@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
-import { EN_CA } from '@cra-arc/upd/i18n';
+import { EN_CA } from '@dua-upd/upd/i18n';
 
 @Component({
-  selector: 'app-task-details-summary',
+  selector: 'upd-task-details-summary',
   templateUrl: './task-details-summary.component.html',
   styleUrls: ['./task-details-summary.component.css'],
 })

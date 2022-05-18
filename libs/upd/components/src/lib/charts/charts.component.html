@@ -1,6 +1,6 @@
-<app-card
-  [card-title]="title"
-  [title-tooltip]="titleTooltip"
+<upd-card
+  [title]="title"
+  [titleTooltip]="titleTooltip"
   [h]="!hasData ? 100 : 0"
 >
   <ng-container *ngIf="!hasData; else elseBlock">
@@ -16,7 +16,7 @@
       >
         <ng-container *ngIf="type === 'combo-bar-line'">
           <ng-container *ngIf="!this.convertToLine; else elseConvertLine2">
-            <combo-grouped-vertical-bar-line-chart
+            <upd-combo-grouped-vertical-bar-line-chart
               [ngClass]="barChart.length > 7 ? 'show4nLabels' : ''"
               [scheme]="comboBarScheme"
               [colorSchemeLine]="lineChartScheme"
@@ -80,7 +80,7 @@
                   {{ tooltip.series }}: {{ tooltip.value.toLocaleString(lang) }}
                 </div>
               </ng-template>
-            </combo-grouped-vertical-bar-line-chart>
+            </upd-combo-grouped-vertical-bar-line-chart>
           </ng-container>
           <ng-template #elseConvertLine2>
             <ngx-charts-line-chart
@@ -567,7 +567,7 @@
         </ng-container>
 
         <ng-container *ngIf="type === 'bubble'">
-          <combo-bubble-line-chart
+          <upd-combo-bubble-line-chart
             *ngIf="isPercent"
             [scheme]="colorScheme"
             [animations]="animations"
@@ -600,7 +600,7 @@
                 model.value | percent: '1.0':lang
               }}</span>
             </ng-template>
-          </combo-bubble-line-chart>
+          </upd-combo-bubble-line-chart>
         </ng-container>
 
         <ng-container *ngIf="type === 'gauge'">
@@ -636,25 +636,25 @@
 
     <p></p>
     <div class="pt-3">
-      <app-accordion>
-        <app-data-table
+      <upd-accordion>
+        <upd-data-table
           *ngIf="table"
           [filter]="false"
           [sort]="false"
           [pagination]="false"
           [data]="table"
           [cols]="tableCols"
-        ></app-data-table>
+        ></upd-data-table>
 
-        <app-data-table
+        <upd-data-table
           *ngIf="!table"
           [filter]="false"
           [sort]="false"
           [pagination]="false"
           [data]="data"
           [cols]="tableCols"
-        ></app-data-table>
-      </app-accordion>
+        ></upd-data-table>
+      </upd-accordion>
     </div>
   </ng-template>
-</app-card>
+</upd-card>

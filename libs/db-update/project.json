@@ -1,5 +1,4 @@
 {
-  "root": "libs/db-update",
   "sourceRoot": "libs/db-update/src",
   "projectType": "library",
   "targets": {

@@ -1,4 +1,4 @@
-import type { OptionalKeyOf } from '@cra-arc/utils-common'
+import type { OptionalKeyOf } from '@dua-upd/utils-common'
 
 export type ColumnConfigPipe = 'percent' | 'number' | 'date';
 

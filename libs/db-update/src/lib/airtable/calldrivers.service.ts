@@ -1,7 +1,7 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
-import { AirtableClient, DateRange, DateType } from '@cra-arc/external-data';
+import { AirtableClient, DateRange, DateType } from '@dua-upd/external-data';
 import { InjectModel } from '@nestjs/mongoose';
-import { CallDriver, CallDriverDocument } from '@cra-arc/db';
+import { CallDriver, CallDriverDocument } from '@dua-upd/db';
 import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 

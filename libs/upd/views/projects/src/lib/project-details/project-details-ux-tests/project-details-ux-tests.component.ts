@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@cra-arc/upd-components';
+import { ColumnConfig } from '@dua-upd/upd-components';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
-import { EN_CA } from '@cra-arc/upd/i18n';
+import { EN_CA } from '@dua-upd/upd/i18n';
 
 @Component({
-  selector: 'app-project-details-ux-tests',
+  selector: 'upd-project-details-ux-tests',
   templateUrl: './project-details-ux-tests.component.html',
   styleUrls: ['./project-details-ux-tests.component.css'],
 })

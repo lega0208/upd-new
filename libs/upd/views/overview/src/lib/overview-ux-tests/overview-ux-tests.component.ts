@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA, FR_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { OverviewProject } from '@cra-arc/types-common';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
+import { OverviewProject } from '@dua-upd/types-common';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
-  selector: 'app-overview-ux-tests',
+  selector: 'upd-overview-ux-tests',
   templateUrl: './overview-ux-tests.component.html',
   styleUrls: ['./overview-ux-tests.component.css'],
 })

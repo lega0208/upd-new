@@ -3,21 +3,21 @@
   <a [routerLink]="['/', langLink, 'tasks']" [translate]="'menu-tasks'"></a>
 </div>
 
-<app-loading-spinner
+<upd-loading-spinner
   *ngIf="(loading$ | async); else elseBlock"
-></app-loading-spinner>
+></upd-loading-spinner>
 
 <ng-template #elseBlock>
-  <app-page-404 *ngIf="(error$ | async) === '' || (title$ | async) === ''; else elseBlock2"></app-page-404>
+  <upd-page-404 *ngIf="(error$ | async) === '' || (title$ | async) === ''; else elseBlock2"></upd-page-404>
 </ng-template>
 <ng-template #elseBlock2>
 <h2 class="h3 pt-2 pb-2" data-i18n="task-title">
   <span [translate]="'task'"></span>: {{ title$ | async }}
 </h2>
 
-<app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
-<app-date-selector
+<upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
+<upd-date-selector
   *ngIf="!((currentRoute$ | async) || '').endsWith('uxtests')"
-  ></app-date-selector>
+  ></upd-date-selector>
 <router-outlet></router-outlet>
 </ng-template>

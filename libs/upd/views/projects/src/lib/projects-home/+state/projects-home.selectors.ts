@@ -5,21 +5,21 @@ import {
 } from './projects-home.reducer';
 
 // Lookup the 'ProjectsHome' feature state managed by NgRx
-export const getProjectsHomeState = createFeatureSelector<ProjectsHomeState>(
+export const selectProjectsHomeState = createFeatureSelector<ProjectsHomeState>(
   PROJECTS_HOME_FEATURE_KEY
 );
 
-export const getProjectsHomeLoaded = createSelector(
-  getProjectsHomeState,
+export const selectProjectsHomeLoaded = createSelector(
+  selectProjectsHomeState,
   (state: ProjectsHomeState) => state.loaded
 );
 
-export const getProjectsHomeError = createSelector(
-  getProjectsHomeState,
+export const selectProjectsHomeError = createSelector(
+  selectProjectsHomeState,
   (state: ProjectsHomeState) => state.error
 );
 
-export const getProjectsHomeData = createSelector(
-  getProjectsHomeState,
+export const selectProjectsHomeData = createSelector(
+  selectProjectsHomeState,
   (state: ProjectsHomeState) => state.data
 );

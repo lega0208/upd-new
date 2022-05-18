@@ -7,9 +7,9 @@
     {{ data[config.field] }}
   </a>
   <ng-container *ngIf="isProjectLabel">
-    <app-project-status-label
+    <upd-project-status-label
       [statusText]="projectLabel"
-    ></app-project-status-label>
+    ></upd-project-status-label>
   </ng-container>
   <span
     *ngIf="

@@ -1,5 +1,5 @@
-import { PageData, TaskData, UxTestData } from '@cra-arc/external-data';
-import { Page, Project, Task, UxTest } from '@cra-arc/db';
+import { PageData, TaskData, UxTestData } from '@dua-upd/external-data';
+import { Page, Project, Task, UxTest } from '@dua-upd/db';
 
 export type UxApiDataType = TaskData | UxTestData | PageData;
 export interface UxApiData {

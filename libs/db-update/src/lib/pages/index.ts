@@ -2,7 +2,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import cheerio from 'cheerio';
 import { connect, Model, Document, Types } from 'mongoose';
-import { getPageModel, Page, getDbConnectionString } from '@cra-arc/db';
+import { getPageModel, Page, getDbConnectionString } from '@dua-upd/db';
 
 // todo: implement this rather than the more specific functions below?
 //        will probably want to rethink how to do all this
@@ -44,8 +44,6 @@ export async function* getRedirectsWithRateLimit(
   batchSize: number,
   delay: number
 ) {
-  const redirectHttpCodes = [301, 302, 307, 308];
-
   urls = urls.map((url) => `https://${url}`);
 
   while (urls.length > 0) {

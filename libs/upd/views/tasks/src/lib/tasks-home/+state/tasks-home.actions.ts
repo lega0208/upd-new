@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { TasksHomeData } from '@cra-arc/types-common';
+import { TasksHomeData } from '@dua-upd/types-common';
 
 export const loadTasksHomeInit = createAction('[TasksHome] Init');
 

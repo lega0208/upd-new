@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA } from '@cra-arc/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { EN_CA } from '@dua-upd/upd/i18n';
 import {
   animate,
-  animateChild,
   group,
   query,
   style,
@@ -36,7 +35,7 @@ export const fader =
   ]);
 
 @Component({
-  selector: 'app-root',
+  selector: 'upd-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   animations: [fader],

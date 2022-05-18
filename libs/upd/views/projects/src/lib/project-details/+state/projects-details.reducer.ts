@@ -1,6 +1,6 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
-import type { ProjectsDetailsData } from '@cra-arc/types-common';
+import type { ProjectsDetailsData } from '@dua-upd/types-common';
 import * as ProjectsDetailsActions from './projects-details.actions';
 
 export const PROJECTS_DETAILS_FEATURE_KEY = 'projectsDetails';

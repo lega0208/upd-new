@@ -1,5 +1,4 @@
 {
-  "root": "libs/external-data",
   "sourceRoot": "libs/external-data/src",
   "projectType": "library",
   "targets": {

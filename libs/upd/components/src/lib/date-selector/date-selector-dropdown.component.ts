@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { of } from 'rxjs';
-import { DateRangePeriod } from "@cra-arc/upd/state";
+import { DateRangePeriod } from "@dua-upd/upd/state";
 
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-date-selector-dropdown',
+  selector: 'upd-date-selector-dropdown',
   template: `
     <div ngbDropdown class="d-inline-block">
       <button

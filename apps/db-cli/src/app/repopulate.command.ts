@@ -6,8 +6,8 @@ import {
   QuestionSet,
   Question,
 } from 'nest-commander';
-import { DbUpdateService } from '@cra-arc/db-update';
-import { DataIntegrityService } from '@cra-arc/data-integrity';
+import { DbUpdateService } from '@dua-upd/db-update';
+import { DataIntegrityService } from '@dua-upd/data-integrity';
 
 @QuestionSet({ name: 'repopulate' })
 export class RepopulateQuestions {

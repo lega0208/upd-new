@@ -37,7 +37,7 @@ describe('Overview Selectors', () => {
 
   describe('Overview Selectors', () => {
     it('getAllOverview() should return the list of Overview', () => {
-      const results = OverviewSelectors.getOverviewData(state);
+      const results = OverviewSelectors.selectOverviewData(state);
       const selId = getOverviewId(results[1]);
 
       expect(results.length).toBe(3);
@@ -52,13 +52,13 @@ describe('Overview Selectors', () => {
     });
 
     it('getOverviewLoaded() should return the current "loaded" status', () => {
-      const result = OverviewSelectors.getOverviewLoaded(state);
+      const result = OverviewSelectors.selectOverviewLoaded(state);
 
       expect(result).toBe(true);
     });
 
     it('getOverviewError() should return the current "error" state', () => {
-      const result = OverviewSelectors.getOverviewError(state);
+      const result = OverviewSelectors.selectOverviewError(state);
 
       expect(result).toBe(ERROR_MSG);
     });

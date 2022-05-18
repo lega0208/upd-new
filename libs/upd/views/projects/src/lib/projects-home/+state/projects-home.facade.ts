@@ -10,7 +10,7 @@ import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 
-import { I18nFacade } from '@cra-arc/upd/state';
+import { I18nFacade } from '@dua-upd/upd/state';
 
 dayjs.extend(utc);
 
@@ -23,10 +23,10 @@ export class ProjectsHomeFacade {
   currentLang$ = this.i18n.currentLang$;
 
   loaded$ = this.store.
-    select((ProjectsHomeSelectors.getProjectsHomeLoaded)
+    select((ProjectsHomeSelectors.selectProjectsHomeLoaded)
   );
   projectsHomeData$ = this.store.
-    select((ProjectsHomeSelectors.getProjectsHomeData)
+    select((ProjectsHomeSelectors.selectProjectsHomeData)
   );
 
   projectsHomeTableData$ = combineLatest([this.projectsHomeData$, this.currentLang$]).pipe(
@@ -59,7 +59,7 @@ export class ProjectsHomeFacade {
   completedCOPS$ = this.projectsHomeData$.pipe(
     map((data) => data?.completedCOPS)
   );
-  error$ = this.store.select((ProjectsHomeSelectors.getProjectsHomeError));
+  error$ = this.store.select((ProjectsHomeSelectors.selectProjectsHomeError));
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
 

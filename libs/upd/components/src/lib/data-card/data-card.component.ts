@@ -7,11 +7,11 @@ import {
 } from '@angular/core';
 import { formatNumber, formatPercent } from '@angular/common';
 import { combineLatest, map, Observable, of } from 'rxjs';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA } from '@cra-arc/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { EN_CA } from '@dua-upd/upd/i18n';
 
 @Component({
-  selector: 'app-data-card',
+  selector: 'upd-data-card',
   templateUrl: './data-card.component.html',
   styleUrls: ['./data-card.component.scss'],
 })

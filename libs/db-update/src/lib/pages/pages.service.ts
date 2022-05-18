@@ -10,9 +10,9 @@ import type {
   ProjectDocument,
   TaskDocument,
   UxTestDocument,
-} from '@cra-arc/db';
-import { Page, Project, Task, UxTest } from '@cra-arc/db';
-import { squishTrim, wait } from '@cra-arc/utils-common';
+} from '@dua-upd/db';
+import { Page, Project, Task, UxTest } from '@dua-upd/db';
+import { squishTrim, wait } from '@dua-upd/utils-common';
 
 dayjs.extend(duration);
 

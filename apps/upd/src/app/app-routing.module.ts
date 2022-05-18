@@ -10,7 +10,7 @@ const routes: Routes = [
   {
     path: 'overview',
     loadChildren: () =>
-      import('@cra-arc/upd/views/overview').then(
+      import('@dua-upd/upd/views/overview').then(
         (module) => module.OverviewModule
       ),
     data: { animation: 'overview' },
@@ -18,19 +18,19 @@ const routes: Routes = [
   {
     path: 'pages',
     loadChildren: () =>
-      import('@cra-arc/upd/views/pages').then((module) => module.PagesModule),
+      import('@dua-upd/upd/views/pages').then((module) => module.PagesModule),
     data: { animation: 'pages' },
   },
   {
     path: 'tasks',
     loadChildren: () =>
-      import('@cra-arc/upd/views/tasks').then((module) => module.TasksModule),
+      import('@dua-upd/upd/views/tasks').then((module) => module.TasksModule),
     data: { animation: 'tasks' },
   },
   {
     path: 'projects',
     loadChildren: () =>
-      import('@cra-arc/upd/views/projects').then(
+      import('@dua-upd/upd/views/projects').then(
         (module) => module.ProjectsModule
       ),
     data: { animation: 'projects' },

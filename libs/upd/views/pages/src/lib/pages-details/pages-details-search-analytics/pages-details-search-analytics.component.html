@@ -1,32 +1,32 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="totalImpressionsGSC$"
         [comparison$]="totalImpressionsGSCPercentChange$"
         [title]="'total-impressions-google'"
         [tooltip]="'tooltip-impressions-page-google'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
 
     <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="ctrGSC$"
         [pipe]="'percent'"
         [comparison$]="ctrGSCPercentChange$"
         [title]="'ctr-google'"
         [tooltip]="'tooltip-ctr-google'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
 
     <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="avgRankGSC$"
         [pipeParams]="'1.0-2'"
         [comparison$]="avgRankGSCPercentChange$"
         [title]="'avg-rank-google'"
         [tooltip]="'tooltip-avg-rank-page-google'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
   </div>
 </div>
@@ -34,13 +34,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="(topGSCSearchTerms$ | async) || []"
         [cols]="topGSCSearchTermsCols"
         [title]="'top25-search-terms-google-page'"
         [tooltip]="'tooltip_table_title_top25_search_terms_google'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>
@@ -48,13 +48,13 @@
 <!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="(searchTermsCanada$ | async) || []"
         [cols]="searchTermsCanadaCols"
         [pagination]="false"
         [title]="'search-terms-canada'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div> -->
@@ -62,13 +62,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="(referrerType$ | async) || []"
         [cols]="referrerTypeCols"
         [pagination]="false"
         [title]="'referrer-type'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>

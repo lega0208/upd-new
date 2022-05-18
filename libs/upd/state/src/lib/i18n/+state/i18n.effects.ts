@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
 import { EMPTY, mergeMap, of } from 'rxjs';
 
-import { I18nService, LocaleId } from '@cra-arc/upd/i18n';
+import { I18nService, LocaleId } from '@dua-upd/upd/i18n';
 import * as I18nActions from './i18n.actions';
 import { selectCurrentLang } from './i18n.selectors';
 import { selectRouteNestedParam } from '../../router/router.selectors';

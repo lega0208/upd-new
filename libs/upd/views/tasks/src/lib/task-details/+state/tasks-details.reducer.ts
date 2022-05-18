@@ -1,7 +1,7 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
 import * as TasksDetailsActions from './tasks-details.actions';
-import type { TaskDetailsData } from '@cra-arc/types-common';
+import type { TaskDetailsData } from '@dua-upd/types-common';
 
 export const TASKS_DETAILS_FEATURE_KEY = 'tasksDetails';
 
@@ -26,7 +26,7 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     avgTaskSuccessFromLastTest: 0,
     dateFromLastTest: new Date(0),
     taskSuccessByUxTest: [],
-    feedbackComments: []
+    feedbackComments: [],
   },
   loaded: false,
   loading: false,
@@ -35,34 +35,42 @@ export const tasksDetailsInitialState: TasksDetailsState = {
 
 const reducer = createReducer(
   tasksDetailsInitialState,
-  on(TasksDetailsActions.loadTasksDetailsInit, (state) => ({
-    ...state,
-    loaded: false,
-    loading: true,
-    error: null,
-  })),
-  on(TasksDetailsActions.loadTasksDetailsSuccess, (state, { data }) =>
-    data === null
-      ? {
-          ...state,
-          loaded: true,
-          loading: false,
-          error: null,
-        }
-      : {
-          ...state,
-          data: { ...data },
-          loaded: true,
-          loading: false,
-          error: null,
-        }
+  on(
+    TasksDetailsActions.loadTasksDetailsInit,
+    (state): TasksDetailsState => ({
+      ...state,
+      loaded: false,
+      loading: true,
+      error: null,
+    })
   ),
-  on(TasksDetailsActions.loadTasksDetailsError, (state, { error }) => ({
-    ...state,
-    loaded: true,
-    loading: false,
-    error,
-  }))
+  on(
+    TasksDetailsActions.loadTasksDetailsSuccess,
+    (state, { data }): TasksDetailsState =>
+      data === null
+        ? {
+            ...state,
+            loaded: true,
+            loading: false,
+            error: null,
+          }
+        : {
+            ...state,
+            data: { ...data },
+            loaded: true,
+            loading: false,
+            error: null,
+          }
+  ),
+  on(
+    TasksDetailsActions.loadTasksDetailsError,
+    (state, { error }): TasksDetailsState => ({
+      ...state,
+      loaded: true,
+      loading: false,
+      error,
+    })
+  )
 );
 
 export function tasksDetailsReducer(

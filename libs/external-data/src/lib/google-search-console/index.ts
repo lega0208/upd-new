@@ -3,8 +3,8 @@ import utc from 'dayjs/plugin/utc';
 import { getGscClient, Searchconsole } from './client';
 import { SearchAnalyticsQueryBuilder, SearchFilter } from './query';
 import { DataState, Dimension } from './gsc-property';
-import { GscSearchTermMetrics, Overall, PageMetrics } from '@cra-arc/db';
-import { wait } from '@cra-arc/utils-common';
+import { GscSearchTermMetrics, Overall, PageMetrics } from '@dua-upd/db';
+import { wait } from '@dua-upd/utils-common';
 import { DateRange } from '../types';
 import { datesFromDateRange } from '../utils';
 

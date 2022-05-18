@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { GetTableProps } from '@cra-arc/utils-common';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 
 type VisitorLocationColTypes = GetTableProps<PagesDetailsWebtrafficComponent, 'visitorLocation$'>
 type BarTableColTypes = GetTableProps<PagesDetailsWebtrafficComponent, 'barTable$'>
 
 @Component({
-  selector: 'app-page-details-webtraffic',
+  selector: 'upd-page-details-webtraffic',
   templateUrl: './pages-details-webtraffic.component.html',
   styleUrls: ['./pages-details-webtraffic.component.css'],
 })

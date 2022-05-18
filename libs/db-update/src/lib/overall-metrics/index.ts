@@ -4,8 +4,8 @@ import {
   DateRange,
   queryDateFormat,
   SearchAnalyticsClient,
-} from '@cra-arc/external-data';
-import { getOverallModel, Overall, getDbConnectionString } from '@cra-arc/db';
+} from '@dua-upd/external-data';
+import { getOverallModel, Overall, getDbConnectionString } from '@dua-upd/db';
 import { connect, Model, Document, Types } from 'mongoose';
 import utc from 'dayjs/plugin/utc';
 

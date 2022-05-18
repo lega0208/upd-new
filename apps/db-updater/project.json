@@ -1,5 +1,4 @@
 {
-  "root": "apps/db-updater",
   "sourceRoot": "apps/db-updater/src",
   "projectType": "application",
   "targets": {

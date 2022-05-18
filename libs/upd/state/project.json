@@ -1,5 +1,4 @@
 {
-  "root": "libs/upd/state",
   "sourceRoot": "libs/upd/state/src",
   "projectType": "library",
   "targets": {

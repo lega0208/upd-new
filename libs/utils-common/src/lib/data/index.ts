@@ -1,5 +1,5 @@
 import { Model } from 'mongoose';
-import { FeedbackComment, FeedbackDocument, UxTest } from '@cra-arc/types-common';
+import { FeedbackComment, FeedbackDocument, UxTest } from '@dua-upd/types-common';
 import { dateRangeSplit } from '../date';
 
 /**

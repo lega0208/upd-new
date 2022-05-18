@@ -9,6 +9,7 @@ import {
   ContentChild,
   TemplateRef,
   ViewChild,
+  OnInit,
 } from '@angular/core';
 import { trigger, style, animate, transition } from '@angular/animations';
 import {
@@ -26,12 +27,12 @@ import {
   ScaleType,
   ViewDimensions,
 } from '@amonsour/ngx-charts';
-import { scaleBand, scaleLinear, scalePoint, scaleTime } from 'd3-scale';
+import { scaleLinear, scalePoint, scaleTime } from 'd3-scale';
 import { curveLinear } from 'd3-shape';
 import { isPlatformServer } from '@angular/common';
 
 @Component({
-  selector: 'combo-bubble-line-chart',
+  selector: 'upd-combo-bubble-line-chart',
   templateUrl: './combo-bubble-line-chart.component.html',
   styleUrls: ['./combo-bubble-line-chart.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,7 +53,10 @@ import { isPlatformServer } from '@angular/common';
     ]),
   ],
 })
-export class ComboBubbleLineChartComponent extends BaseChartComponent {
+export class ComboBubbleLineChartComponent
+  extends BaseChartComponent
+  implements OnInit
+{
   @Input() showGridLines = true;
   @Input() legend = false;
   @Input() legendTitle = 'Legend';

@@ -1,13 +1,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-charts
+      <upd-charts
         type="line"
         [title]="'visits'"
         [data]="(visitsByDay$ | async) || []"
         [table]="(barTable$ | async) || []"
         [tableCols]="barTableCols"
-      ></app-charts>
+      ></upd-charts>
     </div>
   </div>
 </div>
@@ -15,14 +15,14 @@
 <!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="(whereVisitorsCameFrom$ | async) || []"
         [cols]="whereVisitorsCameFromCols"
         [pagination]="false"
         title="Where visitors came from"
         tooltip="Where visitors came from tooltip"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div> -->
@@ -30,14 +30,14 @@
 <!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="(whatVisitorsClickedOn$ | async) || []"
         [cols]="whatVisitorsClickedOnCols"
         [pagination]="false"
         title="What visitors clicked on"
         tooltip="What visitors clicked on tooltip"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div> -->
@@ -45,13 +45,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="(visitorLocation$ | async) || []"
         [cols]="visitorLocationCols"
         [pagination]="false"
         [title]="'visitor-location'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>

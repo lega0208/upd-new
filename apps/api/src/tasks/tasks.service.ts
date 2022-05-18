@@ -9,8 +9,8 @@ import {
   Project,
   Task,
   UxTest,
-} from '@cra-arc/db';
-import { CallDriver } from '@cra-arc/types-common';
+} from '@dua-upd/db';
+import { CallDriver } from '@dua-upd/types-common';
 import type {
   CallDriverDocument,
   ProjectDocument,
@@ -20,15 +20,15 @@ import type {
   TasksHomeData,
   TaskDetailsAggregatedData,
   UxTestDocument,
-} from '@cra-arc/types-common';
-import type { ApiParams } from '@cra-arc/upd/services';
-import { TasksHomeAggregatedData } from '@cra-arc/types-common';
+} from '@dua-upd/types-common';
+import type { ApiParams } from '@dua-upd/upd/services';
+import { TasksHomeAggregatedData } from '@dua-upd/types-common';
 import {
   getAvgSuccessFromLastTests,
   getFeedbackComments,
   getLatestTest,
   dateRangeSplit, getFeedbackByTags
-} from '@cra-arc/utils-common';
+} from '@dua-upd/utils-common';
 
 @Injectable()
 export class TasksService {

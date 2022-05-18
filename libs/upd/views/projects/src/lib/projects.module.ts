@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 
-import { UpdComponentsModule } from '@cra-arc/upd-components';
-import { ApiService, ServicesModule } from '@cra-arc/upd/services';
+import { UpdComponentsModule } from '@dua-upd/upd-components';
+import { ApiService, ServicesModule } from '@dua-upd/upd/services';
 
 import { ProjectsComponent } from './projects.component';
 import { ProjectsHomeComponent } from './projects-home/projects-home.component';
@@ -31,7 +31,7 @@ import { ProjectsDetailsEffects } from './project-details/+state/projects-detail
 import { ProjectsDetailsFacade } from './project-details/+state/projects-details.facade';
 import { ProjectDetailsDetailsComponent } from './project-details/project-details-details/project-details-details.component';
 import { ProjectDetailsUxTestsComponent } from './project-details/project-details-ux-tests/project-details-ux-tests.component';
-import { I18nModule } from '@cra-arc/upd/i18n';
+import { I18nModule } from '@dua-upd/upd/i18n';
 
 @NgModule({
   imports: [

@@ -11,7 +11,7 @@ import {
   Project,
   Task,
   UxTest,
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 import type {
   FeedbackComment,
   FeedbackDocument,
@@ -24,14 +24,14 @@ import type {
   ProjectStatus,
   ProjectsHomeData,
   UxTestDocument,
-} from '@cra-arc/types-common';
-import { ApiParams } from '@cra-arc/upd/services';
-import { dateRangeSplit } from '@cra-arc/utils-common/date';
+} from '@dua-upd/types-common';
+import { ApiParams } from '@dua-upd/upd/services';
+import { dateRangeSplit } from '@dua-upd/utils-common/date';
 import {
   getAvgSuccessFromLastTests,
   getFeedbackByTags,
   getLatestTest,
-} from '@cra-arc/utils-common/data';
+} from '@dua-upd/utils-common/data';
 
 dayjs.extend(utc);
 

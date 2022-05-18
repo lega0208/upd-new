@@ -4,7 +4,7 @@ import { select, Store } from '@ngrx/store';
 import { init, setLang } from './i18n.actions';
 import { I18nState } from './i18n.reducer';
 import { selectCurrentLang } from './i18n.selectors';
-import { I18nService, LocaleId } from '@cra-arc/upd/i18n';
+import { I18nService, LocaleId } from '@dua-upd/upd/i18n';
 
 @Injectable()
 export class I18nFacade {

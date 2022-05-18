@@ -5,7 +5,7 @@ import {
   getTaskModel,
   getProjectModel,
   getDbConnectionString,
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 
 export async function consolidateDuplicatePages() {
   console.log('Checking for duplicated Pages:');

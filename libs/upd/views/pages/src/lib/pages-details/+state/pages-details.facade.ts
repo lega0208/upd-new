@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map, debounceTime, combineLatest } from 'rxjs';
 
-import { percentChange } from '@cra-arc/utils-common';
-import type { PickByType } from '@cra-arc/utils-common';
+import { percentChange } from '@dua-upd/utils-common';
+import type { PickByType } from '@dua-upd/utils-common';
 import { PagesDetailsState } from './pages-details.reducer';
-import { GscSearchTermMetrics, PageAggregatedData, PageDetailsData } from '@cra-arc/types-common';
+import { GscSearchTermMetrics, PageAggregatedData, PageDetailsData } from '@dua-upd/types-common';
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
@@ -13,8 +13,8 @@ import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
-import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade, selectDatePeriodSelection } from '@cra-arc/upd/state';
+import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade, selectDatePeriodSelection } from '@dua-upd/upd/state';
 
 dayjs.extend(utc);
 

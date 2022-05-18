@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { DbUpdateService } from '@cra-arc/db-update';
+import { DbUpdateService } from '@dua-upd/db-update';
 import { environment } from '../environments/environment';
-import { DataIntegrityService } from '@cra-arc/data-integrity';
+import { DataIntegrityService } from '@dua-upd/data-integrity';
 
 @Injectable()
 export class UpdateService {

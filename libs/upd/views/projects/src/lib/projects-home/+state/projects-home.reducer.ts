@@ -1,6 +1,6 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
-import { ProjectsHomeData } from '@cra-arc/types-common';
+import { ProjectsHomeData } from '@dua-upd/types-common';
 import * as ProjectsHomeActions from './projects-home.actions';
 
 export const PROJECTS_HOME_FEATURE_KEY = 'projectsHome';
@@ -32,21 +32,30 @@ export const projectsHomeInitialState: ProjectsHomeState = {
 
 const reducer = createReducer(
   projectsHomeInitialState,
-  on(ProjectsHomeActions.loadProjectsHomeInit, (state) => ({
-    ...state,
-    loaded: false,
-    error: null,
-  })),
-  on(ProjectsHomeActions.loadProjectsHomeSuccess, (state, { data }) => ({
-    data: data,
-    loaded: true,
-    error: null,
-  })),
-  on(ProjectsHomeActions.loadProjectsHomeError, (state, { error }) => ({
-    ...state,
-    loaded: true,
-    error,
-  }))
+  on(
+    ProjectsHomeActions.loadProjectsHomeInit,
+    (state): ProjectsHomeState => ({
+      ...state,
+      loaded: false,
+      error: null,
+    })
+  ),
+  on(
+    ProjectsHomeActions.loadProjectsHomeSuccess,
+    (state, { data }): ProjectsHomeState => ({
+      data: data,
+      loaded: true,
+      error: null,
+    })
+  ),
+  on(
+    ProjectsHomeActions.loadProjectsHomeError,
+    (state, { error }): ProjectsHomeState => ({
+      ...state,
+      loaded: true,
+      error,
+    })
+  )
 );
 
 export function projectsHomeReducer(

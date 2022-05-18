@@ -1,9 +1,9 @@
 <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col-lg-12">
-      <app-card
+      <upd-card
       [card-title]="'Project description'"
-    ></app-card>
+    ></upd-card>
       </div>
     </div>
   </div>
@@ -11,7 +11,7 @@
   <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
-        <app-data-table-card
+        <upd-data-table-card
         [data]="(memberList$ | async) || []"
         [cols]="memberListCols"
         [sort]="false"
@@ -19,8 +19,8 @@
         [pagination]="false"
         [title]="'Members'"
       >
-      </app-data-table-card>
-  
+      </upd-data-table-card>
+
       </div>
     </div>
   </div>
@@ -28,7 +28,7 @@
   <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col-lg-12">
-      <app-card
+      <upd-card
       [card-title]="'Timeline'"
     >
     <p>Start Date:</p>
@@ -36,7 +36,7 @@
     <p>Completed:</p>
     <p>Year review:</p>
 
-</app-card>
+</upd-card>
       </div>
     </div>
   </div>

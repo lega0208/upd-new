@@ -4,9 +4,9 @@ import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
 import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
 
 import * as ProjectsDetailsActions from './projects-details.actions';
-import { ApiService } from '@cra-arc/upd/services';
+import { ApiService } from '@dua-upd/upd/services';
 import { Store } from '@ngrx/store';
-import { selectDatePeriod, selectDateRanges, selectRouteNestedParam } from '@cra-arc/upd/state';
+import { selectDatePeriod, selectDateRanges, selectRouteNestedParam } from '@dua-upd/upd/state';
 import { selectProjectsDetailsData } from './projects-details.selectors';
 import { loadProjectsDetailsSuccess } from './projects-details.actions';
 
@@ -55,7 +55,7 @@ export class ProjectsDetailsEffects {
       )
     )
   );
-  
+
   dateChange$ = createEffect(() =>
     this.actions$.pipe(
       ofType(selectDatePeriod),

@@ -1,28 +1,28 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <!-- <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="uniqueVisitors$"
         [comparison$]="uniqueVisitorsPercentChange$"
         [title]="'unique-visitors'"
         [tooltip]="'tooltip-unique-visitors'"
-      ></app-data-card>
+      ></upd-data-card>
     </div> -->
     <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="visits$"
         [comparison$]="visitsPercentChange$"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
     <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="pageViews$"
         [comparison$]="pageViewsPercentChange$"
         [title]="'page-views'"
         [tooltip]="'tooltip-page-views'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
   </div>
 </div>
@@ -30,7 +30,7 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-charts
+      <upd-charts
         [type]="'combo-bar-line'"
         [title]="'d3-visits-compared-to-calls'"
         [displayLegend]="'below'"
@@ -42,7 +42,7 @@
         [table]="barTable$ | async"
         [convertToLine]="(isChartDataOver31Days$ | async) || false"
         [tableCols]="barTableCols"
-      ></app-charts>
+      ></upd-charts>
     </div>
   </div>
 </div>
@@ -50,30 +50,30 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-4 col-sm-12">
-      <app-data-card
+      <upd-data-card
         [current$]="gscImpressions$"
         [comparison$]="gscImpressionsPercentChange$"
         [title]="'total-impressions-google'"
         [tooltip]="'tooltip-total-impressions-google'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
-      <app-data-card
+      <upd-data-card
         [current$]="gscCTR$"
         [pipe]="'percent'"
         [comparison$]="gscCTRPercentChange$"
         [title]="'ctr-google'"
         [tooltip]="'tooltip-ctr-google'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
-      <app-data-card
+      <upd-data-card
         [current$]="gscAverage$"
         [pipeParams]="'1.0-2'"
         [comparison$]="gscAveragePercentChange$"
         [title]="'avg-rank-google'"
         [tooltip]="'tooltip-avg-rank-google'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
   </div>
 </div>
@@ -81,7 +81,7 @@
 <!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [filter]="false"
         [sort]="false"
         [pagination]="false"
@@ -90,7 +90,7 @@
         [title]="'top10-tasks-GC'"
         [tooltip]="'tooltip-top10-tasks-GC'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div> -->
@@ -98,22 +98,22 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-12">
-      <app-charts
+      <upd-charts
         [title]="'d3-dyfwywlf'"
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [data]="dyfChart$ | async"
         [type]="'donut'"
         [tableCols]="dyfTableCols"
-      ></app-charts>
+      ></upd-charts>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
-      <app-charts
+      <upd-charts
         [title]="'d3-www'"
         titleTooltip="{{ 'tooltip-d3-www' | translate }}"
         [data]="whatWasWrongChart$ | async"
         [type]="'donut'"
         [tableCols]="whatWasWrongTableCols"
-      ></app-charts>
+      ></upd-charts>
     </div>
   </div>
 </div>

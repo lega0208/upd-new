@@ -1,8 +1,7 @@
 {
   "projectType": "library",
-  "root": "libs/upd/views/tasks",
   "sourceRoot": "libs/upd/views/tasks/src",
-  "prefix": "cra-arc",
+  "prefix": "upd",
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",

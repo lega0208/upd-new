@@ -1,18 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { LocaleId } from '@cra-arc/upd/i18n';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
-import { Metrics } from '../query';
 
 @Component({
-  selector: 'app-overview-search-analytics',
+  selector: 'upd-overview-search-analytics',
   templateUrl: './overview-search-analytics.component.html',
   styleUrls: ['./overview-search-analytics.component.css'],
 })
-export class OverviewSearchAnalyticsComponent implements OnInit{
-  currentLang!: LocaleId;
+export class OverviewSearchAnalyticsComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
 
   gscImpressions$ = this.overviewService.impressions$;
@@ -37,10 +35,6 @@ export class OverviewSearchAnalyticsComponent implements OnInit{
   ) {}
 
   ngOnInit() {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
       this.CanSearchTermsCols = [
         { field: 'Search terms', header: this.i18n.service.translate('search-terms', lang) },

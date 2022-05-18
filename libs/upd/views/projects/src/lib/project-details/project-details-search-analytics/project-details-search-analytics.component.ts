@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { map } from 'rxjs';
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA } from '@cra-arc/upd/i18n';
-import { GetTableProps } from '@cra-arc/utils-common';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { EN_CA } from '@dua-upd/upd/i18n';
+import { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 
 type VisitsByPageColTypes = GetTableProps<ProjectDetailsSearchAnalyticsComponent, 'visitsByPage$'>
 
 @Component({
-  selector: 'app-project-details-search-analytics',
+  selector: 'upd-project-details-search-analytics',
   templateUrl: './project-details-search-analytics.component.html',
   styleUrls: ['./project-details-search-analytics.component.css'],
 })

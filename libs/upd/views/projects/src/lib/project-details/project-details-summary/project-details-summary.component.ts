@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA } from '@cra-arc/upd/i18n';
-import { GetTableProps } from '@cra-arc/utils-common';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { EN_CA } from '@dua-upd/upd/i18n';
+import { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 type ParticipantTasksColTypes = GetTableProps<ProjectDetailsSummaryComponent, 'participantTasks$'>
@@ -11,7 +11,7 @@ type DyfTableColTypes = GetTableProps<ProjectDetailsSummaryComponent, 'dyfChart$
 type WhatWasWrongColTypes = GetTableProps<ProjectDetailsSummaryComponent, 'whatWasWrongChart$'>
 
 @Component({
-  selector: 'app-project-details-summary',
+  selector: 'upd-project-details-summary',
   templateUrl: './project-details-summary.component.html',
   styleUrls: ['./project-details-summary.component.css'],
 })

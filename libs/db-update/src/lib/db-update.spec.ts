@@ -1,6 +1,6 @@
 import { fetchAndMergeOverallMetrics, updateOverallMetrics } from './overall-metrics';
 import { updatePages } from './pages';
-import { toQueryFormat } from '@cra-arc/external-data';
+import { toQueryFormat } from '@dua-upd/external-data';
 import { writeFile } from 'node:fs/promises';
 import { addAAPageMetrics, addRefsToPageMetrics, fetchAndMergePageMetrics } from './pages-metrics';
 import { getAndPrepareUxData, updateUxData } from './airtable';
@@ -13,7 +13,7 @@ import {
   Page,
   Project,
   UxTest,
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 import { connect, Types, disconnect } from 'mongoose';
 import { updateCalldriverData } from './airtable/calldrivers';
 

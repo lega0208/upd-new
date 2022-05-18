@@ -1,5 +1,4 @@
 {
-  "root": "libs/data-integrity",
   "sourceRoot": "libs/data-integrity/src",
   "targets": {
     "build": {

@@ -8,7 +8,7 @@ import {
   ProjectsHomeData,
   TasksHomeData,
   TaskDetailsData, ProjectsDetailsData
-} from '@cra-arc/types-common';
+} from '@dua-upd/types-common';
 
 export type ApiParams = {
   dateRange: string;

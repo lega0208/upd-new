@@ -1,11 +1,11 @@
-<app-card [card-title]="title" [title-tooltip]="tooltip">
-  <ng-container *ngIf="data.length == 0; else elseBlock">
+<upd-card [title]="title" [titleTooltip]="tooltip">
+  <ng-container *ngIf="data.length === 0; else elseBlock">
     <p>
       {{ title | translate }} <span [translate]="'nodata-available'"></span>
     </p>
   </ng-container>
   <ng-template #elseBlock>
-    <app-data-table
+    <upd-data-table
       [filter]="filter"
       [sort]="sort"
       [pagination]="pagination"
@@ -15,6 +15,6 @@
       [kpi]="kpi"
       [sortField]="sortField"
       [sortOrder]="sortOrder"
-    ></app-data-table>
+    ></upd-data-table>
   </ng-template>
-</app-card>
+</upd-card>

@@ -1,7 +1,7 @@
 import { PathLocationStrategy, APP_BASE_HREF, PlatformLocation } from '@angular/common';
 import { Optional, Inject, Injectable } from '@angular/core';
 import { UrlSerializer } from '@angular/router';
-import { EN_CA, FR_CA, I18nService } from '@cra-arc/upd/i18n';
+import { EN_CA, FR_CA, I18nService } from '@dua-upd/upd/i18n';
 
 @Injectable()
 export class PathPreserveQueryLocationStrategy extends PathLocationStrategy {

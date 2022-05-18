@@ -2,12 +2,12 @@ import { connect, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
-import { AirtableClient, DateRange, DateType } from '@cra-arc/external-data';
+import { AirtableClient, DateRange, DateType } from '@dua-upd/external-data';
 import {
   Feedback,
   getFeedbackModel,
   getDbConnectionString,
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 
 dayjs.extend(utc);
 

@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 @Component({
-  selector: 'app-project-details-details',
+  selector: 'upd-project-details-details',
   templateUrl: './project-details-details.component.html',
   styleUrls: ['./project-details-details.component.css'],
 })

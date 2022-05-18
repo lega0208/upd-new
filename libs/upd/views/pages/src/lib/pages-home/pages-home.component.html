@@ -1,18 +1,18 @@
 <h2 class="mb-4">Pages</h2>
 
-<app-date-selector></app-date-selector>
+<upd-date-selector></upd-date-selector>
 
-<app-alert [type]="'info'" [dismissible]="false" [selfClosing]="false">
+<upd-alert [type]="'info'" [dismissible]="false" [selfClosing]="false">
   <span class="material-icons align-top pe-1">info</span>
   <span [translate]="'pages-home-notification'"></span>
-</app-alert>
+</upd-alert>
 
-<app-card>
-  <app-data-table
+<upd-card>
+  <upd-data-table
     [data]="(pagesHomeData$ | async) || []"
     [cols]="columns"
     [displayRows]="25"
     [loading]="(loading$ | async) || false"
   >
-  </app-data-table>
-</app-card>
+  </upd-data-table>
+</upd-card>

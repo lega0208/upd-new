@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { Overall, PageMetrics } from '@cra-arc/db';
+import { Overall, PageMetrics } from '@dua-upd/db';
 import { AnalyticsCoreAPI, getAAClient } from './client';
 import {
   createExamplePageBreakdownMetricsQuery,
@@ -10,7 +10,7 @@ import {
 import { queryDateFormat, ReportSearch, ReportSettings } from './querybuilder';
 import { DateRange } from '../types';
 import { datesFromDateRange } from '../utils';
-import { wait } from '@cra-arc/utils-common';
+import { wait } from '@dua-upd/utils-common';
 
 export * from './client';
 export * from './querybuilder';

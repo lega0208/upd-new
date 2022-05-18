@@ -8,15 +8,15 @@ import {
   OverallDocument,
   Page,
   PageMetrics,
-} from '@cra-arc/types-common';
-import type { PageDocument, PageMetricsModel } from '@cra-arc/types-common';
+} from '@dua-upd/types-common';
+import type { PageDocument, PageMetricsModel } from '@dua-upd/types-common';
 import {
   DateType,
   queryDateFormat,
   SearchAnalyticsClient,
   withRetry,
-} from '@cra-arc/external-data';
-import { wait } from '@cra-arc/utils-common';
+} from '@dua-upd/external-data';
+import { wait } from '@dua-upd/utils-common';
 import { CalldriversService } from './airtable/calldrivers.service';
 import { FeedbackService } from './airtable/feedback.service';
 import { AirtableService } from './airtable/airtable.service';

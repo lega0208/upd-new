@@ -11,9 +11,8 @@ import {
 import { CurveFactory } from 'd3-shape';
 import { curves, Curves, ChartTypes } from './types';
 import { ColumnConfig } from '../data-table-styles/types';
-import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { Observable, of } from 'rxjs';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { EN_CA } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 registerLocaleData(localeFr);
@@ -25,7 +24,7 @@ import 'dayjs/esm/locale/fr-ca';
 dayjs.extend(utc);
 
 @Component({
-  selector: 'app-charts',
+  selector: 'upd-charts',
   templateUrl: './charts.component.html',
   styleUrls: ['./charts.component.css'],
 })

@@ -1,7 +1,7 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Document, Model, Types } from 'mongoose';
-import { AirtableClient, PageData, TaskData, UxTestData } from '@cra-arc/external-data';
+import { AirtableClient, PageData, TaskData, UxTestData } from '@dua-upd/external-data';
 import {
   CallDriver,
   Feedback,
@@ -9,7 +9,7 @@ import {
   Project,
   Task,
   UxTest
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 import type {
   CallDriverDocument,
   FeedbackDocument,
@@ -17,13 +17,13 @@ import type {
   ProjectDocument,
   TaskDocument,
   UxTestDocument,
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 import type {
   UxApiData,
   UxApiDataType,
   UxData
 } from './types';
-import { WithObjectId } from '@cra-arc/utils-common';
+import { WithObjectId } from '@dua-upd/utils-common';
 import { assertHasUrl, assertObjectId } from './utils';
 
 @Injectable()

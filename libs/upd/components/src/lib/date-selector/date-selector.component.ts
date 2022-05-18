@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
 import { combineLatest, map } from 'rxjs';
-import { DateSelectionFacade, DateRangePeriod } from '@cra-arc/upd/state';
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { DateSelectionFacade, DateRangePeriod } from '@dua-upd/upd/state';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
 
 import dayjs from 'dayjs/esm';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 
 @Component({
-  selector: 'app-date-selector',
+  selector: 'upd-date-selector',
   templateUrl: './date-selector.component.html',
   styleUrls: ['./date-selector.component.css'],
 })

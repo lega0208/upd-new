@@ -1,5 +1,5 @@
-import { FeedbackComment, Page, PageMetrics, Task, UxTest } from '@cra-arc/db';
-import type { GscSearchTermMetrics } from '@cra-arc/db';
+import { FeedbackComment, Page, PageMetrics, Task, UxTest } from '@dua-upd/db';
+import type { GscSearchTermMetrics } from '@dua-upd/db';
 
 export {
   Page,
@@ -10,7 +10,7 @@ export {
   Task,
   Project,
   Feedback,
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 
 export type {
   PageDocument,
@@ -24,7 +24,7 @@ export type {
   GscSearchTermMetrics,
   FeedbackDocument,
   FeedbackComment,
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 
 export interface ViewData<T> {
   dateRange: string;

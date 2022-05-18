@@ -1,9 +1,9 @@
 <div class="row mb-4 mt-1 d-block">
-  <app-date-selector-dropdown
+  <upd-date-selector-dropdown
     [onSelect]="selectPeriod.bind(this)"
     [selectedPeriod]="displayFormatSelectedPeriod$"
     [selectionOptions]="selectionOptions"
-  ></app-date-selector-dropdown>
+  ></upd-date-selector-dropdown>
 
     <span class="text-secondary ps-3 pe-2 text-nowrap dates-header-week">
     <strong>{{ displayFormatDateRange$ | async }}</strong>

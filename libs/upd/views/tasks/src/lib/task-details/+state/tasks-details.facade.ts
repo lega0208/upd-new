@@ -7,13 +7,13 @@ import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 
-import { I18nFacade, selectRoute } from '@cra-arc/upd/state';
-import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
+import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import {
   TaskDetailsAggregatedData,
   TaskDetailsData, VisitsByPage
-} from '@cra-arc/types-common';
-import { percentChange, PickByType } from '@cra-arc/utils-common';
+} from '@dua-upd/types-common';
+import { percentChange, PickByType } from '@dua-upd/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
@@ -156,9 +156,9 @@ export class TasksDetailsFacade {
       const comparisonDateRange =
         data?.comparisonDateRangeData?.calldriversEnquiry || [];
 
-      const dataEnquiryLine = dateRange.map((d, i) => {
+      const dataEnquiryLine = dateRange.map((d) => {
         let prevVal = NaN;
-        comparisonDateRange.map((cd, i) => {
+        comparisonDateRange.map((cd) => {
           if (d.enquiry_line === cd.enquiry_line) {
             prevVal = cd.calls;
           }
@@ -170,9 +170,9 @@ export class TasksDetailsFacade {
         };
       });
 
-      comparisonDateRange.map((d, i) => {
+      comparisonDateRange.map((d) => {
         let currVal = 0;
-        dateRange.map((cd, i) => {
+        dateRange.map((cd) => {
           if (d.enquiry_line === cd.enquiry_line) {
             currVal = cd.calls;
           }
@@ -249,11 +249,8 @@ export class TasksDetailsFacade {
     })
   );
 
-  taskSuccessChart$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
+  taskSuccessChart$ = this.tasksDetailsData$.pipe(
+    map((data) => {
       const taskSuccessByUxTest = data?.taskSuccessByUxTest;
 
       if (!taskSuccessByUxTest) return [];
@@ -295,9 +292,6 @@ export class TasksDetailsFacade {
     mapToPercentChange('gscTotalPosition')
   );
 
-  // taskSuccessByUxTest$ = this.tasksDetailsData$.pipe(
-  //   map((data) => data?.taskSuccessByUxTest)
-  // );
   taskSuccessByUxTest$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,

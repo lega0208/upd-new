@@ -10,6 +10,7 @@ import {
   TemplateRef,
   TrackByFunction,
   ChangeDetectionStrategy,
+  OnInit,
 } from '@angular/core';
 
 import { curveLinear } from 'd3-shape';
@@ -33,7 +34,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   // tslint:disable-next-line: component-selector
-  selector: 'combo-grouped-vertical-bar-line-chart',
+  selector: 'upd-combo-grouped-vertical-bar-line-chart',
   templateUrl: './combo-grouped-vertical-bar-line-chart.component.html',
   styleUrls: ['./combo-grouped-vertical-bar-line-chart.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -50,7 +51,10 @@ import { animate, style, transition, trigger } from '@angular/animations';
     ]),
   ],
 })
-export class ComboGroupedVerticalBarLineChartComponent extends BaseChartComponent {
+export class ComboGroupedVerticalBarLineChartComponent
+  extends BaseChartComponent
+  implements OnInit
+{
   @Input() curve: any = curveLinear;
   @Input() legend = false;
   @Input() legendTitle = 'Legend';

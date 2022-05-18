@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { TaskDetailsData } from '@cra-arc/types-common';
+import { TaskDetailsData } from '@dua-upd/types-common';
 
 export const loadTasksDetailsInit = createAction('[TasksDetails] Init');
 

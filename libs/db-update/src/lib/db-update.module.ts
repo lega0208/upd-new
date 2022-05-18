@@ -1,11 +1,11 @@
 import { ConsoleLogger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { DbModule } from '@cra-arc/db';
+import { DbModule } from '@dua-upd/db';
 import {
   AdobeAnalyticsClient,
   AirtableClient,
   SearchAnalyticsClient,
-} from '@cra-arc/external-data';
+} from '@dua-upd/external-data';
 import { DbUpdateService } from './db-update.service';
 import { OverallMetricsService } from './overall-metrics/overall-metrics.service';
 import { AirtableService } from './airtable/airtable.service';

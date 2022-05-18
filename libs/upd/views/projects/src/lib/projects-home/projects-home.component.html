@@ -3,48 +3,48 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-3 col-sm-12">
-      <app-data-card
+      <upd-data-card
         [current$]="numInProgress$"
         [title]="'Projects in progress'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
 
     <div class="col-lg-3 col-sm-12">
-      <app-data-card
+      <upd-data-card
         [current$]="numPlanning$"
         [title]="'Projects in planning'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
 
     <div class="col-lg-3 col-sm-12">
-      <app-data-card
+      <upd-data-card
         [current$]="totalCompleted$"
         [title]="'Total projects completed'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
 
     <div class="col-lg-3 col-sm-12">
-      <app-data-card
+      <upd-data-card
         [current$]="completedCOPS$"
         [title]="'COPS projects completed'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
 
     <!-- <div class="col-lg-3 col-sm-12">
-      <app-data-card
+      <upd-data-card
         [current]="(numDelayed$ | async | number) || 0"
         [title]="'Projects delayed'"
-      ></app-data-card>
+      ></upd-data-card>
     </div> -->
   </div>
 </div>
 
-<app-card>
-  <app-data-table
+<upd-card>
+  <upd-data-table
     [data]="(tableData$ | async) || []"
     [cols]="columns"
     [searchFields]="searchFields"
     [displayRows]="25"
     sortField="title"
-  ></app-data-table>
-</app-card>
+  ></upd-data-table>
+</upd-card>

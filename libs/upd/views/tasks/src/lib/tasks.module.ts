@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 
-import { UpdComponentsModule } from '@cra-arc/upd-components';
-import { ApiService, ServicesModule } from '@cra-arc/upd/services';
+import { UpdComponentsModule } from '@dua-upd/upd-components';
+import { ApiService, ServicesModule } from '@dua-upd/upd/services';
 
 import { TasksComponent } from './tasks.component';
 import { TasksHomeComponent } from './tasks-home/tasks-home.component';
@@ -30,7 +30,7 @@ import {
 } from './task-details/+state/tasks-details.reducer';
 import { TasksDetailsEffects } from './task-details/+state/tasks-details.effects';
 import { TasksDetailsFacade } from './task-details/+state/tasks-details.facade';
-import { I18nModule } from '@cra-arc/upd/i18n';
+import { I18nModule } from '@dua-upd/upd/i18n';
 
 @NgModule({
   imports: [

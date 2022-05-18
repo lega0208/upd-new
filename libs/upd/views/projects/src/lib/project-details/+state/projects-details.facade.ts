@@ -15,14 +15,14 @@ import {
   ProjectsDetailsData,
   TaskKpi,
   VisitsByPage,
-} from '@cra-arc/types-common';
-import { percentChange, PickByType } from '@cra-arc/utils-common';
-import { I18nFacade, selectUrl } from '@cra-arc/upd/state';
+} from '@dua-upd/types-common';
+import { percentChange, PickByType } from '@dua-upd/utils-common';
+import { I18nFacade, selectUrl } from '@dua-upd/upd/state';
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
-import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 
 dayjs.extend(utc);
 

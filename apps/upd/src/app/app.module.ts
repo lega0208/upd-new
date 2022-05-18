@@ -9,12 +9,12 @@ import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { routerReducer, StoreRouterConnectingModule } from '@ngrx/router-store';
 
-import { AppRoutingModule } from './app-routing.module';
+import { AppRoutingModule } from './upd-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 
-import { I18nModule } from '@cra-arc/upd/i18n';
+import { I18nModule } from '@dua-upd/upd/i18n';
 
 import {
   DateSelectionEffects,
@@ -23,10 +23,10 @@ import {
   i18nReducer,
   I18nEffects,
   I18nFacade,
-} from '@cra-arc/upd/state';
+} from '@dua-upd/upd/state';
 
 import { environment } from '../environments/environment';
-import { PathPreserveQueryLocationStrategy } from '@cra-arc/upd/services';
+import { PathPreserveQueryLocationStrategy } from '@dua-upd/upd/services';
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidebarComponent],

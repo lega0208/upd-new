@@ -1,5 +1,4 @@
 {
-  "root": "libs/db",
   "sourceRoot": "libs/db/src",
   "projectType": "library",
   "targets": {

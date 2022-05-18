@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
-import { PageData } from '@cra-arc/external-data';
-import { UxApiDataType, UxDataType } from '@cra-arc/db-update';
+import { PageData } from '@dua-upd/external-data';
+import { UxApiDataType, UxDataType } from './types';
 
 export function assertObjectId(
   value: UxDataType[] | Types.ObjectId[]

@@ -3,7 +3,7 @@ import { NgbAlert } from '@ng-bootstrap/ng-bootstrap';
 
 import { TranslateService } from '@ngx-translate/core';
 @Component({
-  selector: 'app-alert',
+  selector: 'upd-alert',
   templateUrl: './alert.component.html',
   styleUrls: ['./alert.component.scss'],
 })

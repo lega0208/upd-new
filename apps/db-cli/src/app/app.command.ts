@@ -1,6 +1,6 @@
 import { Command, CommandRunner, SubCommand } from 'nest-commander';
 import { ConsoleLogger } from '@nestjs/common';
-import { DataIntegrityService } from '@cra-arc/data-integrity';
+import { DataIntegrityService } from '@dua-upd/data-integrity';
 import { UpdateCommand } from './update.command';
 import { RepopulateCommand } from './repopulate.command';
 

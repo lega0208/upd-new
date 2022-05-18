@@ -1,5 +1,5 @@
 {
-  "npmScope": "cra-arc",
+  "npmScope": "dua-upd",
   "affected": {
     "defaultBase": "main"
   },
@@ -16,9 +16,16 @@
   },
   "tasksRunnerOptions": {
     "default": {
-      "runner": "@nrwl/workspace/tasks-runners/default",
+      "runner": "@nrwl/nx-cloud",
       "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e", "compodoc"]
+        "cacheableOperations": [
+          "build",
+          "lint",
+          "test",
+          "e2e",
+          "compodoc"
+        ],
+        "accessToken": "NWZiNDZlNGMtMDhjYS00NTBlLTg0YWMtY2EwMTlmYzk2MTJjfHJlYWQ="
       }
     }
   },

@@ -2,14 +2,14 @@
   {{ 'overview-title' | translate }}
 </h2>
 
-<app-loading-spinner
+<upd-loading-spinner
   *ngIf="loading$ | async; else elseBlock"
-></app-loading-spinner>
+></upd-loading-spinner>
 
 <ng-template #elseBlock>
-  <app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
-  <app-date-selector
+  <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
+  <upd-date-selector
     *ngIf="!((currentRoute$ | async) || '').endsWith('uxtests')"
-  ></app-date-selector>
+  ></upd-date-selector>
   <router-outlet></router-outlet>
 </ng-template>

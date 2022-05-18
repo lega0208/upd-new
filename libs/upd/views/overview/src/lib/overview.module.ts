@@ -1,11 +1,10 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 
-import { UpdComponentsModule } from '@cra-arc/upd-components';
-import { ServicesModule } from '@cra-arc/upd/services';
+import { UpdComponentsModule } from '@dua-upd/upd-components';
+import { ServicesModule } from '@dua-upd/upd/services';
 
 import { OverviewComponent } from './overview.component';
 import { OverviewRoutingModule } from './overview-routing.module';
@@ -24,7 +23,7 @@ import {
 } from './+state/overview/overview.reducer';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { I18nModule } from '@cra-arc/upd/i18n';
+import { I18nModule } from '@dua-upd/upd/i18n';
 
 @NgModule({
   imports: [

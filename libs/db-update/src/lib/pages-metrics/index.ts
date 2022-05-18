@@ -5,14 +5,14 @@ import {
   queryDateFormat,
   SearchAnalyticsClient,
   datesFromDateRange,
-} from '@cra-arc/external-data';
+} from '@dua-upd/external-data';
 import {
   getDbConnectionString,
   PageMetrics,
   getPageMetricsModel,
   getPageModel,
   Page,
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 import { connect, Model, Document, Types } from 'mongoose';
 import utc from 'dayjs/plugin/utc';
 

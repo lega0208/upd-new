@@ -1,7 +1,7 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
 import * as I18nActions from './i18n.actions';
-import { EN_CA, FR_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 
 export const I18N_FEATURE_KEY = 'i18n';
 

@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
-import { ColumnConfig } from '@cra-arc/upd-components';
+import { ColumnConfig } from '@dua-upd/upd-components';
 
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { GetTableProps } from '@cra-arc/utils-common';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { GetTableProps } from '@dua-upd/utils-common';
 
 type GscSearchTermsColTypes = GetTableProps<PagesDetailsSearchAnalyticsComponent, 'topGSCSearchTerms$'>
 type ReferrerTypeColTypes = GetTableProps<PagesDetailsSearchAnalyticsComponent, 'referrerType$'>
 
 @Component({
-  selector: 'app-page-details-search-analytics',
+  selector: 'upd-page-details-search-analytics',
   templateUrl: './pages-details-search-analytics.component.html',
   styleUrls: ['./pages-details-search-analytics.component.css'],
 })

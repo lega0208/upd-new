@@ -5,8 +5,8 @@ import {
   CallDriver,
   getCallDriversModel,
   getDbConnectionString,
-} from '@cra-arc/db';
-import { AirtableClient, DateRange, DateType } from '@cra-arc/external-data';
+} from '@dua-upd/db';
+import { AirtableClient, DateRange, DateType } from '@dua-upd/external-data';
 
 dayjs.extend(utc);
 

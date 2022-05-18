@@ -1,30 +1,30 @@
 <div class="container-fluid gx-0">
   <div class="row">
     <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="gscImpressions$"
         [comparison$]="gscImpressionsPercentChange$"
         [title]="'total-impressions-google'"
         [tooltip]="'tooltip-total-impressions-google'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
     <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="gscCTR$"
         [pipe]="'percent'"
         [comparison$]="gscCTRPercentChange$"
         [title]="'ctr-google'"
         [tooltip]="'tooltip-ctr-google'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
     <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="gscAverage$"
         [pipeParams]="'1.0-2'"
         [comparison$]="gscAveragePercentChange$"
         [title]="'avg-rank-google'"
         [tooltip]="'tooltip-avg-rank-google'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
   </div>
 </div>
@@ -32,7 +32,7 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [filter]="false"
         [sort]="true"
         [pagination]="false"
@@ -41,7 +41,7 @@
         [title]="'top10-terms-google'"
         [tooltip]="'tooltip-top10-search-terms-google'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>
@@ -49,7 +49,7 @@
 <!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [filter]="false"
         [sort]="true"
         [pagination]="true"
@@ -57,7 +57,7 @@
         [cols]="CanSearchTermsCols"
         [title]="'search-terms-canada'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div> -->

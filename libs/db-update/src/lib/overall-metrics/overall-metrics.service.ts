@@ -1,7 +1,7 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
-import { AdobeAnalyticsClient, DateRange, queryDateFormat, SearchAnalyticsClient } from '@cra-arc/external-data';
+import { AdobeAnalyticsClient, DateRange, queryDateFormat, SearchAnalyticsClient } from '@dua-upd/external-data';
 import { InjectModel } from '@nestjs/mongoose';
-import { Overall, OverallDocument } from '@cra-arc/db';
+import { Overall, OverallDocument } from '@dua-upd/db';
 import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';

@@ -2,15 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { GetTableProps } from '@cra-arc/utils-common';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { GetTableProps } from '@dua-upd/utils-common';
 
 type FeedbackCommentsColType = GetTableProps<PagesDetailsFeedbackComponent, 'feedbackComments$'>
 type FeedbackByTagsColTypes = GetTableProps<PagesDetailsFeedbackComponent, 'feedbackByTagsTable$'>
 
 @Component({
-  selector: 'app-page-details-feedback',
+  selector: 'upd-page-details-feedback',
   templateUrl: './pages-details-feedback.component.html',
   styleUrls: ['./pages-details-feedback.component.css'],
 })

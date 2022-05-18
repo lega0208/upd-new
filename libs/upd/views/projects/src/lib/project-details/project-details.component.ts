@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { ProjectStatus } from '@cra-arc/types-common';
+import { ProjectStatus } from '@dua-upd/types-common';
 import { map, Observable } from 'rxjs';
 import { ProjectsDetailsFacade } from './+state/projects-details.facade';
 
-import { I18nFacade } from '@cra-arc/upd/state';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
-import { EN_CA } from '@cra-arc/upd/i18n';
+import { EN_CA } from '@dua-upd/upd/i18n';
 
 @Component({
-  selector: 'app-project-details',
+  selector: 'upd-project-details',
   templateUrl: './project-details.component.html',
   styleUrls: ['./project-details.component.css'],
 })
@@ -28,7 +28,7 @@ export class ProjectDetailsComponent implements OnInit {
   status$ = this.projectsDetailsService.status$;
   loaded$ = this.projectsDetailsService.loaded$;
   currentRoute$ = this.projectsDetailsService.currentRoute$;
-  
+
   navTabs: { href: string; title: string }[] = [];
 
   constructor(

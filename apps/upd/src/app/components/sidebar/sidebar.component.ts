@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { map } from 'rxjs';
-import { FR_CA } from '@cra-arc/upd/i18n';
+import { FR_CA } from '@dua-upd/upd/i18n';
 
 @Component({
-  selector: 'app-sidebar',
+  selector: 'upd-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css'],
 })

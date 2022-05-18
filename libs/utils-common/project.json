@@ -1,5 +1,4 @@
 {
-  "root": "libs/utils-common",
   "sourceRoot": "libs/utils-common/src",
   "projectType": "library",
   "targets": {

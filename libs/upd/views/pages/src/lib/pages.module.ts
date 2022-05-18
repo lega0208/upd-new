@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UpdComponentsModule } from '@cra-arc/upd-components';
+import { UpdComponentsModule } from '@dua-upd/upd-components';
 
 import { PagesRoutingModule } from './pages-routing.module';
 import { PagesComponent } from './pages.component';
@@ -24,9 +24,9 @@ import {
 } from './pages-details/+state/pages-details.reducer';
 import { PagesDetailsEffects } from './pages-details/+state/pages-details.effects';
 import { PagesDetailsFacade } from './pages-details/+state/pages-details.facade';
-import { ServicesModule, ApiService } from '@cra-arc/upd/services';
+import { ServicesModule, ApiService } from '@dua-upd/upd/services';
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { I18nModule } from '@cra-arc/upd/i18n';
+import { I18nModule } from '@dua-upd/upd/i18n';
 
 @NgModule({
   imports: [

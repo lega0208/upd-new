@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { TasksHomeAggregatedData } from '@cra-arc/types-common';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { TasksHomeAggregatedData } from '@dua-upd/types-common';
 import { TasksHomeFacade } from './+state/tasks-home.facade';
 
 @Component({
-  selector: 'app-tasks-home',
+  selector: 'upd-tasks-home',
   templateUrl: './tasks-home.component.html',
   styleUrls: ['./tasks-home.component.css'],
 })

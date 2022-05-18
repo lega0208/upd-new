@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
-import { ApiService } from '@cra-arc/upd/services';
+import { ApiService } from '@dua-upd/upd/services';
 
-import { selectDateRanges, selectRouteNestedParam, selectDatePeriod } from '@cra-arc/upd/state';
+import { selectDateRanges, selectRouteNestedParam, selectDatePeriod } from '@dua-upd/upd/state';
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 

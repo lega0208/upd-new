@@ -19,7 +19,7 @@ import {
   Feedback,
   FeedbackDocument,
   PageMetrics,
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 import type {
   PageMetricsModel,
   ProjectsHomeData,
@@ -27,8 +27,8 @@ import type {
   OverviewData,
   OverviewUxData,
   OverviewProjectData,
-} from '@cra-arc/types-common';
-import { ApiParams } from '@cra-arc/upd/services';
+} from '@dua-upd/types-common';
+import { ApiParams } from '@dua-upd/upd/services';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);

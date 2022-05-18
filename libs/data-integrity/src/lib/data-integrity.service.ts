@@ -8,9 +8,9 @@ import {
   OverallDocument,
   Page,
   PageMetrics,
-} from '@cra-arc/types-common';
-import type { PageDocument, PageMetricsModel } from '@cra-arc/types-common';
-import { DbUpdateService } from '@cra-arc/db-update';
+} from '@dua-upd/types-common';
+import type { PageDocument, PageMetricsModel } from '@dua-upd/types-common';
+import { DbUpdateService } from '@dua-upd/db-update';
 import { outputCsv } from './utils';
 
 dayjs.extend(utc);

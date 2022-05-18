@@ -1,8 +1,7 @@
 {
   "projectType": "application",
-  "root": "apps/upd",
   "sourceRoot": "apps/upd/src",
-  "prefix": "cra-arc",
+  "prefix": "upd",
   "targets": {
     "build": {
       "executor": "@nrwl/angular:webpack-browser",

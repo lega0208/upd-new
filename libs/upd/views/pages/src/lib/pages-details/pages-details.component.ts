@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { PagesDetailsFacade } from './+state/pages-details.facade';
 
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
-import { EN_CA } from '@cra-arc/upd/i18n';
+import { EN_CA } from '@dua-upd/upd/i18n';
 
 @Component({
-  selector: 'app-page-details',
+  selector: 'upd-page-details',
   templateUrl: './pages-details.component.html',
   styleUrls: ['./pages-details.component.css'],
 })

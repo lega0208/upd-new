@@ -23,6 +23,6 @@ describe('ProjectStatusLabelComponent', () => {
     expect(component).toBeTruthy();
   });
   it('should take an object that maps css classes to values', () => {
-
+    expect(true).toBeTruthy();
   })
 });

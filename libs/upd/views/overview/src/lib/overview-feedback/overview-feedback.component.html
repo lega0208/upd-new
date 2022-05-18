@@ -1,22 +1,22 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-12">
-      <app-charts
+      <upd-charts
         [title]="'d3-dyfwywlf'"
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [data]="dyfChart$ | async"
         [type]="'donut'"
         [tableCols]="dyfTableCols"
-      ></app-charts>
+      ></upd-charts>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
-      <app-charts
+      <upd-charts
         [title]="'d3-www'"
         titleTooltip="{{ 'tooltip-d3-www' | translate }}"
         [data]="whatWasWrongChart$ | async"
         [type]="'donut'"
         [tableCols]="whatWasWrongTableCols"
-      ></app-charts>
+      ></upd-charts>
     </div>
   </div>
 </div>
@@ -24,7 +24,7 @@
 <!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [filter]="false"
         [sort]="false"
         [pagination]="false"
@@ -32,7 +32,7 @@
         [cols]="taskSurveyCols"
         [title]="'top5-programs-most-feedback'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>
@@ -40,7 +40,7 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [filter]="false"
         [sort]="false"
         [pagination]="false"
@@ -48,7 +48,7 @@
         [cols]="taskSurveyCols"
         [title]="'top5-pages-most-feedback'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div> -->

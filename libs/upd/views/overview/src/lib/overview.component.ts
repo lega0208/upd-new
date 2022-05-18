@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { OverviewFacade } from './+state/overview/overview.facade';
 
-import { I18nFacade } from '@cra-arc/upd/state';
-import { combineLatest, tap } from 'rxjs';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { combineLatest } from 'rxjs';
 
 @Component({
-  selector: 'app-overview',
+  selector: 'upd-overview',
   templateUrl: './overview.component.html',
 })
 export class OverviewComponent implements OnInit {

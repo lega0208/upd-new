@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { LocaleId, EN_CA, FR_CA } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { LocaleId, EN_CA, FR_CA } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
 
 @Component({
-  selector: 'app-header',
+  selector: 'upd-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
 })

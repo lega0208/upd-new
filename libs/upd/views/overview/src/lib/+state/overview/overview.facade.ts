@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import { combineLatest, debounceTime, map, mergeMap, of, tap } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { combineLatest, debounceTime, map, mergeMap, of } from 'rxjs';
 
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
@@ -9,17 +9,17 @@ import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
-import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { OverviewAggregatedData, OverviewData } from '@cra-arc/types-common';
-import { percentChange } from '@cra-arc/utils-common';
-import type { PickByType } from '@cra-arc/utils-common';
+import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
+import { OverviewAggregatedData, OverviewData } from '@dua-upd/types-common';
+import { percentChange } from '@dua-upd/utils-common';
+import type { PickByType } from '@dua-upd/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
 import {
   I18nFacade,
   selectDatePeriodSelection,
   selectUrl,
-} from '@cra-arc/upd/state';
+} from '@dua-upd/upd/state';
 
 dayjs.extend(utc);
 dayjs.extend(isSameOrBefore);
@@ -27,18 +27,16 @@ dayjs.extend(isSameOrBefore);
 @Injectable()
 export class OverviewFacade {
   currentLang$ = this.i18n.currentLang$;
-  loaded$ = this.store.pipe(select(OverviewSelectors.getOverviewLoaded));
-  loading$ = this.store.pipe(
-    select(OverviewSelectors.getOverviewLoading),
-    debounceTime(500)
-  );
-  dateRangeSelected$ = this.store.pipe(select(selectDatePeriodSelection));
-  overviewData$ = this.store.pipe(select(OverviewSelectors.getOverviewData));
+  loaded$ = this.store.select(OverviewSelectors.selectOverviewLoaded);
+  loading$ = this.store
+    .select(OverviewSelectors.selectOverviewLoading)
+    .pipe(debounceTime(500));
+  dateRangeSelected$ = this.store.select(selectDatePeriodSelection);
+  overviewData$ = this.store.select(OverviewSelectors.selectOverviewData);
 
-  currentRoute$ = this.store.pipe(
-    select(selectUrl),
-    map((url) => url.replace(/\?.+$/, ''))
-  );
+  currentRoute$ = this.store
+    .select(selectUrl)
+    .pipe(map((url) => url.replace(/\?.+$/, '')));
 
   visitors$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.visitors || 0)
@@ -198,9 +196,9 @@ export class OverviewFacade {
       const comparisonDateRange =
         data?.comparisonDateRangeData?.calldriversEnquiry || [];
 
-      const dataEnquiryLine = dateRange.map((d, i) => {
+      const dataEnquiryLine = dateRange.map((d) => {
         let prevVal = NaN;
-        comparisonDateRange.map((cd, i) => {
+        comparisonDateRange.map((cd) => {
           if (d.enquiry_line === cd.enquiry_line) {
             prevVal = cd.sum;
           }
@@ -212,9 +210,9 @@ export class OverviewFacade {
         };
       });
 
-      comparisonDateRange.map((d, i) => {
+      comparisonDateRange.map((d) => {
         let currVal = 0;
-        dateRange.map((cd, i) => {
+        dateRange.map((cd) => {
           if (d.enquiry_line === cd.enquiry_line) {
             currVal = cd.sum;
           }
@@ -268,7 +266,7 @@ export class OverviewFacade {
 
       const dateRangeDates = visitsByDay.map(({ date }) => date);
 
-      const dateRangeSeries = visitsByDay.map(({ visits }, i) => ({
+      const dateRangeSeries = visitsByDay.map(({ visits }) => ({
         name: dateRangeLabel, // todo: date label (x-axis) formatting based on date range length
         value: visits || 0,
       }));
@@ -394,9 +392,6 @@ export class OverviewFacade {
       const [startDate, endDate] = data.dateRange
         .split('/')
         .map((d) => new Date(d));
-      const [prevStartDate, prevEndDate] = (data.comparisonDateRange || '')
-        .split('/')
-        .map((d) => new Date(d));
 
       let queryDate = dayjs.utc(startDate);
       const end = dayjs.utc(endDate);
@@ -410,10 +405,7 @@ export class OverviewFacade {
         queryDate = queryDate.add(1, 'day');
       }
 
-      const drSeries: { name: string; value: number }[] = [];
-      let cnt = 0;
-
-      const dateRangeSeries = calldriversByDay.map(({ date, calls }, i) => {
+      const dateRangeSeries = calldriversByDay.map(({ date, calls }) => {
         const callDate = dayjs.utc(date).locale(lang).format(dateFormat);
 
         return {
@@ -421,8 +413,6 @@ export class OverviewFacade {
           value: calls,
         };
       });
-
-      //console.log(drSeries);
 
       const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
       const comparisonDateRangeLabel = getWeeklyDatesLabel(
@@ -682,7 +672,7 @@ export class OverviewFacade {
     map((data) => data.copsTestsCompletedSince2018)
   );
 
-  error$ = this.store.pipe(select(OverviewSelectors.getOverviewError));
+  error$ = this.store.select(OverviewSelectors.selectOverviewError);
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
 

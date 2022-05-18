@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
-import { ProjectStatus } from '@cra-arc/types-common';
+import { ProjectStatus } from '@dua-upd/types-common';
 
 @Component({
-  selector: 'app-project-status-label',
+  selector: 'upd-project-status-label',
   template: `
     <span class="badge {{ classMap[statusText] }}">{{ statusText | translate }}</span>
   `,

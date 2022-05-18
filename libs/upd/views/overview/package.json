@@ -1,5 +1,5 @@
 {
-  "name": "@cra-arc/upd/views/overview",
+  "name": "@dua-upd/upd/views/overview",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^13.2.0",

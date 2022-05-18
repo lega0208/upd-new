@@ -3,12 +3,12 @@
   <a [routerLink]="['/', langLink, 'pages']">Pages</a>
 </div>
 
-<app-loading-spinner
+<upd-loading-spinner
   *ngIf="(loading$ | async) && (url$ | async) !== ''; else elseBlock"
-></app-loading-spinner>
+></upd-loading-spinner>
 
 <ng-template #elseBlock>
-  <app-page-404 *ngIf="(loading$ | async) === true && (url$ | async) === ''; else elseBlock2"></app-page-404>
+  <upd-page-404 *ngIf="(loading$ | async) === true && (url$ | async) === ''; else elseBlock2"></upd-page-404>
 </ng-template>
 <ng-template #elseBlock2>
   <h2 class="h3 pt-2 pb-2">Page: {{ title$ | async }}</h2>
@@ -32,14 +32,14 @@
         URL</span
       >
       <ng-container *ngIf="showAlert">
-        <app-alert position="top">Copied successfully!</app-alert>
+        <upd-alert position="top">Copied successfully!</upd-alert>
       </ng-container>
     </span>
   </div>
   <!-- View URL / Copy URL stuff -->
 
-  <app-nav-tabs [tabs]="navTabs"></app-nav-tabs>
-  <app-date-selector></app-date-selector>
+  <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
+  <upd-date-selector></upd-date-selector>
 
   <router-outlet></router-outlet>
 </ng-template>

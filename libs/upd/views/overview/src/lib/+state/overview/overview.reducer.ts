@@ -1,7 +1,7 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
 import * as OverviewActions from './overview.actions';
-import { OverviewData } from '@cra-arc/types-common';
+import { OverviewData } from '@dua-upd/types-common';
 
 export const OVERVIEW_FEATURE_KEY = 'overview';
 
@@ -35,26 +35,38 @@ export const initialState: OverviewState = {
 
 const reducer = createReducer(
   initialState,
-  on(OverviewActions.init, (state) => ({
-    ...state,
-    loading: true,
-    loaded: false,
-    error: null,
-  })),
-  on(OverviewActions.loadOverviewSuccess, (state, payload: { data: OverviewData }) => ({
-    data: payload.data,
-    loading: false,
-    loaded: true,
-    error: null,
-  })),
-  on(OverviewActions.loadOverviewError, (state, { error }) => ({
-    ...state,
-    loading: false,
-    loaded: true,
-    error,
-  }))
+  on(
+    OverviewActions.init,
+    (state): OverviewState => ({
+      ...state,
+      loading: true,
+      loaded: false,
+      error: null,
+    })
+  ),
+  on(
+    OverviewActions.loadOverviewSuccess,
+    (state, payload: { data: OverviewData }): OverviewState => ({
+      data: payload.data,
+      loading: false,
+      loaded: true,
+      error: null,
+    })
+  ),
+  on(
+    OverviewActions.loadOverviewError,
+    (state, { error }): OverviewState => ({
+      ...state,
+      loading: false,
+      loaded: true,
+      error,
+    })
+  )
 );
 
-export function overviewReducer(state: OverviewState | undefined, action: Action) {
+export function overviewReducer(
+  state: OverviewState | undefined,
+  action: Action
+) {
   return reducer(state, action);
 }

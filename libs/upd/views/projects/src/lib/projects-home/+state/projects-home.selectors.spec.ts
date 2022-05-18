@@ -54,13 +54,13 @@ describe('ProjectsHome Selectors', () => {
     });
 
     it('getProjectsHomeLoaded() should return the current "loaded" status', () => {
-      const result = ProjectsHomeSelectors.getProjectsHomeLoaded(state);
+      const result = ProjectsHomeSelectors.selectProjectsHomeLoaded(state);
 
       expect(result).toBe(true);
     });
 
     it('getProjectsHomeError() should return the current "error" state', () => {
-      const result = ProjectsHomeSelectors.getProjectsHomeError(state);
+      const result = ProjectsHomeSelectors.selectProjectsHomeError(state);
 
       expect(result).toBe(ERROR_MSG);
     });

@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@cra-arc/upd-components';
+import { ColumnConfig } from '@dua-upd/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { LocaleId } from '@cra-arc/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { LocaleId } from '@dua-upd/upd/i18n';
 import { combineLatest } from 'rxjs';
 
 @Component({
-  selector: 'app-overview-webtraffic',
+  selector: 'upd-overview-webtraffic',
   templateUrl: './overview-webtraffic.component.html',
   styleUrls: ['./overview-webtraffic.component.css'],
 })

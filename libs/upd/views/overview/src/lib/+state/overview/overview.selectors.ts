@@ -2,26 +2,26 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { OVERVIEW_FEATURE_KEY, OverviewState } from './overview.reducer';
 
 // Select full overview state
-export const getOverviewState =
+export const selectOverviewState =
   createFeatureSelector<OverviewState>(OVERVIEW_FEATURE_KEY);
 
 // select specific state properties
-export const getOverviewLoaded = createSelector(
-  getOverviewState,
+export const selectOverviewLoaded = createSelector(
+  selectOverviewState,
   (state: OverviewState) => state.loaded
 );
 
-export const getOverviewLoading = createSelector(
-  getOverviewState,
+export const selectOverviewLoading = createSelector(
+  selectOverviewState,
   (state: OverviewState) => state.loading
 );
 
-export const getOverviewError = createSelector(
-  getOverviewState,
+export const selectOverviewError = createSelector(
+  selectOverviewState,
   (state: OverviewState) => state.error
 );
 
-export const getOverviewData = createSelector(
-  getOverviewState,
+export const selectOverviewData = createSelector(
+  selectOverviewState,
   (state: OverviewState) => state.data
 );

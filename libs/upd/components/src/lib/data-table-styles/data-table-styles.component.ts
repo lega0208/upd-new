@@ -1,11 +1,11 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ColumnConfig, ColumnConfigPipe } from './types';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
-import { ProjectStatus } from '@cra-arc/types-common';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { ProjectStatus } from '@dua-upd/types-common';
+import { I18nFacade } from '@dua-upd/upd/state';
 
 @Component({
-  selector: 'app-data-table-styles',
+  selector: 'upd-data-table-styles',
   templateUrl: './data-table-styles.component.html',
   styleUrls: ['./data-table-styles.component.scss'],
   providers: [PercentPipe, DecimalPipe, DatePipe],

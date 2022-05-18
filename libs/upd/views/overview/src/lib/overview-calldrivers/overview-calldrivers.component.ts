@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { LocaleId } from '@cra-arc/upd/i18n';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
-  selector: 'app-overview-calldrivers',
+  selector: 'upd-overview-calldrivers',
   templateUrl: './overview-calldrivers.component.html',
   styleUrls: ['./overview-calldrivers.component.css'],
 })

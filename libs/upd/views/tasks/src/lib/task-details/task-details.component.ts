@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { TasksDetailsFacade } from './+state/tasks-details.facade';
 
-import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA } from '@cra-arc/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { EN_CA } from '@dua-upd/upd/i18n';
 
 @Component({
-  selector: 'app-task-details',
+  selector: 'upd-task-details',
   templateUrl: './task-details.component.html',
   styleUrls: ['./task-details.component.css'],
 })

@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ProjectsHomeFacade } from './+state/projects-home.facade';
-import { ColumnConfig } from '@cra-arc/upd-components';
+import { ColumnConfig } from '@dua-upd/upd-components';
 
-import { I18nFacade } from '@cra-arc/upd/state';
-import { FR_CA, LocaleId } from '@cra-arc/upd/i18n';
-import { ProjectsHomeProject } from '@cra-arc/types-common';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
+import { ProjectsHomeProject } from '@dua-upd/types-common';
 
 @Component({
-  selector: 'app-projects-home',
+  selector: 'upd-projects-home',
   templateUrl: './projects-home.component.html',
   styleUrls: ['./projects-home.component.css'],
 })

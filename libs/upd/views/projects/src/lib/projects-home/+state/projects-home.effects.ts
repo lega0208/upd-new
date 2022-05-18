@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { createEffect, Actions, ofType } from '@ngrx/effects';
 import { catchError, EMPTY, mergeMap, map } from 'rxjs';
 
-import { ApiService } from '@cra-arc/upd/services';
+import { ApiService } from '@dua-upd/upd/services';
 import * as ProjectsHomeActions from './projects-home.actions';
 
 @Injectable()

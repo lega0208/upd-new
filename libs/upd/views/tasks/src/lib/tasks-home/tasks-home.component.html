@@ -1,12 +1,12 @@
 <h2 [translate]="'menu-tasks'" class="mb-4"></h2>
 
-<app-date-selector></app-date-selector>
+<upd-date-selector></upd-date-selector>
 
-<app-card>
-  <app-data-table
+<upd-card>
+  <upd-data-table
     [data]="(tasksHomeData$ | async) || []"
     [cols]="columns"
     [searchFields]="searchFields"
     [displayRows]="25"
-  ></app-data-table>
-</app-card>
+  ></upd-data-table>
+</upd-card>

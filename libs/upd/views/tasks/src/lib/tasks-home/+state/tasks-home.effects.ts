@@ -9,13 +9,13 @@ import {
   DateSelectionState,
   selectDatePeriod,
   selectDateRanges,
-} from '@cra-arc/upd/state';
-import { ApiService } from '@cra-arc/upd/services';
+} from '@dua-upd/upd/state';
+import { ApiService } from '@dua-upd/upd/services';
 
 @Injectable()
 export class TasksHomeEffects {
-  init$ = createEffect(() =>
-    this.actions$.pipe(
+  init$ = createEffect(() => {
+    return this.actions$.pipe(
       ofType(TasksHomeActions.loadTasksHomeInit),
       concatLatestFrom(() => this.store.select(selectDateRanges)),
       mergeMap(([, { dateRange }]) =>
@@ -24,19 +24,19 @@ export class TasksHomeEffects {
           catchError(() => EMPTY)
         )
       )
-    )
-  );
+    );
+  });
 
-  dateChange$ = createEffect(() =>
-    this.actions$.pipe(
+  dateChange$ = createEffect(() => {
+    return this.actions$.pipe(
       ofType(selectDatePeriod),
       mergeMap(() => of(TasksHomeActions.loadTasksHomeInit()))
-    )
-  );
+    );
+  });
 
   constructor(
     private readonly actions$: Actions,
-    private store: Store<DateSelectionState>,
+    private store: Store,
     private api: ApiService
   ) {}
 }

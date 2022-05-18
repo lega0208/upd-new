@@ -8,9 +8,9 @@ import {
   DateSelectionState,
   selectDatePeriod,
   selectDateRanges,
-} from '@cra-arc/upd/state';
-import { PagesHomeData } from '@cra-arc/types-common';
-import { ApiService } from '@cra-arc/upd/services';
+} from '@dua-upd/upd/state';
+import { PagesHomeData } from '@dua-upd/types-common';
+import { ApiService } from '@dua-upd/upd/services';
 
 @Injectable()
 export class PagesHomeEffects {

@@ -1,11 +1,11 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-4 col-sm-12">
-      <app-data-card
+      <upd-data-card
         [current$]="visits$"
         [comparison$]="visitsPercentChange$"
         [title]="'Total visits from all pages'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
   </div>
 </div>
@@ -13,12 +13,12 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
       [data]="(visitsByPage$ | async) || []"
       [cols]="visitsByPageCols"
       [title]="'Visits by page'"
     >
-    </app-data-table-card>
+    </upd-data-table-card>
     </div>
   </div>
 </div>

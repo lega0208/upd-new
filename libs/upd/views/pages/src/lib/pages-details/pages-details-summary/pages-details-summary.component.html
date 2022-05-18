@@ -1,30 +1,30 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <!-- <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="visitors$"
         [comparison$]="visitorsPercentChange$"
         [title]="'unique-visitors'"
         [tooltip]="'tooltip-unique-visitors'"
-      ></app-data-card>
+      ></upd-data-card>
     </div> -->
 
     <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="visits$"
         [comparison$]="visitsPercentChange$"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
 
     <div class="col">
-      <app-data-card
+      <upd-data-card
         [current$]="pageViews$"
         [comparison$]="pageViewsPercentChange$"
         [title]="'page-views'"
         [tooltip]="'tooltip-page-views'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
   </div>
 </div>
@@ -32,13 +32,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-charts
+      <upd-charts
         type="line"
         [title]="'visits'"
         [table]="(barTable$ | async) || []"
         [tableCols]="barTableCols"
         [data]="(visitsByDay$ | async) || []"
-      ></app-charts>
+      ></upd-charts>
     </div>
   </div>
 </div>
@@ -46,7 +46,7 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-charts
+      <upd-charts
         type="grouped-bar"
         [title]="'d3-visits-by-device-type'"
         titleTooltip="{{ 'tooltip-d3-visits-by-device-type' | translate }}"
@@ -54,7 +54,7 @@
         [table]="visitsByDeviceTypeTable$ | async"
         [tableCols]="visitsByDeviceTypeCols"
         [showLegend]="true"
-      ></app-charts>
+      ></upd-charts>
     </div>
   </div>
 </div>
@@ -62,13 +62,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="(topSearchTermsIncrease$ | async) || []"
         [cols]="topSearchTermsCols"
         [pagination]="false"
         [title]="'top5-search-terms-increase'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>
@@ -76,13 +76,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="(topSearchTermsDecrease$ | async) || []"
         [cols]="topSearchTermsCols"
         [pagination]="false"
         [title]="'top5-search-terms-decrease'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>
@@ -90,10 +90,10 @@
 <!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-card
+      <upd-card
         [card-title]="'related-tasks'"
       >
-      </app-card>
+      </upd-card>
     </div>
   </div>
 </div> -->

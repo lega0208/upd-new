@@ -1,20 +1,20 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-sm-12">
-      <app-data-kpi-card
+      <upd-data-kpi-card
         [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
         [date]="(dateFromLastTest$ | async) || ''"
         [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
         [title]="'Average task success from last UX test'"
         [project]="true"
-      ></app-data-kpi-card>
+      ></upd-data-kpi-card>
     </div>
 
     <div class="col-lg-6 col-sm-12">
-      <app-data-card
+      <upd-data-card
         [current$]="totalParticipants$"
         [title]="'Total participants from all tests'"
-      ></app-data-card>
+      ></upd-data-card>
     </div>
   </div>
 </div>
@@ -22,7 +22,7 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-12">
-      <app-charts
+      <upd-charts
         [title]="'Tasks success by Test'"
         [data]="(lineTaskChart$ | async) || []"
         [type]="'line'"
@@ -33,7 +33,7 @@
         [maxXAxisTickLength]="40"
         [table]="(taskSuccessByUxTest$ | async) || []"
         [tableCols]="taskSuccessRateCols"
-      ></app-charts>
+      ></upd-charts>
     </div>
   </div>
 </div>
@@ -41,7 +41,7 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="(projectTasks$ | async) || []"
         [cols]="participantTasksCols"
         [sort]="false"
@@ -49,7 +49,7 @@
         [filter]="false"
         [title]="'Participant tasks'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>
@@ -57,7 +57,7 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="(taskSuccessByUxTestKpi$ | async) || []"
         [cols]="successRateCols"
         [sort]="false"
@@ -66,7 +66,7 @@
         [kpi]="true"
         [title]="'Task success by UX Test'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>

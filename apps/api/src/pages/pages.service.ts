@@ -1,7 +1,7 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cache } from 'cache-manager';
-import { Feedback, FeedbackModel, MetricsConfig } from '@cra-arc/db';
+import { Feedback, FeedbackModel, MetricsConfig } from '@dua-upd/db';
 import {
   Page,
   PageAggregatedData,
@@ -11,10 +11,10 @@ import {
   PagesHomeData,
   GscSearchTermMetrics,
   PagesHomeAggregatedData,
-} from '@cra-arc/types-common';
-import type { PageMetricsModel } from '@cra-arc/types-common';
+} from '@dua-upd/types-common';
+import type { PageMetricsModel } from '@dua-upd/types-common';
 import { Model, Types } from 'mongoose';
-import { ApiParams } from '@cra-arc/upd/services';
+import { ApiParams } from '@dua-upd/upd/services';
 
 @Injectable()
 export class PagesService {

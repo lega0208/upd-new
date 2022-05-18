@@ -1,28 +1,28 @@
 <div class="container-fluid gx-0">
     <div class="row">
       <div class="col">
-        <app-data-card
+        <upd-data-card
           [current$]="gscTotalImpressions$"
           [comparison$]="gscTotalImpressionsPercentChange$"
           [title]="'total-impressions-google'"
           [tooltip]="'tooltip-impressions-project-google'"
-        ></app-data-card>
+        ></upd-data-card>
       </div>
       <div class="col">
-        <app-data-card
+        <upd-data-card
           [current$]="gscTotalCtr$"
           [pipe]="'percent'"
           [title]="'ctr-google'"
           [tooltip]="'tooltip-ctr-google'"
-        ></app-data-card>
+        ></upd-data-card>
       </div>
       <div class="col">
-        <app-data-card
+        <upd-data-card
           [current$]="gscTotalPosition$"
           [pipeParams]="'1.0-2'"
           [title]="'avg-rank-google'"
           [tooltip]="'tooltip-avg-rank-project-google'"
-        ></app-data-card>
+        ></upd-data-card>
       </div>
     </div>
   </div>
@@ -30,12 +30,12 @@
 <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
-        <app-data-table-card
+        <upd-data-table-card
         [data]="(visitsByPage$ | async) || []"
         [cols]="visitsByPageCols"
         [title]="'Breakdown by Page - Search from Google'"
     >
-    </app-data-table-card>
+    </upd-data-table-card>
       </div>
     </div>
   </div>

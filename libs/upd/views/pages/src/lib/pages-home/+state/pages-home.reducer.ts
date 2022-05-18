@@ -1,7 +1,7 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
 import * as PagesHomeActions from './pages-home.actions';
-import { PagesHomeData } from '@cra-arc/types-common';
+import { PagesHomeData } from '@dua-upd/types-common';
 
 export const PAGES_HOME_FEATURE_KEY = 'pagesHome';
 

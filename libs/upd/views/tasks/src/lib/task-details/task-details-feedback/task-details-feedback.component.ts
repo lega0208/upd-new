@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
-import { EN_CA } from '@cra-arc/upd/i18n';
-import { GetTableProps } from '@cra-arc/utils-common';
+import { EN_CA } from '@dua-upd/upd/i18n';
+import { GetTableProps } from '@dua-upd/utils-common';
 import { combineLatest } from 'rxjs';
 
 type FeedbackCommentsColType = GetTableProps<TaskDetailsFeedbackComponent, 'feedbackComments$'>
 type FeedbackByTagsColTypes = GetTableProps<TaskDetailsFeedbackComponent, 'feedbackByTagsTable$'>
 
 @Component({
-  selector: 'app-task-details-feedback',
+  selector: 'upd-task-details-feedback',
   templateUrl: './task-details-feedback.component.html',
   styleUrls: ['./task-details-feedback.component.css'],
 })

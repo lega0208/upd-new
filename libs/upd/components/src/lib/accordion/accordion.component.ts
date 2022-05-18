@@ -1,13 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-accordion',
+  selector: 'upd-accordion',
   templateUrl: './accordion.component.html',
   styleUrls: ['./accordion.component.scss'],
 })
-export class AccordionComponent implements OnInit {
-  @Input() title: string = 'View data table';
-  constructor() {}
-
-  ngOnInit(): void {}
+export class AccordionComponent{
+  @Input() title = 'View data table';
 }

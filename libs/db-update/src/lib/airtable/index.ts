@@ -1,11 +1,11 @@
 import { connect, Document, Model, Types } from 'mongoose';
-import { WithObjectId } from '@cra-arc/utils-common';
+import { WithObjectId } from '@dua-upd/utils-common';
 import {
   AirtableClient,
   PageData,
   TaskData,
   UxTestData,
-} from '@cra-arc/external-data';
+} from '@dua-upd/external-data';
 import {
   Page,
   Project,
@@ -16,7 +16,7 @@ import {
   getProjectModel,
   getUxTestModel,
   getDbConnectionString,
-} from '@cra-arc/db';
+} from '@dua-upd/db';
 import { assertHasUrl, assertObjectId } from './utils';
 import type { UxApiDataType, UxData, UxApiData } from './types';
 

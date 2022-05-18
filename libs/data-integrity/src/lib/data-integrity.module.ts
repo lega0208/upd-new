@@ -1,6 +1,6 @@
 import { ConsoleLogger, Logger, Module } from '@nestjs/common';
-import { DbModule } from '@cra-arc/db';
-import { DbUpdateModule, DbUpdateService } from '@cra-arc/db-update';
+import { DbModule } from '@dua-upd/db';
+import { DbUpdateModule, DbUpdateService } from '@dua-upd/db-update';
 import { DataIntegrityService } from './data-integrity.service';
 
 @Module({

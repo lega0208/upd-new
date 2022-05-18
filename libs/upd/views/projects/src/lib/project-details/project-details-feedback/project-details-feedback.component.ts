@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA } from '@cra-arc/upd/i18n';
-import { GetTableProps } from '@cra-arc/utils-common';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { EN_CA } from '@dua-upd/upd/i18n';
+import { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 
@@ -15,7 +15,7 @@ type FeedbackCommentsColType = GetTableProps<ProjectDetailsFeedbackComponent, 'f
 type FeedbackByTagsColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'feedbackByTagsTable$'>
 
 @Component({
-  selector: 'app-project-details-feedback',
+  selector: 'upd-project-details-feedback',
   templateUrl: './project-details-feedback.component.html',
   styleUrls: ['./project-details-feedback.component.css'],
 })

@@ -1,7 +1,7 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
 import * as TasksHomeActions from './tasks-home.actions';
-import { TasksHomeData } from '@cra-arc/types-common';
+import { TasksHomeData } from '@dua-upd/types-common';
 
 export const TASKS_HOME_FEATURE_KEY = 'tasksHome';
 

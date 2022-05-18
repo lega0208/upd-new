@@ -1,5 +1,4 @@
 {
-  "root": "apps/db-cli",
   "sourceRoot": "apps/db-cli/src",
   "projectType": "application",
   "targets": {

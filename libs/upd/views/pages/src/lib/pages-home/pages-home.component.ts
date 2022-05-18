@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 
-import { ColumnConfig } from '@cra-arc/upd-components';
-import { I18nFacade } from '@cra-arc/upd/state';
-import { PagesHomeAggregatedData } from '@cra-arc/types-common';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { PagesHomeAggregatedData } from '@dua-upd/types-common';
 import { PagesHomeFacade } from './+state/pages-home.facade';
 
 @Component({
-  selector: 'app-pages-home',
+  selector: 'upd-pages-home',
   templateUrl: './pages-home.component.html',
   styleUrls: ['./pages-home.component.css'],
 })

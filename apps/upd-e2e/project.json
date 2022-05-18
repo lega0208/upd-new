@@ -1,5 +1,4 @@
 {
-  "root": "apps/upd-e2e",
   "sourceRoot": "apps/upd-e2e/src",
   "projectType": "application",
   "targets": {

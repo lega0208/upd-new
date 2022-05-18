@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { ColumnConfig, ColumnConfigPipe } from '@cra-arc/upd-components';
+import { ColumnConfig, ColumnConfigPipe } from '@dua-upd/upd-components';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 
-import { LocaleId } from '@cra-arc/upd/i18n';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
 
 @Component({
-  selector: 'app-task-details-ux-tests',
+  selector: 'upd-task-details-ux-tests',
   templateUrl: './task-details-ux-tests.component.html',
   styleUrls: ['./task-details-ux-tests.component.css'],
 })

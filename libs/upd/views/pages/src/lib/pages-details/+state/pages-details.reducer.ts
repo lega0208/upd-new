@@ -1,7 +1,7 @@
 import { createReducer, on, Action } from '@ngrx/store';
 
 import * as PagesDetailsActions from './pages-details.actions';
-import { PageDetailsData } from '@cra-arc/types-common';
+import { PageDetailsData } from '@dua-upd/types-common';
 
 export const PAGES_DETAILS_FEATURE_KEY = 'pagesDetails';
 

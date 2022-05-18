@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   displayName: 'utils-common',
 
   transform: {
@@ -6,5 +6,5 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/libs/utils-common',
-  preset: '../../jest.preset.ts',
+  preset: '../../jest.preset.js',
 };

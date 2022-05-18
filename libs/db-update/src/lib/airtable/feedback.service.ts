@@ -4,10 +4,10 @@ import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
-import { AirtableClient } from '@cra-arc/external-data';
-import type { DateRange, DateType } from '@cra-arc/external-data';
-import { Feedback } from '@cra-arc/db';
-import type { FeedbackDocument } from '@cra-arc/db';
+import { AirtableClient } from '@dua-upd/external-data';
+import type { DateRange, DateType } from '@dua-upd/external-data';
+import { Feedback } from '@dua-upd/db';
+import type { FeedbackDocument } from '@dua-upd/db';
 
 dayjs.extend(utc);
 

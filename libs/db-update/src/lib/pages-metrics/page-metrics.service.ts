@@ -4,15 +4,15 @@ import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
-import type { PageDocument, PageMetricsModel } from '@cra-arc/db';
-import { Page, PageMetrics } from '@cra-arc/db';
+import type { PageDocument, PageMetricsModel } from '@dua-upd/db';
+import { Page, PageMetrics } from '@dua-upd/db';
 import {
   DateRange,
   queryDateFormat,
   datesFromDateRange,
   AdobeAnalyticsClient,
   SearchAnalyticsClient,
-} from '@cra-arc/external-data';
+} from '@dua-upd/external-data';
 
 dayjs.extend(utc);
 

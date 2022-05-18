@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @angular-eslint/no-output-native */
 import {
   Component,
@@ -9,7 +8,7 @@ import {
   ChangeDetectionStrategy,
   TemplateRef,
   PLATFORM_ID,
-  Inject,
+  Inject, OnInit
 } from '@angular/core';
 import { trigger, style, animate, transition } from '@angular/animations';
 import {
@@ -30,6 +29,7 @@ import {
 import { isPlatformServer } from '@angular/common';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'g[ngx-combo-charts-series-vertical]',
   template: `
     <svg:g
@@ -95,7 +95,7 @@ import { isPlatformServer } from '@angular/common';
     ]),
   ],
 })
-export class ComboSeriesVerticalComponent implements OnChanges {
+export class ComboSeriesVerticalComponent implements OnChanges, OnInit {
   @Input() dims!: ViewDimensions;
   @Input() type: BarChartType = BarChartType.Standard;
   @Input() series!: DataItem[];

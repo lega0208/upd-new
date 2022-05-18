@@ -3,7 +3,7 @@ import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 
 import { TranslateService } from '@ngx-translate/core';
 @Component({
-  selector: 'app-modal',
+  selector: 'upd-modal',
   templateUrl: './modal.component.html',
   styleUrls: ['./modal.component.scss']
 })
@@ -11,9 +11,9 @@ export class ModalComponent {
 
   @Input() modalTitle = '';
   @Input() buttonTitle = '';
-   
-  closeResult: string = '';
-  
+
+  closeResult = '';
+
   constructor(private modalService: NgbModal, public translateService:TranslateService) {}
 
   open(content: any) {
@@ -23,7 +23,7 @@ export class ModalComponent {
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
   }
-    
+
   private getDismissReason(reason: any): string {
     if (reason === ModalDismissReasons.ESC) {
       return 'by pressing ESC';

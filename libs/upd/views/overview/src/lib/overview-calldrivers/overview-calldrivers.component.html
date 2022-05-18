@@ -1,13 +1,13 @@
 
-<app-alert [type]="'info'" [dismissible]="false" [selfClosing]="false">
+<upd-alert [type]="'info'" [dismissible]="false" [selfClosing]="false">
   <span class="material-icons align-top pe-1">info</span>
   <span [translate]="'calldrivers-notification'"></span>
-</app-alert>
+</upd-alert>
 
 <div class="container-fluid gx-0">
   <div class="row">
     <div class="col">
-      <app-charts
+      <upd-charts
         [title]="'d3-tcbil'"
         [yAxisLabel]="'Number of calls (in thousands)'"
         [showXAxisLabel]="false"
@@ -19,7 +19,7 @@
         [table]="calldriversTable$ | async"
         [tableCols]="calldriversCols"
         [type]="'grouped-bar'"
-      ></app-charts>
+      ></upd-charts>
     </div>
   </div>
 </div>
@@ -27,14 +27,14 @@
 <!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="charts"
         [cols]="chartsCols"
         [filter]="false"
         [pagination]="false"
         [title]="'top5-call-drivers'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>
@@ -42,14 +42,14 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="charts"
         [cols]="chartsCols"
         [filter]="false"
         [pagination]="false"
         [title]="'top5-call-drivers-increase'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div>
@@ -57,14 +57,14 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <app-data-table-card
+      <upd-data-table-card
         [data]="charts"
         [cols]="chartsCols"
         [filter]="false"
         [pagination]="false"
         [title]="'top5-call-drivers-decrease'"
       >
-      </app-data-table-card>
+      </upd-data-table-card>
     </div>
   </div>
 </div> -->

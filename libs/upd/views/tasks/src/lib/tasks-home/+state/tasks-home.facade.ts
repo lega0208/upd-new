@@ -5,7 +5,7 @@ import { combineLatest, map } from 'rxjs';
 import { TasksHomeState } from './tasks-home.reducer';
 import * as TasksHomeActions from './tasks-home.actions';
 import * as TasksHomeSelectors from './tasks-home.selectors';
-import { I18nFacade } from '@cra-arc/upd/state';
+import { I18nFacade } from '@dua-upd/upd/state';
 
 @Injectable()
 export class TasksHomeFacade {

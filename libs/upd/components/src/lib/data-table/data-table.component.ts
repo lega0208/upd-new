@@ -3,7 +3,7 @@ import { Table } from 'primeng/table';
 import { ColumnConfig } from '../data-table-styles/types';
 
 @Component({
-  selector: 'app-data-table',
+  selector: 'upd-data-table',
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.css'],
 })
@@ -20,7 +20,7 @@ export class DataTableComponent implements OnInit {
   @Input() loading = false;
   @Input() sortField = '';
   @Input() sortOrder = 'asc';
-  @Input() sorting: number = 1;
+  @Input() sorting = 1;
   @Input() kpi = false;
 
   ngOnInit(): void {
