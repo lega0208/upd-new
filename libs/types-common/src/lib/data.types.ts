@@ -224,6 +224,7 @@ export interface ProjectsHomeData {
   numCompletedLast6Months: number;
   totalCompleted: number;
   numDelayed: number;
+  completedCOPS: number;
   projects: ProjectsHomeProject[];
 }
 

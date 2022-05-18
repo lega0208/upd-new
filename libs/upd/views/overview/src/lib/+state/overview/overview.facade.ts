@@ -15,7 +15,11 @@ import { percentChange } from '@cra-arc/utils-common';
 import type { PickByType } from '@cra-arc/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
-import { I18nFacade, selectDatePeriodSelection, selectUrl } from '@cra-arc/upd/state';
+import {
+  I18nFacade,
+  selectDatePeriodSelection,
+  selectUrl,
+} from '@cra-arc/upd/state';
 
 dayjs.extend(utc);
 dayjs.extend(isSameOrBefore);
@@ -90,9 +94,14 @@ export class OverviewFacade {
   projects$ = this.overviewData$.pipe(
     map((data) => data?.projects?.projects || [])
   );
-  testTypeTranslations$ = combineLatest([this.projects$, this.currentLang$]).pipe(
+  testTypeTranslations$ = combineLatest([
+    this.projects$,
+    this.currentLang$,
+  ]).pipe(
     mergeMap(([projects]) => {
-      const splitTestTypes = projects.flatMap((project) => project.testType || []);
+      const splitTestTypes = projects.flatMap(
+        (project) => project.testType || []
+      );
 
       const testTypes = [...new Set<string>(splitTestTypes)];
 
@@ -106,8 +115,6 @@ export class OverviewFacade {
     this.testTypeTranslations$,
   ]).pipe(
     map(([data, lang, testTypeTranslations]) => {
-      const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
-
       const projects = data?.projects?.projects.map((data) => {
         const testType = (data.testType || []).map((testType: string) => {
           return (
@@ -122,9 +129,7 @@ export class OverviewFacade {
             ? this.i18n.service.translate(data.title.replace(/\s+/g, ' '), lang)
             : '',
           testType: testType.sort().join(', '),
-          startDate: data.startDate
-            ? dayjs.utc(data.startDate).locale(lang).format(dateFormat)
-            : '',
+          startDate: data.startDate || '',
         };
       });
 
@@ -691,7 +696,10 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
 
   const dateFormat = lang === FR_CA ? 'D MMM' : 'MMM D';
 
-  const formattedStartDate = dayjs.utc(startDate).locale(lang).format(dateFormat);
+  const formattedStartDate = dayjs
+    .utc(startDate)
+    .locale(lang)
+    .format(dateFormat);
   const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
 
   return `${formattedStartDate}-${formattedEndDate}`;

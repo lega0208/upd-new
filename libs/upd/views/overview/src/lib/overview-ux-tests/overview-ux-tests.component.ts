@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@cra-arc/upd-components';
 import { I18nFacade } from '@cra-arc/upd/state';
-import { EN_CA, LocaleId } from '@cra-arc/upd/i18n';
+import { EN_CA, FR_CA, LocaleId } from '@cra-arc/upd/i18n';
 import { OverviewProject } from '@cra-arc/types-common';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
@@ -21,7 +21,8 @@ export class OverviewUxTestsComponent implements OnInit {
   tasksTested$ = this.overviewService.uxTasksTested$;
   participantsTested$ = this.overviewService.uxParticipantsTested$;
   testsConductedLastFiscal$ = this.overviewService.uxTestsConductedLastFiscal$;
-  testsConductedLastQuarter$ = this.overviewService.uxTestsConductedLastQuarter$;
+  testsConductedLastQuarter$ =
+    this.overviewService.uxTestsConductedLastQuarter$;
   COPSTests$ = this.overviewService.uxCopsTestsCompleted$;
 
   constructor(
@@ -40,7 +41,10 @@ export class OverviewUxTestsComponent implements OnInit {
           field: 'title',
           header: this.i18n.service.translate('ux_projects', lang),
           type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/projects', link: '_id' },
+          typeParams: {
+            preLink: '/' + this.langLink + '/projects',
+            link: '_id',
+          },
         },
         {
           field: 'testType',
@@ -49,6 +53,8 @@ export class OverviewUxTestsComponent implements OnInit {
         {
           field: 'startDate',
           header: this.i18n.service.translate('date', lang),
+          pipe: 'date',
+          pipeParam: lang === FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY',
         },
         {
           field: 'avgSuccessRate',

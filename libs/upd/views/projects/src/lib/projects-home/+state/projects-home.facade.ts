@@ -56,6 +56,9 @@ export class ProjectsHomeFacade {
   numDelayed$ = this.projectsHomeData$.pipe(
     map((data) => data?.numDelayed)
   );
+  completedCOPS$ = this.projectsHomeData$.pipe(
+    map((data) => data?.completedCOPS)
+  );
   error$ = this.store.select((ProjectsHomeSelectors.getProjectsHomeError));
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}

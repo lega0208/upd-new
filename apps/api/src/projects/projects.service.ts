@@ -141,6 +141,7 @@ export class ProjectsService {
             status: projectStatusSwitchExpression,
           })
           .sort({ status: 1 })
+
           .group({
             _id: '$status',
             count: { $sum: 1 },
@@ -243,8 +244,11 @@ export class ProjectsService {
         status: 1,
       });
 
+      const completedCOPS = projectsData.filter(data => data.cops && data.status === 'Complete').length;
+
     const results = {
       ...aggregatedData,
+      completedCOPS: completedCOPS,
       projects: projectsData,
     };
 
