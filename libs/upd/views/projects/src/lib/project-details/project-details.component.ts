@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ProjectStatus } from '@dua-upd/types-common';
-import { map, Observable } from 'rxjs';
+import { map } from 'rxjs';
 import { ProjectsDetailsFacade } from './+state/projects-details.facade';
 
 import { I18nFacade } from '@dua-upd/upd/state';
