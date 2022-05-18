@@ -23,6 +23,13 @@
       ></app-data-card>
     </div>
 
+    <div class="col-lg-3 col-sm-12">
+      <app-data-card
+        [current$]="completedCOPS$"
+        [title]="'COPS projects completed'"
+      ></app-data-card>
+    </div>
+
     <!-- <div class="col-lg-3 col-sm-12">
       <app-data-card
         [current]="(numDelayed$ | async | number) || 0"

@@ -23,6 +23,7 @@ export class ProjectsHomeComponent implements OnInit {
   numCompletedLast6Months$ = this.projectsHomeService.numCompletedLast6Months$;
   totalCompleted$ = this.projectsHomeService.totalCompleted$;
   numDelayed$ = this.projectsHomeService.numDelayed$;
+  completedCOPS$ = this.projectsHomeService.completedCOPS$;
 
   columns: ColumnConfig<ProjectsHomeProject>[] = [];
 

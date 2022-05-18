@@ -17,7 +17,6 @@ import { I18nFacade } from '@cra-arc/upd/state';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 registerLocaleData(localeFr);
-import * as d3 from 'd3';
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';

@@ -618,6 +618,13 @@ export class PagesDetailsFacade {
       const feedbackByTagsPrevious =
         data.comparisonDateRangeData?.feedbackByTags || [];
 
+      const isCurrZero = feedbackByTags.every((v) => v.numComments === 0);
+      const isPrevZero = feedbackByTagsPrevious.every((v) => v.numComments === 0);
+
+      if (isCurrZero && isPrevZero) {
+        return [] as MultiSeries;
+      }
+
       const dateRange = data.dateRange;
       const comparisonDateRange = data.comparisonDateRange;
 

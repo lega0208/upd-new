@@ -19,11 +19,18 @@ export class DataTableComponent implements OnInit {
   @Input() captionTitle = '';
   @Input() loading = false;
   @Input() sortField = '';
+  @Input() sortOrder = 'asc';
+  @Input() sorting: number = 1;
   @Input() kpi = false;
 
   ngOnInit(): void {
     if (this.searchFields.length === 0) {
       this.searchFields = this.cols.map((obj) => obj.field);
+    }
+    if (this.sortOrder === 'desc' || this.sortOrder === 'descending') {
+      this.sorting = -1;
+    } else {
+      this.sorting = 1;
     }
   }
 }

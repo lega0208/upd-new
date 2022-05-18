@@ -48,14 +48,12 @@
   <div class="row">
     <div class="col">
       <app-data-table-card
-        [filter]="false"
-        [sort]="true"
-        [pagination]="false"
         [data]="(uxChartData | async) || []"
         [cols]="uxChartCols"
         [title]="'Recent testing scores by project'"
-      >
-      </app-data-table-card>
+        [sortField]="'startDate'"
+        [sortOrder]="'desc'"
+      ></app-data-table-card>
     </div>
   </div>
 </div>

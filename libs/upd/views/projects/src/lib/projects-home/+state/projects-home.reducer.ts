@@ -23,6 +23,7 @@ export const projectsHomeInitialState: ProjectsHomeState = {
     numCompletedLast6Months: 0,
     totalCompleted: 0,
     numDelayed: 0,
+    completedCOPS: 0,
     projects: [],
   },
   loaded: false,
