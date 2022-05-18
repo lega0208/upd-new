@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+env:
+  NX_CLOUD_AUTH_TOKEN: ${{ secrets.NX_CLOUD_AUTH_TOKEN }}
+
 jobs:
   main:
     name: Nx Cloud - Main Job
