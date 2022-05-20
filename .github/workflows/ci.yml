@@ -17,16 +17,73 @@ concurrency:
 jobs:
   main:
     name: Nx Cloud - Main Job
-    uses: nrwl/ci/.github/workflows/nx-cloud-main.yml@v0.3
-    with:
-      parallel-commands: |
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout [main]
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16'
+      - name: Use the node_modules cache if available [npm]
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-16-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-16-
+      - run: npm ci
+      - run: npx nx-cloud start-ci-run
         npx nx workspace-lint
-      parallel-commands-on-agents: |
-        npx nx affected --target=lint --parallel
-        npx nx affected --target=build --parallel --maxParallel=3
-
+        npx nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
+        npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
+      - run: npx nx-cloud stop-all-agents
+  pr:
+    name: Nx Cloud - Main Job
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout [main]
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16'
+      - name: Use the node_modules cache if available [npm]
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-16-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-16-
+      - run: npm ci
+      - run: npx nx-cloud start-ci-run
+      - run: npx nx workspace-lint
+      - run: npx nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
+      - run: npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
+      - run: npx nx-cloud stop-all-agents
   agents:
-    name: Nx Cloud - Agents
-    uses: nrwl/ci/.github/workflows/nx-cloud-agents.yml@v0.3
-    with:
-      number-of-agents: 3
+    runs-on: ubuntu-latest
+    name: Agent 1
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        agent: [ 1, 2, 3 ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16'
+      - name: Use the node_modules cache if available [npm]
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-16-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-16-
+      - run: npm ci
+      - name: Start Nx Agent ${{ matrix.agent }}
+        run: npx nx-cloud start-agent
