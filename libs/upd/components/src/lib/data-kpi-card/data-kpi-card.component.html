@@ -18,6 +18,9 @@
           <p class="h3 w-100">
             {{ comparison | percent : undefined : i18n.currentLang }}
           </p>
+          <p>
+            <ng-container *ngIf="date">({{'Last UX test date:' | translate}} {{ date | date:'mediumDate' : '' :  i18n.currentLang }})</ng-container>
+          </p>
         </div>
       </div>
       <div class="row row-no-gutters">

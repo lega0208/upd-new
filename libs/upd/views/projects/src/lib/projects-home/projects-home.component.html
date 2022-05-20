@@ -19,7 +19,7 @@
     <div class="col-lg-3 col-sm-12">
       <upd-data-card
         [current$]="totalCompleted$"
-        [title]="'Total projects completed'"
+        [title]="'Projects completed'"
       ></upd-data-card>
     </div>
 
@@ -41,10 +41,12 @@
 
 <upd-card>
   <upd-data-table
+    [captionTitle]="'List of all projects'"
     [data]="(tableData$ | async) || []"
     [cols]="columns"
     [searchFields]="searchFields"
     [displayRows]="25"
-    sortField="title"
+    sortField="startDate"
+    [sortOrder]="'desc'"
   ></upd-data-table>
 </upd-card>

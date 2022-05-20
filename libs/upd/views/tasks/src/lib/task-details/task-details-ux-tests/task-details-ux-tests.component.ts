@@ -50,7 +50,7 @@ export class TaskDetailsUxTestsComponent implements OnInit {
         { field: 'scenario', header: this.i18n.service.translate('Scenario', lang) },
         // { field: 'result', header: this.i18n.service.translate('Result', lang) },
         { field: 'success_rate', header: this.i18n.service.translate('success-rate', lang), pipe: 'percent' },
-        { field: 'date', header: this.i18n.service.translate('Date', lang) },
+        { field: 'date', header: this.i18n.service.translate('Date', lang), pipe: 'date' },
       ];
     });
   }

@@ -26,6 +26,7 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   taskSuccessByUxTest$ = this.projectsDetailsService.taskSuccessByUxTest$;
 
   visits$ = this.projectsDetailsService.visits$;
+  visitsPercentChange$ = this.projectsDetailsService.visitsPercentChange$;
 
   participantTasks$ = this.projectsDetailsService.projectTasks$;
 
