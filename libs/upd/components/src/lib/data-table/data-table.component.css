@@ -1,3 +1,12 @@
 .bg-green {
   background-color: #90ee90 !important;
 }
+/* .bg-red {
+  background-color: #f5bcbc  !important;
+}
+.bg-orange {
+  background-color: #f8e6d2  !important;
+} */
+td.validation-kpi-not-met + td.bg-green {
+  background-color: #f8e6d2  !important;
+}

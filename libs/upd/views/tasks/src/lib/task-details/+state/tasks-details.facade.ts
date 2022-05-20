@@ -302,7 +302,8 @@ export class TasksDetailsFacade {
         ...d,
         title: d.title ? this.i18n.service.translate(d.title, lang) : d.title,
         test_type: d.test_type ? this.i18n.service.translate(d.test_type, lang) : d.test_type,
-        date: dayjs.utc(d.date).locale(lang).format(dateFormat),
+        //date: dayjs.utc(d.date).locale(lang).format(dateFormat),
+        date: d.date,
       }));
       return [...(taskSuccessByUxTest || [])];
     })

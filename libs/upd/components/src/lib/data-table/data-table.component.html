@@ -20,7 +20,7 @@
 >
   <ng-template *ngIf="filter || captionTitle" pTemplate="caption">
     <ng-container *ngIf="captionTitle">
-      {{ captionTitle }}
+      {{ captionTitle | translate }}
     </ng-container>
     <ng-container *ngIf="filter">
       <div class="p-d-flex">
@@ -84,6 +84,9 @@
       <td
         *ngFor="let col of columns"
         [ngClass]="{
+          'validation-kpi-not-met':
+          kpi &&
+          (col.field === 'Validation' && rowData[col.field] < 0.8),
           'bg-green':
             kpi &&
             (rowData[col.field] >= 0.8 ||
@@ -113,6 +116,10 @@
         <p class="legend_field">
           <span class="legend_color" style="background: #90ee90"></span
           >{{ 'kpi-met' | translate }}
+        </p>
+        <p class="legend_field">
+          <span class="legend_color" style="background: #f8e6d2"></span
+          >{{ 'kpi-half-met' | translate }}
         </p>
       </div>
     </div>

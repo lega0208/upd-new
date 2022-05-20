@@ -474,3 +474,11 @@ margin: 0px 20px 0px 20px;
 .chart-legend .legend-title-text {
   line-height: 18px !important;
 }
+
+.p-datatable.p-datatable-sm .p-datatable-header {
+  /* padding: 0.5rem 0.5rem; */
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.125rem;
+  color: #000;
+}

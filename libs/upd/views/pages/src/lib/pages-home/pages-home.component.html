@@ -9,6 +9,7 @@
 
 <upd-card>
   <upd-data-table
+    [captionTitle]="'List of top pages'"
     [data]="(pagesHomeData$ | async) || []"
     [cols]="columns"
     [displayRows]="25"

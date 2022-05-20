@@ -66,7 +66,7 @@ export class ProjectsHomeComponent implements OnInit {
         {
           field: 'avgSuccessRate',
           header: this.i18n.service.translate(
-            'Average test success rate',
+            'Average success rate',
             lang
           ),
           pipe: 'percent',

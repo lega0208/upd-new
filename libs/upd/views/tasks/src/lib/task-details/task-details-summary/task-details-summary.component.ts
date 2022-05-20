@@ -4,7 +4,7 @@ import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
-import { EN_CA } from '@dua-upd/upd/i18n';
+import { EN_CA, FR_CA } from '@dua-upd/upd/i18n';
 
 @Component({
   selector: 'upd-task-details-summary',
@@ -74,7 +74,10 @@ export class TaskDetailsSummaryComponent implements OnInit {
           field: 'title',
           header: this.i18n.service.translate('ux-test', lang),
         },
-        { field: 'date', header: this.i18n.service.translate('date', lang) },
+        { field: 'date', 
+          header: this.i18n.service.translate('date', lang), 
+          pipe: 'date' 
+        },
         {
           field: 'test_type',
           header: this.i18n.service.translate('test-type', lang),
