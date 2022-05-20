@@ -78,7 +78,7 @@ export class OverviewFeedbackComponent implements OnInit {
           field: 'name',
           header: this.i18n.service.translate('page', lang),
           type: 'link',
-          typeParams: { link: 'url', external: true },
+          typeParams: { link: 'name', external: true },
         },
         {
           field: 'currValue',
