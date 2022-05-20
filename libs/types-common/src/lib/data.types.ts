@@ -125,7 +125,11 @@ export interface OverviewAggregatedData {
   calldriversEnquiry: { enquiry_line: string; sum: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
-  totalFeedback: { date: Date; feedback: number }[];
+  totalFeedback: {
+    main_section: string;
+    sum: number;
+  }[];
+  feedbackPages: { _id: string; title: string; url: string; sum: number }[];
 }
 
 export interface OverviewUxData {

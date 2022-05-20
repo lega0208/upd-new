@@ -21,15 +21,15 @@
   </div>
 </div>
 
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <upd-data-table-card
         [filter]="false"
         [sort]="false"
         [pagination]="false"
-        [data]="taskSurvey"
-        [cols]="taskSurveyCols"
+        [data]="(comparisonFeedbackTable$ | async) || []"
+        [cols]="feedbackCols"
         [title]="'top5-programs-most-feedback'"
       >
       </upd-data-table-card>
@@ -44,11 +44,11 @@
         [filter]="false"
         [sort]="false"
         [pagination]="false"
-        [data]="taskSurvey"
-        [cols]="taskSurveyCols"
+        [data]="(comparisonFeedbackPagesTable$ | async) || []"
+        [cols]="feedbackPagesTableCols"
         [title]="'top5-pages-most-feedback'"
       >
       </upd-data-table-card>
     </div>
   </div>
-</div> -->
+</div>

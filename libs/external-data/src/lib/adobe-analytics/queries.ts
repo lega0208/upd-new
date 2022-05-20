@@ -114,6 +114,34 @@ export const createPageMetricsQuery = (
     .build();
 };
 
+// top Tasks
+export const createCXTasksQuery = (
+  dateRange: DateRange,
+  options: { settings?: ReportSettings; search?: ReportSearch } = {}
+) => {
+  const queryBuilder = new AdobeAnalyticsQueryBuilder();
+
+  const querySettings = {
+    nonesBehavior: 'return-nones',
+    countRepeatInstances: true,
+    ...options.settings,
+  };
+
+  if (options.search) {
+    queryBuilder.setSearch(options.search);
+  }
+
+  return queryBuilder
+  .setDimension('variables/evar90.4')
+    .setMetrics({tasks: 'metrics/event110'} as MetricsConfig)
+    .setGlobalFilters([
+      { type: 'segment', segmentId: SEGMENTS.CX_TASKS },
+      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
+    ])
+    .setSettings(querySettings)
+    .build();
+};
+
 // todo: just an example for now - should be made to take an array of pages/itemIds and set filters and stuff accordingly
 export const createExamplePageBreakdownMetricsQuery = (
   dateRange: DateRange

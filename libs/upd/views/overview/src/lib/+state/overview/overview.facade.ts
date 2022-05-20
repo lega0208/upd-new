@@ -652,6 +652,114 @@ export class OverviewFacade {
       return pieChartData;
     })
   );
+  
+  comparisonFeedbackTable$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const dateRange = data?.dateRangeData?.totalFeedback || [];
+      const comparisonDateRange =
+        data?.comparisonDateRangeData?.totalFeedback || [];
+
+      const dataFeedback = dateRange.map((d, i) => {
+        let prevVal = NaN;
+        comparisonDateRange.map((cd, i) => {
+          if (d.main_section === cd.main_section) {
+            prevVal = cd.sum;
+          }
+        });
+        return {
+          name: this.i18n.service.translate(`${d.main_section}`, lang),
+          currValue: d.sum,
+          prevValue: prevVal,
+        };
+      });
+
+      comparisonDateRange.map((d, i) => {
+        let currVal = 0;
+        dateRange.map((cd, i) => {
+          if (d.main_section === cd.main_section) {
+            currVal = cd.sum;
+          }
+        });
+        if (currVal === 0) {
+          dataFeedback.push({
+            name: this.i18n.service.translate(`${d.main_section}`, lang),
+            currValue: 0,
+            prevValue: d.sum,
+          });
+        }
+      });
+
+      return dataFeedback.map((val: any, i) => ({
+          ...val,
+          percentChange: percentChange(
+            val.currValue,
+            val.prevValue
+          ),
+        }))
+        .filter((v) => v.currValue > 0 || v.prevValue > 0)
+        .sort((a, b) => b.currValue - a.currValue)
+        .splice(0, 5);
+    })
+  );
+
+  comparisonFeedbackPagesTable$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const dateRange = data?.dateRangeData?.feedbackPages || [];
+      const comparisonDateRange =
+        data?.comparisonDateRangeData?.feedbackPages || [];
+
+      const dataFeedback = dateRange.map((d, i) => {
+        let prevVal = NaN;
+        comparisonDateRange.map((cd, i) => {
+          if (d.url === cd.url) {
+            prevVal = cd.sum;
+          }
+        });
+        return {
+          name: this.i18n.service.translate(`${d.url}`, lang),
+          currValue: d.sum,
+          prevValue: prevVal,
+          id: d._id,
+          title: d.title,
+        };
+      });
+      
+      comparisonDateRange.map((d, i) => {
+        let currValue = 0;
+        dateRange.map((cd, i) => {
+          if (d.url === cd.url) {
+            currValue = cd.sum;
+          }
+        });
+        if (currValue === 0) {
+          dataFeedback.push({
+            name: this.i18n.service.translate(`${d.url}`, lang),
+            currValue: 0,
+            prevValue: d.sum,
+            id: d._id,
+            title: d.title,
+          });
+        }
+      });
+
+      return dataFeedback.map((val: any, i) => ({
+          ...val,
+          percentChange: percentChange(
+            val.currValue,
+            val.prevValue
+          ),
+        }))
+        .filter((v) => v.currValue > 0 || v.prevValue > 0)
+        .sort((a, b) => b.currValue - a.currValue)
+        .splice(0, 5);
+    })
+  );
 
   uxTestsCompleted$ = this.overviewData$.pipe(
     map((data) => data.testsCompletedSince2018)

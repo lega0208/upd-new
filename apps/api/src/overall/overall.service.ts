@@ -4,7 +4,7 @@ import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import {
   CallDriver,
   CallDriverDocument,
@@ -19,6 +19,8 @@ import {
   Feedback,
   FeedbackDocument,
   PageMetrics,
+  Page,
+  PageDocument,
 } from '@dua-upd/db';
 import type {
   PageMetricsModel,
@@ -75,6 +77,7 @@ const projectStatusSwitchExpression = {
 export class OverallService {
   constructor(
     @InjectModel(Overall.name) private overallModel: Model<OverallDocument>,
+    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
@@ -108,6 +111,7 @@ export class OverallService {
         this.pageMetricsModel,
         this.calldriversModel,
         this.feedbackModel,
+        this.pageModel,
         this.cacheManager,
         params.dateRange
       ),
@@ -116,6 +120,7 @@ export class OverallService {
         this.pageMetricsModel,
         this.calldriversModel,
         this.feedbackModel,
+        this.pageModel,
         this.cacheManager,
         params.comparisonDateRange
       ),
@@ -351,6 +356,7 @@ async function getOverviewMetrics(
   PageMetricsModel: PageMetricsModel,
   calldriversModel: Model<CallDriverDocument>,
   feedbackModel: Model<FeedbackDocument>,
+  pageModel: Model<PageDocument>,
   cacheManager: Cache,
   dateRange: string
 ): Promise<OverviewAggregatedData> {
@@ -445,7 +451,17 @@ async function getOverviewMetrics(
   const totalFeedback = await feedbackModel
     .aggregate()
     .sort({ date: 1 })
-    .match({ date: dateQuery })
+    .match({
+      $and: [
+        { date: dateQuery },
+        {
+          url: {
+            $regex:
+              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
+          },
+        },
+      ],
+    })
     .group({
       _id: '$main_section',
       sum: { $sum: 1 },
@@ -468,6 +484,41 @@ async function getOverviewMetrics(
       __v: 0,
     })
     .exec();
+
+  let feedbackPages = await feedbackModel
+    .aggregate()
+    .match({
+      $and: [
+        { date: dateQuery },
+        {
+          url: {
+            $regex:
+              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
+          },
+        },
+      ],
+    })
+    .group({
+      _id: '$url',
+      sum: { $sum: 1 },
+    })
+    .project({
+      _id: 0,
+      url: '$_id',
+      sum: 1,
+    })
+    .sort({ sum: -1 })
+    .exec();
+
+    const pageUrls = await pageModel.find({}, { url: 1, _id: 1, title: 1 }).lean();
+
+    feedbackPages = feedbackPages.map((feedbackPage) => {
+      const pageUrl = pageUrls.find((page) => page.url === feedbackPage.url);
+      return {
+        ...feedbackPage,
+        ...pageUrl,
+      };
+    });
 
   const aggregatedMetrics = await overallModel
     .aggregate<
@@ -518,6 +569,7 @@ async function getOverviewMetrics(
     totalFeedback,
     topPagesVisited,
     top10GSC,
+    feedbackPages,
   };
 }
 

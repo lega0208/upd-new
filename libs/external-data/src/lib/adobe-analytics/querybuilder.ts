@@ -18,6 +18,7 @@ export const SEGMENTS = {
     HARD_TO_UNDERSTAND: 's300000938_60ec6a6119c8017b0a4dc0be',
     ERROR: 's300000938_60ec6a8ee670b5326fe33de5',
   },
+  CX_TASKS: 's300000938_60e59fc096f01a011ca0d986',
 };
 
 export const CALCULATED_METRICS = {
