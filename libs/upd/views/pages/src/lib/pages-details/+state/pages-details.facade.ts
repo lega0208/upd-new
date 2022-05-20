@@ -94,6 +94,10 @@ export class PagesDetailsFacade {
     mapToPercentChange('gsc_total_position')
   );
 
+  tasks$ = this.pagesDetailsData$.pipe(
+    map((data) => data?.tasks || 0)
+  );
+
   visitsByDay$ = combineLatest([
     this.pagesDetailsData$,
     this.currentLang$,

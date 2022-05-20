@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
+import { _DisposeViewRepeaterStrategy } from '@angular/cdk/collections';
 
+type TasksTableColTypes = GetTableProps<PagesDetailsSummaryComponent, 'tasks$'>
 type BarTableColTypes = GetTableProps<PagesDetailsSummaryComponent, 'barTable$'>
 type VisitsByDeviceColTypes = GetTableProps<PagesDetailsSummaryComponent, 'visitsByDeviceTypeTable$'>
 
@@ -40,6 +42,9 @@ export class PagesDetailsSummaryComponent implements OnInit {
 
   topSearchTermsDecrease$ = this.pageDetailsService.topSearchTermsDecrease$;
 
+  tasks$ = this.pageDetailsService.tasks$;
+  tasksCols: ColumnConfig<TasksTableColTypes>[] = [];
+
   dateRangeLabel$ = this.pageDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.pageDetailsService.comparisonDateRangeLabel$;
 
@@ -48,6 +53,7 @@ export class PagesDetailsSummaryComponent implements OnInit {
 
   visitsByDeviceTypeTable$ = this.pageDetailsService.visitsByDeviceTypeTable$;
   visitsByDeviceTypeCols: ColumnConfig<VisitsByDeviceColTypes>[] = [];
+  langLink = 'en';
 
   constructor(
     private pageDetailsService: PagesDetailsFacade,
@@ -66,6 +72,7 @@ export class PagesDetailsSummaryComponent implements OnInit {
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
     ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.topSearchTermsCols = [
         {
           field: 'term',
@@ -119,6 +126,15 @@ export class PagesDetailsSummaryComponent implements OnInit {
         { field: 'currValue', header: dateRange, pipe: 'number' },
         { field: 'prevValue', header: comparisonDateRange, pipe: 'number' },
       ];
+      this.tasksCols = [
+        {
+          field: 'title',
+          header: this.i18n.service.translate('Task', lang),
+          type: 'link',
+          typeParams: {
+            preLink: '/' + this.langLink + '/tasks', link: '_id'
+          }
+        }];
     });
   }
 }
