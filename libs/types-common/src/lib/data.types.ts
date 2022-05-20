@@ -129,7 +129,7 @@ export interface OverviewAggregatedData {
     main_section: string;
     sum: number;
   }[];
-  feedbackPages: { url: string; sum: number }[];
+  feedbackPages: { _id: string; title: string; url: string; sum: number }[];
 }
 
 export interface OverviewUxData {

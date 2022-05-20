@@ -725,6 +725,8 @@ export class OverviewFacade {
           name: this.i18n.service.translate(`${d.url}`, lang),
           currValue: d.sum,
           prevValue: prevVal,
+          id: d._id,
+          title: d.title,
         };
       });
       
@@ -737,9 +739,11 @@ export class OverviewFacade {
         });
         if (currValue === 0) {
           dataFeedback.push({
-            name: d.url,
+            name: this.i18n.service.translate(`${d.url}`, lang),
             currValue: 0,
             prevValue: d.sum,
+            id: d._id,
+            title: d.title,
           });
         }
       });

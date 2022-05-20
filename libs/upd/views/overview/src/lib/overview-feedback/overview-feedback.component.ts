@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
@@ -26,10 +26,12 @@ export class OverviewFeedbackComponent implements OnInit {
     percentChange: number
   }>[] = [];
   feedbackPagesTableCols: ColumnConfig<{
+    title: string;
     name: string;
     currValue: number;
     percentChange: number;
   }>[] = [];
+  langLink = 'en';
 
   constructor(
     private overviewService: OverviewFacade,
@@ -38,6 +40,7 @@ export class OverviewFeedbackComponent implements OnInit {
 
   ngOnInit() {
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.dyfTableCols = [
         {
           field: 'name',
@@ -84,6 +87,8 @@ export class OverviewFeedbackComponent implements OnInit {
           field: 'currValue',
           header: this.i18n.service.translate('# of comments', lang),
           pipe: 'number',
+          type: 'link',
+          typeParams: { preLink: '/' + this.langLink + '/pages',  link: 'id', postLink: 'pagefeedback' },
         },
         {
           field: 'percentChange',
