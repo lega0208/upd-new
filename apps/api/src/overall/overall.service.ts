@@ -492,7 +492,6 @@ async function getOverviewMetrics(
       sum: 1,
     })
     .sort({ sum: -1 })
-    .limit(5)
     .exec();
 
   const aggregatedMetrics = await overallModel

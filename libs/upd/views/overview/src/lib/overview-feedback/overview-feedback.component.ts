@@ -15,19 +15,20 @@ export class OverviewFeedbackComponent implements OnInit {
 
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
-  feedbackTable$ = this.overviewService.feedbackTable$;
-  feedbackPagesTable$ = this.overviewService.feedbackPagesTable$;
+  comparisonFeedbackTable$ = this.overviewService.comparisonFeedbackTable$;
+  comparisonFeedbackPagesTable$ = this.overviewService.comparisonFeedbackPagesTable$; 
 
   dyfTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
   feedbackCols: ColumnConfig<{
     name: string;
-    currValue: string;
-    prevValue: string;
+    currValue: number;
+    percentChange: number
   }>[] = [];
   feedbackPagesTableCols: ColumnConfig<{
-    url: string;
-    sum: number;
+    name: string;
+    currValue: number;
+    percentChange: number;
   }>[] = [];
 
   constructor(
@@ -66,18 +67,28 @@ export class OverviewFeedbackComponent implements OnInit {
           header: this.i18n.service.translate('# of comments', lang),
           pipe: 'number',
         },
+        {
+          field: 'percentChange',
+          header: this.i18n.service.translate('comparison', lang),
+          pipe: 'percent',
+        },
       ];
       this.feedbackPagesTableCols = [
         {
-          field: 'url',
+          field: 'name',
           header: this.i18n.service.translate('page', lang),
           type: 'link',
           typeParams: { link: 'url', external: true },
         },
         {
-          field: 'sum',
+          field: 'currValue',
           header: this.i18n.service.translate('# of comments', lang),
           pipe: 'number',
+        },
+        {
+          field: 'percentChange',
+          header: this.i18n.service.translate('comparison', lang),
+          pipe: 'percent',
         },
       ];
     });

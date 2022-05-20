@@ -652,8 +652,11 @@ export class OverviewFacade {
       return pieChartData;
     })
   );
-
-  feedbackTable$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+  
+  comparisonFeedbackTable$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
     map(([data, lang]) => {
       const dateRange = data?.dateRangeData?.totalFeedback || [];
       const comparisonDateRange =
@@ -689,15 +692,69 @@ export class OverviewFacade {
         }
       });
 
-      return dataFeedback
+      return dataFeedback.map((val: any, i) => ({
+          ...val,
+          percentChange: percentChange(
+            val.currValue,
+            val.prevValue
+          ),
+        }))
         .filter((v) => v.currValue > 0 || v.prevValue > 0)
         .sort((a, b) => b.currValue - a.currValue)
         .splice(0, 5);
     })
   );
 
-  feedbackPagesTable$ = this.overviewData$.pipe(
-    map((data) => data?.dateRangeData?.feedbackPages)
+  comparisonFeedbackPagesTable$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const dateRange = data?.dateRangeData?.feedbackPages || [];
+      const comparisonDateRange =
+        data?.comparisonDateRangeData?.feedbackPages || [];
+
+      const dataFeedback = dateRange.map((d, i) => {
+        let prevVal = NaN;
+        comparisonDateRange.map((cd, i) => {
+          if (d.url === cd.url) {
+            prevVal = cd.sum;
+          }
+        });
+        return {
+          name: this.i18n.service.translate(`${d.url}`, lang),
+          currValue: d.sum,
+          prevValue: prevVal,
+        };
+      });
+      
+      comparisonDateRange.map((d, i) => {
+        let currValue = 0;
+        dateRange.map((cd, i) => {
+          if (d.url === cd.url) {
+            currValue = cd.sum;
+          }
+        });
+        if (currValue === 0) {
+          dataFeedback.push({
+            name: d.url,
+            currValue: 0,
+            prevValue: d.sum,
+          });
+        }
+      });
+
+      return dataFeedback.map((val: any, i) => ({
+          ...val,
+          percentChange: percentChange(
+            val.currValue,
+            val.prevValue
+          ),
+        }))
+        .filter((v) => v.currValue > 0 || v.prevValue > 0)
+        .sort((a, b) => b.currValue - a.currValue)
+        .splice(0, 5);
+    })
   );
 
   uxTestsCompleted$ = this.overviewData$.pipe(

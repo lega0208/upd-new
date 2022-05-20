@@ -28,7 +28,7 @@
         [filter]="false"
         [sort]="false"
         [pagination]="false"
-        [data]="(feedbackTable$ | async) || []"
+        [data]="(comparisonFeedbackTable$ | async) || []"
         [cols]="feedbackCols"
         [title]="'top5-programs-most-feedback'"
       >
@@ -44,7 +44,7 @@
         [filter]="false"
         [sort]="false"
         [pagination]="false"
-        [data]="(feedbackPagesTable$ | async) || []"
+        [data]="(comparisonFeedbackPagesTable$ | async) || []"
         [cols]="feedbackPagesTableCols"
         [title]="'top5-pages-most-feedback'"
       >
