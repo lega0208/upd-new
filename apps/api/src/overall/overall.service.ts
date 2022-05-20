@@ -445,7 +445,17 @@ async function getOverviewMetrics(
   const totalFeedback = await feedbackModel
     .aggregate()
     .sort({ date: 1 })
-    .match({ date: dateQuery })
+    .match({
+      $and: [
+        { date: dateQuery },
+        {
+          url: {
+            $regex:
+              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
+          },
+        },
+      ],
+    })
     .group({
       _id: '$main_section',
       sum: { $sum: 1 },
