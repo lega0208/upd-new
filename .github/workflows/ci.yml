@@ -36,9 +36,9 @@ jobs:
             ${{ runner.os }}-node-16-
       - run: npm ci
       - run: npx nx-cloud start-ci-run
-        npx nx workspace-lint
-        npx nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
-        npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
+      - run: npx nx workspace-lint
+      - run: npx nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
+      - run: npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
       - run: npx nx-cloud stop-all-agents
   pr:
     name: Nx Cloud - Main Job
