@@ -469,6 +469,32 @@ async function getOverviewMetrics(
     })
     .exec();
 
+  const feedbackPages = await feedbackModel
+    .aggregate()
+    .match({
+      $and: [
+        { date: dateQuery },
+        {
+          url: {
+            $regex:
+              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
+          },
+        },
+      ],
+    })
+    .group({
+      _id: '$url',
+      sum: { $sum: 1 },
+    })
+    .project({
+      _id: 0,
+      url: '$_id',
+      sum: 1,
+    })
+    .sort({ sum: -1 })
+    .limit(5)
+    .exec();
+
   const aggregatedMetrics = await overallModel
     .aggregate<
       Omit<OverviewAggregatedData, 'visitsByDay' | 'calldriversByDay'>
@@ -518,6 +544,7 @@ async function getOverviewMetrics(
     totalFeedback,
     topPagesVisited,
     top10GSC,
+    feedbackPages,
   };
 }
 

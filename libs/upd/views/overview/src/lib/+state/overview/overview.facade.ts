@@ -653,6 +653,53 @@ export class OverviewFacade {
     })
   );
 
+  feedbackTable$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+      const dateRange = data?.dateRangeData?.totalFeedback || [];
+      const comparisonDateRange =
+        data?.comparisonDateRangeData?.totalFeedback || [];
+
+      const dataFeedback = dateRange.map((d, i) => {
+        let prevVal = NaN;
+        comparisonDateRange.map((cd, i) => {
+          if (d.main_section === cd.main_section) {
+            prevVal = cd.sum;
+          }
+        });
+        return {
+          name: this.i18n.service.translate(`${d.main_section}`, lang),
+          currValue: d.sum,
+          prevValue: prevVal,
+        };
+      });
+
+      comparisonDateRange.map((d, i) => {
+        let currVal = 0;
+        dateRange.map((cd, i) => {
+          if (d.main_section === cd.main_section) {
+            currVal = cd.sum;
+          }
+        });
+        if (currVal === 0) {
+          dataFeedback.push({
+            name: this.i18n.service.translate(`${d.main_section}`, lang),
+            currValue: 0,
+            prevValue: d.sum,
+          });
+        }
+      });
+
+      return dataFeedback
+        .filter((v) => v.currValue > 0 || v.prevValue > 0)
+        .sort((a, b) => b.currValue - a.currValue)
+        .splice(0, 5);
+    })
+  );
+
+  feedbackPagesTable$ = this.overviewData$.pipe(
+    map((data) => data?.dateRangeData?.feedbackPages)
+  );
+
   uxTestsCompleted$ = this.overviewData$.pipe(
     map((data) => data.testsCompletedSince2018)
   );

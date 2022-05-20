@@ -15,10 +15,20 @@ export class OverviewFeedbackComponent implements OnInit {
 
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
+  feedbackTable$ = this.overviewService.feedbackTable$;
+  feedbackPagesTable$ = this.overviewService.feedbackPagesTable$;
 
   dyfTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
-  taskSurveyCols: ColumnConfig<{ task: string; completion: number }>[] = [];
+  feedbackCols: ColumnConfig<{
+    name: string;
+    currValue: string;
+    prevValue: string;
+  }>[] = [];
+  feedbackPagesTableCols: ColumnConfig<{
+    url: string;
+    sum: number;
+  }>[] = [];
 
   constructor(
     private overviewService: OverviewFacade,
@@ -28,18 +38,48 @@ export class OverviewFeedbackComponent implements OnInit {
   ngOnInit() {
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
       this.dyfTableCols = [
-        { field: 'name', header: this.i18n.service.translate('Selection', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'name',
+          header: this.i18n.service.translate('Selection', lang),
+        },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
       this.whatWasWrongTableCols = [
         { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
-      this.taskSurveyCols = [
-        { field: 'task', header: this.i18n.service.translate('task', lang) },
-        { field: 'completion', header: this.i18n.service.translate('Task Success Survey Completed', lang) }
+      this.feedbackCols = [
+        {
+          field: 'name',
+          header: this.i18n.service.translate('program-service', lang),
+        },
+        {
+          field: 'currValue',
+          header: this.i18n.service.translate('# of comments', lang),
+          pipe: 'number',
+        },
       ];
-
+      this.feedbackPagesTableCols = [
+        {
+          field: 'url',
+          header: this.i18n.service.translate('page', lang),
+          type: 'link',
+          typeParams: { link: 'url', external: true },
+        },
+        {
+          field: 'sum',
+          header: this.i18n.service.translate('# of comments', lang),
+          pipe: 'number',
+        },
+      ];
     });
   }
 }
