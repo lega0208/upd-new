@@ -158,6 +158,11 @@ export class TasksService {
       .populate('pages')
       .populate('ux_tests');
 
+    const projects = await this.taskModel
+      .findById(new Types.ObjectId(params.id), { title: 1, projects: 1 })
+      .populate('projects')
+      .lean();
+
     const taskUrls = task.pages
       .map((page) => {
         if ('all_urls' in page && page.all_urls.length) {
@@ -176,6 +181,7 @@ export class TasksService {
     const returnData: TaskDetailsData = {
       _id: task._id.toString(),
       title: task.title,
+      ...projects,
       dateRange: params.dateRange,
       dateRangeData: await getTaskAggregatedData(
         this.pageMetricsModel,
