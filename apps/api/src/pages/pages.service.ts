@@ -74,6 +74,11 @@ export class PagesService {
       .populate('tasks')
       .lean();
 
+    const projects = await this.pageModel
+      .findById(new Types.ObjectId(params.id), { title: 1, url: 1, projects: 1 })
+      .populate('projects')
+      .lean();
+
     const queryMetricsConfig = [
       'visits',
       'visitors',
@@ -166,6 +171,7 @@ export class PagesService {
 
     const results = {
       ...page,
+      ...projects,
       dateRange: params.dateRange,
       dateRangeData: {
         ...dateRangeData,

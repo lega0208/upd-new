@@ -198,6 +198,10 @@ export interface TaskDetailsData
     success_rate: number | null;
     total_users: number;
   }[];
+  projects: {
+    id: string;
+    title: string
+  }[];
   feedbackComments: FeedbackComment[];
 }
 
