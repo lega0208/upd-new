@@ -27,7 +27,8 @@ import {
   getAvgSuccessFromLastTests,
   getFeedbackComments,
   getLatestTest,
-  dateRangeSplit, getFeedbackByTags
+  dateRangeSplit,
+  getFeedbackByTags,
 } from '@dua-upd/utils-common';
 
 @Injectable()
@@ -156,12 +157,14 @@ export class TasksService {
         user_type: 0,
       })
       .populate('pages')
-      .populate('ux_tests');
+      .populate('ux_tests')
+      .populate('projects');
 
-    const projects = await this.taskModel
-      .findById(new Types.ObjectId(params.id), { title: 1, projects: 1 })
-      .populate('projects')
-      .lean();
+    const projects = task.projects
+      .map((project) => {
+        return { id: project._id, title: project.title };
+      })
+      .flat();
 
     const taskUrls = task.pages
       .map((page) => {
@@ -181,7 +184,7 @@ export class TasksService {
     const returnData: TaskDetailsData = {
       _id: task._id.toString(),
       title: task.title,
-      ...projects,
+      projects,
       dateRange: params.dateRange,
       dateRangeData: await getTaskAggregatedData(
         this.pageMetricsModel,
