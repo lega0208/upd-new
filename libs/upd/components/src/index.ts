@@ -15,4 +15,5 @@ export * from './lib/modal/modal.component';
 export * from './lib/nav-tabs/nav-tabs.component';
 export * from './lib/page-404/page-404.component';
 export * from './lib/project-status-label/project-status-label.component';
+export * from './lib/project-header/project-header.component';
 export * from './lib/upd-components.module';
