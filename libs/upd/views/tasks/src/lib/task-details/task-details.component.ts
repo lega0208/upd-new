@@ -3,6 +3,7 @@ import { TasksDetailsFacade } from './+state/tasks-details.facade';
 
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
+import { ColumnConfig } from '@dua-upd/upd-components';
 
 @Component({
   selector: 'upd-task-details',
@@ -20,6 +21,9 @@ export class TaskDetailsComponent implements OnInit {
   currentRoute$ = this.taskDetailsService.currentRoute$;
 
   navTabs: { href: string; title: string }[] = [];
+
+  projects$ = this.taskDetailsService.projects$;
+  projectsCol: ColumnConfig[] = [];
 
   constructor(
     private readonly taskDetailsService: TasksDetailsFacade,
@@ -54,6 +58,18 @@ export class TaskDetailsComponent implements OnInit {
         {
           href: 'uxtests',
           title: this.i18n.service.translate('tab-uxtests', lang),
+        },
+      ];
+
+      this.projectsCol = [
+        {
+          field: 'title',
+          header: 'project',
+          type: 'link',
+          typeParams: {
+            preLink: '/' + this.langLink + '/projects',
+            link: 'id',
+          },
         },
       ];
 

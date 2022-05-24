@@ -97,6 +97,10 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   topSearchTermsDecrease?: GscSearchTermMetrics[];
   top25GSCSearchTerms?: GscSearchTermMetrics[];
   tasks?: Task[];
+  projects?: {
+    id: string;
+    title: string;
+  }[];
   feedbackComments: FeedbackComment[];
 }
 
@@ -200,7 +204,7 @@ export interface TaskDetailsData
   }[];
   projects: {
     id: string;
-    title: string
+    title: string;
   }[];
   feedbackComments: FeedbackComment[];
 }

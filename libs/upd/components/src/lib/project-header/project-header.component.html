@@ -1,0 +1,17 @@
+<div *ngIf="data.length > 0" class="page_header back_link">
+  <span id="page_project">
+    <span class="material-icons align-top px-1">folder</span>
+    <ng-container *ngFor="let d of data; let i = index">
+      <ng-container *ngFor="let c of config">
+        <a
+          [routerLink]="[c.typeParams?.preLink, d['id']]"
+          [queryParamsHandling]="'merge'"
+          >{{ d[c.field] }}</a
+        >
+        <ng-container *ngIf="!(i === data.length - 1)"
+          >,&NonBreakingSpace;</ng-container
+        >
+      </ng-container>
+    </ng-container>
+  </span>
+</div>

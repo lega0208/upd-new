@@ -36,6 +36,7 @@ import { Page404Component } from './page-404/page-404.component';
 import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { I18nModule } from '@dua-upd/upd/i18n';
+import { ProjectHeaderComponent } from './project-header/project-header.component';
 
 @NgModule({
   imports: [
@@ -74,6 +75,7 @@ import { I18nModule } from '@dua-upd/upd/i18n';
     DataTableCardComponent,
     Page404Component,
     LoadingSpinnerComponent,
+    ProjectHeaderComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -100,6 +102,7 @@ import { I18nModule } from '@dua-upd/upd/i18n';
     DataTableCardComponent,
     Page404Component,
     LoadingSpinnerComponent,
+    ProjectHeaderComponent,
   ],
 })
 export class UpdComponentsModule {}

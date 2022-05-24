@@ -4,20 +4,27 @@
 </div>
 
 <upd-loading-spinner
-  *ngIf="(loading$ | async); else elseBlock"
+  *ngIf="loading$ | async; else elseBlock"
 ></upd-loading-spinner>
 
 <ng-template #elseBlock>
-  <upd-page-404 *ngIf="(error$ | async) === '' || (title$ | async) === ''; else elseBlock2"></upd-page-404>
+  <upd-page-404
+    *ngIf="(error$ | async) === '' || (title$ | async) === ''; else elseBlock2"
+  ></upd-page-404>
 </ng-template>
 <ng-template #elseBlock2>
-<h2 class="h3 pt-2 pb-2" data-i18n="task-title">
-  <span [translate]="'task'"></span>: {{ title$ | async }}
-</h2>
+  <h2 class="h3 pt-2 pb-2" data-i18n="task-title">
+    <span [translate]="'task'"></span>: {{ title$ | async }}
+  </h2>
 
-<upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
-<upd-date-selector
-  *ngIf="!((currentRoute$ | async) || '').endsWith('uxtests')"
+  <upd-project-header
+    [data]="(projects$ | async) || []"
+    [config]="projectsCol"
+  ></upd-project-header>
+
+  <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
+  <upd-date-selector
+    *ngIf="!((currentRoute$ | async) || '').endsWith('uxtests')"
   ></upd-date-selector>
-<router-outlet></router-outlet>
+  <router-outlet></router-outlet>
 </ng-template>

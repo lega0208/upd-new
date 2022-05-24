@@ -5,7 +5,11 @@ import { map, debounceTime, combineLatest } from 'rxjs';
 import { percentChange } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import { PagesDetailsState } from './pages-details.reducer';
-import { GscSearchTermMetrics, PageAggregatedData, PageDetailsData } from '@dua-upd/types-common';
+import {
+  GscSearchTermMetrics,
+  PageAggregatedData,
+  PageDetailsData,
+} from '@dua-upd/types-common';
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
@@ -20,20 +24,17 @@ dayjs.extend(utc);
 
 @Injectable()
 export class PagesDetailsFacade {
-  loaded$ = this.store.
-    select((PagesDetailsSelectors.selectPagesDetailsLoaded)
-  );
-  loading$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsLoading).pipe(
-
-    debounceTime(500)
-  );
-  pagesDetailsData$ = this.store.
-    select((PagesDetailsSelectors.selectPagesDetailsData)
+  loaded$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsLoaded);
+  loading$ = this.store
+    .select(PagesDetailsSelectors.selectPagesDetailsLoading)
+    .pipe(debounceTime(500));
+  pagesDetailsData$ = this.store.select(
+    PagesDetailsSelectors.selectPagesDetailsData
   );
 
   currentLang$ = this.i18n.currentLang$;
 
-  dateRangeSelected$ = this.store.select((selectDatePeriodSelection));
+  dateRangeSelected$ = this.store.select(selectDatePeriodSelection);
 
   dateRangeLabel$ = combineLatest([
     this.pagesDetailsData$,
@@ -94,8 +95,17 @@ export class PagesDetailsFacade {
     mapToPercentChange('gsc_total_position')
   );
 
-  tasks$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.tasks || 0)
+  tasks$ = this.pagesDetailsData$.pipe(map((data) => data?.tasks || 0));
+
+  projects$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+      return (
+        data?.projects?.map((d) => ({
+          id: d.id,
+          title: this.i18n.service.translate(d.title, lang),
+        })) || []
+      );
+    })
   );
 
   visitsByDay$ = combineLatest([
@@ -319,7 +329,7 @@ export class PagesDetailsFacade {
         .map((d) => new Date(d));
 
       if (!visitsByDay) {
-        return [] as { name: string; currValue: number; prevValue: number; }[];
+        return [] as { name: string; currValue: number; prevValue: number }[];
       }
 
       const dateRangeSeries = visitsByDay.map(({ date, visits }) => ({
@@ -593,7 +603,12 @@ export class PagesDetailsFacade {
   );
 
   top25GSCSearchTerms$ = this.pagesDetailsData$.pipe(
-    map((data) => [...(data?.top25GSCSearchTerms || [])] as (GscSearchTermMetrics & { change: number })[])
+    map(
+      (data) =>
+        [...(data?.top25GSCSearchTerms || [])] as (GscSearchTermMetrics & {
+          change: number;
+        })[]
+    )
   );
 
   feedbackComments$ = combineLatest([
@@ -623,7 +638,9 @@ export class PagesDetailsFacade {
         data.comparisonDateRangeData?.feedbackByTags || [];
 
       const isCurrZero = feedbackByTags.every((v) => v.numComments === 0);
-      const isPrevZero = feedbackByTagsPrevious.every((v) => v.numComments === 0);
+      const isPrevZero = feedbackByTagsPrevious.every(
+        (v) => v.numComments === 0
+      );
 
       if (isCurrZero && isPrevZero) {
         return [] as MultiSeries;
@@ -685,14 +702,9 @@ export class PagesDetailsFacade {
     })
   );
 
-  error$ = this.store.
-    select((PagesDetailsSelectors.selectPagesDetailsError)
-  );
+  error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
 
-  constructor(
-    private readonly store: Store,
-    private i18n: I18nFacade
-  ) {}
+  constructor(private readonly store: Store, private i18n: I18nFacade) {}
 
   /**
    * Use the initialization action to perform one
@@ -740,10 +752,7 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
     .utc(startDate)
     .locale(lang)
     .format(dateFormat);
-  const formattedEndDate = dayjs
-    .utc(endDate)
-    .locale(lang)
-    .format(dateFormat);
+  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };

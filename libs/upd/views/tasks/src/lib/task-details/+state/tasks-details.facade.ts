@@ -11,7 +11,8 @@ import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import {
   TaskDetailsAggregatedData,
-  TaskDetailsData, VisitsByPage
+  TaskDetailsData,
+  VisitsByPage,
 } from '@dua-upd/types-common';
 import { percentChange, PickByType } from '@dua-upd/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
@@ -26,14 +27,10 @@ export class TasksDetailsFacade {
    * Combine pieces of state using createSelector,
    * and expose them as observables through the facade.
    */
-  loaded$ = this.store.
-    select((TasksDetailsSelectors.selectTasksDetailsLoaded)
-  );
-  loading$ = this.store.
-    select((TasksDetailsSelectors.selectTasksDetailsLoading)
-  );
-  tasksDetailsData$ = this.store.
-    select((TasksDetailsSelectors.selectTasksDetailsData)
+  loaded$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsLoaded);
+  loading$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsLoading);
+  tasksDetailsData$ = this.store.select(
+    TasksDetailsSelectors.selectTasksDetailsData
   );
 
   currentLang$ = this.i18n.currentLang$;
@@ -44,9 +41,8 @@ export class TasksDetailsFacade {
     this.tasksDetailsData$,
     this.currentLang$,
   ]).pipe(
-    map(
-      ([data, lang]) =>
-        data.title ? this.i18n.service.translate(data.title, lang) : data.title
+    map(([data, lang]) =>
+      data.title ? this.i18n.service.translate(data.title, lang) : data.title
     )
   );
 
@@ -79,6 +75,17 @@ export class TasksDetailsFacade {
 
   visitsByPageFeedbackWithPercentChange$ = this.tasksDetailsData$.pipe(
     mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo', '_id')
+  );
+
+  projects$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+      return (
+        data?.projects?.map((d) => ({
+          id: d.id,
+          title: this.i18n.service.translate(d.title, lang),
+        })) || []
+      );
+    })
   );
 
   dateRangeLabel$ = combineLatest([
@@ -301,7 +308,9 @@ export class TasksDetailsFacade {
       const taskSuccessByUxTest = data?.taskSuccessByUxTest?.map((d) => ({
         ...d,
         title: d.title ? this.i18n.service.translate(d.title, lang) : d.title,
-        test_type: d.test_type ? this.i18n.service.translate(d.test_type, lang) : d.test_type,
+        test_type: d.test_type
+          ? this.i18n.service.translate(d.test_type, lang)
+          : d.test_type,
         //date: dayjs.utc(d.date).locale(lang).format(dateFormat),
         date: d.date,
       }));
@@ -344,7 +353,9 @@ export class TasksDetailsFacade {
         data.comparisonDateRangeData?.feedbackByTags || [];
 
       const isCurrZero = feedbackByTags.every((v) => v.numComments === 0);
-      const isPrevZero = feedbackByTagsPrevious.every((v) => v.numComments === 0);
+      const isPrevZero = feedbackByTagsPrevious.every(
+        (v) => v.numComments === 0
+      );
 
       if (isCurrZero && isPrevZero) {
         return [] as MultiSeries;
@@ -406,9 +417,7 @@ export class TasksDetailsFacade {
     })
   );
 
-  error$ = this.store.
-    select((TasksDetailsSelectors.selectTasksDetailsError)
-  );
+  error$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsError);
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
 
@@ -466,7 +475,6 @@ function mapObjectArraysWithPercentChange(
   propPath: string,
   sortPath?: string
 ) {
-
   return map((data: TaskDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
       return;

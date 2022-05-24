@@ -20,7 +20,9 @@ export class PagesDetailsComponent implements OnInit {
   showAlert = false;
 
   langLink = 'en';
-  navTabs: { href: string; title: string }[] = []
+  navTabs: { href: string; title: string }[] = [];
+  projects$ = this.pageDetailsService.projects$;
+  projectsCol: ColumnConfig[] = [];
 
   constructor(
     private pageDetailsService: PagesDetailsFacade,
@@ -31,15 +33,39 @@ export class PagesDetailsComponent implements OnInit {
     this.pageDetailsService.init();
 
     this.currentLang$.subscribe((lang) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
+
       this.navTabs = [
-        { href: 'summary', title: this.i18n.service.translate('tab-summary', lang) },
-        { href: 'webtraffic', title: this.i18n.service.translate('tab-webtraffic', lang) },
-        { href: 'searchanalytics', title: this.i18n.service.translate('tab-searchanalytics', lang) },
-        { href: 'pagefeedback', title: this.i18n.service.translate('tab-pagefeedback', lang) },
+        {
+          href: 'summary',
+          title: this.i18n.service.translate('tab-summary', lang),
+        },
+        {
+          href: 'webtraffic',
+          title: this.i18n.service.translate('tab-webtraffic', lang),
+        },
+        {
+          href: 'searchanalytics',
+          title: this.i18n.service.translate('tab-searchanalytics', lang),
+        },
+        {
+          href: 'pagefeedback',
+          title: this.i18n.service.translate('tab-pagefeedback', lang),
+        },
         // { href: 'details', title: this.i18n.service.translate('tab-details', lang) },
       ];
 
-      this.langLink = lang === EN_CA ? 'en' : 'fr';
+      this.projectsCol = [
+        {
+          field: 'title',
+          header: 'project',
+          type: 'link',
+          typeParams: {
+            preLink: '/' + this.langLink + '/projects',
+            link: 'id',
+          },
+        },
+      ];
     });
   }
 
