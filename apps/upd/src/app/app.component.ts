@@ -77,7 +77,7 @@ export class AppComponent implements OnInit {
           if (data.title) {
             return data.title;
           } else {
-            return "1Usability Performance Dashboard";
+            return "Usability Performance Dashboard";
           }
         })
       )
