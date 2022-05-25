@@ -47,6 +47,25 @@ export interface UxTestData {
   launch_date?: Date;
   status?: string;
   cops?: boolean;
+  attachments?: AttachmentData;
+}
+
+export interface AttachmentData {
+  id: string;
+  url: string;
+  filename: string;
+  size?: number;
+  type?: string;
+  thumbnails?: {
+    small?: ThumbnailData;
+    large?: ThumbnailData;
+  };
+}
+
+export interface ThumbnailData {
+  url?: string;
+  width?: number;
+  height?: number;
 }
 
 export interface PageData {

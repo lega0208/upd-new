@@ -7,6 +7,6 @@ import { ColumnConfig } from '../data-table-styles/types';
   styleUrls: ['./project-header.component.scss'],
 })
 export class ProjectHeaderComponent {
-  @Input() config: ColumnConfig[] = [];
+  @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() data: Record<string, number | string>[] = [];
 }

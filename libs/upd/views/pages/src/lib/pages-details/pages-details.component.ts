@@ -22,7 +22,7 @@ export class PagesDetailsComponent implements OnInit {
   langLink = 'en';
   navTabs: { href: string; title: string }[] = [];
   projects$ = this.pageDetailsService.projects$;
-  projectsCol: ColumnConfig[] = [];
+  projectsCol: ColumnConfig = { field: '', header: '' };
 
   constructor(
     private pageDetailsService: PagesDetailsFacade,
@@ -55,17 +55,15 @@ export class PagesDetailsComponent implements OnInit {
         // { href: 'details', title: this.i18n.service.translate('tab-details', lang) },
       ];
 
-      this.projectsCol = [
-        {
-          field: 'title',
-          header: 'project',
-          type: 'link',
-          typeParams: {
-            preLink: '/' + this.langLink + '/projects',
-            link: 'id',
-          },
+      this.projectsCol = {
+        field: 'title',
+        header: 'project',
+        type: 'link',
+        typeParams: {
+          preLink: '/' + this.langLink + '/projects',
+          link: 'id',
         },
-      ];
+      } as ColumnConfig;
     });
   }
 

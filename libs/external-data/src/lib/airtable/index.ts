@@ -141,6 +141,7 @@ export class AirtableClient {
       launch_date: fields['Launch Date'],
       status: squishTrim(fields['Status']),
       cops: fields['COPS'],
+      attachments: fields['Attachments (Ex. Scorecard)'],
     })) as UxTestData[];
   }
 
