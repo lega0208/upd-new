@@ -15,12 +15,12 @@ const routes: Routes = [
     component: OverviewComponent,
     children: [
       { path: '', redirectTo: 'summary', pathMatch: 'full' },
-      { path: 'summary', component: OverviewSummaryComponent },
-      { path: 'webtraffic', component: OverviewWebtrafficComponent },
-      { path: 'searchanalytics', component: OverviewSearchAnalyticsComponent },
-      { path: 'pagefeedback', component: OverviewFeedbackComponent },
-      { path: 'calldrivers', component: OverviewCalldriversComponent },
-      { path: 'uxtests', component: OverviewUxTestsComponent },
+      { path: 'summary', component: OverviewSummaryComponent, data: {title: 'Overview | Summary'}  },
+      { path: 'webtraffic', component: OverviewWebtrafficComponent, data: {title: 'Overview | Web traffic'}  },
+      { path: 'searchanalytics', component: OverviewSearchAnalyticsComponent, data: {title: 'Overview | Search analytics'}  },
+      { path: 'pagefeedback', component: OverviewFeedbackComponent, data: {title: 'Overview | Page feedback'}  },
+      { path: 'calldrivers', component: OverviewCalldriversComponent, data: {title: 'Overview | Call drivers'}  },
+      { path: 'uxtests', component: OverviewUxTestsComponent, data: {title: 'Overview | UX tests'}  },
     ],
   },
 ];

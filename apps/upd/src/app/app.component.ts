@@ -10,6 +10,9 @@ import {
   trigger
 } from '@angular/animations';
 import { ChildrenOutletContexts } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { filter, map, mergeMap } from 'rxjs';
 
 export const fader =
   trigger('routeAnimations', [
@@ -47,15 +50,44 @@ export class AppComponent implements OnInit {
 
   constructor(
     private i18n: I18nFacade,
-    private contexts: ChildrenOutletContexts
+    private contexts: ChildrenOutletContexts,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private titleService: Title
   ) {}
 
   ngOnInit() {
     // dispatch init event to set lang from state
     this.i18n.init();
-    this.currentLang$.subscribe((lang) => {
-      this.title = this.i18n.service.translate('app.title', lang);
-    });
+    // this.currentLang$.subscribe((lang) => {
+    //   this.title = this.i18n.service.translate('app.title', lang);
+    // });
+
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        map(() => {
+          let route = this.activatedRoute;
+          while (route.firstChild) route = route.firstChild;
+          return route;
+        }),
+        filter((route: any) => route.outlet === "primary"),
+        mergeMap((route: any) => route.data),
+        map((data: any) => {
+          if (data.title) {
+            return data.title;
+          } else {
+            return "1Usability Performance Dashboard";
+          }
+        })
+      )
+      .subscribe(pathString => {
+            this.currentLang$.subscribe((lang) => {
+                pathString = this.i18n.service.translate(pathString, lang);
+            });
+        return this.titleService.setTitle(pathString);
+      });
+
   }
 
   getRouteAnimationData() {

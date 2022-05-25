@@ -20,13 +20,10 @@ const routes: Routes = [
         component: PagesDetailsComponent,
         children: [
           { path: '', redirectTo: 'summary', pathMatch: 'full' },
-          { path: 'summary', component: PagesDetailsSummaryComponent },
-          { path: 'webtraffic', component: PagesDetailsWebtrafficComponent },
-          {
-            path: 'searchanalytics',
-            component: PagesDetailsSearchAnalyticsComponent,
-          },
-          { path: 'pagefeedback', component: PagesDetailsFeedbackComponent },
+          { path: 'summary', component: PagesDetailsSummaryComponent, data: {title: 'Pages | Summary'} },
+          { path: 'webtraffic', component: PagesDetailsWebtrafficComponent, data: {title: 'Pages | Web traffic'} },
+          { path: 'searchanalytics', component: PagesDetailsSearchAnalyticsComponent, data: {title: 'Pages | Search analytics'} },
+          { path: 'pagefeedback', component: PagesDetailsFeedbackComponent, data: {title: 'Pages | Page feedback'} },
         ],
       },
     ],
