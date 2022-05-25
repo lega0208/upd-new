@@ -23,7 +23,7 @@ export class TaskDetailsComponent implements OnInit {
   navTabs: { href: string; title: string }[] = [];
 
   projects$ = this.taskDetailsService.projects$;
-  projectsCol: ColumnConfig[] = [];
+  projectsCol: ColumnConfig = { field: '', header: '' };
 
   constructor(
     private readonly taskDetailsService: TasksDetailsFacade,
@@ -61,17 +61,15 @@ export class TaskDetailsComponent implements OnInit {
         },
       ];
 
-      this.projectsCol = [
-        {
-          field: 'title',
-          header: 'project',
-          type: 'link',
-          typeParams: {
-            preLink: '/' + this.langLink + '/projects',
-            link: 'id',
-          },
+      this.projectsCol = {
+        field: 'title',
+        header: 'project',
+        type: 'link',
+        typeParams: {
+          preLink: '/' + this.langLink + '/projects',
+          link: 'id',
         },
-      ];
+      } as ColumnConfig;
 
       this.langLink = lang === EN_CA ? 'en' : 'fr';
     });
