@@ -13,19 +13,19 @@ const routes: Routes = [
       import('@dua-upd/upd/views/overview').then(
         (module) => module.OverviewModule
       ),
-    data: { animation: 'overview' },
+    data: { animation: 'overview', title: 'Overview | Summary' },
   },
   {
     path: 'pages',
     loadChildren: () =>
       import('@dua-upd/upd/views/pages').then((module) => module.PagesModule),
-    data: { animation: 'pages' },
+    data: { animation: 'pages', title: 'Pages | Home' },
   },
   {
     path: 'tasks',
     loadChildren: () =>
       import('@dua-upd/upd/views/tasks').then((module) => module.TasksModule),
-    data: { animation: 'tasks' },
+    data: { animation: 'tasks', title: 'Tasks | Home' },
   },
   {
     path: 'projects',
@@ -33,7 +33,7 @@ const routes: Routes = [
       import('@dua-upd/upd/views/projects').then(
         (module) => module.ProjectsModule
       ),
-    data: { animation: 'projects' },
+    data: { animation: 'projects', title: 'Projects | Home' },
   },
   { path: '**', redirectTo: 'overview' },
 ];

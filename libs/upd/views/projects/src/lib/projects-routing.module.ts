@@ -23,19 +23,21 @@ const routes: Routes = [
         component: ProjectDetailsComponent,
         children: [
           { path: '', redirectTo: 'summary', pathMatch: 'full' },
-          { path: 'summary', component: ProjectDetailsSummaryComponent },
-          { path: 'webtraffic', component: ProjectDetailsWebtrafficComponent },
+          { path: 'summary', component: ProjectDetailsSummaryComponent, data: {title: 'Projects | Summary'} },
+          { path: 'webtraffic', component: ProjectDetailsWebtrafficComponent, data: {title: 'Projects | Web traffic'} },
           {
             path: 'searchanalytics',
-            component: ProjectDetailsSearchAnalyticsComponent,
+            component: ProjectDetailsSearchAnalyticsComponent, 
+            data: {title: 'Projects | Search analytics'} 
           },
-          { path: 'pagefeedback', component: ProjectDetailsFeedbackComponent },
+          { path: 'pagefeedback', component: ProjectDetailsFeedbackComponent, data: {title: 'Projects | Page feedback'} },
           // {
           //   path: 'calldrivers',
-          //   component: ProjectDetailsCalldriversComponent,
+          //   component: ProjectDetailsCalldriversComponent, 
+          //   data: {title: 'Projects | Call drivers'} 
           // },
-          { path: 'uxtests', component: ProjectDetailsUxTestsComponent },
-          // { path: 'details', component: ProjectDetailsDetailsComponent },
+          { path: 'uxtests', component: ProjectDetailsUxTestsComponent, data: {title: 'Projects | UX tests'} },
+          // { path: 'details', component: ProjectDetailsDetailsComponent, data: {title: 'Projects | Details'} },
         ],
       },
     ],

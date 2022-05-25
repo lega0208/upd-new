@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { LocationStrategy } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { StoreModule } from '@ngrx/store';
@@ -56,6 +56,7 @@ import { PathPreserveQueryLocationStrategy } from '@dua-upd/upd/services';
     !environment.production ? StoreDevtoolsModule.instrument() : [],
   ],
   providers: [
+    Title,
     DateSelectionFacade,
     I18nFacade,
     { provide: LocationStrategy, useClass: PathPreserveQueryLocationStrategy },
