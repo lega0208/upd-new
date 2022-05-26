@@ -84,10 +84,10 @@ export class AppComponent implements OnInit {
       .subscribe(pathString => {
             this.currentLang$.subscribe((lang) => {
                 pathString = this.i18n.service.translate(pathString, lang);
+                this.title = pathString;
             });
         return this.titleService.setTitle(pathString);
       });
-
   }
 
   getRouteAnimationData() {
