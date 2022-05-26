@@ -1,7 +1,7 @@
 <upd-card [title]="title" [titleTooltip]="tooltip">
   <ng-container *ngIf="data.length === 0; else elseBlock">
     <p>
-      {{ title | translate }} <span [translate]="'nodata-available'"></span>
+      <!-- {{ title | translate }} --> <span [translate]="'nodata-available'"></span> 
     </p>
   </ng-container>
   <ng-template #elseBlock>
