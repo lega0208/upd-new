@@ -24,7 +24,7 @@ import {
 
 dayjs.extend(utc);
 dayjs.extend(isSameOrBefore);
-dayjs.extend(quarterOfYear)
+dayjs.extend(quarterOfYear);
 
 @Injectable()
 export class OverviewFacade {
@@ -242,20 +242,18 @@ export class OverviewFacade {
 
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
-  visitsByDay$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => {
+  visitsByDay$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+    this.dateRangeSelected$,
+  ]).pipe(
+    map(([data, lang, dateRangePeriod]) => {
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
         data?.comparisonDateRangeData?.visitsByDay || [];
-      const days = visitsByDay?.length || 0;
-      const prevDays = comparisonVisitsByDay?.length || 0;
-      const maxDays = Math.max(days, prevDays);
-      const granularity = Math.ceil(days / 7);
-      const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
-      let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
-      let [prevStartDate] = (data.comparisonDateRange || '')
-        .split('/')
-        .map((d) => new Date(d));
+
+      const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
+      const dateSelection = dateRangePeriod.replace('ly', '');
 
       const isCurrZero = visitsByDay?.every((v) => v.visits === 0);
       const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
@@ -285,53 +283,32 @@ export class OverviewFacade {
         })
       );
 
-      let dayCount = 0;
-
-      while (dayCount < maxDays) {
-        const prevMonthDays = getMonthlyDays(prevStartDate);
-        const currMonthDays = getMonthlyDays(startDate);
-
-        if (currMonthDays > prevMonthDays) {
-          // if the current month has more days than the previous month,
-          // we need to pad the previous month with zeros
-
-          const daysToPad = currMonthDays - prevMonthDays;
-
-          comparisonDateRangeSeries.splice(
-            dayCount + prevMonthDays,
-            0,
-            ...Array(daysToPad).fill({
-              name: comparisonDateRangeLabel,
-              value: 0,
-            })
-          );
-
-          dayCount += currMonthDays;
-        } else {
-          // if the current month has less days than the previous month,
-          // we need to pad the current month with zeros
-
-          const daysToPad = prevMonthDays - currMonthDays;
-
-          dateRangeSeries.splice(
-            dayCount + currMonthDays,
-            0,
-            ...Array(daysToPad).fill({
-              name: dateRangeLabel,
-              value: 0,
-            })
-          );
-
-          dayCount += prevMonthDays;
-        }
-
-        prevStartDate = dayjs.utc(prevStartDate).add(1, 'month').toDate();
-        startDate = dayjs.utc(startDate).add(1, 'month').toDate();
-      }
-
       let visitsByDayData: MultiSeries = [];
+      let cntPrevVisits = 0;
 
-      if (maxDays > 31) {
+      const visitsByDaySeries = visitsByDay.map((data, i) => {
+        let prevVisits = 0;
+
+        if (
+          comparisonVisitsByDay.find(
+            (d) =>
+              dayjs(d.date)
+                .utc(false)
+                .add(1, dateSelection)
+                .format('YYYY-MM-DD') ===
+              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+          )
+        ) {
+          prevVisits = comparisonVisitsByDay[cntPrevVisits].visits;
+          cntPrevVisits++;
+        }
+        return {
+          name: dayjs.utc(data.date).locale(lang).format(dateFormat),
+          value: prevVisits,
+        };
+      });
+
+      if (dateRangePeriod !== 'weekly' && dateRangePeriod !== 'monthly') {
         visitsByDayData = [
           {
             name: dateRangeLabel,
@@ -351,13 +328,7 @@ export class OverviewFacade {
         ) {
           visitsByDayData.push({
             name: comparisonDateRangeLabel,
-            series: comparisonDateRangeSeries.map(({ value }, i) => ({
-              name: dayjs
-                .utc(dateRangeDates[i])
-                .locale(lang)
-                .format(dateFormat),
-              value: value || 0,
-            })),
+            series: visitsByDaySeries,
           });
         }
       } else {
@@ -393,11 +364,12 @@ export class OverviewFacade {
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
       const dateSelection = dateRangePeriod.replace('ly', '');
 
-      let cntPrevCalls = 0, cntCurrCalls = 0;
+      let cntPrevCalls = 0,
+        cntCurrCalls = 0;
 
       const callDriversByDay = visitsByDay.map((data, i) => {
-
-        let calls = 0, prevCalls = 0;
+        let calls = 0,
+          prevCalls = 0;
 
         if (calldriversByDay.find((d) => d.date === data.date)) {
           calls = calldriversByDay[cntCurrCalls].calls;
@@ -406,7 +378,10 @@ export class OverviewFacade {
         if (
           comparisonCalldriversByDay.find(
             (d) =>
-              dayjs(d.date).utc(false).add(1, dateSelection).format('YYYY-MM-DD') ===
+              dayjs(d.date)
+                .utc(false)
+                .add(1, dateSelection)
+                .format('YYYY-MM-DD') ===
               dayjs(data.date).utc(false).format('YYYY-MM-DD')
           )
         ) {
@@ -418,9 +393,8 @@ export class OverviewFacade {
           currValue: calls,
           prevValue: prevCalls,
         };
-        
       });
-      
+
       const dateRangeSeries = callDriversByDay.map((data, i) => {
         return {
           name: data.name,
@@ -632,11 +606,14 @@ export class OverviewFacade {
         })
       );
 
-      let cntPrevVisits = 0, cntCurrCalls = 0, cntPrevCalls = 0;
+      let cntPrevVisits = 0,
+        cntCurrCalls = 0,
+        cntPrevCalls = 0;
 
       const visitsByDayData = dateRangeSeries.map((data, i) => {
-
-        let prevVisits = 0, calls = 0, prevCalls = 0;
+        let prevVisits = 0,
+          calls = 0,
+          prevCalls = 0;
 
         if (dateRangeSeriesCall.find((d) => d.date === data.date)) {
           calls = dateRangeSeriesCall[cntCurrCalls].calls;
@@ -645,7 +622,10 @@ export class OverviewFacade {
         if (
           comparisonDateRangeSeries.find(
             (d) =>
-              dayjs(d.date).utc(false).add(1, dateSelection).format('YYYY-MM-DD') ===
+              dayjs(d.date)
+                .utc(false)
+                .add(1, dateSelection)
+                .format('YYYY-MM-DD') ===
               dayjs(data.date).utc(false).format('YYYY-MM-DD')
           )
         ) {
@@ -655,7 +635,10 @@ export class OverviewFacade {
         if (
           comparisonDateRangeSeriesCall.find(
             (d) =>
-              dayjs(d.date).utc(false).add(1, dateSelection).format('YYYY-MM-DD') ===
+              dayjs(d.date)
+                .utc(false)
+                .add(1, dateSelection)
+                .format('YYYY-MM-DD') ===
               dayjs(data.date).utc(false).format('YYYY-MM-DD')
           )
         ) {
