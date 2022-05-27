@@ -28,6 +28,11 @@ import {
 import { environment } from '../environments/environment';
 import { PathPreserveQueryLocationStrategy } from '@dua-upd/upd/services';
 
+import {
+  NgxGoogleAnalyticsModule,
+  NgxGoogleAnalyticsRouterModule,
+} from 'ngx-google-analytics';
+
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidebarComponent],
   imports: [
@@ -54,6 +59,9 @@ import { PathPreserveQueryLocationStrategy } from '@dua-upd/upd/services';
     EffectsModule.forRoot([DateSelectionEffects, I18nEffects]),
 
     !environment.production ? StoreDevtoolsModule.instrument() : [],
+
+    NgxGoogleAnalyticsModule.forRoot(environment.gaTrackingId),
+    NgxGoogleAnalyticsRouterModule,
   ],
   providers: [
     Title,

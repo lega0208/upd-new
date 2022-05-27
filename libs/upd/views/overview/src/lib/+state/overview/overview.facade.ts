@@ -5,6 +5,7 @@ import { combineLatest, debounceTime, map, mergeMap, of } from 'rxjs';
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import isSameOrBefore from 'dayjs/esm/plugin/isSameOrBefore';
+import quarterOfYear from 'dayjs/esm/plugin/quarterOfYear';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 
@@ -23,6 +24,7 @@ import {
 
 dayjs.extend(utc);
 dayjs.extend(isSameOrBefore);
+dayjs.extend(quarterOfYear)
 
 @Injectable()
 export class OverviewFacade {
@@ -386,31 +388,50 @@ export class OverviewFacade {
       const calldriversByDay = data?.dateRangeData?.calldriversByDay || [];
       const comparisonCalldriversByDay =
         data?.comparisonDateRangeData?.calldriversByDay || [];
+      const visitsByDay = data?.dateRangeData?.visitsByDay || [];
 
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
+      const dateSelection = dateRangePeriod.replace('ly', '');
 
-      const [startDate, endDate] = data.dateRange
-        .split('/')
-        .map((d) => new Date(d));
+      let cntPrevCalls = 0, cntCurrCalls = 0;
 
-      let queryDate = dayjs.utc(startDate);
-      const end = dayjs.utc(endDate);
-      const queries: { day: string; date: string }[] = [];
+      const callDriversByDay = visitsByDay.map((data, i) => {
 
-      while (queryDate.isSameOrBefore(end)) {
-        queries.push({
-          day: dayjs.utc(queryDate).format('dddd'),
-          date: dayjs.utc(queryDate).format('YYYY-MM-DD'),
-        });
-        queryDate = queryDate.add(1, 'day');
-      }
+        let calls = 0, prevCalls = 0;
 
-      const dateRangeSeries = calldriversByDay.map(({ date, calls }) => {
-        const callDate = dayjs.utc(date).locale(lang).format(dateFormat);
-
+        if (calldriversByDay.find((d) => d.date === data.date)) {
+          calls = calldriversByDay[cntCurrCalls].calls;
+          cntCurrCalls++;
+        }
+        if (
+          comparisonCalldriversByDay.find(
+            (d) =>
+              dayjs(d.date).utc(false).add(1, dateSelection).format('YYYY-MM-DD') ===
+              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+          )
+        ) {
+          prevCalls = comparisonCalldriversByDay[cntPrevCalls].calls;
+          cntPrevCalls++;
+        }
         return {
-          name: callDate,
-          value: calls,
+          name: dayjs.utc(data.date).locale(lang).format(dateFormat),
+          currValue: calls,
+          prevValue: prevCalls,
+        };
+        
+      });
+      
+      const dateRangeSeries = callDriversByDay.map((data, i) => {
+        return {
+          name: data.name,
+          value: data.currValue,
+        };
+      });
+
+      const comparisonDateRangeSeries = callDriversByDay.map((data, i) => {
+        return {
+          name: data.name,
+          value: data.prevValue,
         };
       });
 
@@ -438,24 +459,6 @@ export class OverviewFacade {
           },
         ] as MultiSeries;
       }
-
-      const isOver = dateRangePeriod !== 'weekly' ? 1 : 0;
-
-      const comparisonCallDrivers = isOver
-        ? calldriversByDay
-        : comparisonCalldriversByDay;
-
-      const comparisonDateRangeSeries = comparisonCalldriversByDay.map(
-        ({ calls }, i) => {
-          return {
-            name: dayjs
-              .utc(comparisonCallDrivers[i]?.date)
-              .locale(lang)
-              .format(dateFormat),
-            value: calls,
-          };
-        }
-      );
 
       return [
         {
@@ -578,6 +581,100 @@ export class OverviewFacade {
     })
   );
 
+  tableMerge$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+    this.dateRangeSelected$,
+  ]).pipe(
+    map(([data, lang, dateRangePeriod]) => {
+      const visitsByDay = data?.dateRangeData?.visitsByDay;
+      const calldriversByDay = data?.dateRangeData?.calldriversByDay || [];
+      const comparisonVisitsByDay =
+        data?.comparisonDateRangeData?.visitsByDay || [];
+      const comparisonCalldriversByDay =
+        data?.comparisonDateRangeData?.calldriversByDay || [];
+
+      const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
+      const dateSelection = dateRangePeriod.replace('ly', '');
+
+      const days = visitsByDay?.length || 0;
+      const prevDays = comparisonVisitsByDay?.length || 0;
+      const maxDays = Math.max(days, prevDays);
+
+      let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
+      let [prevStartDate] = (data.comparisonDateRange || '')
+        .split('/')
+        .map((d) => new Date(d));
+
+      if (!visitsByDay) {
+        return [] as MultiSeries;
+      }
+
+      const dateRangeSeries = visitsByDay.map(({ date, visits }) => ({
+        date,
+        visits,
+      }));
+      const dateRangeSeriesCall = calldriversByDay.map(({ date, calls }) => ({
+        date,
+        calls,
+      }));
+
+      const comparisonDateRangeSeries = comparisonVisitsByDay.map(
+        ({ date, visits }) => ({
+          date,
+          visits,
+        })
+      );
+      const comparisonDateRangeSeriesCall = comparisonCalldriversByDay.map(
+        ({ date, calls }) => ({
+          date,
+          calls,
+        })
+      );
+
+      let cntPrevVisits = 0, cntCurrCalls = 0, cntPrevCalls = 0;
+
+      const visitsByDayData = dateRangeSeries.map((data, i) => {
+
+        let prevVisits = 0, calls = 0, prevCalls = 0;
+
+        if (dateRangeSeriesCall.find((d) => d.date === data.date)) {
+          calls = dateRangeSeriesCall[cntCurrCalls].calls;
+          cntCurrCalls++;
+        }
+        if (
+          comparisonDateRangeSeries.find(
+            (d) =>
+              dayjs(d.date).utc(false).add(1, dateSelection).format('YYYY-MM-DD') ===
+              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+          )
+        ) {
+          prevVisits = comparisonDateRangeSeries[cntPrevVisits].visits;
+          cntPrevVisits++;
+        }
+        if (
+          comparisonDateRangeSeriesCall.find(
+            (d) =>
+              dayjs(d.date).utc(false).add(1, dateSelection).format('YYYY-MM-DD') ===
+              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+          )
+        ) {
+          prevCalls = comparisonDateRangeSeriesCall[cntPrevCalls].calls;
+          cntPrevCalls++;
+        }
+        return {
+          name: dayjs.utc(data.date).locale(lang).format(dateFormat),
+          currValue: dateRangeSeries[i]?.visits || 0,
+          prevValue: prevVisits,
+          callCurrValue: calls,
+          callPrevValue: prevCalls,
+        };
+      });
+
+      return visitsByDayData;
+    })
+  );
+
   dateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang))
   );
@@ -652,7 +749,7 @@ export class OverviewFacade {
       return pieChartData;
     })
   );
-  
+
   comparisonFeedbackTable$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
@@ -692,12 +789,10 @@ export class OverviewFacade {
         }
       });
 
-      return dataFeedback.map((val: any, i) => ({
+      return dataFeedback
+        .map((val: any, i) => ({
           ...val,
-          percentChange: percentChange(
-            val.currValue,
-            val.prevValue
-          ),
+          percentChange: percentChange(val.currValue, val.prevValue),
         }))
         .filter((v) => v.currValue > 0 || v.prevValue > 0)
         .sort((a, b) => b.currValue - a.currValue)
@@ -729,7 +824,7 @@ export class OverviewFacade {
           title: d.title,
         };
       });
-      
+
       comparisonDateRange.map((d, i) => {
         let currValue = 0;
         dateRange.map((cd, i) => {
@@ -748,12 +843,10 @@ export class OverviewFacade {
         }
       });
 
-      return dataFeedback.map((val: any, i) => ({
+      return dataFeedback
+        .map((val: any, i) => ({
           ...val,
-          percentChange: percentChange(
-            val.currValue,
-            val.prevValue
-          ),
+          percentChange: percentChange(val.currValue, val.prevValue),
         }))
         .filter((v) => v.currValue > 0 || v.prevValue > 0)
         .sort((a, b) => b.currValue - a.currValue)

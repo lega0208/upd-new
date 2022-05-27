@@ -38,14 +38,13 @@ export class OverviewSummaryComponent implements OnInit {
   gscAverage$ = this.overviewService.avgRank$;
   gscAveragePercentChange$ = this.overviewService.avgRankPercentChange$;
 
-
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
 
   barChartData$ = this.overviewService.visitsByDay$;
   calldriversChartData$ = this.overviewService.calldriversByDay$;
 
-  barTable$ = this.overviewService.barTable$;
+  barTable$ = this.overviewService.tableMerge$;
 
   dateRangeLabel$ = this.overviewService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
@@ -57,9 +56,15 @@ export class OverviewSummaryComponent implements OnInit {
     private i18n: I18nFacade
   ) {}
 
-  dyfTableCols: ColumnConfig<{ name: string; value: string; }>[] = [];
-  whatWasWrongTableCols: ColumnConfig<{ name: string; value: string; }>[] = [];
-  barTableCols: ColumnConfig<{ name: string; currValue: string; prevValue: string; }>[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; value: string }>[] = [];
+  whatWasWrongTableCols: ColumnConfig<{ name: string; value: string }>[] = [];
+  barTableCols: ColumnConfig<{
+    name: string;
+    currValue: string;
+    callCurrValue: string;
+    prevValue: string;
+    callPrevValue: string;
+  }>[] = [];
   taskSurveyCols: ColumnConfig[] = [];
 
   ngOnInit() {
@@ -97,8 +102,22 @@ export class OverviewSummaryComponent implements OnInit {
           pipe: 'number',
         },
         {
+          field: 'callCurrValue',
+          header: this.i18n.service.translate('Calls for ', lang, {
+            value: dateRange,
+          }),
+          pipe: 'number',
+        },
+        {
           field: 'prevValue',
           header: this.i18n.service.translate('Visits for ', lang, {
+            value: comparisonDateRange,
+          }),
+          pipe: 'number',
+        },
+        {
+          field: 'callPrevValue',
+          header: this.i18n.service.translate('Calls for ', lang, {
             value: comparisonDateRange,
           }),
           pipe: 'number',
