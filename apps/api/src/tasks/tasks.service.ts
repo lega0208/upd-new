@@ -327,7 +327,7 @@ async function getTaskAggregatedData(
     .exec();
 
   const calldriversEnquiry = await calldriversModel
-    .aggregate()
+    .aggregate<{ enquiry_line: string; calls: number }>()
     .match({
       tpc_id: { $in: calldriversTpcId },
       date: dateQuery,

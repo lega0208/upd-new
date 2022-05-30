@@ -5,6 +5,8 @@ import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {
+  CallDriver,
+  CallDriverDocument,
   Feedback,
   Page,
   PageMetrics,
@@ -95,6 +97,8 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
 @Injectable()
 export class ProjectsService {
   constructor(
+    @InjectModel(CallDriver.name)
+    private calldriversModel: Model<CallDriverDocument>,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
     @InjectModel(Project.name) private projectsModel: Model<ProjectDocument>,
     @InjectModel(UxTest.name) private uxTestsModel: Model<UxTestDocument>,
@@ -244,7 +248,9 @@ export class ProjectsService {
         status: 1,
       });
 
-      const completedCOPS = projectsData.filter(data => data.cops && data.status === 'Complete').length;
+    const completedCOPS = projectsData.filter(
+      (data) => data.cops && data.status === 'Complete'
+    ).length;
 
     const results = {
       ...aggregatedData,
@@ -336,6 +342,8 @@ export class ProjectsService {
       dateRangeData: await getAggregatedProjectMetrics(
         this.pageMetricsModel,
         this.feedbackModel,
+        this.calldriversModel,
+        this.projectsModel,
         new Types.ObjectId(params.id),
         params.dateRange,
         projectUrls
@@ -343,6 +351,8 @@ export class ProjectsService {
       comparisonDateRangeData: await getAggregatedProjectMetrics(
         this.pageMetricsModel,
         this.feedbackModel,
+        this.calldriversModel,
+        this.projectsModel,
         new Types.ObjectId(params.id),
         params.comparisonDateRange,
         projectUrls
@@ -369,6 +379,8 @@ export class ProjectsService {
 async function getAggregatedProjectMetrics(
   pageMetricsModel: PageMetricsModel,
   feedbackModel: Model<FeedbackDocument>,
+  calldriversModel: Model<CallDriverDocument>,
+  projectModel: Model<ProjectDocument>,
   id: Types.ObjectId,
   dateRange: string,
   projectUrls: string[]
@@ -438,8 +450,40 @@ async function getAggregatedProjectMetrics(
       .exec()
   )[0];
 
+  const project = await projectModel.findById(id).populate('tasks');
+  const tasks = (project?.tasks || []) as unknown[];
+
+  const tpcIds = tasks
+    .filter((task: Types.ObjectId | Task) => 'tpc_ids' in task)
+    .map((task: Task) => task.tpc_ids)
+    .flat();
+
+  const calldriversEnquiry = await calldriversModel
+    .aggregate<{ enquiry_line: string; calls: number }>()
+    .match({
+      tpc_id: { $in: tpcIds },
+      date: { $gte: startDate, $lte: endDate },
+    })
+    .project({
+      _id: 0,
+      enquiry_line: 1,
+      calls: 1,
+    })
+    .group({
+      _id: '$enquiry_line',
+      calls: { $sum: '$calls' },
+    })
+    .project({
+      _id: 0,
+      calls: 1,
+      enquiry_line: '$_id',
+    })
+    .sort({ enquiry_line: 'asc' })
+    .exec();
+
   return {
     ...projectMetrics,
+    calldriversEnquiry,
     feedbackByTags,
   };
 }

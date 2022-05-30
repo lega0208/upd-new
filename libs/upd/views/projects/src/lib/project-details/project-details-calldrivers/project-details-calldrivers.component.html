@@ -7,15 +7,17 @@
   <div class="row">
     <div class="col">
       <upd-charts
-      [title]="'d3-tcbil'"
+        [title]="'d3-tcbil'"
         [yAxisLabel]="'Number of calls (in thousands)'"
         [showXAxisLabel]="false"
         [showGridLines]="true"
         [displayLegend]="'below'"
         [groupPadding]="75"
         [showLegend]="true"
-        [data]="bar"
+        [data]="calldriversChart$ | async"
         [type]="'grouped-bar'"
+        [table]="calldriversTable$ | async"
+        [tableCols]="calldriversCols"
       ></upd-charts>
     </div>
   </div>

@@ -56,10 +56,10 @@ export class ProjectDetailsComponent implements OnInit {
           href: 'pagefeedback',
           title: this.i18n.service.translate('tab-pagefeedback', lang),
         },
-        // {
-        //   href: 'calldrivers',
-        //   title: this.i18n.service.translate('tab-calldrivers', lang),
-        // },
+        {
+          href: 'calldrivers',
+          title: this.i18n.service.translate('tab-calldrivers', lang),
+        },
         {
           href: 'uxtests',
           title: this.i18n.service.translate('tab-uxtests', lang),

@@ -1,28 +1,29 @@
+import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { combineLatest, map } from 'rxjs';
+import dayjs from 'dayjs/esm';
+import utc from 'dayjs/esm/plugin/utc';
+import 'dayjs/esm/locale/en-ca';
+import 'dayjs/esm/locale/fr-ca';
 import {
   BubbleChartMultiSeries,
   MultiSeries,
   SingleSeries,
 } from '@amonsour/ngx-charts';
-import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import { combineLatest, map } from 'rxjs';
 
-import * as ProjectsDetailsActions from './projects-details.actions';
-import { ProjectsDetailsState } from './projects-details.reducer';
-import * as ProjectsDetailsSelectors from './projects-details.selectors';
+import { percentChange, PickByType } from '@dua-upd/utils-common';
+import { I18nFacade, selectUrl } from '@dua-upd/upd/state';
+import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import {
+  CalldriversTableRow,
   ProjectDetailsAggregatedData,
   ProjectsDetailsData,
   TaskKpi,
   VisitsByPage,
 } from '@dua-upd/types-common';
-import { percentChange, PickByType } from '@dua-upd/utils-common';
-import { I18nFacade, selectUrl } from '@dua-upd/upd/state';
-import dayjs from 'dayjs/esm';
-import utc from 'dayjs/esm/plugin/utc';
-import 'dayjs/esm/locale/en-ca';
-import 'dayjs/esm/locale/fr-ca';
-import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
+
+import * as ProjectsDetailsActions from './projects-details.actions';
+import * as ProjectsDetailsSelectors from './projects-details.selectors';
 
 dayjs.extend(utc);
 
@@ -32,20 +33,19 @@ export class ProjectsDetailsFacade {
    * Combine pieces of state using createSelector,
    * and expose them as observables through the facade.
    */
-  loaded$ = this.store.pipe(
-    select(ProjectsDetailsSelectors.selectProjectsDetailsLoaded)
+  loaded$ = this.store.select(
+    ProjectsDetailsSelectors.selectProjectsDetailsLoaded
   );
 
-  projectsDetailsData$ = this.store.pipe(
-    select(ProjectsDetailsSelectors.selectProjectsDetailsData)
+  projectsDetailsData$ = this.store.select(
+    ProjectsDetailsSelectors.selectProjectsDetailsData
   );
 
   currentLang$ = this.i18n.currentLang$;
 
-  currentRoute$ = this.store.pipe(
-    select(selectUrl),
-    map((url) => url.replace(/\?.+$/, ''))
-  );
+  currentRoute$ = this.store
+    .select(selectUrl)
+    .pipe(map((url) => url.replace(/\?.+$/, '')));
 
   title$ = this.projectsDetailsData$.pipe(
     map((data) => data?.title.replace(/\s+/g, ' '))
@@ -96,6 +96,100 @@ export class ProjectsDetailsFacade {
 
   visitsByPageFeedbackWithPercentChange$ = this.projectsDetailsData$.pipe(
     mapPageMetricsArraysWithPercentChange('visitsByPage', 'dyfNo')
+  );
+
+  calldriversChart$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
+      );
+
+      const dataEnquiryLine = (
+        data?.dateRangeData?.calldriversEnquiry || []
+      ).map((d) => ({
+        name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
+        value: d.calls,
+      }));
+
+      const comparisonDataEnquiryLine = (
+        data?.comparisonDateRangeData?.calldriversEnquiry || []
+      ).map((d) => ({
+        name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
+        value: d.calls,
+      }));
+
+      const isCurrZero = dataEnquiryLine.every((v) => v.value === 0);
+      const isPrevZero = comparisonDataEnquiryLine.every((v) => v.value === 0);
+
+      if (isCurrZero && isPrevZero) {
+        return [] as MultiSeries;
+      }
+
+      const dataEnquiryLineFinal = dataEnquiryLine.filter((v) => v.value > 0);
+      const comparisonDataEnquiryLineFinal = comparisonDataEnquiryLine.filter(
+        (v) => v.value > 0
+      );
+
+      const barChartData: MultiSeries = [
+        {
+          name: dateRangeLabel,
+          series: dataEnquiryLineFinal,
+        },
+        {
+          name: comparisonDateRangeLabel,
+          series: comparisonDataEnquiryLineFinal,
+        },
+      ];
+
+      return barChartData;
+    })
+  );
+
+  calldriversTable$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const currentData: { enquiry_line: string; calls: number }[] =
+        data?.dateRangeData?.calldriversEnquiry || [];
+      const comparisonData: { enquiry_line: string; calls: number }[] =
+        data?.comparisonDateRangeData?.calldriversEnquiry || [];
+
+      const callsByEnquiryLine: Record<string, CalldriversTableRow> = {};
+
+      for (const { calls, enquiry_line } of currentData) {
+        callsByEnquiryLine[enquiry_line] = {
+          enquiry_line,
+          currValue: calls,
+          prevValue: 0,
+        };
+      }
+
+      for (const { calls, enquiry_line } of comparisonData) {
+        if (!callsByEnquiryLine[enquiry_line]) {
+          callsByEnquiryLine[enquiry_line] = {
+            enquiry_line,
+            currValue: 0,
+            prevValue: calls,
+          };
+        } else {
+          callsByEnquiryLine[enquiry_line].prevValue = calls;
+        }
+      }
+
+      return Object.values(callsByEnquiryLine).map(
+        ({ enquiry_line, currValue, prevValue }) => ({
+          name: this.i18n.service.translate(`d3-${enquiry_line}`, lang),
+          currValue,
+          prevValue,
+        })
+      );
+    })
   );
 
   dyfData$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
@@ -425,7 +519,9 @@ export class ProjectsDetailsFacade {
         data.comparisonDateRangeData?.feedbackByTags || [];
 
       const isCurrZero = feedbackByTags.every((v) => v.numComments === 0);
-      const isPrevZero = feedbackByTagsPrevious.every((v) => v.numComments === 0);
+      const isPrevZero = feedbackByTagsPrevious.every(
+        (v) => v.numComments === 0
+      );
 
       if (isCurrZero && isPrevZero) {
         return [] as MultiSeries;
@@ -528,7 +624,7 @@ export class ProjectsDetailsFacade {
                   : '',
                 extra: {
                   date: uxTest?.date,
-                }
+                },
               };
             })
             .filter((v) => v.value !== null && v.value !== undefined)
@@ -557,12 +653,12 @@ export class ProjectsDetailsFacade {
         }))
         .filter((v) => v.name !== null && v.name !== '')
         .sort((a, b) => {
-          return (a.series).length < (b.series).length ? 1 : -1;
+          return a.series.length < b.series.length ? 1 : -1;
         }) as MultiSeries;
 
       return taskSuccess;
-        })
-      );
+    })
+  );
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
 

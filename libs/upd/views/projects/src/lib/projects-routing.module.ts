@@ -27,15 +27,15 @@ const routes: Routes = [
           { path: 'webtraffic', component: ProjectDetailsWebtrafficComponent, data: {title: 'Projects | Web traffic'} },
           {
             path: 'searchanalytics',
-            component: ProjectDetailsSearchAnalyticsComponent, 
-            data: {title: 'Projects | Search analytics'} 
+            component: ProjectDetailsSearchAnalyticsComponent,
+            data: {title: 'Projects | Search analytics'}
           },
           { path: 'pagefeedback', component: ProjectDetailsFeedbackComponent, data: {title: 'Projects | Page feedback'} },
-          // {
-          //   path: 'calldrivers',
-          //   component: ProjectDetailsCalldriversComponent, 
-          //   data: {title: 'Projects | Call drivers'} 
-          // },
+          {
+            path: 'calldrivers',
+            component: ProjectDetailsCalldriversComponent,
+            data: {title: 'Projects | Call drivers'}
+          },
           { path: 'uxtests', component: ProjectDetailsUxTestsComponent, data: {title: 'Projects | UX tests'} },
           // { path: 'details', component: ProjectDetailsDetailsComponent, data: {title: 'Projects | Details'} },
         ],

@@ -262,6 +262,7 @@ export interface ProjectDetailsAggregatedData {
   gscSearchTerms: GscSearchTermMetrics;
   visitsByPage: VisitsByPage[];
   feedbackByTags: { tag: string; numComments: number }[];
+  calldriversEnquiry: { enquiry_line: string; calls: number }[];
 }
 
 export interface ProjectsDetailsData
@@ -281,4 +282,10 @@ export interface TaskKpi {
   Exploratory: number;
   'Spot Check': number;
   change: number;
+}
+
+export interface CalldriversTableRow {
+  enquiry_line: string;
+  currValue: number;
+  prevValue: number;
 }
