@@ -14,9 +14,10 @@
     "db-repair": "npm run db-cli db-repair",
     "db-repopulate": "npm run db-cli repopulate",
     "deploy": "git pull && npm i && npm run build && cd docker && docker-compose build && docker-compose up -d",
-    "lint": "nx lint",
+    "lint": "nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel",
     "test": "nx test",
-    "analyze-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json"
+    "analyze-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json",
+    "pre-pr": "npm run lint && npm run build:parallel"
   },
   "private": true,
   "dependencies": {
