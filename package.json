@@ -14,6 +14,7 @@
     "db-repair": "npm run db-cli db-repair",
     "db-repopulate": "npm run db-cli repopulate",
     "deploy": "git pull && npm i && npm run build && cd docker && docker-compose build && docker-compose up -d",
+    "lint": "nx lint",
     "test": "nx test",
     "analyze-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json"
   },
