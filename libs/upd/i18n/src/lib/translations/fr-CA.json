@@ -99,6 +99,7 @@
   "# of comments": "Nombre de commentaires",
   "# of comments for ": "Nombre de commentaires pour {{value}}",
   "# of calls": "Nombre d'appels",
+  "Number of calls": "Nombre d'appels",
   "top5-call-drivers": "Cinq premiers facteurs générateurs d'appels",
   "top5-call-drivers-decrease": "Cinq premiers facteurs générateurs d'appels ayant connu la plus forte baisse au cours de la période",
   "top5-call-drivers-increase": "Cinq premiers facteurs générateurs d'appels ayant connu la plus forte augmentation au cours de la période",
