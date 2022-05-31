@@ -57,11 +57,11 @@ import {
     ),
     StoreRouterConnectingModule.forRoot(),
     EffectsModule.forRoot([DateSelectionEffects, I18nEffects]),
-
     !environment.production ? StoreDevtoolsModule.instrument() : [],
-
-    NgxGoogleAnalyticsModule.forRoot(environment.gaTrackingId),
-    NgxGoogleAnalyticsRouterModule,
+    environment.production
+      ? NgxGoogleAnalyticsModule.forRoot(environment.gaTrackingId)
+      : [],
+    environment.production ? NgxGoogleAnalyticsRouterModule : [],
   ],
   providers: [
     Title,
