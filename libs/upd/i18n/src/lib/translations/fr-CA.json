@@ -62,6 +62,7 @@
   "task": "Tâche",
   "topic": "Sujet",
   "sub-topic": "Sous-sujet",
+  "sub-subtopic": "Sous-sous-sujet",
   "change": "Changement",
   "d3-dyfwywlf": "Avez-vous trouvé ce que vous cherchiez?",
   "yes": "Oui",
@@ -271,6 +272,7 @@
   "Loading Data": "Chargement des données",
   "COPS": "POC",
   "Inquiry line": "Ligne de renseignements",
+  "inquiry line": "Ligne de renseignements",
   "calldrivers-notification": "Ce rapport présente les résultats des sujets d'appel pour les principales files d'attente d'agents sur la base d'un échantillon aléatoire d'appels.",
 
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",

@@ -263,6 +263,7 @@ export interface ProjectDetailsAggregatedData {
   visitsByPage: VisitsByPage[];
   feedbackByTags: { tag: string; numComments: number }[];
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
+  callsByTopic: CallsByTopic[];
 }
 
 export interface ProjectsDetailsData
@@ -288,4 +289,12 @@ export interface CalldriversTableRow {
   enquiry_line: string;
   currValue: number;
   prevValue: number;
+}
+
+export interface CallsByTopic {
+  tpc_id: string;
+  topic: string;
+  subtopic: string;
+  sub_subtopic: string;
+  calls: number;
 }

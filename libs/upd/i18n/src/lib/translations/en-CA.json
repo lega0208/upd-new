@@ -62,6 +62,7 @@
   "task": "Task",
   "topic": "Topic",
   "sub-topic": "Sub-topic",
+  "sub-subtopic": "Sub-subtopic",
   "change": "Change",
   "d3-dyfwywlf": "Did you find what you were looking for?",
   "yes": "Yes",
@@ -271,6 +272,7 @@
   "Loading Data": "Loading Data",
   "COPS": "COPS",
   "Inquiry line": "Inquiry line",
+  "inquiry line": "Inquiry line",
   "calldrivers-notification": "This report presents call topic results for the main agent queues based on a random sample of calls.",
 
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",

@@ -15,13 +15,23 @@ export class ProjectDetailsCalldriversComponent implements OnInit {
 
   calldriversChart$ = this.projectsDetailsService.calldriversChart$;
   calldriversTable$ = this.projectsDetailsService.calldriversTable$;
-  calldriversCols: ColumnConfig<{ name: string; currValue: number; prevValue: number }>[] = [];
+  calldriversCols: ColumnConfig<{
+    name: string;
+    currValue: number;
+    prevValue: number;
+  }>[] = [];
+
+  callsByTopic$ = this.projectsDetailsService.callsByTopic$;
+  callsByTopicConfig$ = this.projectsDetailsService.callsByTopicConfig$;
 
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
-  comparisonDateRangeLabel$ = this.projectsDetailsService.comparisonDateRangeLabel$;
+  comparisonDateRangeLabel$ =
+    this.projectsDetailsService.comparisonDateRangeLabel$;
 
-  constructor(private readonly projectsDetailsService: ProjectsDetailsFacade, private i18n: I18nFacade) {}
-
+  constructor(
+    private readonly projectsDetailsService: ProjectsDetailsFacade,
+    private i18n: I18nFacade
+  ) {}
 
   ngOnInit() {
     combineLatest([

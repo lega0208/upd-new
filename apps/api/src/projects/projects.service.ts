@@ -15,6 +15,7 @@ import {
   UxTest,
 } from '@dua-upd/db';
 import type {
+  CallsByTopic,
   FeedbackComment,
   FeedbackDocument,
   PageDocument,
@@ -458,11 +459,23 @@ async function getAggregatedProjectMetrics(
     .map((task: Task) => task.tpc_ids)
     .flat();
 
+  const calldriverDocs = await calldriversModel
+    .find(
+      {
+        tpc_id: { $in: tpcIds },
+        date: { $gte: startDate, $lte: endDate },
+      },
+      { _id: 1 }
+    )
+    .lean()
+    .exec();
+
+  const documentIds = calldriverDocs.map(({ _id }) => _id);
+
   const calldriversEnquiry = await calldriversModel
     .aggregate<{ enquiry_line: string; calls: number }>()
     .match({
-      tpc_id: { $in: tpcIds },
-      date: { $gte: startDate, $lte: endDate },
+      _id: { $in: documentIds },
     })
     .project({
       _id: 0,
@@ -481,9 +494,38 @@ async function getAggregatedProjectMetrics(
     .sort({ enquiry_line: 'asc' })
     .exec();
 
+  const callsByTopic = await calldriversModel.aggregate<CallsByTopic>()
+    .match({
+      _id: { $in: documentIds },
+    })
+    .project({
+      _id: 0,
+      tpc_id: 1,
+      topic: 1,
+      subtopic: 1,
+      sub_subtopic: 1,
+      calls: 1,
+    })
+    .group({
+      _id: '$tpc_id',
+      topic: { $first: '$topic' },
+      subtopic: { $first: '$subtopic' },
+      sub_subtopic: { $first: '$sub_subtopic' },
+      calls: { $sum: '$calls' },
+    })
+    .project({
+      _id: 0,
+      tpc_id: '$_id',
+      topic: 1,
+      subtopic: 1,
+      sub_subtopic: 1,
+      calls: 1,
+    });
+
   return {
     ...projectMetrics,
     calldriversEnquiry,
+    callsByTopic,
     feedbackByTags,
   };
 }

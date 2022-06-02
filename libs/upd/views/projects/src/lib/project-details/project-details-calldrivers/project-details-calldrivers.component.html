@@ -3,7 +3,7 @@
   <span [translate]="'calldrivers-notification'"></span>
 </upd-alert>
 
-<div class="container-fluid gx-0">
+<div class="container-fluid gx-0 my-4">
   <div class="row">
     <div class="col">
       <upd-charts
@@ -24,47 +24,17 @@
   </div>
 </div>
 
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid gx-0 my-4">
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [data]="charts"
-        [cols]="chartsCols"
-        [filter]="false"
-        [pagination]="false"
-        [title]="'top5-call-drivers'"
+        [data]="(callsByTopic$ | async) || []"
+        [cols]="(callsByTopicConfig$ | async) || []"
+        [filter]="true"
+        [pagination]="true"
+        [title]="'tab-calldrivers'"
       >
       </upd-data-table-card>
     </div>
   </div>
 </div>
-
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-data-table-card
-        [data]="charts"
-        [cols]="chartsCols"
-        [filter]="false"
-        [pagination]="false"
-        [title]="'top5-call-drivers-increase'"
-      >
-      </upd-data-table-card>
-    </div>
-  </div>
-</div>
-
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-data-table-card
-        [data]="charts"
-        [cols]="chartsCols"
-        [filter]="false"
-        [pagination]="false"
-        [title]="'top5-call-drivers-decrease'"
-      >
-      </upd-data-table-card>
-    </div>
-  </div>
-</div> -->

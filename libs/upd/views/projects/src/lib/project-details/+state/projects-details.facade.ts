@@ -11,7 +11,11 @@ import {
   SingleSeries,
 } from '@amonsour/ngx-charts';
 
-import { percentChange, PickByType } from '@dua-upd/utils-common';
+import {
+  GetTableProps,
+  percentChange,
+  PickByType,
+} from '@dua-upd/utils-common';
 import { I18nFacade, selectUrl } from '@dua-upd/upd/state';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import {
@@ -24,8 +28,14 @@ import {
 
 import * as ProjectsDetailsActions from './projects-details.actions';
 import * as ProjectsDetailsSelectors from './projects-details.selectors';
+import { ColumnConfig } from '@dua-upd/upd-components';
 
 dayjs.extend(utc);
+
+type CallsByTopicTableType = GetTableProps<
+  ProjectsDetailsFacade,
+  'callsByTopic$'
+>;
 
 @Injectable()
 export class ProjectsDetailsFacade {
@@ -191,6 +201,63 @@ export class ProjectsDetailsFacade {
       );
     })
   );
+
+  callsByTopic$ = this.projectsDetailsData$.pipe(
+    map((data) => {
+      if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
+        return null;
+      }
+      const comparisonData = data?.comparisonDateRangeData?.callsByTopic || [];
+
+      return (data?.dateRangeData?.callsByTopic || []).map((callsByTopic) => {
+        const previousCalls = comparisonData.find(
+          (prevTopic) => prevTopic.tpc_id === callsByTopic.tpc_id
+        );
+
+        return {
+          topic: `${callsByTopic.tpc_id}.topic`,
+          subtopic: `${callsByTopic.tpc_id}.sub-topic`,
+          sub_subtopic: `${callsByTopic.tpc_id}.sub-subtopic`,
+          calls: callsByTopic.calls,
+          comparison: !previousCalls?.calls
+            ? Infinity
+            : percentChange(callsByTopic.calls, previousCalls.calls),
+        };
+      });
+    })
+  );
+
+  callsByTopicConfig$ = this.i18n.service
+    .observeKeys(['topic', 'sub-topic', 'sub-subtopic', 'calls', 'comparison'])
+    .pipe(
+      map((headers): ColumnConfig<CallsByTopicTableType>[] => [
+        {
+          field: 'topic',
+          header: headers['topic'],
+          translate: true,
+        },
+        {
+          field: 'subtopic',
+          header: headers['sub-topic'],
+          translate: true,
+        },
+        {
+          field: 'sub_subtopic',
+          header: headers['sub-subtopic'],
+          translate: true,
+        },
+        {
+          field: 'calls',
+          header: headers['calls'],
+          pipe: 'number',
+        },
+        {
+          field: 'comparison',
+          header: headers['comparison'],
+          pipe: 'percent',
+        },
+      ])
+    );
 
   dyfData$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
@@ -598,11 +665,11 @@ export class ProjectsDetailsFacade {
   );
 
   lineTaskChart$ = combineLatest([
-        this.projectsDetailsData$,
-        this.currentLang$,
-      ]).pipe(
-        map(([data, lang]) => {
-  const taskSuccessByUxData = data?.taskSuccessByUxTest;
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const taskSuccessByUxData = data?.taskSuccessByUxTest;
 
       const tasks = taskSuccessByUxData
         ?.map((uxTest) => uxTest?.tasks?.split('; '))
