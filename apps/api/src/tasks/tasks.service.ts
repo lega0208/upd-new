@@ -224,6 +224,7 @@ export class TasksService {
               success_rate: uxTest.success_rate,
               total_users: uxTest.total_users,
               scenario: uxTest.scenario,
+              attachments: uxTest.attachments,
             }
         )
         .filter((uxTest) => !!uxTest)
@@ -349,9 +350,12 @@ async function getTaskAggregatedData(
     .sort({ enquiry_line: 'asc' })
     .exec();
 
+  const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
+
   return {
     ...results[0],
     calldriversEnquiry,
+    totalCalldrivers: totalCalldrivers,
     feedbackByTags,
   };
 }

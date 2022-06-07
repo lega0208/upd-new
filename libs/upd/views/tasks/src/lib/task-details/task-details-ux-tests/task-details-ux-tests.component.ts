@@ -1,10 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { ColumnConfig, ColumnConfigPipe } from '@dua-upd/upd-components';
+import { ColumnConfig } from '@dua-upd/upd-components';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
+import { GetTableProps } from '@dua-upd/utils-common';
+
+type DocumentsColTypes = GetTableProps<
+  TaskDetailsUxTestsComponent,
+  'documents$'
+>;
 
 @Component({
   selector: 'upd-task-details-ux-tests',
@@ -25,6 +31,9 @@ export class TaskDetailsUxTestsComponent implements OnInit {
   avgTaskSuccessFromLastTest$ =
     this.taskDetailsService.avgTaskSuccessFromLastTest$;
 
+  documents$ = this.taskDetailsService.documents$;
+  documentsCols: ColumnConfig<DocumentsColTypes>[] = [];
+
   constructor(
     private readonly taskDetailsService: TasksDetailsFacade,
     private i18n: I18nFacade
@@ -38,19 +47,40 @@ export class TaskDetailsUxTestsComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
-    combineLatest([
-      this.currentLang$
-    ]).subscribe(([lang]) => {
+    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+      this.documentsCols = [
+        {
+          field: 'filename',
+          header: this.i18n.service.translate('Documents', lang),
+          type: 'link',
+          typeParams: { link: 'url', external: true },
+        },
+      ];
       this.taskSuccessChartCols = [
         { field: 'name', header: this.i18n.service.translate('Title', lang) },
-        { field: 'value', header: this.i18n.service.translate('success-rate', lang), pipe: 'percent' },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('success-rate', lang),
+          pipe: 'percent',
+        },
       ];
       this.taskSuccessDataCols = [
         { field: 'title', header: this.i18n.service.translate('Title', lang) },
-        { field: 'scenario', header: this.i18n.service.translate('Scenario', lang) },
+        {
+          field: 'scenario',
+          header: this.i18n.service.translate('Scenario', lang),
+        },
         // { field: 'result', header: this.i18n.service.translate('Result', lang) },
-        { field: 'success_rate', header: this.i18n.service.translate('success-rate', lang), pipe: 'percent' },
-        { field: 'date', header: this.i18n.service.translate('Date', lang), pipe: 'date' },
+        {
+          field: 'success_rate',
+          header: this.i18n.service.translate('success-rate', lang),
+          pipe: 'percent',
+        },
+        {
+          field: 'date',
+          header: this.i18n.service.translate('Date', lang),
+          pipe: 'date',
+        },
       ];
     });
   }

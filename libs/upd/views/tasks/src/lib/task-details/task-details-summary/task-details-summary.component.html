@@ -2,8 +2,8 @@
   <div class="row">
     <div class="col-lg-6 col-sm-12">
       <upd-data-kpi-card
-        [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
-        [date]="(dateFromLastTest$ | async) || ''"
+        [comparison$]="avgTaskSuccessFromLastTest$ || 0"
+        [date$]="dateFromLastTest$ || ''"
         [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
         [title]="'Average task success from last UX test'"
       ></upd-data-kpi-card>
@@ -23,11 +23,11 @@
   <div class="row">
     <div class="col">
       <upd-data-table-card
-      [data]="(visitsByPage$ | async) || []"
-      [cols]="visitsByPageCols"
-      [title]="'Visits by page'"
-    >
-    </upd-data-table-card>
+        [data]="(visitsByPage$ | async) || []"
+        [cols]="visitsByPageCols"
+        [title]="'Visits by page'"
+      >
+      </upd-data-table-card>
     </div>
   </div>
 </div>
@@ -59,12 +59,12 @@
   <div class="row">
     <div class="col">
       <upd-data-table-card
-      [data]="(taskSuccessByUxTest$ | async) || []"
-      [cols]="taskSuccessByUxTestCols"
-      [pagination]="false"
-      [title]="'Task success by UX test'"
-    >
-    </upd-data-table-card>
+        [data]="(taskSuccessByUxTest$ | async) || []"
+        [cols]="taskSuccessByUxTestCols"
+        [pagination]="false"
+        [title]="'Task success by UX test'"
+      >
+      </upd-data-table-card>
     </div>
   </div>
 </div>
