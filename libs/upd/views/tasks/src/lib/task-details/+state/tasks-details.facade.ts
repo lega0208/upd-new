@@ -14,12 +14,18 @@ import {
   TaskDetailsData,
   VisitsByPage,
 } from '@dua-upd/types-common';
-import { percentChange, PickByType } from '@dua-upd/utils-common';
+import { GetTableProps, percentChange, PickByType } from '@dua-upd/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
+import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 
 dayjs.extend(utc);
+
+type CallsByTopicTableType = GetTableProps<
+  TasksDetailsFacade,
+  'callsByTopic$'
+>
 
 @Injectable()
 export class TasksDetailsFacade {
@@ -194,6 +200,62 @@ export class TasksDetailsFacade {
       });
       return dataEnquiryLine.filter((v) => v.currValue > 0 || v.prevValue > 0);
     })
+  );
+
+  callsByTopic$ = this.tasksDetailsData$.pipe(
+    map((data) => {
+      if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
+        return null;
+      }
+      const comparisonData = data?.comparisonDateRangeData?.callsByTopic || [];
+
+      return (data?.dateRangeData?.callsByTopic || []).map((callsByTopic) => {
+        const previousCalls = comparisonData.find(
+          (prevTopic) => prevTopic.tpc_id === callsByTopic.tpc_id
+        );
+
+        return {
+          topic: `${callsByTopic.tpc_id}.topic`,
+          subtopic: `${callsByTopic.tpc_id}.sub-topic`,
+          sub_subtopic: `${callsByTopic.tpc_id}.sub-subtopic`,
+          calls: callsByTopic.calls,
+          comparison: !previousCalls?.calls
+            ? Infinity
+            : percentChange(callsByTopic.calls, previousCalls.calls),
+        };
+      });
+    })
+  );
+
+  callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(
+    this.i18n.service,
+    [
+      {
+        field: 'topic',
+        header: 'topic',
+        translate: true,
+      },
+      {
+        field: 'subtopic',
+        header: 'sub-topic',
+        translate: true,
+      },
+      {
+        field: 'sub_subtopic',
+        header: 'sub-subtopic',
+        translate: true,
+      },
+      {
+        field: 'calls',
+        header: 'calls',
+        pipe: 'number',
+      },
+      {
+        field: 'comparison',
+        header: 'comparison',
+        pipe: 'percent',
+      },
+    ]
   );
 
   dyfData$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(

@@ -29,3 +29,11 @@ export interface FeedbackComment {
   whats_wrong: string;
   comment: string;
 }
+
+export interface CallsByTopic {
+  tpc_id: string;
+  topic: string;
+  subtopic: string;
+  sub_subtopic: string;
+  calls: number;
+}

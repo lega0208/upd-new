@@ -1,4 +1,3 @@
-import { MultiSeries } from '@amonsour/ngx-charts';
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { ColumnConfig } from '@dua-upd/upd-components';

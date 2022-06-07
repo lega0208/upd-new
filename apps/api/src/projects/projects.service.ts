@@ -6,16 +6,16 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {
   CallDriver,
-  CallDriverDocument,
   Feedback,
   Page,
   PageMetrics,
   Project,
   Task,
-  UxTest,
+  UxTest
 } from '@dua-upd/db';
 import type {
   CallsByTopic,
+  CallDriverModel,
   FeedbackComment,
   FeedbackDocument,
   PageDocument,
@@ -99,7 +99,7 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
 export class ProjectsService {
   constructor(
     @InjectModel(CallDriver.name)
-    private calldriversModel: Model<CallDriverDocument>,
+    private calldriversModel: CallDriverModel,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
     @InjectModel(Project.name) private projectsModel: Model<ProjectDocument>,
     @InjectModel(UxTest.name) private uxTestsModel: Model<UxTestDocument>,
@@ -380,7 +380,7 @@ export class ProjectsService {
 async function getAggregatedProjectMetrics(
   pageMetricsModel: PageMetricsModel,
   feedbackModel: Model<FeedbackDocument>,
-  calldriversModel: Model<CallDriverDocument>,
+  calldriversModel: CallDriverModel,
   projectModel: Model<ProjectDocument>,
   id: Types.ObjectId,
   dateRange: string,
@@ -472,55 +472,9 @@ async function getAggregatedProjectMetrics(
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 
-  const calldriversEnquiry = await calldriversModel
-    .aggregate<{ enquiry_line: string; calls: number }>()
-    .match({
-      _id: { $in: documentIds },
-    })
-    .project({
-      _id: 0,
-      enquiry_line: 1,
-      calls: 1,
-    })
-    .group({
-      _id: '$enquiry_line',
-      calls: { $sum: '$calls' },
-    })
-    .project({
-      _id: 0,
-      calls: 1,
-      enquiry_line: '$_id',
-    })
-    .sort({ enquiry_line: 'asc' })
-    .exec();
+  const calldriversEnquiry = await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
 
-  const callsByTopic = await calldriversModel.aggregate<CallsByTopic>()
-    .match({
-      _id: { $in: documentIds },
-    })
-    .project({
-      _id: 0,
-      tpc_id: 1,
-      topic: 1,
-      subtopic: 1,
-      sub_subtopic: 1,
-      calls: 1,
-    })
-    .group({
-      _id: '$tpc_id',
-      topic: { $first: '$topic' },
-      subtopic: { $first: '$subtopic' },
-      sub_subtopic: { $first: '$sub_subtopic' },
-      calls: { $sum: '$calls' },
-    })
-    .project({
-      _id: 0,
-      tpc_id: '$_id',
-      topic: 1,
-      subtopic: 1,
-      sub_subtopic: 1,
-      calls: 1,
-    });
+  const callsByTopic = await calldriversModel.getCallsByTopicFromIds(documentIds);
 
   return {
     ...projectMetrics,

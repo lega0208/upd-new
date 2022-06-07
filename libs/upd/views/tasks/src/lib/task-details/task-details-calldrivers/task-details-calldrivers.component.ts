@@ -16,6 +16,9 @@ export class TaskDetailsCalldriversComponent implements OnInit {
   calldriversTable$ = this.taskDetailsService.calldriversTable$;
   calldriversCols: ColumnConfig[] = [];
 
+  callsByTopic$ = this.taskDetailsService.callsByTopic$;
+  callsByTopicConfig$ = this.taskDetailsService.callsByTopicConfig$;
+
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
 

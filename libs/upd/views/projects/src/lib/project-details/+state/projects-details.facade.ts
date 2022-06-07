@@ -28,7 +28,7 @@ import {
 
 import * as ProjectsDetailsActions from './projects-details.actions';
 import * as ProjectsDetailsSelectors from './projects-details.selectors';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 
 dayjs.extend(utc);
 
@@ -227,37 +227,36 @@ export class ProjectsDetailsFacade {
     })
   );
 
-  callsByTopicConfig$ = this.i18n.service
-    .observeKeys(['topic', 'sub-topic', 'sub-subtopic', 'calls', 'comparison'])
-    .pipe(
-      map((headers): ColumnConfig<CallsByTopicTableType>[] => [
-        {
-          field: 'topic',
-          header: headers['topic'],
-          translate: true,
-        },
-        {
-          field: 'subtopic',
-          header: headers['sub-topic'],
-          translate: true,
-        },
-        {
-          field: 'sub_subtopic',
-          header: headers['sub-subtopic'],
-          translate: true,
-        },
-        {
-          field: 'calls',
-          header: headers['calls'],
-          pipe: 'number',
-        },
-        {
-          field: 'comparison',
-          header: headers['comparison'],
-          pipe: 'percent',
-        },
-      ])
-    );
+  callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(
+    this.i18n.service,
+    [
+      {
+        field: 'topic',
+        header: 'topic',
+        translate: true,
+      },
+      {
+        field: 'subtopic',
+        header: 'sub-topic',
+        translate: true,
+      },
+      {
+        field: 'sub_subtopic',
+        header: 'sub-subtopic',
+        translate: true,
+      },
+      {
+        field: 'calls',
+        header: 'calls',
+        pipe: 'number',
+      },
+      {
+        field: 'comparison',
+        header: 'comparison',
+        pipe: 'percent',
+      },
+    ]
+  );
 
   dyfData$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types

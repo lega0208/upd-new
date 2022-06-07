@@ -1,5 +1,5 @@
 import { FeedbackComment, Page, PageMetrics, Task, UxTest } from '@dua-upd/db';
-import type { GscSearchTermMetrics } from '@dua-upd/db';
+import type { GscSearchTermMetrics, CallsByTopic } from '@dua-upd/db';
 
 export {
   Page,
@@ -18,12 +18,14 @@ export type {
   PageMetricsModel,
   OverallDocument,
   CallDriverDocument,
+  CallDriverModel,
   UxTestDocument,
   TaskDocument,
   ProjectDocument,
   GscSearchTermMetrics,
   FeedbackDocument,
   FeedbackComment,
+  CallsByTopic,
 } from '@dua-upd/db';
 
 export interface ViewData<T> {
@@ -184,6 +186,7 @@ export interface TaskDetailsMetrics {
   gscTotalCtr: number;
   gscTotalPosition: number;
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
+  callsByTopic: CallsByTopic[];
 }
 
 export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
@@ -289,12 +292,4 @@ export interface CalldriversTableRow {
   enquiry_line: string;
   currValue: number;
   prevValue: number;
-}
-
-export interface CallsByTopic {
-  tpc_id: string;
-  topic: string;
-  subtopic: string;
-  sub_subtopic: string;
-  calls: number;
 }

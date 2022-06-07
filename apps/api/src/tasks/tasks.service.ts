@@ -3,26 +3,27 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
 import {
+  CallDriver,
   Feedback,
-  FeedbackDocument,
   PageMetrics,
   Project,
   Task,
   UxTest,
 } from '@dua-upd/db';
-import { CallDriver } from '@dua-upd/types-common';
 import type {
   CallDriverDocument,
+  CallDriverModel,
+  FeedbackDocument,
   ProjectDocument,
   PageMetricsModel,
   TaskDocument,
   TaskDetailsData,
   TasksHomeData,
+  TasksHomeAggregatedData,
   TaskDetailsAggregatedData,
   UxTestDocument,
 } from '@dua-upd/types-common';
 import type { ApiParams } from '@dua-upd/upd/services';
-import { TasksHomeAggregatedData } from '@dua-upd/types-common';
 import {
   getAvgSuccessFromLastTests,
   getFeedbackComments,
@@ -40,7 +41,7 @@ export class TasksService {
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
     @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>,
     @InjectModel(CallDriver.name)
-    private calldriversModel: Model<CallDriverDocument>,
+    private calldriversModel: CallDriverModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -252,7 +253,7 @@ export class TasksService {
 
 async function getTaskAggregatedData(
   pageMetricsModel: PageMetricsModel,
-  calldriversModel: Model<CallDriverDocument>,
+  calldriversModel: CallDriverModel,
   feedbackModel: Model<FeedbackDocument>,
   dateRange: string,
   pageUrls: string[],
@@ -275,7 +276,7 @@ async function getTaskAggregatedData(
     .aggregate<TaskDetailsAggregatedData>()
     .sort({ date: -1, url: 1 })
     .match({
-      date: { $gte: startDate, $lte: endDate },
+      date: dateQuery,
       url: { $in: pageUrls },
     })
     .group({
@@ -326,32 +327,27 @@ async function getTaskAggregatedData(
     .project({ _id: 0 })
     .exec();
 
-  const calldriversEnquiry = await calldriversModel
-    .aggregate<{ enquiry_line: string; calls: number }>()
-    .match({
-      tpc_id: { $in: calldriversTpcId },
-      date: dateQuery,
-    })
-    .project({
-      _id: 0,
-      enquiry_line: 1,
-      calls: 1,
-    })
-    .group({
-      _id: '$enquiry_line',
-      calls: { $sum: '$calls' },
-    })
-    .project({
-      _id: 0,
-      calls: 1,
-      enquiry_line: '$_id',
-    })
-    .sort({ enquiry_line: 'asc' })
+  const calldriverDocs = await calldriversModel
+    .find(
+      {
+        tpc_id: calldriversTpcId,
+        date: dateQuery,
+      },
+      { _id: 1 }
+    )
+    .lean()
     .exec();
+
+  const documentIds = calldriverDocs.map(({ _id }) => _id);
+
+  const calldriversEnquiry = await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
+
+  const callsByTopic = await calldriversModel.getCallsByTopicFromIds(documentIds);
 
   return {
     ...results[0],
     calldriversEnquiry,
+    callsByTopic,
     feedbackByTags,
   };
 }
