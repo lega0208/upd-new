@@ -70,6 +70,10 @@ export class ProjectsDetailsFacade {
     map((data) => data?.dateFromLastTest)
   );
 
+  totalCalldriver$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.dateRangeData?.totalCalldrivers || 0)
+  );
+
   projectTasks$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,
@@ -106,6 +110,10 @@ export class ProjectsDetailsFacade {
 
   visitsByPageFeedbackWithPercentChange$ = this.projectsDetailsData$.pipe(
     mapPageMetricsArraysWithPercentChange('visitsByPage', 'dyfNo')
+  );
+
+  totalCalldriverPercentChange$ = this.projectsDetailsData$.pipe(
+    mapToPercentChange('totalCalldrivers')
   );
 
   calldriversChart$ = combineLatest([

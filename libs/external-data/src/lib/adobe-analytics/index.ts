@@ -3,6 +3,7 @@ import utc from 'dayjs/plugin/utc';
 import { Overall, PageMetrics } from '@dua-upd/db';
 import { AnalyticsCoreAPI, getAAClient } from './client';
 import {
+  createCXTasksQuery,
   createExamplePageBreakdownMetricsQuery,
   createOverallMetricsQuery,
   createPageMetricsQuery,
@@ -80,24 +81,21 @@ export class AdobeAnalyticsClient {
     options?: {
       settings?: ReportSettings;
       search?: ReportSearch;
-      postProcess?: (
-        data: Partial<PageMetrics[]>
-      ) => unknown | void;
+      postProcess?: (data: Partial<PageMetrics[]>) => unknown | void;
     }
   ): Promise<Partial<PageMetrics[]>[]> {
     if (!this.client) {
       await this.initClient();
     }
     const dateRanges = datesFromDateRange(dateRange, queryDateFormat)
-      .map(
-        (date) => ({
-          start: date,
-          end: dayjs.utc(date).add(1, 'day').format(queryDateFormat),
-        })
-      )
+      .map((date) => ({
+        start: date,
+        end: dayjs.utc(date).add(1, 'day').format(queryDateFormat),
+      }))
       .filter(
         (dateRange) =>
-          dayjs.utc(dateRange.start).startOf('day') !== dayjs.utc().startOf('day')
+          dayjs.utc(dateRange.start).startOf('day') !==
+          dayjs.utc().startOf('day')
       );
     const promises = [];
 
@@ -125,7 +123,11 @@ export class AdobeAnalyticsClient {
 
                 return rowValues;
               },
-              { date, url: row.value, aa_item_id: row.itemId } as Partial<PageMetrics>
+              {
+                date,
+                url: row.value,
+                aa_item_id: row.itemId,
+              } as Partial<PageMetrics>
             );
 
             return [...parsedResults, newPageMetricsData];
@@ -134,8 +136,13 @@ export class AdobeAnalyticsClient {
 
       if (options?.postProcess) {
         promises.push(
-          promise.then(options.postProcess)
-            .then((data) => console.log(`Successfully inserted data for ${data?.modifiedCount} pages`))
+          promise
+            .then(options.postProcess)
+            .then((data) =>
+              console.log(
+                `Successfully inserted data for ${data?.modifiedCount} pages`
+              )
+            )
         );
       } else {
         promises.push(promise);
@@ -145,6 +152,54 @@ export class AdobeAnalyticsClient {
     }
 
     return await Promise.all(promises);
+  }
+
+  async getOverallCXMetrics(
+    dateRange: DateRange,
+    options: ReportSettings = {}
+  ): Promise<Partial<Overall>[]> {
+    if (!this.client) {
+      await this.initClient();
+    }
+
+    options = {
+      limit: 400,
+      ...options,
+    };
+
+    const overallMetricsCXQuery = createCXTasksQuery(dateRange, options);
+
+    const results = await this.client.getReport(overallMetricsCXQuery);
+
+    // todo: should probably handle results having more than 1 "page" (i.e. paginated results)
+    const { columnIds } = results.body.columns;
+
+    return (
+      results.body.rows
+        // need to filter out extra day from bouncerate bug
+        .filter(({ value }) => {
+          const rowDate = dayjs(value).utc(true).toDate();
+          const startDate = dayjs(dateRange.start).utc(true).toDate();
+
+          return rowDate >= startDate;
+        })
+        .reduce((parsedResults, row) => {
+          // reformat date to iso string and convert to Date object
+          const date = dayjs(row.value).utc(true).toDate();
+
+          // build up results object using columnIds as keys
+          const newDailyData = row.data.reduce(
+            (rowValues, value, index) => {
+              const columnId = columnIds[index];
+              rowValues[columnId] = value;
+              return rowValues;
+            },
+            { date } as Partial<Overall>
+          );
+
+          return [...parsedResults, newDailyData];
+        }, [] as Partial<Overall>[])
+    );
   }
 
   async getExamplePageBreakdownMetrics(dateRange: DateRange): Promise<any[]> {

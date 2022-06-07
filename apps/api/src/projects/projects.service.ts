@@ -476,10 +476,13 @@ async function getAggregatedProjectMetrics(
 
   const callsByTopic = await calldriversModel.getCallsByTopicFromIds(documentIds);
 
+  const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
+
   return {
     ...projectMetrics,
     calldriversEnquiry,
     callsByTopic,
+    totalCalldrivers,
     feedbackByTags,
   };
 }

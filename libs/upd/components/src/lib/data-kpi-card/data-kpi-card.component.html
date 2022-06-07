@@ -1,11 +1,15 @@
-<upd-card [title]="title" [titleTooltip]="tooltip">
-  <ng-container *ngIf="numUxTests === 0; else elseBlock">
+<upd-card [title]="title" [titleTooltip]="tooltip" [h]="100">
+  <ng-container
+    *ngIf="numUxTests === 0 || (comparison$ | async) === 0; else elseBlock"
+  >
     <div class="container-fluid p-0">
       <div class="row row-no-gutters">
         <div class="col">
-          <p class="w-100" *ngIf="project; else elseBlock2">{{'tasks-not-tested' | translate }}</p>
+          <p class="w-100" *ngIf="project; else elseBlock2">
+            {{ 'tasks-not-tested' | translate }}
+          </p>
           <ng-template #elseBlock2>
-            <p class="w-100">{{'task-not-tested' | translate }}</p>
+            <p class="w-100">{{ 'task-not-tested' | translate }}</p>
           </ng-template>
         </div>
       </div>
@@ -16,28 +20,31 @@
       <div class="row row-no-gutters">
         <div class="col">
           <p class="h3 w-100">
-            {{ comparison | percent : undefined : i18n.currentLang }}
+            {{ comparisonFormatted$ | async }}
           </p>
           <p>
-            <ng-container *ngIf="date">({{'Last UX test date:' | translate}} {{ date | date:'mediumDate' : '' :  i18n.currentLang }})</ng-container>
+            <ng-container *ngIf="(dateFormatted$ | async) && type !== 'volume'"
+              >({{ 'Last UX test date:' | translate }}
+              {{ dateFormatted$ | async }})</ng-container
+            >
           </p>
+        </div>
+        <div *ngIf="type === 'volume'" class="col ml-auto">
+          <span [ngClass]="differenceClass" class="h3 float-end">
+            <span *ngIf="differenceArrow" class="material-icons">{{
+              differenceArrow
+            }}</span>
+            {{ differenceFormatted$ | async }}
+          </span>
         </div>
       </div>
       <div class="row row-no-gutters">
         <div class="col">
           <p class="w-100 mb-0 mt-2">
-            <ng-container *ngIf="comparison < 0.8; else elseBlock">
-              <span class="text-danger text-nowrap align-middle"
-                ><span class="material-icons">warning</span></span
-              >
-              {{'kpi-not-met' | translate}}
-            </ng-container>
-            <ng-template #elseBlock>
-              <span class="text-success text-nowrap"
-                ><span class="material-icons">check_circle</span></span
-              >
-              {{'kpi-met' | translate}}
-            </ng-template>
+            <span [ngClass]="comparisonClass" class="text-nowrap"
+              ><span class="material-icons">{{ comparisonIcon }}</span></span
+            >
+            {{ kpi | translate }}
           </p>
         </div>
       </div>

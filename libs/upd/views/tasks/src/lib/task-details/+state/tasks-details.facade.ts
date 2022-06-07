@@ -94,6 +94,22 @@ export class TasksDetailsFacade {
     })
   );
 
+  documents$ = this.tasksDetailsData$.pipe(
+    map((data) =>
+      data?.taskSuccessByUxTest
+        .map((d) => {
+          return d.attachments.map((a) => {
+            const url = a.url.replace('https://', '');
+            return {
+              filename: a.filename,
+              url: url,
+            };
+          });
+        })
+        .flat()
+    )
+  );
+
   dateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,

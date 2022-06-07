@@ -6,9 +6,18 @@ import { EN_CA } from '@dua-upd/upd/i18n';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
-type ParticipantTasksColTypes = GetTableProps<ProjectDetailsSummaryComponent, 'participantTasks$'>
-type DyfTableColTypes = GetTableProps<ProjectDetailsSummaryComponent, 'dyfChart$'>
-type WhatWasWrongColTypes = GetTableProps<ProjectDetailsSummaryComponent, 'whatWasWrongChart$'>
+type ParticipantTasksColTypes = GetTableProps<
+  ProjectDetailsSummaryComponent,
+  'participantTasks$'
+>;
+type DyfTableColTypes = GetTableProps<
+  ProjectDetailsSummaryComponent,
+  'dyfChart$'
+>;
+type WhatWasWrongColTypes = GetTableProps<
+  ProjectDetailsSummaryComponent,
+  'whatWasWrongChart$'
+>;
 
 @Component({
   selector: 'upd-project-details-summary',
@@ -33,7 +42,14 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   dyfChart$ = this.projectsDetailsService.dyfData$;
   whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
 
-  constructor(private readonly projectsDetailsService: ProjectsDetailsFacade, private i18n: I18nFacade) {}
+  totalCalldriver$ = this.projectsDetailsService.totalCalldriver$;
+  totalCalldriverPercentChange$ =
+    this.projectsDetailsService.totalCalldriverPercentChange$;
+
+  constructor(
+    private readonly projectsDetailsService: ProjectsDetailsFacade,
+    private i18n: I18nFacade
+  ) {}
 
   participantTasksCols: ColumnConfig<ParticipantTasksColTypes>[] = [];
   dyfTableCols: ColumnConfig<DyfTableColTypes>[] = [];
@@ -52,15 +68,26 @@ export class ProjectDetailsSummaryComponent implements OnInit {
           header: this.i18n.service.translate('Task list', lang),
           type: 'link',
           typeParams: { preLink: '/' + this.langLink + '/tasks', link: '_id' },
-        }
+        },
       ];
       this.dyfTableCols = [
-        { field: 'name', header: this.i18n.service.translate('Selection', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'name',
+          header: this.i18n.service.translate('Selection', lang),
+        },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
       this.whatWasWrongTableCols = [
         { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        { field: 'value', header: this.i18n.service.translate('visits', lang), pipe: 'number' }
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
       ];
     });
   }

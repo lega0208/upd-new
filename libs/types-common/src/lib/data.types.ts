@@ -1,5 +1,5 @@
 import { FeedbackComment, Page, PageMetrics, Task, UxTest } from '@dua-upd/db';
-import type { GscSearchTermMetrics, CallsByTopic } from '@dua-upd/db';
+import type { GscSearchTermMetrics, AttachmentData, CallsByTopic } from '@dua-upd/db';
 
 export {
   Page,
@@ -187,6 +187,7 @@ export interface TaskDetailsMetrics {
   gscTotalPosition: number;
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
+  totalCalldrivers: number;
 }
 
 export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
@@ -204,6 +205,8 @@ export interface TaskDetailsData
     test_type: string;
     success_rate: number | null;
     total_users: number;
+    scenario: string;
+    attachments: AttachmentData[];
   }[];
   projects: {
     id: string;
@@ -267,6 +270,7 @@ export interface ProjectDetailsAggregatedData {
   feedbackByTags: { tag: string; numComments: number }[];
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
+  totalCalldrivers: number;
 }
 
 export interface ProjectsDetailsData

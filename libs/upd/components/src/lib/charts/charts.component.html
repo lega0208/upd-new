@@ -5,7 +5,8 @@
 >
   <ng-container *ngIf="!hasData; else elseBlock">
     <p>
-      <!-- {{ title | translate }}--> <span [translate]="'nodata-available'"></span> 
+      <!-- {{ title | translate }}-->
+      <span [translate]="'nodata-available'"></span>
     </p>
   </ng-container>
   <ng-template #elseBlock>
@@ -118,6 +119,7 @@
               (select)="onSelect($event)"
             >
               <!-- <ng-template #seriesTooltipTemplate let-model="model">
+                {{ model | json }}
               <div class="area-tooltip-container">
             <div *ngFor="let tooltip of model;  let i = index" class="tooltip-item">
               <span class="tooltip-item-color" [style.background-color]="tooltip.color"></span>
@@ -149,7 +151,7 @@
                     class="tooltip-item-color"
                     [style.background-color]="tooltip.color"
                   ></span>
-                  {{ tooltip.label }}
+
                   {{ tooltip.series }}: {{ tooltip.value.toLocaleString(lang) }}
                 </div>
               </ng-template>
@@ -197,7 +199,9 @@
             <ng-template #tooltipTemplate let-model="model">
               <span class="tooltip-label"
                 >{{ model.series }} • {{ model.name }} •
-                {{dayjs(model.date).utc(false).locale(lang).format('MMM DD') }}</span
+                {{
+                  dayjs(model.date).utc(false).locale(lang).format('MMM DD')
+                }}</span
               >
               <span class="tooltip-val">{{
                 model.value | percent: '1.0':lang
@@ -205,8 +209,8 @@
             </ng-template>
             <ng-template #seriesTooltipTemplate let-model="model">
               <span class="tooltip-header">
-              {{ model[0].name }}
-            </span>
+                {{ model[0].name }}
+              </span>
               <div
                 *ngFor="let tooltip of model; let i = index"
                 class="tooltip-item"
@@ -217,7 +221,10 @@
                 ></span>
                 {{ tooltip.label }}
                 {{ tooltip.series }}: ({{
-                  dayjs(tooltip.extra.date).utc(false).locale(lang).format('MMM DD')
+                  dayjs(tooltip.extra.date)
+                    .utc(false)
+                    .locale(lang)
+                    .format('MMM DD')
                 }}) {{ tooltip.value | percent: '1.0':lang }}
               </div>
             </ng-template>
