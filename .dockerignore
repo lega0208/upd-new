@@ -6,3 +6,4 @@ apps
 libs
 tools
 tmp
+docker/certbot/conf/keys

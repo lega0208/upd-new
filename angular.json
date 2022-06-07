@@ -15,6 +15,7 @@
     "upd-i18n": "libs/upd/i18n",
     "upd-services": "libs/upd/services",
     "upd-state": "libs/upd/state",
+    "upd-utils": "libs/upd/utils",
     "upd-views-overview": "libs/upd/views/overview",
     "upd-views-pages": "libs/upd/views/pages",
     "upd-views-projects": "libs/upd/views/projects",
