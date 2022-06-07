@@ -117,23 +117,19 @@ export const createPageMetricsQuery = (
 // top Tasks
 export const createCXTasksQuery = (
   dateRange: DateRange,
-  options: { settings?: ReportSettings; search?: ReportSearch } = {}
+  settings: ReportSettings = {}
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
   const querySettings = {
     nonesBehavior: 'return-nones',
     countRepeatInstances: true,
-    ...options.settings,
+    ...settings,
   };
 
-  if (options.search) {
-    queryBuilder.setSearch(options.search);
-  }
-
   return queryBuilder
-  .setDimension('variables/evar90.4')
-    .setMetrics({tasks: 'metrics/event110'} as MetricsConfig)
+    .setDimension('variables/evar90.4')
+    .setMetrics({ visits: 'metrics/event110' } as MetricsConfig)
     .setGlobalFilters([
       { type: 'segment', segmentId: SEGMENTS.CX_TASKS },
       { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },

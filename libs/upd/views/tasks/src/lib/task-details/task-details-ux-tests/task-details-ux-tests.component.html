@@ -2,8 +2,8 @@
   <div class="row">
     <div class="col-lg-6 col-sm-12">
       <upd-data-kpi-card
-        [comparison]="(avgTaskSuccessFromLastTest$ | async) || 0"
-        [date]="(dateFromLastTest$ | async) || ''"
+        [comparison$]="avgTaskSuccessFromLastTest$ || 0"
+        [date$]="dateFromLastTest$ || ''"
         [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
         [title]="'Average task success from last UX test'"
       ></upd-data-kpi-card>
@@ -51,13 +51,17 @@
   </div>
 </div>
 
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <upd-card
+      <upd-data-table-card
+        [data]="(documents$ | async) || []"
+        [cols]="documentsCols"
+        [sort]="false"
+        [pagination]="false"
+        [filter]="false"
         [title]="'Documents'"
-      >
-      </upd-card>
+      ></upd-data-table-card>
     </div>
   </div>
-</div> -->
+</div>

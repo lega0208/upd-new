@@ -47,7 +47,7 @@ export interface UxTestData {
   launch_date?: Date;
   status?: string;
   cops?: boolean;
-  attachments?: AttachmentData;
+  attachments?: AttachmentData[];
 }
 
 export interface AttachmentData {

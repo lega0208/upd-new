@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, debounceTime, map, mergeMap, of } from 'rxjs';
 
-import dayjs from 'dayjs/esm';
+import dayjs, { QUnitType } from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import isSameOrBefore from 'dayjs/esm/plugin/isSameOrBefore';
 import quarterOfYear from 'dayjs/esm/plugin/quarterOfYear';
@@ -253,7 +253,7 @@ export class OverviewFacade {
         data?.comparisonDateRangeData?.visitsByDay || [];
 
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
-      const dateSelection = dateRangePeriod.replace('ly', '');
+      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
 
       const isCurrZero = visitsByDay?.every((v) => v.visits === 0);
       const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
@@ -277,8 +277,9 @@ export class OverviewFacade {
       );
 
       const comparisonDateRangeSeries = comparisonVisitsByDay.map(
-        ({ visits }) => ({
+        ({ date, visits }) => ({
           name: comparisonDateRangeLabel,
+          date: date,
           value: visits || 0,
         })
       );
@@ -307,6 +308,8 @@ export class OverviewFacade {
           value: prevVisits,
         };
       });
+
+      console.log(visitsByDaySeries)
 
       if (dateRangePeriod !== 'weekly' && dateRangePeriod !== 'monthly') {
         visitsByDayData = [
@@ -362,14 +365,15 @@ export class OverviewFacade {
       const visitsByDay = data?.dateRangeData?.visitsByDay || [];
 
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
-      const dateSelection = dateRangePeriod.replace('ly', '');
+      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
 
       let cntPrevCalls = 0,
         cntCurrCalls = 0;
 
       const callDriversByDay = visitsByDay.map((data, i) => {
         let calls = 0,
-          prevCalls = 0;
+          prevCalls = 0,
+          prevDate = new Date();
 
         if (calldriversByDay.find((d) => d.date === data.date)) {
           calls = calldriversByDay[cntCurrCalls].calls;
@@ -386,10 +390,13 @@ export class OverviewFacade {
           )
         ) {
           prevCalls = comparisonCalldriversByDay[cntPrevCalls].calls;
+          prevDate = comparisonCalldriversByDay[cntPrevCalls].date;
           cntPrevCalls++;
         }
         return {
           name: dayjs.utc(data.date).locale(lang).format(dateFormat),
+          currDate: data.date,
+          prevDate: prevDate,
           currValue: calls,
           prevValue: prevCalls,
         };
@@ -399,6 +406,16 @@ export class OverviewFacade {
         return {
           name: data.name,
           value: data.currValue,
+          extra: {
+            current: dayjs
+              .utc(data.currDate)
+              .locale(lang)
+              .format('YYYY-MM-DD'),
+            previous: dayjs
+              .utc(data.prevDate)
+              .locale(lang)
+              .format('YYYY-MM-DD'),
+          },
         };
       });
 
@@ -461,6 +478,7 @@ export class OverviewFacade {
     map(([dateRangePeriod, bar, calls]) => {
       const isOver =
         dateRangePeriod !== 'weekly' && dateRangePeriod !== 'monthly' ? 1 : 0;
+      console.log(isOver)
       if (!isOver) return;
 
       return [...bar, ...calls];
@@ -569,17 +587,8 @@ export class OverviewFacade {
         data?.comparisonDateRangeData?.calldriversByDay || [];
 
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
-      const dateSelection = dateRangePeriod.replace('ly', '');
-
-      const days = visitsByDay?.length || 0;
-      const prevDays = comparisonVisitsByDay?.length || 0;
-      const maxDays = Math.max(days, prevDays);
-
-      let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
-      let [prevStartDate] = (data.comparisonDateRange || '')
-        .split('/')
-        .map((d) => new Date(d));
-
+      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
+      
       if (!visitsByDay) {
         return [] as MultiSeries;
       }

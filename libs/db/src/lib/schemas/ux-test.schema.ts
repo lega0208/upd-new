@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types } from 'mongoose';
+import { AttachmentData } from './types';
 import { Page } from './page.schema';
 import { Project } from './project.schema';
 import { Task } from './task.schema';
@@ -76,6 +77,9 @@ export class UxTest {
 
   @Prop({ type: Boolean })
   cops?: boolean;
+
+  @Prop({ type: [{ id: String, url: String, filename: String }] })
+  attachments?: AttachmentData[];
 }
 
 export const UxTestSchema = SchemaFactory.createForClass(UxTest);

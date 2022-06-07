@@ -494,7 +494,8 @@ async function getAggregatedProjectMetrics(
     .sort({ enquiry_line: 'asc' })
     .exec();
 
-  const callsByTopic = await calldriversModel.aggregate<CallsByTopic>()
+  const callsByTopic = await calldriversModel
+    .aggregate<CallsByTopic>()
     .match({
       _id: { $in: documentIds },
     })
@@ -521,11 +522,13 @@ async function getAggregatedProjectMetrics(
       sub_subtopic: 1,
       calls: 1,
     });
+  const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
   return {
     ...projectMetrics,
     calldriversEnquiry,
     callsByTopic,
+    totalCalldrivers: totalCalldrivers,
     feedbackByTags,
   };
 }

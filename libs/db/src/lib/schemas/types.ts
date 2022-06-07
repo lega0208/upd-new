@@ -1,4 +1,3 @@
-
 export type AccumulatorOperator =
   | '$accumulator'
   | '$addToSet'
@@ -15,11 +14,11 @@ export type AccumulatorOperator =
   | '$sum';
 
 export interface GscSearchTermMetrics {
-  term: string,
-  clicks: number,
-  ctr: number,
-  impressions: number,
-  position: number,
+  term: string;
+  clicks: number;
+  ctr: number;
+  impressions: number;
+  position: number;
 }
 
 export interface FeedbackComment {
@@ -28,4 +27,10 @@ export interface FeedbackComment {
   tag: string;
   whats_wrong: string;
   comment: string;
+}
+
+export interface AttachmentData {
+  id: string;
+  url: string;
+  filename: string;
 }
