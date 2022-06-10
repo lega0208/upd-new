@@ -3,6 +3,7 @@
   "projectType": "application",
   "targets": {
     "build": {
+      "defaultConfiguration": "production",
       "executor": "@nrwl/node:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -24,6 +25,7 @@
             "mongoose"
           ],
           "inspect": false,
+          "webpackConfig": ["apps/db-cli/webpack.config.js"],
           "fileReplacements": [
             {
               "replace": "apps/api/src/environments/environment.ts",
