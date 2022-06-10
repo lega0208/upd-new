@@ -79,7 +79,7 @@
 <ng-container *ngIf="!hasType && !hasPipe">
   {{
     config.translate
-      ? (data[config.field].toString() | translate: undefined:currentLang)
+      ? (data[config.field]?.toString() || '' | translate:undefined:currentLang)
       : data[config.field]
   }}
 </ng-container>

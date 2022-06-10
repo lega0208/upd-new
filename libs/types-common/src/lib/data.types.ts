@@ -1,31 +1,10 @@
-import { FeedbackComment, Page, PageMetrics, Task, UxTest } from '@dua-upd/db';
-import type { GscSearchTermMetrics, AttachmentData, CallsByTopic } from '@dua-upd/db';
-
-export {
-  Page,
-  PageMetrics,
-  Overall,
-  CallDriver,
-  UxTest,
-  Task,
-  Project,
-  Feedback,
-} from '@dua-upd/db';
-
-export type {
-  PageDocument,
-  PageMetricsDocument,
-  PageMetricsModel,
-  OverallDocument,
-  CallDriverDocument,
-  CallDriverModel,
-  UxTestDocument,
-  TaskDocument,
-  ProjectDocument,
-  GscSearchTermMetrics,
-  FeedbackDocument,
-  FeedbackComment,
+import { Page, PageMetrics, Task, UxTest } from '@dua-upd/db';
+import type {
+  AttachmentData,
   CallsByTopic,
+  FeedbackComment,
+  GscSearchTermMetrics,
+  TopCalldriverTopics,
 } from '@dua-upd/db';
 
 export interface ViewData<T> {
@@ -161,6 +140,9 @@ export interface OverviewData
   extends ViewData<OverviewAggregatedData>,
     OverviewUxData {
   projects?: OverviewProjectData;
+  top5CalldriverTopics: TopCalldriverTopics[];
+  top5IncreasedCalldriverTopics: TopCalldriverTopics[];
+  top5DecreasedCalldriverTopics: TopCalldriverTopics[];
 }
 
 export interface TasksHomeAggregatedData {

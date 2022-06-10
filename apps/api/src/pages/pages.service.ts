@@ -1,19 +1,23 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cache } from 'cache-manager';
-import { Feedback, FeedbackModel, MetricsConfig } from '@dua-upd/db';
+import { Model, Types } from 'mongoose';
 import {
-  Page,
-  PageAggregatedData,
-  PageDocument,
-  PageDetailsData,
-  PageMetrics,
-  PagesHomeData,
+  Feedback,
+  FeedbackModel,
   GscSearchTermMetrics,
+  MetricsConfig,
+  Page,
+  PageDocument,
+  PageMetrics,
+  PageMetricsModel,
+} from '@dua-upd/db';
+import {
+  PageAggregatedData,
+  PageDetailsData,
+  PagesHomeData,
   PagesHomeAggregatedData,
 } from '@dua-upd/types-common';
-import type { PageMetricsModel } from '@dua-upd/types-common';
-import { Model, Types } from 'mongoose';
 import { ApiParams } from '@dua-upd/upd/services';
 
 @Injectable()

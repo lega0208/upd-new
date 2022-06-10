@@ -24,14 +24,15 @@
   </div>
 </div>
 
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [data]="charts"
-        [cols]="chartsCols"
+        [data]="(top5CalldriverTopics$ | async) || []"
+        [cols]="(top5CalldriverTopicsConfig$ | async) || []"
         [filter]="false"
         [pagination]="false"
+        [sort]="false"
         [title]="'top5-call-drivers'"
       >
       </upd-data-table-card>
@@ -43,10 +44,11 @@
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [data]="charts"
-        [cols]="chartsCols"
+        [data]="(top5IncreasedCalldriverTopics$ | async) || []"
+        [cols]="(top5IncreasedCalldriverTopicsConfig$ | async) || []"
         [filter]="false"
         [pagination]="false"
+        [sort]="false"
         [title]="'top5-call-drivers-increase'"
       >
       </upd-data-table-card>
@@ -58,13 +60,14 @@
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [data]="charts"
-        [cols]="chartsCols"
+        [data]="(top5DecreasedCalldriverTopics$ | async) || []"
+        [cols]="(top5DecreasedCalldriverTopicsConfig$ | async) || []"
         [filter]="false"
         [pagination]="false"
+        [sort]="false"
         [title]="'top5-call-drivers-decrease'"
       >
       </upd-data-table-card>
     </div>
   </div>
-</div> -->
+</div>

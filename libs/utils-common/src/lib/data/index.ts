@@ -1,5 +1,5 @@
 import { Model } from 'mongoose';
-import { FeedbackComment, FeedbackDocument, UxTest } from '@dua-upd/types-common';
+import { FeedbackComment, FeedbackDocument, UxTest } from '@dua-upd/db';
 import { dateRangeSplit } from '../date';
 
 /**
@@ -110,54 +110,3 @@ export function getAvgSuccessFromLastTests(uxTests: Partial<UxTest>[]) {
   return getAvgTestSuccess(allTests);
 }
 
-/**
- *
- * @param dateRange
- * @param pageUrls
- * @param feedbackModel
- */
-export async function getFeedbackComments(
-  dateRange: string,
-  pageUrls: string[],
-  feedbackModel: Model<FeedbackDocument>
-): Promise<FeedbackComment[]> {
-  const [startDate, endDate] = dateRangeSplit(dateRange);
-
-  return (
-    (await feedbackModel.find({
-      url: { $in: pageUrls },
-      date: { $gte: startDate, $lte: endDate },
-    })) || []
-  ).map((feedback) => ({
-    date: feedback.date,
-    url: feedback.url,
-    tag: feedback.tags?.length ? feedback.tags[0] : '',
-    whats_wrong: feedback.whats_wrong || '',
-    comment: feedback.comment,
-  }));
-}
-
-export async function getFeedbackByTags(
-  dateRange: string,
-  urls: string[],
-  feedbackModel: Model<FeedbackDocument>
-) {
-  const [startDate, endDate] = dateRangeSplit(dateRange);
-
-  return feedbackModel
-    .aggregate<{ tag: string; numComments: number }>()
-    .match({
-      url: { $in: urls },
-      date: { $gte: startDate, $lte: endDate },
-    })
-    .unwind('$tags')
-    .group({
-      _id: '$tags',
-      numComments: { $sum: 1 },
-    })
-    .project({
-      _id: 0,
-      tag: '$_id',
-      numComments: 1,
-    });
-}

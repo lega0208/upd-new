@@ -4,32 +4,29 @@ import { FilterQuery, Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
 import {
   CallDriver,
+  CallDriverModel,
   Feedback,
+  FeedbackDocument, FeedbackModel,
   PageMetrics,
+  PageMetricsModel,
   Project,
+  ProjectDocument,
   Task,
+  TaskDocument,
   UxTest,
+  UxTestDocument
 } from '@dua-upd/db';
 import type {
-  CallDriverDocument,
-  CallDriverModel,
-  FeedbackDocument,
-  ProjectDocument,
-  PageMetricsModel,
-  TaskDocument,
   TaskDetailsData,
   TasksHomeData,
   TasksHomeAggregatedData,
   TaskDetailsAggregatedData,
-  UxTestDocument,
 } from '@dua-upd/types-common';
 import type { ApiParams } from '@dua-upd/upd/services';
 import {
   getAvgSuccessFromLastTests,
-  getFeedbackComments,
   getLatestTest,
   dateRangeSplit,
-  getFeedbackByTags,
 } from '@dua-upd/utils-common';
 
 @Injectable()
@@ -39,7 +36,7 @@ export class TasksService {
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>,
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
-    @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>,
+    @InjectModel(Feedback.name) private feedbackModel: FeedbackModel,
     @InjectModel(CallDriver.name)
     private calldriversModel: CallDriverModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
@@ -235,14 +232,15 @@ export class TasksService {
           return 0;
         });
 
+      // *** @@@
+      // move functions to uxTests statics
       returnData.dateFromLastTest = getLatestTest(uxTests)?.date || null;
       returnData.avgTaskSuccessFromLastTest =
         getAvgSuccessFromLastTests(uxTests);
 
-      returnData.feedbackComments = await getFeedbackComments(
+      returnData.feedbackComments = await this.feedbackModel.getComments(
         params.dateRange,
         taskUrls,
-        this.feedbackModel
       );
     }
 
@@ -255,15 +253,14 @@ export class TasksService {
 async function getTaskAggregatedData(
   pageMetricsModel: PageMetricsModel,
   calldriversModel: CallDriverModel,
-  feedbackModel: Model<FeedbackDocument>,
+  feedbackModel: FeedbackModel,
   dateRange: string,
   pageUrls: string[],
   calldriversTpcId: number[]
 ): Promise<TaskDetailsAggregatedData> {
-  const feedbackByTags = await getFeedbackByTags(
+  const feedbackByTags = await feedbackModel.getCommentsByTag(
     dateRange,
-    pageUrls,
-    feedbackModel
+    pageUrls
   );
 
   const [startDate, endDate] = dateRangeSplit(dateRange);

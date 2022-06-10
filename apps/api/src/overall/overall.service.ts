@@ -4,10 +4,10 @@ import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import {
   CallDriver,
-  CallDriverDocument,
+  CallDriverModel,
   Overall,
   OverallDocument,
   Project,
@@ -19,11 +19,11 @@ import {
   Feedback,
   FeedbackDocument,
   PageMetrics,
+  PageMetricsModel,
   Page,
   PageDocument,
 } from '@dua-upd/db';
 import type {
-  PageMetricsModel,
   ProjectsHomeData,
   OverviewAggregatedData,
   OverviewData,
@@ -83,7 +83,7 @@ export class OverallService {
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>,
     @InjectModel(CallDriver.name)
-    private calldriversModel: Model<CallDriverDocument>,
+    private calldriversModel: CallDriverModel,
     @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
@@ -102,6 +102,23 @@ export class OverallService {
     const testsSince2018 = await this.uxTestModel.find({
       date: { $gte: new Date('2018-01-01') },
     });
+
+    const topCalldriverTopics =
+      await this.calldriversModel.getTopicsWithPercentChange(
+        params.dateRange,
+        params.comparisonDateRange
+      );
+
+    const top5CalldriverTopics = topCalldriverTopics.slice(0, 5);
+
+    const top5IncreasedCalldriverTopics = topCalldriverTopics
+      .sort((a, b) => Number(b.change) - Number(a.change))
+      .slice(0, 5);
+
+    const top5DecreasedCalldriverTopics = topCalldriverTopics
+      .filter((topic) => topic.change < 0)
+      .sort((a, b) => Number(a.change) - Number(b.change))
+      .slice(0, 5);
 
     const results = {
       dateRange: params.dateRange,
@@ -126,6 +143,9 @@ export class OverallService {
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
       ...(await getUxData(testsSince2018)),
+      top5CalldriverTopics,
+      top5IncreasedCalldriverTopics,
+      top5DecreasedCalldriverTopics,
     } as OverviewData;
 
     await this.cacheManager.set(cacheKey, results);
@@ -354,7 +374,7 @@ async function getProjects(
 async function getOverviewMetrics(
   overallModel: Model<OverallDocument>,
   PageMetricsModel: PageMetricsModel,
-  calldriversModel: Model<CallDriverDocument>,
+  calldriversModel: CallDriverModel,
   feedbackModel: Model<FeedbackDocument>,
   pageModel: Model<PageDocument>,
   cacheManager: Cache,
@@ -485,11 +505,12 @@ async function getOverviewMetrics(
     })
     .exec();
 
-  let feedbackPages = await feedbackModel
-    .aggregate()
+  const feedbackPages = await feedbackModel
+    .aggregate<{ _id: string; title: string; url: string; sum: number }>()
     .match({
       $and: [
         { date: dateQuery },
+        // todo: remove url filter once there is logic in place to remove non-CRA pages from feedback collection
         {
           url: {
             $regex:
@@ -508,17 +529,21 @@ async function getOverviewMetrics(
       sum: 1,
     })
     .sort({ sum: -1 })
+    .lookup({
+      from: 'pages',
+      localField: 'url',
+      foreignField: 'url',
+      as: 'page',
+    })
+    .unwind('$page')
+    .addFields({
+      _id: '$page._id',
+      title: '$page.title',
+    })
+    .project({
+      page: 0,
+    })
     .exec();
-
-    const pageUrls = await pageModel.find({}, { url: 1, _id: 1, title: 1 }).lean();
-
-    feedbackPages = feedbackPages.map((feedbackPage) => {
-      const pageUrl = pageUrls.find((page) => page.url === feedbackPage.url);
-      return {
-        ...feedbackPage,
-        ...pageUrl,
-      };
-    });
 
   const aggregatedMetrics = await overallModel
     .aggregate<

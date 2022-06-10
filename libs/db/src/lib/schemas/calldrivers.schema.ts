@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types } from 'mongoose';
-import type { CallsByTopic } from './types';
+import type { CallsByTopic, TopCalldriverTopics } from './types';
 
 export type CallDriverDocument = CallDriver & Document;
 
@@ -27,7 +27,7 @@ export class CallDriver {
   @Prop({ type: String })
   sub_subtopic?: string;
 
-  @Prop({ type: Number })
+  @Prop({ type: Number, index: true })
   tpc_id = 999999; // Some records don't have a tpc_id, so they will default to this value
 
   @Prop({ type: Number })
@@ -38,6 +38,8 @@ export class CallDriver {
 }
 
 export const CallDriverSchema = SchemaFactory.createForClass(CallDriver);
+
+CallDriverSchema.index({ date: 1, tpc_id: 1 });
 
 export function getCallDriversModel(): Model<Document<CallDriver>> {
   return model(CallDriver.name, CallDriverSchema);
@@ -101,6 +103,61 @@ CallDriverSchema.statics['getCallsByEnquiryLineFromIds'] = async function (
     .exec();
 };
 
+CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
+  dateRange: string,
+  comparisonDateRange: string,
+  tpcIds?: number[]
+) {
+  const [currentData, previousData] = await Promise.all(
+    [dateRange, comparisonDateRange].map(async (dateRange) => {
+      const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+      const tpcIdsQuery = tpcIds?.length ? { tpc_id: { $in: tpcIds } } : {};
+
+      return this.aggregate<TopCalldriverTopics>()
+        .sort({ date: 1, tpc_id: 1 })
+        .match({ date: { $gte: startDate, $lte: endDate }, ...tpcIdsQuery })
+        .group({
+          _id: '$tpc_id',
+          topic: { $first: '$topic' },
+          subtopic: { $first: '$subtopic' },
+          sub_subtopic: { $first: '$sub_subtopic' },
+          calls: { $sum: '$calls' },
+        })
+        .project({
+          _id: 0,
+          tpc_id: '$_id',
+          topic: 1,
+          subtopic: 1,
+          sub_subtopic: 1,
+          calls: 1,
+        })
+        .exec();
+    })
+  );
+
+  const currentDataMap = new Map(
+    currentData.map((topicData) => [topicData.tpc_id, topicData])
+  );
+  const previousDataMap = new Map(
+    previousData.map((topicData) => [topicData.tpc_id, topicData])
+  );
+
+  return [...currentDataMap.keys()]
+    .map((tpcId) => {
+      const currentData = currentDataMap.get(tpcId);
+      const previousData = previousDataMap.get(tpcId);
+
+      return {
+        ...currentData,
+        change: !previousData?.calls
+          ? 'Infinity'
+          : (currentData?.calls ?? 0 - previousData.calls) / previousData.calls,
+      };
+    })
+    .sort((a, b) => (b.calls ?? 0) - (a.calls ?? 0));
+};
+
 export interface CallDriverModel extends Model<CallDriverDocument> {
   getCallsByTopicFromIds(
     documentIds: Types.ObjectId[]
@@ -108,4 +165,9 @@ export interface CallDriverModel extends Model<CallDriverDocument> {
   getCallsByEnquiryLineFromIds(
     documentIds: Types.ObjectId[]
   ): Promise<{ enquiry_line: string; calls: number }[]>;
+  getTopicsWithPercentChange(
+    dateRange: string,
+    comparisonDateRange: string,
+    tpcIds?: number[]
+  ): Promise<TopCalldriverTopics[]>;
 }

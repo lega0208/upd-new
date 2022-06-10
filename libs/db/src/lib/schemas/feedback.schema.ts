@@ -95,7 +95,10 @@ FeedbackSchema.statics['getComments'] = async function (
 };
 
 export interface FeedbackModel extends Model<FeedbackDocument> {
-  getComments: (dateRange: string, urls: string[]) => Promise<FeedbackComment[]>;
+  getComments: (
+    dateRange: string,
+    urls: string[]
+  ) => Promise<FeedbackComment[]>;
   getCommentsByTag: (
     dateRange: string,
     urls: string[]

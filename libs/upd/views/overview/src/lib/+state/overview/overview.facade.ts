@@ -21,6 +21,7 @@ import {
   selectDatePeriodSelection,
   selectUrl,
 } from '@dua-upd/upd/state';
+import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 
 dayjs.extend(utc);
 dayjs.extend(isSameOrBefore);
@@ -309,7 +310,7 @@ export class OverviewFacade {
         };
       });
 
-      console.log(visitsByDaySeries)
+      console.log(visitsByDaySeries);
 
       if (dateRangePeriod !== 'weekly' && dateRangePeriod !== 'monthly') {
         visitsByDayData = [
@@ -407,10 +408,7 @@ export class OverviewFacade {
           name: data.name,
           value: data.currValue,
           extra: {
-            current: dayjs
-              .utc(data.currDate)
-              .locale(lang)
-              .format('YYYY-MM-DD'),
+            current: dayjs.utc(data.currDate).locale(lang).format('YYYY-MM-DD'),
             previous: dayjs
               .utc(data.prevDate)
               .locale(lang)
@@ -478,7 +476,7 @@ export class OverviewFacade {
     map(([dateRangePeriod, bar, calls]) => {
       const isOver =
         dateRangePeriod !== 'weekly' && dateRangePeriod !== 'monthly' ? 1 : 0;
-      console.log(isOver)
+      console.log(isOver);
       if (!isOver) return;
 
       return [...bar, ...calls];
@@ -588,7 +586,7 @@ export class OverviewFacade {
 
       const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
       const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
-      
+
       if (!visitsByDay) {
         return [] as MultiSeries;
       }
@@ -864,6 +862,66 @@ export class OverviewFacade {
   uxCopsTestsCompleted$ = this.overviewData$.pipe(
     map((data) => data.copsTestsCompletedSince2018)
   );
+
+  top5CalldriverTopics$ = this.overviewData$.pipe(
+    map((data) =>
+      data.top5CalldriverTopics.map((topicData) => ({
+        topic: `${topicData.tpc_id}.topic`,
+        subtopic: `${topicData.tpc_id}.sub-topic`,
+        sub_subtopic: `${topicData.tpc_id}.sub-subtopic`,
+        calls: topicData.calls,
+        change: topicData.change === 'Infinity' ? Infinity : topicData.change,
+      }))
+    )
+  );
+
+  top5CalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
+    { field: 'topic', header: 'topic', translate: true },
+    { field: 'subtopic', header: 'sub-topic', translate: true },
+    { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
+    { field: 'calls', header: 'calls', pipe: 'number' },
+    { field: 'change', header: 'change', pipe: 'percent' },
+  ]);
+
+  top5IncreasedCalldriverTopics$ = this.overviewData$.pipe(
+    map((data) =>
+      data.top5IncreasedCalldriverTopics.map((topicData) => ({
+        topic: `${topicData.tpc_id}.topic`,
+        subtopic: `${topicData.tpc_id}.sub-topic`,
+        sub_subtopic: `${topicData.tpc_id}.sub-subtopic`,
+        calls: topicData.calls,
+        change: topicData.change === 'Infinity' ? Infinity : topicData.change,
+      }))
+    )
+  );
+
+  top5IncreasedCalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
+    { field: 'topic', header: 'topic', translate: true },
+    { field: 'subtopic', header: 'sub-topic', translate: true },
+    { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
+    { field: 'calls', header: 'calls', pipe: 'number' },
+    { field: 'change', header: 'change', pipe: 'percent' },
+  ]);
+
+  top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
+    map((data) =>
+      data.top5DecreasedCalldriverTopics.map((topicData) => ({
+        topic: `${topicData.tpc_id}.topic`,
+        subtopic: `${topicData.tpc_id}.sub-topic`,
+        sub_subtopic: `${topicData.tpc_id}.sub-subtopic`,
+        calls: topicData.calls,
+        change: topicData.change === 'Infinity' ? Infinity : topicData.change,
+      }))
+    )
+  );
+
+  top5DecreasedCalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
+    { field: 'topic', header: 'topic', translate: true },
+    { field: 'subtopic', header: 'sub-topic', translate: true },
+    { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
+    { field: 'calls', header: 'calls', pipe: 'number' },
+    { field: 'change', header: 'change', pipe: 'percent' },
+  ]);
 
   error$ = this.store.select(OverviewSelectors.selectOverviewError);
 

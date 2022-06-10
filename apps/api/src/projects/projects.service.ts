@@ -6,33 +6,32 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {
   CallDriver,
-  Feedback,
-  Page,
-  PageMetrics,
-  Project,
-  Task,
-  UxTest
-} from '@dua-upd/db';
-import type {
-  CallsByTopic,
   CallDriverModel,
+  Feedback,
   FeedbackComment,
   FeedbackDocument,
+  FeedbackModel,
+  Page,
   PageDocument,
+  PageMetrics,
   PageMetricsModel,
+  Project,
   ProjectDocument,
+  Task,
+  UxTest,
+  UxTestDocument,
+} from '@dua-upd/db';
+import type {
   ProjectsDetailsData,
   ProjectDetailsAggregatedData,
   ProjectsHomeProject,
   ProjectStatus,
   ProjectsHomeData,
-  UxTestDocument,
 } from '@dua-upd/types-common';
 import { ApiParams } from '@dua-upd/upd/services';
 import { dateRangeSplit } from '@dua-upd/utils-common/date';
 import {
   getAvgSuccessFromLastTests,
-  getFeedbackByTags,
   getLatestTest,
 } from '@dua-upd/utils-common/data';
 
@@ -103,7 +102,7 @@ export class ProjectsService {
     @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
     @InjectModel(Project.name) private projectsModel: Model<ProjectDocument>,
     @InjectModel(UxTest.name) private uxTestsModel: Model<UxTestDocument>,
-    @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>,
+    @InjectModel(Feedback.name) private feedbackModel: FeedbackModel,
     @InjectModel(Page.name) private pageModel: Model<PageDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
@@ -379,7 +378,7 @@ export class ProjectsService {
 
 async function getAggregatedProjectMetrics(
   pageMetricsModel: PageMetricsModel,
-  feedbackModel: Model<FeedbackDocument>,
+  feedbackModel: FeedbackModel,
   calldriversModel: CallDriverModel,
   projectModel: Model<ProjectDocument>,
   id: Types.ObjectId,
@@ -388,10 +387,9 @@ async function getAggregatedProjectMetrics(
 ): Promise<ProjectDetailsAggregatedData> {
   const [startDate, endDate] = dateRangeSplit(dateRange);
 
-  const feedbackByTags = await getFeedbackByTags(
+  const feedbackByTags = await feedbackModel.getCommentsByTag(
     dateRange,
     projectUrls,
-    feedbackModel
   );
 
   const projectMetrics = (

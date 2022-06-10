@@ -37,6 +37,10 @@ export interface CallsByTopic {
   calls: number;
 }
 
+export interface TopCalldriverTopics extends CallsByTopic {
+  change: number | 'Infinity';
+}
+
 export interface AttachmentData {
   id: string;
   url: string;

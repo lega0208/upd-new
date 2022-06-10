@@ -7,9 +7,10 @@ import {
   Overall,
   OverallDocument,
   Page,
+  PageDocument,
   PageMetrics,
-} from '@dua-upd/types-common';
-import type { PageDocument, PageMetricsModel } from '@dua-upd/types-common';
+  PageMetricsModel,
+} from '@dua-upd/db';
 import {
   DateType,
   queryDateFormat,

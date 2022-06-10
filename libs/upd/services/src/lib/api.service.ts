@@ -7,7 +7,8 @@ import {
   PagesHomeData,
   ProjectsHomeData,
   TasksHomeData,
-  TaskDetailsData, ProjectsDetailsData
+  TaskDetailsData,
+  ProjectsDetailsData
 } from '@dua-upd/types-common';
 
 export type ApiParams = {

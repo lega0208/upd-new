@@ -1,4 +1,4 @@
-import { ConsoleLogger, Injectable, Logger } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import dayjs from 'dayjs';
@@ -7,9 +7,10 @@ import {
   Overall,
   OverallDocument,
   Page,
+  PageDocument,
   PageMetrics,
-} from '@dua-upd/types-common';
-import type { PageDocument, PageMetricsModel } from '@dua-upd/types-common';
+  PageMetricsModel,
+} from '@dua-upd/db';
 import { DbUpdateService } from '@dua-upd/db-update';
 import { outputCsv } from './utils';
 

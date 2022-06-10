@@ -14,46 +14,27 @@ export class OverviewCalldriversComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
-  charts = [
-    {
-      Topic: 'Electronic Services',
-      'Number of calls for Feb 27-Mar 05': '72,740',
-      'Number of calls for Mar 06-Mar 12': '68,306',
-    },
-    {
-      Topic: 'COVID-19',
-      'Number of calls for Feb 27-Mar 05': '43,549',
-      'Number of calls for Mar 06-Mar 12': '52,792',
-    },
-    {
-      Topic: 'Account Maintenance',
-      'Number of calls for Feb 27-Mar 05': '38,342',
-      'Number of calls for Mar 06-Mar 12': '41,206',
-    },
-    {
-      Topic: 'Print requests',
-      'Number of calls for Feb 27-Mar 05': '27,230',
-      'Number of calls for Mar 06-Mar 12': '26,128',
-    },
-    {
-      Topic: 'Payments to the CRA',
-      'Number of calls for Feb 27-Mar 05': '20,663',
-      'Number of calls for Mar 06-Mar 12': '22,806',
-    },
-  ];
-
   dateRangeLabel$ = this.overviewService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
-
-  constructor(
-    private overviewService: OverviewFacade,
-    private i18n: I18nFacade
-  ) {}
 
   calldriversChart$ = this.overviewService.calldriversChart$;
   calldriversTable$ = this.overviewService.calldriversTable$;
   calldriversCols: ColumnConfig<{ name: string; currValue: number; prevValue: number }>[] = [];
   chartsCols: ColumnConfig[] = [];
+
+  top5CalldriverTopics$ = this.overviewService.top5CalldriverTopics$;
+  top5CalldriverTopicsConfig$ = this.overviewService.top5CalldriverTopicsConfig$;
+
+  top5IncreasedCalldriverTopics$ = this.overviewService.top5IncreasedCalldriverTopics$;
+  top5IncreasedCalldriverTopicsConfig$ = this.overviewService.top5IncreasedCalldriverTopicsConfig$;
+
+  top5DecreasedCalldriverTopics$ = this.overviewService.top5DecreasedCalldriverTopics$;
+  top5DecreasedCalldriverTopicsConfig$ = this.overviewService.top5DecreasedCalldriverTopicsConfig$;
+
+  constructor(
+    private overviewService: OverviewFacade,
+    private i18n: I18nFacade
+  ) {}
 
   ngOnInit() {
     this.i18n.service.onLangChange(
