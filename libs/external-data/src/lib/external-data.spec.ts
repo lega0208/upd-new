@@ -26,7 +26,9 @@ describe('getPageMetrics', () => {
       end: toQueryFormat('2022-01-02'),
     };
 
-    const results = await client.getPageMetrics(dateRange, { settings: { limit: 25 } });
+    const results = await client.getPageMetrics(dateRange, {
+      settings: { limit: 25 },
+    });
 
     console.log(results);
 
@@ -43,17 +45,15 @@ describe('new AA fields', () => {
       end: dayjs('2022-01-02').format(queryDateFormat),
     };
     const results = await client.getOverallMetrics(dateRange);
-
     console.log(results);
-
     expect(results).toBeDefined();
-  })
+  });
 });
 
 describe('externalData', () => {
   const dateRange = {
-    start: toQueryFormat('2022-01-01'),
-    end: toQueryFormat('2022-01-02'),
+    start: toQueryFormat('2022-06-01'),
+    end: toQueryFormat('2022-06-02'),
   };
 
   it('should be able to initalize the query builder', async () => {
@@ -77,8 +77,9 @@ describe('externalData', () => {
         },
       ])
       .setSearch({
-        clause: '( CONTAINS \'www.canada.ca/en/revenue-agency/services/e-services/cra-login-services.html\' )'
-        + ' OR ( CONTAINS \'www.canada.ca/en/revenue-agency/services/e-services/represent-a-client.html\' )'
+        clause:
+          "( CONTAINS 'www.canada.ca/en/revenue-agency/services/e-services/cra-login-services.html' )" +
+          " OR ( CONTAINS 'www.canada.ca/en/revenue-agency/services/e-services/represent-a-client.html' )",
       })
       .setSettings({ limit: 10 })
       .build();
@@ -86,11 +87,88 @@ describe('externalData', () => {
     expect(query).toBeDefined();
   });
 
-  it('should be able to get overall metrics', async () => {
-    const client = new AdobeAnalyticsClient()
-    const results = await client.getOverallMetrics(dateRange);
 
-    expect(results).toBeDefined();
+  it('should be able to get phrases users searched on from page', async () => {
+    const client = new AdobeAnalyticsClient();
+
+    const results = await client.acquireInternalSearchItemId(dateRange);
+    const array: string[] = [];
+
+    results.forEach((result) => {
+      array.push(result.internalsearch_item_id);
+    });
+
+    console.log(array.length);
+
+    const results2 = await client.getPhrasesSearchedOnPage(
+      dateRange,
+      array.slice(0, 333)
+    );
+    console.log(results2);
+
+    expect(results2).toBeDefined();
+  });
+  it('should be able to get where visitors came from', async () => {
+    const client = new AdobeAnalyticsClient();
+
+    const results = await client.acquirePageUrlItemId(dateRange)
+    const array: string[] = [];
+
+    results.forEach((result) => {
+      array.push(result.pageurl_item_id);
+    });
+
+    console.log(array.length);
+
+    const results2 = await client.getWhereVisitorsCameFrom(
+      dateRange,
+      array.slice(0, 1000)
+    );
+    console.log(results2);
+
+    expect(results2).toBeDefined();
+  });
+  
+  it('should be able to get internal searches', async () => {
+    const client = new AdobeAnalyticsClient();
+
+    const results = await client.acquireInternalSearchItemId(dateRange);
+    const array: string[] = [];
+
+    results.forEach((result) => {
+      array.push(result.internalsearch_item_id);
+    });
+
+    console.log(array.length);
+
+    const results2 = await client.getInternalSearches(
+      dateRange,
+      array.slice(0, 333)
+    );
+    console.log(results2);
+
+    expect(results2).toBeDefined();
+  });
+
+  it('should be able to get activity map', async () => {
+    const client = new AdobeAnalyticsClient();
+
+    const results = await client.acquireActivityMapItemId(dateRange);
+    const array: string[] = [];
+
+    results.forEach((result) => {
+      array.push(result.activitymap_item_id);
+    });
+
+    console.log(array.length);
+
+    const results2 = await client.getActivityMap(
+      dateRange,
+      array.slice(0, 1000)
+    );
+    console.log(results2);
+
+    expect(results2).toBeDefined();
   });
 });
 
@@ -109,34 +187,42 @@ describe('Google Search Console', () => {
         dimensions: ['date', 'query'],
         dimensionFilterGroups: [
           {
-            filters: [{
-              dimension: 'page',
-              operator: 'equals',
-              expression: 'https://www.canada.ca/en/services/taxes.html',
-            }]
-          }
+            filters: [
+              {
+                dimension: 'page',
+                operator: 'equals',
+                expression: 'https://www.canada.ca/en/services/taxes.html',
+              },
+            ],
+          },
         ],
         startDate: '2022-01-01',
         endDate: '2022-01-02',
-      }
+      },
     });
 
     expect(results.data.rows).toBeDefined();
-  })
+  });
 
   it('should be able to get results for GSC overall metrics for all CRA-related pages', async () => {
     const client = new SearchAnalyticsClient();
-    const results = await client.getOverallMetrics({ start: '2022-01-16', end: '2022-01-16' });
+    const results = await client.getOverallMetrics({
+      start: '2022-01-16',
+      end: '2022-01-16',
+    });
 
     expect(results).toBeDefined();
-  })
+  });
 
   it('should be able to get results for GSC search terms for all CRA-related pages', async () => {
     const client = new SearchAnalyticsClient();
-    const results = await client.getPageMetrics({ start: '2022-01-16', end: '2022-01-16' });
+    const results = await client.getPageMetrics({
+      start: '2022-01-16',
+      end: '2022-01-16',
+    });
 
     expect(results).toBeDefined();
-  })
+  });
 
   it('should be able to get results for fresh data', async () => {
     const results = await gscClient.searchanalytics.query({
@@ -145,22 +231,24 @@ describe('Google Search Console', () => {
         dimensions: ['date', 'query'],
         dimensionFilterGroups: [
           {
-            filters: [{
-              dimension: 'page',
-              operator: 'equals',
-              expression: 'https://www.canada.ca/en/services/taxes.html',
-            }]
-          }
+            filters: [
+              {
+                dimension: 'page',
+                operator: 'equals',
+                expression: 'https://www.canada.ca/en/services/taxes.html',
+              },
+            ],
+          },
         ],
         startDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
         endDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
         dataState: 'all',
-      }
+      },
     });
     console.log(results.data.rows);
 
     expect(results.data.rows).toBeDefined();
-  })
+  });
 
   it('should be able to get results for a regex', async () => {
     const results = await gscClient.searchanalytics.query({
@@ -169,23 +257,25 @@ describe('Google Search Console', () => {
         dimensions: ['date', 'query', 'page'],
         dimensionFilterGroups: [
           {
-            filters: [{
-              dimension: 'page',
-              operator: 'includingRegex',
-              expression: '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
-            }]
-          }
+            filters: [
+              {
+                dimension: 'page',
+                operator: 'includingRegex',
+                expression:
+                  '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
+              },
+            ],
+          },
         ],
         startDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
         endDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
         dataState: 'all',
-      }
+      },
     });
 
     expect(results.data.rows).toBeDefined();
-  })
-
-})
+  });
+});
 
 describe('AirTable', () => {
   it('should initialise the client', async () => {

@@ -19,6 +19,7 @@ export const SEGMENTS = {
     ERROR: 's300000938_60ec6a8ee670b5326fe33de5',
   },
   CX_TASKS: 's300000938_60e59fc096f01a011ca0d986',
+  CRA_SEARCH_PAGES: 's300000938_62a35c1ce69f2c0a983cc013'
 };
 
 export const CALCULATED_METRICS = {
@@ -68,6 +69,17 @@ export const CALCULATED_METRICS = {
   DEVICES_DESKTOP: 'cm300000938_5ec603fa86fd4d00d83b4ae7',
   DEVICES_MOBILE: 'cm300000938_5ec603c086fd4d00d83b4adb',
   DEVICES_TABLET: 'cm300000938_5ec6041b4c546630df64a161',
+  // Time Spent on Page (Visits)
+  TIME_LESSTHAN15SEC: 'cm300000938_62a39491f51dca5fb72736f0',
+  TIME_15TO29SEC: 'cm300000938_62a394d3f51dca5fb72736f1',
+  TIME_30TO59SEC: 'cm300000938_62a39503f51dca5fb72736f2',
+  TIME_1TO3MIN: 'cm300000938_62a39521f51dca5fb72736f3',
+  TIME_3TO5MIN: 'cm300000938_62a395498ee8735b4868005c',
+  TIME_5TO10MIN: 'cm300000938_62a395655bec3c26817454fa',
+  TIME_10TO15MIN: 'cm300000938_62a395895bec3c26817454fb',
+  TIME_15TO20MIN: 'cm300000938_62a395a55bec3c26817454fc',
+  TIME_20TO30MIN: 'cm300000938_62a395c511f9c0642390482b',
+  TIME_MORETHAN30MIN: 'cm300000938_62a395f34333af490687dd02',
 };
 
 export type ReportQueryMetricId =
@@ -124,12 +136,12 @@ export interface ReportRow {
 }
 
 export type MetricConfig = {
-  id: ReportQueryMetricId,
-  filters?: ReportFilter[]
+  id: ReportQueryMetricId;
+  filters?: ReportFilter[];
 };
 
 export type MetricsConfig = {
-  [key: string]: ReportQueryMetricId | MetricConfig
+  [key: string]: ReportQueryMetricId | MetricConfig;
 };
 
 export interface AdobeAnalyticsReportQuery {
@@ -178,18 +190,51 @@ export class AdobeAnalyticsQueryBuilder {
           columnId: key,
         });
       } else {
-        this.query.metricContainer.metrics.push({
-          id: metric.id,
-          columnId: key,
-          filters: metric.filters.map(filter => filter.id as string),
-        });
-        // todo: throw error if there are duplicated filter ids
+        if (
+          metric.filters[0].itemIds !== undefined &&
+          metric.filters[0].itemIds?.length > 0
+        ) {
+          metric.filters.map((filter) => {
+            return filter.itemIds.map((itemId, index) => {
+              this.query.metricContainer.metrics.push({
+                id: metric.id,
+                columnId: itemId as string,
+                filters: [index.toString()],
+              });
+            });
+          });
 
-        if (!this.query.metricContainer.metricFilters) {
-          this.query.metricContainer.metricFilters = [];
+          // todo: throw error if there are duplicated filter ids
+
+          if (!this.query.metricContainer.metricFilters) {
+            this.query.metricContainer.metricFilters = [];
+          }
+          metric.filters.map((filter) => {
+            return filter.itemIds.map((itemId, index) => {
+              return this.query.metricContainer.metricFilters.push({
+                id: index.toString(),
+                type: filter.type,
+                dimension: filter.dimension,
+                itemId: itemId,
+              });
+            });
+          });
+        } else {
+
+          metric.filters.map((filter) => {
+            this.query.metricContainer.metrics.push({
+              id: metric.id,
+              columnId: filter.itemId as string,
+              filters: [filter.id as string],
+            });
+          });
+
+          if (!this.query.metricContainer.metricFilters) {
+            this.query.metricContainer.metricFilters = [];
+          }
+
+          this.query.metricContainer.metricFilters.push(...metric.filters);
         }
-
-        this.query.metricContainer.metricFilters.push(...metric.filters);
       }
     }
 
@@ -213,7 +258,8 @@ export class AdobeAnalyticsQueryBuilder {
   }
 
   public addMetricFilter(filter: ReportFilter) {
-    this.query.metricContainer.metricFilters = this.query.metricContainer.metricFilters || [];
+    this.query.metricContainer.metricFilters =
+      this.query.metricContainer.metricFilters || [];
     this.query.metricContainer.metricFilters.push(filter);
 
     return this;
@@ -278,7 +324,6 @@ export class AdobeAnalyticsQueryBuilder {
   }
 
   public setAnchorDate(date: string) {
-
     this.query.anchorDate = date;
   }
 
