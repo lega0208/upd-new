@@ -9,6 +9,7 @@
     "dev": "nx run-many --target=serve --projects=api,upd --parallel=2",
     "build": "nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel=false",
     "build:parallel": "nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel",
+    "compodoc": "upd:compodoc --serve --port 8081",
     "db-cli": "nx build db-cli && node dist/apps/db-cli/main.js",
     "db-updater": "npm run db-cli update",
     "db-repair": "npm run db-cli db-repair",

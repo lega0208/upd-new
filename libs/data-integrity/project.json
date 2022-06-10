@@ -1,5 +1,6 @@
 {
   "sourceRoot": "libs/data-integrity/src",
+  "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nrwl/node:webpack",
@@ -34,6 +35,19 @@
       "options": {
         "jestConfig": "libs/data-integrity/jest.config.ts",
         "passWithNoTests": true
+      }
+    },
+    "compodoc": {
+      "executor": "@twittwer/compodoc:compodoc",
+      "options": {
+        "tsConfig": "libs/data-integrity/tsconfig.compodoc.json",
+        "outputPath": "dist/compodoc/data-integrity",
+        "workspaceDocs": true
+      },
+      "configurations": {
+        "json": {
+          "exportFormat": "json"
+        }
       }
     }
   },
