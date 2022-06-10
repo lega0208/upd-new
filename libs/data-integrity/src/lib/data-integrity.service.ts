@@ -5,10 +5,12 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {
   Overall,
-  OverallDocument,
   Page,
-  PageDocument,
   PageMetrics,
+} from '@dua-upd/db';
+import type {
+  OverallDocument,
+  PageDocument,
   PageMetricsModel,
 } from '@dua-upd/db';
 import { DbUpdateService } from '@dua-upd/db-update';
