@@ -14,7 +14,13 @@
       "configurations": {
         "production": {
           "options": {
-            "tsConfig": "libs/db/tsconfig.lib.prod.json"
+            "tsConfig": "libs/db/tsconfig.lib.prod.json",
+            "fileReplacements": [
+              {
+                "replace": "apps/db/src/environments/environment.ts",
+                "with": "apps/db/src/environments/environment.prod.ts"
+              }
+            ]
           }
         },
         "development": {

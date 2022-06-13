@@ -3,6 +3,7 @@
   "projectType": "application",
   "targets": {
     "build": {
+      "defaultConfiguration": "production",
       "executor": "@nrwl/node:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -18,6 +19,7 @@
           "extractLicenses": false,
           "generatePackageJson": true,
           "inspect": false,
+          "watch": false,
           "webpackConfig": ["apps/db-cli/webpack.config.js"],
           "fileReplacements": [
             {
@@ -25,6 +27,16 @@
               "with": "apps/db-cli/src/environments/environment.prod.ts"
             }
           ]
+        },
+        "development": {
+          "optimization": true,
+          "externalDependencies": "all",
+          "extractLicenses": false,
+          "generatePackageJson": true,
+          "inspect": false,
+          "watch": false,
+          "webpackConfig": ["apps/db-cli/webpack.config.js"],
+          "fileReplacements": []
         }
       }
     },
