@@ -6,10 +6,10 @@ import { readFile } from 'fs/promises';
 
 export { AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
 
-export async function getJWT() {
+export async function getJWT(expiryDateTime: number) {
   const privateKey = await readFile('keys/secret.pem');
   const jwtPayload = {
-    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
+    exp: expiryDateTime,
     iss: process.env.AW_ORGANIZATION_ID,
     sub: process.env.AW_TECHNICAL_ID,
     'https://ims-na1.adobelogin.com/s/ent_analytics_bulk_ingest_sdk': true,
@@ -33,6 +33,7 @@ export async function getToken(jwt: string) {
       )
     ).data.access_token;
   } catch (e) {
+    console.error('Error getting Adobe Analytics JSON Web Token:');
     // todo: better error handling
     if (e.response) {
       console.log(e.response.data);
@@ -42,8 +43,8 @@ export async function getToken(jwt: string) {
   }
 }
 
-export async function getAAClient(): Promise<AnalyticsCoreAPI> {
-  const jwt = await getJWT();
+export async function getAAClient(expiryDateTime: number): Promise<AnalyticsCoreAPI> {
+  const jwt = await getJWT(expiryDateTime);
   const token = await getToken(jwt);
 
   return await init(process.env.AW_COMPANY_ID, process.env.AW_CLIENT_ID, token);

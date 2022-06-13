@@ -30,15 +30,23 @@ dayjs.extend(utc);
 export class AdobeAnalyticsClient {
   client: AnalyticsCoreAPI;
 
+  clientTokenExpiry = 0;
+
   async initClient() {
-    this.client = await getAAClient();
+    this.clientTokenExpiry = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
+
+    this.client = await getAAClient(this.clientTokenExpiry);
+  }
+
+  clientTokenIsExpired() {
+    return this.clientTokenExpiry < Math.floor(Date.now() / 1000);
   }
 
   async getOverallMetrics(
     dateRange: DateRange,
     options: ReportSettings = {}
   ): Promise<Partial<Overall>[]> {
-    if (!this.client) {
+    if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
 
@@ -90,7 +98,7 @@ export class AdobeAnalyticsClient {
       postProcess?: (data: Partial<PageMetrics[]>) => unknown | void;
     }
   ): Promise<Partial<PageMetrics[]>[]> {
-    if (!this.client) {
+    if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
     const dateRanges = datesFromDateRange(dateRange, queryDateFormat)
@@ -164,7 +172,7 @@ export class AdobeAnalyticsClient {
     dateRange: DateRange,
     options: ReportSettings = {}
   ): Promise<Partial<Overall>[]> {
-    if (!this.client) {
+    if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
 
@@ -212,7 +220,7 @@ export class AdobeAnalyticsClient {
     dateRange: DateRange,
     options: ReportSettings = {}
   ) {
-    if (!this.client) {
+    if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
 
@@ -253,7 +261,7 @@ export class AdobeAnalyticsClient {
     dateRange: DateRange,
     options: ReportSettings = {}
   ) {
-    if (!this.client) {
+    if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
 
@@ -294,7 +302,7 @@ export class AdobeAnalyticsClient {
     dateRange: DateRange,
     options: ReportSettings = {}
   ) {
-    if (!this.client) {
+    if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
 
@@ -332,7 +340,7 @@ export class AdobeAnalyticsClient {
   }
 
   async getActivityMap(dateRange: DateRange, itemIds: string[], options: ReportSettings = {}) {
-    if (!this.client) {
+    if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
 
@@ -371,7 +379,7 @@ export class AdobeAnalyticsClient {
   }
 
   async getWhereVisitorsCameFrom(dateRange: DateRange, itemIds: string[], options: ReportSettings = {}) {
-    if (!this.client) {
+    if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
 
@@ -414,7 +422,7 @@ export class AdobeAnalyticsClient {
     itemIds: string[],
     options: ReportSettings = {}
   ) {
-    if (!this.client) {
+    if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
 
@@ -462,7 +470,7 @@ export class AdobeAnalyticsClient {
     itemIds: string[],
     options: ReportSettings = {}
   ) {
-    if (!this.client) {
+    if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
 
