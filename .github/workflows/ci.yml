@@ -28,13 +28,18 @@ jobs:
         with:
           node-version: '16'
       - name: Use the node_modules cache if available [npm]
+        id: use-npm-cache
         uses: actions/cache@v2
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-16-${{ hashFiles('**/package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-16-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-16-
-      - run: npm ci
+            ${{ runner.os }}-node-16-modules-
+
+      - name: Install dependencies
+        if: steps.use-npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
       - run: npx nx-cloud start-ci-run
       - run: npx nx workspace-lint
       - run: npx nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
@@ -55,16 +60,21 @@ jobs:
       - name: Use the node_modules cache if available [npm]
         uses: actions/cache@v2
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-16-${{ hashFiles('**/package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-16-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-16-
-      - run: npm ci
+            ${{ runner.os }}-node-16-modules-
+
+      - name: Install dependencies
+        if: steps.use-npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
       - run: npx nx-cloud start-ci-run
       - run: npx nx workspace-lint
       - run: npx nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
       - run: npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
       - run: npx nx-cloud stop-all-agents
+
   agents:
     runs-on: ubuntu-latest
     name: Agent 1
@@ -80,10 +90,14 @@ jobs:
       - name: Use the node_modules cache if available [npm]
         uses: actions/cache@v2
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-16-${{ hashFiles('**/package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-16-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-16-
-      - run: npm ci
+            ${{ runner.os }}-node-16-modules-
+
+      - name: Install dependencies
+        if: steps.use-npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
       - name: Start Nx Agent ${{ matrix.agent }}
         run: npx nx-cloud start-agent
