@@ -8,6 +8,10 @@ import { dateRangeSplit } from '../date';
  */
 export const getLatestTest = (uxTests: Partial<UxTest>[]) =>
   uxTests.reduce((latestTest, test) => {
+    if (test.success_rate) {
+      return test;
+    }
+
     if (!latestTest || typeof latestTest?.date !== 'object') {
       return test;
     }
@@ -36,7 +40,7 @@ export function getAvgTestSuccess(uxTests: Partial<UxTest>[]) {
       testsWithSuccessRate.reduce(
         (total, success_rate) => total + success_rate,
         0
-      ) / uxTests.length
+      ) / testsWithSuccessRate.length
     );
   }
 
