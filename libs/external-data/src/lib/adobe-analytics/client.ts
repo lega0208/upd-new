@@ -3,6 +3,7 @@ import { init, AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
 import { readFile } from 'fs/promises';
+import dayjs from 'dayjs';
 
 export { AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
 
@@ -43,9 +44,19 @@ export async function getToken(jwt: string) {
   }
 }
 
-export async function getAAClient(expiryDateTime: number): Promise<AnalyticsCoreAPI> {
+export async function getAAClient(
+  expiryDateTime: number
+): Promise<AnalyticsCoreAPI> {
   const jwt = await getJWT(expiryDateTime);
   const token = await getToken(jwt);
+
+  const formattedExpiryDateTime = dayjs(expiryDateTime * 1000).format(
+    'YYYY-MM-DD HH:mm:ss'
+  );
+
+  console.log(
+    `New AA client token successfully created.\r\nValid until: ${formattedExpiryDateTime}`
+  );
 
   return await init(process.env.AW_COMPANY_ID, process.env.AW_CLIENT_ID, token);
 }

@@ -29,13 +29,22 @@ dayjs.extend(utc);
 
 export class AdobeAnalyticsClient {
   client: AnalyticsCoreAPI;
+  clientTokenExpiry: number;
 
-  clientTokenExpiry = 0;
+  constructor(
+    clientTokenExpiry = Math.floor(Date.now() / 1000) + 24 * 60 * 60
+  ) {
+    this.clientTokenExpiry = clientTokenExpiry;
+  }
 
-  async initClient() {
-    this.clientTokenExpiry = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
+  async initClient(
+    clientTokenExpiry = Math.floor(Date.now() / 1000) + 24 * 60 * 60
+  ) {
+    this.clientTokenExpiry = clientTokenExpiry;
 
-    this.client = await getAAClient(this.clientTokenExpiry);
+    this.client = await getAAClient(clientTokenExpiry);
+
+    return this.client;
   }
 
   clientTokenIsExpired() {
@@ -99,8 +108,13 @@ export class AdobeAnalyticsClient {
     }
   ): Promise<Partial<PageMetrics[]>[]> {
     if (!this.client || this.clientTokenIsExpired()) {
+      if (this.clientTokenIsExpired()) {
+        console.log('Client token is expired, refreshing.');
+      }
+
       await this.initClient();
     }
+
     const dateRanges = datesFromDateRange(dateRange, queryDateFormat)
       .map((date) => ({
         start: date,
@@ -114,6 +128,8 @@ export class AdobeAnalyticsClient {
     const promises = [];
 
     for (const dateRange of dateRanges) {
+      console.log('Creating Pages Metrics query for date range:', dateRange);
+
       const pageMetricsQuery = createPageMetricsQuery(dateRange, options);
       const promise = this.client
         .getReport(pageMetricsQuery)
@@ -229,10 +245,7 @@ export class AdobeAnalyticsClient {
       ...options,
     };
 
-    const acquirePageUrlItemId = acquirePageUrlItemIdQuery(
-      dateRange,
-      options
-    );
+    const acquirePageUrlItemId = acquirePageUrlItemIdQuery(dateRange, options);
     const results = await this.client.getReport(acquirePageUrlItemId);
 
     const { columnIds } = results.body.columns;
@@ -339,7 +352,11 @@ export class AdobeAnalyticsClient {
     }, []);
   }
 
-  async getActivityMap(dateRange: DateRange, itemIds: string[], options: ReportSettings = {}) {
+  async getActivityMap(
+    dateRange: DateRange,
+    itemIds: string[],
+    options: ReportSettings = {}
+  ) {
     if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
@@ -349,7 +366,11 @@ export class AdobeAnalyticsClient {
       ...options,
     };
 
-    const activityMapQuery = createActivityMapQuery(dateRange, itemIds, options);
+    const activityMapQuery = createActivityMapQuery(
+      dateRange,
+      itemIds,
+      options
+    );
     const results = await this.client.getReport(activityMapQuery);
 
     const { columnIds } = results.body.columns;
@@ -378,7 +399,11 @@ export class AdobeAnalyticsClient {
       );
   }
 
-  async getWhereVisitorsCameFrom(dateRange: DateRange, itemIds: string[], options: ReportSettings = {}) {
+  async getWhereVisitorsCameFrom(
+    dateRange: DateRange,
+    itemIds: string[],
+    options: ReportSettings = {}
+  ) {
     if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
     }
@@ -388,7 +413,11 @@ export class AdobeAnalyticsClient {
       ...options,
     };
 
-    const whereVisitorsCameFromQuery = createWhereVisitorsCameFromQuery(dateRange, itemIds, options);
+    const whereVisitorsCameFromQuery = createWhereVisitorsCameFromQuery(
+      dateRange,
+      itemIds,
+      options
+    );
     const results = await this.client.getReport(whereVisitorsCameFromQuery);
 
     const { columnIds } = results.body.columns;

@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { wait } from '@dua-upd/utils-common';
 import { AirtableClient } from './airtable';
 import { withRateLimit } from './utils';
 import {
@@ -16,6 +17,54 @@ import {
 
 // need to set a bigger timout because AA is super slow :)
 jest.setTimeout(900000);
+
+describe('AdobeAnalyticsClient', () => {
+  let client: AdobeAnalyticsClient;
+
+  beforeAll(() => {
+    client = new AdobeAnalyticsClient();
+  })
+
+  it('should refresh the JWT if expired', async () => {
+
+    const innerClient = await client.initClient(Math.floor(Date.now() / 1000) + 3);
+
+    const initialToken = innerClient.token;
+
+    // Token should be defined
+    expect(initialToken).toBeDefined();
+
+    await wait(3500);
+
+    // After waiting, token should be expired
+    expect(client.clientTokenIsExpired()).toEqual(true);
+
+    // Token should get refreshed and then able to successfully get data from the API
+    const dateRange = {
+      start: toQueryFormat('2022-06-10'),
+      end: toQueryFormat('2022-06-11'),
+    };
+
+    const data = await client.getPageMetrics(dateRange, {
+      settings: {
+        limit: 10
+      },
+      search: {
+        clause: `BEGINS-WITH 'www.canada.ca' AND (BEGINS-WITH 'www.canada.ca/en/revenue-agency'\
+        OR BEGINS-WITH 'www.canada.ca/fr/agence-revenu' OR BEGINS-WITH 'www.canada.ca/fr/services/impots'\
+        OR BEGINS-WITH 'www.canada.ca/en/services/taxes')`,
+      },
+    })
+
+    expect(data).toBeDefined();
+    expect(Array.isArray(data)).toBe(true);
+    expect(data.length).toBeGreaterThan(0);
+
+    const tokenAfterCall = client.client.token;
+
+    expect(tokenAfterCall).not.toMatch(initialToken);
+  });
+})
 
 describe('getPageMetrics', () => {
   const client = new AdobeAnalyticsClient();
@@ -128,7 +177,7 @@ describe('externalData', () => {
 
     expect(results2).toBeDefined();
   });
-  
+
   it('should be able to get internal searches', async () => {
     const client = new AdobeAnalyticsClient();
 
