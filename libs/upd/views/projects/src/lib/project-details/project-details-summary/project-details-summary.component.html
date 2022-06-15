@@ -35,10 +35,11 @@
       <upd-data-table-card
         [data]="(participantTasks$ | async) || []"
         [cols]="participantTasksCols"
-        [sort]="false"
+        [sort]="true"
         [pagination]="false"
         [filter]="false"
         [title]="'Participant tasks'"
+        sortField="title"
       >
       </upd-data-table-card>
     </div>
