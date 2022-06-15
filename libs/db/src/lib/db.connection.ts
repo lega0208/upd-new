@@ -6,7 +6,7 @@ export const getDbConnectionString = (dbName = 'upd-test') => {
     development: `mongodb://localhost:27017/${dbName}`,
   };
 
-  return environment.production === true
+  return (environment.production === true || process.env.NODE_ENV === 'production')
     ? connectionString.production
     : connectionString.development;
 };
