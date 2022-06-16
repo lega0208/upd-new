@@ -1,98 +1,86 @@
-# CraArc
+# Usability Performance Dashboard
 
-This project was generated using [Nx](https://nx.dev).
+## Stack overview & reading list
 
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>
+### Core
+#### [Node](https://nodejs.org)
+Node.js is a JavaScript runtime built on Chrome's highly optimized V8 JavaScript engine.
+Nearly every part of the stack will use Node in one way or another, so it's very useful to know what it is and how it works. 
 
-🔎 **Smart, Fast and Extensible Build System**
+#### [npm](https://docs.npmjs.com/about-npm)
+npm is the official package manager for Node.js, and comes pre-bundled. It's used to install and manage third-party Node.js packages, as well as for running scripts and/or binaries.
 
-## Quick Start & Documentation
+#### [TypeScript](https://www.typescriptlang.org)
+TypeScript is a strongly-typed superset of JavaScript that compiles to plain JavaScript. The added type safety helps to prevent common programming errors and catches bugs at compile time rather than at runtime.
+And while the type system allows you to create very robust and strict types, it also allows you to use or create types that are loose or flexible enough to accomodate your needs without losing type safety entirely, which you can go back and refine as needed later on.
 
-[Nx Documentation](https://nx.dev/angular)
+#### [Nx](https://nx.dev)
+- [Nx Documentation](https://nx.dev/getting-started/intro)
+- [10-minute video showing all Nx features](https://nx.dev/getting-started/intro)
+- [Interactive Tutorial](https://nx.dev/tutorial/01-create-application)
 
-[10-minute video showing all Nx features](https://nx.dev/getting-started/intro)
+Nx is a bit difficult to describe concisely. Their home page describes it as a "Smart, Fast and Extensible Build System".
+But really, it is many things. I would describe it as a toolkit for managing, organizing, automating, and speeding up all or
+most aspects of the development cycle *of a monorepo*. (A monorepo being a single repository containing multiple projects)
 
-[Interactive Tutorial](https://nx.dev/tutorial/01-create-application)
+The main features are:
+- Scaffolding
+  - generators for Angular, Nest, etc. which can set up build tools and test infrastructure
+    - modules
+    - components
+    - libraries
+    - basically anything you might need
+- Build system with smart caching, which can cut compilation times by a lot
+- Full-project test integration with smart caching, so you only run tests for code that has changed
+- Fully extensible with plugins, custom generators, scripting capabilities, and more
 
-## Adding capabilities to your workspace
 
-Nx supports many plugins which add capabilities for developing different types of applications and different tools.
+### Front-end
+#### [Angular](https://angular.io)
+Opinionated, powerful, and flexible framework for building client applications in TypeScript.
 
-These capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
+#### [NgRx](https://ngrx.io/guide/store)
+State-management library for Angular very reminiscent of Redux. Can be a bit confusing at first, but it's not that complicated
+once you understand the concepts. Recommended to do some tutorials and play around with it to understand how it works.
 
-Below are our core plugins:
+### Back-end
+#### [MongoDB](https://www.mongodb.com/docs/manual/)
+MongoDB is a document-oriented NoSQL database that uses JSON-like documents. This makes it very flexible in terms of schema
+design, but can require a bit more attention to get good query performance in some cases, especially for aggregations.
 
-- [Angular](https://angular.io)
-  - `ng add @nrwl/angular`
-- [React](https://reactjs.org)
-  - `ng add @nrwl/react`
-- Web (no framework frontends)
-  - `ng add @nrwl/web`
-- [Nest](https://nestjs.com)
-  - `ng add @nrwl/nest`
-- [Express](https://expressjs.com)
-  - `ng add @nrwl/express`
-- [Node](https://nodejs.org)
-  - `ng add @nrwl/node`
+#### [NestJS](https://nestjs.com)
+NestJS is a framework for building server-side applications in TypeScript with a very similar module system as Angular.
+Comes out-of-the-box with a lot of useful integrations for various technologies, such as Mongoose (see below). 
 
-There are also many [community plugins](https://nx.dev/community) you could add.
+#### [Mongoose](https://mongoosejs.com/docs/guide.html)
+Mongoose is a MongoDB object modeling library for Node.js that allows you to use code to define schemas for your MongoDB collections
+and has lots of useful functionality to help simplify interactions with the database.
 
-## Generate an application
+### Testing
+#### [Jest](https://jestjs.io/docs/getting-started)
+Jest is a JavaScript testing framework that is essentially the de-facto industry standard for writing unit tests for JavaScript.
+Has many utilities that make it powerful and easy to use. 
 
-Run `ng g @nrwl/angular:app my-app` to generate an application.
+#### [Cypress](https://docs.cypress.io/guides/core-concepts/introduction-to-cypress)
+- [Overview video](https://vimeo.com/237527670)
 
-> You can use any of the plugins above to generate applications as well.
+Cypress is a powerful end-to-end testing framework with many features that allow you to simulate real interactions with your application.
+Not only that, but it also lets you watch these simulations in real time, and jump to different points in the execution, giving
+you "time travel debugging".
 
-When using Nx, you can create multiple applications and libraries in the same workspace.
+### Production environment / Deployment / Continuous Integration
+#### [Azure](https://azure.microsoft.com/en-ca/)
+Cloud service provider by Microsoft. Has a lot of useful tools and services for building and deploying applications.
+We primarily only use a hosted virtual machine running CentOS (Linux).
 
-## Generate a library
+#### [Docker](https://docs.docker.com/)
+Docker is a tool for building and running containerized applications. It's recommended to read up on it, at least to
+get an idea of what it is and how it works.
 
-Run `ng g @nrwl/angular:lib my-lib` to generate a library.
+#### [Github Actions](https://docs.github.com/en/actions)
+Github Actions is a feature in GitHub used for Continuous Integration allowing you to automate the building, testing, and deployment of your code.
 
-> You can also use any of the plugins above to generate libraries as well.
-
-Libraries are shareable across libraries and applications. They can be imported from `@dua-upd/mylib`.
-
-## Development server
-
-Run `ng serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng g component my-component --project=my-app` to generate a new component.
-
-## Build
-
-Run `ng build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Running end-to-end tests
-
-Run `ng e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
-
-Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
-
-## Understand your workspace
-
-Run `nx dep-graph` to see a diagram of the dependencies of your projects.
-
-## Further help
-
-Visit the [Nx Documentation](https://nx.dev/angular) to learn more.
-
-## ☁ Nx Cloud
-
-### Distributed Computation Caching & Distributed Task Execution
-
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
-
-Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
-
-Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
-
-Visit [Nx Cloud](https://nx.app/) to learn more.
+## Additional reading and references
+- [MDN Web Dev tooling overview](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Overview)
+- [Git](https://git-scm.com/)
+  - [Atlassian tutorials and references](https://www.atlassian.com/git) 
