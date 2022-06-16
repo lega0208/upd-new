@@ -81,6 +81,12 @@ get an idea of what it is and how it works.
 Github Actions is a feature in GitHub used for Continuous Integration allowing you to automate the building, testing, and deployment of your code.
 
 ## Additional reading and references
-- [MDN Web Dev tooling overview](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Overview)
 - [Git](https://git-scm.com/)
-  - [Atlassian tutorials and references](https://www.atlassian.com/git) 
+  - [Github guides](https://docs.github.com/en/get-started/using-git/about-git) 
+  - [Atlassian tutorials and references](https://www.atlassian.com/git)
+- MDN Web Docs
+  - [Web Dev tooling overview](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Overview)
+  - [Asynchronous JavaScript](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous)
+  - [Web accessibility overview](https://developer.mozilla.org/en-US/docs/Learn/Accessibility)
+  - [CSS: The box model](https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/The_box_model)
+  - [CSS Layout: Flexbox/Grid/Responsive/Etc.](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout)
