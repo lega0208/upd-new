@@ -43,6 +43,12 @@ Opinionated, powerful, and flexible framework for building client applications i
 State-management library for Angular very reminiscent of Redux. Can be a bit confusing at first, but it's not that complicated
 once you understand the concepts. Recommended to do some tutorials and play around with it to understand how it works.
 
+#### [Bootstrap](https://getbootstrap.com/docs/5.1/getting-started/introduction/)
+A popular CSS library for building responsive, mobile-first projects on the web.
+
+#### [ng-bootstrap](https://ng-bootstrap.github.io/#/home)
+An Angular implementation of most Bootstrap components. 
+
 ### Back-end
 #### [MongoDB](https://www.mongodb.com/docs/manual/)
 MongoDB is a document-oriented NoSQL database that uses JSON-like documents. This makes it very flexible in terms of schema
