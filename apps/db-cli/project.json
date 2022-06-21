@@ -29,7 +29,6 @@
           ]
         },
         "development": {
-          "optimization": true,
           "externalDependencies": "all",
           "extractLicenses": false,
           "generatePackageJson": true,

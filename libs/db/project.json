@@ -10,26 +10,7 @@
         "main": "libs/db/src/index.ts",
         "tsConfig": "libs/db/tsconfig.lib.json",
         "assets": ["libs/db/*.md"]
-      },
-      "configurations": {
-        "production": {
-          "options": {
-            "tsConfig": "libs/db/tsconfig.lib.prod.json",
-            "fileReplacements": [
-              {
-                "replace": "apps/db/src/environments/environment.ts",
-                "with": "apps/db/src/environments/environment.prod.ts"
-              }
-            ]
-          }
-        },
-        "development": {
-          "options": {
-            "tsConfig": "libs/db/tsconfig.lib.json"
-          }
-        }
-      },
-      "defaultConfiguration": "production"
+      }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
