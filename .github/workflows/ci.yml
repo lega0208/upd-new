@@ -9,6 +9,7 @@ on:
 env:
   NX_CLOUD_AUTH_TOKEN: ${{ secrets.NX_CLOUD_AUTH_TOKEN }}
   NX_CLOUD_DISTRIBUTED_EXECUTION: true
+  NX_CLOUD_DISTRIBUTED_EXECUTION_AGENT_COUNT: 3
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
