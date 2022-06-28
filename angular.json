@@ -16,6 +16,7 @@
     "upd-services": "libs/upd/services",
     "upd-state": "libs/upd/state",
     "upd-utils": "libs/upd/utils",
+    "upd-views-about-us": "libs/upd/views/about-us",
     "upd-views-overview": "libs/upd/views/overview",
     "upd-views-pages": "libs/upd/views/pages",
     "upd-views-projects": "libs/upd/views/projects",

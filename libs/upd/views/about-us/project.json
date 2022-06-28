@@ -1,0 +1,53 @@
+{
+  "projectType": "library",
+  "sourceRoot": "libs/upd/views/about-us/src",
+  "prefix": "dua-upd",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:ng-packagr-lite",
+      "outputs": ["dist/libs/upd/views/about-us"],
+      "options": {
+        "project": "libs/upd/views/about-us/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/upd/views/about-us/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/upd/views/about-us/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/upd/views/about-us"],
+      "options": {
+        "jestConfig": "libs/upd/views/about-us/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/upd/views/about-us/**/*.ts",
+          "libs/upd/views/about-us/**/*.html"
+        ]
+      }
+    },
+    "compodoc": {
+      "executor": "@twittwer/compodoc:compodoc",
+      "options": {
+        "tsConfig": "libs/upd/views/about-us/tsconfig.lib.json",
+        "outputPath": "dist/compodoc/upd-views-about-us"
+      },
+      "configurations": {
+        "json": {
+          "exportFormat": "json"
+        }
+      }
+    }
+  },
+  "tags": []
+}

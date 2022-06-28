@@ -5,7 +5,7 @@ const routes: Routes = [
   {
     path: '',
     redirectTo: 'overview',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'overview',
@@ -34,6 +34,13 @@ const routes: Routes = [
         (module) => module.ProjectsModule
       ),
     data: { animation: 'projects', title: 'Projects | Home' },
+  },
+  {
+    path: 'about-us',
+    loadChildren: () =>
+      import('@dua-upd/upd/views/about-us').then(
+        (module) => module.AboutUsModule
+      ),
   },
   { path: '**', redirectTo: 'overview' },
 ];
