@@ -278,6 +278,16 @@
   "inquiry line": "Inquiry line",
   "calldrivers-notification": "This report presents call topic results for the main agent queues based on a random sample of calls.",
 
+  "about-us": "About Us",
+  "about-upd": "About the Usability Performance Dashboard",
+  "about-upd-desc": "Providing a window into how people are interacting with the CRA online.",
+  "Behind the data": "Behind the data",
+  "behind-data-desc": "This will be a self serve, web-based tool which will put together data from a variety of sources to inform decision making related to CRA's web content. This dashboard helps us understand how people find, access, and use CRA services online.",
+  "Work in progress": "Work in progress",
+  "work-in-progress-desc": "This project is ever evolving. New features and sections have been planned and will be worked in over time.",
+  "More to come": "More to come.",
+  "UPD releases": "UPD releases",
+
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",
   "Get a web access code (WEB)": "Get a web access code (WEB)",
   "Close MyBusiness Account": "Close MyBusiness Account",
