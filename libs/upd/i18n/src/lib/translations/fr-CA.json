@@ -278,6 +278,16 @@
   "inquiry line": "Ligne de renseignements",
   "calldrivers-notification": "Ce rapport présente les résultats des sujets d'appel pour les principales files d'attente d'agents sur la base d'un échantillon aléatoire d'appels.",
 
+  "about-us": "À propos de nous",
+  "about-upd": "À propos du Tableau de bord des performances de convivialité",
+  "about-upd-desc": "Offrir un aperçu sur la façon dont les gens interagissent avec l'ARC en ligne.",
+  "Behind the data": "Derrière les données",
+  "behind-data-desc": "Il s'agira d'un outil Web libre-service qui rassemblera des données provenant de diverses sources afin d'éclairer la prise de décision concernant le contenu Web de l'ARC. Ce tableau de bord nous aide à comprendre comment les gens trouvent, accèdent et utilisent les services de l'ARC en ligne.",
+  "Work in progress": "Travaux en cours",
+  "work-in-progress-desc": "Ce projet est en constante évolution. De nouvelles fonctionnalités et sections ont été prévues et seront intégrées au fil du temps.",
+  "More to come": "Il y a plus à venir.",
+  "UPD releases": "Versions du TBPC",
+
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",
   "Get a web access code (WEB)": "Obtenir un code d'accès Web (CAW)",
   "Close MyBusiness Account": "Fermer Mon dossier d'entreprise",

@@ -59,6 +59,17 @@
       </div>
     </div>
     <div class="mb-4">
+        <a
+          [routerLink]="[langPath | async, 'about-us']"
+          [routerLinkActive]="['active']"
+          [queryParamsHandling]="'merge'"
+          class="nav_link"
+        >
+          <span class="material-icons nav_icon">web_asset</span>
+          <span class="nav_name" data-i18n="about-us">{{
+            'about-us' | translate
+          }}</span>
+        </a>
       <a [href]="'feedback-mailto' | translate" class="nav_link">
         <span class="material-icons nav_icon">feedback</span>
         <span class="nav_name" data-i18n="menu-feedback">{{
