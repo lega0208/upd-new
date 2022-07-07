@@ -52,3 +52,8 @@ services:
           nocopy: true
 volumes:
   db-data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /datadrive/db/data
