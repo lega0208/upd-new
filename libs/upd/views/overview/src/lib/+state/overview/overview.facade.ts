@@ -880,7 +880,7 @@ export class OverviewFacade {
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },
-    { field: 'change', header: 'change', pipe: 'percent' },
+    { field: 'change', header: 'comparison', pipe: 'percent' },
   ]);
 
   top5IncreasedCalldriverTopics$ = this.overviewData$.pipe(
@@ -900,7 +900,7 @@ export class OverviewFacade {
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },
-    { field: 'change', header: 'change', pipe: 'percent' },
+    { field: 'change', header: 'comparison', pipe: 'percent' },
   ]);
 
   top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
@@ -920,7 +920,7 @@ export class OverviewFacade {
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },
-    { field: 'change', header: 'change', pipe: 'percent' },
+    { field: 'change', header: 'comparison', pipe: 'percent' },
   ]);
 
   error$ = this.store.select(OverviewSelectors.selectOverviewError);
