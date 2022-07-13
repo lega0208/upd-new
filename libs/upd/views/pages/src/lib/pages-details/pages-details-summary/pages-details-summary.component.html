@@ -15,6 +15,7 @@
         [comparison$]="visitsPercentChange$"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
+        tabindex="0"
       ></upd-data-card>
     </div>
 
@@ -24,6 +25,7 @@
         [comparison$]="pageViewsPercentChange$"
         [title]="'page-views'"
         [tooltip]="'tooltip-page-views'"
+        tabindex="0"
       ></upd-data-card>
     </div>
   </div>
@@ -38,6 +40,7 @@
         [table]="(barTable$ | async) || []"
         [tableCols]="barTableCols"
         [data]="(visitsByDay$ | async) || []"
+        tabindex="0"
       ></upd-charts>
     </div>
   </div>
@@ -55,6 +58,7 @@
         [tableCols]="visitsByDeviceTypeCols"
         [showLegend]="true"
         [groupPadding]="75"
+        tabindex="0"
       ></upd-charts>
     </div>
   </div>
@@ -68,6 +72,7 @@
         [cols]="topSearchTermsCols"
         [pagination]="false"
         [title]="'top5-search-terms-increase'"
+        tabindex="0"
       >
       </upd-data-table-card>
     </div>
@@ -82,6 +87,7 @@
         [cols]="topSearchTermsCols"
         [pagination]="false"
         [title]="'top5-search-terms-decrease'"
+        tabindex="0"
       >
       </upd-data-table-card>
     </div>
@@ -98,6 +104,7 @@
         [sort]="false"
         [filter]="false"
         [title]="'related-tasks'"
+        tabindex="0"
       >
       </upd-data-table-card>
     </div>

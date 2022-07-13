@@ -14,6 +14,7 @@
         [comparison$]="visitsPercentChange$"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
+        tabindex="0"
       ></upd-data-card>
     </div>
     <div class="col">
@@ -22,6 +23,7 @@
         [comparison$]="pageViewsPercentChange$"
         [title]="'page-views'"
         [tooltip]="'tooltip-page-views'"
+        tabindex="0"
       ></upd-data-card>
     </div>
   </div>
@@ -42,6 +44,7 @@
         [table]="barTable$ | async"
         [convertToLine]="(isChartDataOver31Days$ | async) || false"
         [tableCols]="barTableCols"
+        tabindex="0"
       ></upd-charts>
     </div>
   </div>
@@ -55,6 +58,7 @@
         [comparison$]="gscImpressionsPercentChange$"
         [title]="'total-impressions-google'"
         [tooltip]="'tooltip-total-impressions-google'"
+        tabindex="0"
       ></upd-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
@@ -64,6 +68,7 @@
         [comparison$]="gscCTRPercentChange$"
         [title]="'ctr-google'"
         [tooltip]="'tooltip-ctr-google'"
+        tabindex="0"
       ></upd-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
@@ -73,6 +78,7 @@
         [comparison$]="gscAveragePercentChange$"
         [title]="'avg-rank-google'"
         [tooltip]="'tooltip-avg-rank-google'"
+        tabindex="0"
       ></upd-data-card>
     </div>
   </div>
@@ -104,6 +110,7 @@
         [data]="dyfChart$ | async"
         [type]="'donut'"
         [tableCols]="dyfTableCols"
+        tabindex="0"
       ></upd-charts>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
@@ -113,6 +120,7 @@
         [data]="whatWasWrongChart$ | async"
         [type]="'donut'"
         [tableCols]="whatWasWrongTableCols"
+        tabindex="0"
       ></upd-charts>
     </div>
   </div>

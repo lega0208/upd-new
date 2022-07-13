@@ -5,6 +5,7 @@
         [current$]="visits$"
         [comparison$]="visitsPercentChange$"
         [title]="'Total visits from all pages'"
+        tabindex="0"
       ></upd-data-card>
     </div>
   </div>
@@ -17,6 +18,7 @@
       [data]="(visitsByPage$ | async) || []"
       [cols]="visitsByPageCols"
       [title]="'Visits by page'"
+      tabindex="0"
     >
     </upd-data-table-card>
     </div>

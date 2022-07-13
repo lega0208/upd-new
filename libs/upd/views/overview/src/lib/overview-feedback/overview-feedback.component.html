@@ -7,6 +7,7 @@
         [data]="dyfChart$ | async"
         [type]="'donut'"
         [tableCols]="dyfTableCols"
+        tabindex="0"
       ></upd-charts>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
@@ -16,6 +17,7 @@
         [data]="whatWasWrongChart$ | async"
         [type]="'donut'"
         [tableCols]="whatWasWrongTableCols"
+        tabindex="0"
       ></upd-charts>
     </div>
   </div>
@@ -31,6 +33,7 @@
         [data]="(comparisonFeedbackTable$ | async) || []"
         [cols]="feedbackCols"
         [title]="'top5-programs-most-feedback'"
+        tabindex="0"
       >
       </upd-data-table-card>
     </div>
@@ -47,6 +50,7 @@
         [data]="(comparisonFeedbackPagesTable$ | async) || []"
         [cols]="feedbackPagesTableCols"
         [title]="'top5-pages-most-feedback'"
+        tabindex="0"
       >
       </upd-data-table-card>
     </div>

@@ -7,6 +7,7 @@
         [data]="(visitsByDay$ | async) || []"
         [table]="(barTable$ | async) || []"
         [tableCols]="barTableCols"
+        tabindex="0"
       ></upd-charts>
     </div>
   </div>
@@ -50,6 +51,7 @@
         [cols]="visitorLocationCols"
         [pagination]="false"
         [title]="'visitor-location'"
+        tabindex="0"
       >
       </upd-data-table-card>
     </div>

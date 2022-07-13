@@ -6,6 +6,7 @@
           [comparison$]="gscTotalImpressionsPercentChange$"
           [title]="'total-impressions-google'"
           [tooltip]="'tooltip-impressions-task-google'"
+          tabindex="0"
         ></upd-data-card>
       </div>
       <div class="col">
@@ -15,6 +16,7 @@
           [comparison$]="gscTotalCtrPercentChange$"
           [title]="'ctr-google'"
           [tooltip]="'tooltip-ctr-google'"
+          tabindex="0"
         ></upd-data-card>
       </div>
       <div class="col">
@@ -24,6 +26,7 @@
           [comparison$]="gscTotalPositionPercentChange$"
           [title]="'avg-rank-google'"
           [tooltip]="'tooltip-avg-rank-task-google'"
+          tabindex="0"
         ></upd-data-card>
       </div>
     </div>
@@ -36,6 +39,7 @@
       [data]="(visitsByPage$ | async) || []"
       [cols]="visitsByPageCols"
       [title]="'Breakdown by Page - Search from Google'"
+      tabindex="0"
     >
     </upd-data-table-card>
       </div>
