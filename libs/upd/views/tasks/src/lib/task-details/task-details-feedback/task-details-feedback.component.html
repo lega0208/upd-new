@@ -7,6 +7,7 @@
         [data]="dyfChart$ | async"
         [type]="'donut'"
         [tableCols]="dyfTableCols"
+        tabindex="0"
       ></upd-charts>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
@@ -16,6 +17,7 @@
         [data]="whatWasWrongChart$ | async"
         [type]="'donut'"
         [tableCols]="whatWasWrongTableCols"
+        tabindex="0"
       ></upd-charts>
     </div>
   </div>
@@ -28,6 +30,7 @@
       [data]="(visitsByPage$ | async) || []"
       [cols]="visitsByPageCols"
       [title]="'Breakdown by Page - Did you find what you were looking for?'"
+      tabindex="0"
     >
     </upd-data-table-card>
     </div>
@@ -49,6 +52,7 @@
         yAxisLabel="# of comments"
         xAxisLabel="tags"
         [groupPadding]="75"
+        tabindex="0"
       ></upd-charts>
     </div>
   </div>
@@ -61,6 +65,7 @@
         [title]="'feedback-by-tags'"
         [data]="(feedbackComments$ | async) || []"
         [cols]="feedbackCommentsCols"
+        tabindex="0"
       ></upd-data-table-card>
     </div>
   </div>

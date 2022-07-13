@@ -14,6 +14,7 @@
         [comparison$]="visitsPercentChange$"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
+        tabindex="0"
       ></upd-data-card>
     </div>
     <div class="col">
@@ -22,6 +23,7 @@
         [comparison$]="pageViewsPercentChange$"
         [title]="'page-views'"
         [tooltip]="'tooltip-page-views'"
+        tabindex="0"
       ></upd-data-card>
     </div>
   </div>
@@ -39,6 +41,7 @@
         [convertToLine]="(isChartDataOver31Days$ | async) || false"
         [table]="barTable$ | async"
         [tableCols]="barTableCols"
+        tabindex="0"
       ></upd-charts>
     </div>
   </div>
@@ -54,6 +57,7 @@
         [data]="(topPagesWithChangeData$ | async) || []"
         [cols]="topPagesCols"
         [title]="'top10-pages-visited'"
+        tabindex="0"
       >
       </upd-data-table-card>
     </div>

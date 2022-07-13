@@ -6,6 +6,7 @@
         [date$]="dateFromLastTest$ || ''"
         [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
         [title]="'Average task success from last UX test'"
+        tabindex="0"
       ></upd-data-kpi-card>
     </div>
 
@@ -13,6 +14,7 @@
       <upd-data-card
         [current$]="totalParticipants$"
         [title]="'Total participants from all tests'"
+        tabindex="0"
       ></upd-data-card>
     </div>
     <div class="col-auto"></div>
@@ -30,6 +32,7 @@
         [isPercent]="true"
         [yAxisLabel]="'ux-tests'"
         [xAxisLabel]="'Task success rate (%)'"
+        tabindex="0"
       ></upd-charts>
     </div>
   </div>
@@ -45,6 +48,7 @@
         [sort]="false"
         [pagination]="false"
         [title]="'Success rate and scenarios'"
+        tabindex="0"
       >
       </upd-data-table-card>
     </div>
@@ -61,6 +65,7 @@
         [pagination]="false"
         [filter]="false"
         [title]="'Documents'"
+        tabindex="0"
       ></upd-data-table-card>
     </div>
   </div>

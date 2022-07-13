@@ -6,6 +6,7 @@
       <upd-data-card
         [current$]="numInProgress$"
         [title]="'Projects in progress'"
+        tabindex="0"
       ></upd-data-card>
     </div>
 
@@ -13,6 +14,7 @@
       <upd-data-card
         [current$]="numPlanning$"
         [title]="'Projects in planning'"
+        tabindex="0"
       ></upd-data-card>
     </div>
 
@@ -20,6 +22,7 @@
       <upd-data-card
         [current$]="totalCompleted$"
         [title]="'Projects completed'"
+        tabindex="0"
       ></upd-data-card>
     </div>
 
@@ -27,6 +30,7 @@
       <upd-data-card
         [current$]="completedCOPS$"
         [title]="'COPS projects completed'"
+        tabindex="0"
       ></upd-data-card>
     </div>
 
@@ -39,7 +43,7 @@
   </div>
 </div>
 
-<upd-card>
+<upd-card tabindex="0">
   <upd-data-table
     [captionTitle]="'List of all projects'"
     [data]="(tableData$ | async) || []"
