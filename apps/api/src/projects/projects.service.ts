@@ -70,6 +70,30 @@ const projectStatusSwitchExpression = {
         },
         then: 'Planning',
       },
+      {
+        case: {
+          $in: ['Discovery', '$statuses'],
+        },
+        then: 'Discovery',
+      },
+      {
+        case: {
+          $in: ['Being monitored', '$statuses'],
+        },
+        then: 'Being monitored',
+      },
+      {
+        case: {
+          $in: ['Needs review', '$statuses'],
+        },
+        then: 'Needs review',
+      },
+      {
+        case: {
+          $in: ['Paused', '$statuses'],
+        },
+        then: 'Paused',
+      },
     ],
     default: 'Unknown',
   },
@@ -89,6 +113,14 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
       return 'In Progress';
     case statuses.some((status) => status === 'Planning'):
       return 'Planning';
+    case statuses.some((status) => status === 'Discovery'):
+      return 'Discovery';
+    case statuses.some((status) => status === 'Being monitored'):
+      return 'Being monitored';
+    case statuses.some((status) => status === 'Needs review'):
+      return 'Needs review';
+    case statuses.some((status) => status === 'Paused'):
+      return 'Paused';
     default:
       return 'Unknown';
   }
