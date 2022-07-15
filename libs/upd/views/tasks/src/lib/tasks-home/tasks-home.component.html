@@ -2,6 +2,16 @@
 
 <upd-date-selector></upd-date-selector>
 
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <upd-data-card
+      [current$]="totalTasks$"
+      [title]="'tasks'"
+      [tooltip]="'tooltip-total-tasks'"
+    ></upd-data-card>
+  </div>
+</div>
+
 <upd-card>
   <upd-data-table
     [captionTitle]="'List of all tasks'"

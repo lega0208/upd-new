@@ -17,19 +17,31 @@ export class OverviewCalldriversComponent implements OnInit {
   dateRangeLabel$ = this.overviewService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
 
+  currentCallVolume$ = this.overviewService.currentCallVolume$;
+  callPercentChange$ = this.overviewService.callPercentChange$;
+
   calldriversChart$ = this.overviewService.calldriversChart$;
   calldriversTable$ = this.overviewService.calldriversTable$;
-  calldriversCols: ColumnConfig<{ name: string; currValue: number; prevValue: number }>[] = [];
+  calldriversCols: ColumnConfig<{
+    name: string;
+    currValue: number;
+    prevValue: number;
+  }>[] = [];
   chartsCols: ColumnConfig[] = [];
 
   top5CalldriverTopics$ = this.overviewService.top5CalldriverTopics$;
-  top5CalldriverTopicsConfig$ = this.overviewService.top5CalldriverTopicsConfig$;
+  top5CalldriverTopicsConfig$ =
+    this.overviewService.top5CalldriverTopicsConfig$;
 
-  top5IncreasedCalldriverTopics$ = this.overviewService.top5IncreasedCalldriverTopics$;
-  top5IncreasedCalldriverTopicsConfig$ = this.overviewService.top5IncreasedCalldriverTopicsConfig$;
+  top5IncreasedCalldriverTopics$ =
+    this.overviewService.top5IncreasedCalldriverTopics$;
+  top5IncreasedCalldriverTopicsConfig$ =
+    this.overviewService.top5IncreasedCalldriverTopicsConfig$;
 
-  top5DecreasedCalldriverTopics$ = this.overviewService.top5DecreasedCalldriverTopics$;
-  top5DecreasedCalldriverTopicsConfig$ = this.overviewService.top5DecreasedCalldriverTopicsConfig$;
+  top5DecreasedCalldriverTopics$ =
+    this.overviewService.top5DecreasedCalldriverTopics$;
+  top5DecreasedCalldriverTopicsConfig$ =
+    this.overviewService.top5DecreasedCalldriverTopicsConfig$;
 
   constructor(
     private overviewService: OverviewFacade,
@@ -37,24 +49,39 @@ export class OverviewCalldriversComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.i18n.service.onLangChange(
-      ({ lang }) => { this.currentLang = lang as LocaleId; }
-    );
+    this.i18n.service.onLangChange(({ lang }) => {
+      this.currentLang = lang as LocaleId;
+    });
 
-    combineLatest([this.currentLang$, this.dateRangeLabel$, this.comparisonDateRangeLabel$]).subscribe(([lang, dateRange, comparisonDateRange]) => {
+    combineLatest([
+      this.currentLang$,
+      this.dateRangeLabel$,
+      this.comparisonDateRangeLabel$,
+    ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
       this.chartsCols = [
         { field: 'Topic', header: this.i18n.service.translate('topic', lang) },
         {
-          field: this.i18n.service.translate('Number of calls for', lang, {value: ' Feb 27-Mar 05'}),
-          header: this.i18n.service.translate('Number of calls for', lang, {value: ' Feb 27-Mar 05'})
+          field: this.i18n.service.translate('Number of calls for', lang, {
+            value: ' Feb 27-Mar 05',
+          }),
+          header: this.i18n.service.translate('Number of calls for', lang, {
+            value: ' Feb 27-Mar 05',
+          }),
         },
         {
-          field: this.i18n.service.translate('Number of calls for', lang, {value: ' Mar 06-Mar 12'}),
-          header: this.i18n.service.translate('Number of calls for', lang, {value: ' Mar 06-Mar 12'})
+          field: this.i18n.service.translate('Number of calls for', lang, {
+            value: ' Mar 06-Mar 12',
+          }),
+          header: this.i18n.service.translate('Number of calls for', lang, {
+            value: ' Mar 06-Mar 12',
+          }),
         },
       ];
       this.calldriversCols = [
-        { field: 'name', header: this.i18n.service.translate('Inquiry line', lang) },
+        {
+          field: 'name',
+          header: this.i18n.service.translate('Inquiry line', lang),
+        },
         {
           field: 'currValue',
           header: dateRange,
@@ -68,5 +95,4 @@ export class OverviewCalldriversComponent implements OnInit {
       ];
     });
   }
-
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, debounceTime, map, mergeMap, of } from 'rxjs';
+import { combineLatest, debounceTime, map, mergeMap, of, pluck } from 'rxjs';
 
 import dayjs, { QUnitType } from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
@@ -482,6 +482,39 @@ export class OverviewFacade {
       return [...bar, ...calls];
     })
   );
+
+  currentCallVolume$ = this.overviewData$.pipe(
+    map(
+      (data) =>
+        data?.dateRangeData?.calldriversEnquiry.reduce(
+          (totalCalls, enquiryLineCalls) => totalCalls + enquiryLineCalls.sum,
+          0
+        ) || 0
+    )
+  );
+
+  comparisonCallVolume$ = this.overviewData$.pipe(
+    map(
+      (data) =>
+        data?.comparisonDateRangeData?.calldriversEnquiry.reduce(
+          (totalCalls, enquiryLineCalls) => totalCalls + enquiryLineCalls.sum,
+          0
+        ) || 0
+    )
+  );
+
+  callPercentChange$ = combineLatest([
+    this.currentCallVolume$,
+    this.comparisonCallVolume$,
+  ]).pipe(
+    map(([currentCalls, comparisonCalls]) =>
+      percentChange(currentCalls, comparisonCalls)
+    )
+  );
+
+  //   currentCalls$ = this.overviewData$.pipe(
+  //     pluck('dateRangeData', 'calldriversEnquiry', 'sum')
+  //   );
 
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
