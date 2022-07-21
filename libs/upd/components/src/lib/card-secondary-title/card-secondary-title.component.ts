@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ColumnConfig } from '../data-table-styles/types';
 
 @Component({
@@ -6,11 +6,9 @@ import { ColumnConfig } from '../data-table-styles/types';
   templateUrl: './card-secondary-title.component.html',
   styleUrls: ['./card-secondary-title.component.scss'],
 })
-export class CardSecondaryTitleComponent implements OnInit {
+export class CardSecondaryTitleComponent {
   @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() data: Record<string, number | string>[] = [];
 
   constructor() {}
-
-  ngOnInit(): void {}
 }
