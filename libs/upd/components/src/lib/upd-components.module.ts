@@ -40,7 +40,6 @@ import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.compo
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import { ProjectHeaderComponent } from './project-header/project-header.component';
-import { Charts2Component } from './charts2/charts2.component';
 import { CardSecondaryTitleComponent } from './card-secondary-title/card-secondary-title.component';
 
 @NgModule({
@@ -82,7 +81,6 @@ import { CardSecondaryTitleComponent } from './card-secondary-title/card-seconda
     Page404Component,
     LoadingSpinnerComponent,
     ProjectHeaderComponent,
-    Charts2Component,
     CardSecondaryTitleComponent,
   ],
   exports: [
@@ -111,7 +109,6 @@ import { CardSecondaryTitleComponent } from './card-secondary-title/card-seconda
     Page404Component,
     LoadingSpinnerComponent,
     ProjectHeaderComponent,
-    Charts2Component,
     CardSecondaryTitleComponent,
   ],
 })
