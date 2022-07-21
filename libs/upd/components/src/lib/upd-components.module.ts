@@ -82,7 +82,6 @@ import { CardSecondaryTitleComponent } from './card-secondary-title/card-seconda
     Page404Component,
     LoadingSpinnerComponent,
     ProjectHeaderComponent,
-    Charts2Component,
     CardSecondaryTitleComponent,
   ],
   exports: [
@@ -111,7 +110,6 @@ import { CardSecondaryTitleComponent } from './card-secondary-title/card-seconda
     Page404Component,
     LoadingSpinnerComponent,
     ProjectHeaderComponent,
-    Charts2Component,
     CardSecondaryTitleComponent,
   ],
 })
