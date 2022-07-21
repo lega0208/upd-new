@@ -1,0 +1,13 @@
+<div *ngIf="data.length > 0">
+  <ng-container *ngFor="let d of data; let i = index">
+    <a
+      *ngIf="config.typeParams"
+      [routerLink]="[config.typeParams.preLink, d[config.typeParams.link]]"
+      [queryParamsHandling]="'merge'"
+      >{{ d[config.field] }}</a
+    >
+    <ng-container *ngIf="!(i === data.length - 1)"
+      >&NonBreakingSpace;/&NonBreakingSpace;</ng-container
+    >
+  </ng-container>
+</div>

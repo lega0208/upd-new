@@ -618,5 +618,9 @@
   "Projects | Page feedback": "Projets | Rétroaction sur la page",
   "Projects | Call drivers": "Projets | Facteurs générateurs d'appels",
   "Projects | UX tests": "Projets | Essais sur l'expérience utilisateur",
-  "Projects | Details": "Projets | Détails"
+  "Projects | Details": "Projets | Détails",
+
+  "View more traffic data": "Afficher plus de données sur le trafic",
+  "View more call drivers data": "Afficher plus de données sur les facteurs générateurs d'appels",
+  "View more page feedback data": "Afficher plus de données sur les rétroactions sur la page"
 }

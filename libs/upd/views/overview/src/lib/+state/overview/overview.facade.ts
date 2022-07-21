@@ -698,6 +698,23 @@ export class OverviewFacade {
     })
   );
 
+  dyfDataApex$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map(([data, lang]) => {
+      const pieChartData: any = [
+        data?.dateRangeData?.dyf_yes || 0,
+        data?.dateRangeData?.dyf_no || 0,
+      ];
+
+      const isZero = pieChartData.every((v: number) => v === 0);
+      if (isZero) {
+        return [];
+      }
+
+      return pieChartData;
+    })
+  );
+
   whatWasWrongData$ = combineLatest([
     this.overviewData$,
     this.currentLang$,

@@ -22,5 +22,8 @@
     "upd-views-projects": "libs/upd/views/projects",
     "upd-views-tasks": "libs/upd/views/tasks",
     "utils-common": "libs/utils-common"
-  }
+  },
+  "scripts": [
+    "node_modules/apexcharts/dist/apexcharts.min.js"
+  ]
 }

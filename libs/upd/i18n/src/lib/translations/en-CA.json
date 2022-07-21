@@ -618,5 +618,9 @@
   "Projects | Page feedback": "Projects | Page feedback",
   "Projects | Call drivers": "Projects | Call drivers",
   "Projects | UX tests": "Projects | UX tests",
-  "Projects | Details": "Projects | Details"
+  "Projects | Details": "Projects | Details",
+
+  "View more traffic data": "View more traffic data",
+  "View more call drivers data": "View more call drivers data",
+  "View more page feedback data": "View more page feedback data"
 }

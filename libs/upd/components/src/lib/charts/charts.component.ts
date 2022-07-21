@@ -36,6 +36,8 @@ export class ChartsComponent implements OnInit {
 
   dayjs = dayjs;
 
+  @Input() secondaryTitleCols: ColumnConfig = { field: '', header: '' };
+  @Input() secondaryTitleData: Record<string, number | string>[] = [];
   @Input() title = '';
   @Input() titleTooltip = '';
   @Input() currentLang$ = this.i18n.currentLang$;
