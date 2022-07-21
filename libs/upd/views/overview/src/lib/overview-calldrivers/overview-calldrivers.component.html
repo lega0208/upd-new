@@ -1,8 +1,20 @@
-
 <upd-alert [type]="'info'" [dismissible]="false" [selfClosing]="false">
   <span class="material-icons align-top pe-1">info</span>
   <span [translate]="'calldrivers-notification'"></span>
 </upd-alert>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-card
+        [current$]="currentCallVolume$"
+        [comparison$]="callPercentChange$"
+        [title]="'Call volume'"
+        [tooltip]="'tooltip-call-volume'"
+      ></upd-data-card>
+    </div>
+  </div>
+</div>
 
 <div class="container-fluid gx-0">
   <div class="row">
@@ -15,7 +27,7 @@
         [displayLegend]="'below'"
         [groupPadding]="75"
         [showLegend]="true"
-        [data]="(calldriversChart$ |async) || []"
+        [data]="(calldriversChart$ | async) || []"
         [table]="calldriversTable$ | async"
         [tableCols]="calldriversCols"
         [type]="'grouped-bar'"

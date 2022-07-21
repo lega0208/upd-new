@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { combineLatest } from 'rxjs';
+import { combineLatest, observable } from 'rxjs';
 
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
@@ -14,15 +14,18 @@ import { TasksHomeFacade } from './+state/tasks-home.facade';
 export class TasksHomeComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
 
+  totalTasks$ = this.tasksHomeService.totalTasks$;
   tasksHomeData$ = this.tasksHomeService.tasksHomeTableData$;
 
   columns: ColumnConfig<TasksHomeAggregatedData>[] = [];
   searchFields = this.columns.map((col) => col.field);
 
-  constructor(private readonly tasksHomeService: TasksHomeFacade, private i18n: I18nFacade) {}
+  constructor(
+    private readonly tasksHomeService: TasksHomeFacade,
+    private i18n: I18nFacade
+  ) {}
 
   ngOnInit() {
-
     this.tasksHomeService.init();
 
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
@@ -45,7 +48,7 @@ export class TasksHomeComponent implements OnInit {
           field: 'visits',
           header: this.i18n.service.translate('visits', lang),
           pipe: 'number',
-        }
+        },
       ];
     });
   }

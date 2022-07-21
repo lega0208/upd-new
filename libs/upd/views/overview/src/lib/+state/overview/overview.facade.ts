@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, debounceTime, map, mergeMap, of } from 'rxjs';
+import { combineLatest, debounceTime, map, mergeMap, of, pluck } from 'rxjs';
 
 import dayjs, { QUnitType } from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
@@ -483,6 +483,39 @@ export class OverviewFacade {
     })
   );
 
+  currentCallVolume$ = this.overviewData$.pipe(
+    map(
+      (data) =>
+        data?.dateRangeData?.calldriversEnquiry.reduce(
+          (totalCalls, enquiryLineCalls) => totalCalls + enquiryLineCalls.sum,
+          0
+        ) || 0
+    )
+  );
+
+  comparisonCallVolume$ = this.overviewData$.pipe(
+    map(
+      (data) =>
+        data?.comparisonDateRangeData?.calldriversEnquiry.reduce(
+          (totalCalls, enquiryLineCalls) => totalCalls + enquiryLineCalls.sum,
+          0
+        ) || 0
+    )
+  );
+
+  callPercentChange$ = combineLatest([
+    this.currentCallVolume$,
+    this.comparisonCallVolume$,
+  ]).pipe(
+    map(([currentCalls, comparisonCalls]) =>
+      percentChange(currentCalls, comparisonCalls)
+    )
+  );
+
+  //   currentCalls$ = this.overviewData$.pipe(
+  //     pluck('dateRangeData', 'calldriversEnquiry', 'sum')
+  //   );
+
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
   barTable$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
@@ -897,7 +930,7 @@ export class OverviewFacade {
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },
-    { field: 'change', header: 'change', pipe: 'percent' },
+    { field: 'change', header: 'comparison', pipe: 'percent' },
   ]);
 
   top5IncreasedCalldriverTopics$ = this.overviewData$.pipe(
@@ -917,7 +950,7 @@ export class OverviewFacade {
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },
-    { field: 'change', header: 'change', pipe: 'percent' },
+    { field: 'change', header: 'comparison', pipe: 'percent' },
   ]);
 
   top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
@@ -937,7 +970,7 @@ export class OverviewFacade {
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },
-    { field: 'change', header: 'change', pipe: 'percent' },
+    { field: 'change', header: 'comparison', pipe: 'percent' },
   ]);
 
   error$ = this.store.select(OverviewSelectors.selectOverviewError);

@@ -18,9 +18,9 @@ export class ProjectStatusLabelComponent {
     Complete: 'bg-complete',
     Delayed: 'bg-delayed',
     // todo: add missing classes
-    Discovery: '',
-    'Being monitored': '',
-    'Needs review': '',
-    Paused: '',
+    Discovery: 'bg-discovery',
+    'Being monitored': 'bg-being-monitored',
+    'Needs review': 'bg-needs-review',
+    Paused: 'bg-paused',
   };
 }
