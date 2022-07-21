@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { combineLatest } from 'rxjs';
 
@@ -50,6 +50,12 @@ export class OverviewSummaryComponent implements OnInit {
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
 
   isChartDataOver31Days$ = this.overviewService.isChartDataOver31Days$;
+  dyfChartLegend: string[] = [];
+  langLink = 'en';
+  chartCols: ColumnConfig = { field: '', header: '' };
+  chartData: { text: string; link: string }[] = [];
+  donutChartCols: ColumnConfig = { field: '', header: '' };
+  donutChartData: { text: string; link: string }[] = [];
 
   constructor(
     private overviewService: OverviewFacade,
@@ -73,6 +79,12 @@ export class OverviewSummaryComponent implements OnInit {
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
     ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
+
+      this.dyfChartLegend = [
+        this.i18n.service.translate('yes', lang),
+        this.i18n.service.translate('no', lang),
+      ];
       this.dyfTableCols = [
         {
           field: 'name',
@@ -131,6 +143,50 @@ export class OverviewSummaryComponent implements OnInit {
             'Task Success Survey Completed',
             lang
           ),
+        },
+      ];
+
+      this.chartCols = {
+        field: 'text',
+        header: 'secondaryTitle',
+        type: 'link',
+        typeParams: {
+          preLink: '/' + this.langLink + '/overview/',
+          link: 'link',
+        },
+      } as ColumnConfig;
+
+      this.chartData = [
+        {
+          text: this.i18n.service.translate('View more traffic data', lang),
+          link: 'webtraffic',
+        },
+        {
+          text: this.i18n.service.translate(
+            'View more call drivers data',
+            lang
+          ),
+          link: 'calldrivers',
+        },
+      ];
+
+      this.donutChartCols = {
+        field: 'text',
+        header: 'secondaryTitle',
+        type: 'link',
+        typeParams: {
+          preLink: '/' + this.langLink + '/overview/',
+          link: 'link',
+        },
+      } as ColumnConfig;
+
+      this.donutChartData = [
+        {
+          text: this.i18n.service.translate(
+            'View more page feedback data',
+            lang
+          ),
+          link: 'pagefeedback',
         },
       ];
     });

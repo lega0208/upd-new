@@ -9,6 +9,9 @@ import {
   NgbModalModule,
   NgbTooltipModule,
 } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgApexchartsModule,
+} from 'ng-apexcharts';
 import { NgxChartsModule } from '@amonsour/ngx-charts';
 import { CardComponent } from './card/card.component';
 import { DataCardComponent } from './data-card/data-card.component';
@@ -37,6 +40,8 @@ import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.compo
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import { ProjectHeaderComponent } from './project-header/project-header.component';
+import { Charts2Component } from './charts2/charts2.component';
+import { CardSecondaryTitleComponent } from './card-secondary-title/card-secondary-title.component';
 
 @NgModule({
   imports: [
@@ -54,6 +59,7 @@ import { ProjectHeaderComponent } from './project-header/project-header.componen
     InputTextModule,
     NgbModule,
     I18nModule,
+    NgApexchartsModule
   ],
   declarations: [
     CardComponent,
@@ -76,6 +82,8 @@ import { ProjectHeaderComponent } from './project-header/project-header.componen
     Page404Component,
     LoadingSpinnerComponent,
     ProjectHeaderComponent,
+    Charts2Component,
+    CardSecondaryTitleComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -103,6 +111,8 @@ import { ProjectHeaderComponent } from './project-header/project-header.componen
     Page404Component,
     LoadingSpinnerComponent,
     ProjectHeaderComponent,
+    Charts2Component,
+    CardSecondaryTitleComponent,
   ],
 })
 export class UpdComponentsModule {}
