@@ -14,7 +14,7 @@ import { TranslateService } from '@ngx-translate/core';
         ngbDropdownToggle
         translate="{{ selectedPeriod | async}}"
       >
-        <span class="material-icons align-top pe-1">calendar_today</span>
+        <span class="material-icons align-top pe-1" aria-hidden="true">calendar_today</span>
         <span></span>&nbsp;
       </button>
       <div ngbDropdownMenu aria-labelledby="range-button">

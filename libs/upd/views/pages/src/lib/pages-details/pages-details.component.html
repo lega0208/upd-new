@@ -22,8 +22,8 @@
   >
   <div class="page_header back_link">
     <span id="page_project">
-      <span id="view_url" (click)="toggleUrl()">
-        <span class="material-icons align-top">link</span>
+      <span id="view_url" (click)="toggleUrl()" tabindex="0">
+        <span class="material-icons align-top" aria-hidden="true">link</span>
         <span class="m-0" translate
           ><ng-container *ngIf="!showUrl"> View URL</ng-container></span
         >
@@ -37,7 +37,8 @@
         [cdkCopyToClipboardAttempts]="5"
         (click)="toggleAlert()"
         translate
-        ><span class="material-icons align-top">content_copy</span> Copy
+        tabindex="0"
+        ><span class="material-icons align-top" aria-hidden="true">content_copy</span> Copy
         URL</span
       >
       <ng-container *ngIf="showAlert">
