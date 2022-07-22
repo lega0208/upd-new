@@ -5,7 +5,7 @@ import { ColumnConfig } from '../data-table-styles/types';
 @Component({
   selector: 'upd-card',
   template: `
-    <div class="card pt-2" [ngClass]="h !== 0 ? 'h-' + h : ''">
+    <div class="card pt-2" [ngClass]="h !== 0 ? 'h-' + h : ''" tabindex="0">
       <div class="card-body card-pad pt-2 h-100">
         <div class="d-flex justify-content-between">
           <h3
