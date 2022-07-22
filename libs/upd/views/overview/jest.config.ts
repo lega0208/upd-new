@@ -12,6 +12,9 @@ export default {
   transform: {
     '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
   },
+  moduleNameMapper: {
+    '^d3-(.*)$': `d3-$1/dist/d3-$1`,
+  },
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',

@@ -16,10 +16,10 @@ import { I18nFacade } from '@dua-upd/upd/state';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 registerLocaleData(localeFr);
-import dayjs from 'dayjs/esm';
-import utc from 'dayjs/esm/plugin/utc';
-import 'dayjs/esm/locale/en-ca';
-import 'dayjs/esm/locale/fr-ca';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import 'dayjs/locale/en-ca';
+import 'dayjs/locale/fr-ca';
 
 dayjs.extend(utc);
 

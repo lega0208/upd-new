@@ -4,9 +4,9 @@ import { DateSelectionFacade, DateRangePeriod } from '@dua-upd/upd/state';
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 
-import dayjs from 'dayjs/esm';
-import 'dayjs/esm/locale/en-ca';
-import 'dayjs/esm/locale/fr-ca';
+import dayjs from 'dayjs';
+import 'dayjs/locale/en-ca';
+import 'dayjs/locale/fr-ca';
 
 @Component({
   selector: 'upd-date-selector',
