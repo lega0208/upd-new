@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, debounceTime, map, mergeMap, of, pluck } from 'rxjs';
 
-import dayjs, { QUnitType } from 'dayjs/esm';
-import utc from 'dayjs/esm/plugin/utc';
-import isSameOrBefore from 'dayjs/esm/plugin/isSameOrBefore';
-import quarterOfYear from 'dayjs/esm/plugin/quarterOfYear';
-import 'dayjs/esm/locale/en-ca';
-import 'dayjs/esm/locale/fr-ca';
+import dayjs, { QUnitType } from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import quarterOfYear from 'dayjs/plugin/quarterOfYear';
+import 'dayjs/locale/en-ca';
+import 'dayjs/locale/fr-ca';
 
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
