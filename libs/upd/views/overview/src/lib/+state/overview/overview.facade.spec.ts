@@ -44,5 +44,9 @@ describe('OverviewFacade', () => {
       class RootModule {}
       TestBed.configureTestingModule({ imports: [RootModule] });
     });
+
+    it('should create', () => {
+      expect(OverviewFacade).toBeTruthy();
+    });
   });
 });
