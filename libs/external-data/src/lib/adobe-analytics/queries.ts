@@ -12,7 +12,7 @@ export const overallMetricsQueryConfig: MetricsConfig = {
   visits: 'metrics/visits',
   visitors: 'metrics/visitors',
   views: 'metrics/pageviews',
-  average_time_spent: 'metrics/averagetimespentonsite', // this is probably the wrong metric
+  average_time_spent: 'metrics/timespentvisit', // this is most likely correct, used on PAT/PP Workspace
   dyf_submit: 'metrics/event85',
   dyf_yes: 'metrics/event83',
   dyf_no: 'metrics/event84',

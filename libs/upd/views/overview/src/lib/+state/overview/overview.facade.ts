@@ -310,7 +310,7 @@ export class OverviewFacade {
         };
       });
 
-      console.log(visitsByDaySeries);
+      //console.log(visitsByDaySeries);
 
       if (dateRangePeriod !== 'weekly' && dateRangePeriod !== 'monthly') {
         visitsByDayData = [
@@ -476,7 +476,7 @@ export class OverviewFacade {
     map(([dateRangePeriod, bar, calls]) => {
       const isOver =
         dateRangePeriod !== 'weekly' && dateRangePeriod !== 'monthly' ? 1 : 0;
-      console.log(isOver);
+      //console.log(isOver);
       if (!isOver) return;
 
       return [...bar, ...calls];
