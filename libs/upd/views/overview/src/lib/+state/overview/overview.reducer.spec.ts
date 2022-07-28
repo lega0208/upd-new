@@ -23,15 +23,23 @@ describe('Overview Reducer', () => {
         provideMockStore(),
       ],
     });
-
 //    effects = TestBed.inject(OverviewEffects);
   });
 
   it('should return the default state', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const action = {type: 'NOOP'} as any;
+
     const result = overviewReducer(undefined, action);
     expect(result).toBe(initialState);
+  });
+
+  it('init should return the loading state', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const action = {type: '[Overview Page] Init'} as any;
+
+    const result = overviewReducer(undefined, action);
+    expect(result.loading).toBe(true);
   });
 
   /**
