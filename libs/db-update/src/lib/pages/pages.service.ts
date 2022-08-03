@@ -1,6 +1,6 @@
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import axios from 'axios';
@@ -44,9 +44,7 @@ export async function* getPageDataWithRateLimit(
 
   const timer = setInterval(() => {
     logger.log(
-      `\r\n${numProcessed}/${
-        pagesInitialLength
-      } page titles/urls checked - ${getPercentDone()}% complete\r\n` +
+      `\r\n${numProcessed}/${pagesInitialLength} page titles/urls checked - ${getPercentDone()}% complete\r\n` +
         `Estimated time remaining: ${getETA()}\r\n`
     );
   }, 2500);
@@ -221,9 +219,9 @@ export class PageUpdateService {
     // Get list of duplicated urls
     const results = await this.pageModel
       .aggregate<{ urls: string[] }>()
-      .sort({ url: 1 })
+      .unwind('$all_urls')
       .group({
-        _id: '$url',
+        _id: '$all_urls',
         count: {
           $sum: 1,
         },
@@ -241,7 +239,7 @@ export class PageUpdateService {
       })
       .exec();
 
-    if (results.length !== 1) {
+    if (!results.length || !results[0].urls.length) {
       this.logger.log('No duplicates found.');
       return;
     }
@@ -259,7 +257,11 @@ export class PageUpdateService {
 
     // for each url, get all page documents
     for (const url of urls) {
-      const pages = await this.pageModel.find({ url }).exec();
+      const pages = await this.pageModel.find({ all_urls: url }).exec();
+
+      if (!pages || !pages.length) {
+        this.logger.error(`Could not find pages for url: ${url}`);
+      }
 
       // addToSet all tasks, projects, tests, & all_urls
       //    -> for tasks, projects, & tests of docs being deleted:- delete refs after deleting page doc
@@ -281,6 +283,19 @@ export class PageUpdateService {
       // arbitrarily choose the first one as main document
       const mainDocument = pages.pop();
 
+      // if main document doesn't have an airtable id, set it to the first one found, if any.
+      const airtableId =
+        mainDocument.airtable_id ||
+        pages.reduce(
+          (airtableId, page) => airtableId || page.airtable_id,
+          null
+        );
+
+      const airtableIdUpdate =
+        airtableId && airtableId !== mainDocument.airtable_id
+          ? { $set: { airtable_id: airtableId } }
+          : {};
+
       // page consolidation ops: (update main document + delete rest)
       updatePageOps.push({
         updateOne: {
@@ -292,6 +307,7 @@ export class PageUpdateService {
               ux_tests: { $each: pageArrays.ux_tests },
               all_urls: { $each: pageArrays.all_urls },
             },
+            ...airtableIdUpdate,
           },
         },
       });
@@ -350,9 +366,9 @@ export class PageUpdateService {
     );
     const newResults = await this.pageModel
       .aggregate<{ urls: string[] }>()
-      .sort({ url: 1 })
+      .unwind('$all_urls')
       .group({
-        _id: '$url',
+        _id: '$all_urls',
         count: {
           $sum: 1,
         },
@@ -370,8 +386,7 @@ export class PageUpdateService {
       })
       .exec();
 
-    const numDups =
-      !newResults.length || newResults[0]?.urls?.length ? 0 : newResults.length;
+    const numDups = newResults[0]?.urls?.length ?? 0;
 
     const logType = numDups > 0 ? 'error' : 'log';
 
