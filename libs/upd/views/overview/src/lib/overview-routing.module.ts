@@ -18,32 +18,32 @@ const routes: Routes = [
       {
         path: 'summary',
         component: OverviewSummaryComponent,
-        data: { title: 'UPD | Overview | Summary' },
+        data: { title: 'Overview | Summary' },
       },
       {
         path: 'webtraffic',
         component: OverviewWebtrafficComponent,
-        data: { title: 'UPD | Overview | Web traffic' },
+        data: { title: 'Overview | Web traffic' },
       },
       {
         path: 'searchanalytics',
         component: OverviewSearchAnalyticsComponent,
-        data: { title: 'UPD | Overview | Search analytics' },
+        data: { title: 'Overview | Search analytics' },
       },
       {
         path: 'pagefeedback',
         component: OverviewFeedbackComponent,
-        data: { title: 'UPD | Overview | Page feedback' },
+        data: { title: 'Overview | Page feedback' },
       },
       {
         path: 'calldrivers',
         component: OverviewCalldriversComponent,
-        data: { title: 'UPD | Overview | Call drivers' },
+        data: { title: 'Overview | Call drivers' },
       },
       {
         path: 'uxtests',
         component: OverviewUxTestsComponent,
-        data: { title: 'UPD | Overview | UX tests' },
+        data: { title: 'Overview | UX tests' },
       },
     ],
   },
