@@ -1,7 +1,10 @@
 // Utilities for timeouts, retries, and request throttling, etc.
 
 import { DateRange } from './types';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 export const withTimeout = <T>(
   fn: () => Promise<T>,
@@ -50,59 +53,32 @@ export const withRetry = (fn, retries, delay) => {
     });
 };
 
-// can't use right now because of how the timeout function had to be implemented
-export const withResilience = (fn, options = {}) => {
-  const opts = {
-    retries: 3,
-    delay: 500,
-    timeout: 15000,
-    ...options,
-  };
-
-  return withRetry(withTimeout(fn, opts.timeout), opts.retries, opts.delay);
-};
-
-// not currently working... all promises run after the first batch for some reason
-export function withRateLimit<T, U extends unknown[]>(
-  func: (...args: U) => Promise<T>,
-  numCallsPerSecond: number
-) {
-  const active = { count: 0 };
-
-  func = func.bind(this);
-
-  async function waitForQueue(...args: U) {
-    active.count++;
-    const result = await func(...args);
-    console.log('complete!');
-    active.count--;
-
-    return result;
-  }
-
-  return async function (...args: U) {
-    while (active.count >= numCallsPerSecond) {
-      console.log('waiting...');
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1000 / numCallsPerSecond)
-      );
-    }
-
-    return await waitForQueue(...args);
-  };
-}
-
 // For GSC or AA page queries, because they're only done on individual dates
-export function datesFromDateRange(dateRange: DateRange, format = 'YYYY-MM-DD') {
-  const dates = [];
-  let currentDate = dayjs(dateRange.start);
-  const endDate = dayjs(dateRange.end);
+/**
+ *
+ * @param dateRange DateRange object specifying the start and end dates
+ * @param format The format of the date string, or false to return as Date objects
+ * @param inclusive Whether or not to include the end date in the range (AA is exclusive)
+ */
+export function singleDatesFromDateRange(
+  dateRange: DateRange,
+  format: string | false = 'YYYY-MM-DD',
+  inclusive = false
+): Date[] | string[] {
+  const dates: Dayjs[] = [];
 
-  // doesn't include end date, which is what we want because AA date range doesn't include the end date
+  let currentDate = dayjs.utc(dateRange.start);
+
+  const endDate = inclusive
+    ? dayjs.utc(dateRange.end).add(1, 'day')
+    : dayjs.utc(dateRange.end);
+
   while (!currentDate.isSame(endDate, 'day')) {
-    dates.push(currentDate.format(format));
+    dates.push(currentDate);
     currentDate = currentDate.add(1, 'day');
   }
 
-  return dates;
+  return format
+    ? dates.map((date) => date.format(format))
+    : dates.map((date) => date.toDate());
 }

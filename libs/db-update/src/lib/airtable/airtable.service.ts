@@ -1,28 +1,31 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Document, Model, Types } from 'mongoose';
-import { AirtableClient, PageData, TaskData, UxTestData } from '@dua-upd/external-data';
+import {
+  AirtableClient,
+  PageData,
+  TaskData,
+  UxTestData,
+} from '@dua-upd/external-data';
 import {
   CallDriver,
   Feedback,
   Page,
+  PagesList,
   Project,
   Task,
-  UxTest
+  UxTest,
 } from '@dua-upd/db';
 import type {
   CallDriverDocument,
   FeedbackDocument,
   PageDocument,
+  PagesListDocument,
   ProjectDocument,
   TaskDocument,
   UxTestDocument,
 } from '@dua-upd/db';
-import type {
-  UxApiData,
-  UxApiDataType,
-  UxData
-} from './types';
+import type { UxApiData, UxApiDataType, UxData } from './types';
 import { WithObjectId } from '@dua-upd/utils-common';
 import { assertHasUrl, assertObjectId } from './utils';
 
@@ -35,6 +38,8 @@ export class AirtableService {
     private calldriverModel: Model<CallDriverDocument>,
     @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>,
     @InjectModel(Page.name) private pageModel: Model<PageDocument>,
+    @InjectModel(PagesList.name)
+    private pageListModel: Model<PagesListDocument>,
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>
@@ -158,7 +163,8 @@ export class AirtableService {
   }
 
   async getAndPrepareUxData(): Promise<UxData> {
-    const { tasksData, uxTestData, pageData, tasksTopicsMap } = await this.getUxData();
+    const { tasksData, uxTestData, pageData, tasksTopicsMap } =
+      await this.getUxData();
 
     const airtableIdToObjectIdMaps = {
       tasks: new Map<string, Types.ObjectId>(),
@@ -267,7 +273,8 @@ export class AirtableService {
   }
 
   async updateUxData() {
-    const { tasks, uxTests, pages, projects } = await this.getAndPrepareUxData();
+    const { tasks, uxTests, pages, projects } =
+      await this.getAndPrepareUxData();
 
     const pageUpdateOps = pages.map((page) => ({
       updateOne: {
@@ -286,10 +293,6 @@ export class AirtableService {
             tasks: page.tasks || [],
             projects: page.projects || [],
             ux_tests: page.ux_tests || [],
-          },
-          $unset: {
-            lastModified: true,
-            lastChecked: true,
           },
         },
         upsert: true,
@@ -329,7 +332,9 @@ export class AirtableService {
     await this.uxTestModel.bulkWrite(uxTestUpdateOps);
 
     this.logger.log('Pruning old UX tests');
-    const currentUxTestAirtableIds = uxTests.map((uxTest) => uxTest.airtable_id);
+    const currentUxTestAirtableIds = uxTests.map(
+      (uxTest) => uxTest.airtable_id
+    );
     const uxTestPruningResults = await this.uxTestModel.deleteMany({
       airtable_id: { $nin: currentUxTestAirtableIds },
     });
@@ -357,5 +362,53 @@ export class AirtableService {
     // async functions can sometimes behave weirdly if you
     //  don't have a return value that depends on an awaited promise
     return await Promise.resolve();
+  }
+
+  async updatePagesList() {
+    this.logger.log('Updating Published Pages list from Airtable');
+    const currentPagesList =
+      (await this.pageListModel.find().lean().exec()) || [];
+    const currentUrlsList = currentPagesList.map((page) => page.url);
+
+    const lastUpdated =
+      currentPagesList.sort((a, b) => {
+        if (a.updatedAt > b.updatedAt) {
+          return -1;
+        } else if (a.updatedAt < b.updatedAt) {
+          return 1;
+        }
+
+        return 0;
+      })?.[0]?.updatedAt || new Date(0);
+
+    const airtableList = await this.airtableClient.getPagesList(lastUpdated);
+
+    if (airtableList.length === 0) {
+      return;
+    }
+
+    const updatedPages = airtableList.filter((page) =>
+      currentUrlsList.some((url) => url === page.url)
+    );
+
+    const updateOps = updatedPages.map((page) => ({
+      updateOne: {
+        filter: { url: page.url },
+        update: page,
+      },
+    }));
+
+    const newPages = airtableList.filter(
+      (page) => !currentUrlsList.some((url) => url === page.url)
+    );
+
+    const newPagesWithIds = newPages.map((page) => ({
+      _id: new Types.ObjectId(),
+      ...page,
+    }));
+
+    await this.pageListModel.insertMany(newPagesWithIds);
+
+    return this.pageListModel.bulkWrite(updateOps);
   }
 }

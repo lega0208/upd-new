@@ -85,3 +85,10 @@ export interface FeedbackData {
   main_section?: string;
   theme?: string;
 }
+
+export interface PageListData {
+  url: string;
+  title: string;
+  lang?: 'en' | 'fr' | '';
+  last_255: string;
+}
