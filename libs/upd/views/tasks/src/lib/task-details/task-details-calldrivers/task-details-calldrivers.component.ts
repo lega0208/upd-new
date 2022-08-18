@@ -16,9 +16,6 @@ export class TaskDetailsCalldriversComponent implements OnInit {
   calldriversTable$ = this.taskDetailsService.calldriversTable$;
   calldriversCols: ColumnConfig[] = [];
 
-  currentCallVolume$ = this.taskDetailsService.currentCallVolume$;
-  callPercentChange$ = this.taskDetailsService.callPercentChange$;
-
   callsByTopic$ = this.taskDetailsService.callsByTopic$;
   callsByTopicConfig$ = this.taskDetailsService.callsByTopicConfig$;
 

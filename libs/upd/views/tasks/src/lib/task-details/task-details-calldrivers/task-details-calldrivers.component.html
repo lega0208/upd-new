@@ -1,11 +1,3 @@
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-data-card [current$]="currentCallVolume$" [comparison$]="callPercentChange$" [title]="'Call volume'" [tooltip]="'tooltip-call-volume'"></upd-data-card>
-    </div>
-  </div>
-</div>
-
 <upd-alert [type]="'info'" [dismissible]="false" [selfClosing]="false">
   <span class="material-icons align-top pe-1" aria-hidden="true">info</span>
   <span [translate]="'calldrivers-notification'"></span>

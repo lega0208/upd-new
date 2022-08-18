@@ -12,12 +12,14 @@ import { EN_CA, FR_CA } from '@dua-upd/upd/i18n';
   styleUrls: ['./task-details-summary.component.css'],
 })
 export class TaskDetailsSummaryComponent implements OnInit {
-  avgTaskSuccessFromLastTest$ =
-    this.taskDetailsService.avgTaskSuccessFromLastTest$;
+  avgTaskSuccessFromLastTest$ = this.taskDetailsService.avgTaskSuccessFromLastTest$;
   dateFromLastTest$ = this.taskDetailsService.dateFromLastTest$;
 
   visits$ = this.taskDetailsService.visits$;
   visitsPercentChange$ = this.taskDetailsService.visitsPercentChange$;
+
+  currentCallVolume$ = this.taskDetailsService.currentCallVolume$;
+  callPercentChange$ = this.taskDetailsService.callPercentChange$;
 
   visitsByPage$ = this.taskDetailsService.visitsByPageWithPercentChange$;
 
@@ -65,7 +67,7 @@ export class TaskDetailsSummaryComponent implements OnInit {
           field: 'percentChange',
           header: this.i18n.service.translate('%-change', lang),
           pipe: 'percent',
-          type: 'comparison'
+          type: 'comparison',
         },
       ];
 
@@ -74,10 +76,7 @@ export class TaskDetailsSummaryComponent implements OnInit {
           field: 'title',
           header: this.i18n.service.translate('ux-test', lang),
         },
-        { field: 'date', 
-          header: this.i18n.service.translate('date', lang), 
-          pipe: 'date' 
-        },
+        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date' },
         {
           field: 'test_type',
           header: this.i18n.service.translate('test-type', lang),
@@ -112,8 +111,5 @@ export class TaskDetailsSummaryComponent implements OnInit {
     });
   }
 
-  constructor(
-    private readonly taskDetailsService: TasksDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
+  constructor(private readonly taskDetailsService: TasksDetailsFacade, private i18n: I18nFacade) {}
 }
