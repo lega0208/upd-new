@@ -10,6 +10,7 @@ export const SEGMENTS = {
   cra_old: 's300000938_60e59f8fc002e15213e97a00',
   cra_v2: 's300000938_61e820b0baaef34505394e51',
   cra: 's300000938_62069e4f6d13cc3ff1c40dc0', // v2 w/ errors
+  cra_over_255: 's300000938_62d198c24906df4fba26597e', // cra segment, but only includes pages with 256+ characters
   english: 's300000938_57924078e4b05f8496f06d63',
   french: 's300000938_579240a6e4b00bd9617283bd',
   FWYLF: {

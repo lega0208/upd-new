@@ -1,12 +1,17 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { searchconsole_v1 } from '@googleapis/searchconsole';
 import { getGscClient, Searchconsole } from './client';
-import { SearchAnalyticsQueryBuilder, SearchFilter } from './query';
+import {
+  SearchAnalyticsQueryBuilder,
+  SearchAnalyticsReportQuery,
+  SearchFilter,
+} from './query';
 import { DataState, Dimension } from './gsc-property';
 import { GscSearchTermMetrics, Overall, PageMetrics } from '@dua-upd/db';
 import { wait } from '@dua-upd/utils-common';
 import { DateRange } from '../types';
-import { datesFromDateRange } from '../utils';
+import { singleDatesFromDateRange } from '../utils';
 
 export * from './client';
 export * from './query';
@@ -17,8 +22,17 @@ export const craFilter: SearchFilter = {
   dimension: 'page',
   operator: 'includingRegex',
   expression:
-    'www.canada.ca/en/revenue-agency|www.canada.ca/fr/agence-revenu|www.canada.ca/en/services/taxes|www.canada.ca/fr/services/impots',
+    'www.canada.ca/en/revenue-agency' +
+    '|www.canada.ca/fr/agence-revenu' +
+    '|www.canada.ca/en/services/taxes' +
+    '|www.canada.ca/fr/services/impots',
 };
+
+export const createRegexFilter = (expression: string): SearchFilter => ({
+  dimension: 'page',
+  operator: 'includingRegex',
+  expression,
+});
 
 export interface SearchAnalyticsQueryOptions {
   dataState?: DataState;
@@ -28,12 +42,16 @@ export interface SearchAnalyticsQueryOptions {
 export interface SearchAnalyticsPageQueryOptions
   extends SearchAnalyticsQueryOptions {
   url?: string;
+  regex?: string;
 }
+
+export type SearchAnalyticsResponse =
+  searchconsole_v1.Schema$SearchAnalyticsQueryResponse;
 
 export class SearchAnalyticsClient {
   private client: Searchconsole = getGscClient();
 
-  async query(query) {
+  async query(query: SearchAnalyticsReportQuery) {
     return this.client.searchanalytics.query(query);
   }
 
@@ -41,7 +59,7 @@ export class SearchAnalyticsClient {
     const dates =
       dateRange instanceof Date
         ? [dayjs.utc(dateRange).format('YYYY-MM-DD')]
-        : datesFromDateRange(dateRange);
+        : (singleDatesFromDateRange(dateRange) as string[]);
 
     const promises = [];
 
@@ -138,9 +156,9 @@ export class SearchAnalyticsClient {
     const dates =
       dateRange instanceof Date
         ? [dayjs.utc(dateRange).format('YYYY-MM-DD')]
-        : datesFromDateRange(dateRange);
+        : (singleDatesFromDateRange(dateRange) as string[]);
 
-    const promises = [];
+    const promises: Promise<Partial<PageMetrics>[]>[] = [];
 
     for (const date of dates) {
       const mergedDateResults = Promise.all([
@@ -181,13 +199,13 @@ export class SearchAnalyticsClient {
           return {
             ...pageResults,
             ...totals,
-          };
+          } as Partial<PageMetrics>;
         });
 
         return [...resultsWithTotals, ...resultsWithoutTotals];
       });
 
-      await wait(100);
+      await wait(1000);
 
       promises.push(mergedDateResults);
     }
@@ -201,12 +219,15 @@ export class SearchAnalyticsClient {
   ): Promise<Record<string, Partial<PageMetrics>>> {
     const queryBuilder = new SearchAnalyticsQueryBuilder();
 
-    const pageFilter: SearchFilter = !options?.url
-      ? craFilter
-      : {
-          dimension: 'page',
-          expression: `https://${options.url}`,
-        };
+    const pageFilter: SearchFilter =
+      !options?.url && !options?.regex
+        ? craFilter
+        : options?.regex
+        ? createRegexFilter(options.regex)
+        : {
+            dimension: 'page',
+            expression: `https://${options.url}`,
+          };
 
     const dimensions: Dimension[] = ['page'];
 
@@ -250,12 +271,15 @@ export class SearchAnalyticsClient {
   ): Promise<Record<string, Partial<PageMetrics>>> {
     const queryBuilder = new SearchAnalyticsQueryBuilder();
 
-    const pageFilter: SearchFilter = !options?.url
-      ? craFilter
-      : {
-          dimension: 'page',
-          expression: `https://${options.url}`,
-        };
+    const pageFilter: SearchFilter =
+      !options?.url && !options?.regex
+        ? craFilter
+        : options?.regex
+        ? createRegexFilter(options.regex)
+        : {
+            dimension: 'page',
+            expression: `https://${options.url}`,
+          };
 
     const dimensions: Dimension[] = ['page', 'query'];
 

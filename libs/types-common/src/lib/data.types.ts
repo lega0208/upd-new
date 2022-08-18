@@ -19,7 +19,7 @@ export interface EntityDetailsData<T> extends ViewData<T> {
   title: string;
 }
 
-export type PagesHomeAggregatedData = Pick<Page, 'url' | 'title'> & {
+export type PagesHomeAggregatedData = Pick<Page, '_id' | 'url' | 'title' | 'all_urls'> & {
   visits: number;
 };
 export type PagesHomeData = ViewData<PagesHomeAggregatedData[]>;

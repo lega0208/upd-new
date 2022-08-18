@@ -1,12 +1,12 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {
   Overall,
   Page,
-  PageMetrics,
+  PageMetrics, PagesList, PagesListDocument
 } from '@dua-upd/db';
 import type {
   OverallDocument,
@@ -44,7 +44,8 @@ export class DbUpdateService {
     @InjectModel(Overall.name)
     private overallMetricsModel: Model<OverallDocument>,
     @InjectModel(Page.name) private pageModel: Model<PageDocument>,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel
+    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
+    @InjectModel(PagesList.name) private pagesListModel: Model<PagesListDocument>,
   ) {}
 
   async updateAll() {
@@ -53,6 +54,10 @@ export class DbUpdateService {
     try {
       // Make sure not to run updates for the same data sources at
       //  the same time, or else we'll hit the rate limit
+
+      await this.airtableService.updatePagesList();
+      this.logger.log('Published Pages list successfully updated');
+
       await Promise.allSettled([
         withRetry(
           this.overallMetricsService.updateOverallMetrics.bind(this.overallMetricsService),
@@ -91,10 +96,44 @@ export class DbUpdateService {
 
       await this.pageMetricsService.addRefsToPageMetrics();
 
+      await this.createPagesFromPageList();
+
       this.logger.log('Database updates completed.');
     } catch (error) {
       this.logger.error(error);
+      this.logger.error(error.stack);
     }
+  }
+
+  async createPagesFromPageList() {
+    this.logger.log(`Checking for new pages in Published Pages list...`);
+    const pagesList = (await this.pagesListModel.find().exec()) ?? [];
+    const pagesListUrls = pagesList.map((page) => page.url);
+
+    if (pagesList.length === 0) {
+      throw new Error('Published pages list is empty');
+    }
+
+    const pagesWithListMatches = (await this.pageModel
+      .find({
+        all_urls: {
+          $elemMatch: { $in: pagesListUrls },
+        },
+      })
+      .exec()) ?? [];
+
+    const urlsAlreadyInCollection = pagesWithListMatches.flatMap((page) => page.all_urls);
+
+    const pagesToCreate = pagesList.filter((page) => !urlsAlreadyInCollection.includes(page.url)).map((page) => ({
+      _id: new Types.ObjectId(),
+      url: page.url,
+      title: page.title,
+      all_urls: [page.url],
+    }));
+
+    this.logger.log(`Creating ${pagesToCreate.length} new pages from Published Pages list`);
+
+    return this.pageModel.insertMany(pagesToCreate, { ordered: false });
   }
 
   async updateUxData() {

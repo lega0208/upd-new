@@ -296,9 +296,6 @@ PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T>(
     .group({
       _id: '$page',
       ...metricsGroupAggregations,
-      doc: {
-        $first: '$$ROOT',
-      },
     })
     .lookup({
       from: 'pages',
@@ -306,20 +303,17 @@ PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T>(
       foreignField: '_id',
       as: 'page',
     })
-    .unwind('page')
-    .replaceRoot({
-      $mergeObjects: [
-        '$doc',
-        {
-          ...metricsMergeObjects,
-        },
-        '$page',
-      ],
-    })
     .project({
-      url: 1,
-      title: 1,
       ...metricsProjections,
+      url: {
+        $first: '$page.url',
+      },
+      title: {
+        $first: '$page.title',
+      },
+      all_urls: {
+        $first: '$page.all_urls',
+      }
     })
     .sort(metricsSort)
     .exec();

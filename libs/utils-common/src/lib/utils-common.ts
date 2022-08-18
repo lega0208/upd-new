@@ -4,8 +4,8 @@ export function wait(ms: number) {
 }
 
 // Removes double-spaces and trims the string
-export function squishTrim(str: string | void) {
-  return typeof str === 'string' ? str.replace(/\s+/g, ' ').trim() : str;
+export function squishTrim<T extends string>(str?: T) {
+  return str?.replace(/\s+/g, ' ') as T || '';
 }
 
 // Used for measuring function execution time
@@ -74,4 +74,36 @@ export function sortArrayDesc(arr: { data: number; value: string }[][]) {
   });
 
   return arr;
+}
+
+/**
+ * Performs async processing in batches of a given size, with
+ * an optional delay between calls to handle rate-limiting.
+ * @param paramsArray - The array of parameters which will each individually be passed to the function.
+ * @param fn - The async function to be called on each item.
+ * @param batchSize - The maximum number of concurrent calls that can be pending.
+ * @param delay - Can be a number for constant delay or an object for dynamic delay.
+ */
+export async function batchAwait<T, U>(
+  paramsArray: T[],
+  fn: (param: T) => Promise<U>,
+  batchSize: number,
+  delay: number | { delay: number; } = 0,
+): Promise<U[]> {
+  const promises = [];
+
+  for (const params of paramsArray) {
+    const promise = fn(params);
+    promises.push(promise);
+
+    const currentDelay = typeof delay === 'number' ? delay : delay.delay;
+
+    if (promises.length !== 0 && promises.length % batchSize === 0) {
+      await Promise.all([...promises, wait(currentDelay)]);
+    } else {
+      await wait(currentDelay);
+    }
+  }
+
+  return Promise.all(promises);
 }

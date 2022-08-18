@@ -7,4 +7,5 @@ export default {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/libs/utils-common',
   preset: '../../jest.preset.js',
+  testEnvironment: 'node',
 };
