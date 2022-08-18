@@ -29,7 +29,13 @@ export class Page {
   airtable_id?: string;
 
   @Prop({ type: String })
-  aa_item_id?: string;
+  itemid_url?: string;
+
+  @Prop({ type: String })
+  itemid_activitymap?: string;
+
+  @Prop({ type: String })
+  itemid_internalsearch?: string;
 
   @Prop({ type: Date })
   lastChecked?: Date;
