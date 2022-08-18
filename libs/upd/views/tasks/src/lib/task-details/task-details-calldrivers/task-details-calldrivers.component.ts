@@ -16,23 +16,19 @@ export class TaskDetailsCalldriversComponent implements OnInit {
   calldriversTable$ = this.taskDetailsService.calldriversTable$;
   calldriversCols: ColumnConfig[] = [];
 
+  currentCallVolume$ = this.taskDetailsService.currentCallVolume$;
+  callPercentChange$ = this.taskDetailsService.callPercentChange$;
+
   callsByTopic$ = this.taskDetailsService.callsByTopic$;
   callsByTopicConfig$ = this.taskDetailsService.callsByTopicConfig$;
 
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
 
-  constructor(
-    private readonly taskDetailsService: TasksDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
+  constructor(private readonly taskDetailsService: TasksDetailsFacade, private i18n: I18nFacade) {}
 
   ngOnInit() {
-    combineLatest([
-      this.currentLang$,
-      this.dateRangeLabel$,
-      this.comparisonDateRangeLabel$,
-    ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
+    combineLatest([this.currentLang$, this.dateRangeLabel$, this.comparisonDateRangeLabel$]).subscribe(([lang, dateRange, comparisonDateRange]) => {
       this.calldriversCols = [
         {
           field: 'name',
