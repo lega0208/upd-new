@@ -9,11 +9,7 @@ import 'dayjs/esm/locale/fr-ca';
 
 import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
-import {
-  TaskDetailsAggregatedData,
-  TaskDetailsData,
-  VisitsByPage,
-} from '@dua-upd/types-common';
+import { TaskDetailsAggregatedData, TaskDetailsData, VisitsByPage } from '@dua-upd/types-common';
 import { GetTableProps, percentChange, PickByType } from '@dua-upd/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
@@ -22,10 +18,7 @@ import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 
 dayjs.extend(utc);
 
-type CallsByTopicTableType = GetTableProps<
-  TasksDetailsFacade,
-  'callsByTopic$'
->
+type CallsByTopicTableType = GetTableProps<TasksDetailsFacade, 'callsByTopic$'>;
 
 @Injectable()
 export class TasksDetailsFacade {
@@ -35,53 +28,28 @@ export class TasksDetailsFacade {
    */
   loaded$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsLoaded);
   loading$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsLoading);
-  tasksDetailsData$ = this.store.select(
-    TasksDetailsSelectors.selectTasksDetailsData
-  );
+  tasksDetailsData$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsData);
 
   currentLang$ = this.i18n.currentLang$;
 
   currentRoute$ = this.store.select(selectRoute);
 
-  titleHeader$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) =>
-      data.title ? this.i18n.service.translate(data.title, lang) : data.title
-    )
-  );
+  titleHeader$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(map(([data, lang]) => (data.title ? this.i18n.service.translate(data.title, lang) : data.title)));
 
-  avgTaskSuccessFromLastTest$ = this.tasksDetailsData$.pipe(
-    map((data) => data.avgTaskSuccessFromLastTest)
-  );
+  avgTaskSuccessFromLastTest$ = this.tasksDetailsData$.pipe(map((data) => data.avgTaskSuccessFromLastTest));
 
-  dateFromLastTest$ = this.tasksDetailsData$.pipe(
-    map((data) => data.dateFromLastTest)
-  );
+  dateFromLastTest$ = this.tasksDetailsData$.pipe(map((data) => data.dateFromLastTest));
 
-  visits$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visits || 0)
-  );
-  visitsPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('visits')
-  );
+  visits$ = this.tasksDetailsData$.pipe(map((data) => data?.dateRangeData?.visits || 0));
+  visitsPercentChange$ = this.tasksDetailsData$.pipe(mapToPercentChange('visits'));
 
-  visitsByPage$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visitsByPage)
-  );
+  visitsByPage$ = this.tasksDetailsData$.pipe(map((data) => data?.dateRangeData?.visitsByPage));
 
-  visitsByPageWithPercentChange$ = this.tasksDetailsData$.pipe(
-    mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits')
-  );
+  visitsByPageWithPercentChange$ = this.tasksDetailsData$.pipe(mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits'));
 
-  visitsByPageGSCWithPercentChange$ = this.tasksDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'gscTotalClicks', '_id')
-  );
+  visitsByPageGSCWithPercentChange$ = this.tasksDetailsData$.pipe(mapObjectArraysWithPercentChange('visitsByPage', 'gscTotalClicks', '_id'));
 
-  visitsByPageFeedbackWithPercentChange$ = this.tasksDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo', '_id')
-  );
+  visitsByPageFeedbackWithPercentChange$ = this.tasksDetailsData$.pipe(mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo', '_id'));
 
   projects$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
@@ -110,41 +78,21 @@ export class TasksDetailsFacade {
     )
   );
 
-  dateRangeLabel$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)));
+  dateRangeLabel$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)));
 
-  comparisonDateRangeLabel$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) =>
-      getWeeklyDatesLabel(data.comparisonDateRange || '', lang)
-    )
-  );
+  comparisonDateRangeLabel$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(map(([data, lang]) => getWeeklyDatesLabel(data.comparisonDateRange || '', lang)));
 
-  calldriversChart$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
+  calldriversChart$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
-      const comparisonDateRangeLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange || '',
-        lang
-      );
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(data.comparisonDateRange || '', lang);
 
-      const dataEnquiryLine = (
-        data?.dateRangeData?.calldriversEnquiry || []
-      ).map((d) => ({
+      const dataEnquiryLine = (data?.dateRangeData?.calldriversEnquiry || []).map((d) => ({
         name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
         value: d.calls,
       }));
 
-      const comparisonDataEnquiryLine = (
-        data?.comparisonDateRangeData?.calldriversEnquiry || []
-      ).map((d) => ({
+      const comparisonDataEnquiryLine = (data?.comparisonDateRangeData?.calldriversEnquiry || []).map((d) => ({
         name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
         value: d.calls,
       }));
@@ -157,9 +105,7 @@ export class TasksDetailsFacade {
       }
 
       const dataEnquiryLineFinal = dataEnquiryLine.filter((v) => v.value > 0);
-      const comparisonDataEnquiryLineFinal = comparisonDataEnquiryLine.filter(
-        (v) => v.value > 0
-      );
+      const comparisonDataEnquiryLineFinal = comparisonDataEnquiryLine.filter((v) => v.value > 0);
 
       const barChartData: MultiSeries = [
         {
@@ -176,14 +122,10 @@ export class TasksDetailsFacade {
     })
   );
 
-  calldriversTable$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
+  calldriversTable$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       const dateRange = data?.dateRangeData?.calldriversEnquiry || [];
-      const comparisonDateRange =
-        data?.comparisonDateRangeData?.calldriversEnquiry || [];
+      const comparisonDateRange = data?.comparisonDateRangeData?.calldriversEnquiry || [];
 
       const dataEnquiryLine = dateRange.map((d) => {
         let prevVal = NaN;
@@ -226,53 +168,53 @@ export class TasksDetailsFacade {
       const comparisonData = data?.comparisonDateRangeData?.callsByTopic || [];
 
       return (data?.dateRangeData?.callsByTopic || []).map((callsByTopic) => {
-        const previousCalls = comparisonData.find(
-          (prevTopic) => prevTopic.tpc_id === callsByTopic.tpc_id
-        );
+        const previousCalls = comparisonData.find((prevTopic) => prevTopic.tpc_id === callsByTopic.tpc_id);
 
         return {
           topic: `${callsByTopic.tpc_id}.topic`,
           subtopic: `${callsByTopic.tpc_id}.sub-topic`,
           sub_subtopic: `${callsByTopic.tpc_id}.sub-subtopic`,
           calls: callsByTopic.calls,
-          comparison: !previousCalls?.calls
-            ? Infinity
-            : percentChange(callsByTopic.calls, previousCalls.calls),
+          comparison: !previousCalls?.calls ? Infinity : percentChange(callsByTopic.calls, previousCalls.calls),
         };
       });
     })
   );
 
-  callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(
-    this.i18n.service,
-    [
-      {
-        field: 'topic',
-        header: 'topic',
-        translate: true,
-      },
-      {
-        field: 'subtopic',
-        header: 'sub-topic',
-        translate: true,
-      },
-      {
-        field: 'sub_subtopic',
-        header: 'sub-subtopic',
-        translate: true,
-      },
-      {
-        field: 'calls',
-        header: 'calls',
-        pipe: 'number',
-      },
-      {
-        field: 'comparison',
-        header: 'comparison',
-        pipe: 'percent',
-      },
-    ]
+  callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(this.i18n.service, [
+    {
+      field: 'topic',
+      header: 'topic',
+      translate: true,
+    },
+    {
+      field: 'subtopic',
+      header: 'sub-topic',
+      translate: true,
+    },
+    {
+      field: 'sub_subtopic',
+      header: 'sub-subtopic',
+      translate: true,
+    },
+    {
+      field: 'calls',
+      header: 'calls',
+      pipe: 'number',
+    },
+    {
+      field: 'comparison',
+      header: 'comparison',
+      pipe: 'percent',
+    },
+  ]);
+
+  currentCallVolume$ = this.tasksDetailsData$.pipe(map((data) => data?.dateRangeData?.calldriversEnquiry.reduce((totalCalls, enquiryLineCalls) => totalCalls + enquiryLineCalls.calls, 0) || 0));
+
+  comparisonCallVolume$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.comparisonDateRangeData?.calldriversEnquiry.reduce((totalCalls, enquiryLineCalls) => totalCalls + enquiryLineCalls.calls, 0) || 0)
   );
+  callPercentChange$ = combineLatest([this.currentCallVolume$, this.comparisonCallVolume$]).pipe(map(([currentCalls, comparisonCalls]) => percentChange(currentCalls, comparisonCalls)));
 
   dyfData$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
@@ -293,20 +235,11 @@ export class TasksDetailsFacade {
     })
   );
 
-  whatWasWrongData$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
+  whatWasWrongData$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
-      const cantFindInfo = this.i18n.service.translate(
-        'd3-cant-find-info',
-        lang
-      );
+      const cantFindInfo = this.i18n.service.translate('d3-cant-find-info', lang);
       const otherReason = this.i18n.service.translate('d3-other', lang);
-      const hardToUnderstand = this.i18n.service.translate(
-        'd3-hard-to-understand',
-        lang
-      );
+      const hardToUnderstand = this.i18n.service.translate('d3-hard-to-understand', lang);
       const error = this.i18n.service.translate('d3-error', lang);
 
       const pieChartData: SingleSeries = [
@@ -349,46 +282,25 @@ export class TasksDetailsFacade {
     })
   );
 
-  gscTotalClicks$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalClicks || 0)
-  );
-  gscTotalClicksPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('gscTotalClicks')
-  );
+  gscTotalClicks$ = this.tasksDetailsData$.pipe(map((data) => data?.dateRangeData?.gscTotalClicks || 0));
+  gscTotalClicksPercentChange$ = this.tasksDetailsData$.pipe(mapToPercentChange('gscTotalClicks'));
 
-  gscTotalImpressions$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalImpressions || 0)
-  );
-  gscTotalImpressionsPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('gscTotalImpressions')
-  );
+  gscTotalImpressions$ = this.tasksDetailsData$.pipe(map((data) => data?.dateRangeData?.gscTotalImpressions || 0));
+  gscTotalImpressionsPercentChange$ = this.tasksDetailsData$.pipe(mapToPercentChange('gscTotalImpressions'));
 
-  gscTotalCtr$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalCtr || 0)
-  );
-  gscTotalCtrPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('gscTotalCtr')
-  );
+  gscTotalCtr$ = this.tasksDetailsData$.pipe(map((data) => data?.dateRangeData?.gscTotalCtr || 0));
+  gscTotalCtrPercentChange$ = this.tasksDetailsData$.pipe(mapToPercentChange('gscTotalCtr'));
 
-  gscTotalPosition$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalPosition || 0)
-  );
-  gscTotalPositionPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('gscTotalPosition')
-  );
+  gscTotalPosition$ = this.tasksDetailsData$.pipe(map((data) => data?.dateRangeData?.gscTotalPosition || 0));
+  gscTotalPositionPercentChange$ = this.tasksDetailsData$.pipe(mapToPercentChange('gscTotalPosition'));
 
-  taskSuccessByUxTest$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
+  taskSuccessByUxTest$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
       const taskSuccessByUxTest = data?.taskSuccessByUxTest?.map((d) => ({
         ...d,
         title: d.title ? this.i18n.service.translate(d.title, lang) : d.title,
-        test_type: d.test_type
-          ? this.i18n.service.translate(d.test_type, lang)
-          : d.test_type,
+        test_type: d.test_type ? this.i18n.service.translate(d.test_type, lang) : d.test_type,
         //date: dayjs.utc(d.date).locale(lang).format(dateFormat),
         date: d.date,
       }));
@@ -396,44 +308,27 @@ export class TasksDetailsFacade {
     })
   );
 
-  totalParticipants$ = this.tasksDetailsData$.pipe(
-    map((data) =>
-      data?.taskSuccessByUxTest
-        ?.map((data) => data?.total_users)
-        .reduce((a, b) => a + b, 0)
-    )
-  );
+  totalParticipants$ = this.tasksDetailsData$.pipe(map((data) => data?.taskSuccessByUxTest?.map((data) => data?.total_users).reduce((a, b) => a + b, 0)));
 
-  feedbackComments$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
+  feedbackComments$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       const feedbackComments = data?.feedbackComments?.map((d) => ({
         ...d,
         date: d.date,
         tag: d.tag && this.i18n.service.translate(d.tag, lang),
-        whats_wrong: d.whats_wrong
-          ? this.i18n.service.translate(d.whats_wrong, lang)
-          : d.whats_wrong,
+        whats_wrong: d.whats_wrong ? this.i18n.service.translate(d.whats_wrong, lang) : d.whats_wrong,
       }));
       return [...(feedbackComments || [])];
     })
   );
 
-  feedbackByTagsBarChart$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
+  feedbackByTagsBarChart$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
-      const feedbackByTagsPrevious =
-        data.comparisonDateRangeData?.feedbackByTags || [];
+      const feedbackByTagsPrevious = data.comparisonDateRangeData?.feedbackByTags || [];
 
       const isCurrZero = feedbackByTags.every((v) => v.numComments === 0);
-      const isPrevZero = feedbackByTagsPrevious.every(
-        (v) => v.numComments === 0
-      );
+      const isPrevZero = feedbackByTagsPrevious.every((v) => v.numComments === 0);
 
       if (isCurrZero && isPrevZero) {
         return [] as MultiSeries;
@@ -462,29 +357,16 @@ export class TasksDetailsFacade {
     })
   );
 
-  feedbackByTagsTable$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
+  feedbackByTagsTable$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
-      const feedbackByTagsPrevious =
-        data.comparisonDateRangeData?.feedbackByTags || [];
+      const feedbackByTagsPrevious = data.comparisonDateRangeData?.feedbackByTags || [];
 
-      const allUniqueTags = [
-        ...new Set([
-          ...feedbackByTags.map((d) => d.tag),
-          ...feedbackByTagsPrevious.map((d) => d.tag),
-        ]),
-      ];
+      const allUniqueTags = [...new Set([...feedbackByTags.map((d) => d.tag), ...feedbackByTagsPrevious.map((d) => d.tag)])];
 
       return allUniqueTags.map((tag) => {
-        const currValue =
-          feedbackByTags.find((feedback) => feedback.tag === tag)
-            ?.numComments || 0;
-        const prevValue =
-          feedbackByTagsPrevious.find((feedback) => feedback.tag === tag)
-            ?.numComments || 0;
+        const currValue = feedbackByTags.find((feedback) => feedback.tag === tag)?.numComments || 0;
+        const prevValue = feedbackByTagsPrevious.find((feedback) => feedback.tag === tag)?.numComments || 0;
 
         return {
           tag: this.i18n.service.translate(tag, lang),
@@ -513,32 +395,22 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
 
   const dateFormat = lang === FR_CA ? 'D MMM' : 'MMM D';
 
-  const formattedStartDate = dayjs(startDate)
-    .utc(false)
-    .locale(lang)
-    .format(dateFormat);
-  const formattedEndDate = dayjs(endDate)
-    .utc(false)
-    .locale(lang)
-    .format(dateFormat);
+  const formattedStartDate = dayjs(startDate).utc(false).locale(lang).format(dateFormat);
+  const formattedEndDate = dayjs(endDate).utc(false).locale(lang).format(dateFormat);
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };
-type DateRangeDataIndexKey = keyof TaskDetailsAggregatedData &
-  keyof PickByType<TaskDetailsAggregatedData, number>;
+type DateRangeDataIndexKey = keyof TaskDetailsAggregatedData & keyof PickByType<TaskDetailsAggregatedData, number>;
 
 // helper function to get the percent change of a property vs. the comparison date range
-function mapToPercentChange(
-  propName: keyof PickByType<TaskDetailsAggregatedData, number>
-) {
+function mapToPercentChange(propName: keyof PickByType<TaskDetailsAggregatedData, number>) {
   return map((data: TaskDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
       return 0;
     }
 
     const current = data?.dateRangeData[propName as DateRangeDataIndexKey];
-    const previous =
-      data?.comparisonDateRangeData[propName as DateRangeDataIndexKey];
+    const previous = data?.comparisonDateRangeData[propName as DateRangeDataIndexKey];
 
     if (!current || !previous) {
       return 0;
@@ -548,31 +420,20 @@ function mapToPercentChange(
   });
 }
 
-function mapObjectArraysWithPercentChange(
-  propName: keyof TaskDetailsAggregatedData,
-  propPath: string,
-  sortPath?: string
-) {
+function mapObjectArraysWithPercentChange(propName: keyof TaskDetailsAggregatedData, propPath: string, sortPath?: string) {
   return map((data: TaskDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
       return;
     }
 
     const current = [...((data?.dateRangeData?.[propName] || []) as any[])];
-    const previous = [
-      ...((data?.comparisonDateRangeData?.[propName] || []) as any[]),
-    ];
+    const previous = [...((data?.comparisonDateRangeData?.[propName] || []) as any[])];
 
     if (!current || !previous) {
       return;
     }
 
-    const propsAreValidArrays =
-      Array.isArray(current) &&
-      Array.isArray(previous) &&
-      current.length > 0 &&
-      previous.length > 0 &&
-      current.length === previous.length;
+    const propsAreValidArrays = Array.isArray(current) && Array.isArray(previous) && current.length > 0 && previous.length > 0 && current.length === previous.length;
 
     if (propsAreValidArrays) {
       const sortBy = (a: any, b: any) => {
@@ -592,10 +453,7 @@ function mapObjectArraysWithPercentChange(
 
       return current.map((val: any, i) => ({
         ...val,
-        percentChange: percentChange(
-          val[propPath],
-          (previous as any)[i][propPath]
-        ),
+        percentChange: percentChange(val[propPath], (previous as any)[i][propPath]),
       }));
     }
 
@@ -603,41 +461,30 @@ function mapObjectArraysWithPercentChange(
   });
 }
 
-function mapPageMetricsArraysWithPercentChange(
-  propName: keyof TaskDetailsAggregatedData,
-  propPath: string
-) {
+function mapPageMetricsArraysWithPercentChange(propName: keyof TaskDetailsAggregatedData, propPath: string) {
   return map((data: TaskDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
       return;
     }
 
     const current = [...((data?.dateRangeData?.[propName] || []) as any[])];
-    const previous = [
-      ...((data?.comparisonDateRangeData?.[propName] || []) as any[]),
-    ];
+    const previous = [...((data?.comparisonDateRangeData?.[propName] || []) as any[])];
 
-    const currentMetricsByPage = current.reduce(
-      (metricsByPage, page: VisitsByPage) => {
-        metricsByPage[page._id] = {
-          ...page,
-        };
+    const currentMetricsByPage = current.reduce((metricsByPage, page: VisitsByPage) => {
+      metricsByPage[page._id] = {
+        ...page,
+      };
 
-        return metricsByPage;
-      },
-      {} as { [pageId: string]: Record<string, number> }
-    );
+      return metricsByPage;
+    }, {} as { [pageId: string]: Record<string, number> });
 
-    const previousMetricsByPage = previous.reduce(
-      (metricsByPage, page: VisitsByPage) => {
-        metricsByPage[page._id] = {
-          ...page,
-        };
+    const previousMetricsByPage = previous.reduce((metricsByPage, page: VisitsByPage) => {
+      metricsByPage[page._id] = {
+        ...page,
+      };
 
-        return metricsByPage;
-      },
-      {} as { [pageId: string]: Record<string, number> }
-    );
+      return metricsByPage;
+    }, {} as { [pageId: string]: Record<string, number> });
 
     return Object.keys(currentMetricsByPage).map((pageId: string) => {
       const currentMetrics = currentMetricsByPage[pageId];
@@ -645,9 +492,7 @@ function mapPageMetricsArraysWithPercentChange(
 
       return {
         ...currentMetrics,
-        percentChange: previousMetrics
-          ? percentChange(currentMetrics[propPath], previousMetrics[propPath])
-          : null,
+        percentChange: previousMetrics ? percentChange(currentMetrics[propPath], previousMetrics[propPath]) : null,
       };
     });
   });

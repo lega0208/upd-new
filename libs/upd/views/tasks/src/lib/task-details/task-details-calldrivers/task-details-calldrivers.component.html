@@ -15,7 +15,7 @@
         [displayLegend]="'below'"
         [groupPadding]="75"
         [showLegend]="true"
-        [data]="(calldriversChart$ |async) || []"
+        [data]="(calldriversChart$ | async) || []"
         [table]="calldriversTable$ | async"
         [tableCols]="calldriversCols"
         [type]="'grouped-bar'"
@@ -27,14 +27,7 @@
 <div class="container-fluid gx-0 my-4">
   <div class="row">
     <div class="col">
-      <upd-data-table-card
-        [data]="(callsByTopic$ | async) || []"
-        [cols]="(callsByTopicConfig$ | async) || []"
-        [filter]="true"
-        [pagination]="true"
-        [title]="'tab-calldrivers'"
-      >
-      </upd-data-table-card>
+      <upd-data-table-card [data]="(callsByTopic$ | async) || []" [cols]="(callsByTopicConfig$ | async) || []" [filter]="true" [pagination]="true" [title]="'tab-calldrivers'"> </upd-data-table-card>
     </div>
   </div>
 </div>
