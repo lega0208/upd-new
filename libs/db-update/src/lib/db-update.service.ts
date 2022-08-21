@@ -79,9 +79,9 @@ export class DbUpdateService {
         withRetry(this.calldriversService.updateCalldrivers.bind(this.calldriversService), 4, 1000)().catch(
           (err) => this.logger.error('Error updating Calldrivers data', err)
         ),
-        withRetry(this.pagesService.updatePages.bind(this.pagesService), 4, 1000)().catch((err) =>
-          this.logger.error('Error updating Page data', err)
-        ),
+        // withRetry(this.pagesService.updatePages.bind(this.pagesService), 4, 1000)().catch((err) =>
+        //   this.logger.error('Error updating Page data', err)
+        // ),
       ]);
 
       await this.pagesService.consolidateDuplicatePages();
