@@ -64,8 +64,8 @@ export class PagesService {
       ...pages.map((page) => ({
         ...page,
         visits: 0,
-      }))
-    ]
+      })),
+    ];
 
     await this.cacheManager.set(cacheKey, results);
 
@@ -91,7 +91,12 @@ export class PagesService {
     }
 
     const page = await this.pageModel
-      .findById(new Types.ObjectId(params.id), { title: 1, url: 1, tasks: 1 })
+      .findById(new Types.ObjectId(params.id), {
+        title: 1,
+        url: 1,
+        tasks: 1,
+        projects: 1,
+      })
       .populate('tasks')
       .populate('projects')
       .lean();
@@ -235,15 +240,44 @@ export class PagesService {
   async getPageDetailsDataByDay(page: Page, dateRange: string) {
     const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-    return this.pageMetricsModel
-      .find(
-        {
-          url: page.url,
-          date: { $gte: startDate, $lte: endDate },
-        },
-        { _id: 0, visits: 1, date: 1, gsc_searchterms: 1 }
-      )
-      .lean();
+    return (
+      await this.pageMetricsModel
+        .aggregate<PageMetrics>([
+          {
+            $match: {
+              page: page._id,
+              date: { $gte: startDate, $lte: endDate },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              visits: 1,
+              date: 1,
+              gsc_searchterms: 1,
+            },
+          },
+          {
+            $group: {
+              _id: '$date',
+              date: {
+                $first: '$date',
+              },
+              visits: {
+                $sum: '$visits',
+              },
+              gsc_searchterms: {
+                $push: '$gsc_searchterms',
+              },
+            },
+          },
+        ])
+        .sort('date')
+        .exec()
+    ).map((result) => ({
+      ...result,
+      gsc_searchterms: result.gsc_searchterms.flat(),
+    }));
   }
 }
 
