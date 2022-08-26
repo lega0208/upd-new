@@ -44,32 +44,58 @@ export class ProjectsHomeComponent implements OnInit {
           header: this.i18n.service.translate('Name', lang),
           type: 'link',
           typeParam: '_id',
+          filterConfig: {
+            type: 'text',
+          },
         },
         {
           field: 'cops',
           header: this.i18n.service.translate('type', lang),
           type: 'label',
           typeParam: 'cops',
+          filterConfig: {
+            type: 'boolean',
+          },
         },
         {
           field: 'status',
           header: this.i18n.service.translate('Status', lang),
           type: 'label',
           typeParam: 'status',
+          filterConfig: {
+            type: 'category',
+            categories: [
+              {
+                name: this.i18n.service.translate('Unknown', lang),
+                value: 'Unknown',
+              },
+              {
+                name: this.i18n.service.translate('Complete', lang),
+                value: 'Complete',
+              },
+              {
+                name: this.i18n.service.translate('In Progress', lang),
+                value: 'In Progress',
+              },
+            ],
+          },
         },
         {
           field: 'startDate',
           header: this.i18n.service.translate('Start date', lang),
           pipe: 'date',
           pipeParam: lang === FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY',
+          filterConfig: {
+            type: 'date',
+          },
         },
         {
           field: 'avgSuccessRate',
-          header: this.i18n.service.translate(
-            'Average success rate',
-            lang
-          ),
+          header: this.i18n.service.translate('Average success rate', lang),
           pipe: 'percent',
+          filterConfig: {
+            type: 'percent',
+          },
         },
       ];
     });

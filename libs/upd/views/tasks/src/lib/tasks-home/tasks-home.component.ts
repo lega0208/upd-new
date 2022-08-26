@@ -35,14 +35,81 @@ export class TasksHomeComponent implements OnInit {
           header: this.i18n.service.translate('task', lang),
           type: 'link',
           typeParam: '_id',
+          filterConfig: {
+            type: 'text',
+          },
         },
         {
           field: 'topic',
           header: this.i18n.service.translate('category', lang),
+          filterConfig: {
+            type: 'category',
+            categories: [
+              {
+                name: this.i18n.service.translate('Taxes', lang),
+                value: 'Taxes',
+              },
+              {
+                name: this.i18n.service.translate('Benefits', lang),
+                value: 'Benefits',
+              },
+              {
+                name: this.i18n.service.translate('Business', lang),
+                value: 'Business',
+              },
+              {
+                name: this.i18n.service.translate('Business Number', lang),
+                value: 'Business Number',
+              },
+              {
+                name: this.i18n.service.translate('Other', lang),
+                value: 'Other',
+              },
+            ],
+          },
         },
         {
           field: 'subtopic',
           header: this.i18n.service.translate('sub-category', lang),
+          filterConfig: {
+            type: 'category',
+            categories: [
+              {
+                name: this.i18n.service.translate('Payroll', lang),
+                value: 'Payroll',
+              },
+              {
+                name: this.i18n.service.translate('GST/HST', lang),
+                value: 'GST/HST',
+              },
+              {
+                name: this.i18n.service.translate('Common', lang),
+                value: 'Common',
+              },
+              {
+                name: this.i18n.service.translate('COVID-19 Benefits', lang),
+                value: 'COVID-19 Benefits',
+              },
+              {
+                name: this.i18n.service.translate('Income Tax', lang),
+                value: 'Income Tax',
+              },
+              {
+                name: this.i18n.service.translate(
+                  'Savings and Pension Plans',
+                  lang
+                ),
+                value: 'Savings and Pension Plans',
+              },
+              {
+                name: this.i18n.service.translate(
+                  'Managing your business during COVID-19',
+                  lang
+                ),
+                value: 'Managing your business during COVID-19',
+              },
+            ],
+          },
         },
         {
           field: 'visits',
