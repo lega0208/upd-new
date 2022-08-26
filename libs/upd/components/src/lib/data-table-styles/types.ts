@@ -1,4 +1,4 @@
-import type { OptionalKeyOf } from '@dua-upd/utils-common'
+import type { OptionalKeyOf } from '@dua-upd/utils-common';
 
 export type ColumnConfigPipe = 'percent' | 'number' | 'date';
 
@@ -12,6 +12,7 @@ export interface ColumnConfig<T = any> {
   pipeParam?: string;
   tooltip?: string;
   translate?: boolean;
+  filterConfig?: FilterConfig<T>;
 }
 
 export interface typeParams {
@@ -19,4 +20,9 @@ export interface typeParams {
   preLink?: string;
   postLink?: string;
   external?: boolean;
+}
+
+export interface FilterConfig<T = any> {
+  type: 'category' | 'text' | 'boolean' | 'date' | 'number' | 'percent';
+  categories?: { name: string; value: T[keyof T] | null }[];
 }

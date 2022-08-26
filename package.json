@@ -63,8 +63,11 @@
     "d3-scale": "^4.0.2",
     "dayjs": "^1.11.2",
     "dotenv": "^10.0.0",
+    "file-saver": "^2.0.5",
     "helmet": "^5.0.1",
     "jsonwebtoken": "^8.5.1",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.5.25",
     "mongoose": "^6.2.10",
     "nest-commander": "^2.5.0",
     "ng-apexcharts": "^1.7.1",
@@ -76,6 +79,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.4.0",
     "tslib": "^2.0.0",
+    "xlsx": "^0.18.5",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
@@ -112,6 +116,7 @@
     "@types/cron": "^1.7.3",
     "@types/d3": "^7.1.0",
     "@types/d3-scale": "^4.0.2",
+    "@types/file-saver": "^2.0.5",
     "@types/inquirer": "^8.2.1",
     "@types/jest": "27.4.1",
     "@types/node": "14.14.33",

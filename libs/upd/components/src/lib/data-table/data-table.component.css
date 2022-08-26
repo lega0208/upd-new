@@ -8,5 +8,9 @@
   background-color: #f8e6d2  !important;
 } */
 td.validation-kpi-not-met + td.bg-green {
-  background-color: #f8e6d2  !important;
+  background-color: #f8e6d2 !important;
+}
+
+.exportButtons {
+  margin: 0px 5px 5px 0px;
 }

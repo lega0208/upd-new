@@ -9,9 +9,7 @@ import {
   NgbModalModule,
   NgbTooltipModule,
 } from '@ng-bootstrap/ng-bootstrap';
-import {
-  NgApexchartsModule,
-} from 'ng-apexcharts';
+import { NgApexchartsModule } from 'ng-apexcharts';
 import { NgxChartsModule } from '@amonsour/ngx-charts';
 import { CardComponent } from './card/card.component';
 import { DataCardComponent } from './data-card/data-card.component';
@@ -41,6 +39,12 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import { ProjectHeaderComponent } from './project-header/project-header.component';
 import { CardSecondaryTitleComponent } from './card-secondary-title/card-secondary-title.component';
+import { DropdownModule } from 'primeng/dropdown';
+import { FormsModule } from '@angular/forms';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { SliderModule } from 'primeng/slider';
+import { CalendarModule } from 'primeng/calendar';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 @NgModule({
   imports: [
@@ -58,7 +62,13 @@ import { CardSecondaryTitleComponent } from './card-secondary-title/card-seconda
     InputTextModule,
     NgbModule,
     I18nModule,
-    NgApexchartsModule
+    NgApexchartsModule,
+    DropdownModule,
+    FormsModule,
+    MultiSelectModule,
+    SliderModule,
+    CalendarModule,
+    InputNumberModule,
   ],
   declarations: [
     CardComponent,
