@@ -4,7 +4,7 @@ import {
   DateRange,
   queryDateFormat,
   SearchAnalyticsClient,
-  datesFromDateRange,
+  singleDatesFromDateRange,
 } from '@dua-upd/external-data';
 import {
   getDbConnectionString,
@@ -97,7 +97,7 @@ export async function updatePageMetrics() {
     };
 
     // to be able to iterate over each day
-    const dateRanges = datesFromDateRange(fullDateRange, queryDateFormat).map(
+    const dateRanges = singleDatesFromDateRange(fullDateRange, queryDateFormat).map(
       (date) => ({
         start: date,
         end: dayjs(date).add(1, 'day').format(queryDateFormat),

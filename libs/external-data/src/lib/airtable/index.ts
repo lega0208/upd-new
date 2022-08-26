@@ -7,7 +7,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { FieldSet, Query } from 'airtable';
 import { QueryParams, SortParameter } from 'airtable/lib/query_params';
 
-import { squishTrim, wait } from '@dua-upd/utils-common';
+import { squishTrim } from '@dua-upd/utils-common';
 import { getATClient, AirTableAPI } from './client';
 import { bases } from './base';
 import {
@@ -16,6 +16,7 @@ import {
   TaskData,
   UxTestData,
   FeedbackData,
+  PageListData,
 } from './types';
 
 dayjs.extend(utc);
@@ -28,7 +29,7 @@ export * from './types';
 export type DateType = string | Date | Dayjs;
 
 export const createLastUpdatedFilterFormula = (date: DateType) =>
-  `IS_AFTER(LAST_UPDATED_TIME(), "${dayjs(date).format('YYYY-MM-DD')}")`;
+  `IS_AFTER(LAST_MODIFIED_TIME(), "${dayjs.utc(date).format('YYYY-MM-DD')}")`;
 
 export const createDateRangeFilterFormula = (
   dateRange: { start: DateType; end: DateType },
@@ -44,7 +45,7 @@ export const createDateRangeFilterFormula = (
   return `AND(\
       IS_AFTER({${dateField}}, "${start}"),\
       IS_BEFORE({${dateField}}, "${end}")\
-    )`.replace(/\s+/g, '');
+    )`.replace(/\s+/g, ' ');
 };
 
 export class AirtableClient {
@@ -75,7 +76,7 @@ export class AirtableClient {
     await query.eachPage((records, nextPage) => {
       results.push(...records.map((r) => r._rawJson));
 
-      wait(201).then(nextPage);
+      nextPage();
     });
 
     return results;
@@ -274,5 +275,27 @@ export class AirtableClient {
       newMap[task] = Array.from(tasksTopicsMap[task]);
       return newMap;
     }, {} as Record<string, number[]>);
+  }
+
+  async getPagesList(lastUpdated?: Date): Promise<PageListData[]> {
+    const params = lastUpdated
+      ? {
+        filterByFormula: createLastUpdatedFilterFormula(lastUpdated),
+      }
+      : {};
+
+    const query = this.createQuery(bases.PAGES, 'Published CRA pages', params);
+
+    return (await this.selectAll(query)).map<PageListData>(({ id, fields }) => {
+      const url = squishTrim(fields['Page path'] as string).replace('https://', '');
+
+      return {
+        url,
+        airtable_id: id,
+        title: squishTrim(fields['Page title'] as string),
+        lang: squishTrim(fields['Language (jcr:language)']),
+        last_255: url.slice(-255),
+      };
+    });
   }
 }

@@ -56,7 +56,6 @@ export class TasksService {
 
     const tasksData = await this.pageMetricsModel
       .aggregate<TasksHomeAggregatedData>()
-      .project({ date: 1, visits: 1, tasks: 1 })
       .sort({ tasks: 1, date: 1 }) // todo: add index for this sort
       .match({
         $and: [
@@ -72,6 +71,7 @@ export class TasksService {
           { date: { $gte: startDate, $lte: endDate } },
         ],
       })
+      .project({ date: 1, visits: 1, tasks: 1 })
       .unwind({ path: '$tasks' })
       .sort({ tasks: 1 })
       .group({
@@ -90,6 +90,7 @@ export class TasksService {
         $mergeObjects: [{ $first: '$task' }, { visits: '$visits' }],
       })
       .sort({ title: 'asc' })
+      .allowDiskUse(true)
       .exec();
 
     const tasksWithoutMetrics = (

@@ -3,6 +3,7 @@
   "projectType": "application",
   "targets": {
     "build": {
+      "defaultConfiguration": "production",
       "executor": "@nrwl/node:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {

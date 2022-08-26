@@ -47,6 +47,8 @@ export class Task {
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
 
+TaskSchema.index({ tasks: 1, date: 1 });
+
 export const taskModel = model(Task.name, TaskSchema);
 
 export function getTaskModel(): Model<Document<Task>> {

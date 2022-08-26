@@ -102,7 +102,7 @@ export const createOverallMetricsQuery = (
 
 export const createPageMetricsQuery = (
   dateRange: DateRange,
-  options: { settings?: ReportSettings; search?: ReportSearch } = {}
+  options: { settings?: ReportSettings; search?: ReportSearch; segment?: string } = {}
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
@@ -121,7 +121,7 @@ export const createPageMetricsQuery = (
     .setDimension('variables/evar22') // URL last 255 characters
     .setMetrics(overallMetricsQueryConfig)
     .setGlobalFilters([
-      { type: 'segment', segmentId: SEGMENTS.cra },
+      { type: 'segment', segmentId: options?.segment ?? SEGMENTS.cra },
       { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
     ])
     .setSettings(querySettings)
@@ -152,7 +152,6 @@ export const createCXTasksQuery = (
     .build();
 };
 
-// todo: just an example for now - should be made to take an array of pages/itemIds and set filters and stuff accordingly
 export const createActivityMapQuery = (
   dateRange: DateRange,
   itemIds: string[],
@@ -181,6 +180,7 @@ export const createActivityMapQuery = (
       },
     })
     .setGlobalFilters([
+      { type: 'segment', segmentId: SEGMENTS.cra },
       { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
     ])
     .setSettings(querySettings)
@@ -215,6 +215,7 @@ export const createInternalSearchQuery = (
       },
     })
     .setGlobalFilters([
+      { type: 'segment', segmentId: SEGMENTS.cra },
       { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
     ])
     .setSettings(querySettings)
@@ -284,14 +285,14 @@ export const createWhereVisitorsCameFromQuery = (
       },
     })
     .setGlobalFilters([
+      { type: 'segment', segmentId: SEGMENTS.cra },
       { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
     ])
     .setSettings(querySettings)
     .build();
 };
 
-// todo: just an example for now - should be made to take an array of pages/itemIds and set filters and stuff accordingly
-export const acquireActivityMapItemIdQuery = (
+export const createActivityMapItemIdsQuery = (
   dateRange: DateRange,
   settings: ReportSettings = {}
 ) => {
@@ -303,7 +304,7 @@ export const acquireActivityMapItemIdQuery = (
     ...settings,
   };
 
-   return queryBuilder
+  return queryBuilder
     .setDimension('variables/clickmappage') // Site search
     .setMetrics({ visits: 'metrics/clickmaplinkinstances' } as MetricsConfig)
     .setGlobalFilters([
@@ -314,7 +315,7 @@ export const acquireActivityMapItemIdQuery = (
     .build();
 };
 
-export const acquireInternalSearchItemIdQuery = (
+export const createInternalSearchItemIdsQuery = (
   dateRange: DateRange,
   settings: ReportSettings = {}
 ) => {
@@ -337,7 +338,7 @@ export const acquireInternalSearchItemIdQuery = (
     .build();
 };
 
-export const acquirePageUrlItemIdQuery = (
+export const createPageUrlItemIdsQuery = (
   dateRange: DateRange,
   settings: ReportSettings = {}
 ) => {
@@ -350,7 +351,7 @@ export const acquirePageUrlItemIdQuery = (
   };
 
   return queryBuilder
-    .setDimension('variables/evar22') // Site search
+    .setDimension('variables/evar22') // Page URL last 255
     .setMetrics({ visits: 'metrics/visits' } as MetricsConfig)
     .setGlobalFilters([
       { type: 'segment', segmentId: SEGMENTS.cra },
