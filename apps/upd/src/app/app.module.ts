@@ -23,6 +23,8 @@ import {
   i18nReducer,
   I18nEffects,
   I18nFacade,
+  actionSanitizer,
+  stateSanitizer,
 } from '@dua-upd/upd/state';
 
 import { environment } from '../environments/environment';
@@ -57,7 +59,12 @@ import {
     ),
     StoreRouterConnectingModule.forRoot(),
     EffectsModule.forRoot([DateSelectionEffects, I18nEffects]),
-    !environment.production ? StoreDevtoolsModule.instrument() : [],
+    !environment.production
+      ? StoreDevtoolsModule.instrument({
+          actionSanitizer,
+          stateSanitizer,
+        })
+      : [],
     environment.production
       ? NgxGoogleAnalyticsModule.forRoot(environment.gaTrackingId)
       : [],
