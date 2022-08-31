@@ -26164,5 +26164,401 @@
     "topic": "Climate Action Incentive Payment (CAIP)",
     "sub-topic": "When will I get the payment",
     "sub-subtopic": ""
+  },
+  "8532": {
+    "inquiry line": "Benefits",
+    "topic": "CCB - Amount / Balance Owing",
+    "sub-topic": "Explanation of notice",
+    "sub-subtopic": "Change in family net income"
+  },
+  "8533": {
+    "inquiry line": "Benefits",
+    "topic": "CCB - Amount / Balance Owing",
+    "sub-topic": "Explanation of notice",
+    "sub-subtopic": "Change in marital status"
+  },
+  "8534": {
+    "inquiry line": "Benefits",
+    "topic": "CCB - Amount / Balance Owing",
+    "sub-topic": "Explanation of notice",
+    "sub-subtopic": "Change in number of dependants"
+  },
+  "8535": {
+    "inquiry line": "Benefits",
+    "topic": "CCB - Amount / Balance Owing",
+    "sub-topic": "Explanation of notice",
+    "sub-subtopic": "Change in residency"
+  },
+  "8537": {
+    "inquiry line": "Benefits",
+    "topic": "CCB - Amount / Balance Owing",
+    "sub-topic": "Explanation of notice",
+    "sub-subtopic": "Did not respond to a letter from CVB"
+  },
+  "8538": {
+    "inquiry line": "Benefits",
+    "topic": "CCB - Amount / Balance Owing",
+    "sub-topic": "Explanation of notice",
+    "sub-subtopic": "Missing information on spouse income"
+  },
+  "8539": {
+    "inquiry line": "ITE",
+    "topic": "Status of Return - Current Year",
+    "sub-topic": "Cancel, Error, Disassociated, Recycle status",
+    "sub-subtopic": "Recycled - Waiting Royal Assent"
+  },
+  "8540": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Adding GST/HST (RT) accounts",
+    "sub-subtopic": "Sole-Proprietor - RT0001"
+  },
+  "8541": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Adding GST/HST (RT) accounts",
+    "sub-subtopic": "Sole-Proprietor - RT0002 - RT9999"
+  },
+  "8542": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Adding GST/HST (RT) accounts",
+    "sub-subtopic": "Partnership - RT0001"
+  },
+  "8544": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Adding GST/HST (RT) accounts",
+    "sub-subtopic": "Corporation - RT0001 - Registered by Federal or Provincial Partner"
+  },
+  "8545": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Adding GST/HST (RT) accounts",
+    "sub-subtopic": "Corporation - RT0001 - Registered with BRO"
+  },
+  "8546": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Adding GST/HST (RT) accounts",
+    "sub-subtopic": "Corporation - RT0002 - RT9999"
+  },
+  "8547": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Adding Payroll (RP) accounts",
+    "sub-subtopic": "RP0001 - Business Payroll (T4s)"
+  },
+  "8548": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Adding Payroll (RP) accounts",
+    "sub-subtopic": "RP0001 - Domestic Employer"
+  },
+  "8549": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Adding Payroll (RP) accounts",
+    "sub-subtopic": "RP0002 - RP9999"
+  },
+  "8550": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Opening GST/HST (RT) accounts",
+    "sub-subtopic": "Sole-Proprietor - Showed how to self-serve"
+  },
+  "8551": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Opening GST/HST (RT) accounts",
+    "sub-subtopic": "Sole-Proprietor - Unable to self-serve"
+  },
+  "8552": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Opening GST/HST (RT) accounts",
+    "sub-subtopic": "Sole-Proprietor - Didn't want to self-serve"
+  },
+  "8553": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Opening GST/HST (RT) accounts",
+    "sub-subtopic": "Corporation - Showed how to self-serve"
+  },
+  "8554": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Opening GST/HST (RT) accounts",
+    "sub-subtopic": "Corporation - Unable to self-serve"
+  },
+  "8555": {
+    "inquiry line": "BE",
+    "topic": "Business Registration",
+    "sub-topic": "Opening GST/HST (RT) accounts",
+    "sub-subtopic": "Corporation - Didn't want to self-serve"
+  },
+  "8564": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Account locked"
+  },
+  "8566": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Already updated"
+  },
+  "8567": {
+    "inquiry line": "Benefits",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Already updated"
+  },
+  "8568": {
+    "inquiry line": "Benefits",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Failed Confidentiality"
+  },
+  "8569": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Failed Confidentiality"
+  },
+  "8571": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Inactive Master"
+  },
+  "8574": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Not taxpayer or legal rep"
+  },
+  "8576": {
+    "inquiry line": "Benefits",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Other"
+  },
+  "8577": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Other"
+  },
+  "8579": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Refund Exam code"
+  },
+  "8580": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "No - Remove RMF set in error"
+  },
+  "8582": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Nudged - Taxpayer Recently Moved / Will be Moving"
+  },
+  "8583": {
+    "inquiry line": "Benefits",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Nudged - Taxpayer Recently Moved / Will be Moving"
+  },
+  "8584": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Nudged - Incomplete address"
+  },
+  "8586": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Nudged - Incorrect address on E-filed return"
+  },
+  "8588": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Nudged - other"
+  },
+  "8590": {
+    "inquiry line": "Benefits",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Yes - Does not have MyA"
+  },
+  "8591": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Yes - Does not have MyA"
+  },
+  "8592": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Yes - Incorrect address on E-filed return"
+  },
+  "8593": {
+    "inquiry line": "Benefits",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Yes - Incorrect address on E-filed return"
+  },
+  "8594": {
+    "inquiry line": "Benefits",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Yes - Moved recently"
+  },
+  "8595": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Yes - Moved recently"
+  },
+  "8596": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Yes - Other"
+  },
+  "8597": {
+    "inquiry line": "Benefits",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Yes - Other"
+  },
+  "8598": {
+    "inquiry line": "Benefits",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Yes - Unable to update in MyA"
+  },
+  "8599": {
+    "inquiry line": "ITE",
+    "topic": "Account Maintenance",
+    "sub-topic": "Address Update",
+    "sub-subtopic": "Yes - Unable to update in MyA"
+  },
+  "8601": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Assessment",
+    "sub-subtopic": "Electronic Delivery - No Computer"
+  },
+  "8602": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Assessment",
+    "sub-subtopic": "Electronic Delivery - No Internet"
+  },
+  "8603": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Assessment",
+    "sub-subtopic": "Electronic Delivery - No My Account"
+  },
+  "8604": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Assessment",
+    "sub-subtopic": "Electronic Delivery - No Printer"
+  },
+  "8605": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Assessment",
+    "sub-subtopic": "Electronic Delivery - Other"
+  },
+  "8606": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Assessment",
+    "sub-subtopic": "Mailed - Lost / Misplaced / Destroyed"
+  },
+  "8607": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Assessment",
+    "sub-subtopic": "Mailed - Went to old / incorrect address"
+  },
+  "8608": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Assessment",
+    "sub-subtopic": "Mailed - Other"
+  },
+  "8610": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Reassessment",
+    "sub-subtopic": "Electronic Delivery - No Computer"
+  },
+  "8611": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Reassessment",
+    "sub-subtopic": "Electronic Delivery - No Internet"
+  },
+  "8612": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Reassessment",
+    "sub-subtopic": "Electronic Delivery - No My Account"
+  },
+  "8613": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Reassessment",
+    "sub-subtopic": "Electronic Delivery - No Printer"
+  },
+  "8614": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Reassessment",
+    "sub-subtopic": "Electronic Delivery - Other"
+  },
+  "8615": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Reassessment",
+    "sub-subtopic": "Mailed - Lost / Misplaced / Destroyed"
+  },
+  "8616": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Reassessment",
+    "sub-subtopic": "Mailed - Went to old / incorrect address"
+  },
+  "8617": {
+    "inquiry line": "ITE",
+    "topic": "Print requests",
+    "sub-topic": "Notice of Reassessment",
+    "sub-subtopic": "Mailed - Other"
+  },
+  "8618": {
+    "inquiry line": "ITE",
+    "topic": "Federal Tax and Credits",
+    "sub-topic": "47556 -  Fuel Tax Credit for Farmers",
+    "sub-subtopic": ""
+  },
+  "8812": {
+    "inquiry line": "ITE",
+    "topic": "Mailout / Nudge",
+    "sub-topic": "Electronic Notifications to register for online services",
+    "sub-subtopic": ""
   }
 }

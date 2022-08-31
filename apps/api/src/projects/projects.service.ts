@@ -72,9 +72,9 @@ const projectStatusSwitchExpression = {
       },
       {
         case: {
-          $in: ['Discovery', '$statuses'],
+          $in: ['Exploratory', '$statuses'],
         },
-        then: 'Discovery',
+        then: 'Exploratory',
       },
       {
         case: {
@@ -113,8 +113,8 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
       return 'In Progress';
     case statuses.some((status) => status === 'Planning'):
       return 'Planning';
-    case statuses.some((status) => status === 'Discovery'):
-      return 'Discovery';
+    case statuses.some((status) => status === 'Exploratory'):
+      return 'Exploratory';
     case statuses.some((status) => status === 'Being monitored'):
       return 'Being monitored';
     case statuses.some((status) => status === 'Needs review'):

@@ -26164,5 +26164,401 @@
     "topic": "Paiement de l’incitatif à agir pour le climat (PIAC)",
     "sub-topic": "Quand vais-je recevoir le paiement",
     "sub-subtopic": ""
+  },
+  "8532": {
+    "inquiry line": "Prestations",
+    "topic": "ACE - Montants / Solde dû",
+    "sub-topic": "Explication de l’avis",
+    "sub-subtopic": "Changement du revenu net familial"
+  },
+  "8533": {
+    "inquiry line": "Prestations",
+    "topic": "ACE - Montants / Solde dû",
+    "sub-topic": "Explication de l’avis",
+    "sub-subtopic": "Changement d'état matrimonial"
+  },
+  "8534": {
+    "inquiry line": "Prestations",
+    "topic": "ACE - Montants / Solde dû",
+    "sub-topic": "Explication de l’avis",
+    "sub-subtopic": "Changement du nombre de personnes à charge"
+  },
+  "8535": {
+    "inquiry line": "Prestations",
+    "topic": "ACE - Montants / Solde dû",
+    "sub-topic": "Explication de l’avis",
+    "sub-subtopic": "Changement de résidence"
+  },
+  "8537": {
+    "inquiry line": "Prestations",
+    "topic": "ACE - Montants / Solde dû",
+    "sub-topic": "Explication de l’avis",
+    "sub-subtopic": "N'a pas répondu à une lettre de RV"
+  },
+  "8538": {
+    "inquiry line": "Prestations",
+    "topic": "ACE - Montants / Solde dû",
+    "sub-topic": "Explication de l’avis",
+    "sub-subtopic": "Informations manquantes sur le revenu des conjoints"
+  },
+  "8539": {
+    "inquiry line": "DRIP",
+    "topic": "Statut de traitement - Année courante",
+    "sub-topic": "Type de déclaration non précisée - Recyclé, annulé, erreur, etc.",
+    "sub-subtopic": ""
+  },
+  "8540": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8541": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8542": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8544": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8545": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8546": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8547": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8548": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8549": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8550": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8551": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8552": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8553": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8554": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8555": {
+    "inquiry line": "DRE",
+    "topic": "Enregistrement des entreprises",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8564": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8566": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": "Non - Déjà mis à jour"
+  },
+  "8567": {
+    "inquiry line": "Prestations",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": "Non - Déjà mis à jour"
+  },
+  "8568": {
+    "inquiry line": "Prestations",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8569": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8571": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8574": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8576": {
+    "inquiry line": "Prestations",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": "Non - Autre"
+  },
+  "8577": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": "Non - Autre"
+  },
+  "8579": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8580": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8582": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8583": {
+    "inquiry line": "Prestations",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8584": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8586": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8588": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8590": {
+    "inquiry line": "Prestations",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8591": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8592": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8593": {
+    "inquiry line": "Prestations",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8594": {
+    "inquiry line": "Prestations",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8595": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8596": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": "Oui – Autre"
+  },
+  "8597": {
+    "inquiry line": "Prestations",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": "Oui – Autre"
+  },
+  "8598": {
+    "inquiry line": "Prestations",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8599": {
+    "inquiry line": "DRIP",
+    "topic": "Maintenance de compte",
+    "sub-topic": "Mises à jour d’adresse",
+    "sub-subtopic": ""
+  },
+  "8601": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de Cotisation",
+    "sub-subtopic": ""
+  },
+  "8602": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de Cotisation",
+    "sub-subtopic": ""
+  },
+  "8603": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de Cotisation",
+    "sub-subtopic": ""
+  },
+  "8604": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de Cotisation",
+    "sub-subtopic": ""
+  },
+  "8605": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de Cotisation",
+    "sub-subtopic": ""
+  },
+  "8606": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de Cotisation",
+    "sub-subtopic": ""
+  },
+  "8607": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de Cotisation",
+    "sub-subtopic": ""
+  },
+  "8608": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de Cotisation",
+    "sub-subtopic": ""
+  },
+  "8610": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de nouvelle cotisation",
+    "sub-subtopic": ""
+  },
+  "8611": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de nouvelle cotisation",
+    "sub-subtopic": ""
+  },
+  "8612": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de nouvelle cotisation",
+    "sub-subtopic": ""
+  },
+  "8613": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de nouvelle cotisation",
+    "sub-subtopic": ""
+  },
+  "8614": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de nouvelle cotisation",
+    "sub-subtopic": ""
+  },
+  "8615": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de nouvelle cotisation",
+    "sub-subtopic": ""
+  },
+  "8616": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de nouvelle cotisation",
+    "sub-subtopic": ""
+  },
+  "8617": {
+    "inquiry line": "DRIP",
+    "topic": "Demandes d’imprimés",
+    "sub-topic": "Avis de nouvelle cotisation",
+    "sub-subtopic": ""
+  },
+  "8618": {
+    "inquiry line": "DRIP",
+    "topic": "Impôt fédéral et crédits",
+    "sub-topic": "",
+    "sub-subtopic": ""
+  },
+  "8812": {
+    "inquiry line": "DRIP",
+    "topic": "Envoi / Coup de pouce",
+    "sub-topic": "",
+    "sub-subtopic": ""
   }
 }
