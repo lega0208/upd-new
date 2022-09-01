@@ -51,7 +51,7 @@ export function getAvgTestSuccess(uxTests: Partial<UxTest>[]) {
 export function getAvgSuccessFromLastTests(uxTests: Partial<UxTest>[]) {
 
   const uxTestsWithSuccessRate = uxTests
-  .filter((test) => test.success_rate && test.success_rate >= 0);
+  .filter((test) => test.success_rate ?? test.success_rate === 0);
 
   const lastTest = getLatestTest(uxTestsWithSuccessRate);
 
