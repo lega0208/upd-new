@@ -45,6 +45,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { SliderModule } from 'primeng/slider';
 import { CalendarModule } from 'primeng/calendar';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { DataTableExportsComponent } from './data-table-exports/data-table-exports.component';
 
 @NgModule({
   imports: [
@@ -92,6 +93,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     LoadingSpinnerComponent,
     ProjectHeaderComponent,
     CardSecondaryTitleComponent,
+    DataTableExportsComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -120,6 +122,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     LoadingSpinnerComponent,
     ProjectHeaderComponent,
     CardSecondaryTitleComponent,
+    DataTableExportsComponent,
   ],
 })
 export class UpdComponentsModule {}
