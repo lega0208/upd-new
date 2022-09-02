@@ -4,8 +4,8 @@ export function wait(ms: number) {
 }
 
 // Removes double-spaces and trims the string
-export function squishTrim<T extends string>(str?: T) {
-  return str?.replace(/\s+/g, ' ') as T || '';
+export function squishTrim<T extends string = string>(str?: T) {
+  return str?.replace(/\s+/g, ' ').trim() as T || '';
 }
 
 // Used for measuring function execution time
