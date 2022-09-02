@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { combineLatest, observable } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { TasksHomeAggregatedData } from '@dua-upd/types-common';
 import { TasksHomeFacade } from './+state/tasks-home.facade';
+import { createCategoryConfig } from '@dua-upd/upd/utils';
 
 @Component({
   selector: 'upd-tasks-home',
@@ -13,6 +14,7 @@ import { TasksHomeFacade } from './+state/tasks-home.facade';
 })
 export class TasksHomeComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
+  loading$ = this.tasksHomeService.loaded$.pipe(map((loaded) => !loaded));
 
   totalTasks$ = this.tasksHomeService.totalTasks$;
   tasksHomeData$ = this.tasksHomeService.tasksHomeTableData$;
@@ -28,95 +30,46 @@ export class TasksHomeComponent implements OnInit {
   ngOnInit() {
     this.tasksHomeService.init();
 
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
-      this.columns = [
-        {
-          field: 'title',
-          header: this.i18n.service.translate('task', lang),
-          type: 'link',
-          typeParam: '_id',
-          filterConfig: {
-            type: 'text',
+    combineLatest([this.tasksHomeData$, this.currentLang$]).subscribe(
+      ([data, lang]) => {
+        this.columns = [
+          {
+            field: 'title',
+            header: this.i18n.service.translate('task', lang),
+            type: 'link',
+            typeParam: '_id',
           },
-        },
-        {
-          field: 'topic',
-          header: this.i18n.service.translate('category', lang),
-          filterConfig: {
-            type: 'category',
-            categories: [
-              {
-                name: this.i18n.service.translate('Taxes', lang),
-                value: 'Taxes',
-              },
-              {
-                name: this.i18n.service.translate('Benefits', lang),
-                value: 'Benefits',
-              },
-              {
-                name: this.i18n.service.translate('Business', lang),
-                value: 'Business',
-              },
-              {
-                name: this.i18n.service.translate('Business Number', lang),
-                value: 'Business Number',
-              },
-              {
-                name: this.i18n.service.translate('Other', lang),
-                value: 'Other',
-              },
-            ],
+          {
+            field: 'topic',
+            header: this.i18n.service.translate('category', lang),
+            filterConfig: {
+              type: 'category',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'topic',
+              }),
+            },
           },
-        },
-        {
-          field: 'subtopic',
-          header: this.i18n.service.translate('sub-category', lang),
-          filterConfig: {
-            type: 'category',
-            categories: [
-              {
-                name: this.i18n.service.translate('Payroll', lang),
-                value: 'Payroll',
-              },
-              {
-                name: this.i18n.service.translate('GST/HST', lang),
-                value: 'GST/HST',
-              },
-              {
-                name: this.i18n.service.translate('Common', lang),
-                value: 'Common',
-              },
-              {
-                name: this.i18n.service.translate('COVID-19 Benefits', lang),
-                value: 'COVID-19 Benefits',
-              },
-              {
-                name: this.i18n.service.translate('Income Tax', lang),
-                value: 'Income Tax',
-              },
-              {
-                name: this.i18n.service.translate(
-                  'Savings and Pension Plans',
-                  lang
-                ),
-                value: 'Savings and Pension Plans',
-              },
-              {
-                name: this.i18n.service.translate(
-                  'Managing your business during COVID-19',
-                  lang
-                ),
-                value: 'Managing your business during COVID-19',
-              },
-            ],
+          {
+            field: 'subtopic',
+            header: this.i18n.service.translate('sub-category', lang),
+            filterConfig: {
+              type: 'category',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'subtopic',
+              }),
+            },
           },
-        },
-        {
-          field: 'visits',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-      ];
-    });
+          {
+            field: 'visits',
+            header: this.i18n.service.translate('visits', lang),
+            pipe: 'number',
+          },
+        ];
+      }
+    );
   }
 }

@@ -6,8 +6,8 @@ import { ColumnConfig } from '../data-table-styles/types';
   templateUrl: './data-table-card.component.html',
   styleUrls: ['./data-table-card.component.css'],
 })
-export class DataTableCardComponent implements OnInit {
-  @Input() data: any[] = [];
+export class DataTableCardComponent<T> {
+  @Input() data: T[] = [];
   @Input() displayRows = 10;
   @Input() sort = true;
   @Input() pagination = true;
@@ -17,15 +17,12 @@ export class DataTableCardComponent implements OnInit {
   @Input() captionTitle = '';
   @Input() kpi = false;
   @Input() sortField = '';
-  @Input() sortOrder = 'asc';
+  @Input() sortOrder: 'asc' | 'desc' | number = 'asc';
   @Input() title = '';
   @Input() tooltip = '';
+  @Input() loading = false;
 
-  loading!: boolean;
-
-  ngOnInit() {
-    if (this.searchFields.length === 0) {
-      this.searchFields = this.cols.map((obj) => obj.field);
-    }
+  get defaultSearchFields() {
+    return this.cols.map((obj) => obj.field);
   }
 }

@@ -8,13 +8,15 @@ import * as calldriversEnCA from './translations/calldrivers_en-CA.json';
 import * as calldriversfrCA from './translations/calldrivers_fr-CA.json';
 import { LocaleId } from './i18n.types';
 
+export type TranslationJson = Record<string, string | Record<string, unknown>>
+
 export class JsonLoader implements TranslateLoader {
-  getTranslation(lang: LocaleId): Observable<Record<string, string | Record<string, string>>> {
+  getTranslation(lang: LocaleId): Observable<TranslationJson> {
     switch (lang) {
       case 'en-CA':
-        return of({ ...enCA, ...calldriversEnCA } as Record<string, string | Record<string, string>>);
+        return of({ ...enCA, ...calldriversEnCA });
       case 'fr-CA':
-        return of({ ...frCA, ...calldriversfrCA } as Record<string, string | Record<string, string>>);
+        return of({ ...frCA, ...calldriversfrCA });
     }
   }
 }

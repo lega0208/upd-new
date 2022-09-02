@@ -16,7 +16,6 @@
         "assets": ["apps/upd/src/favicon.ico", "apps/upd/src/assets"],
         "styles": ["apps/upd/src/styles.scss"],
         "scripts": [],
-        "statsJson": true,
         "vendorChunk": true
       },
       "configurations": {
@@ -40,6 +39,7 @@
             }
           ],
           "outputHashing": "all",
+          "statsJson": true,
           "buildLibsFromSource": true
         },
         "development": {

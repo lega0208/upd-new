@@ -19,5 +19,6 @@
     [cols]="columns"
     [searchFields]="searchFields"
     [displayRows]="25"
+    [loading]="(loading$ | async) !== false"
   ></upd-data-table>
 </upd-card>

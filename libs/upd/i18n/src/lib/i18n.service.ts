@@ -13,7 +13,7 @@ export class I18nService {
   constructor(private readonly translateService: TranslateService) {}
 
   get currentLang() {
-    return this.translateService.currentLang;
+    return this.translateService.currentLang as LocaleId;
   }
 
   async get(key: string | string[], interpolateParams?: object) {
@@ -28,7 +28,7 @@ export class I18nService {
     this.translateService.setDefaultLang('en-CA');
   }
 
-  observeKey(key: string): Observable<string> {
+  observeKey(key: string): Observable<string | Record<string, unknown>> {
     return this.translateService.stream(key);
   }
 

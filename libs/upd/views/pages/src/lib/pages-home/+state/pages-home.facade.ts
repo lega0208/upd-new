@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
+import {  Store } from '@ngrx/store';
 
 import * as PagesHomeActions from './pages-home.actions';
 import * as PagesHomeSelectors from './pages-home.selectors';
-import { debounceTime, map } from 'rxjs';
+import { map } from 'rxjs';
 
 @Injectable()
 export class PagesHomeFacade {
@@ -11,16 +11,13 @@ export class PagesHomeFacade {
    * Combine pieces of state using createSelector,
    * and expose them as observables through the facade.
    */
-  loading$ = this.store.pipe(
-    select(PagesHomeSelectors.getPagesHomeLoading),
-    debounceTime(500),
-  );
-  loaded$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeLoaded));
-  pagesHomeData$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeData));
+  loading$ = this.store.select(PagesHomeSelectors.selectPagesHomeLoading);
+  loaded$ = this.store.select((PagesHomeSelectors.selectPagesHomeLoaded));
+  pagesHomeData$ = this.store.select((PagesHomeSelectors.selectPagesHomeData));
   pagesHomeTableData$ = this.pagesHomeData$.pipe(
     map((pagesHomeData) => [...pagesHomeData?.dateRangeData || []])
   );
-  error$ = this.store.pipe(select(PagesHomeSelectors.getPagesHomeError));
+  error$ = this.store.select((PagesHomeSelectors.selectPagesHomeError));
 
   constructor(private readonly store: Store) {}
 
