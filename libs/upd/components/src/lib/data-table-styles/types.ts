@@ -23,6 +23,6 @@ export interface typeParams {
 }
 
 export interface FilterConfig<T = any> {
-  type: 'category' | 'text' | 'boolean' | 'date' | 'number' | 'percent';
+  type: 'category' | 'boolean';
   categories?: { name: string; value: T[keyof T] | null }[];
 }

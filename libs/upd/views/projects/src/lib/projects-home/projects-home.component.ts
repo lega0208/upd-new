@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { combineLatest } from 'rxjs';
 import { ProjectsHomeFacade } from './+state/projects-home.facade';
 import { ColumnConfig } from '@dua-upd/upd-components';
 
 import { I18nFacade } from '@dua-upd/upd/state';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { ProjectsHomeProject } from '@dua-upd/types-common';
+import { createCategoryConfig } from '@dua-upd/upd/utils';
 
 @Component({
   selector: 'upd-projects-home',
@@ -37,67 +39,51 @@ export class ProjectsHomeComponent implements OnInit {
   ngOnInit() {
     this.projectsHomeService.init();
 
-    this.currentLang$.subscribe((lang) => {
-      this.columns = [
-        {
-          field: 'title',
-          header: this.i18n.service.translate('Name', lang),
-          type: 'link',
-          typeParam: '_id',
-          filterConfig: {
-            type: 'text',
+    combineLatest([this.tableData$, this.currentLang$]).subscribe(
+      ([data, lang]) => {
+        this.columns = [
+          {
+            field: 'title',
+            header: this.i18n.service.translate('Name', lang),
+            type: 'link',
+            typeParam: '_id',
           },
-        },
-        {
-          field: 'cops',
-          header: this.i18n.service.translate('type', lang),
-          type: 'label',
-          typeParam: 'cops',
-          filterConfig: {
-            type: 'boolean',
+          {
+            field: 'cops',
+            header: this.i18n.service.translate('type', lang),
+            type: 'label',
+            typeParam: 'cops',
+            filterConfig: {
+              type: 'boolean',
+            },
           },
-        },
-        {
-          field: 'status',
-          header: this.i18n.service.translate('Status', lang),
-          type: 'label',
-          typeParam: 'status',
-          filterConfig: {
-            type: 'category',
-            categories: [
-              {
-                name: this.i18n.service.translate('Unknown', lang),
-                value: 'Unknown',
-              },
-              {
-                name: this.i18n.service.translate('Complete', lang),
-                value: 'Complete',
-              },
-              {
-                name: this.i18n.service.translate('In Progress', lang),
-                value: 'In Progress',
-              },
-            ],
+          {
+            field: 'status',
+            header: this.i18n.service.translate('Status', lang),
+            type: 'label',
+            typeParam: 'status',
+            filterConfig: {
+              type: 'category',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'status',
+              }),
+            },
           },
-        },
-        {
-          field: 'startDate',
-          header: this.i18n.service.translate('Start date', lang),
-          pipe: 'date',
-          pipeParam: lang === FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY',
-          filterConfig: {
-            type: 'date',
+          {
+            field: 'startDate',
+            header: this.i18n.service.translate('Start date', lang),
+            pipe: 'date',
+            pipeParam: lang === FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY',
           },
-        },
-        {
-          field: 'avgSuccessRate',
-          header: this.i18n.service.translate('Average success rate', lang),
-          pipe: 'percent',
-          filterConfig: {
-            type: 'percent',
+          {
+            field: 'avgSuccessRate',
+            header: this.i18n.service.translate('Average success rate', lang),
+            pipe: 'percent',
           },
-        },
-      ];
-    });
+        ];
+      }
+    );
   }
 }

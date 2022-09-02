@@ -14,59 +14,34 @@
       | translate
         : { first: '{first}', last: '{last}', totalRecords: '{totalRecords}' }
   }}"
-  [globalFilterFields]="searchFields"
+  [globalFilterFields]="searchFields.length > 0 ? searchFields : defaultSearchFields"
   [sortField]="sortField"
-  [sortOrder]="sorting"
+  [sortOrder]="sortOrder === 'desc' || sortOrder < 0 ? -1 : 1"
+  dataKey="_id"
 >
-  <ng-template *ngIf="filter || captionTitle" pTemplate="caption">
+  <ng-template *ngIf="filter || captionTitle || exports" pTemplate="caption">
     <ng-container *ngIf="captionTitle">
       {{ captionTitle | translate }}
     </ng-container>
-    <div class="flex">
-      <button
-        type="button"
-        pButton
-        pRipple
-        icon="pi pi-file"
-        (click)="dt.exportCSV()"
-        class="mr-2 exportButtons"
-        pTooltip="CSV"
-        tooltipPosition="bottom"
-      ></button>
-      <button
-        type="button"
-        pButton
-        pRipple
-        icon="pi pi-file-pdf"
-        (click)="exportPdf()"
-        class="p-button-warning mr-2 exportButtons"
-        pTooltip="PDF"
-        tooltipPosition="bottom"
-      ></button>
-      <button
-        type="button"
-        pButton
-        pRipple
-        icon="pi pi-file-excel"
-        (click)="exportExcel()"
-        class="p-button-success mr-2 exportButtons"
-        pTooltip="XLS"
-        tooltipPosition="bottom"
-      ></button>
+
+    <upd-data-table-exports
+      *ngIf="exports"
+      [cols]="cols"
+      [data]="data || []"
+      [exportCsv]="dt.exportCSV.bind(dt)"
+    ></upd-data-table-exports>
+
+    <div class="p-d-flex" *ngIf="filter">
+      <span class="p-input-icon-left p-ml-auto">
+        <i class="pi pi-search"></i>
+        <input
+          pInputText
+          type="text"
+          (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+          placeholder="{{ 'dt_search_keyword' | translate }}"
+        />
+      </span>
     </div>
-    <ng-container *ngIf="filter">
-      <div class="p-d-flex">
-        <span class="p-input-icon-left p-ml-auto">
-          <i class="pi pi-search"></i>
-          <input
-            pInputText
-            type="text"
-            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-            placeholder="{{ 'dt_search_keyword' | translate }}"
-          />
-        </span>
-      </div>
-    </ng-container>
   </ng-template>
   <ng-template pTemplate="header" let-columns>
     <tr>
@@ -104,22 +79,14 @@
             </ng-container>
             <p-sortIcon [field]="col.field"></p-sortIcon>
             <ng-template [ngIf]="col.filterConfig">
-              <!-- Text Filtering -->
-              <ng-template [ngIf]="col.filterConfig.type === 'text'">
-                <p-columnFilter
-                  type="text"
-                  [field]="col.field"
-                  matchMode="contains"
-                  display="menu"
-                ></p-columnFilter>
-              </ng-template>
-
               <!-- Boolean Filtering -->
               <ng-template [ngIf]="col.filterConfig.type === 'boolean'">
                 <p-columnFilter
                   type="boolean"
                   [field]="col.field"
                   display="menu"
+                  [hideOnClear]="true"
+                  [showApplyButton]="false"
                 ></p-columnFilter>
               </ng-template>
 
@@ -132,6 +99,8 @@
                   [showMatchModes]="false"
                   [showOperator]="false"
                   [showAddButton]="false"
+                  [showApplyButton]="false"
+                  [hideOnClear]="true"
                 >
                   <ng-template
                     pTemplate="filter"
@@ -143,8 +112,11 @@
                       [options]="col.filterConfig.categories"
                       optionValue="value"
                       optionLabel="name"
-                      placeholder="Any"
+                      [placeholder]="'Options'"
+
                       (onChange)="filter($event.value)"
+                      [filter]="false"
+                      [showHeader]="false"
                     >
                       <ng-template let-option pTemplate="item">
                         <div class="p-multiselect-representative-option">
@@ -154,91 +126,6 @@
                         </div>
                       </ng-template>
                     </p-multiSelect>
-                  </ng-template>
-                </p-columnFilter>
-              </ng-template>
-
-              <!-- Filtering by Date -->
-              <ng-template [ngIf]="col.filterConfig.type === 'date'">
-                <p-columnFilter
-                  [field]="col.field"
-                  display="menu"
-                  [showMatchModes]="false"
-                  [showOperator]="false"
-                  [showAddButton]="false"
-                >
-                  <ng-template
-                    pTemplate="filter"
-                    let-value
-                    let-filter="filterCallback"
-                  >
-                    <p-calendar
-                      #calendar
-                      [ngModel]="value"
-                      dataType="date"
-                      (onSelect)="filter(dateFormat(calendar.value))"
-                      (onInput)="dateFormat(calendar.value)"
-                      dateFormat="M dd, yy"
-                    ></p-calendar>
-                  </ng-template>
-                </p-columnFilter>
-              </ng-template>
-
-              <!-- For Filtering by Number -->
-              <ng-template [ngIf]="col.filterConfig.type === 'number'">
-                <!-- <p-columnFilter
-                  [field]="col.field"
-                  matchMode="between"
-                  display="menu"
-                  [(ngModel)]="rangeValues"
-                  [showMatchModes]="false"
-                  [showOperator]="false"
-                >
-                  <ng-template pTemplate="filter" let-filter="filterCallback">
-                    <div class="flex align-items-center justify-content-center px-2">
-                      <label for="rangeMin">Minimum</label>
-                      <p-inputNumber
-                        inputId="rangeMin"
-                        [size]="1"
-                        [(ngModel)]="rangeValues[0]"
-                        (onInput)="rangeValues[0] = filter($event.values)"
-                      ></p-inputNumber>
-                      <label for="rangeMax">Maximum</label>
-                      <p-inputNumber
-                        inputId="rangeMax"
-                        [size]="1"
-                        [(ngModel)]="rangeValues[1]"
-                        (onInput)="rangeValues[1] = filter($event.values)"
-                      ></p-inputNumber>
-                    </div>
-                  </ng-template>
-                </p-columnFilter> -->
-              </ng-template>
-
-              <!-- Filterable by Percentage (Only working for 0%-100%) -->
-              <ng-template [ngIf]="col.filterConfig.type === 'percent'">
-                <p-columnFilter
-                  [field]="col.field"
-                  matchMode="between"
-                  display="menu"
-                  [showMatchModes]="false"
-                  [showOperator]="false"
-                  [showAddButton]="false"
-                >
-                  <ng-template pTemplate="filter" let-filter="filterCallback">
-                    <p-slider
-                      [(ngModel)]="rangeValues"
-                      [range]="true"
-                      (onChange)="rangeValues = $event.values"
-                      (onSlideEnd)="filter(convertToPercent($event.values))"
-                      (onClearClick)="rangeValues = [0, 100]"
-                      styleClass="m-3"
-                    ></p-slider>
-                    <div
-                      class="flex align-items-center justify-content-center px-2"
-                    >
-                      <span>{{ rangeValues[0] }}% - {{ rangeValues[1] }}%</span>
-                    </div>
                   </ng-template>
                 </p-columnFilter>
               </ng-template>

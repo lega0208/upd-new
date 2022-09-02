@@ -34,6 +34,7 @@ export class ProjectsHomeFacade {
       const projectsHome = data?.projects?.map((d) => ({
         ...d,
         title: d.title ? this.i18n.service.translate(d.title.replace(/\s+/g, ' '), lang) : '',
+        cops: !!d.cops,
         startDate: d.startDate || '',
       }));
 

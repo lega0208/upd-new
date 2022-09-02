@@ -31,3 +31,48 @@
     border-radius: 3px;
   }
 }
+
+.bg-planning {
+  background-color: #cee5ff;
+  color: #262928;
+}
+
+.bg-in-progress {
+  background-color: #f7c2f4;
+  color: #262928;
+}
+
+.bg-complete {
+  background-color: #b3e7bd;
+  color: #262928;
+}
+
+.bg-delayed {
+  background-color: #eda7a7;
+  color: #262928;
+}
+
+.bg-unknown {
+  background-color: grey;
+  color: #fff;
+}
+
+.bg-exploratory {
+  background-color: #e2e7b3;
+  color: #262928;
+}
+
+.bg-being-monitored {
+  background-color: #e3dacb;
+  color: #262928;
+}
+
+.bg-needs-review {
+  background-color: #94e4d8;
+  color: #262928;
+}
+
+.bg-paused {
+  background-color: #c9cbe5;
+  color: #262928;
+}
