@@ -8,9 +8,6 @@ import { dateRangeSplit } from '../date';
  */
 export const getLatestTest = (uxTests: Partial<UxTest>[]) =>
   uxTests.reduce((latestTest, test) => {
-    if (test.success_rate) {
-      return test;
-    }
 
     if (!latestTest || typeof latestTest?.date !== 'object') {
       return test;
@@ -52,7 +49,12 @@ export function getAvgTestSuccess(uxTests: Partial<UxTest>[]) {
  * @param uxTests Array of tests associated to a page/task/project
  */
 export function getAvgSuccessFromLastTests(uxTests: Partial<UxTest>[]) {
-  const lastTest = getLatestTest(uxTests);
+
+  const uxTestsWithSuccessRate = uxTests
+  .filter((test) => test.success_rate ?? test.success_rate === 0);
+
+  const lastTest = getLatestTest(uxTestsWithSuccessRate);
+
 
   const lastTestDate: Date | null = lastTest?.date || null;
 

@@ -200,7 +200,7 @@ export interface TaskDetailsData
 export type ProjectStatus =
   | 'Planning'
   | 'In Progress'
-  | 'Discovery'
+  | 'Exploratory'
   | 'Being monitored'
   | 'Needs review'
   | 'Complete'
