@@ -2,9 +2,9 @@
 
 <upd-date-selector></upd-date-selector>
 
-<upd-card>
+<upd-card title="List of all pages" titleSize="h5">
   <upd-data-table
-    [captionTitle]="'List of top pages'"
+    id="pages-home-"
     [data]="(pagesHomeData$ | async) || []"
     [cols]="columns"
     [displayRows]="25"

@@ -38,7 +38,7 @@
   "date": "Date",
   "value": "Valeur",
   "avg_success_rate": "Taux de réussite moyen",
-
+  "Export": "Exporter",
   "unique-visitors": "Visiteurs uniques",
   "visits-all": "Visites de toutes les pages de l'Agence",
   "page-views": "Pages vues",
@@ -229,6 +229,7 @@
   "List of all projects": "Liste de tous les projets",
   "List of all tasks": "Liste de toutes les tâches",
   "List of top pages": "Liste des meilleures pages",
+  "List of all pages": "Liste de tous les pages",
   "Task list": "Liste des tâches",
   "Participant tasks": "Tâches des participants",
   "Total participants": "Nombre total de participants",

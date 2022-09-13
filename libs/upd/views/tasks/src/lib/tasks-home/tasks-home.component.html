@@ -12,9 +12,9 @@
   </div>
 </div>
 
-<upd-card>
+<upd-card [title]="'List of all tasks'" titleSize="h5">
   <upd-data-table
-    [captionTitle]="'List of all tasks'"
+    id="tasks-home-"
     [data]="(tasksHomeData$ | async) || []"
     [cols]="columns"
     [searchFields]="searchFields"

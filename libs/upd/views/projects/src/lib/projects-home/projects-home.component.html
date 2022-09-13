@@ -39,9 +39,9 @@
   </div>
 </div>
 
-<upd-card>
+<upd-card title="List of all projects" titleSize="h5">
   <upd-data-table
-    [captionTitle]="'List of all projects'"
+    id="projects-home-"
     [data]="(tableData$ | async) || []"
     [cols]="columns"
     [searchFields]="searchFields"

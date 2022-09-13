@@ -14,33 +14,35 @@
       | translate
         : { first: '{first}', last: '{last}', totalRecords: '{totalRecords}' }
   }}"
-  [globalFilterFields]="searchFields.length > 0 ? searchFields : defaultSearchFields"
+  [globalFilterFields]="
+    searchFields.length > 0 ? searchFields : defaultSearchFields
+  "
   [sortField]="sortField"
   [sortOrder]="sortOrder === 'desc' || sortOrder < 0 ? -1 : 1"
   dataKey="_id"
 >
   <ng-template *ngIf="filter || captionTitle || exports" pTemplate="caption">
-    <ng-container *ngIf="captionTitle">
-      {{ captionTitle | translate }}
-    </ng-container>
-
-    <upd-data-table-exports
-      *ngIf="exports"
-      [cols]="cols"
-      [data]="data || []"
-      [exportCsv]="dt.exportCSV.bind(dt)"
-    ></upd-data-table-exports>
-
-    <div class="p-d-flex" *ngIf="filter">
-      <span class="p-input-icon-left p-ml-auto">
-        <i class="pi pi-search"></i>
-        <input
-          pInputText
-          type="text"
-          (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-          placeholder="{{ 'dt_search_keyword' | translate }}"
-        />
-      </span>
+    <div class="d-flex justify-content-between align-items-bottom w-100">
+      <ng-container *ngIf="captionTitle">
+        {{ captionTitle | translate }}
+      </ng-container>
+      <div>
+        <span *ngIf="filter" class="p-input-icon-left p-ml-auto">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            placeholder="{{ 'dt_search_keyword' | translate }}"
+          />
+        </span>
+      </div>
+      <upd-data-table-exports
+        id="data-table-{{ id }}"
+        *ngIf="exports"
+        [cols]="cols"
+        [data]="data || []"
+      ></upd-data-table-exports>
     </div>
   </ng-template>
   <ng-template pTemplate="header" let-columns>
@@ -113,7 +115,6 @@
                       optionValue="value"
                       optionLabel="name"
                       [placeholder]="'Options'"
-
                       (onChange)="filter($event.value)"
                       [filter]="false"
                       [showHeader]="false"

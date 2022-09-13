@@ -38,7 +38,7 @@
   "date": "Date",
   "value": "Value",
   "avg_success_rate": "Average success",
-
+  "Export": "Export",
   "unique-visitors": "Unique visitors",
   "visits-all": "Visits to all CRA pages",
   "page-views": "Page views",
@@ -229,6 +229,7 @@
   "List of all projects": "List of all projects",
   "List of all tasks": "List of all tasks",
   "List of top pages": "List of top pages",
+  "List of all pages": "List of all pages",
   "Task list": "Task list",
   "Participant tasks": "Participant tasks",
   "Total participants": "Total participants",
