@@ -1,9 +1,11 @@
 <div class="row mb-4 mt-1 d-block">
-  <upd-date-selector-dropdown
+  <upd-dropdown
+    id="range-button"
+    icon="calendar_today"
+    [label]="displayFormatSelectedPeriod$ | async"
+    [options]="selectionOptions"
     [onSelect]="selectPeriod.bind(this)"
-    [selectedPeriod]="displayFormatSelectedPeriod$"
-    [selectionOptions]="selectionOptions"
-  ></upd-date-selector-dropdown>
+    ></upd-dropdown>
 
     <span class="text-secondary ps-3 pe-2 text-nowrap dates-header-week">
     <strong>{{ displayFormatDateRange$ | async }}</strong>
