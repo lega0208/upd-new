@@ -30,6 +30,23 @@ export function LogTiming(message = '') {
   };
 }
 
+// Decorator for setting an Input field as required
+export function Required(target: object, propertyKey: string) {
+  Object.defineProperty(target, propertyKey, {
+    get() {
+      throw new Error(`Attribute ${propertyKey} is required`);
+    },
+    set(value) {
+      Object.defineProperty(target, propertyKey, {
+        value,
+        writable: true,
+        configurable: true,
+      });
+    },
+    configurable: true
+  });
+}
+
 /**
  * It takes an array of objects from AA, and returns an array of arrays, where each array is a group of objects
  * @param {{ data: number[]; value: string }[]} arr - The array of objects that you want to seperate.

@@ -19,7 +19,7 @@ export class PagesList {
   airtable_id?: string;
 
   @Prop({ type: String, required: true, unique: true, index: true })
-  url: string = '';
+  url = '';
 
   @Prop({ type: String })
   title?: string;

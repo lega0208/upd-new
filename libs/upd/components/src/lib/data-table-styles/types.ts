@@ -5,7 +5,7 @@ export type ColumnConfigPipe = 'percent' | 'number' | 'date';
 export interface ColumnConfig<T = any> {
   field: OptionalKeyOf<T>;
   header: string;
-  type?: string;
+  type?: 'link' | 'comparison' | 'label';
   typeParam?: string;
   typeParams?: typeParams;
   pipe?: ColumnConfigPipe;

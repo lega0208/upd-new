@@ -5,15 +5,14 @@ import { ColumnConfig } from '../data-table-styles/types';
 @Component({
   selector: 'upd-card',
   template: `
-    <div class="card pt-2" [ngClass]="h !== 0 ? 'h-' + h : ''" tabindex="0">
+    <div class="card pt-2" [ngClass]="cardHeight" tabindex="0">
       <div class="card-body card-pad pt-2 h-100">
         <div class="d-flex justify-content-between">
           <h3
             *ngIf="title !== ''"
-            class="card-title h6 pb-2"
+            [class]="'card-title pb-2 ' + titleSize"
             [class.card-tooltip]="titleTooltip"
           >
-            <!-- <span [ngbPopover]="tooltip" [ngbTooltip]="tooltip" placement="top">{{ title }}</span> -->
             <span placement="top" ngbTooltip="{{ titleTooltip | translate }}">{{
               title | translate
             }}</span>
@@ -33,6 +32,7 @@ import { ColumnConfig } from '../data-table-styles/types';
 export class CardComponent {
   @Input() title = '';
   @Input() titleTooltip = '';
+  @Input() titleSize: CardTitleSize = 'h6';
   @Input() h = 0;
   @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() data: Record<string, number | string>[] = [];
@@ -42,4 +42,10 @@ export class CardComponent {
     config.placement = 'right';
     config.triggers = 'hover focus';
   }
+
+  get cardHeight() {
+    return this.h !== 0 ? 'h-' + this.h : '';
+  }
 }
+
+export type CardTitleSize = 'h3' | 'h4' | 'h5' | 'h6';

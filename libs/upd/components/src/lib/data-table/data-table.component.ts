@@ -2,7 +2,6 @@ import {
   Component,
   Input,
   OnChanges,
-  OnInit,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
@@ -29,6 +28,7 @@ export class DataTableComponent<T> implements OnChanges {
   @Input() sortOrder: 'asc' | 'desc' | number = 'asc';
   @Input() kpi = false;
   @Input() exports = true;
+  @Input() id?: string;
 
   ngOnChanges(changes: SimpleChanges) {
     const colChanges = changes['cols'];

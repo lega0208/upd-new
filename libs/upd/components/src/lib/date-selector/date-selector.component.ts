@@ -22,7 +22,7 @@ export class DateSelectorComponent {
 
   displayFormatDateRanges$ = combineLatest([
     this.selectorService.dateRanges$,
-    this.i18n.currentLang$
+    this.i18n.currentLang$,
   ]).pipe(
     map(([{ dateRange, comparisonDateRange }, lang]) => ({
       dateRange: dateRangeToDisplayFormat(dateRange, lang),
@@ -56,7 +56,11 @@ export class DateSelectorComponent {
 export const dateRangeToDisplayFormat = (date: string, lang: LocaleId) =>
   date
     .split('/')
-    .map((d) => dayjs(d).locale(lang).format(lang === 'en-CA' ? 'MMM DD' : 'DD MMM'))
+    .map((d) =>
+      dayjs(d)
+        .locale(lang)
+        .format(lang === 'en-CA' ? 'MMM DD' : 'DD MMM')
+    )
     .join(' - ');
 
 export const periodToDisplayFormat = (period: DateRangePeriod) =>
