@@ -101,7 +101,7 @@ export class PagesService {
       .populate('projects')
       .lean();
 
-    const projects = page.projects
+    const projects = (page.projects || [])
       .map((project) => {
         return { id: project._id, title: project.title };
       })
