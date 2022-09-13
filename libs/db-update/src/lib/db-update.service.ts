@@ -14,10 +14,11 @@ import type {
   PageMetricsModel,
 } from '@dua-upd/db';
 import {
+  DateRange,
   DateType,
   queryDateFormat,
   SearchAnalyticsClient,
-  withRetry,
+  withRetry
 } from '@dua-upd/external-data';
 import { wait } from '@dua-upd/utils-common';
 import { CalldriversService } from './airtable/calldrivers.service';
@@ -150,7 +151,7 @@ export class DbUpdateService {
 
   async getSingleDayMetrics(date: string) {
     const dateRange = {
-      start: dayjs(date).utc(false).startOf('day').format(queryDateFormat),
+      start: dayjs.utc(date).startOf('day').format(queryDateFormat),
       end: dayjs.utc(date).add(1, 'day').format(queryDateFormat),
     };
     this.logger.log(
@@ -176,6 +177,7 @@ export class DbUpdateService {
 
     for (const pageMetric of pageMetrics) {
       const pageMetricNoId = { ...pageMetric };
+      const _id = pageMetricNoId._id;
       delete pageMetricNoId._id;
 
       bulkInsertOps.push({
@@ -186,7 +188,7 @@ export class DbUpdateService {
           },
           update: {
             $setOnInsert: {
-              _id: pageMetric._id,
+              _id,
             },
             $set: pageMetricNoId,
           },
@@ -216,6 +218,7 @@ export class DbUpdateService {
           update: {
             $set: result,
           },
+          upsert: true,
         },
       });
     }
@@ -251,5 +254,40 @@ export class DbUpdateService {
 
   async repopulateFeedback() {
     return await this.feedbackService.repopulateFeedback();
+  }
+
+  // implement for pages & overall (w/ abstract class, inheritance, or interface?):
+  //  -populate (figures out which DbPopulationStrategy to use),
+  //    -populateBackwards,
+  //    -populateForwards,
+  //    -populateFromEmpty (backwards from yesterday),
+  //    -"expand"(?) (backwards + forwards)
+  //    -"fill" (probably later?) (fills holes in existing data)
+  //  -"unify" in the below function, and add "populate" option to cli
+  async populateDb(dateRange: DateRange) {
+    return;
+  }
+
+  async populateBackwards(startDate: string) {
+    if (/\d{4}-\d{2}-\d{2}/.test(startDate)) {
+      throw new Error('startDate has incorrect format: expected YYYY-MM-DD')
+    }
+
+    // Overall metrics
+
+    // get dates required for query
+    const earliestDateResults = await this.overallMetricsModel
+      .findOne({}, { date: 1 })
+      .sort({ date: 1 })
+      .exec();
+
+    // get the earliest date from the DB, and set the end date to the previous day
+    const earliestDate = dayjs.utc(earliestDateResults[0]['date']);
+    const endDate = earliestDate.subtract(1, 'day').endOf('day');
+
+    const dateRange: DateRange = {
+      start: dayjs.utc(startDate).format(queryDateFormat),
+      end: endDate.format(queryDateFormat),
+    }
   }
 }
