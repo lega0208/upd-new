@@ -7,6 +7,7 @@ import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter, map, mergeMap, withLatestFrom } from 'rxjs';
 import { PrimeNGConfig, Translation } from 'primeng/api';
 import { fader } from './app.animations';
+import packageJson from 'package.json';
 
 @Component({
   selector: 'upd-root',
@@ -18,6 +19,7 @@ export class AppComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
   en = EN_CA;
   title = 'Usability Performance Dashboard';
+  updVersion = packageJson.version;
 
   constructor(
     private i18n: I18nFacade,
