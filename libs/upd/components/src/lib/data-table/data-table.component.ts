@@ -29,6 +29,7 @@ export class DataTableComponent<T> implements OnChanges {
   @Input() kpi = false;
   @Input() exports = true;
   @Input() id?: string;
+  @Input() placeholderText: string = 'dt_search_keyword';
 
   ngOnChanges(changes: SimpleChanges) {
     const colChanges = changes['cols'];
@@ -45,4 +46,9 @@ export class DataTableComponent<T> implements OnChanges {
   get defaultSearchFields() {
     return this.cols.map((obj) => obj.field);
   }
+
+  getEventValue(event: Event) :string {
+    return (event.target as HTMLInputElement).value.replace(/^.+?(?=www\.)/i, '');
+  } 
+
 }

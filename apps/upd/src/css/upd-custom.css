@@ -482,3 +482,16 @@ margin: 0px 20px 0px 20px;
   font-size: 1.125rem;
   color: #000;
 }
+
+.pages-home .searh-url-field {
+  flex: 1;
+}
+
+.pages-home span.p-input-icon-left {
+  display: flex;
+}
+
+.pages-home input.p-inputtext {
+  width: calc(100% - 80px);
+  box-sizing: border-box;
+}

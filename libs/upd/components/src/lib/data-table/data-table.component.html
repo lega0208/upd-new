@@ -26,14 +26,14 @@
       <ng-container *ngIf="captionTitle">
         {{ captionTitle | translate }}
       </ng-container>
-      <div>
+      <div ngClass="searh-url-field">
         <span *ngIf="filter" class="p-input-icon-left p-ml-auto">
           <i class="pi pi-search"></i>
           <input
             pInputText
             type="text"
-            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-            placeholder="{{ 'dt_search_keyword' | translate }}"
+            (input)="dt.filterGlobal(getEventValue($event), 'contains')"
+            placeholder="{{ placeholderText | translate }}"
           />
         </span>
       </div>
