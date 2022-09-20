@@ -60,6 +60,6 @@ export const PageSchema = SchemaFactory.createForClass(Page);
 
 const pageModel = model(Page.name, PageSchema);
 
-export function getPageModel(): Model<Document<Page>> {
+export function getPageModel() {
   return pageModel;
 }

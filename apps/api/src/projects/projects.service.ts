@@ -4,22 +4,23 @@ import { Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import type {
+  CallDriverModel,
+  FeedbackComment,
+  FeedbackModel,
+  PageDocument,
+  PageMetricsModel,
+  ProjectDocument,
+  UxTestDocument,
+} from '@dua-upd/db';
 import {
   CallDriver,
-  CallDriverModel,
   Feedback,
-  FeedbackComment,
-  FeedbackDocument,
-  FeedbackModel,
   Page,
-  PageDocument,
   PageMetrics,
-  PageMetricsModel,
   Project,
-  ProjectDocument,
   Task,
   UxTest,
-  UxTestDocument,
 } from '@dua-upd/db';
 import type {
   ProjectsDetailsData,
@@ -129,13 +130,18 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
 @Injectable()
 export class ProjectsService {
   constructor(
-    @InjectModel(CallDriver.name)
+    @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriversModel: CallDriverModel,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
-    @InjectModel(Project.name) private projectsModel: Model<ProjectDocument>,
-    @InjectModel(UxTest.name) private uxTestsModel: Model<UxTestDocument>,
-    @InjectModel(Feedback.name) private feedbackModel: FeedbackModel,
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
+    @InjectModel(PageMetrics.name, 'defaultConnection')
+    private pageMetricsModel: PageMetricsModel,
+    @InjectModel(Project.name, 'defaultConnection')
+    private projectsModel: Model<ProjectDocument>,
+    @InjectModel(UxTest.name, 'defaultConnection')
+    private uxTestsModel: Model<UxTestDocument>,
+    @InjectModel(Feedback.name, 'defaultConnection')
+    private feedbackModel: FeedbackModel,
+    @InjectModel(Page.name, 'defaultConnection')
+    private pageModel: Model<PageDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -319,15 +325,20 @@ export class ProjectsService {
 
     const populatedProjectDoc = (await this.projectsModel
       .findById(projectId, { title: 1, tasks: 1, ux_tests: 1 })
-      .populate('tasks', ['_id', 'title'])
-      .populate({
-        path: 'ux_tests',
-        select: '-project -pages',
-        populate: {
+      .populate([
+        {
           path: 'tasks',
           select: '_id title',
         },
-      })
+        {
+          path: 'ux_tests',
+          select: '-project -pages',
+          populate: {
+            path: 'tasks',
+            select: '_id title',
+          },
+        },
+      ])
       .exec()) as Project;
 
     const title = populatedProjectDoc.title;
@@ -421,7 +432,7 @@ async function getAggregatedProjectMetrics(
 
   const feedbackByTags = await feedbackModel.getCommentsByTag(
     dateRange,
-    projectUrls,
+    projectUrls
   );
 
   const projectMetrics = (
@@ -502,9 +513,12 @@ async function getAggregatedProjectMetrics(
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 
-  const calldriversEnquiry = await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
+  const calldriversEnquiry =
+    await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
 
-  const callsByTopic = await calldriversModel.getCallsByTopicFromIds(documentIds);
+  const callsByTopic = await calldriversModel.getCallsByTopicFromIds(
+    documentIds
+  );
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
@@ -520,7 +534,7 @@ async function getAggregatedProjectMetrics(
 async function getProjectFeedbackComments(
   dateRange: string,
   projectUrls: string[],
-  feedbackModel: Model<FeedbackDocument>
+  feedbackModel: FeedbackModel
 ): Promise<FeedbackComment[]> {
   const [startDate, endDate] = dateRangeSplit(dateRange);
 

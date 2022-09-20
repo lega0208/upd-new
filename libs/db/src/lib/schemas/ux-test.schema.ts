@@ -84,6 +84,6 @@ export class UxTest {
 
 export const UxTestSchema = SchemaFactory.createForClass(UxTest);
 
-export function getUxTestModel(): Model<Document<UxTest>> {
+export function getUxTestModel() {
   return model(UxTest.name, UxTestSchema);
 }

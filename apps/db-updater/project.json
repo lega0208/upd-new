@@ -1,16 +1,19 @@
 {
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/db-updater/src",
   "projectType": "application",
   "targets": {
     "build": {
       "defaultConfiguration": "production",
-      "executor": "@nrwl/node:webpack",
+      "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/db-updater",
         "main": "apps/db-updater/src/main.ts",
         "tsConfig": "apps/db-updater/tsconfig.app.json",
-        "assets": ["apps/db-updater/src/assets"]
+        "assets": ["apps/db-updater/src/assets"],
+        "target": "node",
+        "compiler": "tsc"
       },
       "configurations": {
         "production": {

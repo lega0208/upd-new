@@ -17,7 +17,8 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "lib": ["ES2020", "dom", "dom.iterable"]
+    "lib": ["ES2020", "dom", "dom.iterable"],
+    "target": "es2020"
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,

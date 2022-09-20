@@ -5,23 +5,25 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import { FilterQuery, Model } from 'mongoose';
+import type {
+  CallDriverModel,
+  OverallDocument,
+  ProjectDocument,
+  TaskDocument,
+  UxTestDocument,
+  FeedbackDocument,
+  PageMetricsModel,
+  PageDocument,
+} from '@dua-upd/db';
 import {
   CallDriver,
-  CallDriverModel,
   Overall,
-  OverallDocument,
   Project,
-  ProjectDocument,
   Task,
-  TaskDocument,
   UxTest,
-  UxTestDocument,
   Feedback,
-  FeedbackDocument,
   PageMetrics,
-  PageMetricsModel,
   Page,
-  PageDocument,
 } from '@dua-upd/db';
 import type {
   ProjectsHomeData,
@@ -76,15 +78,22 @@ const projectStatusSwitchExpression = {
 @Injectable()
 export class OverallService {
   constructor(
-    @InjectModel(Overall.name) private overallModel: Model<OverallDocument>,
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
-    @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
-    @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
-    @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>,
-    @InjectModel(CallDriver.name)
+    @InjectModel(Overall.name, 'defaultConnection')
+    private overallModel: Model<OverallDocument>,
+    @InjectModel(Page.name, 'defaultConnection')
+    private pageModel: Model<PageDocument>,
+    @InjectModel(PageMetrics.name, 'defaultConnection')
+    private pageMetricsModel: PageMetricsModel,
+    @InjectModel(Project.name, 'defaultConnection')
+    private projectModel: Model<ProjectDocument>,
+    @InjectModel(Task.name, 'defaultConnection')
+    private taskModel: Model<TaskDocument>,
+    @InjectModel(UxTest.name, 'defaultConnection')
+    private uxTestModel: Model<UxTestDocument>,
+    @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriversModel: CallDriverModel,
-    @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>,
+    @InjectModel(Feedback.name, 'defaultConnection')
+    private feedbackModel: Model<FeedbackDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 

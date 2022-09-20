@@ -1,5 +1,8 @@
 {
   "name": "@dua-upd/upd/utils",
   "version": "0.0.1",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "@swc/helpers": "~0.3.3"
+  }
 }

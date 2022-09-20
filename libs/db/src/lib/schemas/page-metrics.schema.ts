@@ -224,7 +224,7 @@ PageMetricsSchema.index(
   { background: true, partialFilterExpression: { page: { $exists: true } } }
 );
 
-export function getPageMetricsModel(): Model<Document<PageMetrics>> {
+export function getPageMetricsModel() {
   return model(PageMetrics.name, PageMetricsSchema);
 }
 
@@ -239,12 +239,12 @@ export type GetAggregatedMetrics = <T>(
   sortConfig?: { [key in keyof Partial<T>]: 1 | -1 }
 ) => Promise<T[]>;
 
-export interface PageMetricsModel extends Model<PageMetricsDocument> {
+export interface PageMetricsModel extends Model<PageMetrics> {
   getAggregatedPageMetrics: GetAggregatedMetrics;
 }
 
 PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T>(
-  this: Model<Document<PageMetrics>>,
+  this: Model<PageMetrics>,
   dateRange: string,
   selectedMetrics: (keyof T | MetricsConfig<T>)[],
   pagesFilter?: FilterQuery<PageMetrics>,
@@ -257,7 +257,6 @@ PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T>(
     string,
     { [key in AccumulatorOperator]?: string }
   > = {};
-  const metricsMergeObjects: Record<string, string> = {};
   const metricsSort: Record<string, 1 | -1> = sortConfig || {};
 
   for (const [i, metric] of selectedMetrics.entries()) {
@@ -270,7 +269,6 @@ PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T>(
     metricsGroupAggregations[metricName] = {
       [metricOperator]: `$${metricName}`,
     };
-    metricsMergeObjects[metricName] = `$${metric}`;
 
     if (!sortConfig && i === 0) {
       metricsSort[metricName] = -1;

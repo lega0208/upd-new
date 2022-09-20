@@ -1,21 +1,31 @@
 {
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/db-cli/src",
   "projectType": "application",
   "targets": {
     "build": {
       "defaultConfiguration": "production",
-      "executor": "@nrwl/node:webpack",
+      "executor": "@nxext/vite:build",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/db-cli",
         "main": "apps/db-cli/src/main.ts",
         "tsConfig": "apps/db-cli/tsconfig.app.json",
-        "assets": ["apps/db-cli/src/assets"]
+        "assets": ["apps/db-cli/src/assets"],
+        "configFile": "apps/db-cli/vite.config.ts"
       },
       "configurations": {
         "production": {
           "optimization": true,
-          "externalDependencies": "all",
+          "externalDependencies": [
+            "@nestjs/microservices",
+            "@nestjs/websockets/socket-module",
+            "@nestjs/microservices/microservices-module",
+            "class-transformer",
+            "class-validator",
+            "cache-manager",
+            "mongoose"
+          ],
           "extractLicenses": false,
           "generatePackageJson": true,
           "inspect": false,
@@ -29,7 +39,15 @@
           ]
         },
         "development": {
-          "externalDependencies": "all",
+          "externalDependencies": [
+            "@nestjs/microservices",
+            "@nestjs/websockets/socket-module",
+            "@nestjs/microservices/microservices-module",
+            "class-transformer",
+            "class-validator",
+            "cache-manager",
+            "mongoose"
+          ],
           "extractLicenses": false,
           "generatePackageJson": true,
           "inspect": false,

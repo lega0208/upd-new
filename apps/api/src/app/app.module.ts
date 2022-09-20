@@ -17,6 +17,6 @@ import { environment } from '../environments/environment';
 })
 export class AppModule {
   constructor() {
-    !environment.production && set('debug', true);
+    !environment.production && set('debug', false);
   }
 }

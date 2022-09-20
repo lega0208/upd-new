@@ -4,7 +4,6 @@
     "defaultBase": "main"
   },
   "cli": {
-    "defaultCollection": "@nrwl/angular",
     "packageManager": "npm"
   },
   "implicitDependencies": {
@@ -22,14 +21,6 @@
         "accessToken": "NWZiNDZlNGMtMDhjYS00NTBlLTg0YWMtY2EwMTlmYzk2MTJjfHJlYWQ="
       }
     }
-  },
-  "targetDependencies": {
-    "build": [
-      {
-        "target": "build",
-        "projects": "dependencies"
-      }
-    ]
   },
   "generators": {
     "@nrwl/angular:application": {
@@ -52,5 +43,11 @@
       "crud": true
     }
   },
-  "defaultProject": "upd"
+  "defaultProject": "upd",
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"]
+    }
+  }
 }

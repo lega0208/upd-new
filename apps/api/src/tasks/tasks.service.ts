@@ -2,19 +2,21 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
+import type {
+  CallDriverModel,
+  FeedbackModel,
+  PageMetricsModel,
+  ProjectDocument,
+  TaskDocument,
+  UxTestDocument,
+} from '@dua-upd/db';
 import {
   CallDriver,
-  CallDriverModel,
   Feedback,
-  FeedbackDocument, FeedbackModel,
   PageMetrics,
-  PageMetricsModel,
   Project,
-  ProjectDocument,
   Task,
-  TaskDocument,
   UxTest,
-  UxTestDocument
 } from '@dua-upd/db';
 import type {
   TaskDetailsData,
@@ -32,12 +34,17 @@ import {
 @Injectable()
 export class TasksService {
   constructor(
-    @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
-    @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
-    @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
-    @InjectModel(Feedback.name) private feedbackModel: FeedbackModel,
-    @InjectModel(CallDriver.name)
+    @InjectModel(Project.name, 'defaultConnection')
+    private projectModel: Model<ProjectDocument>,
+    @InjectModel(Task.name, 'defaultConnection')
+    private taskModel: Model<TaskDocument>,
+    @InjectModel(UxTest.name, 'defaultConnection')
+    private uxTestModel: Model<UxTestDocument>,
+    @InjectModel(PageMetrics.name, 'defaultConnection')
+    private pageMetricsModel: PageMetricsModel,
+    @InjectModel(Feedback.name, 'defaultConnection')
+    private feedbackModel: FeedbackModel,
+    @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriversModel: CallDriverModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
@@ -155,9 +162,8 @@ export class TasksService {
         airtable_id: 0,
         user_type: 0,
       })
-      .populate('pages')
-      .populate('ux_tests')
-      .populate('projects');
+      .populate(['pages', 'ux_tests', 'projects'])
+      .exec();
 
     const projects = task.projects
       .map((project) => {
@@ -208,7 +214,7 @@ export class TasksService {
       feedbackComments: [],
     };
 
-    const uxTests = (<UxTestDocument[]>task.ux_tests).map((test) =>
+    const uxTests: UxTest[] = (<UxTestDocument[]>task.ux_tests).map((test) =>
       test.toObject()
     );
 
@@ -241,7 +247,7 @@ export class TasksService {
 
       returnData.feedbackComments = await this.feedbackModel.getComments(
         params.dateRange,
-        taskUrls,
+        taskUrls
       );
     }
 
@@ -339,12 +345,14 @@ async function getTaskAggregatedData(
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 
-  const calldriversEnquiry = await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
+  const calldriversEnquiry =
+    await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
 
-  const callsByTopic = await calldriversModel.getCallsByTopicFromIds(documentIds);
+  const callsByTopic = await calldriversModel.getCallsByTopicFromIds(
+    documentIds
+  );
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
-
 
   return {
     ...results[0],

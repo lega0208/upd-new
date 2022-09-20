@@ -1,9 +1,9 @@
 import { Module, ConsoleLogger } from '@nestjs/common';
 
 import { DataIntegrityModule } from '@dua-upd/data-integrity';
+import { DbUpdateModule } from '@dua-upd/db-update';
 import { AppCommand, DbChecksCommand } from './app.command';
 import { UpdateCommand, UpdateQuestions } from './update.command';
-import { DbUpdateModule } from '@dua-upd/db-update';
 import { RepopulateCommand, RepopulateQuestions } from './repopulate.command';
 
 @Module({

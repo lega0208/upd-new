@@ -124,10 +124,14 @@ export async function* getPageDataWithRateLimit(
 export class PageUpdateService {
   constructor(
     private logger: ConsoleLogger,
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
-    @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
-    @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
-    @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>
+    @InjectModel(Page.name, 'defaultConnection')
+    private pageModel: Model<PageDocument>,
+    @InjectModel(Task.name, 'defaultConnection')
+    private taskModel: Model<TaskDocument>,
+    @InjectModel(Project.name, 'defaultConnection')
+    private projectModel: Model<ProjectDocument>,
+    @InjectModel(UxTest.name, 'defaultConnection')
+    private uxTestModel: Model<UxTestDocument>
   ) {}
 
   async updatePages() {

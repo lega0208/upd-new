@@ -1,14 +1,11 @@
-import { Model } from 'mongoose';
-import { FeedbackComment, FeedbackDocument, UxTest } from '@dua-upd/db';
-import { dateRangeSplit } from '../date';
+import { UxTest } from '@dua-upd/db';
 
 /**
  * Gets the most recent test, or any with a success rate if no dates are present
  * @param uxTests
  */
-export const getLatestTest = (uxTests: Partial<UxTest>[]) =>
+export const getLatestTest = <T extends Pick<UxTest, 'date'>>(uxTests: T[]) =>
   uxTests.reduce((latestTest, test) => {
-
     if (!latestTest || typeof latestTest?.date !== 'object') {
       return test;
     }
@@ -18,7 +15,7 @@ export const getLatestTest = (uxTests: Partial<UxTest>[]) =>
     }
 
     return latestTest;
-  }, null as null | Partial<UxTest>);
+  }, null as null | T);
 
 /**
  * Calculates the average success rate for a given array of UxTests
@@ -48,13 +45,14 @@ export function getAvgTestSuccess(uxTests: Partial<UxTest>[]) {
  *
  * @param uxTests Array of tests associated to a page/task/project
  */
-export function getAvgSuccessFromLastTests(uxTests: Partial<UxTest>[]) {
-
-  const uxTestsWithSuccessRate = uxTests
-  .filter((test) => test.success_rate ?? test.success_rate === 0);
+export function getAvgSuccessFromLastTests<
+  T extends Pick<UxTest, 'date' | 'success_rate' | 'test_type'>
+>(uxTests: T[]) {
+  const uxTestsWithSuccessRate = uxTests.filter(
+    (test) => test.success_rate ?? test.success_rate === 0
+  );
 
   const lastTest = getLatestTest(uxTestsWithSuccessRate);
-
 
   const lastTestDate: Date | null = lastTest?.date || null;
 
@@ -76,7 +74,7 @@ export function getAvgSuccessFromLastTests(uxTests: Partial<UxTest>[]) {
     acc[test.test_type].push(test);
 
     return acc;
-  }, {} as { [key: string]: Partial<UxTest>[] });
+  }, {} as { [key: string]: T[] });
 
   const testTypes = Object.keys(lastTestsByType);
 
@@ -106,7 +104,7 @@ export function getAvgSuccessFromLastTests(uxTests: Partial<UxTest>[]) {
   const allTests =
     testTypes.reduce(
       (acc, key) => acc.concat(lastTestsByType[key]),
-      [] as Partial<UxTest>[]
+      [] as T[]
     ) || [];
 
   if (!allTests || !allTests.length) {
@@ -115,4 +113,3 @@ export function getAvgSuccessFromLastTests(uxTests: Partial<UxTest>[]) {
 
   return getAvgTestSuccess(allTests);
 }
-

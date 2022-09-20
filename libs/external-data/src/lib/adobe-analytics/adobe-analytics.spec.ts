@@ -153,7 +153,7 @@ describe('AdobeAnalyticsClient', () => {
     });
   });
 
-  describe('executeMultiDayQuery', () => {
+  describe.skip('executeMultiDayQuery', () => {
     let mockPreHook: jest.Mock;
     let mockPostHook: jest.Mock;
 
@@ -212,7 +212,7 @@ describe('AdobeAnalyticsClient', () => {
     });
   });
 
-  describe('itemIdz', () => {
+  describe.skip('itemIdz', () => {
     const dateRange = {
       start: toQueryFormat('2020-01-01'),
       end: toQueryFormat('2022-06-25'),

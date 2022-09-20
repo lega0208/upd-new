@@ -27,12 +27,14 @@ export class RepopulateQuestions {
   name: 'repopulate',
   description: 'Repopulate a database collection',
 })
-export class RepopulateCommand implements CommandRunner {
+export class RepopulateCommand extends CommandRunner {
   constructor(
     private readonly inquirerService: InquirerService,
     private dataIntegrityService: DataIntegrityService,
     private dbUpdateService: DbUpdateService
-  ) {}
+  ) {
+    super();
+  }
 
   async run(inputs: string[], options?: Record<string, any>) {
     const target =

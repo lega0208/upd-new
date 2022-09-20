@@ -31,62 +31,69 @@ export class PageMetricsService {
     @Inject(SearchAnalyticsClient.name)
     private gscClient: SearchAnalyticsClient,
     private logger: ConsoleLogger,
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
-    @InjectModel(PagesList.name) private pageListModel: Model<PagesListDocument>
+    @InjectModel(Page.name, 'defaultConnection') private pageModel: Model<Page>,
+    @InjectModel(PageMetrics.name, 'defaultConnection')
+    private pageMetricsModel: PageMetricsModel,
+    @InjectModel(PagesList.name, 'defaultConnection')
+    private pageListModel: Model<PagesList>
   ) {}
 
   async fetchAndMergePageMetrics(dateRange: DateRange) {
     const [aaResults, gscResults] = await Promise.all([
-      this.adobeAnalyticsClient.getPageMetrics(dateRange, {
-        // temporary fix for pages longer than 255 characters
-        search: {
-          clause: `BEGINS-WITH 'www.canada.ca' AND (BEGINS-WITH 'www.canada.ca/en/revenue-agency'\
+      this.adobeAnalyticsClient
+        .getPageMetrics(dateRange, {
+          // temporary fix for pages longer than 255 characters
+          search: {
+            clause: `BEGINS-WITH 'www.canada.ca' AND (BEGINS-WITH 'www.canada.ca/en/revenue-agency'\
         OR BEGINS-WITH 'www.canada.ca/fr/agence-revenu' OR BEGINS-WITH 'www.canada.ca/fr/services/impots'\
         OR BEGINS-WITH 'www.canada.ca/en/services/taxes')`,
-        },
-      })
+          },
+        })
         // replace urls longer than 255 characters with url from published pages list
         .then(async (results) => {
-        const publishedPagesList = await this.pageListModel.find().lean().exec() || [];
+          const publishedPagesList =
+            (await this.pageListModel.find().lean().exec()) || [];
 
-        if (publishedPagesList.length === 0) {
-          throw new Error('No pages found in page list');
-        }
+          if (publishedPagesList.length === 0) {
+            throw new Error('No pages found in page list');
+          }
 
-        // separate en/fr pages and restructure data to make cross-referencing faster
-        const publishedPages = (publishedPagesList as PagesListItem[]).reduce(
-          (pages, page) => {
-            const url = page.last_255; // use last 255 to match AA urls
+          // separate en/fr pages and restructure data to make cross-referencing faster
+          const publishedPages = (publishedPagesList as PagesListItem[]).reduce(
+            (pages, page) => {
+              const url = page.last_255; // use last 255 to match AA urls
 
-            if (page.lang === 'en') {
-              pages['en'][url] = page;
-            } else if (page.lang === 'fr') {
-              pages['fr'][url] = page;
-            }
+              if (page.lang === 'en') {
+                pages['en'][url] = page;
+              } else if (page.lang === 'fr') {
+                pages['fr'][url] = page;
+              }
 
-            return pages;
-          },
-          { en: {}, fr: {} } as Record<'en' | 'fr', Record<string, PageListData>>
-        );
+              return pages;
+            },
+            { en: {}, fr: {} } as Record<
+              'en' | 'fr',
+              Record<string, PageListData>
+            >
+          );
 
-        const langRegex = /canada\.ca\/(en|fr)/i;
+          const langRegex = /canada\.ca\/(en|fr)/i;
 
-        return results.map((dayResults => {
-          return dayResults.map((result) => {
-            if (result.url.startsWith('www.canada.ca')) {
-              return result;
-            }
+          return results.map((dayResults) => {
+            return dayResults.map((result) => {
+              if (result.url.startsWith('www.canada.ca')) {
+                return result;
+              }
 
-            const lang = langRegex.exec(result.url)?.[1];
+              const lang = langRegex.exec(result.url)?.[1];
 
-            return {
-              ...result,
-              url: publishedPages[lang]?.[result.url]?.url || result.url,
-            }
-          })
-        }))
-      }),
+              return {
+                ...result,
+                url: publishedPages[lang]?.[result.url]?.url || result.url,
+              };
+            });
+          });
+        }),
       this.gscClient.getPageMetrics(dateRange, { dataState: 'all' }),
     ]);
 
@@ -126,6 +133,150 @@ export class PageMetricsService {
       .flat() as PageMetrics[];
   }
 
+  // take array of PageMetrics
+  // -> replace 256+ urls with full urls (where applicable)
+  // -> for 256+ without matches but whose start is within "ww.canada.ca/(en|fr)" -> auto-repair
+  //    -> for rest, fuck it
+  // -> check for/get Page refs for each
+  // -> for those without a matching Page (and a valid URL):
+  //    -> use HttpClient to get title + redirect(s)
+  //        -> if redirected, check for Page ref w/ new URL
+  //            -> if Page ref found -> add old URL to all_urls + add page ref
+  //            -> if no Page ref found -> create new Page and add ref
+
+  // So in short:
+  //  -"normalize" URLs
+  //  -add existing Page refs
+  //  -if no ref, get data via HTTP request (keep 404s)
+  //    -with data, check for existing refs again and add if found (+ update all_urls)
+  //  -if still no ref, create new Page (if 404 -> is404 = true)
+  //  -return metrics with proper URLs and Page refs (refs are created/updated as side effects)
+
+  // So in shorter:
+  //  -repairPartialUrls
+  //  -ensurePageRefs
+  // async prepareAAResults(pageMetrics: PageMetrics[]) {
+  //
+  // }
+
+  // async add256PlusMetrics(dateRange: DateRange) {
+  //   const pagesList = (await readFile('./all_pages_foreal.json', 'utf8').then(
+  //     (data) => JSON.parse(data)
+  //   )) as PagesListItem[];
+  //
+  //   const pagesListByLast255 = pagesList.reduce((pagesObj, page) => {
+  //     pagesObj[page.last_255] = page;
+  //     return pagesObj;
+  //   }, {} as Record<string, PagesListItem>);
+  //
+  //   // "parse" DateRange into array of "dates" -> map over array and create queries (For GSC, use regex that matches 256+)
+  //   const gscDates = singleDatesFromDateRange(dateRange, false) as Date[];
+  //   console.log('gscDates', gscDates);
+  //
+  //   const gscPromises: Promise<PageMetrics[]>[] = [];
+  //
+  //   for (const date of gscDates) {
+  //     if (gscPromises.length % 2 === 0) {
+  //       await Promise.all(gscPromises);
+  //     }
+  //
+  //     this.logger.log(`Fetching GSC Page metrics for ${date}`);
+  //     const promise =
+  //       this.gscClient.getPageMetrics(date, {
+  //         regex:
+  //           'www[.]canada[.]ca/(en/services/taxes.{225,450}|fr/services/impots.{224,450}|en/revenue-agency.{225,450}|fr/agence-revenu.{226,450})',
+  //       }).then((results) => results.flat().map(
+  //         (results) =>
+  //           ({
+  //             _id: new Types.ObjectId(),
+  //             ...results,
+  //           } as PageMetrics)
+  //       )).then(async (results) => {
+  //         await this.upsertPageMetrics(results);
+  //
+  //         return results;
+  //       })
+  //
+  //     gscPromises.push(promise);
+  //   }
+  //
+  //   const aaPromises = this.adobeAnalyticsClient.getPageMetrics(dateRange, {
+  //     postProcess: async (results) => {
+  //       const preparedResults = results.map((result) => {
+  //         const resultWithId = {
+  //           _id: new Types.ObjectId(),
+  //           ...result,
+  //         } as PageMetrics;
+  //
+  //         if (!result.url.startsWith('www.canada.ca')) {
+  //           // get full url from pagesList
+  //           const pageListData = pagesListByLast255[result.url];
+  //
+  //           if (!pageListData) {
+  //             // this.logger.log(`${result.url} not found in pagesList, skipping.`);
+  //
+  //             return;
+  //           }
+  //           resultWithId.url = pageListData.url;
+  //
+  //           return resultWithId;
+  //         } else {
+  //           // this.logger.log(`${result.url} starts with www.canada.ca ??`);
+  //
+  //           return;
+  //         }
+  //
+  //       })
+  //         .filter((page) => !!page);
+  //
+  //       await this.upsertPageMetrics(preparedResults);
+  //
+  //       return preparedResults;
+  //     },
+  //   });
+  //
+  //   const results = (await Promise.all([...gscPromises, aaPromises])).flat(2) as PageMetrics[];
+  //
+  //   const uniqueUrls = [...new Set(results.map((result) => result.url))];
+  //
+  //   await this.ensurePageRefs(uniqueUrls);
+  //
+  //   // console.log(JSON.stringify(results, null, 2));
+  //
+  //   // for each query:
+  //   //    (in batches)
+  //   //    -pipeline:
+  //   //      -Log current state (fetching x data for y date from z data source)
+  //   //      -try/catch
+  //   //        -catch -> log error (later on, collect errors and add to logs in blob storage)
+  //   //      -execute query( -> parse response)
+  //   //          -for AA: (for 256+ urls) -> find url match in "published/all pages" list
+  //   //            -for those with no match -> collect urls and output json file?
+  //   //      -insert results (upsert, i.e. update if exists, insert if not)
+  //   //      -log current state (successfully x data for y date from z data source)
+  //   //      -ensure refs (log before & after)
+  //
+  //   // for all:
+  //   //    -DateRange -> Date[]
+  //   //    -Query[] -> BatchAwait[]
+  //   //    -logWrap -- wrap function: log start -> log success | log error (all optional)
+  //   //      -(context stack -- will be logging at different levels)
+  //   //      -start
+  //   //      -success
+  //   //      -error
+  //   //      -withContext (returns logWrap factory with bound context)
+  //   //    -run "task groups" in parallel + in batches
+  //   //    -"subtasks"? i.e. nested tasks w/ their own context(stack)/logging/error handling?
+  //   //    -Task == Task[] | function? That way it's essentially a fancy function tree that
+  //   //              you can orchestrate and wrap with logic or inject context, etc. as needed
+  //   // for each datasource:
+  //   //    -Date[] -> Query[]
+  //   // for each query:
+  //   //    -execute query -> parse response
+  //   //      -for AA: (for 256+ urls) -> find url match in "published/all pages" list
+  //   //        -for those with no match -> collect urls and output json file?
+  //   //      -insert results (upsert, i.e. update if exists, insert if not)
+  // }
 
   async upsertPageMetrics(pageMetrics: PageMetrics[]) {
     const bulkInsertOps = [];
@@ -258,9 +409,7 @@ export class PageMetricsService {
       { ordered: false }
     );
 
-    this.logger.log(
-      'Write results (Pages w/ airtable_id): '
-    );
+    this.logger.log('Write results (Pages w/ airtable_id): ');
     this.logger.log(airtablePageResults);
 
     // Now for metrics that don't have refs, add a page ref if it's in the page's all_urls
@@ -277,7 +426,8 @@ export class PageMetricsService {
     const newPages: Page[] = [];
     const newPageRefsBulkWriteOps = [];
 
-    const publishedPagesList = await this.pageListModel.find().lean().exec() || [];
+    const publishedPagesList =
+      (await this.pageListModel.find().lean().exec()) || [];
 
     if (publishedPagesList.length === 0) {
       throw new Error('No pages found in page list');
@@ -402,9 +552,12 @@ export class PageMetricsService {
       ordered: false,
     });
 
-    const totalRefsAdded = newPageRefsBulkWriteOps.length + nonAirtableBulkWriteOps.length;
+    const totalRefsAdded =
+      newPageRefsBulkWriteOps.length + nonAirtableBulkWriteOps.length;
 
-    this.logger.log(`Successfully added ${totalRefsAdded} references to Page Metrics`);
+    this.logger.log(
+      `Successfully added ${totalRefsAdded} references to Page Metrics`
+    );
   }
 
   async ensurePageRefs(urls: string[]) {
@@ -436,7 +589,7 @@ export class PageMetricsService {
     // create new pages first, then perform all updates in one bulk write
     const newPages = urls.filter((url) => !existingUrls.includes(url));
 
-    const pagesListData = await this.pageListModel.find().lean().exec() || [];
+    const pagesListData = (await this.pageListModel.find().lean().exec()) || [];
 
     if (pagesListData.length === 0) {
       throw new Error('No pages found in page list');

@@ -3,47 +3,31 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import {
-  Overall,
-  Page,
-  PageMetrics,
-} from '@dua-upd/db';
+import { Overall, Page, PageMetrics, PagesList } from '@dua-upd/db';
 import type {
   OverallDocument,
   PageDocument,
   PageMetricsModel,
+  PagesListDocument,
 } from '@dua-upd/db';
 import { DbUpdateService } from '@dua-upd/db-update';
 import { outputCsv } from './utils';
 
 dayjs.extend(utc);
 
-/*
- * Things to address:
- *  - Clean up Pages + Page Metrics with invalid URLs (will reduce overhead and db size)
- *  - Fill in missing data for what's currently there (but prioritizes most "important" pages -- top N by visits?)
- *  - Iterate through Pages and add refs to Page Metrics
- *  - Make db-updater handle errors better (on hitting rate-limit, save current "progress", wait 10 seconds, then try again)
- *    - Also, get titles and redirects at the same time so that it takes half as long and has less chance of hitting rate-limit
- *
- * Other stuff (later):
- *  - Add Tasks/Projects name translation fields to schemas & updater
- *  - Add Status to Projects on insertion, will make queries WAY simpler (and also easier to implement and change the logic
- *    - Could also derive most fields and make all queries simpler
- *  - Duplicate URLs in Pages
- *  - URLs starting with "http://" or "https://"
- *
- * Other other stuff:
- *  - db-updater docker container
- */
 @Injectable()
 export class DataIntegrityService {
   constructor(
-    @InjectModel(Overall.name) private overallModel: Model<OverallDocument>,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
+    @InjectModel(Overall.name, 'defaultConnection')
+    private overallModel: Model<OverallDocument>,
+    @InjectModel(PageMetrics.name, 'defaultConnection')
+    private pageMetricsModel: PageMetricsModel,
+    @InjectModel(Page.name, 'defaultConnection')
+    private pageModel: Model<PageDocument>,
+    @InjectModel(PagesList.name, 'defaultConnection')
+    private pageListModel: Model<PagesListDocument>,
     private dbUpdateService: DbUpdateService,
-    private readonly logger: ConsoleLogger,
+    private readonly logger: ConsoleLogger
   ) {}
 
   // todo: implement this
@@ -106,9 +90,7 @@ export class DataIntegrityService {
   }
 
   async fillMissingGscPageMetrics() {
-    this.logger.log(
-      'Finding and filling missing gsc data in pages_metrics...'
-    );
+    this.logger.log('Finding and filling missing gsc data in pages_metrics...');
 
     const dates = await this.findMissingGscPageMetrics();
 
@@ -172,35 +154,32 @@ export class DataIntegrityService {
   async cleanPageUrls() {
     this.logger.log('Cleaning page urls...');
 
-    await this.pageModel.updateMany(
-      { url: /^https/i },
-      [
-        {
-          $set: {
-            url: {
-              $replaceOne: {
-                input: '$url',
-                find: 'https://',
-                replacement: '',
-              }
+    await this.pageModel.updateMany({ url: /^https/i }, [
+      {
+        $set: {
+          url: {
+            $replaceOne: {
+              input: '$url',
+              find: 'https://',
+              replacement: '',
             },
-            all_urls: {
-              $map: {
-                input: { $ifNull: ['$all_urls', []] },
-                as: 'url',
-                in: {
-                  $replaceOne: {
-                    input: '$$url',
-                    find: 'https://',
-                    replacement: '',
-                  }
-                }
-              }
-            }
+          },
+          all_urls: {
+            $map: {
+              input: { $ifNull: ['$all_urls', []] },
+              as: 'url',
+              in: {
+                $replaceOne: {
+                  input: '$$url',
+                  find: 'https://',
+                  replacement: '',
+                },
+              },
+            },
           },
         },
-      ]
-    );
+      },
+    ]);
 
     this.logger.log('Finished cleaning page urls.');
   }

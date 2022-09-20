@@ -16,7 +16,8 @@ export class FeedbackService {
   constructor(
     @Inject(AirtableClient.name) private airtableClient: AirtableClient,
     private logger: ConsoleLogger,
-    @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>
+    @InjectModel(Feedback.name, 'defaultConnection')
+    private feedbackModel: Model<FeedbackDocument>
   ) {}
 
   async updateFeedbackData(endDate?: DateType) {
@@ -55,7 +56,9 @@ export class FeedbackService {
   }
 
   async repopulateFeedback() {
-    this.logger.log('Repopulating Feedback data... This may take several minutes.');
+    this.logger.log(
+      'Repopulating Feedback data... This may take several minutes.'
+    );
 
     await this.feedbackModel.deleteMany({});
 
