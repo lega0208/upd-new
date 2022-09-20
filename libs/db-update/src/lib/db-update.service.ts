@@ -6,7 +6,9 @@ import utc from 'dayjs/plugin/utc';
 import {
   Overall,
   Page,
-  PageMetrics, PagesList, PagesListDocument
+  PageMetrics,
+  PagesList,
+  PagesListDocument,
 } from '@dua-upd/db';
 import type {
   OverallDocument,
@@ -18,7 +20,7 @@ import {
   DateType,
   queryDateFormat,
   SearchAnalyticsClient,
-  withRetry
+  withRetry,
 } from '@dua-upd/external-data';
 import { wait } from '@dua-upd/utils-common';
 import { CalldriversService } from './airtable/calldrivers.service';
@@ -42,11 +44,14 @@ export class DbUpdateService {
     private overallMetricsService: OverallMetricsService,
     private pagesService: PageUpdateService,
     private pageMetricsService: PageMetricsService,
-    @InjectModel(Overall.name)
+    @InjectModel(Overall.name, 'defaultConnection')
     private overallMetricsModel: Model<OverallDocument>,
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
-    @InjectModel(PagesList.name) private pagesListModel: Model<PagesListDocument>,
+    @InjectModel(Page.name, 'defaultConnection')
+    private pageModel: Model<PageDocument>,
+    @InjectModel(PageMetrics.name, 'defaultConnection')
+    private pageMetricsModel: PageMetricsModel,
+    @InjectModel(PagesList.name, 'defaultConnection')
+    private pagesListModel: Model<PagesListDocument>
   ) {}
 
   async updateAll() {
@@ -61,7 +66,9 @@ export class DbUpdateService {
 
       await Promise.allSettled([
         withRetry(
-          this.overallMetricsService.updateOverallMetrics.bind(this.overallMetricsService),
+          this.overallMetricsService.updateOverallMetrics.bind(
+            this.overallMetricsService
+          ),
           4,
           1000
         )().catch((err) =>
@@ -72,13 +79,19 @@ export class DbUpdateService {
         ),
       ]);
 
-      await withRetry(this.updateFeedback.bind(this), 4, 1000)().catch(
-        (err) => this.logger.error('Error updating Feedback data', err)
+      await withRetry(this.updateFeedback.bind(this), 4, 1000)().catch((err) =>
+        this.logger.error('Error updating Feedback data', err)
       );
 
       await Promise.allSettled([
-        withRetry(this.calldriversService.updateCalldrivers.bind(this.calldriversService), 4, 1000)().catch(
-          (err) => this.logger.error('Error updating Calldrivers data', err)
+        withRetry(
+          this.calldriversService.updateCalldrivers.bind(
+            this.calldriversService
+          ),
+          4,
+          1000
+        )().catch((err) =>
+          this.logger.error('Error updating Calldrivers data', err)
         ),
         // withRetry(this.pagesService.updatePages.bind(this.pagesService), 4, 1000)().catch((err) =>
         //   this.logger.error('Error updating Page data', err)
@@ -115,24 +128,31 @@ export class DbUpdateService {
       throw new Error('Published pages list is empty');
     }
 
-    const pagesWithListMatches = (await this.pageModel
-      .find({
-        all_urls: {
-          $elemMatch: { $in: pagesListUrls },
-        },
-      })
-      .exec()) ?? [];
+    const pagesWithListMatches =
+      (await this.pageModel
+        .find({
+          all_urls: {
+            $elemMatch: { $in: pagesListUrls },
+          },
+        })
+        .exec()) ?? [];
 
-    const urlsAlreadyInCollection = pagesWithListMatches.flatMap((page) => page.all_urls);
+    const urlsAlreadyInCollection = pagesWithListMatches.flatMap(
+      (page) => page.all_urls
+    );
 
-    const pagesToCreate = pagesList.filter((page) => !urlsAlreadyInCollection.includes(page.url)).map((page) => ({
-      _id: new Types.ObjectId(),
-      url: page.url,
-      title: page.title,
-      all_urls: [page.url],
-    }));
+    const pagesToCreate = pagesList
+      .filter((page) => !urlsAlreadyInCollection.includes(page.url))
+      .map((page) => ({
+        _id: new Types.ObjectId(),
+        url: page.url,
+        title: page.title,
+        all_urls: [page.url],
+      }));
 
-    this.logger.log(`Creating ${pagesToCreate.length} new pages from Published Pages list`);
+    this.logger.log(
+      `Creating ${pagesToCreate.length} new pages from Published Pages list`
+    );
 
     return this.pageModel.insertMany(pagesToCreate, { ordered: false });
   }
@@ -158,7 +178,9 @@ export class DbUpdateService {
       `Getting metrics for ${dateRange.start} to ${dateRange.end}`
     );
 
-    return (await this.pageMetricsService.fetchAndMergePageMetrics(dateRange)) as PageMetrics[];
+    return (await this.pageMetricsService.fetchAndMergePageMetrics(
+      dateRange
+    )) as PageMetrics[];
   }
 
   async getPageMetrics(dates: string[]): Promise<PageMetrics[]> {
@@ -254,5 +276,40 @@ export class DbUpdateService {
 
   async repopulateFeedback() {
     return await this.feedbackService.repopulateFeedback();
+  }
+
+  // implement for pages & overall (w/ abstract class, inheritance, or interface?):
+  //  -populate (figures out which DbPopulationStrategy to use),
+  //    -populateBackwards,
+  //    -populateForwards,
+  //    -populateFromEmpty (backwards from yesterday),
+  //    -"expand"(?) (backwards + forwards)
+  //    -"fill" (probably later?) (fills holes in existing data)
+  //  -"unify" in the below function, and add "populate" option to cli
+  async populateDb(dateRange: DateRange) {
+    return;
+  }
+
+  async populateBackwards(startDate: string) {
+    if (/\d{4}-\d{2}-\d{2}/.test(startDate)) {
+      throw new Error('startDate has incorrect format: expected YYYY-MM-DD');
+    }
+
+    // Overall metrics
+
+    // get dates required for query
+    const earliestDateResults = await this.overallMetricsModel
+      .findOne({}, { date: 1 })
+      .sort({ date: 1 })
+      .exec();
+
+    // get the earliest date from the DB, and set the end date to the previous day
+    const earliestDate = dayjs.utc(earliestDateResults[0]['date']);
+    const endDate = earliestDate.subtract(1, 'day').endOf('day');
+
+    const dateRange: DateRange = {
+      start: dayjs.utc(startDate).format(queryDateFormat),
+      end: endDate.format(queryDateFormat),
+    };
   }
 }

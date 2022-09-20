@@ -1,3 +1,4 @@
+/* eslint-disable */
 export default {
   displayName: 'db-cli',
   preset: '../../jest.preset.js',

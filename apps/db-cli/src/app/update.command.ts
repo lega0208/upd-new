@@ -30,12 +30,14 @@ export class UpdateQuestions {
     isDefault: true,
   }
 })
-export class UpdateCommand implements CommandRunner {
+export class UpdateCommand extends CommandRunner {
   constructor(
     private readonly inquirerService: InquirerService,
     private dataIntegrityService: DataIntegrityService,
     private dbUpdateService: DbUpdateService
-  ) {}
+  ) {
+    super();
+  }
 
   async run(inputs: string[], options?: Record<string, any>) {
     const target =

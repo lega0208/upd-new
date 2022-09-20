@@ -8,11 +8,13 @@ import { RepopulateCommand } from './repopulate.command';
   name: 'db-repair',
   description: 'Perform database checks and repair any issues found',
 })
-export class DbChecksCommand implements CommandRunner {
+export class DbChecksCommand extends CommandRunner {
   constructor(
     private readonly logger: ConsoleLogger,
     private dataIntegrityService: DataIntegrityService
-  ) {}
+  ) {
+    super();
+  }
 
   async run(): Promise<void> {
     this.logger.log('Performing database checks and fixing any issues...');
@@ -29,13 +31,17 @@ export class DbChecksCommand implements CommandRunner {
 @Command({
   name: 'run',
   arguments: '[task]',
-  subCommands: [DbChecksCommand, UpdateCommand, RepopulateCommand],
+  subCommands: [
+    DbChecksCommand,
+    UpdateCommand,
+    RepopulateCommand,
+  ],
   description: 'Run database scripts',
   options: {
     isDefault: true,
-  }
+  },
 })
-export class AppCommand implements CommandRunner {
+export class AppCommand extends CommandRunner {
   async run(): Promise<void> {
     return;
   }

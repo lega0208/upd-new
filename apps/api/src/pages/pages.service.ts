@@ -2,17 +2,19 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cache } from 'cache-manager';
 import { Model, Types } from 'mongoose';
-import {
-  Feedback,
+import type {
   FeedbackModel,
   GscSearchTermMetrics,
   MetricsConfig,
-  Page,
   PageDocument,
-  PageMetrics,
   PageMetricsModel,
 } from '@dua-upd/db';
 import {
+  Feedback,
+  Page,
+  PageMetrics,
+} from '@dua-upd/db';
+import type {
   PageAggregatedData,
   PageDetailsData,
   PagesHomeData,
@@ -23,9 +25,12 @@ import { ApiParams } from '@dua-upd/upd/services';
 @Injectable()
 export class PagesService {
   constructor(
-    @InjectModel(Feedback.name) private feedbackModel: FeedbackModel,
-    @InjectModel(PageMetrics.name) private pageMetricsModel: PageMetricsModel,
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
+    @InjectModel(PageMetrics.name, 'defaultConnection')
+    private pageMetricsModel: PageMetricsModel,
+    @InjectModel(Feedback.name, 'defaultConnection')
+    private feedbackModel: FeedbackModel,
+    @InjectModel(Page.name, 'defaultConnection')
+    private pageModel: Model<PageDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 

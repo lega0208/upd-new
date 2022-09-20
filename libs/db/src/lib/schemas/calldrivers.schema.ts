@@ -41,7 +41,7 @@ export const CallDriverSchema = SchemaFactory.createForClass(CallDriver);
 
 CallDriverSchema.index({ date: 1, tpc_id: 1 });
 
-export function getCallDriversModel(): Model<Document<CallDriver>> {
+export function getCallDriversModel() {
   return model(CallDriver.name, CallDriverSchema);
 }
 

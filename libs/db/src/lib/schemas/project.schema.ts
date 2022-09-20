@@ -26,6 +26,6 @@ export class Project {
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);
 
-export function getProjectModel(): Model<Document<Project>> {
+export function getProjectModel() {
   return model(Project.name, ProjectSchema);
 }

@@ -1,4 +1,5 @@
 {
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/upd/src",
   "prefix": "upd",
@@ -50,7 +51,7 @@
           "sourceMap": true,
           "namedChunks": true,
           "verbose": true,
-          "buildLibsFromSource": false
+          "buildLibsFromSource": true
         }
       },
       "defaultConfiguration": "production"

@@ -195,6 +195,6 @@ export class Overall {
 
 export const OverallSchema = SchemaFactory.createForClass(Overall);
 
-export function getOverallModel(): Model<Document<Overall>> {
+export function getOverallModel() {
   return model(Overall.name, OverallSchema);
 }

@@ -10,7 +10,7 @@ export class CalldriversService {
   constructor(
     @Inject(AirtableClient.name) private airtableClient: AirtableClient,
     private logger: ConsoleLogger,
-    @InjectModel(CallDriver.name)
+    @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriverModel: Model<CallDriverDocument>,
   ) {}
 

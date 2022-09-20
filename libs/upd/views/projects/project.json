@@ -1,4 +1,5 @@
 {
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/upd/views/projects/src",
   "prefix": "upd",
@@ -7,7 +8,8 @@
       "executor": "@nrwl/angular:ng-packagr-lite",
       "outputs": ["dist/libs/upd/views/projects"],
       "options": {
-        "project": "libs/upd/views/projects/ng-package.json"
+        "project": "libs/upd/views/projects/ng-package.json",
+        "tsConfig": "libs/upd/views/projects/tsconfig.lib.json"
       },
       "configurations": {
         "production": {

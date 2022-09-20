@@ -34,15 +34,18 @@ export class AirtableService {
   constructor(
     @Inject(AirtableClient.name) private airtableClient: AirtableClient,
     private logger: ConsoleLogger,
-    @InjectModel(CallDriver.name)
-    private calldriverModel: Model<CallDriverDocument>,
-    @InjectModel(Feedback.name) private feedbackModel: Model<FeedbackDocument>,
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
-    @InjectModel(PagesList.name)
-    private pageListModel: Model<PagesListDocument>,
-    @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
-    @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
-    @InjectModel(UxTest.name) private uxTestModel: Model<UxTestDocument>
+    @InjectModel(CallDriver.name, 'defaultConnection')
+    private calldriverModel: Model<CallDriver>,
+    @InjectModel(Feedback.name, 'defaultConnection')
+    private feedbackModel: Model<Feedback>,
+    @InjectModel(Page.name, 'defaultConnection') private pageModel: Model<Page>,
+    @InjectModel(PagesList.name, 'defaultConnection')
+    private pageListModel: Model<PagesList>,
+    @InjectModel(Project.name, 'defaultConnection')
+    private projectModel: Model<Project>,
+    @InjectModel(Task.name, 'defaultConnection') private taskModel: Model<Task>,
+    @InjectModel(UxTest.name, 'defaultConnection')
+    private uxTestModel: Model<UxTest>
   ) {}
 
   async getUxData(): Promise<UxApiData> {
@@ -58,7 +61,7 @@ export class AirtableService {
   // function to help with getting or creating objectIds, and populating an airtableId to ObjectId map to add references
   private async addObjectIdsAndPopulateIdsMap<T>(
     data: UxApiDataType[],
-    model: Model<Document<T>>,
+    model: Model<T>,
     idsMap: Map<string, Types.ObjectId>
   ): Promise<WithObjectId<UxApiDataType>[]> {
     const airtableIds = data.map((doc) => doc.airtable_id);

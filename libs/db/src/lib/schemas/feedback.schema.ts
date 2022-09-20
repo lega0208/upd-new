@@ -46,11 +46,12 @@ FeedbackSchema.index({ url: 1, date: 1 });
 
 export const feedbackModel = model(Feedback.name, FeedbackSchema);
 
-export function getFeedbackModel(): Model<Document<Feedback>> {
+export function getFeedbackModel() {
   return feedbackModel;
 }
 
 FeedbackSchema.statics['getCommentsByTag'] = async function (
+  this: Model<Feedback>,
   dateRange: string,
   urls: string[]
 ) {
@@ -75,6 +76,7 @@ FeedbackSchema.statics['getCommentsByTag'] = async function (
 };
 
 FeedbackSchema.statics['getComments'] = async function (
+  this: Model<Feedback>,
   dateRange: string,
   urls: string[]
 ) {
@@ -84,7 +86,7 @@ FeedbackSchema.statics['getComments'] = async function (
     (await this.find({
       url: { $in: urls },
       date: { $gte: startDate, $lte: endDate },
-    })) || []
+    }).exec()) || []
   ).map((feedback: Feedback) => ({
     date: feedback.date,
     url: feedback.url,
@@ -94,7 +96,7 @@ FeedbackSchema.statics['getComments'] = async function (
   }));
 };
 
-export interface FeedbackModel extends Model<FeedbackDocument> {
+export interface FeedbackModel extends Model<Feedback> {
   getComments: (
     dateRange: string,
     urls: string[]

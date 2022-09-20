@@ -1,5 +1,10 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
-import { AdobeAnalyticsClient, DateRange, queryDateFormat, SearchAnalyticsClient } from '@dua-upd/external-data';
+import {
+  AdobeAnalyticsClient,
+  DateRange,
+  queryDateFormat,
+  SearchAnalyticsClient,
+} from '@dua-upd/external-data';
 import { InjectModel } from '@nestjs/mongoose';
 import { Overall, OverallDocument } from '@dua-upd/db';
 import { Model, Types } from 'mongoose';
@@ -11,10 +16,13 @@ dayjs.extend(utc);
 @Injectable()
 export class OverallMetricsService {
   constructor(
-    @Inject(AdobeAnalyticsClient.name) private adobeAnalyticsClient: AdobeAnalyticsClient,
-    @Inject(SearchAnalyticsClient.name) private gscClient: SearchAnalyticsClient,
+    @Inject(AdobeAnalyticsClient.name)
+    private adobeAnalyticsClient: AdobeAnalyticsClient,
+    @Inject(SearchAnalyticsClient.name)
+    private gscClient: SearchAnalyticsClient,
     private logger: ConsoleLogger,
-    @InjectModel(Overall.name) private overallMetricsModel: Model<OverallDocument>,
+    @InjectModel(Overall.name, 'defaultConnection')
+    private overallMetricsModel: Model<OverallDocument>
   ) {}
 
   // todo: refactor to be able to use it for data-integrity & elsewhere
@@ -44,12 +52,16 @@ export class OverallMetricsService {
         `\r\nFetching overall metrics from AA & GSC for dates: ${dateRange.start} to ${dateRange.end}\r\n`
       );
 
-      const newOverallMetrics = await this.fetchAndMergeOverallMetrics(dateRange);
+      const newOverallMetrics = await this.fetchAndMergeOverallMetrics(
+        dateRange
+      );
       this.logger.log(
         `\r\nInserting ${newOverallMetrics.length} new overall metrics documents\r\n`
       );
 
-      const inserted = await this.overallMetricsModel.insertMany(newOverallMetrics);
+      const inserted = await this.overallMetricsModel.insertMany(
+        newOverallMetrics
+      );
 
       const datesInserted = inserted
         .map((doc) => dayjs.utc(doc['date']).format('YYYY-MM-DD'))
@@ -70,7 +82,7 @@ export class OverallMetricsService {
       this.gscClient.getOverallMetrics(dateRange, 'all'),
     ]);
 
-    this.logger.log('Finished fetching data from AA & GSC')
+    this.logger.log('Finished fetching data from AA & GSC');
 
     return aaResults.map((result) => {
       const gscResult = gscResults.find(
