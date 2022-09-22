@@ -1,10 +1,8 @@
-import { Command, CommandRunner, SubCommand } from 'nest-commander';
+import { Command, CommandRunner } from 'nest-commander';
 import { ConsoleLogger } from '@nestjs/common';
 import { DataIntegrityService } from '@dua-upd/data-integrity';
-import { UpdateCommand } from './update.command';
-import { RepopulateCommand } from './repopulate.command';
 
-@SubCommand({
+@Command({
   name: 'db-repair',
   description: 'Perform database checks and repair any issues found',
 })
@@ -24,25 +22,6 @@ export class DbChecksCommand extends CommandRunner {
 
     this.logger.log('Completed DB repairs.');
 
-    return;
-  }
-}
-
-@Command({
-  name: 'run',
-  arguments: '[task]',
-  subCommands: [
-    DbChecksCommand,
-    UpdateCommand,
-    RepopulateCommand,
-  ],
-  description: 'Run database scripts',
-  options: {
-    isDefault: true,
-  },
-})
-export class AppCommand extends CommandRunner {
-  async run(): Promise<void> {
     return;
   }
 }

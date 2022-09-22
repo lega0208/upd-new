@@ -2,14 +2,13 @@ import { Module, ConsoleLogger } from '@nestjs/common';
 
 import { DataIntegrityModule } from '@dua-upd/data-integrity';
 import { DbUpdateModule } from '@dua-upd/db-update';
-import { AppCommand, DbChecksCommand } from './app.command';
+import { DbChecksCommand } from './db-repair.command';
 import { UpdateCommand, UpdateQuestions } from './update.command';
 import { RepopulateCommand, RepopulateQuestions } from './repopulate.command';
 
 @Module({
   imports: [DataIntegrityModule, DbUpdateModule],
   providers: [
-    AppCommand,
     ConsoleLogger,
     DbChecksCommand,
     UpdateCommand,
