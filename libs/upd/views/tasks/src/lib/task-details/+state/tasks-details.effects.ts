@@ -1,23 +1,25 @@
 import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
 import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
-
-import * as TasksDetailsActions from './tasks-details.actions';
+import { ApiService } from '@dua-upd/upd/services';
 import {
   selectDatePeriod,
   selectDateRanges,
   selectRouteNestedParam,
 } from '@dua-upd/upd/state';
-import { Store } from '@ngrx/store';
-import { ApiService } from '@dua-upd/upd/services';
+import {
+  loadTasksDetailsError,
+  loadTasksDetailsInit,
+  loadTasksDetailsSuccess,
+} from './tasks-details.actions';
 import { selectTasksDetailsData } from './tasks-details.selectors';
-import { loadTasksDetailsSuccess } from './tasks-details.actions';
 
 @Injectable()
 export class TasksDetailsEffects {
   init$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(TasksDetailsActions.loadTasksDetailsInit),
+      ofType(loadTasksDetailsInit),
       concatLatestFrom(() => [
         this.store.select(selectRouteNestedParam('id')),
         this.store.select(selectDateRanges),
@@ -61,7 +63,7 @@ export class TasksDetailsEffects {
   dateChange$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(selectDatePeriod),
-      mergeMap(() => of(TasksDetailsActions.loadTasksDetailsInit()))
+      mergeMap(() => of(loadTasksDetailsInit()))
     );
   });
 

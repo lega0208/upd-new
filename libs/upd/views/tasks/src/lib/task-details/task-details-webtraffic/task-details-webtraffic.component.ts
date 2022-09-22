@@ -27,10 +27,6 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
-    this.visitsByPage$.subscribe((visitsByPage) => {
-      console.log(visitsByPage);
-    })
-
     this.currentLang$.subscribe((lang) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.visitsByPageCols = [
