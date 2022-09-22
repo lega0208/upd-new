@@ -1,8 +1,8 @@
 import {
+  Command,
   CommandRunner,
   InquirerService,
   Option,
-  SubCommand,
   QuestionSet,
   Question,
 } from 'nest-commander';
@@ -23,12 +23,9 @@ export class UpdateQuestions {
   }
 }
 
-@SubCommand({
+@Command({
   name: 'update',
   description: 'Update the database',
-  options: {
-    isDefault: true,
-  }
 })
 export class UpdateCommand extends CommandRunner {
   constructor(

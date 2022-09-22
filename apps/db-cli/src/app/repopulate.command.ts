@@ -2,9 +2,9 @@ import {
   CommandRunner,
   InquirerService,
   Option,
-  SubCommand,
   QuestionSet,
   Question,
+  Command,
 } from 'nest-commander';
 import { DbUpdateService } from '@dua-upd/db-update';
 import { DataIntegrityService } from '@dua-upd/data-integrity';
@@ -23,7 +23,7 @@ export class RepopulateQuestions {
   }
 }
 
-@SubCommand({
+@Command({
   name: 'repopulate',
   description: 'Repopulate a database collection',
 })

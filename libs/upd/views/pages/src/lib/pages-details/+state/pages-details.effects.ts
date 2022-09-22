@@ -1,26 +1,28 @@
 import { Injectable } from '@angular/core';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
+import { catchError, mergeMap, map, of, EMPTY } from 'rxjs';
 import { ApiService } from '@dua-upd/upd/services';
-
 import {
   selectDateRanges,
   selectRouteNestedParam,
   selectDatePeriod,
 } from '@dua-upd/upd/state';
-import * as PagesDetailsActions from './pages-details.actions';
-import * as PagesDetailsSelectors from './pages-details.selectors';
+import {
+  loadPagesDetailsInit,
+  loadPagesDetailsSuccess,
+} from './pages-details.actions';
+import { selectPagesDetailsData } from './pages-details.selectors';
 
 @Injectable()
 export class PagesDetailsEffects {
   init$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PagesDetailsActions.loadPagesDetailsInit),
+      ofType(loadPagesDetailsInit),
       concatLatestFrom(() => [
         this.store.select(selectRouteNestedParam('id')),
         this.store.select(selectDateRanges),
-        this.store.select(PagesDetailsSelectors.selectPagesDetailsData),
+        this.store.select(selectPagesDetailsData),
       ]),
       mergeMap(
         ([, pageId, { dateRange, comparisonDateRange }, pageDetailsData]) => {
@@ -39,9 +41,7 @@ export class PagesDetailsEffects {
             comparisonDateRangeIsLoaded
           ) {
             // if everything is already loaded in the state, don't update it
-            return of(
-              PagesDetailsActions.loadPagesDetailsSuccess({ data: null })
-            );
+            return of(loadPagesDetailsSuccess({ data: null }));
           }
 
           return this.api
@@ -51,9 +51,7 @@ export class PagesDetailsEffects {
               ...{ comparisonDateRange },
             })
             .pipe(
-              map((data) =>
-                PagesDetailsActions.loadPagesDetailsSuccess({ data })
-              ),
+              map((data) => loadPagesDetailsSuccess({ data })),
               catchError(() => EMPTY)
             );
         }
@@ -61,32 +59,12 @@ export class PagesDetailsEffects {
     );
   });
 
-  pageIsLoaded = false;
-
-  dateChange$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(selectDatePeriod),
-        concatLatestFrom(() => [
-          this.store.select(selectRouteNestedParam('id')),
-        ]),
-        mergeMap(([, id]) => {
-          if (!id) {
-            this.pageIsLoaded = false;
-
-            return of(EMPTY);
-          }
-
-          this.pageIsLoaded = true;
-
-          return of(PagesDetailsActions.loadPagesDetailsInit());
-        })
-      );
-    },
-    {
-      dispatch: this.pageIsLoaded,
-    }
-  );
+  dateChange$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(selectDatePeriod),
+      mergeMap(() => of(loadPagesDetailsInit()))
+    );
+  });
 
   constructor(
     private readonly actions$: Actions,
