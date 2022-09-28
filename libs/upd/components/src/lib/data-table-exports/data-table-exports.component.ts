@@ -141,12 +141,12 @@ export class DataTableExportsComponent<T> {
         title: obj.header,
       }));
 
-      const minCellWidth = 100 / (columnsExport.length - 1);
+      const minCellWidth = columnsExport.length === 1 ? 100 : 100 / (columnsExport.length - 1);
 
       const doc = new jsPdf.default('p', 'mm', 'a4');
 
       autoTable(doc, {
-        styles: { halign: 'center' },
+        styles: { halign: 'left' },
         body: await this.getFormattedExportData() as RowInput[],
         bodyStyles: { overflow: 'linebreak', minCellWidth: minCellWidth },
         columns: columnsExport,
