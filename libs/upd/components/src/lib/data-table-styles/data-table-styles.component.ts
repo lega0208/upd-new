@@ -61,7 +61,7 @@ export class DataTableStylesComponent implements OnInit, OnChanges {
     } else if (pipe === 'percent') {
       return this.percentPipe.transform(data, pipeParam, this.currentLang);
     } else if (pipe === 'date') {
-      return this.datePipe.transform(data, pipeParam, undefined, this.currentLang);
+      return this.datePipe.transform(data, pipeParam, 'UTC', this.currentLang);
     }
 
     return data;
