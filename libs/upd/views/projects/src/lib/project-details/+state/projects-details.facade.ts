@@ -67,7 +67,11 @@ export class ProjectsDetailsFacade {
   );
 
   dateFromLastTest$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.dateFromLastTest)
+    map((data) =>
+      data?.dateFromLastTest
+        ? new Date(data?.dateFromLastTest)
+        : data?.dateFromLastTest
+    )
   );
 
   totalCalldriver$ = this.projectsDetailsData$.pipe(
@@ -90,7 +94,7 @@ export class ProjectsDetailsFacade {
   );
 
   visits$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visits || 0)
+    map((data) => data?.dateRangeData?.visits ?? null)
   );
   visitsPercentChange$ = this.projectsDetailsData$.pipe(
     mapToPercentChange('visits')
@@ -109,6 +113,35 @@ export class ProjectsDetailsFacade {
   );
 
   visitsByPageFeedbackWithPercentChange$ = this.projectsDetailsData$.pipe(
+    map((data): ProjectsDetailsData => {
+      if (data.dateRangeData?.visitsByPage) {
+        // data object is immutable, so we need to make a deep copy
+        // -> fastest and easiest way is to serialize/deserialize with JSON methods
+        const newData = JSON.parse(JSON.stringify(data));
+
+        newData.dateRangeData.visitsByPage =
+          data.dateRangeData.visitsByPage.map((page) => {
+            if (page.visits === 0) {
+              return page;
+            }
+
+            const totalFeedback = (page.dyfYes || 0) + (page.dyfNo || 0);
+
+            if (totalFeedback === 0) {
+              return page;
+            }
+
+            return {
+              ...page,
+              feedbackToVisitsRatio: totalFeedback / page.visits,
+            };
+          });
+
+        return newData;
+      }
+
+      return data;
+    }),
     mapPageMetricsArraysWithPercentChange('visitsByPage', 'dyfNo')
   );
 

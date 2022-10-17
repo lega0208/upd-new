@@ -1,12 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { ColumnConfig } from '@dua-upd/upd-components';
-import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
-
 
 type VisitsByPageColType = GetTableProps<ProjectDetailsFeedbackComponent, 'visitsByPage$'>
 type DyfTableColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'dyfChart$'>
@@ -77,7 +75,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
         },
         {
           field: 'dyfNo',
-          header: this.i18n.service.translate('No', lang),
+          header: this.i18n.service.translate('no', lang),
           pipe: 'number',
           type: 'link',
           typeParams: {
@@ -86,19 +84,20 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
             postLink: 'pagefeedback',
           },
         },
-        // {
-        //   field: 'percentChange',
-        //   header: this.i18n.service.translate('comparison-for-No-answer', lang),
-        //   pipe: 'percent',
-        // },
-        // {
-        //   field: '0',
-        //   header: this.i18n.service.translate(
-        //     '% of visitors who left feedback',
-        //     lang
-        //   ),
-        //   pipe: 'percent',
-        // },
+        {
+          field: 'percentChange',
+          header: this.i18n.service.translate('comparison-for-No-answer', lang),
+          pipe: 'percent',
+        },
+        {
+          field: 'feedbackToVisitsRatio',
+          header: this.i18n.service.translate(
+            'Ratio of feedback to visits',
+            lang
+          ),
+          pipe: 'percent',
+          pipeParam: '1.2'
+        },
       ];
 
       this.dyfTableCols = [
