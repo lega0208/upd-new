@@ -233,6 +233,8 @@ export interface VisitsByPage {
   url: string;
   title: string;
   visits: number;
+  dyfYes?: number;
+  dyfNo?: number;
 }
 
 export interface ProjectDetailsAggregatedData {
