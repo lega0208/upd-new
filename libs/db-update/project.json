@@ -23,7 +23,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/db-update"],
+      "outputs": ["{workspaceRoot}/coverage/libs/db-update"],
       "options": {
         "jestConfig": "libs/db-update/jest.config.ts",
         "passWithNoTests": true

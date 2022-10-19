@@ -72,7 +72,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/db-cli"],
+      "outputs": ["{workspaceRoot}/coverage/apps/db-cli"],
       "options": {
         "jestConfig": "apps/db-cli/jest.config.ts",
         "passWithNoTests": true

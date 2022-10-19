@@ -22,7 +22,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/types-common"],
+      "outputs": ["{workspaceRoot}/coverage/libs/types-common"],
       "options": {
         "jestConfig": "libs/types-common/jest.config.js",
         "passWithNoTests": true

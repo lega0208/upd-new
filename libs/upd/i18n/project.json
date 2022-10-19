@@ -6,7 +6,7 @@
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",
-      "outputs": ["dist/libs/upd/i18n"],
+      "outputs": ["{workspaceRoot}/dist/libs/upd/i18n"],
       "options": {
         "project": "libs/upd/i18n/ng-package.json",
         "tsConfig": "libs/upd/i18n/tsconfig.lib.json"

@@ -57,7 +57,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nrwl/angular:webpack-server",
+      "executor": "@nrwl/angular:webpack-dev-server",
       "configurations": {
         "production": {
           "browserTarget": "upd:build:production"
@@ -86,7 +86,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/upd"],
+      "outputs": ["{workspaceRoot}/coverage/apps/upd"],
       "options": {
         "jestConfig": "apps/upd/jest.config.ts",
         "passWithNoTests": true
