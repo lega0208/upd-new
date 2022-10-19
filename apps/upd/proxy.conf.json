@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "http://cra-arc.alpha.canada.ca/",
+    "target": "http://localhost:4200",
     "secure": false
   }
 }
