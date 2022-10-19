@@ -23,6 +23,7 @@
       "@dua-upd/types-common": ["libs/types-common/src/index.ts"],
       "@dua-upd/upd-components": ["libs/upd/components/src/index.ts"],
       "@dua-upd/upd/i18n": ["libs/upd/i18n/src/index.ts"],
+      "@dua-upd/upd/pipes": ["libs/upd/pipes/src/index.ts"],
       "@dua-upd/upd/services": ["libs/upd/services/src/index.ts"],
       "@dua-upd/upd/state": ["libs/upd/state/src/index.ts"],
       "@dua-upd/upd/utils": ["libs/upd/utils/src/index.ts"],
