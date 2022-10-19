@@ -5,7 +5,7 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <upd-data-card
-      [current$]="totalTasks$"
+      [current]="totalTasks$ | async"
       [title]="'tasks'"
       [tooltip]="'tooltip-total-tasks'"
     ></upd-data-card>

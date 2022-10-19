@@ -294,11 +294,11 @@ export class OverviewFacade {
         if (
           comparisonVisitsByDay.find(
             (d) =>
-              dayjs(d.date)
-                .utc(false)
+              dayjs
+                .utc(d.date)
                 .add(1, dateSelection)
                 .format('YYYY-MM-DD') ===
-              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+              dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
           prevVisits = comparisonVisitsByDay[cntPrevVisits].visits;
@@ -381,11 +381,11 @@ export class OverviewFacade {
         if (
           comparisonCalldriversByDay.find(
             (d) =>
-              dayjs(d.date)
-                .utc(false)
+              dayjs
+                .utc(d.date)
                 .add(1, dateSelection)
                 .format('YYYY-MM-DD') ===
-              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+              dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
           prevCalls = comparisonCalldriversByDay[cntPrevCalls].calls;
@@ -659,11 +659,11 @@ export class OverviewFacade {
         if (
           comparisonDateRangeSeries.find(
             (d) =>
-              dayjs(d.date)
-                .utc(false)
+              dayjs
+                .utc(d.date)
                 .add(1, dateSelection)
                 .format('YYYY-MM-DD') ===
-              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+              dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
           prevVisits = comparisonDateRangeSeries[cntPrevVisits].visits;
@@ -672,11 +672,11 @@ export class OverviewFacade {
         if (
           comparisonDateRangeSeriesCall.find(
             (d) =>
-              dayjs(d.date)
-                .utc(false)
+              dayjs
+                .utc(d.date)
                 .add(1, dateSelection)
                 .format('YYYY-MM-DD') ===
-              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+              dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
           prevCalls = comparisonDateRangeSeriesCall[cntPrevCalls].calls;

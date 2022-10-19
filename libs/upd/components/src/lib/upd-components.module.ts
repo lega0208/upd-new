@@ -21,6 +21,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { NgxChartsModule } from '@amonsour/ngx-charts';
 import { I18nModule } from '@dua-upd/upd/i18n';
+import { PipesModule } from '@dua-upd/upd/pipes';
 import { CardComponent } from './card/card.component';
 import { DataCardComponent } from './data-card/data-card.component';
 import { DataTableComponent } from './data-table/data-table.component';
@@ -69,6 +70,7 @@ import { DropdownComponent } from './dropdown/dropdown.component';
     SliderModule,
     CalendarModule,
     InputNumberModule,
+    PipesModule,
   ],
   declarations: [
     CardComponent,

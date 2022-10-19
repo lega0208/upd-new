@@ -13,6 +13,7 @@
     "upd-components": "libs/upd/components",
     "upd-e2e": "apps/upd-e2e",
     "upd-i18n": "libs/upd/i18n",
+    "upd-pipes": "libs/upd/pipes",
     "upd-services": "libs/upd/services",
     "upd-state": "libs/upd/state",
     "upd-utils": "libs/upd/utils",

@@ -31,19 +31,21 @@ import {
 import { TasksDetailsEffects } from './task-details/+state/tasks-details.effects';
 import { TasksDetailsFacade } from './task-details/+state/tasks-details.facade';
 import { I18nModule } from '@dua-upd/upd/i18n';
+import { PipesModule } from '@dua-upd/upd/pipes';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    UpdComponentsModule,
-    TasksRoutingModule,
-    ServicesModule,
-    StoreModule.forFeature(TASKS_HOME_FEATURE_KEY, tasksHomeReducer),
-    EffectsModule.forFeature([TasksHomeEffects]),
-    StoreModule.forFeature(TASKS_DETAILS_FEATURE_KEY, tasksDetailsReducer),
-    EffectsModule.forFeature([TasksDetailsEffects]),
-    I18nModule,
-  ],
+	imports: [
+		CommonModule,
+		UpdComponentsModule,
+		TasksRoutingModule,
+		ServicesModule,
+		StoreModule.forFeature(TASKS_HOME_FEATURE_KEY, tasksHomeReducer),
+		EffectsModule.forFeature([TasksHomeEffects]),
+		StoreModule.forFeature(TASKS_DETAILS_FEATURE_KEY, tasksDetailsReducer),
+		EffectsModule.forFeature([TasksDetailsEffects]),
+		I18nModule,
+		PipesModule,
+	],
   declarations: [
     TasksComponent,
     TasksHomeComponent,

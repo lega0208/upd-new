@@ -2,8 +2,8 @@
   <div class="row">
     <div class="col-lg-4 col-sm-12">
       <upd-data-card
-        [current$]="visits$"
-        [comparison$]="visitsPercentChange$"
+        [current]="visits$ | async"
+        [comparison]="visitsPercentChange$ | async"
         [title]="'Total visits from all pages'"
       ></upd-data-card>
     </div>

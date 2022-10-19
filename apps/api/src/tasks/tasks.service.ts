@@ -165,7 +165,7 @@ export class TasksService {
       .populate(['pages', 'ux_tests', 'projects'])
       .exec();
 
-    const projects = task.projects
+    const projects = (task.projects || [])
       .map((project) => {
         return { id: project._id, title: project.title };
       })

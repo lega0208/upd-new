@@ -12,10 +12,7 @@ import { I18nFacade, selectDatePeriodSelection } from '@dua-upd/upd/state';
 import { percentChange } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import type { GscSearchTermMetrics } from '@dua-upd/db';
-import {
-  PageAggregatedData,
-  PageDetailsData,
-} from '@dua-upd/types-common';
+import { PageAggregatedData, PageDetailsData } from '@dua-upd/types-common';
 
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
@@ -456,7 +453,9 @@ export class PagesDetailsFacade {
 
         const change =
           previousVal === 0
-            ? Infinity
+            ? currentVal === 0
+              ? 0
+              : Infinity
             : (currentVal - previousVal) / previousVal;
 
         return {

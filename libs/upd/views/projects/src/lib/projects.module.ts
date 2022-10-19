@@ -32,23 +32,24 @@ import { ProjectsDetailsFacade } from './project-details/+state/projects-details
 import { ProjectDetailsDetailsComponent } from './project-details/project-details-details/project-details-details.component';
 import { ProjectDetailsUxTestsComponent } from './project-details/project-details-ux-tests/project-details-ux-tests.component';
 import { I18nModule } from '@dua-upd/upd/i18n';
+import { PipesModule } from '@dua-upd/upd/pipes';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    ProjectsRoutingModule,
-    UpdComponentsModule,
-    I18nModule,
-    ServicesModule,
-    StoreModule.forFeature(PROJECTS_HOME_FEATURE_KEY, projectsHomeReducer),
-    EffectsModule.forFeature([ProjectsHomeEffects]),
-    StoreModule.forFeature(
-      PROJECTS_DETAILS_FEATURE_KEY,
-      projectsDetailsReducer
-    ),
-    EffectsModule.forFeature([ProjectsDetailsEffects]),
-    I18nModule,
-  ],
+	imports: [
+		CommonModule,
+		ProjectsRoutingModule,
+		UpdComponentsModule,
+		I18nModule,
+		ServicesModule,
+		StoreModule.forFeature(PROJECTS_HOME_FEATURE_KEY, projectsHomeReducer),
+		EffectsModule.forFeature([ProjectsHomeEffects]),
+		StoreModule.forFeature(
+			PROJECTS_DETAILS_FEATURE_KEY,
+			projectsDetailsReducer
+		),
+		EffectsModule.forFeature([ProjectsDetailsEffects]),
+		PipesModule,
+	],
   declarations: [
     ProjectsComponent,
     ProjectsHomeComponent,

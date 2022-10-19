@@ -213,6 +213,10 @@ summary {
   color: #26a69a !important;
 }
 
+.text-semisuccess {
+  color: #FBC02D !important;
+}
+
 .text-danger {
   color: #df2929 !important;
 }
@@ -449,7 +453,7 @@ margin: 0px 20px 0px 20px;
 .datatable-headers {
   color: #000 !important;
   /* font-weight: 600; */
-  
+
 }
 
 .alert-info {
@@ -494,4 +498,17 @@ margin: 0px 20px 0px 20px;
 .pages-home input.p-inputtext {
   width: calc(100% - 80px);
   box-sizing: border-box;
+}
+
+.nav_link {
+  transition: none;
+}
+
+.nav_link:hover {
+  margin-bottom: .1rem;
+}
+
+
+.material-icons {
+  vertical-align: top;
 }

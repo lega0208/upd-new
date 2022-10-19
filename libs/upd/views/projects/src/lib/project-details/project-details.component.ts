@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { map } from 'rxjs';
 import { ProjectsDetailsFacade } from './+state/projects-details.facade';
 
@@ -10,6 +10,7 @@ import { EN_CA } from '@dua-upd/upd/i18n';
   selector: 'upd-project-details',
   templateUrl: './project-details.component.html',
   styleUrls: ['./project-details.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectDetailsComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;

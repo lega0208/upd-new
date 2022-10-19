@@ -1,0 +1,42 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/upd/pipes/src",
+  "prefix": "dua-upd",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:ng-packagr-lite",
+      "outputs": ["dist/libs/upd/pipes"],
+      "options": {
+        "project": "libs/upd/pipes/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/upd/pipes/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/upd/pipes/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/upd/pipes"],
+      "options": {
+        "jestConfig": "libs/upd/pipes/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/upd/pipes/**/*.ts",
+          "libs/upd/pipes/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

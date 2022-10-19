@@ -260,7 +260,8 @@ export interface ProjectDetailsAggregatedData {
 export interface ProjectsDetailsData
   extends EntityDetailsData<ProjectDetailsAggregatedData> {
   status: ProjectStatus;
-  avgTaskSuccessFromLastTest: number;
+  avgTaskSuccessFromLastTest: number | null;
+  avgSuccessPercentChange: number | null
   dateFromLastTest: Date;
   taskSuccessByUxTest: (Partial<UxTest> & { tasks: string })[];
   tasks: Pick<Task, '_id' | 'title'>[];

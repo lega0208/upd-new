@@ -66,6 +66,10 @@ export class ProjectsDetailsFacade {
     map((data) => data?.avgTaskSuccessFromLastTest)
   );
 
+  avgSuccessPercentChange$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.avgSuccessPercentChange)
+  );
+
   dateFromLastTest$ = this.projectsDetailsData$.pipe(
     map((data) =>
       data?.dateFromLastTest
@@ -710,6 +714,13 @@ export class ProjectsDetailsFacade {
   ]).pipe(
     map(([data, lang]) => {
       const taskSuccessByUxData = data?.taskSuccessByUxTest;
+      const tasksWithSuccessRate = taskSuccessByUxData?.filter(
+        (test) => test.success_rate || test.success_rate === 0
+      )
+
+      if (!taskSuccessByUxData || !tasksWithSuccessRate.length) {
+        return [];
+      }
 
       const tasks = taskSuccessByUxData
         ?.map((uxTest) => uxTest?.tasks?.split('; '))

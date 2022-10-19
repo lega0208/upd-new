@@ -2,19 +2,19 @@
   <div class="row">
     <div class="col-lg-4 col-sm-12">
       <upd-data-card
-        [current$]="testsCompleted$"
+        [current]="testsCompleted$ | async"
         [title]="'tests-completed-since2018'"
       ></upd-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <upd-data-card
-        [current$]="tasksTested$"
+        [current]="tasksTested$ | async"
         [title]="'tasks-tested-since2018'"
       ></upd-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <upd-data-card
-        [current$]="participantsTested$"
+        [current]="participantsTested$ | async"
         [title]="'participants-since2018'"
       ></upd-data-card>
     </div>
@@ -25,19 +25,19 @@
   <div class="row">
     <div class="col-lg-4 col-sm-12">
       <upd-data-card
-        [current$]="testsConductedLastFiscal$"
+        [current]="testsConductedLastFiscal$ | async"
         [title]="'tests-conducted-lastfiscal'"
       ></upd-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <upd-data-card
-        [current$]="testsConductedLastQuarter$"
+        [current]="testsConductedLastQuarter$ | async"
         [title]="'tests-conducted-lastquarter'"
       ></upd-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <upd-data-card
-        [current$]="COPSTests$"
+        [current]="COPSTests$ | async"
         [title]="'cops-completed-since2018'"
       ></upd-data-card>
     </div>

@@ -2,8 +2,8 @@
   <div class="row">
     <div class="col">
       <upd-data-card
-        [current$]="totalImpressionsGSC$"
-        [comparison$]="totalImpressionsGSCPercentChange$"
+        [current]="totalImpressionsGSC$ | async"
+        [comparison]="totalImpressionsGSCPercentChange$ | async"
         [title]="'total-impressions-google'"
         [tooltip]="'tooltip-impressions-page-google'"
       ></upd-data-card>
@@ -11,9 +11,9 @@
 
     <div class="col">
       <upd-data-card
-        [current$]="ctrGSC$"
+        [current]="ctrGSC$ | async"
         [pipe]="'percent'"
-        [comparison$]="ctrGSCPercentChange$"
+        [comparison]="ctrGSCPercentChange$ | async"
         [title]="'ctr-google'"
         [tooltip]="'tooltip-ctr-google'"
       ></upd-data-card>
@@ -21,9 +21,9 @@
 
     <div class="col">
       <upd-data-card
-        [current$]="avgRankGSC$"
+        [current]="avgRankGSC$ | async"
         [pipeParams]="'1.0-2'"
-        [comparison$]="avgRankGSCPercentChange$"
+        [comparison]="avgRankGSCPercentChange$ | async"
         [title]="'avg-rank-google'"
         [tooltip]="'tooltip-avg-rank-page-google'"
       ></upd-data-card>
