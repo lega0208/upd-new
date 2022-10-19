@@ -1,30 +1,38 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-4 col-sm-12">
-      <upd-data-kpi-card
-        [comparison$]="avgTaskSuccessFromLastTest$ || 0"
-        [date$]="dateFromLastTest$ || ''"
-        [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
+      <upd-data-card
+        [current]="avgTaskSuccessFromLastTest$ | async"
+        [comparison]="avgSuccessPercentChange$ | async"
         [title]="'Average task success from last UX test'"
-        [project]="true"
-      ></upd-data-kpi-card>
+        [emptyMessage]="'task-not-tested'"
+        [displayKpis]="true"
+        [displayComparison]="true"
+        pipe="percent"
+      >
+        <p>
+          ({{ 'Last UX test date:' | translate }}
+          {{ dateFromLastTest$ | async | localeDate }})
+        </p>
+      </upd-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
       <upd-data-card
-        [current$]="visits$"
-        [comparison$]="visitsPercentChange$"
+        [current]="visits$ | async"
+        [comparison]="visitsPercentChange$ | async"
         [title]="'Total visits from all pages'"
       ></upd-data-card>
     </div>
     <div class="col-lg-4 col-sm-12">
-      <upd-data-kpi-card
-        [comparison$]="totalCalldriver$ || 0"
-        [difference$]="totalCalldriverPercentChange$ || 0"
-        [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
+      <upd-data-card
+        [current]="totalCalldriver$ | async"
+        [comparison]="totalCalldriverPercentChange$ | async"
         [title]="'Call volume'"
-        [type]="'volume'"
-        [project]="true"
-      ></upd-data-kpi-card>
+        [displayKpis]="true"
+        [kpiObjectiveCriteria]="callVolumeObjectiveCriteria"
+        [kpiStylesConfig]="callVolumeKpiConfig"
+        [comparisonMode]="'upBadDownGood'"
+      ></upd-data-card>
     </div>
   </div>
 </div>

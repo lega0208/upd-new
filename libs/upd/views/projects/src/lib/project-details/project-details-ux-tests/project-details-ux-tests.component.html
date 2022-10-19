@@ -1,18 +1,25 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-sm-12">
-      <upd-data-kpi-card
-        [comparison$]="avgTaskSuccessFromLastTest$ || 0"
-        [date$]="dateFromLastTest$ || ''"
-        [numUxTests]="(taskSuccessByUxTest$ | async)?.length || 0"
+      <upd-data-card
+        [current]="avgTaskSuccessFromLastTest$ | async"
+        [comparison]="avgSuccessPercentChange$ | async"
         [title]="'Average task success from last UX test'"
-        [project]="true"
-      ></upd-data-kpi-card>
+        [emptyMessage]="'task-not-tested'"
+        [displayKpis]="true"
+        [displayComparison]="true"
+        pipe="percent"
+      >
+        <p>
+          ({{ 'Last UX test date:' | translate }}
+          {{ dateFromLastTest$ | async | localeDate }})
+        </p>
+      </upd-data-card>
     </div>
 
     <div class="col-lg-6 col-sm-12">
       <upd-data-card
-        [current$]="totalParticipants$"
+        [current]="totalParticipants$ | async"
         [title]="'Total participants from all tests'"
       ></upd-data-card>
     </div>

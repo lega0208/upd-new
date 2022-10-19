@@ -113,3 +113,129 @@ export function getAvgSuccessFromLastTests<
 
   return getAvgTestSuccess(allTests);
 }
+
+export function groupTestsByType<
+  T extends Pick<UxTest, 'date' | 'success_rate' | 'test_type'>
+>(uxTests: T[]) {
+  return uxTests.reduce(
+    (testsByType, test) => {
+      if (!test.test_type) {
+        testsByType['None'].push(test);
+
+        return testsByType;
+      }
+
+      if (!(test.test_type in testsByType)) {
+        testsByType[test.test_type] = [];
+      }
+
+      testsByType[test.test_type].push(test);
+
+      return testsByType;
+    },
+    { None: [] } as { [key: string]: T[] }
+  );
+}
+
+export function getAvgTestSuccessByDate<
+  T extends Pick<UxTest, 'date' | 'success_rate' | 'test_type'>
+>(uxTests: T[]) {
+  const testsByDate: { [date: string]: T[] } = { None: [] };
+
+  for (const test of uxTests) {
+    if (!test.date) {
+      testsByDate['None'].push(test);
+      continue;
+    }
+
+    const date = test.date.toISOString();
+
+    if (!testsByDate[date]) {
+      testsByDate[date] = [];
+    }
+
+    testsByDate[date].push(test);
+  }
+
+  const dates = Object.keys(testsByDate);
+
+  const avgSuccessRateByDate: Record<string, number | null> = {};
+
+  for (const date of dates) {
+    avgSuccessRateByDate[date] = getAvgTestSuccess(testsByDate[date]);
+  }
+
+  return avgSuccessRateByDate;
+}
+
+export interface TestSuccessWithPercentChange {
+  avgTestSuccess: number | null;
+  percentChange: number | null;
+}
+
+export function getLatestTestData<
+  T extends Pick<UxTest, 'date' | 'success_rate' | 'test_type'>
+>(uxTests: T[]): TestSuccessWithPercentChange {
+  const uxTestsWithSuccessRate = uxTests.filter(
+    (test) => test.success_rate ?? test.success_rate === 0
+  );
+
+  if (!uxTestsWithSuccessRate.length) {
+    return {
+      avgTestSuccess: null,
+      percentChange: null,
+    };
+  }
+
+  const testsByType = groupTestsByType(uxTestsWithSuccessRate);
+
+  const testTypesByPriority = [
+    'Validation',
+    'Baseline',
+    'Exploratory',
+    'Spot Check',
+    'None',
+  ];
+
+  while (testTypesByPriority.length > 0) {
+    const testType = testTypesByPriority.splice(0, 1)[0];
+
+    if (testsByType[testType]?.length) {
+      const avgTestSuccess = getAvgTestSuccess(testsByType[testType]);
+
+      if (avgTestSuccess === null) {
+        continue;
+      }
+
+      while (testTypesByPriority.length > 0) {
+        const previousTestType = testTypesByPriority.splice(0, 1)[0];
+
+        if (testsByType[previousTestType]) {
+          const previousAvgTestSuccess = getAvgTestSuccess(
+            testsByType[previousTestType]
+          );
+
+          const percentChange =
+            previousAvgTestSuccess !== null
+              ? avgTestSuccess - previousAvgTestSuccess
+              : null;
+
+          return {
+            avgTestSuccess,
+            percentChange,
+          };
+        }
+      }
+
+      return {
+        avgTestSuccess,
+        percentChange: null,
+      };
+    }
+  }
+
+  return {
+    avgTestSuccess: null,
+    percentChange: null,
+  };
+}

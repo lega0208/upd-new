@@ -4,28 +4,28 @@
   <div class="row">
     <div class="col-lg-3 col-sm-12">
       <upd-data-card
-        [current$]="numInProgress$"
+        [current]="numInProgress$ | async"
         [title]="'Projects in progress'"
       ></upd-data-card>
     </div>
 
     <div class="col-lg-3 col-sm-12">
       <upd-data-card
-        [current$]="numPlanning$"
+        [current]="numPlanning$ | async"
         [title]="'Projects in planning'"
       ></upd-data-card>
     </div>
 
     <div class="col-lg-3 col-sm-12">
       <upd-data-card
-        [current$]="totalCompleted$"
+        [current]="totalCompleted$ | async"
         [title]="'Projects completed'"
       ></upd-data-card>
     </div>
 
     <div class="col-lg-3 col-sm-12">
       <upd-data-card
-        [current$]="completedCOPS$"
+        [current]="completedCOPS$ | async"
         [title]="'COPS projects completed'"
       ></upd-data-card>
     </div>

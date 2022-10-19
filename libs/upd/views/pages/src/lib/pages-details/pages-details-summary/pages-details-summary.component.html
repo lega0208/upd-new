@@ -2,8 +2,8 @@
   <div class="row">
     <!-- <div class="col">
       <upd-data-card
-        [current$]="visitors$"
-        [comparison$]="visitorsPercentChange$"
+        [current]="visitors$ | async"
+        [comparison]="visitorsPercentChange$ | async"
         [title]="'unique-visitors'"
         [tooltip]="'tooltip-unique-visitors'"
       ></upd-data-card>
@@ -11,8 +11,8 @@
 
     <div class="col">
       <upd-data-card
-        [current$]="visits$"
-        [comparison$]="visitsPercentChange$"
+        [current]="visits$ | async"
+        [comparison]="visitsPercentChange$ | async"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
       ></upd-data-card>
@@ -20,8 +20,8 @@
 
     <div class="col">
       <upd-data-card
-        [current$]="pageViews$"
-        [comparison$]="pageViewsPercentChange$"
+        [current]="pageViews$ | async"
+        [comparison]="pageViewsPercentChange$ | async"
         [title]="'page-views'"
         [tooltip]="'tooltip-page-views'"
       ></upd-data-card>

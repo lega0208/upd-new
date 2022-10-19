@@ -7,8 +7,8 @@
   <div class="row">
     <div class="col">
       <upd-data-card
-        [current$]="currentCallVolume$"
-        [comparison$]="callPercentChange$"
+        [current]="currentCallVolume$ | async"
+        [comparison]="callPercentChange$ | async"
         [title]="'Call volume'"
         [tooltip]="'tooltip-call-volume'"
       ></upd-data-card>

@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@dua-upd/upd-components';
-import { TasksDetailsFacade } from '../+state/tasks-details.facade';
-
-import { LocaleId } from '@dua-upd/upd/i18n';
-import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
+import { ColumnConfig } from '@dua-upd/upd-components';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { GetTableProps } from '@dua-upd/utils-common';
+import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 
 type DocumentsColTypes = GetTableProps<
   TaskDetailsUxTestsComponent,
@@ -18,7 +16,6 @@ type DocumentsColTypes = GetTableProps<
   styleUrls: ['./task-details-ux-tests.component.css'],
 })
 export class TaskDetailsUxTestsComponent implements OnInit {
-  currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
   taskSuccessChart$ = this.taskDetailsService.taskSuccessChart$;
@@ -34,19 +31,17 @@ export class TaskDetailsUxTestsComponent implements OnInit {
   documents$ = this.taskDetailsService.documents$;
   documentsCols: ColumnConfig<DocumentsColTypes>[] = [];
 
+  taskSuccessChartCols: ColumnConfig[] = [];
+  taskSuccessDataCols: ColumnConfig[] = [];
+
+  avgTaskSuccessKpiCriteria = (successRate: number) => successRate >= 0.8 ? 'pass' : 'fail';
+
   constructor(
     private readonly taskDetailsService: TasksDetailsFacade,
     private i18n: I18nFacade
   ) {}
 
-  taskSuccessChartCols: ColumnConfig[] = [];
-  taskSuccessDataCols: ColumnConfig[] = [];
-
   ngOnInit() {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
       this.documentsCols = [
         {

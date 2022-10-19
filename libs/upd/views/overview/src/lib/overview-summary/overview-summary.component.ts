@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';

@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@dua-upd/upd-components';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ColumnConfig, callVolumeObjectiveCriteria } from '@dua-upd/upd-components';
+import { LocaleId, EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { EN_CA } from '@dua-upd/upd/i18n';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
@@ -23,6 +22,7 @@ type WhatWasWrongColTypes = GetTableProps<
   selector: 'upd-project-details-summary',
   templateUrl: './project-details-summary.component.html',
   styleUrls: ['./project-details-summary.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectDetailsSummaryComponent implements OnInit {
   currentLang!: LocaleId;
@@ -31,6 +31,8 @@ export class ProjectDetailsSummaryComponent implements OnInit {
 
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
+  avgSuccessPercentChange$ =
+    this.projectsDetailsService.avgSuccessPercentChange$;
   dateFromLastTest$ = this.projectsDetailsService.dateFromLastTest$;
   taskSuccessByUxTest$ = this.projectsDetailsService.taskSuccessByUxTest$;
 
@@ -45,6 +47,12 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   totalCalldriver$ = this.projectsDetailsService.totalCalldriver$;
   totalCalldriverPercentChange$ =
     this.projectsDetailsService.totalCalldriverPercentChange$;
+
+  callVolumeObjectiveCriteria = callVolumeObjectiveCriteria;
+  callVolumeKpiConfig = {
+    pass: { message: 'kpi-met-volume' },
+    fail: { message: 'kpi-not-met-volume' },
+  };
 
   constructor(
     private readonly projectsDetailsService: ProjectsDetailsFacade,

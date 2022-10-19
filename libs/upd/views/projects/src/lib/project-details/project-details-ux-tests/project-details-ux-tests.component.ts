@@ -1,15 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
-import { EN_CA } from '@dua-upd/upd/i18n';
 
 @Component({
   selector: 'upd-project-details-ux-tests',
   templateUrl: './project-details-ux-tests.component.html',
   styleUrls: ['./project-details-ux-tests.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectDetailsUxTestsComponent implements OnInit {
   currentLang!: LocaleId;
@@ -24,6 +24,8 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
 
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
+  avgSuccessPercentChange$ =
+    this.projectsDetailsService.avgSuccessPercentChange$;
   dateFromLastTest$ = this.projectsDetailsService.dateFromLastTest$;
   projectTasks$ = this.projectsDetailsService.projectTasks$;
   taskSuccessByUxTest$ = this.projectsDetailsService.taskSuccessByUxTest$;
@@ -32,7 +34,7 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
 
   constructor(
     private readonly projectsDetailsService: ProjectsDetailsFacade,
-    private i18n: I18nFacade
+    private i18n: I18nFacade,
   ) {}
 
   participantTasksCols: ColumnConfig[] = [];

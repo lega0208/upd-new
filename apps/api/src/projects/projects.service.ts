@@ -33,7 +33,7 @@ import { ApiParams } from '@dua-upd/upd/services';
 import { dateRangeSplit } from '@dua-upd/utils-common/date';
 import {
   getAvgSuccessFromLastTests,
-  getLatestTest,
+  getLatestTest, getLatestTestData,
 } from '@dua-upd/utils-common/data';
 
 dayjs.extend(utc);
@@ -321,6 +321,10 @@ export class ProjectsService {
 
     const projectDoc = await this.projectsModel.findById(projectId);
 
+    if (projectDoc === null) {
+      return;
+    }
+
     const projectUrls = await getUniqueProjectUrls(projectDoc);
 
     const populatedProjectDoc = (await this.projectsModel
@@ -374,7 +378,10 @@ export class ProjectsService {
 
     const dateFromLastTest: Date | null = lastTest?.date || null;
 
-    const avgTaskSuccessFromLastTest = getAvgSuccessFromLastTests(uxTests);
+    const {
+      percentChange,
+      avgTestSuccess
+    } = getLatestTestData(uxTests);
 
     const tasks = populatedProjectDoc.tasks as Task[];
 
@@ -402,7 +409,8 @@ export class ProjectsService {
       ),
       title,
       status,
-      avgTaskSuccessFromLastTest,
+      avgTaskSuccessFromLastTest: avgTestSuccess,
+      avgSuccessPercentChange: percentChange,
       dateFromLastTest,
       taskSuccessByUxTest: uxTests,
       tasks,

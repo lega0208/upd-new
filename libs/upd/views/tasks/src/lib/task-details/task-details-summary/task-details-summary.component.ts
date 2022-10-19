@@ -1,15 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@dua-upd/upd-components';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ColumnConfig, callVolumeObjectiveCriteria } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { combineLatest } from 'rxjs';
+import { EN_CA } from '@dua-upd/upd/i18n';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
-import { EN_CA, FR_CA } from '@dua-upd/upd/i18n';
 
 @Component({
   selector: 'upd-task-details-summary',
   templateUrl: './task-details-summary.component.html',
   styleUrls: ['./task-details-summary.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskDetailsSummaryComponent implements OnInit {
   avgTaskSuccessFromLastTest$ = this.taskDetailsService.avgTaskSuccessFromLastTest$;
@@ -29,19 +28,22 @@ export class TaskDetailsSummaryComponent implements OnInit {
   taskSuccessByUxTest$ = this.taskDetailsService.taskSuccessByUxTest$;
   taskSuccessByUxTestCols: ColumnConfig[] = [];
 
+  callVolumeObjectiveCriteria = callVolumeObjectiveCriteria;
+  callVolumeKpiConfig = {
+    pass: { message: 'kpi-met-volume' },
+    fail: { message: 'kpi-not-met-volume' },
+  };
+
   currentLang$ = this.i18n.currentLang$;
-  currentLang!: LocaleId;
   langLink = 'en';
 
   visitsByPageCols: ColumnConfig[] = [];
   dyfTableCols: ColumnConfig[] = [];
   whatWasWrongTableCols: ColumnConfig[] = [];
 
-  ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
+  avgTaskSuccessKpiCriteria = (successRate: number) => successRate >= 0.8 ? 'pass' : 'fail';
 
+  ngOnInit(): void {
     this.currentLang$.subscribe((lang) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
 

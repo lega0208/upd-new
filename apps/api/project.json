@@ -43,10 +43,7 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "npx nx build api",
-          "node dist/apps/api/main.js"
-        ],
+        "commands": ["npx nx build api", "node dist/apps/api/main.js"],
         "parallel": false
       }
     },

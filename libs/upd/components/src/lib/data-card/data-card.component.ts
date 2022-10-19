@@ -1,91 +1,201 @@
-import {
-  Component,
-  Input,
-  OnChanges,
-  OnInit,
-  SimpleChanges,
-} from '@angular/core';
-import { formatNumber, formatPercent } from '@angular/common';
-import { combineLatest, map, Observable, of } from 'rxjs';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { EN_CA } from '@dua-upd/upd/i18n';
+import { LocaleNumberPipe, LocalePercentPipe } from '@dua-upd/upd/pipes';
+
+export type ComparisonStatus = 'good' | 'bad' | 'neutral' | 'none';
+
+export interface ComparisonStyles {
+  colourClass: string;
+  iconName: string;
+}
+
+export interface ComparisonConfig {
+  styles: Record<string, ComparisonStyles>;
+  getStyleConfig: (comparisonValue: number) => ComparisonStyles;
+  mode: 'upGoodDownBad' | 'upBadDownGood';
+}
+
+export const comparisonStyling: Record<ComparisonStatus, ComparisonStyles> = {
+  good: {
+    colourClass: 'text-success',
+    iconName: 'arrow_upward',
+  },
+  bad: {
+    colourClass: 'text-danger',
+    iconName: 'arrow_downward',
+  },
+  neutral: {
+    colourClass: '',
+    iconName: '',
+  },
+  none: {
+    colourClass: 'hidden',
+    iconName: '',
+  },
+};
+
+export type KpiObjectiveStatus = 'pass' | 'fail' | 'partial' | 'none';
+
+export type KpiObjectiveStatusConfig = Record<
+  KpiObjectiveStatus,
+  ComparisonStyles & { message: string }
+>;
+
+export type KpiObjectiveCriteria = (
+  current: number,
+  comparison: number
+) => KpiObjectiveStatus;
+
+export type KpiOptionalConfig = {
+  [key in KpiObjectiveStatus]?: {
+    [styles in keyof ComparisonStyles & { message: string }]: string;
+  };
+};
+
+const defaultKpiObjectiveStatusConfig: KpiObjectiveStatusConfig = {
+  pass: {
+    colourClass: 'text-success',
+    iconName: 'check_circle',
+    message: 'kpi-met',
+  },
+  fail: {
+    colourClass: 'text-danger',
+    iconName: 'warning',
+    message: 'kpi-not-met',
+  },
+  partial: {
+    colourClass: 'text-semisuccess',
+    iconName: 'check_circle',
+    message: 'kpi-half-met',
+  },
+  none: {
+    colourClass: 'hidden',
+    iconName: '',
+    message: '',
+  },
+};
+
+const defaultKpiObjectiveCriteria: KpiObjectiveCriteria = (
+  current,
+  comparison: number
+) => {
+  switch (true) {
+    case current < 0.8 && comparison < 0.2:
+      return 'fail';
+    case current < 0.8 && comparison >= 0.2:
+      return 'partial';
+    case current >= 0.8:
+      return 'pass';
+    default:
+      return 'none';
+  }
+};
 
 @Component({
   selector: 'upd-data-card',
   templateUrl: './data-card.component.html',
   styleUrls: ['./data-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DataCardComponent implements OnInit, OnChanges {
-  @Input() current$ = of(0);
-  @Input() comparison$ = of(0);
-  @Input() date!: Date | string;
-  @Input() numUxTests = 0;
+export class DataCardComponent {
+  @Input() current: number | null = null;
+  @Input() comparison?: number | null;
   @Input() title = '';
   @Input() tooltip = '';
   @Input() pipe: 'percent' | 'number' = 'number';
   @Input() pipeParams?: string;
+  @Input() emptyMessage = 'nodata-available';
 
-  EN_CA = EN_CA;
+  @Input() comparisonMode: 'upGoodDownBad' | 'upBadDownGood' = 'upGoodDownBad';
+  @Input() displayComparison = true;
 
-  currentLang$ = this.i18n.currentLang$;
+  @Input() kpiObjectiveCriteria = defaultKpiObjectiveCriteria;
+  @Input() kpiStylesConfig: KpiOptionalConfig = {};
+  @Input() displayKpis = false;
 
-  currentFormatted$ = combineLatest([this.currentLang$, this.current$]).pipe(
-    map(([lang, current]) => {
-      console.log(current);
-      if (this.pipe === 'percent') {
-        return formatPercent(current, lang, this.pipeParams);
-      }
-      return formatNumber(current, lang, this.pipeParams);
-    })
-  );
+  get kpiConfig(): KpiObjectiveStatusConfig {
+    const mergedConfig = { ...defaultKpiObjectiveStatusConfig };
 
-  comparisonFormatted$ = combineLatest([
-    this.currentLang$,
-    this.comparison$,
-  ]).pipe(map(([lang, comparison]) => formatPercent(comparison, lang)));
-
-  comparisonClass = 'hidden';
-  comparisonArrow = '';
-
-  constructor(private i18n: I18nFacade) {}
-
-  ngOnInit() {
-    this.comparison$.subscribe((comparison) => {
-      if (comparison > 0) {
-        this.comparisonClass = 'text-success';
-        this.comparisonArrow = 'arrow_upward';
-      } else if (comparison < 0) {
-        this.comparisonArrow = 'arrow_downward';
-        this.comparisonClass = 'text-danger';
-      } else {
-        this.comparisonClass = 'hidden';
-        this.comparisonArrow = '';
-      }
-    });
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['current$'] && changes['current$'].currentValue) {
-      this.currentFormatted$ = combineLatest([
-        this.currentLang$,
-        changes['current$'].currentValue as Observable<number>,
-      ]).pipe(
-        map(([lang, current]) => {
-          if (this.pipe === 'percent') {
-            return formatPercent(current, lang, this.pipeParams);
-          }
-          return formatNumber(current, lang, this.pipeParams);
-        })
-      );
+    // merge any provided config options with defaults
+    for (const key of Object.keys(
+      this.kpiStylesConfig
+    ) as KpiObjectiveStatus[]) {
+      mergedConfig[key] = {
+        ...mergedConfig[key],
+        ...this.kpiStylesConfig[key],
+      };
     }
 
-    if (changes['comparison$']) {
-      this.comparisonFormatted$ = combineLatest([
-        this.currentLang$,
-        this.comparison$,
-      ]).pipe(
-        map(([lang, comparison]) => formatPercent(Math.abs(comparison), lang))
-      );
+    return mergedConfig;
+  }
+
+  get kpiObjectiveStatus() {
+    return typeof this.current === 'number'
+      ? this.kpiObjectiveCriteria(this.current, this.comparison || 0)
+      : 'none';
+  }
+
+  get comparisonStyles() {
+    if (!this.displayComparison || typeof this.comparison !== 'number') {
+      return comparisonStyling.none;
+    }
+
+    if (this.comparisonMode === 'upBadDownGood') {
+      // JSON stringify/parse to deep clone object
+      const styling = JSON.parse(JSON.stringify(comparisonStyling));
+      styling.good.iconName = 'arrow_downward';
+      styling.bad.iconName = 'arrow_upward';
+
+      switch (true) {
+        case this.comparison < 0:
+          return styling.good;
+        case this.comparison > 0:
+          return styling.bad;
+        default:
+          return styling.neutral;
+      }
+    }
+
+    switch (true) {
+      case this.comparison > 0:
+        return comparisonStyling.good;
+      case this.comparison < 0:
+        return comparisonStyling.bad;
+      default:
+        return comparisonStyling.neutral;
+    }
+  }
+
+  constructor(
+    private i18n: I18nFacade,
+    private numberPipe: LocaleNumberPipe,
+    private percentPipe: LocalePercentPipe
+  ) {}
+
+  get localePipe() {
+    switch (this.pipe) {
+      case 'number':
+        return this.numberPipe;
+      case 'percent':
+        return this.percentPipe;
+      default:
+        return this.numberPipe;
     }
   }
 }
+
+export const callVolumeObjectiveCriteria: KpiObjectiveCriteria = (
+  current,
+  comparison: number
+) => {
+  switch (true) {
+    case current === 0:
+      return 'none';
+    case comparison > -0.05:
+      return 'fail';
+    case comparison <= -0.05:
+      return 'pass';
+    default:
+      return 'none';
+  }
+};
