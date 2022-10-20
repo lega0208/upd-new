@@ -17,7 +17,7 @@
         "compiler": "tsc",
         "generateIndexHtml": false,
         "runtimeChunk": false,
-        "webpackConfig": "apps/db-updater/webpack.config.js",
+        "webpackConfig": "apps/db-updater/webpack.config.js"
       },
       "configurations": {
         "production": {
