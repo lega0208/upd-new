@@ -5,18 +5,23 @@
   "targets": {
     "build": {
       "defaultConfiguration": "production",
-      "executor": "@nxext/vite:build",
+      "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/api",
         "main": "apps/api/src/main.ts",
         "tsConfig": "apps/api/tsconfig.app.json",
         "assets": ["apps/api/src/assets"],
-        "configFile": "apps/api/vite.config.ts"
+        "deleteOutputPath": false,
+        "compiler": "tsc",
+        "generateIndexHtml": false,
+        "runtimeChunk": false,
+        "target": "node",
+        "webpackConfig": "apps/api/webpack.config.js"
       },
       "configurations": {
         "production": {
-          "optimization": true,
+          "optimization": false,
           "externalDependencies": [
             "@nestjs/microservices",
             "@nestjs/websockets/socket-module",
@@ -27,7 +32,6 @@
             "mongoose"
           ],
           "inspect": false,
-          "webpackConfig": ["apps/api/webpack.config.js"],
           "fileReplacements": [
             {
               "replace": "apps/api/src/environments/environment.ts",
@@ -41,10 +45,9 @@
       }
     },
     "serve": {
-      "executor": "nx:run-commands",
+      "executor": "@nrwl/node:node",
       "options": {
-        "commands": ["npx nx build api", "node dist/apps/api/main.js"],
-        "parallel": false
+        "buildTarget": "api:build"
       }
     },
     "lint": {
@@ -56,7 +59,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/api"],
+      "outputs": ["{workspaceRoot}/coverage/apps/api"],
       "options": {
         "jestConfig": "apps/api/jest.config.ts",
         "passWithNoTests": true

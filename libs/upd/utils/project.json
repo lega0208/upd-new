@@ -22,7 +22,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/upd/utils"],
+      "outputs": ["{workspaceRoot}/coverage/libs/upd/utils"],
       "options": {
         "jestConfig": "libs/upd/utils/jest.config.ts",
         "passWithNoTests": true

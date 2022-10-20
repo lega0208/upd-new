@@ -6,7 +6,7 @@
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",
-      "outputs": ["dist/libs/upd/views/tasks"],
+      "outputs": ["{workspaceRoot}/dist/libs/upd/views/tasks"],
       "options": {
         "project": "libs/upd/views/tasks/ng-package.json",
         "tsConfig": "libs/upd/views/tasks/tsconfig.lib.json"
@@ -23,7 +23,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/upd/views/tasks"],
+      "outputs": ["{workspaceRoot}/coverage/libs/upd/views/tasks"],
       "options": {
         "jestConfig": "libs/upd/views/tasks/jest.config.ts",
         "passWithNoTests": true

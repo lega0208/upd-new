@@ -23,7 +23,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/external-data"],
+      "outputs": ["{workspaceRoot}/coverage/libs/external-data"],
       "options": {
         "jestConfig": "libs/external-data/jest.config.ts",
         "passWithNoTests": true
