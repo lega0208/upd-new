@@ -12,15 +12,18 @@
         "main": "apps/db-updater/src/main.ts",
         "tsConfig": "apps/db-updater/tsconfig.app.json",
         "assets": ["apps/db-updater/src/assets"],
+        "deleteOutputPath": false,
         "target": "node",
-        "compiler": "tsc"
+        "compiler": "tsc",
+        "generateIndexHtml": false,
+        "runtimeChunk": false,
+        "webpackConfig": "apps/db-updater/webpack.config.js",
       },
       "configurations": {
         "production": {
-          "optimization": true,
+          "optimization": false,
           "externalDependencies": "all",
           "extractLicenses": false,
-          "generatePackageJson": true,
           "inspect": false,
           "fileReplacements": [
             {

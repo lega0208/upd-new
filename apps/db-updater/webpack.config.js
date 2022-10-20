@@ -6,13 +6,13 @@ module.exports = (config, context) => {
   return merge(config, {
     devtool: 'eval-cheap-module-source-map',
     optimization: {
-      nodeEnv: process.env.NODE_ENV || 'development',
+      nodeEnv: process.env.NODE_ENV || 'development'
     },
     plugins: [
       new CopyPlugin({
         patterns: [
           {
-            from: 'apps/db-cli/src/assets/package.json',
+            from: 'apps/db-updater/src/assets/package.json',
             to: join(config.output.path, 'package.json'),
           },
         ],

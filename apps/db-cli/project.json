@@ -5,19 +5,25 @@
   "targets": {
     "build": {
       "defaultConfiguration": "production",
-      "executor": "@nxext/vite:build",
+      "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/db-cli",
         "main": "apps/db-cli/src/main.ts",
         "tsConfig": "apps/db-cli/tsconfig.app.json",
         "assets": ["apps/db-cli/src/assets"],
-        "configFile": "apps/db-cli/vite.config.ts"
+        "deleteOutputPath": false,
+        "compiler": "tsc",
+        "generateIndexHtml": false,
+        "runtimeChunk": false,
+        "target": "node",
+        "webpackConfig": "apps/db-cli/webpack.config.js"
       },
       "configurations": {
         "production": {
-          "optimization": true,
+          "optimization": false,
           "externalDependencies": [
+            "@adobe/aio-lib-analytics",
             "@nestjs/microservices",
             "@nestjs/websockets/socket-module",
             "@nestjs/microservices/microservices-module",
@@ -27,10 +33,8 @@
             "mongoose"
           ],
           "extractLicenses": false,
-          "generatePackageJson": true,
           "inspect": false,
           "watch": false,
-          "webpackConfig": ["apps/db-cli/webpack.config.js"],
           "fileReplacements": [
             {
               "replace": "apps/db-cli/src/environments/environment.ts",
@@ -39,21 +43,7 @@
           ]
         },
         "development": {
-          "externalDependencies": [
-            "@nestjs/microservices",
-            "@nestjs/websockets/socket-module",
-            "@nestjs/microservices/microservices-module",
-            "class-transformer",
-            "class-validator",
-            "cache-manager",
-            "mongoose"
-          ],
-          "extractLicenses": false,
-          "generatePackageJson": true,
-          "inspect": false,
-          "watch": false,
-          "webpackConfig": ["apps/db-cli/webpack.config.js"],
-          "fileReplacements": []
+          "sourcemaps": true
         }
       }
     },
