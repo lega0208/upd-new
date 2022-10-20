@@ -99,7 +99,7 @@
     "@nrwl/cli": "15.0.0",
     "@nrwl/cypress": "15.0.0",
     "@nrwl/devkit": "15.0.0",
-    "@nrwl/esbuild": "^15.0.0",
+    "@nrwl/esbuild": "15.0.0",
     "@nrwl/eslint-plugin-nx": "15.0.0",
     "@nrwl/jest": "15.0.0",
     "@nrwl/js": "15.0.0",
