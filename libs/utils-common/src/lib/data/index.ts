@@ -177,7 +177,7 @@ export function getLatestTestData<
   T extends Pick<UxTest, 'date' | 'success_rate' | 'test_type'>
 >(uxTests: T[]): TestSuccessWithPercentChange {
   const uxTestsWithSuccessRate = uxTests.filter(
-    (test) => test.success_rate ?? test.success_rate === 0
+    (test) => test.success_rate || test.success_rate === 0
   );
 
   if (!uxTestsWithSuccessRate.length) {
