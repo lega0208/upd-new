@@ -10,6 +10,7 @@ env:
   NX_CLOUD_AUTH_TOKEN: ${{ secrets.NX_CLOUD_AUTH_TOKEN }}
   NX_CLOUD_DISTRIBUTED_EXECUTION: true
   NX_CLOUD_DISTRIBUTED_EXECUTION_AGENT_COUNT: 3
+  NODE_ENV: production
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -42,7 +43,7 @@ jobs:
       - run: npx nx-cloud start-ci-run
       - run: npx nx workspace-lint
       - run: npx nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
-      - run: npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
+      - run: NODE_ENV=production npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
       - run: npx nx-cloud stop-all-agents
   pr:
     name: Nx Cloud - Main Job
@@ -70,7 +71,7 @@ jobs:
       - run: npx nx-cloud start-ci-run
       - run: npx nx workspace-lint
       - run: npx nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
-      - run: npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
+      - run: NODE_ENV=production npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
       - run: npx nx-cloud stop-all-agents
 
   agents:
