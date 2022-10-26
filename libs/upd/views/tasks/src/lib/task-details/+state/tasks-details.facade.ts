@@ -85,6 +85,35 @@ export class TasksDetailsFacade {
   );
 
   visitsByPageFeedbackWithPercentChange$ = this.tasksDetailsData$.pipe(
+    map((data): TaskDetailsData => {
+      if (data.dateRangeData?.visitsByPage) {
+        // data object is immutable, so we need to make a deep copy
+        // -> fastest and easiest way is to serialize/deserialize with JSON methods
+        const newData = JSON.parse(JSON.stringify(data));
+
+        newData.dateRangeData.visitsByPage =
+          data.dateRangeData.visitsByPage.map((page) => {
+            if (page.visits === 0) {
+              return page;
+            }
+
+            const totalFeedback = (page.dyfYes || 0) + (page.dyfNo || 0);
+
+            if (totalFeedback === 0) {
+              return page;
+            }
+
+            return {
+              ...page,
+              feedbackToVisitsRatio: totalFeedback / page.visits,
+            };
+          });
+
+        return newData;
+      }
+
+      return data;
+    }),
     mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo', '_id')
   );
 
