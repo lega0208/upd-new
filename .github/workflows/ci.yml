@@ -21,16 +21,16 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'pull_request' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: Checkout [main]
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
           node-version: '16'
       - name: Use the node_modules cache if available [npm]
         id: use-npm-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-16-modules-${{ hashFiles('**/package-lock.json') }}
@@ -42,23 +42,23 @@ jobs:
       - run: npx nx-cloud start-ci-run
       - run: npx nx workspace-lint
       - run: npx nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
-      - run: npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
+      - run: NODE_ENV=production npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
       - run: npx nx-cloud stop-all-agents
   pr:
     name: Nx Cloud - Main Job
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: Checkout [main]
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
           node-version: '16'
       - name: Use the node_modules cache if available [npm]
         id: use-npm-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-16-modules-${{ hashFiles('**/package-lock.json') }}
@@ -67,10 +67,11 @@ jobs:
         if: steps.use-npm-cache.outputs.cache-hit != 'true'
         run: npm ci
 
+      - run: npm list
       - run: npx nx-cloud start-ci-run
       - run: npx nx workspace-lint
       - run: npx nx run-many --target=lint --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
-      - run: npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
+      - run: NODE_ENV=production npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --maxParallel=3
       - run: npx nx-cloud stop-all-agents
 
   agents:
@@ -81,13 +82,13 @@ jobs:
       matrix:
         agent: [ 1, 2, 3 ]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: '16'
       - name: Use the node_modules cache if available [npm]
         id: use-npm-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-16-modules-${{ hashFiles('**/package-lock.json') }}
