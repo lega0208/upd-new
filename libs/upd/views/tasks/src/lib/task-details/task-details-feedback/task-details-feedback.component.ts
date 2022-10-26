@@ -61,22 +61,23 @@ export class TaskDetailsFeedbackComponent implements OnInit {
         },
         {
           field: 'dyfNo',
-          header: this.i18n.service.translate('No', lang),
+          header: this.i18n.service.translate('no', lang),
           pipe: 'number',
         },
-        // {
-        //   field: '0',
-        //   header: this.i18n.service.translate('comparison-for-No-answer', lang),
-        //   pipe: 'percent',
-        // },
-        // {
-        //   field: '0',
-        //   header: this.i18n.service.translate(
-        //     '% of visitors who left feedback',
-        //     lang
-        //   ),
-        //   pipe: 'percent',
-        // },
+        {
+          field: 'percentChange',
+          header: this.i18n.service.translate('comparison-for-No-answer', lang),
+          pipe: 'percent',
+        },
+        {
+          field: 'feedbackToVisitsRatio',
+          header: this.i18n.service.translate(
+            'Ratio of feedback to visits',
+            lang
+          ),
+          pipe: 'percent',
+          pipeParam: '1.2'
+        },
       ];
 
       this.dyfTableCols = [

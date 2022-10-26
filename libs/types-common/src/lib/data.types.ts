@@ -173,7 +173,7 @@ export interface TaskDetailsMetrics {
 }
 
 export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
-  visitsByPage: { _id: string; title: string; visits: number }[];
+  visitsByPage: VisitsByPage[];
   feedbackByTags: { tag: string; numComments: number }[];
 }
 
