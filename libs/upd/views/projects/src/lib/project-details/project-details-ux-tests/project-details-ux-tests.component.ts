@@ -4,6 +4,12 @@ import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
+import { GetTableProps } from '@dua-upd/utils-common';
+
+type DocumentsColTypes = GetTableProps<
+  ProjectDetailsUxTestsComponent,
+  'documents$'
+  >;
 
 @Component({
   selector: 'upd-project-details-ux-tests',
@@ -32,6 +38,9 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
   taskSuccessByUxTestKpi$ = this.projectsDetailsService.taskSuccessByUxTestKpi$;
   totalParticipants$ = this.projectsDetailsService.totalParticipants$;
 
+  documents$ = this.projectsDetailsService.documents$;
+  documentsCols: ColumnConfig<DocumentsColTypes>[] = [];
+
   constructor(
     private readonly projectsDetailsService: ProjectsDetailsFacade,
     private i18n: I18nFacade,
@@ -48,6 +57,15 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
 
     combineLatest([this.currentLang$, this.taskSuccessByUxTestKpi$]).subscribe(
       ([lang, kpiData]) => {
+        this.documentsCols = [
+          {
+            field: 'filename',
+            header: this.i18n.service.translate('Documents', lang),
+            type: 'link',
+            typeParams: { link: 'url', external: true },
+          },
+        ];
+
         this.langLink = lang === EN_CA ? 'en' : 'fr';
         this.participantTasksCols = [
           {

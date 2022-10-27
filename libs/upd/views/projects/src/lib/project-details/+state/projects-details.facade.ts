@@ -778,6 +778,22 @@ export class ProjectsDetailsFacade {
     })
   );
 
+  documents$ = this.projectsDetailsData$.pipe(
+    map((data) =>
+      data?.taskSuccessByUxTest
+        .map((d) => {
+          return d.attachments ? d.attachments.map((a) => {
+            const url = a.url.replace('https://', '');
+            return {
+              filename: a.filename,
+              url: url,
+            };
+          }) : d;
+        })
+        .flat()
+    )
+  );
+
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
 
   /**
