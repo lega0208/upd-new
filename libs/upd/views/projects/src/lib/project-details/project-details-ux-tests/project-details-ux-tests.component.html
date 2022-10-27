@@ -79,3 +79,18 @@
     </div>
   </div>
 </div>
+
+<div *ngIf="(documents$ | async) as documents" class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [data]="documents|| []"
+        [cols]="documentsCols"
+        [sort]="false"
+        [pagination]="false"
+        [filter]="false"
+        [title]="'Documents'"
+      ></upd-data-table-card>
+    </div>
+  </div>
+</div>
