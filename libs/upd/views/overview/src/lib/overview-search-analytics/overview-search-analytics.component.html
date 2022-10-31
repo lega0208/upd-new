@@ -46,6 +46,24 @@
   </div>
 </div>
 
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [filter]="false"
+        [sort]="true"
+        [pagination]="true"
+        [data]="(SearchAssessment$ | async) || []"
+        [cols]="SearchAssessmentCols"
+        [title]="'search-assessment'"
+        [tooltip]="'tooltip-search-assessment'"
+      >
+      </upd-data-table-card>
+    </div>
+  </div>
+</div>
+
+
 <!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">

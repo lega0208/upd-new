@@ -115,6 +115,13 @@ export interface OverviewAggregatedData {
     sum: number;
   }[];
   feedbackPages: { _id: string; title: string; url: string; sum: number }[];
+  searchAssessmentData: {
+    lang: string;
+    query: string;
+    expected_result: string;
+    position: number;
+    date: string;
+  }[];
 }
 
 export interface OverviewUxData {

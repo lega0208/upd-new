@@ -102,7 +102,11 @@ export const createOverallMetricsQuery = (
 
 export const createPageMetricsQuery = (
   dateRange: DateRange,
-  options: { settings?: ReportSettings; search?: ReportSearch; segment?: string } = {}
+  options: {
+    settings?: ReportSettings;
+    search?: ReportSearch;
+    segment?: string;
+  } = {}
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
@@ -332,6 +336,140 @@ export const createInternalSearchItemIdsQuery = (
     .setMetrics({ visits: 'metrics/event51' } as MetricsConfig)
     .setGlobalFilters([
       { type: 'segment', segmentId: SEGMENTS.cra },
+      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
+    ])
+    .setSettings(querySettings)
+    .build();
+};
+
+export const createPhraseItemIdsQuery = (
+  dateRange: DateRange,
+  lang,
+  settings: ReportSettings = {}
+) => {
+  const queryBuilder = new AdobeAnalyticsQueryBuilder();
+
+  const querySettings = {
+    nonesBehavior: 'return-nones',
+    countRepeatInstances: true,
+    ...settings,
+  };
+
+  return queryBuilder
+    .setDimension('variables/evar50') // Site search
+    .setMetrics({ visits: 'metrics/event51' } as MetricsConfig)
+    .setGlobalFilters([
+      { type: 'segment', segmentId: SEGMENTS.cra },
+      {
+        type: 'segment',
+        segmentId: lang === 'en' ? SEGMENTS.english : SEGMENTS.french,
+      },
+      { type: 'segment', segmentId: SEGMENTS.no_low_traffic },
+      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
+    ])
+    .setSettings(querySettings)
+    .build();
+};
+
+export const createPhraseMostClickedQuery = (
+  dateRange: DateRange,
+  itemids: string[],
+  lang,
+  settings: ReportSettings = {}
+) => {
+  const queryBuilder = new AdobeAnalyticsQueryBuilder();
+
+  const querySettings = {
+    nonesBehavior: 'return-nones',
+    countRepeatInstances: true,
+    ...settings,
+  };
+
+  return queryBuilder
+    .setDimension('variables/evar52') // Site search
+    .setMetrics({
+      rank: {
+        id: 'metrics/event51',
+        sort: 'desc',
+        filters: [
+          {
+            itemIds: itemids,
+            type: 'breakdown',
+            dimension: 'variables/evar50',
+          },
+        ],
+      },
+      // clicks: {
+      //   id: 'metrics/event51',
+      //   filters: [
+      //     {
+      //       itemIds: itemids,
+      //       type: 'breakdown',
+      //       dimension: 'variables/evar50',
+      //     },
+      //   ],
+      // },
+    } as MetricsConfig)
+    .setGlobalFilters([
+      { type: 'segment', segmentId: SEGMENTS.cra },
+      {
+        type: 'segment',
+        segmentId: lang === 'en' ? SEGMENTS.english : SEGMENTS.french,
+      },
+      { type: 'segment', segmentId: SEGMENTS.no_low_traffic },
+      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
+    ])
+    .setSettings(querySettings)
+    .build();
+};
+
+export const createPhraseRankingQuery = (
+  dateRange: DateRange,
+  itemids: string[],
+  lang,
+  settings: ReportSettings = {}
+) => {
+  const queryBuilder = new AdobeAnalyticsQueryBuilder();
+
+  const querySettings = {
+    nonesBehavior: 'return-nones',
+    countRepeatInstances: true,
+    ...settings,
+  };
+
+  return queryBuilder
+    .setDimension('variables/evar52') // Site search
+    .setMetrics({
+      // rank: {
+      //   id: 'metrics/event51',
+      //   sort: 'desc',
+      //   filters: [
+      //     {
+      //       itemIds: itemids,
+      //       type: 'breakdown',
+      //       dimension: 'variables/evar50',
+      //     },
+      //   ],
+      // },
+      clicks: {
+        id: 'cm300000938_5b437b86b7204e079e96509f',
+        sort: 'asc',
+        filters: [
+          {
+            itemIds: itemids,
+            type: 'breakdown',
+            dimension: 'variables/evar50',
+          },
+        ],
+      },
+    } as MetricsConfig)
+    .setGlobalFilters([
+      { type: 'segment', segmentId: SEGMENTS.cra },
+      {
+        type: 'segment',
+        segmentId: lang === 'en' ? SEGMENTS.english : SEGMENTS.french,
+      },
+      { type: 'segment', segmentId: SEGMENTS.no_low_traffic },
       { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
     ])
     .setSettings(querySettings)

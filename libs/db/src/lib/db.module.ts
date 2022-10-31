@@ -19,6 +19,8 @@ import {
   TaskSchema,
   UxTest,
   UxTestSchema,
+  SearchAssessment,
+  SearchAssessmentSchema,
 } from './db.schemas';
 import { ConfigModule } from '@nestjs/config';
 import { getDbConnectionString } from './db.connection';
@@ -41,6 +43,7 @@ import { getDbConnectionString } from './db.connection';
         { name: Task.name, schema: TaskSchema },
         { name: UxTest.name, schema: UxTestSchema },
         { name: Project.name, schema: ProjectSchema },
+        { name: SearchAssessment.name, schema: SearchAssessmentSchema },
       ],
       'defaultConnection'
     ),

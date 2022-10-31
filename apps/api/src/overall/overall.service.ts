@@ -5,25 +5,25 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import { FilterQuery, Model } from 'mongoose';
-import type {
-  CallDriverModel,
-  OverallDocument,
-  ProjectDocument,
-  TaskDocument,
-  UxTestDocument,
-  FeedbackDocument,
-  PageMetricsModel,
-  PageDocument,
-} from '@dua-upd/db';
 import {
   CallDriver,
+  CallDriverModel,
   Overall,
+  OverallDocument,
   Project,
+  ProjectDocument,
   Task,
+  TaskDocument,
   UxTest,
+  UxTestDocument,
   Feedback,
+  FeedbackDocument,
   PageMetrics,
+  PageMetricsModel,
   Page,
+  PageDocument,
+  SearchAssessment,
+  SearchAssessmentDocument,
 } from '@dua-upd/db';
 import type {
   ProjectsHomeData,
@@ -94,6 +94,8 @@ export class OverallService {
     private calldriversModel: CallDriverModel,
     @InjectModel(Feedback.name, 'defaultConnection')
     private feedbackModel: Model<FeedbackDocument>,
+    @InjectModel(SearchAssessment.name, 'defaultConnection')
+    private searchAssessmentModel: Model<SearchAssessmentDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -138,6 +140,7 @@ export class OverallService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.searchAssessmentModel,
         this.cacheManager,
         params.dateRange
       ),
@@ -147,6 +150,7 @@ export class OverallService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.searchAssessmentModel,
         this.cacheManager,
         params.comparisonDateRange
       ),
@@ -386,6 +390,7 @@ async function getOverviewMetrics(
   calldriversModel: CallDriverModel,
   feedbackModel: Model<FeedbackDocument>,
   pageModel: Model<PageDocument>,
+  searchAssessmentModel: Model<SearchAssessmentDocument>,
   cacheManager: Cache,
   dateRange: string
 ): Promise<OverviewAggregatedData> {
@@ -595,10 +600,32 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
+  const searchAssessmentData = await searchAssessmentModel
+    .aggregate()
+    .match({ date: dateQuery })
+    .group({
+      _id: { $toLower: '$query' },
+      visits: { $sum: '$visits' },
+      position: { $avg: '$expected_position' },
+      doc: { $push: '$$ROOT' },
+    })
+    .replaceRoot({
+      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
+    })
+    .project({
+      query: '$_id',
+      _id: 0,
+      visits: 1,
+      position: 1,
+      expected_result: 1,
+    })
+    .exec();
+
   return {
     visitsByDay,
     calldriversByDay,
     calldriversEnquiry,
+    searchAssessmentData,
     ...aggregatedMetrics[0],
     totalFeedback,
     topPagesVisited,

@@ -13,6 +13,7 @@ export const SEGMENTS = {
   cra_over_255: 's300000938_62d198c24906df4fba26597e', // cra segment, but only includes pages with 256+ characters
   english: 's300000938_57924078e4b05f8496f06d63',
   french: 's300000938_579240a6e4b00bd9617283bd',
+  no_low_traffic: 's300000938_6335b3e85aac1b53dba7dd5f',
   FWYLF: {
     CANT_FIND_INFO: 's300000938_60ec6b712b7fae2105ab3c07',
     OTHER: 's300000938_60ed8367fa6ab12e495a9a5e',
@@ -20,7 +21,7 @@ export const SEGMENTS = {
     ERROR: 's300000938_60ec6a8ee670b5326fe33de5',
   },
   CX_TASKS: 's300000938_60e59fc096f01a011ca0d986',
-  CRA_SEARCH_PAGES: 's300000938_62a35c1ce69f2c0a983cc013'
+  CRA_SEARCH_PAGES: 's300000938_62a35c1ce69f2c0a983cc013',
 };
 
 export const CALCULATED_METRICS = {
@@ -182,6 +183,8 @@ export class AdobeAnalyticsQueryBuilder {
   }
 
   public setMetrics(metrics: MetricsConfig) {
+    let metricsFilterId = 0;
+    let filterId = 0;
     for (const key of Object.keys(metrics)) {
       const metric = metrics[key];
 
@@ -197,10 +200,11 @@ export class AdobeAnalyticsQueryBuilder {
         ) {
           metric.filters.map((filter) => {
             return filter.itemIds.map((itemId, index) => {
+              metricsFilterId++;
               this.query.metricContainer.metrics.push({
                 id: metric.id,
                 columnId: itemId as string,
-                filters: [index.toString()],
+                filters: [metricsFilterId.toString()],
               });
             });
           });
@@ -212,8 +216,9 @@ export class AdobeAnalyticsQueryBuilder {
           }
           metric.filters.map((filter) => {
             return filter.itemIds.map((itemId, index) => {
+              filterId++;
               return this.query.metricContainer.metricFilters.push({
-                id: index.toString(),
+                id: filterId.toString(),
                 type: filter.type,
                 dimension: filter.dimension,
                 itemId: itemId,
@@ -221,7 +226,6 @@ export class AdobeAnalyticsQueryBuilder {
             });
           });
         } else {
-
           metric.filters.map((filter) => {
             this.query.metricContainer.metrics.push({
               id: metric.id,

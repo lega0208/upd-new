@@ -294,7 +294,7 @@ export class OverviewFacade {
         if (
           comparisonVisitsByDay.find(
             (d) =>
-              dayjs
+            dayjs
                 .utc(d.date)
                 .add(1, dateSelection)
                 .format('YYYY-MM-DD') ===
@@ -381,11 +381,11 @@ export class OverviewFacade {
         if (
           comparisonCalldriversByDay.find(
             (d) =>
-              dayjs
-                .utc(d.date)
-                .add(1, dateSelection)
-                .format('YYYY-MM-DD') ===
-              dayjs.utc(data.date).format('YYYY-MM-DD')
+            dayjs
+            .utc(d.date)
+            .add(1, dateSelection)
+            .format('YYYY-MM-DD') ===
+          dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
           prevCalls = comparisonCalldriversByDay[cntPrevCalls].calls;
@@ -659,11 +659,11 @@ export class OverviewFacade {
         if (
           comparisonDateRangeSeries.find(
             (d) =>
-              dayjs
-                .utc(d.date)
-                .add(1, dateSelection)
-                .format('YYYY-MM-DD') ===
-              dayjs.utc(data.date).format('YYYY-MM-DD')
+            dayjs
+            .utc(d.date)
+            .add(1, dateSelection)
+            .format('YYYY-MM-DD') ===
+          dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
           prevVisits = comparisonDateRangeSeries[cntPrevVisits].visits;
@@ -672,11 +672,11 @@ export class OverviewFacade {
         if (
           comparisonDateRangeSeriesCall.find(
             (d) =>
-              dayjs
-                .utc(d.date)
-                .add(1, dateSelection)
-                .format('YYYY-MM-DD') ===
-              dayjs.utc(data.date).format('YYYY-MM-DD')
+            dayjs
+            .utc(d.date)
+            .add(1, dateSelection)
+            .format('YYYY-MM-DD') ===
+          dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
           prevCalls = comparisonDateRangeSeriesCall[cntPrevCalls].calls;
@@ -784,6 +784,28 @@ export class OverviewFacade {
       }
 
       return pieChartData;
+    })
+  );
+
+  searchAssessmentData$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map(([data, lang]) => {
+      const datas = data?.dateRangeData?.searchAssessmentData.map((d) => {
+        const rank = isFinite(d.position) ? Math.round(d.position) : '';
+        const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
+        const url = d.expected_result?.replace(/^https:\/\//i, '');
+        return {
+          query: d.query,
+          url: url,
+          position: rank,
+          pass: pass,
+        };
+      });
+
+      return datas;
     })
   );
 
@@ -949,6 +971,7 @@ export class OverviewFacade {
     { field: 'calls', header: 'calls', pipe: 'number' },
     { field: 'change', header: 'comparison', pipe: 'percent' },
   ]);
+
 
   top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
