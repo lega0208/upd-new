@@ -54,7 +54,7 @@
     "@popperjs/core": "^2.10.2",
     "@swc/helpers": "^0.4.11",
     "airtable": "^0.11.1",
-    "apexcharts": "^3.35.3",
+    "apexcharts": "^3.36.0",
     "axios": "^0.24.0",
     "cache-manager": "^3.6.0",
     "cheerio": "^1.0.0-rc.10",
@@ -69,8 +69,9 @@
     "jspdf-autotable": "^3.5.25",
     "mongoose": "^6.2.10",
     "nest-commander": "^3.1.0",
-    "ng-apexcharts": "^1.7.1",
+    "ng-apexcharts": "^1.7.4",
     "ngx-google-analytics": "^14.0.0",
+    "notifications-node-client": "^5.2.1",
     "pm2": "^5.1.2",
     "primeflex": "^3.2.1",
     "primeicons": "^5.0.0",
@@ -151,4 +152,3 @@
     "webpack-merge": "^5.8.0"
   }
 }
-

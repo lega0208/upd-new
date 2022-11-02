@@ -22,6 +22,7 @@ import { HttpClient, squishTrim } from '@dua-upd/utils-common';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import cheerio from 'cheerio';
+import { NotifyClient } from 'notifications-node-client' 
 
 dayjs.extend(utc);
 
@@ -71,27 +72,23 @@ export class SearchAssessmentService {
 
   searchAssessmentModel = getSearchAssessmentModel();
 
-  // client = new SMTPClient({
-  //   host: process.env.EMAIL_HOST,
-  //   user: process.env.EMAIL_USER,
-  //   password: process.env.EMAIL_PASSWORD,
-  //   ssl: true,
-  // });
+  async email(lang: lang = 'en') {
+    try {
+      const templateid = lang === 'en' ? process.env.EMAIL_TEMPLATE_EN : process.env.EMAIL_TEMPLATE_FR;
 
-  // async email() {
-  //   try {
-  //     const message = await this.client.sendAsync({
-  //       text: 'i hope this works',
-  //       from: 'Adam Monsour <adam.monsour@gmail.com>',
-  //       to: 'Adam Monsour <adam.monsour@gmail.com>',
-  //       subject: 'testing emailjs',
-  //       body: 'testing emailjs',
-  //     });
-  //     console.log(message);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // }
+      const client = new NotifyClient('https://api.notification.canada.ca', process.env.NOTIFY_API_KEY);
+      await client.sendEmail(templateid, process.env.NOTIFY_EMAIL, {
+        personalisation: {
+          first_name: 'DUA',
+        },
+      }).then((response) => {
+        console.log(response)
+      })
+      
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   async updateSearchAssessmentData(lang: lang = 'en') {
     await connect(getDbConnectionString());
