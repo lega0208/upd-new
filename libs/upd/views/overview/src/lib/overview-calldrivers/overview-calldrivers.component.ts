@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import { ColumnConfig, callVolumeObjectiveCriteria } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
@@ -42,6 +42,12 @@ export class OverviewCalldriversComponent implements OnInit {
     this.overviewService.top5DecreasedCalldriverTopics$;
   top5DecreasedCalldriverTopicsConfig$ =
     this.overviewService.top5DecreasedCalldriverTopicsConfig$;
+
+  callVolumeObjectiveCriteria = callVolumeObjectiveCriteria;
+  callVolumeKpiConfig = {
+      pass: { message: 'kpi-met-volume' },
+      fail: { message: 'kpi-not-met-volume' },
+    };
 
   constructor(
     private overviewService: OverviewFacade,
