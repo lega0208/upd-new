@@ -8,7 +8,7 @@ export type TaskDocument = Task & Document;
 
 @Schema()
 export class Task {
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ required: true, unique: true, type: String, index: true })

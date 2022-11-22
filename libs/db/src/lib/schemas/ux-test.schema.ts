@@ -9,7 +9,7 @@ export type UxTestDocument = UxTest & Document;
 
 @Schema({ collection: 'ux_tests' })
 export class UxTest {
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ required: true, type: String })

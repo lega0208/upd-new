@@ -6,7 +6,7 @@ export type FeedbackDocument = Feedback & Document;
 
 @Schema({ collection: 'feedback' })
 export class Feedback {
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: String, required: true })

@@ -1,15 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types } from 'mongoose';
-import { GscSearchTermMetrics } from './types';
+import { GscSearchTermMetrics, AASearchTermMetrics } from './types';
 
 export type OverallDocument = Overall & Document;
 
 @Schema({ collection: 'overall_metrics' })
 export class Overall {
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
-  @Prop({ required: true, type: Date, index: true })
+  @Prop({ required: true, type: Date, unique: true, index: true })
   date = new Date(0);
 
   @Prop({ type: Number })
@@ -181,17 +181,24 @@ export class Overall {
   gsc_total_position = 0;
 
   @Prop({
-    type: [{
-      clicks: Number,
-      ctr: Number,
-      impressions: Number,
-      position: Number,
-      term: String,
-    }]
+    type: [
+      {
+        clicks: Number,
+        ctr: Number,
+        impressions: Number,
+        position: Number,
+        term: String,
+      },
+    ],
   })
   gsc_searchterms?: GscSearchTermMetrics[];
-}
 
+  @Prop({ type: [{ term: String, clicks: Number, position: Number }] })
+  aa_searchterms_en?: AASearchTermMetrics[];
+
+  @Prop({ type: [{ term: String, clicks: Number, position: Number }] })
+  aa_searchterms_fr?: AASearchTermMetrics[];
+}
 
 export const OverallSchema = SchemaFactory.createForClass(Overall);
 

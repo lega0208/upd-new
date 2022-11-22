@@ -8,7 +8,7 @@ export type ProjectDocument = Project & Document;
 
 @Schema()
 export class Project {
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: String, required: true, unique: true, index: true })
