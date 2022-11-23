@@ -9,7 +9,13 @@ import {
   prettyJson,
   today,
 } from '@dua-upd/utils-common';
-import { AAItemId, AASearchTermMetrics, DbService, Overall } from '@dua-upd/db';
+import {
+  AAItemId,
+  AASearchTermMetrics,
+  DbService,
+  Overall,
+  PageMetrics,
+} from '@dua-upd/db';
 import {
   AdobeAnalyticsService,
   DateRange,
@@ -161,7 +167,9 @@ export class InternalSearchTermsService {
           })
         );
 
-        await this.db.collections.aaItemIds.bulkWrite(updateOps);
+        await this.db.collections.aaItemIds.bulkWrite(
+          updateOps as AnyBulkWriteOperation<AAItemId>[]
+        );
       }
     }
     /*
@@ -238,7 +246,9 @@ export class InternalSearchTermsService {
           })
         );
 
-        await this.db.collections.aaItemIds.bulkWrite(updateOps);
+        await this.db.collections.aaItemIds.bulkWrite(
+          updateOps as AnyBulkWriteOperation<AAItemId>[]
+        );
       }
     }
 
@@ -715,7 +725,7 @@ export class InternalSearchTermsService {
       console.log(bulkWriteOps.length);
 
       const bulkWriteResults = await this.db.collections.pageMetrics.bulkWrite(
-        bulkWriteOps,
+        bulkWriteOps as AnyBulkWriteOperation<PageMetrics>[],
         {
           ordered: false,
         }
