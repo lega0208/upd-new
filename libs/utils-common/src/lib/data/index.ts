@@ -1,10 +1,14 @@
-import { UxTest } from '@dua-upd/db';
+import { Types } from 'mongoose';
+
+export type DbEntity = {
+  _id: Types.ObjectId;
+};
 
 /**
  * Gets the most recent test, or any with a success rate if no dates are present
  * @param uxTests
  */
-export const getLatestTest = <T extends Pick<UxTest, 'date'>>(uxTests: T[]) =>
+export const getLatestTest = <T extends { date?: Date }>(uxTests: T[]) =>
   uxTests.reduce((latestTest, test) => {
     if (!latestTest || typeof latestTest?.date !== 'object') {
       return test;
@@ -22,7 +26,9 @@ export const getLatestTest = <T extends Pick<UxTest, 'date'>>(uxTests: T[]) =>
  * or returns null if no success rates are found.
  * @param uxTests
  */
-export function getAvgTestSuccess(uxTests: Partial<UxTest>[]) {
+export function getAvgTestSuccess<T extends { success_rate?: number }>(
+  uxTests: T[]
+) {
   const testsWithSuccessRate = uxTests
     .map((test) => test.success_rate)
     .filter(
@@ -46,7 +52,7 @@ export function getAvgTestSuccess(uxTests: Partial<UxTest>[]) {
  * @param uxTests Array of tests associated to a page/task/project
  */
 export function getAvgSuccessFromLastTests<
-  T extends Pick<UxTest, 'date' | 'success_rate' | 'test_type'>
+  T extends { date?: Date; success_rate?: number; test_type?: string }
 >(uxTests: T[]) {
   const uxTestsWithSuccessRate = uxTests.filter(
     (test) => test.success_rate ?? test.success_rate === 0
@@ -115,7 +121,7 @@ export function getAvgSuccessFromLastTests<
 }
 
 export function groupTestsByType<
-  T extends Pick<UxTest, 'date' | 'success_rate' | 'test_type'>
+  T extends { date?: Date; success_rate?: number; test_type?: string }
 >(uxTests: T[]) {
   return uxTests.reduce(
     (testsByType, test) => {
@@ -138,7 +144,7 @@ export function groupTestsByType<
 }
 
 export function getAvgTestSuccessByDate<
-  T extends Pick<UxTest, 'date' | 'success_rate' | 'test_type'>
+  T extends { date?: Date; success_rate?: number; test_type?: string }
 >(uxTests: T[]) {
   const testsByDate: { [date: string]: T[] } = { None: [] };
 
@@ -174,7 +180,7 @@ export interface TestSuccessWithPercentChange {
 }
 
 export function getLatestTestData<
-  T extends Pick<UxTest, 'date' | 'success_rate' | 'test_type'>
+  T extends { date?: Date; success_rate?: number; test_type?: string }
 >(uxTests: T[]): TestSuccessWithPercentChange {
   const uxTestsWithSuccessRate = uxTests.filter(
     (test) => test.success_rate || test.success_rate === 0
