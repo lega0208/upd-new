@@ -21,6 +21,7 @@ import {
 } from '@dua-upd/external-data';
 import { PagesListService } from '../pages-list/pages-list.service';
 import { arrayToDictionary, logJson } from '@dua-upd/utils-common';
+import { AnyBulkWriteOperation } from 'mongodb';
 
 dayjs.extend(utc);
 
@@ -267,6 +268,7 @@ export class PageMetricsService {
         },
       },
     }));
+
     const airtablePageResults = await this.pageMetricsModel.bulkWrite(
       bulkWriteOps,
       { ordered: false }
@@ -545,32 +547,5 @@ export class PageMetricsService {
     }
 
     this.logger.log('Finished ensuring Page references for Page Metrics');
-  }
-
-  // For merging AA page metrics data with pre-existing GSC data, or inserting if no match is found
-  async upsertAAPageMetrics(pageMetrics: PageMetrics[]) {
-    return await this.pageMetricsModel.bulkWrite(
-      pageMetrics.map(
-        (metrics) => ({
-          updateOne: {
-            filter: { url: metrics.url, date: metrics.date },
-            update: { $set: metrics },
-            upsert: true,
-          },
-        }),
-        { ordered: false }
-      )
-    );
-  }
-
-  async addAAPageMetrics(dateRange: DateRange) {
-    return await this.adobeAnalyticsClient.getPageMetrics(dateRange, {
-      postProcess: this.upsertAAPageMetrics,
-      search: {
-        clause: `BEGINS-WITH 'www.canada.ca' AND (BEGINS-WITH 'www.canada.ca/en/revenue-agency'\
-        OR BEGINS-WITH 'www.canada.ca/fr/agence-revenu' OR BEGINS-WITH 'www.canada.ca/fr/services/impots'\
-        OR BEGINS-WITH 'www.canada.ca/en/services/taxes')`,
-      },
-    });
   }
 }

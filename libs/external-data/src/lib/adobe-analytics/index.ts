@@ -1,15 +1,11 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { AASearchTermMetrics, Overall, PageMetrics } from '@dua-upd/db';
+import { type AASearchTermMetrics, Overall, PageMetrics } from '@dua-upd/db';
 import {
   wait,
   sortArrayDesc,
   seperateArray,
   AsyncLogTiming,
-  normalizeUTCDate,
-  startOfDay,
-  today,
-  logJson,
 } from '@dua-upd/utils-common';
 import { AnalyticsCoreAPI, getAAClient } from './client';
 import {
@@ -25,10 +21,10 @@ import {
   createWhereVisitorsCameFromQuery,
 } from './queries';
 import {
-  AdobeAnalyticsReportQuery,
+  type AdobeAnalyticsReportQuery,
   queryDateFormat,
-  ReportSearch,
-  ReportSettings,
+  type ReportSearch,
+  type ReportSettings,
 } from './querybuilder';
 import type {
   AAMaybeResponse,

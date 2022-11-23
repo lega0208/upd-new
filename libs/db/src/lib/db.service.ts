@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { type FilterQuery, Model } from 'mongoose';
 import {
   models,
   CallDriver,
