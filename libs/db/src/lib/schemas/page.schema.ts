@@ -13,7 +13,7 @@ export type PageDocument = Page & Document;
 
 @Schema()
 export class Page {
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ required: true, type: String, index: true })

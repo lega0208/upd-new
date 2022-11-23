@@ -1,10 +1,11 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { Overall, PageMetrics } from '@dua-upd/db';
+import { type AASearchTermMetrics, Overall, PageMetrics } from '@dua-upd/db';
 import {
   wait,
   sortArrayDesc,
   seperateArray,
+  AsyncLogTiming,
 } from '@dua-upd/utils-common';
 import { AnalyticsCoreAPI, getAAClient } from './client';
 import {
@@ -20,12 +21,12 @@ import {
   createWhereVisitorsCameFromQuery,
 } from './queries';
 import {
-  AdobeAnalyticsReportQuery,
+  type AdobeAnalyticsReportQuery,
   queryDateFormat,
-  ReportSearch,
-  ReportSettings,
+  type ReportSearch,
+  type ReportSettings,
 } from './querybuilder';
-import {
+import type {
   AAMaybeResponse,
   AAQueryCreatorParam,
   AAResponse,
@@ -33,13 +34,16 @@ import {
   AAResultsRow,
   DateRange,
 } from '../types';
-import { singleDatesFromDateRange } from '../utils';
+import { singleDatesFromDateRange, withRetry } from '../utils';
+import { ConsoleLogger } from '@nestjs/common';
+import chalk from 'chalk';
 
 export * from './client';
 export * from './querybuilder';
 export * from './queries';
 export * from './aa-dimensions';
 export * from './aa-metrics';
+export * from '../types';
 
 dayjs.extend(utc);
 
@@ -48,7 +52,8 @@ export class AdobeAnalyticsClient {
   clientTokenExpiry: number;
 
   constructor(
-    clientTokenExpiry = Math.floor(Date.now() / 1000) + 24 * 60 * 60
+    clientTokenExpiry = Math.floor(Date.now() / 1000) + 24 * 60 * 60,
+    private logger: Console | ConsoleLogger = console
   ) {
     this.clientTokenExpiry = clientTokenExpiry;
   }
@@ -70,9 +75,14 @@ export class AdobeAnalyticsClient {
   // Creates an array of single-day queries from a date range and query creator function
   createMultiDayQueries(
     dateRange: DateRange,
-    queryCreator: AAQueryCreatorParam
+    queryCreator: AAQueryCreatorParam,
+    inclusiveEndDate = false
   ) {
-    const dateRanges = singleDatesFromDateRange(dateRange, queryDateFormat)
+    const dateRanges = singleDatesFromDateRange(
+      dateRange,
+      queryDateFormat,
+      inclusiveEndDate
+    )
       .map((date) => ({
         start: date,
         end: dayjs.utc(date).add(1, 'day').format(queryDateFormat),
@@ -86,13 +96,14 @@ export class AdobeAnalyticsClient {
     return dateRanges.map((dateRange) => queryCreator(dateRange));
   }
 
+  @AsyncLogTiming
   async executeQuery<T = AAResponse>(
     query: AdobeAnalyticsReportQuery,
     options: {
       resultsParser?: AAResultsParser<T>;
       hooks?: {
         pre?: (dateRange: string | DateRange) => void;
-        post?: (data: T[]) => void;
+        post?: <U>(data: T[]) => U extends Promise<any> ? U : Promise<U>;
       };
       parseResults?: boolean;
     } = {}
@@ -105,6 +116,7 @@ export class AdobeAnalyticsClient {
       await this.initClient();
     }
 
+    // This is only used to log the dateRange for now
     if (options.hooks?.pre) {
       options.hooks.pre(query.globalFilters[1].dateRange);
     }
@@ -128,14 +140,17 @@ export class AdobeAnalyticsClient {
     const parsedResults = resultsParser(columnIds, results.body.rows);
 
     if (options.hooks?.post) {
-      return Promise.resolve(parsedResults).then((results) => {
-        options.hooks.post(results);
-
-        return results as T extends AAResponse ? AAResponse : T[];
-      });
+      return Promise.resolve(parsedResults).then(
+        (results) =>
+          options.hooks.post(results) as T extends AAResponse ? AAResponse : T[]
+      );
     }
 
     return parsedResults as T extends AAResponse ? AAResponse : T[];
+  }
+
+  get executeQueryWithRetry() {
+    return withRetry(this.executeQuery.bind(this), 2, 520);
   }
 
   async executeMultiDayQuery<T>(
@@ -144,23 +159,53 @@ export class AdobeAnalyticsClient {
     hooks?: {
       pre?: (dateRange: string | DateRange) => void;
       post?: (data: T[]) => void;
-    }
-  ): Promise<T[]> {
-    const queries = this.createMultiDayQueries(dateRange, queryCreator);
+    },
+    inclusiveEndDate = false,
+    maxParallel = 12
+  ): Promise<void> {
+    const queries = this.createMultiDayQueries(
+      dateRange,
+      queryCreator,
+      inclusiveEndDate
+    );
 
     const promises = [];
 
     for (const query of queries) {
-      const promise = this.executeQuery<T>(query, { hooks });
+      const executeQueryWithRetry = withRetry(
+        this.executeQuery.bind(this),
+        2,
+        520
+      );
+
+      const promise = executeQueryWithRetry<T>(query, {
+        hooks,
+      });
 
       promises.push(promise);
 
-      await wait(500);
+      if (promises.length % maxParallel === 0) {
+        await Promise.all([
+          wait(520),
+          ...promises.splice(0, maxParallel),
+        ]).catch((err) => {
+          this.logger.error(
+            chalk.red(
+              'An error occurred while waiting for a batch to complete:'
+            )
+          );
+          this.logger.error(chalk.red(err.stack));
+        });
+      }
+
+      await wait(520);
     }
 
-    // todo: batchAwait
+    await Promise.all(promises).catch((err) => {
+      this.logger.error(chalk.red(err.stack));
+    });
 
-    return Promise.all<T>(promises);
+    return await Promise.resolve();
   }
 
   async getOverallMetrics(
@@ -172,7 +217,7 @@ export class AdobeAnalyticsClient {
     }
 
     options = {
-      limit: 400,
+      limit: 20000,
       ...options,
     };
 
@@ -210,6 +255,7 @@ export class AdobeAnalyticsClient {
     );
   }
 
+  // make sure url_last_255 itemIds get captured ***** @@
   async getPageMetrics(
     dateRange: DateRange,
     options?: {
@@ -294,7 +340,7 @@ export class AdobeAnalyticsClient {
         promises.push(promise);
       }
 
-      await wait(500);
+      await wait(520);
     }
 
     return await Promise.all(promises);
@@ -552,6 +598,7 @@ export class AdobeAnalyticsClient {
       );
   }
 
+  @AsyncLogTiming
   async getInternalSearches(
     dateRange: DateRange,
     itemIds: string[],
@@ -659,12 +706,123 @@ export function createRowsParser<T>(
 
   if (!dateRangeFilter) {
     throw new Error(
-      'Expected global daterange filter in AA query, but none was found'
+      'Expected global daterange filter at index 1 in AA query, but none was found'
     );
   }
 
   const { startDate } = parseQueryDateRange(dateRangeFilter);
 
+  // for itemId queries // (just internal search for now)
+  if (dimension === 'variables/evar52') {
+    return (columnIds: string[], rows: AAResultsRow[]) =>
+      rows.map(
+        // currently ignoring the data because we don't need it
+        (row) =>
+          ({
+            itemId: row.itemId,
+            value: row.value,
+            type: 'internalSearch',
+          } as T)
+      );
+  }
+
+  const metricFilter = query.metricContainer.metricFilters?.[0];
+  const queryHasItemIds = metricFilter?.itemIds?.length || metricFilter?.itemId;
+
+  // for overall search phrases
+  if (dimension === 'variables/evar50' && !queryHasItemIds) {
+    return (columnIds, rows) =>
+      rows.map(
+        (row) =>
+          row.data.reduce(
+            (parsedRow, value, index) => {
+              const columnId = columnIds[index];
+
+              if (value !== 'NaN') {
+                parsedRow[columnId] = value;
+              }
+
+              return parsedRow;
+            },
+            {
+              date: new Date(startDate),
+              term: row.value,
+            }
+          ) as T
+      );
+  }
+
+  // for page search phrases
+  if (dimension === 'variables/evar50' && queryHasItemIds) {
+    return (columnIds: string[], rows: AAResultsRow[]) => {
+      const searchTermResults = rows.map((row) => {
+        return row.data.reduce(
+          (parsedRow, value, index) => {
+            const columnId = columnIds[index];
+
+            if (value !== 0 && value !== 'NaN') {
+              parsedRow[columnId] = value;
+            }
+
+            return parsedRow;
+          },
+          {
+            date: startDate,
+            term: row.value,
+          }
+        );
+      }) as ({ date: Date; term: string } & { [data: string]: number })[];
+
+      const resultsByItemId: Record<string, AASearchTermMetrics[]> = {};
+
+      for (const searchTermResult of searchTermResults) {
+        const { date, term } = searchTermResult;
+
+        const reformatted = Object.entries(searchTermResult)
+          .filter(([key, val]) => key !== 'date' && key !== 'term')
+          .reduce((resultsById, [key, val]) => {
+            const [metricName, itemId] = key.split('-');
+
+            if (!resultsById[itemId]) {
+              resultsById[itemId] = {};
+            }
+
+            if (resultsById[itemId][metricName]) {
+              throw Error(
+                'Tried to assign a value to a key that already exists:\r\n' +
+                  `itemId: ${itemId}, metric name: ${metricName},` +
+                  `value: ${val}, existing value: ${resultsById[itemId][metricName]}`
+              );
+            }
+
+            resultsById[itemId][metricName] = val;
+
+            return resultsById;
+          }, {}) as { [itemId: string]: { clicks: number; position: number } };
+
+        for (const itemId of Object.keys(reformatted)) {
+          if (!resultsByItemId[itemId]) {
+            resultsByItemId[itemId] = [];
+          }
+
+          resultsByItemId[itemId].push({
+            term,
+            ...reformatted[itemId],
+          });
+        }
+      }
+
+      return Object.entries(resultsByItemId).map(
+        ([itemId, aa_searchterms]) =>
+          ({
+            itemId,
+            aa_searchterms,
+          } as T)
+      );
+    };
+  }
+
+  // only overall metrics need variables/daterangeday at the moment
   if (dimension !== 'variables/daterangeday') {
     return (columnIds: string[], rows: AAResultsRow[]) =>
       rows.map((row) =>

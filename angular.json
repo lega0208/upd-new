@@ -2,6 +2,7 @@
   "version": 2,
   "projects": {
     "api": "apps/api",
+    "blob-storage": "libs/blob-storage",
     "data-integrity": "libs/data-integrity",
     "db": "libs/db",
     "db-cli": "apps/db-cli",

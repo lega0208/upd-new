@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@dua-upd/api-interfaces": ["libs/api-interfaces/src/index.ts"],
+      "@dua-upd/blob-storage": ["libs/blob-storage/src/index.ts"],
       "@dua-upd/data-integrity": ["libs/data-integrity/src/index.ts"],
       "@dua-upd/db": ["libs/db/src/index.ts"],
       "@dua-upd/db-update": ["libs/db-update/src/index.ts"],

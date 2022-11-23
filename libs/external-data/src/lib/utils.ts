@@ -3,6 +3,7 @@
 import { DateRange } from './types';
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import chalk from 'chalk';
 
 dayjs.extend(utc);
 
@@ -29,20 +30,30 @@ export const withTimeout = <T>(
     });
 };
 
-export const withRetry = (fn, retries, delay) => {
-  return () =>
+export const withRetry = <T extends <U>(...args: Parameters<T>) => Promise<ReturnType<T>>>(
+  fn: T,
+  retries: number,
+  delay: number
+) => {
+  return <U>(...args: Parameters<T>): Promise<ReturnType<T>> =>
     new Promise((resolve, reject) => {
       const attempt = (retries, delay) => {
-        fn().then(
+        fn<U>(...args).then(
           (result) => {
             resolve(result);
           },
           (err) => {
+            console.error(chalk.red(`Error below occurred in ${fn.name}, retrying (${retries - 1} attempts left)`));
+            console.error(chalk.red(err.message));
+
             if (retries > 0) {
               setTimeout(() => {
                 attempt(retries - 1, delay);
               }, delay);
             } else {
+              console.error(chalk.red(`All retry attempts for ${fn.name} failed:`));
+              console.error(chalk.red(err.stack));
+
               reject(err);
             }
           }

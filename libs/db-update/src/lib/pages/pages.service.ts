@@ -1,18 +1,26 @@
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import axios from 'axios';
 import cheerio from 'cheerio';
 import type {
   PageDocument,
+  PageMetricsModel,
   ProjectDocument,
   TaskDocument,
   UxTestDocument,
 } from '@dua-upd/db';
-import { Page, Project, Task, UxTest } from '@dua-upd/db';
-import { squishTrim, wait } from '@dua-upd/utils-common';
+import {
+  AAItemId,
+  Page,
+  PageMetrics,
+  Project,
+  Task,
+  UxTest,
+} from '@dua-upd/db';
+import { AsyncLogTiming, logJson, squishTrim, wait } from '@dua-upd/utils-common';
 
 dayjs.extend(duration);
 
@@ -131,7 +139,11 @@ export class PageUpdateService {
     @InjectModel(Project.name, 'defaultConnection')
     private projectModel: Model<ProjectDocument>,
     @InjectModel(UxTest.name, 'defaultConnection')
-    private uxTestModel: Model<UxTestDocument>
+    private uxTestModel: Model<UxTestDocument>,
+    @InjectModel(PageMetrics.name, 'defaultConnection')
+    private pageMetricsModel: PageMetricsModel,
+    @InjectModel(AAItemId.name, 'defaultConnection')
+    private aaItemIdModel: Model<AAItemId>
   ) {}
 
   async updatePages() {
@@ -217,6 +229,7 @@ export class PageUpdateService {
     this.logger.log('Successfully updated page titles and urls.');
   }
 
+  @AsyncLogTiming
   async consolidateDuplicatePages() {
     this.logger.log('Checking for duplicate pages:');
 
@@ -250,6 +263,7 @@ export class PageUpdateService {
 
     const urls = results[0].urls;
     this.logger.log(`Found ${urls.length} duplicated pages -- Consolidating`);
+    logJson(urls);
 
     const updatePageOps = [];
     const deletePageOps = [];
@@ -344,12 +358,53 @@ export class PageUpdateService {
         }
       }
 
+      // Update page metrics refs
+      const updatePageMetricsRefsOps = pages.map((page) => ({
+        updateMany: {
+          filter: { page: page._id },
+          update: {
+            $set: {
+              page: mainDocument._id,
+              $addToSet: {
+                tasks: { $each: pageArrays.tasks },
+                projects: { $each: pageArrays.projects },
+                ux_tests: { $each: pageArrays.ux_tests },
+              },
+            },
+          },
+        },
+      }));
+
+      // Need to update itemId refs too
+      const updateItemIdRefsOps = pages.map((page) => ({
+        updateMany: {
+          filter: { page: page._id },
+          update: {
+            $set: {
+              page: mainDocument._id,
+            },
+          },
+        },
+      }));
+
       // not doing ops in parallel in case one of them fails
       if (updatePageOps.length > 0)
         await this.pageModel.bulkWrite(updatePageOps, { ordered: false });
 
       if (deletePageOps.length > 0)
         await this.pageModel.bulkWrite(deletePageOps, { ordered: false });
+
+      if (updatePageMetricsRefsOps.length > 0) {
+        await this.pageMetricsModel.bulkWrite(updatePageMetricsRefsOps, {
+          ordered: false,
+        });
+      }
+
+      if (updateItemIdRefsOps.length > 0) {
+        await this.aaItemIdModel.bulkWrite(updateItemIdRefsOps, {
+          ordered: false,
+        });
+      }
 
       if (removeRefsOps.ux_tests.length > 0)
         await this.uxTestModel.bulkWrite(removeRefsOps.ux_tests, {
@@ -370,6 +425,7 @@ export class PageUpdateService {
     );
     const newResults = await this.pageModel
       .aggregate<{ urls: string[] }>()
+      .project({ all_urls: 1 })
       .unwind('$all_urls')
       .group({
         _id: '$all_urls',
@@ -382,15 +438,9 @@ export class PageUpdateService {
           $gt: 1,
         },
       })
-      .group({
-        _id: null,
-        urls: {
-          $addToSet: '$_id',
-        },
-      })
       .exec();
 
-    const numDups = newResults[0]?.urls?.length ?? 0;
+    const numDups = newResults?.length || 0;
 
     const logType = numDups > 0 ? 'error' : 'log';
 

@@ -47,8 +47,8 @@ export class PagesService {
       };
     }
 
-    const metrics =
-      await this.pageMetricsModel.getAggregatedPageMetrics<PagesHomeAggregatedData>(
+    const metrics: PagesHomeAggregatedData[] =
+      await this.pageMetricsModel.getAggregatedPageMetrics(
         dateRange,
         ['visits'],
         {},
@@ -153,8 +153,8 @@ export class PagesService {
       'visits_referrer_typed_bookmarked',
     ] as (keyof PageAggregatedData | MetricsConfig<PageAggregatedData>)[];
 
-    const dateRangeData = (
-      await this.pageMetricsModel.getAggregatedPageMetrics<PageAggregatedData>(
+    const dateRangeData: PageAggregatedData = (
+      await this.pageMetricsModel.getAggregatedPageMetrics(
         params.dateRange,
         queryMetricsConfig,
         { page: page._id }
@@ -167,7 +167,7 @@ export class PagesService {
     );
 
     const comparisonDateRangeData = (
-      await this.pageMetricsModel.getAggregatedPageMetrics<PageAggregatedData>(
+      await this.pageMetricsModel.getAggregatedPageMetrics(
         params.comparisonDateRange,
         queryMetricsConfig,
         { page: page._id }

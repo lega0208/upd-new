@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory,  } from '@nestjs/mongoose';
 import { model, Document, Model, Types, FilterQuery } from 'mongoose';
-import { GscSearchTermMetrics, AccumulatorOperator } from './types';
+import { GscSearchTermMetrics, AccumulatorOperator, AASearchTermMetrics } from './types';
 import { Page } from './page.schema';
 import { Task } from './task.schema';
 import { Project } from './project.schema';
@@ -10,7 +10,7 @@ export type PageMetricsDocument = PageMetrics & Document;
 
 @Schema({ collection: 'pages_metrics' })
 export class PageMetrics {
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ required: true, type: String, index: true })
@@ -203,6 +203,9 @@ export class PageMetrics {
   })
   gsc_searchterms: GscSearchTermMetrics[] = [];
 
+  @Prop({ type: [{ term: String, clicks: Number, position: Number }] })
+  aa_searchterms?: AASearchTermMetrics[];
+
   @Prop({ type: Types.ObjectId, ref: 'Page', index: true })
   page?: Types.ObjectId | Page;
 
@@ -224,26 +227,28 @@ PageMetricsSchema.index(
   { background: true, partialFilterExpression: { page: { $exists: true } } }
 );
 
-export function getPageMetricsModel() {
-  return model(PageMetrics.name, PageMetricsSchema);
-}
+// export function getPageMetricsModel() {
+//   return model(PageMetrics.name, PageMetricsSchema);
+// }
 
 export type MetricsConfig<T> = {
   [key in AccumulatorOperator]?: keyof Partial<T>;
 };
 
-export type GetAggregatedMetrics = <T>(
-  dateRange: string,
-  selectedMetrics: (keyof T | MetricsConfig<T>)[],
-  pagesFilter?: FilterQuery<PageMetrics>,
-  sortConfig?: { [key in keyof Partial<T>]: 1 | -1 }
-) => Promise<T[]>;
+// export type GetAggregatedMetrics = <T>(
+//   dateRange: string,
+//   selectedMetrics: (keyof T | MetricsConfig<T>)[],
+//   pagesFilter?: FilterQuery<PageMetrics>,
+//   sortConfig?: { [key in keyof Partial<T>]: 1 | -1 }
+// ) => Promise<T[]>;
 
-export interface PageMetricsModel extends Model<PageMetrics> {
-  getAggregatedPageMetrics: GetAggregatedMetrics;
-}
+// export interface PageMetricsModel extends Model<PageMetrics> {
+//   getAggregatedPageMetrics: GetAggregatedMetrics;
+//
+// }
 
-PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T>(
+
+export async function getAggregatedPageMetrics<T>(
   this: Model<PageMetrics>,
   dateRange: string,
   selectedMetrics: (keyof T | MetricsConfig<T>)[],
@@ -315,4 +320,10 @@ PageMetricsSchema.statics['getAggregatedPageMetrics'] = async function <T>(
     })
     .sort(metricsSort)
     .exec();
-};
+}
+
+PageMetricsSchema.statics = {
+  getAggregatedPageMetrics,
+}
+
+export type PageMetricsModel = Model<PageMetrics> & typeof PageMetricsSchema.statics;
