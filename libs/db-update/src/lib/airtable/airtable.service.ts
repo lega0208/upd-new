@@ -1,6 +1,6 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Document, Model, Types } from 'mongoose';
+import { Model, Types, LeanDocument } from 'mongoose';
 import {
   AirtableClient,
   PageData,
@@ -16,17 +16,8 @@ import {
   Task,
   UxTest,
 } from '@dua-upd/db';
-import type {
-  CallDriverDocument,
-  FeedbackDocument,
-  PageDocument,
-  PagesListDocument,
-  ProjectDocument,
-  TaskDocument,
-  UxTestDocument,
-} from '@dua-upd/db';
 import type { UxApiData, UxApiDataType, UxData } from './types';
-import { WithObjectId } from '@dua-upd/utils-common';
+import { arrayToDictionary, WithObjectId } from '@dua-upd/utils-common';
 import { assertHasUrl, assertObjectId } from './utils';
 
 @Injectable()
@@ -59,7 +50,9 @@ export class AirtableService {
   }
 
   // function to help with getting or creating objectIds, and populating an airtableId to ObjectId map to add references
-  private async addObjectIdsAndPopulateIdsMap<T>(
+  private async addObjectIdsAndPopulateIdsMap<
+    T extends { _id: Types.ObjectId; airtable_id?: string }
+  >(
     data: UxApiDataType[],
     model: Model<T>,
     idsMap: Map<string, Types.ObjectId>
@@ -70,7 +63,7 @@ export class AirtableService {
     const urlFilter = {};
 
     // for Pages, we might already have an entry that wasn't from airtable, so we'll check urls as well
-    if (model.name === 'Page') {
+    if (model.modelName === 'Page') {
       assertHasUrl(data);
 
       const urls = data.map((doc) => doc.url.replace(/^https:\/\//i, ''));
@@ -79,21 +72,33 @@ export class AirtableService {
     }
 
     const existingDataFilter =
-      model.name === 'Page'
+      model.modelName === 'Page'
         ? { $or: [airtableFilter, ...urlFilter['$or']] }
         : airtableFilter;
 
-    const existingData = (await model
-      .find(existingDataFilter, { _id: 1, airtable_id: 1 })
-      .lean()) as { _id: Types.ObjectId; airtable_id: string }[];
+    const existingData =
+      (await model.find(existingDataFilter).lean().exec()) || ([] as T[]);
 
     for (const doc of existingData) {
       idsMap.set(doc.airtable_id, doc._id);
     }
 
+    const allUrlsDict = Object.fromEntries(
+      existingData
+        .map((page: T) =>
+          'all_urls' in page
+            ? (<Page>(<unknown>page)).all_urls.map((url) => [url, page])
+            : []
+        )
+        .flat()
+    );
+
     return data.map((doc) => {
       if (!idsMap.get(doc.airtable_id)) {
-        idsMap.set(doc.airtable_id, new Types.ObjectId());
+        // *** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ <-
+        // if Page -> check allUrlsDict for url match -> set to proper _id
+        // (+ if this doesn't fix updating the airtable_id, could maybe update it "inline")
+        idsMap.set(doc.airtable_id, allUrlsDict[doc['url']]?._id || new Types.ObjectId());
       }
       return {
         ...doc,
@@ -370,19 +375,14 @@ export class AirtableService {
   async updatePagesList() {
     this.logger.log('Updating Published Pages list from Airtable');
     const currentPagesList =
-      (await this.pageListModel.find().lean().exec()) || [];
-    const currentUrlsList = currentPagesList.map((page) => page.url);
+      (await this.pageListModel.find().sort({ updatedAt: -1 }).lean().exec()) ||
+      [];
 
-    const lastUpdated =
-      currentPagesList.sort((a, b) => {
-        if (a.updatedAt > b.updatedAt) {
-          return -1;
-        } else if (a.updatedAt < b.updatedAt) {
-          return 1;
-        }
+    const currentUrlsDict = arrayToDictionary(currentPagesList, 'url');
 
-        return 0;
-      })?.[0]?.updatedAt || new Date(0);
+    const lastUpdated = currentPagesList.length
+      ? currentPagesList[0].updatedAt
+      : new Date(0);
 
     const airtableList = await this.airtableClient.getPagesList(lastUpdated);
 
@@ -390,8 +390,9 @@ export class AirtableService {
       return;
     }
 
+
     const updatedPages = airtableList.filter((page) =>
-      currentUrlsList.some((url) => url === page.url)
+      page.url && currentUrlsDict[page.url]
     );
 
     const updateOps = updatedPages.map((page) => ({
@@ -402,7 +403,7 @@ export class AirtableService {
     }));
 
     const newPages = airtableList.filter(
-      (page) => !currentUrlsList.some((url) => url === page.url)
+      (page) => page.url && !currentUrlsDict[page.url]
     );
 
     const newPagesWithIds = newPages.map((page) => ({
@@ -413,5 +414,16 @@ export class AirtableService {
     await this.pageListModel.insertMany(newPagesWithIds);
 
     return this.pageListModel.bulkWrite(updateOps);
+  }
+
+  async getPagesList() {
+    const publishedPagesList =
+      (await this.pageListModel.find().lean().exec()) || [];
+
+    if (publishedPagesList.length === 0) {
+      throw new Error('No pages found in page list');
+    }
+
+    return publishedPagesList;
   }
 }
