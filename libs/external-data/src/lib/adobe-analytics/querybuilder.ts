@@ -5,6 +5,11 @@
 
 import { ReportQueryDimension } from './aa-dimensions';
 import { metricIds } from './aa-metrics';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import { clone, logJson } from '@dua-upd/utils-common';
+
+dayjs.extend(utc);
 
 export const SEGMENTS = {
   cra_old: 's300000938_60e59f8fc002e15213e97a00',
@@ -13,6 +18,7 @@ export const SEGMENTS = {
   cra_over_255: 's300000938_62d198c24906df4fba26597e', // cra segment, but only includes pages with 256+ characters
   english: 's300000938_57924078e4b05f8496f06d63',
   french: 's300000938_579240a6e4b00bd9617283bd',
+  no_low_traffic: 's300000938_6335b3e85aac1b53dba7dd5f',
   FWYLF: {
     CANT_FIND_INFO: 's300000938_60ec6b712b7fae2105ab3c07',
     OTHER: 's300000938_60ed8367fa6ab12e495a9a5e',
@@ -20,7 +26,7 @@ export const SEGMENTS = {
     ERROR: 's300000938_60ec6a8ee670b5326fe33de5',
   },
   CX_TASKS: 's300000938_60e59fc096f01a011ca0d986',
-  CRA_SEARCH_PAGES: 's300000938_62a35c1ce69f2c0a983cc013'
+  CRA_SEARCH_PAGES: 's300000938_62a35c1ce69f2c0a983cc013',
 };
 
 export const CALCULATED_METRICS = {
@@ -81,6 +87,8 @@ export const CALCULATED_METRICS = {
   TIME_15TO20MIN: 'cm300000938_62a395a55bec3c26817454fc',
   TIME_20TO30MIN: 'cm300000938_62a395c511f9c0642390482b',
   TIME_MORETHAN30MIN: 'cm300000938_62a395f34333af490687dd02',
+  // Average search rank
+  AVG_SEARCH_RANK: 'cm300000938_5b437b86b7204e079e96509f',
 };
 
 export type ReportQueryMetricId =
@@ -114,7 +122,7 @@ export interface ReportSettings {
   includeAnomalyDetection?: boolean;
   includePercentChange?: boolean;
   includeLatLong?: boolean;
-  nonesBehavior?: string;
+  nonesBehavior?: 'exclude-nones' | 'return-nones';
 }
 
 export interface ReportStatistics {
@@ -143,6 +151,15 @@ export type MetricConfig = {
 
 export type MetricsConfig = {
   [key: string]: ReportQueryMetricId | MetricConfig;
+};
+
+export type BreakdownMetricConfig = {
+  metricId: ReportQueryMetricId;
+  breakdownDimension: ReportQueryDimension;
+};
+
+export type BreakdownMetricsConfig = {
+  [key: string]: BreakdownMetricConfig;
 };
 
 export interface AdobeAnalyticsReportQuery {
@@ -176,67 +193,60 @@ export class AdobeAnalyticsQueryBuilder {
     };
   }
 
+  clone() {
+    return clone<AdobeAnalyticsQueryBuilder>(this);
+  }
+
   public setDimension(dimension: ReportQueryDimension) {
     this.query.dimension = dimension;
     return this;
   }
 
   public setMetrics(metrics: MetricsConfig) {
-    for (const key of Object.keys(metrics)) {
-      const metric = metrics[key];
+    const multiFilter = Object.keys(metrics).length !== 1;
 
+    for (const [key, metric] of Object.entries(metrics)) {
       if (typeof metric === 'string') {
         this.query.metricContainer.metrics.push({
           id: metric as string,
           columnId: key,
         });
-      } else {
-        if (
-          metric.filters[0].itemIds !== undefined &&
-          metric.filters[0].itemIds?.length > 0
-        ) {
-          metric.filters.map((filter) => {
-            return filter.itemIds.map((itemId, index) => {
-              this.query.metricContainer.metrics.push({
-                id: metric.id,
-                columnId: itemId as string,
-                filters: [index.toString()],
-              });
-            });
-          });
 
-          // todo: throw error if there are duplicated filter ids
+        continue;
+      }
 
-          if (!this.query.metricContainer.metricFilters) {
-            this.query.metricContainer.metricFilters = [];
-          }
-          metric.filters.map((filter) => {
-            return filter.itemIds.map((itemId, index) => {
-              return this.query.metricContainer.metricFilters.push({
-                id: index.toString(),
-                type: filter.type,
-                dimension: filter.dimension,
-                itemId: itemId,
-              });
-            });
-          });
-        } else {
+      if (!this.query.metricContainer.metricFilters) {
+        this.query.metricContainer.metricFilters = [];
+      }
 
-          metric.filters.map((filter) => {
+      if (metric.filters?.[0]?.itemIds?.length) {
+        const idPrefix = multiFilter ? `${key}-` : '';
+
+        for (const filter of metric.filters) {
+          for (const itemId of filter.itemIds) {
             this.query.metricContainer.metrics.push({
               id: metric.id,
-              columnId: filter.itemId as string,
-              filters: [filter.id as string],
+              columnId: `${idPrefix}${itemId}`,
+              filters: [`${idPrefix}${itemId}`],
             });
-          });
 
-          if (!this.query.metricContainer.metricFilters) {
-            this.query.metricContainer.metricFilters = [];
+            this.query.metricContainer.metricFilters.push({
+              id: `${idPrefix}${itemId}`,
+              type: filter.type,
+              dimension: filter.dimension,
+              itemId,
+            });
           }
-
-          this.query.metricContainer.metricFilters.push(...metric.filters);
         }
+
+        continue;
       }
+
+      // if no itemIds, ignore filters? Probably going to need to change this (this is mostly for overall metrics)
+      this.query.metricContainer.metrics.push({
+        id: metric.id,
+        columnId: key,
+      });
     }
 
     return this;
@@ -250,7 +260,7 @@ export class AdobeAnalyticsQueryBuilder {
     const metric = {
       id: metricId,
       columnId,
-      filters: filters,
+      filters,
     };
 
     this.query.metricContainer.metrics.push(metric);
@@ -300,6 +310,17 @@ export class AdobeAnalyticsQueryBuilder {
     return this;
   }
 
+  public addGlobalFilters(filters: ReportFilter[]) {
+    this.query.globalFilters = [...this.query.globalFilters, ...filters];
+
+    return this;
+  }
+
+  public prependGlobalFilters(filters: ReportFilter[]) {
+    this.query.globalFilters = [...filters, ...this.query.globalFilters];
+
+    return this;
+  }
   public setGlobalFilters(filters: ReportFilter[]) {
     this.query.globalFilters = filters;
 
@@ -313,7 +334,10 @@ export class AdobeAnalyticsQueryBuilder {
   }
 
   public setSettings(settings: ReportSettings) {
-    this.query.settings = settings;
+    this.query.settings = {
+      ...this.query.settings,
+      ...settings,
+    };
 
     return this;
   }
@@ -328,12 +352,14 @@ export class AdobeAnalyticsQueryBuilder {
     this.query.anchorDate = date;
   }
 
-  public build(): AdobeAnalyticsReportQuery {
+  public build(logOutput = false): AdobeAnalyticsReportQuery {
     if (this.query.metricContainer.metrics.length === 0) {
       throw new Error(
         'Tried to build a query with no metrics, a query must have at least one metric'
       );
     }
+
+    logOutput && logJson(this.query);
 
     return this.query;
   }
@@ -341,9 +367,16 @@ export class AdobeAnalyticsQueryBuilder {
 
 export const queryDateFormat = 'YYYY-MM-DDTHH:mm:ss.SSS';
 
-export function toQueryFormat(date: string): string {
-  if (!/\d{4}-\d{2}-\d{2}/.test(date)) {
-    throw new Error('Expected date in format: YYYY-MM-DD');
+export function toQueryFormat(date: string | Date): string {
+  if (typeof date === 'string') {
+    if (!/\d{4}-\d{2}-\d{2}/.test(date)) {
+      throw new Error('Expected date in format: YYYY-MM-DD');
+    }
+
+    return `${date}T00:00:00.000`;
   }
-  return date + 'T00:00:00.000';
+
+  const formattedDate = dayjs.utc(date).format('YYYY-MM-DD');
+
+  return `${formattedDate}T00:00:00.000`;
 }
