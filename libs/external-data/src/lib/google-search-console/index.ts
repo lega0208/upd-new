@@ -11,7 +11,7 @@ import { DataState, Dimension } from './gsc-property';
 import { GscSearchTermMetrics, Overall, PageMetrics } from '@dua-upd/db';
 import { wait } from '@dua-upd/utils-common';
 import { DateRange } from '../types';
-import { singleDatesFromDateRange } from '../utils';
+import { singleDatesFromDateRange, withRetry } from '../utils';
 
 export * from './client';
 export * from './query';
@@ -52,7 +52,13 @@ export class SearchAnalyticsClient {
   private client: Searchconsole = getGscClient();
 
   async query(query: SearchAnalyticsReportQuery) {
-    return this.client.searchanalytics.query(query);
+    const queryWithRetry = withRetry(
+      this.client.searchanalytics.query.bind(this.client.searchanalytics),
+      3,
+      500
+    );
+
+    return queryWithRetry(query);
   }
 
   async getOverallMetrics(dateRange: DateRange | Date, dataState?: DataState) {
@@ -72,12 +78,12 @@ export class SearchAnalyticsClient {
         ...searchTerms,
       }));
 
-      await wait(100);
+      await wait(500);
 
       promises.push(mergedDateResults);
     }
 
-    return await Promise.all(promises);
+    return await Promise.all<Overall[]>(promises);
   }
 
   async getOverallTotals(
@@ -103,7 +109,7 @@ export class SearchAnalyticsClient {
     return results.data.rows.map(
       (row) =>
         ({
-          date: dayjs(date).utc(true).toDate(),
+          date: dayjs.utc(date).toDate(),
           gsc_total_clicks: row.clicks,
           gsc_total_impressions: row.impressions,
           gsc_total_ctr: row.ctr,
@@ -144,20 +150,22 @@ export class SearchAnalyticsClient {
     );
 
     return {
-      date: dayjs(date).utc(true).toDate(),
+      date: dayjs.utc(date).toDate(),
       gsc_searchterms,
     };
   }
 
   async getPageMetrics(
     dateRange: DateRange | Date,
-    options?: SearchAnalyticsPageQueryOptions
+    options?: SearchAnalyticsPageQueryOptions & {
+      onComplete?: (data: Partial<PageMetrics>[]) => Promise<void>;
+    }
   ) {
     const dates =
       dateRange instanceof Date
         ? [dayjs.utc(dateRange).format('YYYY-MM-DD')]
-        : (singleDatesFromDateRange(dateRange) as string[]);
-
+        : (singleDatesFromDateRange(dateRange, 'YYYY-MM-DD', true) as string[]);
+    console.log('GSC getPageMetrics dates:', dates);
     const promises: Promise<Partial<PageMetrics>[]>[] = [];
 
     for (const date of dates) {
@@ -205,9 +213,17 @@ export class SearchAnalyticsClient {
         return [...resultsWithTotals, ...resultsWithoutTotals];
       });
 
-      await wait(1000);
+      await wait(500);
 
-      promises.push(mergedDateResults);
+      const promise = options.onComplete
+        ? mergedDateResults.then(async (data) => {
+            await options.onComplete(data);
+
+            return data;
+          })
+        : mergedDateResults;
+
+      promises.push(promise);
     }
 
     return await Promise.all(promises);
@@ -250,7 +266,7 @@ export class SearchAnalyticsClient {
       .map(
         (row) =>
           ({
-            date: dayjs(date).utc(true).toDate(),
+            date: dayjs.utc(date).toDate(),
             url: row['keys'][0].replace('https://', '').replace('#.+', ''),
             gsc_total_clicks: row.clicks,
             gsc_total_impressions: row.impressions,
@@ -303,7 +319,7 @@ export class SearchAnalyticsClient {
 
       if (!results[url]) {
         results[url] = {
-          date: dayjs(date).utc(true).toDate(),
+          date: dayjs.utc(date).toDate(),
           url,
           gsc_searchterms: [],
         };

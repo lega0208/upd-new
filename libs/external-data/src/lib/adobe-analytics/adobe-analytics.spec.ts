@@ -108,7 +108,7 @@ describe('AdobeAnalyticsClient', () => {
     let mockPostHook: jest.Mock;
 
     let dateRange: DateRange;
-    let overallMetrics: Partial<PageMetrics>[];
+    let overallMetrics: Partial<Overall>[];
 
     beforeAll(async () => {
       mockPreHook = jest.fn();
@@ -153,7 +153,7 @@ describe('AdobeAnalyticsClient', () => {
     });
   });
 
-  describe.skip('executeMultiDayQuery', () => {
+  describe('executeMultiDayQuery', () => {
     let mockPreHook: jest.Mock;
     let mockPostHook: jest.Mock;
 
@@ -167,14 +167,16 @@ describe('AdobeAnalyticsClient', () => {
 
       dateRange = {
         start: toQueryFormat('2022-06-10'),
-        end: toQueryFormat('2022-06-12'),
+        end: toQueryFormat('2022-06-11'),
       };
 
       pageMetricsSearch = {
-        clause: `BEGINS-WITH 'www.canada.ca/en/revenue-agency/services/payments-cra/business-payments.html'`,
+        clause: `BEGINS-WITH 'www.canada.ca' AND (BEGINS-WITH 'www.canada.ca/en/revenue-agency'\
+        OR BEGINS-WITH 'www.canada.ca/fr/agence-revenu' OR BEGINS-WITH 'www.canada.ca/fr/services/impots'\
+        OR BEGINS-WITH 'www.canada.ca/en/services/taxes')`,
       };
 
-      pageMetrics = await client.executeMultiDayQuery<Partial<PageMetrics>>(
+      pageMetrics = (await client.executeMultiDayQuery<Partial<PageMetrics>>(
         dateRange,
         (singleDateRange: DateRange) =>
           createPageMetricsQuery(singleDateRange, {
@@ -184,24 +186,30 @@ describe('AdobeAnalyticsClient', () => {
           pre: mockPreHook,
           post: mockPostHook,
         }
-      );
+      )).flat();
 
       return pageMetrics;
     });
 
     it('should return page metrics results', () => {
-      console.log(pageMetrics);
+      const over255 = pageMetrics
+        .map((metrics) => metrics.url)
+        .filter((url) => url.length > 255);
 
-      expect(Array.isArray(pageMetrics)).toBe(true);
-      expect(pageMetrics.length).toBe(2);
+      // expect(Array.isArray(pageMetrics)).toBe(true);
+      // expect(pageMetrics.length).toBe(2);
+      console.log('over255:');
+      console.log(over255);
+
+      expect(over255.length).toBeGreaterThan(0);
     });
 
-    it('should call pre and post hooks for each query', async () => {
+    it.skip('should call pre and post hooks for each query', async () => {
       expect(mockPreHook).toHaveBeenCalledTimes(2);
       expect(mockPostHook).toHaveBeenCalledTimes(2);
     });
 
-    it('should have the same results as getPageMetrics', async () => {
+    it.skip('should have the same results as getPageMetrics', async () => {
       const oldMethodPageMetrics = await client.getPageMetrics(dateRange, {
         search: pageMetricsSearch,
       });

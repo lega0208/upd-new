@@ -12,7 +12,7 @@ export type PagesListDocument = PagesList & Document;
 
 @Schema({ collection: 'pages_list', timestamps: true, toObject: { getters: true } })
 export class PagesList {
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: String })
@@ -30,7 +30,7 @@ export class PagesList {
   @Prop({ type: String })
   last_255?: string;
 
-  @Prop() updatedAt?: Date;
+  @Prop({ type: Date }) updatedAt?: Date;
 }
 
 export const PagesListSchema = SchemaFactory.createForClass(PagesList);

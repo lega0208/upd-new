@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
+  AAItemId,
+  AAItemIdSchema,
   CallDriver,
   CallDriverSchema,
   Feedback,
@@ -24,6 +26,20 @@ import {
 } from './db.schemas';
 import { ConfigModule } from '@nestjs/config';
 import { getDbConnectionString } from './db.connection';
+import { DbService } from './db.service';
+
+export const models = {
+  callDrivers: { model: CallDriver as typeof CallDriver, schema: CallDriverSchema },
+  feedback: { model: Feedback, schema: FeedbackSchema },
+  overall: { model: Overall, schema: OverallSchema },
+  pageMetrics: { model: PageMetrics, schema: PageMetricsSchema },
+  pages: { model: Page, schema: PageSchema },
+  pagesList: { model: PagesList, schema: PagesListSchema },
+  tasks: { model: Task, schema: TaskSchema },
+  uxTests: { model: UxTest, schema: UxTestSchema },
+  projects: { model: Project, schema: ProjectSchema },
+  aaItemIds: { model: AAItemId, schema: AAItemIdSchema },
+} as const;
 
 @Module({
   imports: [
@@ -33,18 +49,10 @@ import { getDbConnectionString } from './db.connection';
       dbName: 'upd-test',
     }),
     MongooseModule.forFeature(
-      [
-        { name: CallDriver.name, schema: CallDriverSchema },
-        { name: Feedback.name, schema: FeedbackSchema },
-        { name: Overall.name, schema: OverallSchema },
-        { name: PageMetrics.name, schema: PageMetricsSchema },
-        { name: Page.name, schema: PageSchema },
-        { name: PagesList.name, schema: PagesListSchema },
-        { name: Task.name, schema: TaskSchema },
-        { name: UxTest.name, schema: UxTestSchema },
-        { name: Project.name, schema: ProjectSchema },
-        { name: SearchAssessment.name, schema: SearchAssessmentSchema },
-      ],
+      Object.values(models).map((collection) => ({
+        name: collection.model.name,
+        schema: collection.schema,
+      })),
       'defaultConnection'
     ),
   ],

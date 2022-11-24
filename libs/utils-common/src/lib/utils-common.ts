@@ -1,11 +1,11 @@
 // Utility function for to help with rate-limiting within async functions
-export function wait(ms: number) {
+export function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // Removes double-spaces and trims the string
 export function squishTrim<T extends string = string>(str?: T) {
-  return str?.replace(/\s+/g, ' ').trim() as T || '';
+  return (str?.replace(/\s+/g, ' ').trim() as T) || '';
 }
 
 // Used for measuring function execution time
@@ -30,6 +30,26 @@ export function LogTiming(message = '') {
   };
 }
 
+export const AsyncLogTiming = <T extends (...args: unknown[]) => ReturnType<T>>(
+  target: object,
+  propertyKey: string,
+  descriptor: PropertyDescriptor
+) => {
+  const originalMethod: T = descriptor.value;
+
+  descriptor.value = async function (...args: Parameters<T>) {
+    const start = Date.now();
+    const result = await originalMethod.apply(this, args);
+    const finish = Date.now();
+    console.log(
+      `${propertyKey} Execution time: ${Math.round((finish - start) / 10) / 100} seconds`
+    );
+    return result;
+  };
+
+  return descriptor;
+};
+
 // Decorator for setting an Input field as required
 export function Required(target: object, propertyKey: string) {
   Object.defineProperty(target, propertyKey, {
@@ -43,8 +63,95 @@ export function Required(target: object, propertyKey: string) {
         configurable: true,
       });
     },
-    configurable: true
+    configurable: true,
   });
+}
+
+type KeysMatching<T extends object, V> = {
+  [K in keyof T]-?: T[K] extends V ? K : never;
+}[keyof T];
+
+/**
+ * Converts an array of objects into a "dictionary" or lookup table, using the value of the specified property as the key
+ *
+ * Helps with performance when searching nested properties of large arrays of objects
+ *
+ * @param array The array to convert
+ * @param keyProp The property to use as keys
+ * @param allowDuplicateKeys Will throw an error if a duplicate key is found by default
+ *
+ * @example
+ * const arrayOfObjects = [{ prop1: 'a string', ... }];
+ * // Say I need to check a bunch of strings against my array
+ * const aBunchOfStrings ['Wow', 'look', *'a string'*, 'and another'];
+ *
+ * // I could use Array.find() and do a full search for every string, or...
+ *
+ * const objectDictionary = arrayToDictionary(arrayOfObjects, 'prop1'); // { 'a string': { ... } }
+ *
+ * // oh boy i hope i find an object with 'a string' as prop1
+ * for (const potentialMatch of aBunchOfStrings) {
+ *   const match = objectDictionary[potentialMatch];
+ *
+ *   if (match) {
+ *     console.log(match);
+ *     // {
+ *     //   prop1: 'a string',
+ *     //   ...
+ *     // }
+ *   }
+ * }
+ *
+ */
+export function arrayToDictionary<T extends object>(
+  array: T[],
+  keyProp: keyof T,
+  allowDuplicateKeys = false
+) {
+  if (!array.length) return {};
+
+  const dictionary: Record<string, T> = {};
+
+  for (const obj of array) {
+    const key = `${obj[keyProp]}`;
+
+    if (!key) {
+      throw Error(
+        'Could not convert array to dictionary: the value of the key property is invalid or undefined.\r\n' +
+          'Object where error occurred:\r\n\r\n' +
+          JSON.stringify(obj, null, 2)
+      );
+    }
+
+    if (!allowDuplicateKeys && dictionary[key]) {
+      throw Error(
+        'Could not convert array to dictionary: received duplicate key: ' + key
+      );
+    }
+
+    dictionary[key] = obj;
+  }
+
+  return dictionary;
+}
+
+// For cloning class instances, objects, etc., including current state
+export const clone = <T extends object>(obj: T): T =>
+  Object.assign(Object.create(Object.getPrototypeOf(obj)), obj);
+
+/**
+ * Because I was getting tired of re-typing 'console.log(JSON.stringify(anything, null, 2))' over and over
+ * @param anything - The value to log
+ * @param logger - Optional custom logger (though honestly why not just add this to the custom logger?)
+ */
+export function logJson(anything: unknown, logger = console.log) {
+  logger(JSON.stringify(anything, null, 2));
+}
+
+
+// For logging JSON
+export function prettyJson(obj: object) {
+  return JSON.stringify(obj, null, 2);
 }
 
 /**
@@ -105,7 +212,7 @@ export async function batchAwait<T, U>(
   paramsArray: T[],
   fn: (param: T) => Promise<U>,
   batchSize: number,
-  delay: number | { delay: number; } = 0,
+  delay: number | { delay: number } = 0
 ): Promise<U[]> {
   const promises = [];
 

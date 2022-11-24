@@ -6,7 +6,7 @@ export type CallDriverDocument = CallDriver & Document;
 
 @Schema()
 export class CallDriver {
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: String, required: true, unique: true })
@@ -47,8 +47,8 @@ export function getCallDriversModel() {
 
 CallDriverSchema.statics['getCallsByTopicFromIds'] = async function (
   documentIds: Types.ObjectId[]
-) {
-  return this.aggregate<CallsByTopic>()
+): Promise<CallsByTopic[]> {
+  return this.aggregate()
     .match({
       _id: { $in: documentIds },
     })
@@ -80,8 +80,8 @@ CallDriverSchema.statics['getCallsByTopicFromIds'] = async function (
 
 CallDriverSchema.statics['getCallsByEnquiryLineFromIds'] = async function (
   documentIds: Types.ObjectId[]
-) {
-  return this.aggregate<{ enquiry_line: string; calls: number }>()
+): Promise<{ enquiry_line: string; calls: number }[]> {
+  return this.aggregate()
     .match({
       _id: { $in: documentIds },
     })
@@ -109,7 +109,7 @@ CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
   tpcIds?: number[]
 ) {
   const [currentData, previousData] = await Promise.all(
-    [dateRange, comparisonDateRange].map(async (dateRange) => {
+    [dateRange, comparisonDateRange].map((dateRange) => {
       const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
       const tpcIdsQuery = tpcIds?.length ? { tpc_id: { $in: tpcIds } } : {};
@@ -132,7 +132,7 @@ CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
           sub_subtopic: 1,
           calls: 1,
         })
-        .exec();
+        .exec() as Promise<TopCalldriverTopics[]>;
     })
   );
 
@@ -158,7 +158,7 @@ CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
     .sort((a, b) => (b.calls ?? 0) - (a.calls ?? 0));
 };
 
-export interface CallDriverModel extends Model<CallDriverDocument> {
+export interface CallDriverModel extends Model<CallDriver> {
   getCallsByTopicFromIds(
     documentIds: Types.ObjectId[]
   ): Promise<CallsByTopic[]>;

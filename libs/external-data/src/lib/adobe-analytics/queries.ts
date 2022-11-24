@@ -1,12 +1,18 @@
 import {
   AdobeAnalyticsQueryBuilder,
+  AdobeAnalyticsReportQuery,
+  BreakdownMetricsConfig,
   CALCULATED_METRICS,
   MetricsConfig,
+  ReportFilter,
+  ReportQueryMetricId,
   ReportSearch,
   ReportSettings,
   SEGMENTS,
 } from './querybuilder';
 import { DateRange } from '../types';
+import { clone, wait } from '@dua-upd/utils-common';
+import { ReportQueryDimension } from './aa-dimensions';
 
 export const overallMetricsQueryConfig: MetricsConfig = {
   visits: 'metrics/visits',
@@ -83,9 +89,10 @@ export const createOverallMetricsQuery = (
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
+  const querySettings: ReportSettings = {
     nonesBehavior: 'return-nones',
     countRepeatInstances: true,
+    limit: 25000,
     ...settings,
   };
 
@@ -100,18 +107,20 @@ export const createOverallMetricsQuery = (
     .build();
 };
 
+export interface PageMetricsQueryOptions {
+  settings?: ReportSettings;
+  search?: ReportSearch;
+  segment?: string;
+}
+
 export const createPageMetricsQuery = (
   dateRange: DateRange,
-  options: {
-    settings?: ReportSettings;
-    search?: ReportSearch;
-    segment?: string;
-  } = {}
+  options: PageMetricsQueryOptions = {}
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
-    nonesBehavior: 'return-nones',
+  const querySettings: ReportSettings = {
+    nonesBehavior: 'exclude-nones',
     countRepeatInstances: true,
     limit: 25000,
     ...options.settings,
@@ -125,7 +134,7 @@ export const createPageMetricsQuery = (
     .setDimension('variables/evar22') // URL last 255 characters
     .setMetrics(overallMetricsQueryConfig)
     .setGlobalFilters([
-      { type: 'segment', segmentId: options?.segment ?? SEGMENTS.cra },
+      { type: 'segment', segmentId: options?.segment ?? SEGMENTS.cra_v2 },
       { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
     ])
     .setSettings(querySettings)
@@ -139,7 +148,7 @@ export const createCXTasksQuery = (
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
+  const querySettings: ReportSettings = {
     nonesBehavior: 'return-nones',
     countRepeatInstances: true,
     ...settings,
@@ -163,7 +172,7 @@ export const createActivityMapQuery = (
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
+  const querySettings: ReportSettings = {
     nonesBehavior: 'return-nones',
     countRepeatInstances: true,
     ...settings,
@@ -191,24 +200,63 @@ export const createActivityMapQuery = (
     .build();
 };
 
+export const createBatchedInternalSearchQueries = (
+  dateRange: DateRange,
+  itemIds?: string[],
+  settings: ReportSettings = {}
+) => {
+  const batchQueries: AdobeAnalyticsReportQuery[] = [];
+
+  while (itemIds.length) {
+    batchQueries.push(
+      createInternalSearchQuery(dateRange, itemIds.splice(0, 200), settings)
+    );
+  }
+
+  return batchQueries;
+};
+
 export const createInternalSearchQuery = (
   dateRange: DateRange,
-  itemids: string[],
-  settings: ReportSettings = {}
+  itemids?: string[],
+  settings: ReportSettings & { lang?: 'en' | 'fr' } = {}
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
-    nonesBehavior: 'return-nones',
+  const lang = settings.lang;
+
+  delete settings.lang;
+
+  const querySettings: ReportSettings = {
+    nonesBehavior: 'exclude-nones',
     countRepeatInstances: true,
+    limit: 50000,
     ...settings,
   };
+  const langSegment: ReportFilter[] = lang
+    ? [
+        {
+          type: 'segment',
+          segmentId: lang === 'fr' ? SEGMENTS.french : SEGMENTS.english,
+        },
+      ]
+    : [];
 
   return queryBuilder
     .setDimension('variables/evar50') // Site search
     .setMetrics({
-      activityMap: {
+      clicks: {
         id: 'metrics/event51',
+        filters: [
+          {
+            itemIds: itemids,
+            type: 'breakdown',
+            dimension: 'variables/evar52',
+          },
+        ],
+      },
+      position: {
+        id: CALCULATED_METRICS.AVG_SEARCH_RANK,
         filters: [
           {
             itemIds: itemids,
@@ -221,9 +269,11 @@ export const createInternalSearchQuery = (
     .setGlobalFilters([
       { type: 'segment', segmentId: SEGMENTS.cra },
       { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
+      { type: 'segment', segmentId: SEGMENTS.no_low_traffic },
+      ...langSegment,
     ])
     .setSettings(querySettings)
-    .build();
+    .build(false);
 };
 
 export const createPhrasesSearchedOnPageQuery = (
@@ -233,7 +283,7 @@ export const createPhrasesSearchedOnPageQuery = (
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
+  const querySettings: ReportSettings = {
     nonesBehavior: 'return-nones',
     countRepeatInstances: true,
     ...settings,
@@ -268,7 +318,7 @@ export const createWhereVisitorsCameFromQuery = (
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
+  const querySettings: ReportSettings = {
     nonesBehavior: 'return-nones',
     countRepeatInstances: true,
     ...settings,
@@ -302,7 +352,7 @@ export const createActivityMapItemIdsQuery = (
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
+  const querySettings: ReportSettings = {
     nonesBehavior: 'return-nones',
     countRepeatInstances: true,
     ...settings,
@@ -325,7 +375,7 @@ export const createInternalSearchItemIdsQuery = (
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
+  const querySettings: ReportSettings = {
     nonesBehavior: 'return-nones',
     countRepeatInstances: true,
     ...settings,
@@ -342,139 +392,43 @@ export const createInternalSearchItemIdsQuery = (
     .build();
 };
 
-export const createPhraseItemIdsQuery = (
-  dateRange: DateRange,
-  lang,
-  settings: ReportSettings = {}
+export const itemIdQueryCreatorFactory = (
+  dimension: ReportQueryDimension,
+  metric: MetricsConfig = { visits: 'metrics/visits' }
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
+  const defaultSettings: ReportSettings = {
     nonesBehavior: 'return-nones',
     countRepeatInstances: true,
-    ...settings,
+    limit: 50000,
   };
 
-  return queryBuilder
-    .setDimension('variables/evar50') // Site search
-    .setMetrics({ visits: 'metrics/event51' } as MetricsConfig)
-    .setGlobalFilters([
-      { type: 'segment', segmentId: SEGMENTS.cra },
-      {
-        type: 'segment',
-        segmentId: lang === 'en' ? SEGMENTS.english : SEGMENTS.french,
-      },
-      { type: 'segment', segmentId: SEGMENTS.no_low_traffic },
-      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
-    ])
-    .setSettings(querySettings)
-    .build();
+  queryBuilder
+    .setDimension(dimension)
+    .setMetrics(metric)
+    .setSettings(defaultSettings);
+
+  return (dateRange: DateRange, settings: ReportSettings = {}) =>
+    queryBuilder
+      .prependGlobalFilters([
+        { type: 'segment', segmentId: SEGMENTS.cra },
+        { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
+      ])
+      .setSettings(settings)
+      .build();
 };
 
-export const createPhraseMostClickedQuery = (
-  dateRange: DateRange,
-  itemids: string[],
-  lang,
-  settings: ReportSettings = {}
-) => {
-  const queryBuilder = new AdobeAnalyticsQueryBuilder();
-
-  const querySettings = {
-    nonesBehavior: 'return-nones',
-    countRepeatInstances: true,
-    ...settings,
-  };
-
-  return queryBuilder
-    .setDimension('variables/evar52') // Site search
-    .setMetrics({
-      rank: {
-        id: 'metrics/event51',
-        sort: 'desc',
-        filters: [
-          {
-            itemIds: itemids,
-            type: 'breakdown',
-            dimension: 'variables/evar50',
-          },
-        ],
-      },
-      // clicks: {
-      //   id: 'metrics/event51',
-      //   filters: [
-      //     {
-      //       itemIds: itemids,
-      //       type: 'breakdown',
-      //       dimension: 'variables/evar50',
-      //     },
-      //   ],
-      // },
-    } as MetricsConfig)
-    .setGlobalFilters([
-      { type: 'segment', segmentId: SEGMENTS.cra },
-      {
-        type: 'segment',
-        segmentId: lang === 'en' ? SEGMENTS.english : SEGMENTS.french,
-      },
-      { type: 'segment', segmentId: SEGMENTS.no_low_traffic },
-      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
-    ])
-    .setSettings(querySettings)
-    .build();
-};
-
-export const createPhraseRankingQuery = (
-  dateRange: DateRange,
-  itemids: string[],
-  lang,
-  settings: ReportSettings = {}
-) => {
-  const queryBuilder = new AdobeAnalyticsQueryBuilder();
-
-  const querySettings = {
-    nonesBehavior: 'return-nones',
-    countRepeatInstances: true,
-    ...settings,
-  };
-
-  return queryBuilder
-    .setDimension('variables/evar52') // Site search
-    .setMetrics({
-      // rank: {
-      //   id: 'metrics/event51',
-      //   sort: 'desc',
-      //   filters: [
-      //     {
-      //       itemIds: itemids,
-      //       type: 'breakdown',
-      //       dimension: 'variables/evar50',
-      //     },
-      //   ],
-      // },
-      clicks: {
-        id: 'cm300000938_5b437b86b7204e079e96509f',
-        sort: 'asc',
-        filters: [
-          {
-            itemIds: itemids,
-            type: 'breakdown',
-            dimension: 'variables/evar50',
-          },
-        ],
-      },
-    } as MetricsConfig)
-    .setGlobalFilters([
-      { type: 'segment', segmentId: SEGMENTS.cra },
-      {
-        type: 'segment',
-        segmentId: lang === 'en' ? SEGMENTS.english : SEGMENTS.french,
-      },
-      { type: 'segment', segmentId: SEGMENTS.no_low_traffic },
-      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
-    ])
-    .setSettings(querySettings)
-    .build();
-};
+export const createActivityMapItemIdsQuerie = itemIdQueryCreatorFactory(
+  'variables/clickmappage',
+  { clicks: 'metrics/clickmaplinkinstances' }
+);
+export const createInternalSearchItemIdsQuerie = itemIdQueryCreatorFactory(
+  'variables/evar52',
+  { clicks: 'metrics/event51' }
+);
+export const createPageUrlItemIdsQuerie =
+  itemIdQueryCreatorFactory('variables/evar22');
 
 export const createPageUrlItemIdsQuery = (
   dateRange: DateRange,
@@ -482,7 +436,7 @@ export const createPageUrlItemIdsQuery = (
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
-  const querySettings = {
+  const querySettings: ReportSettings = {
     nonesBehavior: 'return-nones',
     countRepeatInstances: true,
     ...settings,

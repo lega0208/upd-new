@@ -10,6 +10,7 @@ import { Overall, OverallDocument } from '@dua-upd/db';
 import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { today } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
 
@@ -25,7 +26,6 @@ export class OverallMetricsService {
     private overallMetricsModel: Model<OverallDocument>
   ) {}
 
-  // todo: refactor to be able to use it for data-integrity & elsewhere
   async updateOverallMetrics() {
     // get dates required for query
     const latestDateResults = await this.overallMetricsModel
@@ -39,7 +39,7 @@ export class OverallMetricsService {
     const startTime = latestDate.add(1, 'day');
 
     // collect data up to the start of the current day/end of the previous day
-    const cutoffDate = dayjs.utc().subtract(1, 'day').endOf('day');
+    const cutoffDate = today().subtract(1, 'day').endOf('day');
 
     // fetch data if our db isn't up-to-date
     if (startTime.isBefore(cutoffDate)) {
@@ -76,6 +76,7 @@ export class OverallMetricsService {
       this.logger.log('Overall metrics already up-to-date.');
     }
   }
+
   async fetchAndMergeOverallMetrics(dateRange: DateRange) {
     const [aaResults, gscResults] = await Promise.all([
       this.adobeAnalyticsClient.getOverallMetrics(dateRange),

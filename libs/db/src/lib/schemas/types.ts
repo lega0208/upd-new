@@ -21,6 +21,12 @@ export interface GscSearchTermMetrics {
   position: number;
 }
 
+export interface AASearchTermMetrics {
+  term: string;
+  clicks: number;
+  position?: number;
+}
+
 export interface FeedbackComment {
   url: string;
   date: Date;

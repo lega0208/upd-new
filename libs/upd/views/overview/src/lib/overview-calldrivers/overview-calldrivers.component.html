@@ -10,6 +10,10 @@
         [current]="currentCallVolume$ | async"
         [comparison]="callPercentChange$ | async"
         [title]="'Call volume'"
+        [displayKpis]="true"
+        [kpiObjectiveCriteria]="callVolumeObjectiveCriteria"
+        [kpiStylesConfig]="callVolumeKpiConfig"
+        [comparisonMode]="'upBadDownGood'"
         [tooltip]="'tooltip-call-volume'"
       ></upd-data-card>
     </div>

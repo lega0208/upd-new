@@ -22,13 +22,14 @@ import {
   SearchAnalyticsClient,
   withRetry,
 } from '@dua-upd/external-data';
-import { wait } from '@dua-upd/utils-common';
+import { AsyncLogTiming, wait } from '@dua-upd/utils-common';
 import { CalldriversService } from './airtable/calldrivers.service';
 import { FeedbackService } from './airtable/feedback.service';
 import { AirtableService } from './airtable/airtable.service';
 import { OverallMetricsService } from './overall-metrics/overall-metrics.service';
 import { PageUpdateService } from './pages/pages.service';
 import { PageMetricsService } from './pages-metrics/page-metrics.service';
+import { InternalSearchTermsService } from './internal-search/search-terms.service';
 
 dayjs.extend(utc);
 
@@ -44,6 +45,7 @@ export class DbUpdateService {
     private overallMetricsService: OverallMetricsService,
     private pagesService: PageUpdateService,
     private pageMetricsService: PageMetricsService,
+    private internalSearchService: InternalSearchTermsService,
     @InjectModel(Overall.name, 'defaultConnection')
     private overallMetricsModel: Model<OverallDocument>,
     @InjectModel(Page.name, 'defaultConnection')
@@ -72,15 +74,15 @@ export class DbUpdateService {
           4,
           1000
         )().catch((err) =>
-          this.logger.error('Error updating overall metrics', err)
+          this.logger.error('Error updating overall metrics', err.stack)
         ),
         withRetry(this.updateUxData.bind(this), 4, 1000)().catch((err) =>
-          this.logger.error('Error updating UX data', err)
+          this.logger.error('Error updating UX data', err.stack)
         ),
       ]);
 
       await withRetry(this.updateFeedback.bind(this), 4, 1000)().catch((err) =>
-        this.logger.error('Error updating Feedback data', err)
+        this.logger.error('Error updating Feedback data', err.stack)
       );
 
       await Promise.allSettled([
@@ -91,7 +93,7 @@ export class DbUpdateService {
           4,
           1000
         )().catch((err) =>
-          this.logger.error('Error updating Calldrivers data', err)
+          this.logger.error('Error updating Calldrivers data', err.stack)
         ),
         // withRetry(this.pagesService.updatePages.bind(this.pagesService), 4, 1000)().catch((err) =>
         //   this.logger.error('Error updating Page data', err)
@@ -99,6 +101,10 @@ export class DbUpdateService {
       ]);
 
       await this.pagesService.consolidateDuplicatePages();
+
+      await this.internalSearchService
+        .upsertOverallSearchTerms()
+        .catch((err) => this.logger.error(err.stack));
 
       await withRetry(
         this.pageMetricsService.updatePageMetrics.bind(this.pageMetricsService),
@@ -110,7 +116,14 @@ export class DbUpdateService {
 
       await this.pageMetricsService.addRefsToPageMetrics();
 
+      await this.internalSearchService
+        .upsertPageSearchTerms()
+        .catch((err) => this.logger.error(err.stack));
+
       await this.createPagesFromPageList();
+
+      // run this again in case we've created duplicates from the published pages list
+      await this.pagesService.consolidateDuplicatePages();
 
       this.logger.log('Database updates completed.');
     } catch (error) {
@@ -119,6 +132,7 @@ export class DbUpdateService {
     }
   }
 
+  @AsyncLogTiming
   async createPagesFromPageList() {
     this.logger.log(`Checking for new pages in Published Pages list...`);
     const pagesList = (await this.pagesListModel.find().exec()) ?? [];
@@ -276,40 +290,5 @@ export class DbUpdateService {
 
   async repopulateFeedback() {
     return await this.feedbackService.repopulateFeedback();
-  }
-
-  // implement for pages & overall (w/ abstract class, inheritance, or interface?):
-  //  -populate (figures out which DbPopulationStrategy to use),
-  //    -populateBackwards,
-  //    -populateForwards,
-  //    -populateFromEmpty (backwards from yesterday),
-  //    -"expand"(?) (backwards + forwards)
-  //    -"fill" (probably later?) (fills holes in existing data)
-  //  -"unify" in the below function, and add "populate" option to cli
-  async populateDb(dateRange: DateRange) {
-    return;
-  }
-
-  async populateBackwards(startDate: string) {
-    if (/\d{4}-\d{2}-\d{2}/.test(startDate)) {
-      throw new Error('startDate has incorrect format: expected YYYY-MM-DD');
-    }
-
-    // Overall metrics
-
-    // get dates required for query
-    const earliestDateResults = await this.overallMetricsModel
-      .findOne({}, { date: 1 })
-      .sort({ date: 1 })
-      .exec();
-
-    // get the earliest date from the DB, and set the end date to the previous day
-    const earliestDate = dayjs.utc(earliestDateResults[0]['date']);
-    const endDate = earliestDate.subtract(1, 'day').endOf('day');
-
-    const dateRange: DateRange = {
-      start: dayjs.utc(startDate).format(queryDateFormat),
-      end: endDate.format(queryDateFormat),
-    };
   }
 }

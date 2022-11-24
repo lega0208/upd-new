@@ -1,16 +1,16 @@
-import cheerio from 'cheerio';
+import { load } from 'cheerio';
 import axios from 'axios';
 import { batchAwait, squishTrim } from '../utils-common';
 import { LoggerService } from '@nestjs/common';
 
 export type IfRedirect = (
   url: string,
-  data: { responseUrl: string; html: string; }
+  data: { responseUrl: string; html: string }
 ) => void;
 
 export type OnSuccess = (
   url: string,
-  data: { responseUrl: string; html: string; isRedirect: boolean; }
+  data: { responseUrl: string; html: string; isRedirect: boolean }
 ) => void;
 
 export type If404 = (url: string) => void;
@@ -28,11 +28,10 @@ export type HttpClientOptions = {
 };
 
 export class HttpClient {
-  cheerio = cheerio;
-  rateLimitDelay = 10;
-  delayContainer = { delay: this.rateLimitDelay };
-  batchSize = 100;
-  logger: LoggerService | Console = console;
+  private rateLimitDelay = 10;
+  private delayContainer = { delay: this.rateLimitDelay };
+  private batchSize = 100;
+  private readonly logger: LoggerService | Console = console;
 
   constructor(options: HttpClientOptions = {}) {
     this.rateLimitDelay = options.rateLimitDelay || this.rateLimitDelay;
@@ -55,30 +54,32 @@ export class HttpClient {
     const requestUrl = protocolRegex.test(url) ? url : `https://${url}`;
 
     try {
-      return axios.get<string>(requestUrl).then((response) => {
-        const isRedirect = !!response.request._redirectable?._isRedirect;
+      return axios
+        .get<string>(requestUrl, { validateStatus: null })
+        .then((response) => {
+          const isRedirect = !!response.request._redirectable?._isRedirect;
 
-        const responseUrl = (
-          response.request._redirectable?._currentUrl ||
-          response.headers['location']
-        ).replace('https://', '');
+          const responseUrl = (
+            response.request._redirectable?._currentUrl ||
+            response.headers['location']
+          ).replace('https://', '');
 
-        const is404 =
-          response.status === 404 ||
-          responseUrl === 'www.canada.ca/errors/404.html';
+          const is404 =
+            response.status === 404 ||
+            responseUrl === 'www.canada.ca/errors/404.html';
 
-        if (is404) {
-          if404?.(url);
+          if (is404) {
+            if404?.(url);
 
-          return;
-        }
+            return;
+          }
 
-        isRedirect && ifRedirect?.(url, { responseUrl, html: response.data });
+          isRedirect && ifRedirect?.(url, { responseUrl, html: response.data });
 
-        onSuccess?.(url, { responseUrl, html: response.data, isRedirect });
+          onSuccess?.(url, { responseUrl, html: response.data, isRedirect });
 
-        return response.data;
-      });
+          return response.data;
+        });
     } catch (e) {
       this.logger.error(`Error fetching page data for ${url}:`);
       this.logger.error(e);
@@ -108,7 +109,7 @@ export class HttpClient {
     );
   }
 
-  async getCurrentTitlesAndUrls(urls: string[]) {
+  async getCurrentTitlesAndUrls(urls: string[], options: RequestOptions = {}) {
     const titlesAndRedirects: {
       url: string;
       title: string;
@@ -121,7 +122,7 @@ export class HttpClient {
         '',
       ])[0].replace(/\s+(-|&nbsp;|&ndash;)\s+Canada\.ca/i, '');
 
-      const title = squishTrim(cheerio.load(rawTitle)('title').text());
+      const title = squishTrim(load(rawTitle)('title').text());
 
       const results = {
         url,
@@ -131,9 +132,10 @@ export class HttpClient {
       };
 
       titlesAndRedirects.push(results);
-    }
+    };
 
     await this.getAll(urls, {
+      ...options,
       onSuccess: getTitleAndRedirect,
     });
 
