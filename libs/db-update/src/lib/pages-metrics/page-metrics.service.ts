@@ -1,38 +1,46 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import chalk from 'chalk';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-
-import type {
-  PageDocument,
-  PageMetricsModel,
-  PagesListDocument,
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import { AnyBulkWriteOperation } from 'mongodb';
+import { Model, Types } from 'mongoose';
+import { arrayToDictionary, today } from '@dua-upd/utils-common';
+import {
+  Page,
+  PageMetrics,
+  PagesList,
+  type PagesListItem,
+  type PageMetricsModel,
+  DbService,
 } from '@dua-upd/db';
-import { Page, PageMetrics, PagesList, PagesListItem } from '@dua-upd/db';
 import {
   DateRange,
-  queryDateFormat,
-  singleDatesFromDateRange,
   AdobeAnalyticsClient,
   SearchAnalyticsClient,
   AirtableClient,
   PageListData,
+  AdobeAnalyticsService,
+  GoogleSearchConsoleService,
 } from '@dua-upd/external-data';
 import { PagesListService } from '../pages-list/pages-list.service';
-import { arrayToDictionary, logJson } from '@dua-upd/utils-common';
-import { AnyBulkWriteOperation } from 'mongodb';
+import { PipelineConfig, assemblePipeline } from '../pipelines';
 
 dayjs.extend(utc);
+dayjs.extend(isSameOrBefore);
 
 @Injectable()
 export class PageMetricsService {
   constructor(
     @Inject(AdobeAnalyticsClient.name)
     private adobeAnalyticsClient: AdobeAnalyticsClient,
+    private adobeAnalyticsService: AdobeAnalyticsService,
     @Inject(AirtableClient.name) private airtableClient: AirtableClient,
+    private dbService: DbService,
     @Inject(SearchAnalyticsClient.name)
     private gscClient: SearchAnalyticsClient,
+    private searchAnalyticsService: GoogleSearchConsoleService,
     private logger: ConsoleLogger,
     @InjectModel(Page.name, 'defaultConnection') private pageModel: Model<Page>,
     @InjectModel(PageMetrics.name, 'defaultConnection')
@@ -41,101 +49,6 @@ export class PageMetricsService {
     private pageListModel: Model<PagesList>,
     private pagesListService: PagesListService
   ) {}
-
-  async fetchAndMergePageMetrics(dateRange: DateRange) {
-    const [aaResults, gscResults] = await Promise.all([
-      this.adobeAnalyticsClient
-        .getPageMetrics(dateRange, {
-          // temporary fix for pages longer than 255 characters
-          search: {
-            clause: `BEGINS-WITH 'www.canada.ca' AND (BEGINS-WITH 'www.canada.ca/en/revenue-agency'\
-        OR BEGINS-WITH 'www.canada.ca/fr/agence-revenu' OR BEGINS-WITH 'www.canada.ca/fr/services/impots'\
-        OR BEGINS-WITH 'www.canada.ca/en/services/taxes')`,
-          },
-        })
-        // replace urls longer than 255 characters with url from published pages list
-        .then(async (results) => {
-          const publishedPagesList =
-            (await this.pageListModel.find().lean().exec()) || [];
-
-          if (publishedPagesList.length === 0) {
-            throw new Error('No pages found in page list');
-          }
-
-          // separate en/fr pages and restructure data to make cross-referencing faster
-          const publishedPages = (publishedPagesList as PagesListItem[]).reduce(
-            (pages, page) => {
-              const url = page.last_255; // use last 255 to match AA urls
-
-              if (page.lang === 'en') {
-                pages['en'][url] = page;
-              } else if (page.lang === 'fr') {
-                pages['fr'][url] = page;
-              }
-
-              return pages;
-            },
-            { en: {}, fr: {} } as Record<
-              'en' | 'fr',
-              Record<string, PageListData>
-            >
-          );
-
-          const langRegex = /canada\.ca\/(en|fr)/i;
-
-          return results.map((dayResults) => {
-            return dayResults.map((result) => {
-              if (result.url.startsWith('www.canada.ca')) {
-                return result;
-              }
-
-              const lang = langRegex.exec(result.url)?.[1];
-
-              return {
-                ...result,
-                url: publishedPages[lang]?.[result.url]?.url || result.url,
-              };
-            });
-          });
-        }),
-      this.gscClient.getPageMetrics(dateRange, { dataState: 'all' }),
-    ]);
-
-    // because there'll be potentially tens of thousands of results,
-    //   we'll group them by date to merge them more efficiently
-    const aaDates = aaResults.map((dateResults) => dateResults[0]?.date);
-    const gscDates = gscResults.map((dateResults) => dateResults[0]?.date);
-
-    if (aaDates.length !== gscDates.length) {
-      this.logger.error(
-        'Mismatched dates between Adobe Analytics and Google Search Console'
-      );
-    }
-
-    return aaDates
-      .map((date) => {
-        const aaDateResults = aaResults.find(
-          (dateResults) => dateResults[0]?.date.getTime() === date.getTime()
-        );
-        const gscDateResults =
-          gscResults.find(
-            (dateResults) => dateResults[0]?.date.getTime() === date.getTime()
-          ) || [];
-
-        return aaDateResults.map((aaDateResults) => {
-          const gscResults = gscDateResults.find(
-            (gscDateResult) => gscDateResult.url === aaDateResults.url
-          );
-
-          return {
-            _id: new Types.ObjectId(),
-            ...aaDateResults,
-            ...(gscResults || {}),
-          };
-        });
-      })
-      .flat() as PageMetrics[];
-  }
 
   async upsertPageMetrics(pageMetrics: PageMetrics[]) {
     const bulkInsertOps = [];
@@ -176,38 +89,21 @@ export class PageMetricsService {
       : dayjs.utc('2020-01-01');
     const startTime = latestDate.add(1, 'day');
 
-    // collect data up to the start of the current day/end of the previous day
-    const cutoffDate = dayjs.utc().startOf('day');
+    // collect data up to the previous day
+    const cutoffDate = today().subtract(1, 'day');
 
     // fetch data if our db isn't up-to-date
-    if (startTime.isBefore(cutoffDate)) {
-      const fullDateRange = {
-        start: startTime.format(queryDateFormat),
-        end: cutoffDate.format(queryDateFormat),
+    if (startTime.isSameOrBefore(cutoffDate)) {
+      const dateRange = {
+        start: startTime.format('YYYY-MM-DD'),
+        end: cutoffDate.format('YYYY-MM-DD'),
       };
 
-      // to be able to iterate over each day
-      const dateRanges = singleDatesFromDateRange(
-        fullDateRange,
-        queryDateFormat
-      ).map((date) => ({
-        start: date,
-        end: dayjs.utc(date).add(1, 'day').format(queryDateFormat),
-      }));
+      const pipelineConfig = this.createPageMetricsPipelineConfig(dateRange);
 
-      for (const dateRange of dateRanges) {
-        this.logger.log(
-          `\r\nFetching page metrics from AA & GSC for date: ${dateRange.start}\r\n`
-        );
+      const pipeline = assemblePipeline<Partial<PageMetrics>>(pipelineConfig);
 
-        const newPageMetrics = await this.fetchAndMergePageMetrics(dateRange);
-
-        await this.pageMetricsModel.insertMany(newPageMetrics);
-
-        this.logger.log(
-          `Successfully inserted page metrics data for: ${dateRange.start}`
-        );
-      }
+      await pipeline();
 
       return await Promise.resolve();
     } else {
@@ -269,7 +165,8 @@ export class PageMetricsService {
       },
     }));
 
-    const airtablePageResults = await this.pageMetricsModel.bulkWrite(
+    // i put this "any" here because mongoose type inference was breaking my IDE...
+    const airtablePageResults = await (this.pageMetricsModel.bulkWrite as any)(
       bulkWriteOps,
       { ordered: false }
     );
@@ -427,13 +324,7 @@ export class PageMetricsService {
     // ASSUMING ALL_URLS ARE DEDUPLICATED (todo: add check and dedupe if necessary)
     const existingPages =
       (await this.pageModel
-        .aggregate<{
-          _id: Types.ObjectId;
-          url: string;
-          projects: Types.ObjectId;
-          tasks: Types.ObjectId;
-          ux_tests: Types.ObjectId;
-        }>()
+        .aggregate()
         .match({
           all_urls: {
             $elemMatch: { $in: urls },
@@ -547,5 +438,114 @@ export class PageMetricsService {
     }
 
     this.logger.log('Finished ensuring Page references for Page Metrics');
+  }
+
+  createPageMetricsPipelineConfig(
+    dateRange: DateRange
+  ): PipelineConfig<Partial<PageMetrics>> {
+    const insertFunc = async (
+      data: Partial<PageMetrics>[],
+      datasourceName?: string
+    ) => {
+      if (data.length) {
+        console.log(
+          `[${
+            datasourceName || 'datasource'
+          }] (${data[0].date.toISOString()}) number of records passed to insertFunc:`
+        );
+        console.log(data.length);
+
+        const bulkInsertOps: AnyBulkWriteOperation[] = data.map((record) => ({
+          updateOne: {
+            filter: {
+              url: record.url,
+              date: record.date,
+            },
+            update: {
+              $setOnInsert: {
+                _id: new Types.ObjectId(),
+              },
+              $set: record,
+            },
+            upsert: true,
+          },
+        }));
+
+        return await Promise.resolve(bulkInsertOps).then((bulkInsertOps) =>
+          this.pageMetricsModel
+            .bulkWrite(bulkInsertOps as AnyBulkWriteOperation<PageMetrics>[], {
+              ordered: false,
+            })
+            .then((bulkWriteResults) =>
+              console.log(
+                `[${
+                  datasourceName || 'datasource'
+                }] (${data[0].date.toISOString()}) bulkWrite completed`
+              )
+            )
+            .catch((err) =>
+              this.logger.error(
+                chalk.red(`Error during bulkWrite: \r\n${err.stack}`)
+              )
+            )
+        );
+      }
+    };
+
+    const aaDataSource = async () => {
+      await this.adobeAnalyticsService.getPageMetrics(dateRange, {
+        onComplete: async (pageMetrics) => {
+          // ignore pages w/ 0 visits (can assume everything else is 0)
+          const filteredPageMetrics = pageMetrics.filter(
+            (metrics) => !!metrics.visits
+          );
+
+          const pageMetricsWithRepairedUrls =
+            await this.pagesListService.repairUrls(filteredPageMetrics);
+
+          return Promise.resolve().then(() =>
+            insertFunc(pageMetricsWithRepairedUrls, 'AA')
+          );
+        },
+      });
+    };
+
+    const gscDataSource = async () => {
+      await this.searchAnalyticsService.getPageMetricsWithRetry(dateRange, {
+        dataState: 'final',
+        onComplete: async (results) => {
+          return await insertFunc(results, 'GSC');
+        },
+      });
+
+      return Promise.resolve();
+    };
+
+    return {
+      dataSources: {
+        aaData: aaDataSource,
+        gscData: gscDataSource,
+      },
+      insertWithHooks: true,
+      insertFn: () => Promise.resolve(null),
+      onComplete: async () => {
+        console.log(
+          chalk.blueBright(
+            `Finished inserting results -- Adding Page references`
+          )
+        );
+
+        await this.dbService.validatePageMetricsRefs({
+          date: {
+            $gte: dateRange.start,
+            $lte: dateRange.end,
+          },
+        });
+
+        console.log(
+          chalk.green('Page Metrics updates completed successfully ✔ ')
+        );
+      },
+    };
   }
 }

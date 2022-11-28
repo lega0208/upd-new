@@ -422,7 +422,7 @@ export class PopulateCommand extends CommandRunner {
           });
         }
 
-        console.log(chalk.green('Populate script completed successfully ✔ '));
+        console.log(chalk.green('Page Metrics updates completed successfully ✔ '));
       },
     };
   }

@@ -3,20 +3,20 @@ import { resolve } from 'path';
 import { ApexOptions } from 'apexcharts';
 import { writeFile } from 'fs/promises';
 
-function openInChrome(path) {
+function openHtmlFile(path) {
   let command = '';
   switch (process.platform) {
     case 'darwin':
-      command = 'open';
+      command = 'open chrome';
       break;
     case 'win32':
-      command = 'start';
+      command = 'start chrome';
       break;
     default:
       command = 'xdg-open';
       break;
   }
-  return child_process.execSync(`${command} chrome "${resolve(path)}"`);
+  return child_process.execSync(`${command} "${resolve(path)}"`);
 }
 
 export async function outputChart(filename: string, options: ApexOptions = {}) {
@@ -71,7 +71,7 @@ export async function outputChart(filename: string, options: ApexOptions = {}) {
 
   await writeFile(`./${filename}.html`, output, 'utf8');
 
-  openInChrome(`./${filename}.html`);
+  openHtmlFile(`./${filename}.html`);
 }
 
 export async function outputTable(
@@ -99,7 +99,7 @@ export async function outputTable(
       .map((col) => `<td>${col}</td>`)
       .join('')}
       </tr>`
-  );
+  ).join('');
 
   const tableOutput = `
     <table>
@@ -122,5 +122,5 @@ ${css}
 
   await writeFile(`./${filename}.html`, output, 'utf8');
 
-  openInChrome(`./${filename}.html`);
+  openHtmlFile(`./${filename}.html`);
 }

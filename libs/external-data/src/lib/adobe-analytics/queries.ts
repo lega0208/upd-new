@@ -11,7 +11,7 @@ import {
   SEGMENTS,
 } from './querybuilder';
 import { DateRange } from '../types';
-import { clone, wait } from '@dua-upd/utils-common';
+import { chunkMap, clone, wait } from '@dua-upd/utils-common';
 import { ReportQueryDimension } from './aa-dimensions';
 
 export const overallMetricsQueryConfig: MetricsConfig = {
@@ -204,17 +204,13 @@ export const createBatchedInternalSearchQueries = (
   dateRange: DateRange,
   itemIds?: string[],
   settings: ReportSettings = {}
-) => {
-  const batchQueries: AdobeAnalyticsReportQuery[] = [];
-
-  while (itemIds.length) {
-    batchQueries.push(
-      createInternalSearchQuery(dateRange, itemIds.splice(0, 200), settings)
-    );
-  }
-
-  return batchQueries;
-};
+) =>
+  chunkMap(
+    itemIds,
+    (itemIdsBatch) =>
+      createInternalSearchQuery(dateRange, itemIdsBatch, settings),
+    200
+  );
 
 export const createInternalSearchQuery = (
   dateRange: DateRange,

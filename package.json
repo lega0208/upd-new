@@ -71,7 +71,7 @@
     "jsonwebtoken": "^8.5.1",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.5.25",
-    "mongoose": "^6.2.10",
+    "mongoose": "^6.7.3",
     "nest-commander": "^3.1.0",
     "ng-apexcharts": "^1.7.4",
     "ngx-google-analytics": "^14.0.0",
@@ -82,6 +82,8 @@
     "primeng": "^14.1.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.5.0",
+    "simple-zstd": "^1.4.2",
+    "tar": "^6.1.12",
     "tslib": "^2.4.0",
     "xlsx": "^0.18.5",
     "zone.js": "~0.11.4"
