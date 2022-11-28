@@ -106,15 +106,9 @@ export class DbUpdateService {
         .upsertOverallSearchTerms()
         .catch((err) => this.logger.error(err.stack));
 
-      await withRetry(
-        this.pageMetricsService.updatePageMetrics.bind(this.pageMetricsService),
-        4,
-        1000
-      )().catch((err) =>
+      await this.pageMetricsService.updatePageMetrics().catch((err) =>
         this.logger.error('Error updating Page Metrics data', err)
       );
-
-      await this.pageMetricsService.addRefsToPageMetrics();
 
       await this.internalSearchService
         .upsertPageSearchTerms()
@@ -181,31 +175,6 @@ export class DbUpdateService {
 
   async updateFeedback(endDate?: DateType) {
     return this.feedbackService.updateFeedbackData(endDate);
-  }
-
-  async getSingleDayMetrics(date: string) {
-    const dateRange = {
-      start: dayjs.utc(date).startOf('day').format(queryDateFormat),
-      end: dayjs.utc(date).add(1, 'day').format(queryDateFormat),
-    };
-    this.logger.log(
-      `Getting metrics for ${dateRange.start} to ${dateRange.end}`
-    );
-
-    return (await this.pageMetricsService.fetchAndMergePageMetrics(
-      dateRange
-    )) as PageMetrics[];
-  }
-
-  async getPageMetrics(dates: string[]): Promise<PageMetrics[]> {
-    const promises = [];
-
-    for (const date of dates) {
-      promises.push(this.getSingleDayMetrics(date));
-      await wait(501);
-    }
-
-    return (await Promise.all(promises)).flat();
   }
 
   async upsertPageMetrics(pageMetrics: PageMetrics[]) {

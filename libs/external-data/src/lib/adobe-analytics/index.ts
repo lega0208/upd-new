@@ -106,7 +106,7 @@ export class AdobeAnalyticsClient {
       resultsParser?: AAResultsParser<T>;
       hooks?: {
         pre?: (dateRange: string | DateRange) => void;
-        post?: <U>(data: T[]) => U extends Promise<any> ? U : Promise<U>;
+        post?: <U>(data: T[]) => U extends Promise<unknown> ? U : Promise<U>;
       };
       parseResults?: boolean;
     } = {}
@@ -153,7 +153,7 @@ export class AdobeAnalyticsClient {
   }
 
   get executeQueryWithRetry() {
-    return withRetry(this.executeQuery.bind(this), 2, 520);
+    return withRetry(this.executeQuery.bind(this), 5, 550);
   }
 
   async executeMultiDayQuery<T>(

@@ -350,10 +350,10 @@ export class InternalSearchTermsService {
     // collect data up to the start of the current day/end of the previous day
     const queryDateRange = dateRange || {
       start: dayjs
-        .utc(latestDateResults[0]['date'])
+        .utc(latestDateResults['date'])
         .add(1, 'day')
-        .format(queryDateFormat),
-      end: today().subtract(1, 'day').endOf('day').format(queryDateFormat),
+        .format('YYYY-MM-DD'),
+      end: today().subtract(1, 'day').endOf('day').format('YYYY-MM-DD'),
     };
 
     const queryStart = dayjs.utc(queryDateRange.start);
@@ -459,7 +459,7 @@ export class InternalSearchTermsService {
 
     const queriesDateRange = dateRange || {
       start: dayjs
-        .utc((await latestDateResult())[0]['date'])
+        .utc((await latestDateResult())['date'])
         .add(1, 'day')
         .format(queryDateFormat),
       end: normalizeUTCDate(dayjs.utc())

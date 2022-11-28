@@ -42,7 +42,9 @@ export const AsyncLogTiming = <T extends (...args: unknown[]) => ReturnType<T>>(
     const result = await originalMethod.apply(this, args);
     const finish = Date.now();
     console.log(
-      `${propertyKey} Execution time: ${Math.round((finish - start) / 10) / 100} seconds`
+      `${propertyKey} Execution time: ${
+        Math.round((finish - start) / 10) / 100
+      } seconds`
     );
     return result;
   };
@@ -148,7 +150,6 @@ export function logJson(anything: unknown, logger = console.log) {
   logger(JSON.stringify(anything, null, 2));
 }
 
-
 // For logging JSON
 export function prettyJson(obj: object) {
   return JSON.stringify(obj, null, 2);
@@ -230,4 +231,24 @@ export async function batchAwait<T, U>(
   }
 
   return Promise.all(promises);
+}
+
+/**
+ * Maps over chunks of an array rather than individual items
+ * @param array Array to map over
+ * @param mapFunc Map function
+ * @param chunkSize Size of chunks
+ */
+export function chunkMap<T, ReturnT>(
+  array: T[],
+  mapFunc: (val: T[]) => ReturnT,
+  chunkSize: number
+): ReturnT[] {
+  const chunks = [];
+
+  while (array.length) {
+    chunks.push(mapFunc(array.splice(0, chunkSize)));
+  }
+
+  return chunks;
 }

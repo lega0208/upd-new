@@ -43,18 +43,6 @@ export class DataIntegrityService {
     return this.pageMetricsModel.deleteMany({ url: { $exists: false } });
   }
 
-  async findMissingMetrics() {
-    return []; // todo: implement this
-  }
-
-  // both AA & GSC
-  async fillMissingMetrics() {
-    const missingDates = await this.findMissingMetrics();
-    const metrics = await this.dbUpdateService.getPageMetrics(missingDates);
-
-    await this.dbUpdateService.upsertPageMetrics(metrics);
-  }
-
   // Can be made a bit more efficient later by checking for what's missing and calling the appropriate method(s)
   async fillMissingData() {
     this.logger.log('Finding and filling missing data...');
@@ -71,6 +59,9 @@ export class DataIntegrityService {
     const missingDays = (
       await this.pageMetricsModel
         .find({
+          date: {
+            $gte: new Date('2020-09-01')
+          },
           url: 'www.canada.ca/en/revenue-agency/services/e-services/represent-a-client.html',
           gsc_total_impressions: { $exists: false },
         })
@@ -102,6 +93,9 @@ export class DataIntegrityService {
       await this.overallModel
         .find(
           {
+            date: {
+              $gte: new Date('2020-09-01')
+            },
             gsc_total_impressions: { $exists: false },
           },
           {

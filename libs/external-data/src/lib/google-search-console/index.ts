@@ -215,7 +215,7 @@ export class SearchAnalyticsClient {
 
       await wait(500);
 
-      const promise = options.onComplete
+      const promise = options?.onComplete
         ? mergedDateResults.then(async (data) => {
             await options.onComplete(data);
 
