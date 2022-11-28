@@ -373,6 +373,10 @@ export function toQueryFormat(date: string | Date): string {
       throw new Error('Expected date in format: YYYY-MM-DD');
     }
 
+    if (/T00:00:00\.000$|T23:59:59\.999$/.test(date)) {
+      return date;
+    }
+
     return `${date}T00:00:00.000`;
   }
 
