@@ -453,19 +453,19 @@ export class InternalSearchTermsService {
     // if no dateRange provided, set to "latest date from DB" to "yesterday"
     const latestDateResult = () =>
       this.db.collections.pageMetrics
-        .findOne({ aa_searchterms: { $exists: true } }, { date: 1 })
+        .findOne(
+          { aa_searchterms: { $exists: true, $not: { $size: 0 } } },
+          { date: 1 }
+        )
         .sort({ date: -1 })
         .exec();
 
     const queriesDateRange = dateRange || {
       start: dayjs
-        .utc((await latestDateResult())['date'])
+        .utc((await latestDateResult())?.['date'])
         .add(1, 'day')
         .format(queryDateFormat),
-      end: normalizeUTCDate(dayjs.utc())
-        .subtract(1, 'day')
-        .endOf('day')
-        .format(queryDateFormat),
+      end: today().subtract(1, 'day').endOf('day').format(queryDateFormat),
     };
 
     const queryStart = dayjs.utc(queriesDateRange.start);
@@ -492,7 +492,11 @@ export class InternalSearchTermsService {
     };
 
     const dateRanges = (
-      singleDatesFromDateRange(dateRange, queryDateFormat, true) as string[]
+      singleDatesFromDateRange(
+        queriesDateRange,
+        queryDateFormat,
+        true
+      ) as string[]
     )
       .map((date: string) => ({
         start: date,
