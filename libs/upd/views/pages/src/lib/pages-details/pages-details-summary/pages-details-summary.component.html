@@ -32,13 +32,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <upd-charts
-        type="line"
+      <upd-apex-bar
         [title]="'visits'"
-        [table]="(barTable$ | async) || []"
+        [series]="(apexBar$ | async) || []"
+        [table]="barTable$ | async"
+        [yAxis]="'visits' | translate"
         [tableCols]="barTableCols"
-        [data]="(visitsByDay$ | async) || []"
-      ></upd-charts>
+      ></upd-apex-bar>
     </div>
   </div>
 </div>
@@ -46,60 +46,62 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <upd-charts
-        type="grouped-bar"
+      <upd-apex-bar
         [title]="'d3-visits-by-device-type'"
-        titleTooltip="{{ 'tooltip-d3-visits-by-device-type' | translate }}"
-        [data]="visitsByDeviceType$ | async"
+        [titleTooltip]="'tooltip-d3-visits-by-device-type' | translate"
+        [series]="(apexVisitsByDeviceTypeChart$ | async) || []"
+        [xAxis]="[
+          visitsByDeviceTypeCols[1].header,
+          visitsByDeviceTypeCols[2].header
+        ]"
+        [yAxis]="'visits' | translate"
         [table]="visitsByDeviceTypeTable$ | async"
         [tableCols]="visitsByDeviceTypeCols"
-        [showLegend]="true"
-        [groupPadding]="75"
-      ></upd-charts>
+      ></upd-apex-bar>
     </div>
   </div>
-</div>
 
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-data-table-card
-        [data]="(topSearchTermsIncrease$ | async) || []"
-        [cols]="topSearchTermsCols"
-        [pagination]="false"
-        [title]="'top5-search-terms-increase'"
-      >
-      </upd-data-table-card>
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <upd-data-table-card
+          [data]="(topSearchTermsIncrease$ | async) || []"
+          [cols]="topSearchTermsCols"
+          [pagination]="false"
+          [title]="'top5-search-terms-increase'"
+        >
+        </upd-data-table-card>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-data-table-card
-        [data]="(topSearchTermsDecrease$ | async) || []"
-        [cols]="topSearchTermsCols"
-        [pagination]="false"
-        [title]="'top5-search-terms-decrease'"
-      >
-      </upd-data-table-card>
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <upd-data-table-card
+          [data]="(topSearchTermsDecrease$ | async) || []"
+          [cols]="topSearchTermsCols"
+          [pagination]="false"
+          [title]="'top5-search-terms-decrease'"
+        >
+        </upd-data-table-card>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-data-table-card
-        [data]="(tasks$ | async) || []"
-        [cols]="tasksCols"
-        [pagination]="false"
-        [sort]="false"
-        [filter]="false"
-        [title]="'related-tasks'"
-      >
-      </upd-data-table-card>
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <upd-data-table-card
+          [data]="(tasks$ | async) || []"
+          [cols]="tasksCols"
+          [pagination]="false"
+          [sort]="false"
+          [filter]="false"
+          [title]="'related-tasks'"
+        >
+        </upd-data-table-card>
+      </div>
     </div>
   </div>
 </div>

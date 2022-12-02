@@ -12,6 +12,7 @@ import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 export class ProjectDetailsCalldriversComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
 
+  apexCalldriversChart$ = this.projectsDetailsService.apexCalldriversChart$;
   calldriversChart$ = this.projectsDetailsService.calldriversChart$;
   calldriversTable$ = this.projectsDetailsService.calldriversTable$;
   calldriversCols: ColumnConfig<{

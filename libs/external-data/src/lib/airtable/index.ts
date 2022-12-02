@@ -133,7 +133,7 @@ export class AirtableClient {
   async insertRecords(
     baseId: string,
     tableName: string,
-    records: CreatedFieldRecord[]
+    records: RecordData<Partial<FieldSet>>[]
   ) {
     const chunkSize = 10;
     const chunks = [];
@@ -194,13 +194,13 @@ export class AirtableClient {
       expected_position: fields['Expected Position'],
       pass: fields['Pass'],
       date: fields['Date'],
-      visits: fields['Visits'],
+      clicks: fields['Clicks'],
       url: fields['URL'],
     })) as FieldRecordQuery[];
   }
 
   async insertSearchAssessment(
-    data: CreatedFieldRecord[],
+    data,
     lang: lang = 'en',
     lastUpdatedDate?: DateType
   ) {
@@ -217,10 +217,26 @@ export class AirtableClient {
     );
   }
 
+  async insertExpectedDB(
+    data,
+    table = 'Expected - EN',
+    lang: lang = 'en',
+    lastUpdatedDate?: DateType
+  ) {
+    const params = lastUpdatedDate
+      ? {
+          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
+        }
+      : {};
+
+    return await this.insertRecords(bases.SEARCH_ASSESSMENT, `${table}`, data);
+  }
+
   async updateSearchAssessment(
     data: RecordData<Partial<FieldSet>>[],
     lang: lang = 'en'
   ) {
+    console.log(lang);
     return await this.updateRecords(
       bases.SEARCH_ASSESSMENT,
       `CRA - ${lang.toUpperCase()}`,

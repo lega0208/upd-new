@@ -7,9 +7,15 @@ import { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { _DisposeViewRepeaterStrategy } from '@angular/cdk/collections';
 
-type TasksTableColTypes = GetTableProps<PagesDetailsSummaryComponent, 'tasks$'>
-type BarTableColTypes = GetTableProps<PagesDetailsSummaryComponent, 'barTable$'>
-type VisitsByDeviceColTypes = GetTableProps<PagesDetailsSummaryComponent, 'visitsByDeviceTypeTable$'>
+type TasksTableColTypes = GetTableProps<PagesDetailsSummaryComponent, 'tasks$'>;
+type BarTableColTypes = GetTableProps<
+  PagesDetailsSummaryComponent,
+  'barTable$'
+>;
+type VisitsByDeviceColTypes = GetTableProps<
+  PagesDetailsSummaryComponent,
+  'visitsByDeviceTypeTable$'
+>;
 
 @Component({
   selector: 'upd-page-details-summary',
@@ -48,8 +54,14 @@ export class PagesDetailsSummaryComponent implements OnInit {
   dateRangeLabel$ = this.pageDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.pageDetailsService.comparisonDateRangeLabel$;
 
+  apexBar$ = this.pageDetailsService.apexBar$;
   barTable$ = this.pageDetailsService.barTable$;
   barTableCols: ColumnConfig<BarTableColTypes>[] = [];
+
+  apexVisitsByDeviceTypeChart$ =
+    this.pageDetailsService.apexVisitsByDeviceTypeChart$;
+  apexVisitsByDeviceTypeLabels$ =
+    this.pageDetailsService.apexVisitsByDeviceTypeLabels$;
 
   visitsByDeviceTypeTable$ = this.pageDetailsService.visitsByDeviceTypeTable$;
   visitsByDeviceTypeCols: ColumnConfig<VisitsByDeviceColTypes>[] = [];
@@ -132,9 +144,11 @@ export class PagesDetailsSummaryComponent implements OnInit {
           header: this.i18n.service.translate('Task', lang),
           type: 'link',
           typeParams: {
-            preLink: '/' + this.langLink + '/tasks', link: '_id'
-          }
-        }];
+            preLink: '/' + this.langLink + '/tasks',
+            link: '_id',
+          },
+        },
+      ];
     });
   }
 }

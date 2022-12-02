@@ -1,4 +1,10 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
 import { ColumnConfig, ColumnConfigPipe } from './types';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { ProjectStatus } from '@dua-upd/types-common';
@@ -40,7 +46,11 @@ export class DataTableStylesComponent implements OnInit, OnChanges {
         ) || '';
     }
 
-    if (this.config.type === 'label' && this.config.typeParam !== 'cops')
+    if (
+      this.config.type === 'label' &&
+      this.config.typeParam !== 'cops' &&
+      this.config.typeParam !== 'passFail'
+    )
       this.isProjectLabel = true;
 
     this.projectLabel = this.data[this.config.field] as ProjectStatus;

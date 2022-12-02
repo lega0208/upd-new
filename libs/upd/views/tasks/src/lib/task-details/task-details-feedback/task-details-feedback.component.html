@@ -1,22 +1,24 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-12">
-      <upd-charts
+      <upd-apex-donut
         [title]="'d3-dyfwywlf'"
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
-        [data]="dyfChart$ | async"
-        [type]="'donut'"
+        [series]="(dyfChartApex$ | async) || []"
+        [labels]="dyfChartLegend"
         [tableCols]="dyfTableCols"
-      ></upd-charts>
+        [table]="dyfChart$ | async"
+      ></upd-apex-donut>
     </div>
     <div class="col-lg-6 col-md-6 col-sm-12">
-      <upd-charts
+      <upd-apex-donut
         [title]="'d3-www'"
         titleTooltip="{{ 'tooltip-d3-www' | translate }}"
-        [data]="whatWasWrongChart$ | async"
-        [type]="'donut'"
+        [series]="(whatWasWrongChartApex$ | async) || []"
+        [labels]="whatWasWrongChartLegend"
         [tableCols]="whatWasWrongTableCols"
-      ></upd-charts>
+        [table]="whatWasWrongChart$ | async"
+      ></upd-apex-donut>
     </div>
   </div>
 </div>
@@ -25,11 +27,11 @@
   <div class="row">
     <div class="col">
       <upd-data-table-card
-      [data]="(visitsByPage$ | async) || []"
-      [cols]="visitsByPageCols"
-      [title]="'Breakdown by Page - Did you find what you were looking for?'"
-    >
-    </upd-data-table-card>
+        [data]="(visitsByPage$ | async) || []"
+        [cols]="visitsByPageCols"
+        [title]="'Breakdown by Page - Did you find what you were looking for?'"
+      >
+      </upd-data-table-card>
     </div>
   </div>
 </div>
@@ -37,19 +39,17 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <upd-charts
-        type="grouped-bar"
+      <upd-apex-bar
         [title]="'total-feedback-by-page'"
-        [data]="(feedbackByTagsBarChartData$ | async) || []"
-        [displayLegend]="'below'"
-        [showLegend]="true"
+        [series]="(apexFeedbackByTagsChart$ | async) || []"
+        [xAxis]="[
+          (dateRangeLabel$ | async) || '',
+          (comparisonDateRangeLabel$ | async) || ''
+        ]"
+        [yAxis]="'# of comments' | translate"
         [tableCols]="feedbackByTagsTableCols"
         [table]="feedbackByTagsTable$ | async"
-        [scaleBy]="1"
-        yAxisLabel="# of comments"
-        xAxisLabel="tags"
-        [groupPadding]="75"
-      ></upd-charts>
+      ></upd-apex-bar>
     </div>
   </div>
 </div>

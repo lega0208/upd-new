@@ -11,23 +11,22 @@ import {
   NgbModalModule,
   NgbTooltipModule,
 } from '@ng-bootstrap/ng-bootstrap';
-import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
+import { CardComponent } from './card/card.component';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { SliderModule } from 'primeng/slider';
 import { CalendarModule } from 'primeng/calendar';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { NgxChartsModule } from '@amonsour/ngx-charts';
-import { I18nModule } from '@dua-upd/upd/i18n';
 import { PipesModule } from '@dua-upd/upd/pipes';
-import { CardComponent } from './card/card.component';
 import { DataCardComponent } from './data-card/data-card.component';
 import { DataTableComponent } from './data-table/data-table.component';
 import { DateSelectorComponent } from './date-selector/date-selector.component';
 import { DateSelectorDropdownComponent } from './date-selector/date-selector-dropdown.component';
 import { NavTabsComponent } from './nav-tabs/nav-tabs.component';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 import {
   ComboGroupedVerticalBarLineChartComponent,
   ComboSeriesVerticalComponent,
@@ -43,10 +42,18 @@ import { ProjectStatusLabelComponent } from './project-status-label/project-stat
 import { DataTableCardComponent } from './data-table-card/data-table-card.component';
 import { Page404Component } from './page-404/page-404.component';
 import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
+import { I18nModule } from '@dua-upd/upd/i18n';
 import { ProjectHeaderComponent } from './project-header/project-header.component';
+import { NgApexchartsModule } from 'ng-apexcharts';
 import { CardSecondaryTitleComponent } from './card-secondary-title/card-secondary-title.component';
 import { DataTableExportsComponent } from './data-table-exports/data-table-exports.component';
 import { DropdownComponent } from './dropdown/dropdown.component';
+import { ApexChartsComponent } from './apex-charts/apex-charts.component';
+import { ApexBarLineComponent } from './apex-bar-line/apex-bar-line.component';
+import { ApexRadialBarComponent } from './apex-radial-bar/apex-radial-bar.component';
+import { ApexBarComponent } from './apex-bar/apex-bar.component';
+import { ApexDonutComponent } from './apex-donut/apex-donut.component';
+import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.component';
 
 @NgModule({
   imports: [
@@ -59,6 +66,7 @@ import { DropdownComponent } from './dropdown/dropdown.component';
     NgbModalModule,
     NgbTooltipModule,
     NgxChartsModule,
+    NgApexchartsModule,
     TableModule,
     ButtonModule,
     InputTextModule,
@@ -96,6 +104,12 @@ import { DropdownComponent } from './dropdown/dropdown.component';
     CardSecondaryTitleComponent,
     DataTableExportsComponent,
     DropdownComponent,
+    ApexChartsComponent,
+    ApexBarLineComponent,
+    ApexRadialBarComponent,
+    ApexBarComponent,
+    ApexDonutComponent,
+    ApexSparkLineComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -125,6 +139,12 @@ import { DropdownComponent } from './dropdown/dropdown.component';
     ProjectHeaderComponent,
     CardSecondaryTitleComponent,
     DataTableExportsComponent,
+    ApexChartsComponent,
+    ApexBarLineComponent,
+    ApexRadialBarComponent,
+    ApexBarComponent,
+    ApexDonutComponent,
+    ApexSparkLineComponent,
   ],
 })
 export class UpdComponentsModule {}

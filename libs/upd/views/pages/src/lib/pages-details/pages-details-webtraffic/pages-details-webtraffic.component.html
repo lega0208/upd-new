@@ -1,13 +1,13 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <upd-charts
-        type="line"
+      <upd-apex-bar
         [title]="'visits'"
-        [data]="(visitsByDay$ | async) || []"
-        [table]="(barTable$ | async) || []"
+        [series]="(apexBar$ | async) || []"
+        [table]="barTable$ | async"
+        [yAxis]="'visits' | translate"
         [tableCols]="barTableCols"
-      ></upd-charts>
+      ></upd-apex-bar>
     </div>
   </div>
 </div>

@@ -21,6 +21,8 @@ import { ColumnConfig } from '../data-table-styles/types';
           <upd-card-secondary-title
             [config]="config"
             [data]="data"
+            [type]="type"
+            [modal]="modal"
           ></upd-card-secondary-title>
         </div>
         <ng-content></ng-content>
@@ -36,6 +38,8 @@ export class CardComponent {
   @Input() h = 0;
   @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() data: Record<string, number | string>[] = [];
+  @Input() type = 'list';
+  @Input() modal = '';
 
   constructor(config: NgbPopoverConfig) {
     config.disablePopover = this.titleTooltip !== '';

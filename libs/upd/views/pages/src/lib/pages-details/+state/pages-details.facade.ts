@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map, debounceTime, combineLatest } from 'rxjs';
-import dayjs from 'dayjs/esm';
-import utc from 'dayjs/esm/plugin/utc';
-import 'dayjs/esm/locale/en-ca';
-import 'dayjs/esm/locale/fr-ca';
+import dayjs, { QUnitType } from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import 'dayjs/locale/en-ca';
+import 'dayjs/locale/fr-ca';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 
 import { LocaleId } from '@dua-upd/upd/i18n';
@@ -16,6 +16,7 @@ import { PageAggregatedData, PageDetailsData } from '@dua-upd/types-common';
 
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
+import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
 
 dayjs.extend(utc);
 
@@ -45,6 +46,66 @@ export class PagesDetailsFacade {
     map(([data, lang]) =>
       getWeeklyDatesLabel(data.comparisonDateRange || '', lang)
     )
+  );
+
+  apexBar$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+    this.dateRangeSelected$,
+  ]).pipe(
+    map(([data, lang, dateRangePeriod]) => {
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
+      );
+      const visitsByDay = data?.dateRangeData?.visitsByDay || [];
+      const comparisonVisitsByDay =
+        data?.comparisonDateRangeData?.visitsByDay || [];
+      const visitsByDayFinal = data?.dateRangeData?.visitsByDay.map((d) => {
+        return {
+          x: d.date,
+          y: d.visits,
+        };
+      });
+
+      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
+
+      let cntPrevVisits = 0;
+
+      const comparisonVisitsByDayFinal = visitsByDay.map((data, i) => {
+        let prevVisits = 0;
+
+        if (
+          comparisonVisitsByDay.find(
+            (d) =>
+              dayjs(d.date)
+                .utc(false)
+                .add(1, dateSelection)
+                .format('YYYY-MM-DD') ===
+              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+          )
+        ) {
+          prevVisits = comparisonVisitsByDay[cntPrevVisits].visits;
+          cntPrevVisits++;
+        }
+        return {
+          x: data.date,
+          y: prevVisits,
+        };
+      });
+
+      return [
+        {
+          name: dateRangeLabel,
+          data: visitsByDayFinal,
+        },
+        {
+          name: comparisonDateRangeLabel,
+          data: comparisonVisitsByDayFinal,
+        },
+      ] as ApexAxisChartSeries;
+    })
   );
 
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
@@ -326,7 +387,7 @@ export class PagesDetailsFacade {
         .map((d) => new Date(d));
 
       if (!visitsByDay) {
-        return [] as { name: string; currValue: number; prevValue: number }[];
+        return [] as MultiSeries;
       }
 
       const dateRangeSeries = visitsByDay.map(({ date, visits }) => ({
@@ -378,18 +439,15 @@ export class PagesDetailsFacade {
           dayCount += prevMonthDays;
         }
 
-        prevStartDate = dayjs(prevStartDate)
-          .utc(false)
-          .add(1, 'month')
-          .toDate();
-        startDate = dayjs(startDate).utc(false).add(1, 'month').toDate();
+        prevStartDate = dayjs.utc(prevStartDate).add(1, 'month').toDate();
+        startDate = dayjs.utc(startDate).add(1, 'month').toDate();
       }
 
       const dateRangeDates = dateRangeSeries.map(({ date }) => date);
 
       const visitsByDayData = dateRangeDates.map((date, i) => {
         return {
-          name: dayjs(date).utc(false).locale(lang).format(dateFormat),
+          name: dayjs.utc(date).locale(lang).format(dateFormat),
           currValue: dateRangeSeries[i]?.visits || 0,
           prevValue: comparisonDateRangeSeries[i]?.visits || 0,
         };
@@ -426,6 +484,67 @@ export class PagesDetailsFacade {
           prevValue: data?.comparisonDateRangeData?.visits_device_other || 0,
         },
       ];
+    })
+  );
+
+  dyfDataApex$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map(([data, lang]) => {
+      const pieChartData: any = [
+        data?.dateRangeData?.dyf_yes || 0,
+        data?.dateRangeData?.dyf_no || 0,
+      ] as ApexNonAxisChartSeries;
+
+      const isZero = pieChartData.every((v: number) => v === 0);
+      if (isZero) {
+        return [];
+      }
+
+      return pieChartData;
+    })
+  );
+
+  whatWasWrongDataApex$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map(([data, lang]) => {
+      const pieChartData = [
+        data?.dateRangeData?.fwylf_cant_find_info || 0,
+        data?.dateRangeData?.fwylf_other || 0,
+        data?.dateRangeData?.fwylf_hard_to_understand || 0,
+        data?.dateRangeData?.fwylf_error || 0,
+      ] as ApexNonAxisChartSeries;
+
+      const isZero = pieChartData.every((v) => v === 0);
+      if (isZero) {
+        return [];
+      }
+
+      return pieChartData;
+    })
+  );
+
+  apexVisitsByDeviceTypeChart$ = combineLatest([
+    this.visitsByDeviceTypeTable$,
+  ]).pipe(
+    map(([data]) => {
+      return data.map(({ name, currValue, prevValue }) => ({
+        name,
+        data: [currValue, prevValue],
+      }));
+    })
+  );
+
+  apexVisitsByDeviceTypeLabels$ = combineLatest([
+    this.visitsByDeviceTypeTable$,
+  ]).pipe(
+    map(([data]) => {
+      return data.map(({ name }) => name);
     })
   );
 

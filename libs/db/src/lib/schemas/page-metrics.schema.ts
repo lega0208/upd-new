@@ -1,6 +1,10 @@
-import { Prop, Schema, SchemaFactory,  } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types, FilterQuery } from 'mongoose';
-import { GscSearchTermMetrics, AccumulatorOperator, AASearchTermMetrics } from './types';
+import {
+  GscSearchTermMetrics,
+  AccumulatorOperator,
+  AASearchTermMetrics,
+} from './types';
 import { Page } from './page.schema';
 import { Task } from './task.schema';
 import { Project } from './project.schema';
@@ -227,9 +231,9 @@ PageMetricsSchema.index(
   { background: true, partialFilterExpression: { page: { $exists: true } } }
 );
 
-// export function getPageMetricsModel() {
-//   return model(PageMetrics.name, PageMetricsSchema);
-// }
+export function getPageMetricsModel() {
+  return model(PageMetrics.name, PageMetricsSchema);
+}
 
 export type MetricsConfig<T> = {
   [key in AccumulatorOperator]?: keyof Partial<T>;
@@ -246,7 +250,6 @@ export type MetricsConfig<T> = {
 //   getAggregatedPageMetrics: GetAggregatedMetrics;
 //
 // }
-
 
 export async function getAggregatedPageMetrics<T>(
   this: Model<PageMetrics>,
@@ -316,7 +319,7 @@ export async function getAggregatedPageMetrics<T>(
       },
       all_urls: {
         $first: '$page.all_urls',
-      }
+      },
     })
     .sort(metricsSort)
     .exec();
@@ -324,6 +327,7 @@ export async function getAggregatedPageMetrics<T>(
 
 PageMetricsSchema.statics = {
   getAggregatedPageMetrics,
-}
+};
 
-export type PageMetricsModel = Model<PageMetrics> & typeof PageMetricsSchema.statics;
+export type PageMetricsModel = Model<PageMetrics> &
+  typeof PageMetricsSchema.statics;

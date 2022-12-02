@@ -19,3 +19,7 @@ export * from './lib/project-header/project-header.component';
 export * from './lib/card-secondary-title/card-secondary-title.component';
 export * from './lib/upd-components.module';
 export * from './lib/data-table-exports/data-table-exports.component';
+export * from './lib/apex-radial-bar/apex-radial-bar.component';
+export * from './lib/apex-bar/apex-bar.component';
+export * from './lib/apex-spark-line/apex-spark-line.component';
+export * from './lib/apex-radial-bar/kpi-objectives';

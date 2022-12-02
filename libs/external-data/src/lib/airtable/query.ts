@@ -9,7 +9,7 @@ export type FieldRecordQuery = {
   expected_position?: number;
   most_clicks?: number;
   date: string;
-  visits: number;
+  clicks: number;
   pass?: boolean;
   url?: string;
 };

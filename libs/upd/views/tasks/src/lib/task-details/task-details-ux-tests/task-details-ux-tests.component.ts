@@ -19,6 +19,8 @@ export class TaskDetailsUxTestsComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
 
   taskSuccessChart$ = this.taskDetailsService.taskSuccessChart$;
+  taskSuccessChartData$ = this.taskDetailsService.taskSuccessChartData$;
+  taskSuccessChartLegend$ = this.taskDetailsService.taskSuccessChartLegend$;
   taskSuccessData$ = this.taskDetailsService.taskSuccessByUxTest$;
 
   totalParticipants$ = this.taskDetailsService.totalParticipants$;
@@ -34,7 +36,8 @@ export class TaskDetailsUxTestsComponent implements OnInit {
   taskSuccessChartCols: ColumnConfig[] = [];
   taskSuccessDataCols: ColumnConfig[] = [];
 
-  avgTaskSuccessKpiCriteria = (successRate: number) => successRate >= 0.8 ? 'pass' : 'fail';
+  avgTaskSuccessKpiCriteria = (successRate: number) =>
+    successRate >= 0.8 ? 'pass' : 'fail';
 
   constructor(
     private readonly taskDetailsService: TasksDetailsFacade,

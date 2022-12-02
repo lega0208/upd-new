@@ -375,10 +375,18 @@ async function getProjects(
       testType: 1,
     });
 
+  const uxTests = await uxTestsModel
+    .aggregate<UxTestDocument>()
+    .project({
+      _id: 0,
+    })
+    .exec();
+
   const results = {
     ...aggregatedData,
     ...uxTest,
     projects: projectsData,
+    uxTests: uxTests,
   };
 
   return results;
@@ -403,6 +411,14 @@ async function getOverviewMetrics(
 
   const visitsByDay = await overallModel
     .find({ date: dateQuery }, { _id: 0, date: 1, visits: 1 })
+    .sort({ date: 1 })
+    .lean();
+
+  const dyfByDay = await overallModel
+    .find(
+      { date: dateQuery },
+      { _id: 0, date: 1, dyf_yes: 1, dyf_no: 1, dyf_submit: 1 }
+    )
     .sort({ date: 1 })
     .lean();
 
@@ -561,7 +577,10 @@ async function getOverviewMetrics(
 
   const aggregatedMetrics = await overallModel
     .aggregate<
-      Omit<OverviewAggregatedData, 'visitsByDay' | 'calldriversByDay'>
+      Omit<
+        OverviewAggregatedData,
+        'visitsByDay' | 'calldriversByDay' | 'dyfByDay'
+      >
     >()
     .match({
       date: dateQuery,
@@ -600,12 +619,12 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
-  const searchAssessmentData = await searchAssessmentModel
+  const searchAssessmentDataEn = await searchAssessmentModel
     .aggregate()
-    .match({ date: dateQuery })
+    .match({ date: dateQuery, lang: 'en' })
     .group({
       _id: { $toLower: '$query' },
-      visits: { $sum: '$visits' },
+      clicks: { $sum: '$clicks' },
       position: { $avg: '$expected_position' },
       doc: { $push: '$$ROOT' },
     })
@@ -615,7 +634,28 @@ async function getOverviewMetrics(
     .project({
       query: '$_id',
       _id: 0,
-      visits: 1,
+      clicks: 1,
+      position: 1,
+      expected_result: 1,
+    })
+    .exec();
+
+  const searchAssessmentDataFr = await searchAssessmentModel
+    .aggregate()
+    .match({ date: dateQuery, lang: 'fr' })
+    .group({
+      _id: { $toLower: '$query' },
+      clicks: { $sum: '$clicks' },
+      position: { $avg: '$expected_position' },
+      doc: { $push: '$$ROOT' },
+    })
+    .replaceRoot({
+      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
+    })
+    .project({
+      query: '$_id',
+      _id: 0,
+      clicks: 1,
       position: 1,
       expected_result: 1,
     })
@@ -624,8 +664,10 @@ async function getOverviewMetrics(
   return {
     visitsByDay,
     calldriversByDay,
+    dyfByDay,
     calldriversEnquiry,
-    searchAssessmentData,
+    searchAssessmentDataEn,
+    searchAssessmentDataFr,
     ...aggregatedMetrics[0],
     totalFeedback,
     topPagesVisited,

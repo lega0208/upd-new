@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AdobeAnalyticsClient } from '../lib/adobe-analytics';
 import { AirtableClient } from '../lib/airtable';
 import { SearchAssessmentService } from './search-assessment.service';
+import { AdobeAnalyticsService } from '../lib/adobe-analytics/adobe-analytics.service';
 
 @Module({
   imports: [
@@ -20,11 +21,13 @@ import { SearchAssessmentService } from './search-assessment.service';
       useValue: new AirtableClient(),
     },
     SearchAssessmentService,
+    AdobeAnalyticsService,
   ],
   exports: [
     AdobeAnalyticsClient.name,
     AirtableClient.name,
     SearchAssessmentService,
+    AdobeAnalyticsService,
   ],
 })
 export class SearchAssessmentModule {}

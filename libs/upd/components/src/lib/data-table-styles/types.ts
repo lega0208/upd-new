@@ -5,7 +5,7 @@ export type ColumnConfigPipe = 'percent' | 'number' | 'date';
 export interface ColumnConfig<T = any> {
   field: OptionalKeyOf<T>;
   header: string;
-  type?: 'link' | 'comparison' | 'label';
+  type?: 'link' | 'comparison' | 'label' | 'text';
   typeParam?: string;
   typeParams?: typeParams;
   pipe?: ColumnConfigPipe;
@@ -23,6 +23,6 @@ export interface typeParams {
 }
 
 export interface FilterConfig<T = any> {
-  type: 'category' | 'boolean';
+  type: 'category' | 'boolean' | 'passFail';
   categories?: { name: string; value: T[keyof T] | null }[];
 }

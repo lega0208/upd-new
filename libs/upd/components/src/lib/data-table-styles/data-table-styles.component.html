@@ -25,6 +25,21 @@
   >
     COPS
   </span>
+  <span
+    *ngIf="
+      config.type === 'text' &&
+      config.typeParam === 'passFail' &&
+      !!data[config.field]
+    "
+    class="badge"
+    [ngClass]="{
+      'bg-completed': data[config.field] === 'Pass',
+      'bg-delayed': data[config.field] === 'Fail'
+    }"
+    translate
+  >
+    {{ data[config.field] }}
+  </span>
 </ng-container>
 
 <ng-container *ngIf="hasType && config.typeParams">
@@ -79,7 +94,7 @@
 <ng-container *ngIf="!hasType && !hasPipe">
   {{
     config.translate
-      ? (data[config.field].toString() || '' | translate:undefined:currentLang)
+      ? (data[config.field].toString() || '' | translate: undefined:currentLang)
       : data[config.field]
   }}
 </ng-container>

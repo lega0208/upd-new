@@ -6,8 +6,14 @@ import { I18nFacade } from '@dua-upd/upd/state';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 
-type VisitorLocationColTypes = GetTableProps<PagesDetailsWebtrafficComponent, 'visitorLocation$'>
-type BarTableColTypes = GetTableProps<PagesDetailsWebtrafficComponent, 'barTable$'>
+type VisitorLocationColTypes = GetTableProps<
+  PagesDetailsWebtrafficComponent,
+  'visitorLocation$'
+>;
+type BarTableColTypes = GetTableProps<
+  PagesDetailsWebtrafficComponent,
+  'barTable$'
+>;
 
 @Component({
   selector: 'upd-page-details-webtraffic',
@@ -17,6 +23,8 @@ type BarTableColTypes = GetTableProps<PagesDetailsWebtrafficComponent, 'barTable
 export class PagesDetailsWebtrafficComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
+
+  apexBar$ = this.pageDetailsService.apexBar$;
 
   visitsByDay$ = this.pageDetailsService.visitsByDay$;
 

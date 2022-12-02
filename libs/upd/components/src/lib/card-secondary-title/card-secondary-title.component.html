@@ -1,4 +1,4 @@
-<div *ngIf="data.length > 0">
+<div *ngIf="data.length > 0 && type === 'list'">
   <ng-container *ngFor="let d of data; let i = index">
     <a
       *ngIf="config.typeParams"
@@ -9,5 +9,13 @@
     <ng-container *ngIf="!(i === data.length - 1)"
       >&NonBreakingSpace;/&NonBreakingSpace;</ng-container
     >
+  </ng-container>
+</div>
+
+<div *ngIf="type === 'modal'">
+  <ng-container ngProjectAs="[modal]">
+    <upd-modal>
+      {{ modal }}
+    </upd-modal>
   </ng-container>
 </div>

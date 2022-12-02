@@ -1,0 +1,78 @@
+<upd-card
+  [title]="title"
+  [titleTooltip]="titleTooltip"
+  [h]="100"
+  [config]="secondaryTitleCols"
+  [data]="secondaryTitleData"
+>
+  <div class="radialBar">
+    <apx-chart
+      *ngIf="chartOptions.chart"
+      #chart
+      [series]="chartOptions.series || []"
+      [labels]="chartOptions.labels || []"
+      [legend]="chartOptions.legend || {}"
+      [chart]="chartOptions.chart"
+      [yaxis]="chartOptions.yaxis || []"
+      [xaxis]="chartOptions.xaxis || {}"
+      [stroke]="chartOptions.stroke || {}"
+      [plotOptions]="chartOptions.plotOptions || {}"
+      [markers]="chartOptions.markers || {}"
+      [fill]="chartOptions.fill || {}"
+      [colors]="chartOptions.colors || []"
+      [dataLabels]="chartOptions.dataLabels || {}"
+      [tooltip]="chartOptions.tooltip || {}"
+    ></apx-chart>
+  </div>
+  <!-- <div class="button">
+    <upd-modal>
+      <ng-content></ng-content>
+    </upd-modal>
+  </div> -->
+
+  <div class="d-flex align-items-baseline box">
+    <span class="fw-bold large-text">
+      {{ curr }}
+    </span>
+    <div class="d-flex justify-content-end">
+      <span *ngIf="keyword === 'calls'">calls per 100 visits</span>
+      <span *ngIf="keyword === 'feedback'"
+        >positive feedback per 1000 visits</span
+      >
+    </div>
+  </div>
+
+  <div class="d-flex second-box">
+    <div class="d-flex"></div>
+    <span
+      [ngStyle]="{ color: kpiConfig[kpiObjectiveStatus].colour }"
+      class="text-nowrap pe-2"
+      ><span class="material-icons">{{
+        kpiConfig[kpiObjectiveStatus].iconName
+      }}</span>
+      {{ comparison | localePercent }}</span
+    >
+    <span *ngIf="keyword === 'calls'">({{ diff }} calls) </span>
+    <span *ngIf="keyword === 'feedback'">({{ diff }} positive feedback)</span>
+    <ng-content></ng-content>
+    <div class="d-flex push" *ngIf="modal">
+      <upd-modal [modalTitle]="title">
+        {{ modal }}
+      </upd-modal>
+    </div>
+  </div>
+
+  <!--
+
+  <div class="pt-3">
+    <upd-accordion
+      [title]="'view-description'"
+    >
+      <upd-data-table
+        [filter]="false"
+        [sort]="false"
+        [pagination]="false"
+      ></upd-data-table>
+    </upd-accordion>
+  </div> -->
+</upd-card>

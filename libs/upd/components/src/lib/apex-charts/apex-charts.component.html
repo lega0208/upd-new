@@ -1,0 +1,41 @@
+<upd-card
+  [title]="title"
+  [titleTooltip]="titleTooltip"
+  [h]="100"
+  [config]="secondaryTitleCols"
+  [data]="secondaryTitleData"
+>
+  <div id="chart" [ngClass]="type === 'radialBar' ? 'radialBarChart' : ''">
+    <apx-chart
+      #chart
+      [series]="chartOptions.series"
+      [labels]="chartOptions.labels"
+      [legend]="chartOptions.legend"
+      [chart]="chartOptions.chart"
+      [yaxis]="chartOptions.yaxis"
+      [xaxis]="chartOptions.xaxis"
+      [stroke]="chartOptions.stroke"
+      [plotOptions]="chartOptions.plotOptions"
+      [markers]="chartOptions.markers"
+      [fill]="chartOptions.fill"
+      [colors]="chartOptions.colors"
+      [dataLabels]="chartOptions.dataLabels"
+      [tooltip]="chartOptions.tooltip"
+    ></apx-chart>
+  </div>
+
+  <div *ngIf="type === 'radialBar'" class="radial">
+    <ng-content></ng-content>
+  </div>
+  <div class="pt-3" *ngIf="table">
+    <upd-accordion>
+      <upd-data-table
+        [filter]="false"
+        [sort]="false"
+        [pagination]="false"
+        [data]="table"
+        [cols]="tableCols"
+      ></upd-data-table>
+    </upd-accordion>
+  </div>
+</upd-card>
