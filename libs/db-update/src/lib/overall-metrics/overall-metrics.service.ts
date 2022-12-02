@@ -1,8 +1,9 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import {
   AdobeAnalyticsClient,
+  AdobeAnalyticsService,
   DateRange,
-  queryDateFormat,
+  GoogleSearchConsoleService,
   SearchAnalyticsClient,
 } from '@dua-upd/external-data';
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,6 +12,7 @@ import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { today } from '@dua-upd/utils-common';
+import { assemblePipeline, PipelineConfig } from '../pipelines';
 
 dayjs.extend(utc);
 
@@ -19,8 +21,10 @@ export class OverallMetricsService {
   constructor(
     @Inject(AdobeAnalyticsClient.name)
     private adobeAnalyticsClient: AdobeAnalyticsClient,
+    private adobeAnalyticsService: AdobeAnalyticsService,
     @Inject(SearchAnalyticsClient.name)
     private gscClient: SearchAnalyticsClient,
+    private searchAnalyticsService: GoogleSearchConsoleService,
     private logger: ConsoleLogger,
     @InjectModel(Overall.name, 'defaultConnection')
     private overallMetricsModel: Model<OverallDocument>
@@ -44,57 +48,74 @@ export class OverallMetricsService {
     // fetch data if our db isn't up-to-date
     if (startTime.isBefore(cutoffDate)) {
       const dateRange = {
-        start: startTime.format(queryDateFormat),
-        end: cutoffDate.format(queryDateFormat),
+        start: startTime.format('YYYY-MM-DD'),
+        end: cutoffDate.format('YYYY-MM-DD'),
       };
 
       this.logger.log(
         `\r\nFetching overall metrics from AA & GSC for dates: ${dateRange.start} to ${dateRange.end}\r\n`
       );
 
-      const newOverallMetrics = await this.fetchAndMergeOverallMetrics(
-        dateRange
-      );
-      this.logger.log(
-        `\r\nInserting ${newOverallMetrics.length} new overall metrics documents\r\n`
-      );
+      const pipelineConfig = this.createOverallMetricsPipelineConfig(dateRange);
 
-      const inserted = await this.overallMetricsModel.insertMany(
-        newOverallMetrics
-      );
+      const pipeline = assemblePipeline<Overall>(pipelineConfig);
 
-      const datesInserted = inserted
-        .map((doc) => dayjs.utc(doc['date']).format('YYYY-MM-DD'))
-        .join(', ');
-
-      this.logger.log(
-        `Successfully inserted overall metrics data for the following dates: ${datesInserted}`
-      );
-
-      return inserted;
+      await pipeline();
     } else {
       this.logger.log('Overall metrics already up-to-date.');
     }
   }
 
-  async fetchAndMergeOverallMetrics(dateRange: DateRange) {
-    const [aaResults, gscResults] = await Promise.all([
-      this.adobeAnalyticsClient.getOverallMetrics(dateRange),
-      this.gscClient.getOverallMetrics(dateRange, 'all'),
-    ]);
+  createOverallMetricsPipelineConfig(
+    dateRange: DateRange
+  ): PipelineConfig<Overall> {
+    const aaDataSource = () =>
+      this.adobeAnalyticsService.getOverallMetrics(dateRange, {
+        inclusiveDateRange: true,
+      });
+    const gscDataSource = () =>
+      this.searchAnalyticsService.getOverallMetrics(dateRange, 'final');
 
-    this.logger.log('Finished fetching data from AA & GSC');
+    return {
+      dataSources: { aaData: aaDataSource, gscData: gscDataSource },
+      mergeBeforeInsert: (results) => mergeByDate(Object.values(results)),
+      insertFn: async (data) => {
+        const bulkInsertOps = data.map((record) => ({
+          updateOne: {
+            filter: {
+              date: record.date,
+            },
+            update: {
+              $setOnInsert: {
+                _id: new Types.ObjectId(),
+              },
+              $set: record,
+            },
+            upsert: true,
+          },
+        }));
 
-    return aaResults.map((result) => {
-      const gscResult = gscResults.find(
-        (gscResult) => gscResult.date.getTime() === result.date.getTime()
-      );
+        await this.overallMetricsModel.bulkWrite(bulkInsertOps);
 
-      return {
-        _id: new Types.ObjectId(),
-        ...result,
-        ...gscResult,
-      };
-    });
+        return Promise.resolve();
+      },
+    };
   }
+}
+
+export function mergeByDate<T extends { date: Date }>(results: T[][]) {
+  const resultsByDate = {};
+
+  for (const resultData of results.flat()) {
+    const date = resultData.date.toISOString();
+
+    if (!resultsByDate[date]) {
+      resultsByDate[date] = resultData;
+      continue;
+    }
+
+    resultsByDate[date] = { ...resultsByDate[date], ...resultData };
+  }
+
+  return Object.values(resultsByDate) as T[];
 }

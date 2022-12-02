@@ -350,10 +350,10 @@ export class InternalSearchTermsService {
     // collect data up to the start of the current day/end of the previous day
     const queryDateRange = dateRange || {
       start: dayjs
-        .utc(latestDateResults[0]['date'])
+        .utc(latestDateResults['date'])
         .add(1, 'day')
-        .format(queryDateFormat),
-      end: today().subtract(1, 'day').endOf('day').format(queryDateFormat),
+        .format('YYYY-MM-DD'),
+      end: today().subtract(1, 'day').endOf('day').format('YYYY-MM-DD'),
     };
 
     const queryStart = dayjs.utc(queryDateRange.start);
@@ -453,19 +453,19 @@ export class InternalSearchTermsService {
     // if no dateRange provided, set to "latest date from DB" to "yesterday"
     const latestDateResult = () =>
       this.db.collections.pageMetrics
-        .findOne({ aa_searchterms: { $exists: true } }, { date: 1 })
+        .findOne(
+          { aa_searchterms: { $exists: true, $not: { $size: 0 } } },
+          { date: 1 }
+        )
         .sort({ date: -1 })
         .exec();
 
     const queriesDateRange = dateRange || {
       start: dayjs
-        .utc((await latestDateResult())[0]['date'])
+        .utc((await latestDateResult())?.['date'])
         .add(1, 'day')
         .format(queryDateFormat),
-      end: normalizeUTCDate(dayjs.utc())
-        .subtract(1, 'day')
-        .endOf('day')
-        .format(queryDateFormat),
+      end: today().subtract(1, 'day').endOf('day').format(queryDateFormat),
     };
 
     const queryStart = dayjs.utc(queriesDateRange.start);
@@ -492,7 +492,11 @@ export class InternalSearchTermsService {
     };
 
     const dateRanges = (
-      singleDatesFromDateRange(dateRange, queryDateFormat, true) as string[]
+      singleDatesFromDateRange(
+        queriesDateRange,
+        queryDateFormat,
+        true
+      ) as string[]
     )
       .map((date: string) => ({
         start: date,

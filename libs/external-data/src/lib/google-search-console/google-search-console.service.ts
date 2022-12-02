@@ -1,4 +1,4 @@
-import { ConsoleLogger, Injectable } from '@nestjs/common';
+import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import {
   SearchAnalyticsClient,
   SearchAnalyticsPageQueryOptions,
@@ -9,9 +9,11 @@ import { withRetry } from '../utils';
 
 @Injectable()
 export class GoogleSearchConsoleService {
-  private readonly client = new SearchAnalyticsClient();
-
-  constructor(private logger: ConsoleLogger) {}
+  constructor(
+    private logger: ConsoleLogger,
+    @Inject(SearchAnalyticsClient.name)
+    private readonly client: SearchAnalyticsClient
+  ) {}
 
   async getOverallMetrics(
     dateRange: DateRange,
@@ -41,6 +43,6 @@ export class GoogleSearchConsoleService {
   }
 
   get getPageMetricsWithRetry() {
-    return withRetry(this.getPageMetrics.bind(this), 2, 520);
+    return withRetry(this.getPageMetrics.bind(this), 3, 520);
   }
 }

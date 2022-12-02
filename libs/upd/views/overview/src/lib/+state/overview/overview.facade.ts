@@ -994,7 +994,7 @@ export class OverviewFacade {
       const comparisonCalldriversByDay =
         data?.comparisonDateRangeData?.calldriversByDay || [];
 
-      const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
+      const dateFormat = dateRangePeriod === 'weekly' ? 'dddd, MMM D' : 'MMM D';
       const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
 
       if (!visitsByDay) {
@@ -1062,6 +1062,8 @@ export class OverviewFacade {
           prevValue: prevVisits,
           callCurrValue: calls,
           callPrevValue: prevCalls,
+          prevName: comparisonDateRangeSeries[i] ?
+                    dayjs.utc(comparisonDateRangeSeries[i].date).locale(lang).format(dateFormat) : ''
         };
       });
 
