@@ -546,9 +546,7 @@ export class SearchAssessmentService {
     if (searchAssessmentData.length === 0)
       return;
 
-    return await this.searchAssessmentModel
-      .insertMany(searchAssessmentData)
-      .then(() => this.logger.log('Successfully updated the data'));
+    await this.searchAssessmentModel.insertMany(searchAssessmentData)
   }
 
   async deleteSearchAssessment(lang: lang = 'en') {
