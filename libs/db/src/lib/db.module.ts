@@ -38,6 +38,7 @@ export const models = {
   tasks: { model: Task, schema: TaskSchema },
   uxTests: { model: UxTest, schema: UxTestSchema },
   projects: { model: Project, schema: ProjectSchema },
+  searchAssessment: { model: SearchAssessment, schema: SearchAssessmentSchema },
   aaItemIds: { model: AAItemId, schema: AAItemIdSchema },
 } as const;
 

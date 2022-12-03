@@ -220,6 +220,13 @@
   "Launch date": "Date de lancement",
   "Average test success rate": "Taux moyen de réussite aux tests",
   "Average success rate": "Taux de réussite moyen",
+  "Search term language": "Langue du terme recherché",
+  "Pass": "Passer",
+  "Fail": "Échouer",
+  "Targeted URL": "URL ciblée",
+  "SAT-title": "Évaluation des principaux termes de recherche (anglais et français) de Canada.ca",
+  "English": "Anglais",
+  "French": "Français",
 
   "Projects in progress": "Projets en cours",
   "Projects in planning": "Projets en planification",

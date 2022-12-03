@@ -618,6 +618,7 @@ async function getOverviewMetrics(
       visits: 1,
       position: 1,
       expected_result: 1,
+      lang: 1,
     })
     .exec();
 

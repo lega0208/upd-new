@@ -8,3 +8,4 @@ export * from './schemas/calldrivers.schema';
 export * from './schemas/feedback.schema';
 export * from './schemas/pages-list.schema';
 export * from './schemas/aa_item_ids.schema';
+export * from './schemas/search-assessment.schema';

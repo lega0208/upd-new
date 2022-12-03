@@ -27,6 +27,10 @@ export class UpdateService {
     try {
       this.isRunning = true;
 
+      if (new Date().getDay() === 0) {
+        await this.dbUpdateService.updateSAT();
+      }
+
       await this.dbUpdateService.updateAll();
 
       await this.dataIntegrityService.fillMissingData();

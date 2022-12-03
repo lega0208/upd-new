@@ -20,6 +20,7 @@ import {
   DateType,
   queryDateFormat,
   SearchAnalyticsClient,
+  SearchAssessmentService,
   withRetry,
 } from '@dua-upd/external-data';
 import { AsyncLogTiming, wait } from '@dua-upd/utils-common';
@@ -46,6 +47,7 @@ export class DbUpdateService {
     private pagesService: PageUpdateService,
     private pageMetricsService: PageMetricsService,
     private internalSearchService: InternalSearchTermsService,
+    private searchAssessmentService: SearchAssessmentService,
     @InjectModel(Overall.name, 'defaultConnection')
     private overallMetricsModel: Model<OverallDocument>,
     @InjectModel(Page.name, 'defaultConnection')
@@ -55,6 +57,13 @@ export class DbUpdateService {
     @InjectModel(PagesList.name, 'defaultConnection')
     private pagesListModel: Model<PagesListDocument>
   ) {}
+
+  async updateSAT() {
+    this.logger.log('Starting search assessment...');
+    await this.searchAssessmentService.upsertPreviousSearchAssessment();
+    await this.searchAssessmentService.getLatestSearchAssessment();
+    this.logger.log('Search assessment successfully updated.');
+  }
 
   async updateAll() {
     this.logger.log('Starting database updates...');

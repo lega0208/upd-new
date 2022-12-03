@@ -28,7 +28,7 @@ export class SearchAssessment {
   pass = false;
 
   @Prop({ type: Number, required: true, index: true })
-  visits = 0;
+  clicks = 0;
 }
 
 export const SearchAssessmentSchema =
@@ -56,7 +56,7 @@ SearchAssessmentSchema.statics['getSAT'] = async function (
       expected_url: 1,
       expected_position: 1,
       pass: 1,
-      visits: 1,
+      clicks: 1,
     })
     .exec();
 };

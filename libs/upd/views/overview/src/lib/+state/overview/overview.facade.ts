@@ -793,7 +793,37 @@ export class OverviewFacade {
   ]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
-      const datas = data?.dateRangeData?.searchAssessmentData.map((d) => {
+      const searchAssessment = data?.dateRangeData?.searchAssessmentData.map(
+        (d) => {
+          const isEnglish = d.lang === 'en';
+          const rank = isFinite(d.position) ? Math.round(d.position) : '';
+          const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
+          const url = d.expected_result?.replace(/^https:\/\//i, '');
+
+            return {
+              lang: isEnglish ? this.i18n.service.translate('English',lang) : this.i18n.service.translate('French',lang),
+              query: d.query,
+              url: url,
+              position: rank,
+              pass: pass,
+              clicks: d.clicks,
+            };
+        }
+      )
+      .sort((a, b) => 
+      a.lang.localeCompare(b.lang) ||
+      b.clicks - a.clicks);
+
+      return [...(searchAssessment || [])];
+    })
+  );
+
+  comparisonSearchAssessmentData$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      return data?.comparisonDateRangeData?.searchAssessmentData.map((d) => {
         const rank = isFinite(d.position) ? Math.round(d.position) : '';
         const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
         const url = d.expected_result?.replace(/^https:\/\//i, '');
@@ -802,12 +832,14 @@ export class OverviewFacade {
           url: url,
           position: rank,
           pass: pass,
+          clicks: d.clicks,
         };
-      });
-
-      return datas;
+      })
+      .sort((a, b) => 
+      b.clicks - a.clicks);
     })
   );
+  
 
   comparisonFeedbackTable$ = combineLatest([
     this.overviewData$,

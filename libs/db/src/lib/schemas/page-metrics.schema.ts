@@ -227,9 +227,9 @@ PageMetricsSchema.index(
   { background: true, partialFilterExpression: { page: { $exists: true } } }
 );
 
-// export function getPageMetricsModel() {
-//   return model(PageMetrics.name, PageMetricsSchema);
-// }
+export function getPageMetricsModel() {
+  return model(PageMetrics.name, PageMetricsSchema);
+}
 
 export type MetricsConfig<T> = {
   [key in AccumulatorOperator]?: keyof Partial<T>;

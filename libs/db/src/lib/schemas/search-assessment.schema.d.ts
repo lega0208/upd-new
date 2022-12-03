@@ -15,9 +15,14 @@ export declare class SearchAssessment {
   expected_result?: string;
   expected_position?: number;
   pass?: boolean;
-  visits: number;
+  clicks: number;
 }
-export declare const SearchAssessmentSchema: import('mongoose').Schema<Document<SearchAssessment, any, any>,Model<Document<SearchAssessment, any, any>, any, any, any>, {}, {}>;
+export declare const SearchAssessmentSchema: import('mongoose').Schema<
+  Document<SearchAssessment, any, any>,
+  Model<Document<SearchAssessment, any, any>, any, any, any>,
+  {},
+  {}
+>;
 export declare function getSearchAssessmentModel(): Model<
   Document<SearchAssessment>
 >;

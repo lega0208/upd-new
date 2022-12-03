@@ -5,11 +5,9 @@ import { I18nFacade } from '@dua-upd/upd/state';
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { GetTableProps } from '@dua-upd/utils-common';
+import { createCategoryConfig } from '@dua-upd/upd/utils';
 
-type searchAssessmentColTypes = GetTableProps<
-  OverviewSearchAnalyticsComponent,
-  'SearchAssessment$'
->;
+type searchAssessmentColTypes = GetTableProps<OverviewSearchAnalyticsComponent, 'searchAssessmentData$'>
 
 @Component({
   selector: 'upd-overview-search-analytics',
@@ -29,10 +27,10 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
   gscAveragePercentChange$ = this.overviewService.avgRankPercentChange$;
 
   GSCSearchTerms$ = this.overviewService.top10GSC$;
-  SearchAssessment$ = this.overviewService.searchAssessmentData$;
+  searchAssessmentData$ = this.overviewService.searchAssessmentData$;
 
   GSCSearchTermsCols: ColumnConfig<GscSearchTermsRow>[] = [];
-  SearchAssessmentCols: ColumnConfig<searchAssessmentColTypes>[] = [];
+  searchAssessmentCols: ColumnConfig<searchAssessmentColTypes>[] = [];
 
   constructor(
     private overviewService: OverviewFacade,
@@ -40,47 +38,86 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
-      // this.CanSearchTermsCols = [
-      //   { field: 'Search terms', header: this.i18n.service.translate('search-terms', lang) },
-      //   { field: 'Clicks', header: this.i18n.service.translate('clicks', lang) },
-      //   { field: 'Comparison', header: this.i18n.service.translate('comparison', lang) }
-      // ];
-      this.GSCSearchTermsCols = [
-        { field: '_id', header: this.i18n.service.translate('search-terms', lang) },
-        { field: 'clicks', header: this.i18n.service.translate('clicks', lang), pipe: 'number' },
-        { field: 'percentChange', header: this.i18n.service.translate('comparison', lang), pipe: 'percent' },
-        { field: 'impressions', header: this.i18n.service.translate('impressions', lang), pipe: 'number' },
-        { field: 'ctr', header: this.i18n.service.translate('ctr', lang), pipe: 'percent' },
-        {
-          field: 'position',
-          header: this.i18n.service.translate('position', lang),
-          pipe: 'number',
-          pipeParam: '1.0-2',
-        }
-      ];
-
-      this.SearchAssessmentCols = [
-        {
-          field: 'query',
-          header: this.i18n.service.translate('search-terms', lang),
-        },
-        { field: 'pass', header: this.i18n.service.translate('result', lang) },
-        {
-          field: 'url',
-          header: this.i18n.service.translate('url', lang),
-          type: 'link',
-          typeParams: {
-            external: true,
-            link: 'url',
+    combineLatest([this.searchAssessmentData$, this.currentLang$]).subscribe(
+      ([data, lang]) => {
+        // this.CanSearchTermsCols = [
+        //   { field: 'Search terms', header: this.i18n.service.translate('search-terms', lang) },
+        //   { field: 'Clicks', header: this.i18n.service.translate('clicks', lang) },
+        //   { field: 'Comparison', header: this.i18n.service.translate('comparison', lang) }
+        // ];
+        this.GSCSearchTermsCols = [
+          {
+            field: '_id',
+            header: this.i18n.service.translate('search-terms', lang),
           },
-        },
-        {
-          field: 'position',
-          header: this.i18n.service.translate('position', lang),
-        },
-      ];
-    });
+          {
+            field: 'clicks',
+            header: this.i18n.service.translate('clicks', lang),
+            pipe: 'number',
+          },
+          {
+            field: 'percentChange',
+            header: this.i18n.service.translate('comparison', lang),
+            pipe: 'percent',
+          },
+          {
+            field: 'impressions',
+            header: this.i18n.service.translate('impressions', lang),
+            pipe: 'number',
+          },
+          {
+            field: 'ctr',
+            header: this.i18n.service.translate('ctr', lang),
+            pipe: 'percent',
+          },
+          {
+            field: 'position',
+            header: this.i18n.service.translate('position', lang),
+            pipe: 'number',
+            pipeParam: '1.0-2',
+          },
+        ];
+
+        this.searchAssessmentCols = [
+          {
+            field: 'query',
+            header: this.i18n.service.translate('search-terms', lang),
+          },
+
+          {
+            field: 'lang',
+            header: this.i18n.service.translate('Search term language', lang),
+            filterConfig: {
+              type: 'category',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'lang',
+              }),
+            },
+          },
+          {
+            field: 'url',
+            header: this.i18n.service.translate('Targeted URL', lang),
+            type: 'link',
+            typeParams: {
+              external: true,
+              link: 'url',
+            },
+          },
+          {
+            field: 'position',
+            header: this.i18n.service.translate('position', lang),
+          },
+          {
+            field: 'pass',
+            header: this.i18n.service.translate('Result', lang),
+            type: 'text',
+            typeParam: 'passFail',
+          },
+        ];
+      }
+    );
   }
 }
 
