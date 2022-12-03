@@ -70,6 +70,7 @@ export class OverviewSummaryComponent implements OnInit {
     callCurrValue: string;
     prevValue: string;
     callPrevValue: string;
+    prevName: string;
   }>[] = [];
   taskSurveyCols: ColumnConfig[] = [];
 
@@ -120,6 +121,7 @@ export class OverviewSummaryComponent implements OnInit {
           }),
           pipe: 'number',
         },
+        { field: 'prevName', header: this.i18n.service.translate('Dates', lang) },
         {
           field: 'prevValue',
           header: this.i18n.service.translate('Visits for ', lang, {
