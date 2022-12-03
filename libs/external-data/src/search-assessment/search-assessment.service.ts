@@ -84,8 +84,6 @@ export class SearchAssessmentService {
   async upsertPreviousSearchAssessment() {
     await connect(getDbConnectionString());
 
-    this.logger.log(new Date().getDay());
-
     for (const lang of ['en', 'fr'] as ('en' | 'fr')[]) {
       const records = await this.getCurrentSearchAssessment(lang);
       let startDate = dayjs(records[0]?.fields.Date || '2022-11-13').startOf(
