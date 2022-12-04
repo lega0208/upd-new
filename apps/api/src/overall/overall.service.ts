@@ -605,7 +605,7 @@ async function getOverviewMetrics(
     .match({ date: dateQuery })
     .group({
       _id: { $toLower: '$query' },
-      visits: { $sum: '$visits' },
+      clicks: { $sum: '$clicks' },
       position: { $avg: '$expected_position' },
       doc: { $push: '$$ROOT' },
     })
@@ -615,7 +615,7 @@ async function getOverviewMetrics(
     .project({
       query: '$_id',
       _id: 0,
-      visits: 1,
+      clicks: 1,
       position: 1,
       expected_result: 1,
       lang: 1,

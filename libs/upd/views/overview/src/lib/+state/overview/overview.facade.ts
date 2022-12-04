@@ -294,10 +294,7 @@ export class OverviewFacade {
         if (
           comparisonVisitsByDay.find(
             (d) =>
-            dayjs
-                .utc(d.date)
-                .add(1, dateSelection)
-                .format('YYYY-MM-DD') ===
+              dayjs.utc(d.date).add(1, dateSelection).format('YYYY-MM-DD') ===
               dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
@@ -381,11 +378,8 @@ export class OverviewFacade {
         if (
           comparisonCalldriversByDay.find(
             (d) =>
-            dayjs
-            .utc(d.date)
-            .add(1, dateSelection)
-            .format('YYYY-MM-DD') ===
-          dayjs.utc(data.date).format('YYYY-MM-DD')
+              dayjs.utc(d.date).add(1, dateSelection).format('YYYY-MM-DD') ===
+              dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
           prevCalls = comparisonCalldriversByDay[cntPrevCalls].calls;
@@ -659,11 +653,8 @@ export class OverviewFacade {
         if (
           comparisonDateRangeSeries.find(
             (d) =>
-            dayjs
-            .utc(d.date)
-            .add(1, dateSelection)
-            .format('YYYY-MM-DD') ===
-          dayjs.utc(data.date).format('YYYY-MM-DD')
+              dayjs.utc(d.date).add(1, dateSelection).format('YYYY-MM-DD') ===
+              dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
           prevVisits = comparisonDateRangeSeries[cntPrevVisits].visits;
@@ -672,11 +663,8 @@ export class OverviewFacade {
         if (
           comparisonDateRangeSeriesCall.find(
             (d) =>
-            dayjs
-            .utc(d.date)
-            .add(1, dateSelection)
-            .format('YYYY-MM-DD') ===
-          dayjs.utc(data.date).format('YYYY-MM-DD')
+              dayjs.utc(d.date).add(1, dateSelection).format('YYYY-MM-DD') ===
+              dayjs.utc(data.date).format('YYYY-MM-DD')
           )
         ) {
           prevCalls = comparisonDateRangeSeriesCall[cntPrevCalls].calls;
@@ -688,8 +676,12 @@ export class OverviewFacade {
           prevValue: prevVisits,
           callCurrValue: calls,
           callPrevValue: prevCalls,
-          prevName: comparisonDateRangeSeries[i] ?
-                    dayjs.utc(comparisonDateRangeSeries[i].date).locale(lang).format(dateFormat) : ''
+          prevName: comparisonDateRangeSeries[i]
+            ? dayjs
+                .utc(comparisonDateRangeSeries[i].date)
+                .locale(lang)
+                .format(dateFormat)
+            : '',
         };
       });
 
@@ -795,26 +787,25 @@ export class OverviewFacade {
   ]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
-      const searchAssessment = data?.dateRangeData?.searchAssessmentData.map(
-        (d) => {
+      const searchAssessment = data?.dateRangeData?.searchAssessmentData
+        .map((d) => {
           const isEnglish = d.lang === 'en';
           const rank = isFinite(d.position) ? Math.round(d.position) : '';
           const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
           const url = d.expected_result?.replace(/^https:\/\//i, '');
 
-            return {
-              lang: isEnglish ? this.i18n.service.translate('English',lang) : this.i18n.service.translate('French',lang),
-              query: d.query,
-              url: url,
-              position: rank,
-              pass: pass,
-              clicks: d.clicks,
-            };
-        }
-      )
-      .sort((a, b) => 
-      a.lang.localeCompare(b.lang) ||
-      b.clicks - a.clicks);
+          return {
+            lang: isEnglish
+              ? this.i18n.service.translate('English', lang)
+              : this.i18n.service.translate('French', lang),
+            query: d.query,
+            url: url,
+            position: rank,
+            pass: pass,
+            clicks: d.clicks,
+          };
+        })
+        .sort((a, b) => a.lang.localeCompare(b.lang) || b.clicks - a.clicks);
 
       return [...(searchAssessment || [])];
     })
@@ -825,23 +816,26 @@ export class OverviewFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
-      return data?.comparisonDateRangeData?.searchAssessmentData.map((d) => {
-        const rank = isFinite(d.position) ? Math.round(d.position) : '';
-        const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
-        const url = d.expected_result?.replace(/^https:\/\//i, '');
-        return {
-          query: d.query,
-          url: url,
-          position: rank,
-          pass: pass,
-          clicks: d.clicks,
-        };
-      })
-      .sort((a, b) => 
-      b.clicks - a.clicks);
+      return data?.comparisonDateRangeData?.searchAssessmentData
+        .map((d) => {
+          const isEnglish = d.lang === 'en';
+          const rank = isFinite(d.position) ? Math.round(d.position) : '';
+          const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
+          const url = d.expected_result?.replace(/^https:\/\//i, '');
+          return {
+            lang: isEnglish
+              ? this.i18n.service.translate('English', lang)
+              : this.i18n.service.translate('French', lang),
+            query: d.query,
+            url: url,
+            position: rank,
+            pass: pass,
+            clicks: d.clicks,
+          };
+        })
+        .sort((a, b) => a.lang.localeCompare(b.lang) || b.clicks - a.clicks);
     })
   );
-  
 
   comparisonFeedbackTable$ = combineLatest([
     this.overviewData$,
@@ -998,14 +992,16 @@ export class OverviewFacade {
     )
   );
 
-  top5IncreasedCalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
-    { field: 'topic', header: 'topic', translate: true },
-    { field: 'subtopic', header: 'sub-topic', translate: true },
-    { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
-    { field: 'calls', header: 'calls', pipe: 'number' },
-    { field: 'change', header: 'comparison', pipe: 'percent' },
-  ]);
-
+  top5IncreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
+    this.i18n.service,
+    [
+      { field: 'topic', header: 'topic', translate: true },
+      { field: 'subtopic', header: 'sub-topic', translate: true },
+      { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
+      { field: 'calls', header: 'calls', pipe: 'number' },
+      { field: 'change', header: 'comparison', pipe: 'percent' },
+    ]
+  );
 
   top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
@@ -1019,13 +1015,16 @@ export class OverviewFacade {
     )
   );
 
-  top5DecreasedCalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
-    { field: 'topic', header: 'topic', translate: true },
-    { field: 'subtopic', header: 'sub-topic', translate: true },
-    { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
-    { field: 'calls', header: 'calls', pipe: 'number' },
-    { field: 'change', header: 'comparison', pipe: 'percent' },
-  ]);
+  top5DecreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
+    this.i18n.service,
+    [
+      { field: 'topic', header: 'topic', translate: true },
+      { field: 'subtopic', header: 'sub-topic', translate: true },
+      { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
+      { field: 'calls', header: 'calls', pipe: 'number' },
+      { field: 'change', header: 'comparison', pipe: 'percent' },
+    ]
+  );
 
   error$ = this.store.select(OverviewSelectors.selectOverviewError);
 

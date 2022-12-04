@@ -1,8 +1,9 @@
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AdobeAnalyticsClient, toQueryFormat } from '../lib/adobe-analytics';
 import { AirtableClient } from '../lib/airtable';
 import { SearchAssessmentService } from './search-assessment.service';
+import { ConsoleLogger } from '@nestjs/common';
+import { DbModule, DbService } from '@dua-upd/db';
 
 jest.setTimeout(900000000);
 
@@ -15,23 +16,18 @@ describe('SearchAssessmentService', () => {
         ConfigModule.forRoot({
           isGlobal: true,
         }),
+        DbModule,
       ],
       providers: [
-        {
-          provide: AdobeAnalyticsClient.name,
-          useValue: new AdobeAnalyticsClient(),
-        },
         {
           provide: AirtableClient.name,
           useValue: new AirtableClient(),
         },
         SearchAssessmentService,
+        ConsoleLogger,
+        DbService,
       ],
-      exports: [
-        AdobeAnalyticsClient.name,
-        AirtableClient.name,
-        SearchAssessmentService,
-      ],
+      exports: [AirtableClient.name, SearchAssessmentService, ConsoleLogger],
     }).compile();
 
     service = module.get<SearchAssessmentService>(SearchAssessmentService);
@@ -40,18 +36,25 @@ describe('SearchAssessmentService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  // it('should send mail', async () => {
+  //   const result = await service.email('en', 6, '2021-01-01');
+  //   console.log(result);
+  //   expect(result).toBeDefined();
+  // });
   // it('should remove', async () => {
   //   const res = await service.archiveSearchAssessmentData();
   //   return expect(res).not.toBeDefined();
   // });
 
-  it('should remove', async () => {
-    const res = await service.updateSearchAssessmentData();
-    return expect(res).not.toBeDefined();
+  it('should upsert', async () => {
+    const res = await service.upsertPreviousSearchAssessment();
+    const res2 = await service.getLatestSearchAssessment();
+    return expect(res2).not.toBeDefined();
   });
 
-  // it('should remove', async () => {
-  //   const res = await service.deleteSearchAssessment();
+  // it('should get latest', async () => {
+  //   const res = await service.getLatestSearchAssessment();
   //   return expect(res).not.toBeDefined();
   // });
 

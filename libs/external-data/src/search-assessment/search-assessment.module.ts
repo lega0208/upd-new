@@ -1,30 +1,26 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AdobeAnalyticsClient } from '../lib/adobe-analytics';
 import { AirtableClient } from '../lib/airtable';
 import { SearchAssessmentService } from './search-assessment.service';
+import { ConsoleLogger } from '@nestjs/common';
+import { DbModule, DbService } from '@dua-upd/db';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    DbModule,
   ],
   providers: [
-    {
-      provide: AdobeAnalyticsClient.name,
-      useValue: new AdobeAnalyticsClient(),
-    },
     {
       provide: AirtableClient.name,
       useValue: new AirtableClient(),
     },
     SearchAssessmentService,
+    ConsoleLogger,
+    DbService,
   ],
-  exports: [
-    AdobeAnalyticsClient.name,
-    AirtableClient.name,
-    SearchAssessmentService,
-  ],
+  exports: [AirtableClient.name, SearchAssessmentService, ConsoleLogger],
 })
 export class SearchAssessmentModule {}
