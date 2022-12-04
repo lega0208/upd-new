@@ -27,14 +27,14 @@ export class UpdateService {
     try {
       this.isRunning = true;
 
-      if (new Date().getDay() === 0) {
-        await this.dbUpdateService.updateSAT();
-      }
-
       await this.dbUpdateService.updateAll();
 
       await this.dataIntegrityService.fillMissingData();
       await this.dataIntegrityService.cleanPageUrls();
+      
+      if (new Date().getDay() === 0) {
+        await this.dbUpdateService.updateSAT();
+      }
     } catch (error) {
       this.logger.error(error);
     }
