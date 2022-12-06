@@ -229,8 +229,12 @@ export class AirtableClient {
         }
       : {};
 
-    return await this.insertRecords(bases.SEARCH_ASSESSMENT, `${table}`, data);
-  }
+
+    return await this.insertRecords(
+      bases.SEARCH_ASSESSMENT,
+      `${table}`,
+      data
+    );
 
   async updateSearchAssessment(
     data: RecordData<Partial<FieldSet>>[],

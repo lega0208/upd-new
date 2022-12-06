@@ -1062,8 +1062,12 @@ export class OverviewFacade {
           prevValue: prevVisits,
           callCurrValue: calls,
           callPrevValue: prevCalls,
-          prevName: comparisonDateRangeSeries[i] ?
-                    dayjs.utc(comparisonDateRangeSeries[i].date).locale(lang).format(dateFormat) : ''
+          prevName: comparisonDateRangeSeries[i]
+            ? dayjs
+                .utc(comparisonDateRangeSeries[i].date)
+                .locale(lang)
+                .format(dateFormat)
+            : '',
         };
       });
 
@@ -1191,26 +1195,24 @@ export class OverviewFacade {
   ]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
-      const searchAssessment = data?.dateRangeData?.searchAssessmentData.map(
-        (d) => {
+      const searchAssessment = data?.dateRangeData?.searchAssessmentData
+        .map((d) => {
           const isEnglish = d.lang === 'en';
           const rank = isFinite(d.position) ? Math.round(d.position) : '';
           const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
           const url = d.expected_result?.replace(/^https:\/\//i, '');
-
-            return {
-              lang: isEnglish ? this.i18n.service.translate('English',lang) : this.i18n.service.translate('French',lang),
-              query: d.query,
-              url: url,
-              position: rank,
-              pass: pass,
-              clicks: d.clicks,
-            };
-        }
-      )
-      .sort((a, b) => 
-      a.lang.localeCompare(b.lang) ||
-      b.clicks - a.clicks);
+          return {
+            lang: isEnglish
+              ? this.i18n.service.translate('English', lang)
+              : this.i18n.service.translate('French', lang),
+            query: d.query,
+            url: url,
+            position: rank,
+            pass: pass,
+            clicks: d.clicks,
+          };
+        })
+        .sort((a, b) => a.lang.localeCompare(b.lang) || b.clicks - a.clicks);
 
       return [...(searchAssessment || [])];
     })

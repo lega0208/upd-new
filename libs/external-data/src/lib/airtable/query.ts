@@ -33,7 +33,7 @@ export type FieldRecord = {
   'Most Clicks Position'?: number;
   Rank?: number;
   Date?: string;
-  Visits?: number;
+  Clicks?: number;
 };
 
 export type CreatedFieldRecord = {

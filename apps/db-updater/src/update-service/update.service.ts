@@ -35,6 +35,10 @@ export class UpdateService {
 
       await this.dataIntegrityService.fillMissingData();
       await this.dataIntegrityService.cleanPageUrls();
+      
+      if (new Date().getDay() === 0) {
+        await this.dbUpdateService.updateSAT();
+      }
     } catch (error) {
       this.logger.error(error);
     }

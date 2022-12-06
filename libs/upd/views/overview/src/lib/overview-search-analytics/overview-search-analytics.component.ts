@@ -6,7 +6,8 @@ import { LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
-import { searchAssessmentColTypes } from '@dua-upd/types-common';
+
+type searchAssessmentColTypes = GetTableProps<OverviewSearchAnalyticsComponent, 'searchAssessmentData$'>
 
 @Component({
   selector: 'upd-overview-search-analytics',
@@ -26,10 +27,11 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
   gscAveragePercentChange$ = this.overviewService.avgRankPercentChange$;
 
   GSCSearchTerms$ = this.overviewService.top10GSC$;
-  SearchAssessment$ = this.overviewService.searchAssessmentData$;
+
+  searchAssessmentData$ = this.overviewService.searchAssessmentData$;
 
   GSCSearchTermsCols: ColumnConfig<GscSearchTermsRow>[] = [];
-  SearchAssessmentCols: ColumnConfig<searchAssessmentColTypes>[] = [];
+  searchAssessmentCols: ColumnConfig<searchAssessmentColTypes>[] = [];
 
   constructor(
     private overviewService: OverviewFacade,
@@ -37,7 +39,7 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    combineLatest([this.SearchAssessment$, this.currentLang$]).subscribe(
+    combineLatest([this.searchAssessmentData$, this.currentLang$]).subscribe(
       ([data, lang]) => {
         // this.CanSearchTermsCols = [
         //   { field: 'Search terms', header: this.i18n.service.translate('search-terms', lang) },
@@ -77,14 +79,26 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
           },
         ];
 
-        this.SearchAssessmentCols = [
+        this.searchAssessmentCols = [
           {
             field: 'query',
             header: this.i18n.service.translate('search-terms', lang),
           },
           {
+            field: 'lang',
+            header: this.i18n.service.translate('Search term language', lang),
+            filterConfig: {
+              type: 'category',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'lang',
+              }),
+            },
+          },
+          {
             field: 'url',
-            header: this.i18n.service.translate('url', lang),
+            header: this.i18n.service.translate('Targeted URL', lang),
             type: 'link',
             typeParams: {
               external: true,
@@ -92,14 +106,14 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
             },
           },
           {
-            field: 'pass',
-            header: this.i18n.service.translate('result', lang),
-            type: 'text',
-            typeParam: 'passFail',
-          },
-          {
             field: 'position',
             header: this.i18n.service.translate('position', lang),
+          },
+          {
+            field: 'pass',
+            header: this.i18n.service.translate('Result', lang),
+            type: 'text',
+            typeParam: 'passFail',
           },
         ];
       }

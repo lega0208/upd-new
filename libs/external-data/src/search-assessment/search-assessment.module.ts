@@ -10,7 +10,7 @@ import { DbModule, DbService } from '@dua-upd/db';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    DbModule
+    DbModule,
   ],
   providers: [
     {
@@ -19,12 +19,8 @@ import { DbModule, DbService } from '@dua-upd/db';
     },
     SearchAssessmentService,
     ConsoleLogger,
-    DbService
+    DbService,
   ],
-  exports: [
-    AirtableClient.name,
-    SearchAssessmentService,
-    ConsoleLogger,
-  ],
+  exports: [AirtableClient.name, SearchAssessmentService, ConsoleLogger],
 })
 export class SearchAssessmentModule {}

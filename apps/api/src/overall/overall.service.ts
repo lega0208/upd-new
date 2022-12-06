@@ -619,7 +619,7 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
-    const searchAssessmentData = await searchAssessmentModel
+  const searchAssessmentData = await searchAssessmentModel
     .aggregate()
     .match({ date: dateQuery })
     .group({

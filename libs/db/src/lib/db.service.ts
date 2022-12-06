@@ -127,9 +127,12 @@ export class DbService {
       }
 
       if (bulkWriteOps.length) {
-        const writeResults = await this.pageMetrics.bulkWrite(bulkWriteOps as AnyBulkWriteOperation<PageMetrics>[], {
-          ordered: false,
-        });
+        const writeResults = await this.pageMetrics.bulkWrite(
+          bulkWriteOps as AnyBulkWriteOperation<PageMetrics>[],
+          {
+            ordered: false,
+          }
+        );
         console.log('validateAllPageRefs writeResults:');
         logJson(writeResults);
       }
@@ -264,7 +267,10 @@ export class DbService {
 
     console.log(`${bulkWriteOps.length} bulkWriteOps`);
 
-    await this.pageMetrics.bulkWrite(bulkWriteOps as AnyBulkWriteOperation<PageMetrics>[], { ordered: false });
+    await this.pageMetrics.bulkWrite(
+      bulkWriteOps as AnyBulkWriteOperation<PageMetrics>[],
+      { ordered: false }
+    );
   }
 
   @AsyncLogTiming

@@ -7,4 +7,5 @@ export * from './lib/airtable';
 export * from './search-assessment/search-assessment.module';
 export * from './search-assessment/search-assessment.service';
 export * from './lib/utils';
+export * from './search-assessment/search-assessment.service';
 export type { DateRange } from './lib/types';

@@ -50,12 +50,12 @@
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [filter]="false"
+        [filter]="true"
         [sort]="true"
         [pagination]="true"
-        [data]="(SearchAssessment$ | async) || []"
-        [cols]="SearchAssessmentCols"
-        [title]="'search-assessment'"
+        [data]="(searchAssessmentData$ | async) || []"
+        [cols]="searchAssessmentCols"
+        [title]="'SAT-title'"
         [tooltip]="'tooltip-search-assessment'"
       >
       </upd-data-table-card>
