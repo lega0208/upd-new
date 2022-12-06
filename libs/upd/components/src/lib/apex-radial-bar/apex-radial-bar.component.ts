@@ -1,4 +1,28 @@
 import {
+  ApexAnnotations,
+  ApexAxisChartSeries,
+  ApexChart,
+  ApexDataLabels,
+  ApexFill,
+  ApexForecastDataPoints,
+  ApexGrid,
+  ApexLegend,
+  ApexMarkers,
+  ApexNoData,
+  ApexNonAxisChartSeries,
+  ApexPlotOptions,
+  ApexResponsive,
+  ApexStates,
+  ApexStroke,
+  ApexTheme,
+  ApexTitleSubtitle,
+  ApexTooltip,
+  ApexXAxis,
+  ApexYAxis,
+  ChartComponent,
+  ChartType
+} from 'ng-apexcharts';
+import {
   ChangeDetectionStrategy,
   Component,
   Input,
@@ -7,17 +31,41 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
-import { ChartComponent, ChartType } from 'ng-apexcharts';
 import { ColumnConfig } from '../data-table-styles/types';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import { ChartOptions } from '../apex-charts/chartbuilder';
 import { KpiObjectiveStatus } from '../data-card/data-card.component';
 import { formatPercent } from '@angular/common';
 import {
   defaultKpiObjectiveStatusConfig,
   defaultKpiObjectiveCriteria,
 } from './kpi-objectives';
+
+type ChartOptions = {
+  annotations?: ApexAnnotations;
+  chart?: ApexChart;
+  colors?: string[];
+  dataLabels?: ApexDataLabels;
+  fill?: ApexFill;
+  forecastDataPoints?: ApexForecastDataPoints;
+  grid?: ApexGrid;
+  labels?: string[];
+  legend?: ApexLegend;
+  markers?: ApexMarkers;
+  noData?: ApexNoData;
+  plotOptions?: ApexPlotOptions;
+  responsive?: ApexResponsive[];
+  series: ApexAxisChartSeries | ApexNonAxisChartSeries;
+  states?: ApexStates;
+  stroke?: ApexStroke;
+  subtitle?: ApexTitleSubtitle;
+  theme?: ApexTheme;
+  title?: ApexTitleSubtitle;
+  tooltip?: ApexTooltip;
+  xaxis?: ApexXAxis;
+  yaxis?: ApexYAxis | ApexYAxis[];
+};
+
 @Component({
   selector: 'upd-apex-radial-bar',
   templateUrl: './apex-radial-bar.component.html',

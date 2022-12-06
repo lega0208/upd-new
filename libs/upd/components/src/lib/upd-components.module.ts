@@ -48,7 +48,6 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { CardSecondaryTitleComponent } from './card-secondary-title/card-secondary-title.component';
 import { DataTableExportsComponent } from './data-table-exports/data-table-exports.component';
 import { DropdownComponent } from './dropdown/dropdown.component';
-import { ApexChartsComponent } from './apex-charts/apex-charts.component';
 import { ApexBarLineComponent } from './apex-bar-line/apex-bar-line.component';
 import { ApexRadialBarComponent } from './apex-radial-bar/apex-radial-bar.component';
 import { ApexBarComponent } from './apex-bar/apex-bar.component';
@@ -104,7 +103,6 @@ import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.compon
     CardSecondaryTitleComponent,
     DataTableExportsComponent,
     DropdownComponent,
-    ApexChartsComponent,
     ApexBarLineComponent,
     ApexRadialBarComponent,
     ApexBarComponent,
@@ -139,7 +137,6 @@ import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.compon
     ProjectHeaderComponent,
     CardSecondaryTitleComponent,
     DataTableExportsComponent,
-    ApexChartsComponent,
     ApexBarLineComponent,
     ApexRadialBarComponent,
     ApexBarComponent,
