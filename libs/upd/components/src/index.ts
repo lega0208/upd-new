@@ -22,4 +22,6 @@ export * from './lib/data-table-exports/data-table-exports.component';
 export * from './lib/apex-radial-bar/apex-radial-bar.component';
 export * from './lib/apex-bar/apex-bar.component';
 export * from './lib/apex-spark-line/apex-spark-line.component';
+export * from './lib/apex-bar-line/apex-bar-line.component';
+export * from './lib/apex-donut/apex-donut.component';
 export * from './lib/apex-radial-bar/kpi-objectives';
