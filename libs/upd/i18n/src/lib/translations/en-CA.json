@@ -227,8 +227,10 @@
   "Fail": "Fail",
   "Targeted URL": "Targeted URL",
   "SAT-title": "Top search term assessment (English and French) from Canada.ca",
+  "SAT-tooltip": "Assessment of the Top 100 English and French search terms on canada.ca and their corresponding target URL.",
   "English": "English",
   "French": "French",
+  
   "Projects in progress": "Projects in progress",
   "Projects in planning": "Projects in planning",
   "Projects completed (last 6 months)": "Projects completed (last 6 months)",

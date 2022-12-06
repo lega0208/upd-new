@@ -131,6 +131,9 @@ export class OverallService {
       .sort((a, b) => Number(a.change) - Number(b.change))
       .slice(0, 5);
 
+    
+    const satDateRange = `${dayjs.utc().subtract(2, 'weeks').startOf('week').format('YYYY-MM-DD')}/${dayjs.utc().subtract(2, 'weeks').endOf('week').format('YYYY-MM-DD')}`;
+    const satComparisonDateRange = `${dayjs.utc().subtract(3, 'weeks').startOf('week').format('YYYY-MM-DD')}/${dayjs.utc().subtract(3, 'weeks').endOf('week').format('YYYY-MM-DD')}`;
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -142,7 +145,8 @@ export class OverallService {
         this.pageModel,
         this.searchAssessmentModel,
         this.cacheManager,
-        params.dateRange
+        params.dateRange,
+        satDateRange
       ),
       comparisonDateRangeData: await getOverviewMetrics(
         this.overallModel,
@@ -152,7 +156,8 @@ export class OverallService {
         this.pageModel,
         this.searchAssessmentModel,
         this.cacheManager,
-        params.comparisonDateRange
+        params.comparisonDateRange,
+        satComparisonDateRange
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
       ...(await getUxData(testsSince2018)),
@@ -400,7 +405,8 @@ async function getOverviewMetrics(
   pageModel: Model<PageDocument>,
   searchAssessmentModel: Model<SearchAssessmentDocument>,
   cacheManager: Cache,
-  dateRange: string
+  dateRange: string,
+  satDateRange: string
 ): Promise<OverviewAggregatedData> {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
@@ -408,6 +414,13 @@ async function getOverviewMetrics(
 
   dateQuery.$gte = new Date(startDate);
   dateQuery.$lte = new Date(endDate);
+
+  const [satStartDate, satEndDate] = satDateRange.split('/').map((d) => new Date(d));
+
+  const satDateQuery: FilterQuery<Date> = {};
+
+  satDateQuery.$gte = new Date(satStartDate);
+  satDateQuery.$lte = new Date(satEndDate);
 
   const visitsByDay = await overallModel
     .find({ date: dateQuery }, { _id: 0, date: 1, visits: 1 })
@@ -619,9 +632,10 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
+  
   const searchAssessmentData = await searchAssessmentModel
     .aggregate()
-    .match({ date: dateQuery })
+    .match({ date: satDateQuery })
     .group({
       _id: { $toLower: '$query' },
       clicks: { $sum: '$clicks' },

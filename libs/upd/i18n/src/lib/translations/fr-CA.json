@@ -227,6 +227,7 @@
   "Fail": "Échouer",
   "Targeted URL": "URL ciblée",
   "SAT-title": "Évaluation des principaux termes de recherche (anglais et français) de Canada.ca",
+  "SAT-tooltip": "Évaluation des 100 principaux termes de recherche en anglais et en français sur canada.ca et leur URL cible correspondante.",
   "English": "Anglais",
   "French": "Français",
 
