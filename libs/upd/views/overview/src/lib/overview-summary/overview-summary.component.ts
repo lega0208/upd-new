@@ -54,8 +54,8 @@ export class OverviewSummaryComponent implements OnInit {
 
   callPerVisits$ = this.overviewService.callPerVisits$;
   callComparisonPerVisits$ = this.overviewService.callComparisonPerVisits$;
-  callPercentChange$ = this.overviewService.callPercentChange$;
-  callDifference$ = this.overviewService.callDifference$;
+  apexCallPercentChange$ = this.overviewService.apexCallPercentChange$;
+  apexCallDifference$ = this.overviewService.apexCallDifference$;
 
   pageViews$ = this.overviewService.views$;
   pageViewsPercentChange$ = this.overviewService.viewsPercentChange$;

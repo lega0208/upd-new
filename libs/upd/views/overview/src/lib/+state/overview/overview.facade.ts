@@ -874,6 +874,15 @@ export class OverviewFacade {
   );
 
   callPercentChange$ = combineLatest([
+    this.currentCallVolume$,
+    this.comparisonCallVolume$,
+  ]).pipe(
+    map(([currentCalls, comparisonVisits]) =>
+      percentChange(currentCalls, comparisonVisits)
+    )
+  );
+
+  apexCallPercentChange$ = combineLatest([
     this.callPerVisits$,
     this.callComparisonPerVisits$,
   ]).pipe(
@@ -882,7 +891,7 @@ export class OverviewFacade {
     )
   );
 
-  callDifference$ = combineLatest([
+  apexCallDifference$ = combineLatest([
     this.callPerVisits$,
     this.callComparisonPerVisits$,
   ]).pipe(

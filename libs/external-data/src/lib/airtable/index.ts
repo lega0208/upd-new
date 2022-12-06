@@ -235,7 +235,7 @@ export class AirtableClient {
       `${table}`,
       data
     );
-
+    }
   async updateSearchAssessment(
     data: RecordData<Partial<FieldSet>>[],
     lang: lang = 'en'

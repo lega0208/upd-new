@@ -6,10 +6,10 @@
         [titleTooltip]="'Calls compared to visits tooltip'"
         [series]="(apexCallDrivers$ | async) || []"
         [current]="(callPerVisits$ | async) || 0"
-        [comparison]="(callPercentChange$ | async) || 0"
+        [comparison]="(apexCallPercentChange$ | async) || 0"
         [keyword]="'calls'"
         [scale]="100"
-        [difference]="(callDifference$ | async) || 0"
+        [difference]="(apexCallDifference$ | async) || 0"
         modal="Feedback decreased by {{
           (kpiFeedbackPercentChange$ | async) || 0 | percent
         }} compared to last week"
