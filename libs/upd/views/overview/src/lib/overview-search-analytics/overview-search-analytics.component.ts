@@ -27,6 +27,7 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
   gscAveragePercentChange$ = this.overviewService.avgRankPercentChange$;
 
   GSCSearchTerms$ = this.overviewService.top10GSC$;
+
   searchAssessmentData$ = this.overviewService.searchAssessmentData$;
 
   GSCSearchTermsCols: ColumnConfig<GscSearchTermsRow>[] = [];
@@ -83,7 +84,6 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
             field: 'query',
             header: this.i18n.service.translate('search-terms', lang),
           },
-
           {
             field: 'lang',
             header: this.i18n.service.translate('Search term language', lang),

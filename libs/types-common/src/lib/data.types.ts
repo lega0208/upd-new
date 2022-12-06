@@ -19,7 +19,10 @@ export interface EntityDetailsData<T> extends ViewData<T> {
   title: string;
 }
 
-export type PagesHomeAggregatedData = Pick<Page, '_id' | 'url' | 'title' | 'all_urls'> & {
+export type PagesHomeAggregatedData = Pick<
+  Page,
+  '_id' | 'url' | 'title' | 'all_urls'
+> & {
   visits: number;
 };
 export type PagesHomeData = ViewData<PagesHomeAggregatedData[]>;
@@ -107,6 +110,12 @@ export interface OverviewAggregatedData {
   enquiryLineEService: number;
   visitsByDay: { date: Date; visits: number }[];
   calldriversByDay: { date: Date; calls: number }[];
+  dyfByDay: {
+    date: Date;
+    dyf_yes: number;
+    dyf_no: number;
+    dyf_submit: number;
+  }[];
   calldriversEnquiry: { enquiry_line: string; sum: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
@@ -142,6 +151,15 @@ export type OverviewProject = ProjectsHomeProject & {
 export interface OverviewProjectData
   extends Omit<ProjectsHomeData, 'projects'> {
   projects: OverviewProject[];
+  uxTests: {
+    title: string;
+    date: Date;
+    test_type: string;
+    success_rate: number | null;
+    total_users: number;
+    scenario: string;
+    attachments: AttachmentData[];
+  }[];
 }
 
 export interface OverviewData
@@ -216,6 +234,12 @@ export type ProjectStatus =
   | 'Delayed'
   | 'Unknown';
 
+export interface searchAssessmentColTypes {
+  query: string;
+  url: string;
+  position: string | number;
+  pass: string;
+}
 export interface ProjectsHomeProject {
   _id: string;
   title: string;
@@ -269,7 +293,7 @@ export interface ProjectsDetailsData
   extends EntityDetailsData<ProjectDetailsAggregatedData> {
   status: ProjectStatus;
   avgTaskSuccessFromLastTest: number | null;
-  avgSuccessPercentChange: number | null
+  avgSuccessPercentChange: number | null;
   dateFromLastTest: Date;
   taskSuccessByUxTest: (Partial<UxTest> & { tasks: string })[];
   tasks: Pick<Task, '_id' | 'title'>[];

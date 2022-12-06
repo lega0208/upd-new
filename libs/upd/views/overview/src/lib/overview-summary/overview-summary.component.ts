@@ -1,5 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import {
+  ColumnConfig,
+  searchKpiObjectiveCriteria,
+  uxTestsKpiObjectiveCriteria,
+  feedbackKpiObjectiveCriteria,
+} from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
@@ -9,22 +14,48 @@ import { combineLatest } from 'rxjs';
   selector: 'upd-overview-summary',
   templateUrl: './overview-summary.component.html',
   styleUrls: ['./overview-summary.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OverviewSummaryComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
   chartMerge$ = this.overviewService.chartMerge$;
+  searchKpiObjectiveCriteria = searchKpiObjectiveCriteria;
+  uxTestsKpiObjectiveCriteria = uxTestsKpiObjectiveCriteria;
+  feedbackKpiObjectiveCriteria = feedbackKpiObjectiveCriteria;
+
+  currentCallVolume$ = this.overviewService.currentCallVolume$;
 
   loaded$ = this.overviewService.loaded$;
   loading$ = this.overviewService.loading$;
   error$ = this.overviewService.error$;
+
+  apex$ = this.overviewService.apex$;
+
+  currentKpiFeedback$ = this.overviewService.currentKpiFeedback$;
+  kpiFeedbackPercentChange$ = this.overviewService.kpiFeedbackPercentChange$;
+  kpiFeedbackDifference$ = this.overviewService.kpiFeedbackDifference$;
+
+  kpiUXTests$ = this.overviewService.kpiUXTests$;
+
+  kpiSearchAssessment$ = this.overviewService.currentKpiSearchAssessment$;
+  kpiSearchAssessmentPercentChange$ =
+    this.overviewService.kpiSearchAssessmentPercentChange$;
 
   uniqueVisitors$ = this.overviewService.visitors$;
   uniqueVisitorsPercentChange$ = this.overviewService.visitorsPercentChange$;
 
   visits$ = this.overviewService.visits$;
   visitsPercentChange$ = this.overviewService.visitsPercentChange$;
+
+  apexCallDrivers$ = this.overviewService.apexCallDrivers$;
+  apexKpiFeedback$ = this.overviewService.apexKpiFeedback$;
+
+  callPerVisits$ = this.overviewService.callPerVisits$;
+  callComparisonPerVisits$ = this.overviewService.callComparisonPerVisits$;
+  callPercentChange$ = this.overviewService.callPercentChange$;
+  callDifference$ = this.overviewService.callDifference$;
 
   pageViews$ = this.overviewService.views$;
   pageViewsPercentChange$ = this.overviewService.viewsPercentChange$;
@@ -39,6 +70,7 @@ export class OverviewSummaryComponent implements OnInit {
   gscAveragePercentChange$ = this.overviewService.avgRankPercentChange$;
 
   dyfChart$ = this.overviewService.dyfData$;
+  dyfChartApex$ = this.overviewService.dyfDataApex$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
 
   barChartData$ = this.overviewService.visitsByDay$;
@@ -56,6 +88,11 @@ export class OverviewSummaryComponent implements OnInit {
   chartData: { text: string; link: string }[] = [];
   donutChartCols: ColumnConfig = { field: '', header: '' };
   donutChartData: { text: string; link: string }[] = [];
+
+  yAxisVisits = '';
+  yAxisCallVolume = '';
+  whatWasWrongChartLegend: string[] = [];
+  whatWasWrongChartApex$ = this.overviewService.whatWasWrongDataApex$;
 
   constructor(
     private overviewService: OverviewFacade,
@@ -81,6 +118,32 @@ export class OverviewSummaryComponent implements OnInit {
       this.comparisonDateRangeLabel$,
     ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+
+      this.dyfChartLegend = [
+        this.i18n.service.translate('yes', lang),
+        this.i18n.service.translate('no', lang),
+      ];
+      this.dyfTableCols = [
+        {
+          field: 'name',
+          header: this.i18n.service.translate('Selection', lang),
+        },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
+      ];
+
+      this.whatWasWrongChartLegend = [
+        this.i18n.service.translate('d3-cant-find-info', lang),
+        this.i18n.service.translate('d3-other', lang),
+        this.i18n.service.translate('d3-hard-to-understand', lang),
+        this.i18n.service.translate('d3-error', lang),
+      ];
+
+      this.yAxisVisits = this.i18n.service.translate('visits', lang);
+      this.yAxisCallVolume = this.i18n.service.translate('Call volume', lang);
 
       this.dyfChartLegend = [
         this.i18n.service.translate('yes', lang),

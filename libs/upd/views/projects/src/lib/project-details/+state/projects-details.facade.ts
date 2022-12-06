@@ -29,6 +29,7 @@ import {
 import * as ProjectsDetailsActions from './projects-details.actions';
 import * as ProjectsDetailsSelectors from './projects-details.selectors';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
+import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
 
 dayjs.extend(utc);
 
@@ -247,6 +248,15 @@ export class ProjectsDetailsFacade {
     })
   );
 
+  apexCalldriversChart$ = combineLatest([this.calldriversTable$]).pipe(
+    map(([data]) => {
+      return data.map((d) => ({
+        name: d.name,
+        data: [d.currValue, d.prevValue],
+      }));
+    })
+  );
+
   callsByTopic$ = this.projectsDetailsData$.pipe(
     map((data) => {
       if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
@@ -301,6 +311,48 @@ export class ProjectsDetailsFacade {
         pipe: 'percent',
       },
     ]
+  );
+
+  dyfDataApex$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map(([data, lang]) => {
+      const pieChartData: any = [
+        data?.dateRangeData?.dyfYes || 0,
+        data?.dateRangeData?.dyfNo || 0,
+      ] as ApexNonAxisChartSeries;
+
+      const isZero = pieChartData.every((v: number) => v === 0);
+      if (isZero) {
+        return [];
+      }
+
+      return pieChartData;
+    })
+  );
+
+  whatWasWrongDataApex$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map(([data, lang]) => {
+      const pieChartData = [
+        data?.dateRangeData?.fwylfCantFindInfo || 0,
+        data?.dateRangeData?.fwylfOther || 0,
+        data?.dateRangeData?.fwylfHardToUnderstand || 0,
+        data?.dateRangeData?.fwylfError || 0,
+      ] as ApexNonAxisChartSeries;
+
+      const isZero = pieChartData.every((v) => v === 0);
+      if (isZero) {
+        return [];
+      }
+
+      return pieChartData;
+    })
   );
 
   dyfData$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
@@ -708,6 +760,17 @@ export class ProjectsDetailsFacade {
     })
   );
 
+  apexFeedbackByTagsTable$ = combineLatest([this.feedbackByTagsTable$]).pipe(
+    map(([data]) => {
+      return data.map((d) => {
+        return {
+          name: d.tag,
+          data: [d.currValue, d.prevValue],
+        };
+      }) as ApexAxisChartSeries;
+    })
+  );
+
   lineTaskChart$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,
@@ -716,7 +779,7 @@ export class ProjectsDetailsFacade {
       const taskSuccessByUxData = data?.taskSuccessByUxTest;
       const tasksWithSuccessRate = taskSuccessByUxData?.filter(
         (test) => test.success_rate || test.success_rate === 0
-      )
+      );
 
       if (!taskSuccessByUxData || !tasksWithSuccessRate.length) {
         return [];
@@ -782,13 +845,15 @@ export class ProjectsDetailsFacade {
     map((data) =>
       data?.taskSuccessByUxTest
         .map((d) => {
-          return d.attachments ? d.attachments.map((a) => {
-            const url = a.url.replace('https://', '');
-            return {
-              filename: a.filename,
-              url: url,
-            };
-          }) : d;
+          return d.attachments
+            ? d.attachments.map((a) => {
+                const url = a.url.replace('https://', '');
+                return {
+                  filename: a.filename,
+                  url: url,
+                };
+              })
+            : d;
         })
         .flat()
     )

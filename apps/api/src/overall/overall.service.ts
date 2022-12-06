@@ -375,10 +375,18 @@ async function getProjects(
       testType: 1,
     });
 
+  const uxTests = await uxTestsModel
+    .aggregate<UxTestDocument>()
+    .project({
+      _id: 0,
+    })
+    .exec();
+
   const results = {
     ...aggregatedData,
     ...uxTest,
     projects: projectsData,
+    uxTests: uxTests,
   };
 
   return results;
@@ -403,6 +411,14 @@ async function getOverviewMetrics(
 
   const visitsByDay = await overallModel
     .find({ date: dateQuery }, { _id: 0, date: 1, visits: 1 })
+    .sort({ date: 1 })
+    .lean();
+
+  const dyfByDay = await overallModel
+    .find(
+      { date: dateQuery },
+      { _id: 0, date: 1, dyf_yes: 1, dyf_no: 1, dyf_submit: 1 }
+    )
     .sort({ date: 1 })
     .lean();
 
@@ -561,7 +577,10 @@ async function getOverviewMetrics(
 
   const aggregatedMetrics = await overallModel
     .aggregate<
-      Omit<OverviewAggregatedData, 'visitsByDay' | 'calldriversByDay'>
+      Omit<
+        OverviewAggregatedData,
+        'visitsByDay' | 'calldriversByDay' | 'dyfByDay'
+      >
     >()
     .match({
       date: dateQuery,
@@ -625,6 +644,7 @@ async function getOverviewMetrics(
   return {
     visitsByDay,
     calldriversByDay,
+    dyfByDay,
     calldriversEnquiry,
     searchAssessmentData,
     ...aggregatedMetrics[0],

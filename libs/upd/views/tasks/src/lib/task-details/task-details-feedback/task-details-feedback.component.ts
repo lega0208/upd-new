@@ -6,8 +6,14 @@ import { EN_CA } from '@dua-upd/upd/i18n';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { combineLatest } from 'rxjs';
 
-type FeedbackCommentsColType = GetTableProps<TaskDetailsFeedbackComponent, 'feedbackComments$'>
-type FeedbackByTagsColTypes = GetTableProps<TaskDetailsFeedbackComponent, 'feedbackByTagsTable$'>
+type FeedbackCommentsColType = GetTableProps<
+  TaskDetailsFeedbackComponent,
+  'feedbackComments$'
+>;
+type FeedbackByTagsColTypes = GetTableProps<
+  TaskDetailsFeedbackComponent,
+  'feedbackByTagsTable$'
+>;
 
 @Component({
   selector: 'upd-task-details-feedback',
@@ -34,10 +40,17 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
 
   feedbackByTagsTable$ = this.taskDetailsService.feedbackByTagsTable$;
+  apexFeedbackByTagsChart$ = this.taskDetailsService.apexFeedbackByTagsTable$;
   feedbackByTagsTableCols: ColumnConfig<FeedbackByTagsColTypes>[] = [];
 
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
+
+  dyfChartApex$ = this.taskDetailsService.dyfDataApex$;
+  dyfChartLegend: string[] = [];
+
+  whatWasWrongChartLegend: string[] = [];
+  whatWasWrongChartApex$ = this.taskDetailsService.whatWasWrongDataApex$;
 
   ngOnInit() {
     combineLatest([
@@ -46,6 +59,18 @@ export class TaskDetailsFeedbackComponent implements OnInit {
       this.currentLang$,
     ]).subscribe(([dateRange, comparisonDateRange, lang]) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+
+      this.dyfChartLegend = [
+        this.i18n.service.translate('yes', lang),
+        this.i18n.service.translate('no', lang),
+      ];
+
+      this.whatWasWrongChartLegend = [
+        this.i18n.service.translate('d3-cant-find-info', lang),
+        this.i18n.service.translate('d3-other', lang),
+        this.i18n.service.translate('d3-hard-to-understand', lang),
+        this.i18n.service.translate('d3-error', lang),
+      ];
 
       this.visitsByPageCols = [
         {
@@ -76,7 +101,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
             lang
           ),
           pipe: 'percent',
-          pipeParam: '1.2'
+          pipeParam: '1.2',
         },
       ];
 
@@ -103,10 +128,20 @@ export class TaskDetailsFeedbackComponent implements OnInit {
 
       this.feedbackCommentsCols = [
         { field: 'url', header: this.i18n.service.translate('URL', lang) },
-        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date' },
+        {
+          field: 'date',
+          header: this.i18n.service.translate('date', lang),
+          pipe: 'date',
+        },
         { field: 'tag', header: this.i18n.service.translate('tags', lang) },
-        { field: 'whats_wrong', header: this.i18n.service.translate('d3-www', lang) },
-        { field: 'comment', header: this.i18n.service.translate('comment', lang) },
+        {
+          field: 'whats_wrong',
+          header: this.i18n.service.translate('d3-www', lang),
+        },
+        {
+          field: 'comment',
+          header: this.i18n.service.translate('comment', lang),
+        },
       ];
 
       this.feedbackByTagsTableCols = [

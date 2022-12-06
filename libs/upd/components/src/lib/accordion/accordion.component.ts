@@ -5,6 +5,6 @@ import { Component, Input } from '@angular/core';
   templateUrl: './accordion.component.html',
   styleUrls: ['./accordion.component.scss'],
 })
-export class AccordionComponent{
-  @Input() title = 'View data table';
+export class AccordionComponent {
+  @Input() title = 'view-data-table';
 }

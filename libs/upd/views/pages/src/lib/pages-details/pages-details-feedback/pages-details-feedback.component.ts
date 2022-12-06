@@ -6,8 +6,14 @@ import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { GetTableProps } from '@dua-upd/utils-common';
 
-type FeedbackCommentsColType = GetTableProps<PagesDetailsFeedbackComponent, 'feedbackComments$'>
-type FeedbackByTagsColTypes = GetTableProps<PagesDetailsFeedbackComponent, 'feedbackByTagsTable$'>
+type FeedbackCommentsColType = GetTableProps<
+  PagesDetailsFeedbackComponent,
+  'feedbackComments$'
+>;
+type FeedbackByTagsColTypes = GetTableProps<
+  PagesDetailsFeedbackComponent,
+  'feedbackByTagsTable$'
+>;
 
 @Component({
   selector: 'upd-page-details-feedback',
@@ -20,8 +26,14 @@ export class PagesDetailsFeedbackComponent implements OnInit {
   dyfChart$ = this.pageDetailsService.dyfData$;
   whatWasWrongChart$ = this.pageDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig<{ name: string; value: number; }>[] = [];
-  whatWasWrongTableCols: ColumnConfig<{ name: string; value: number; }>[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
+  whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
+
+  dyfChartApex$ = this.pageDetailsService.dyfDataApex$;
+  dyfChartLegend: string[] = [];
+
+  whatWasWrongChartLegend: string[] = [];
+  whatWasWrongChartApex$ = this.pageDetailsService.whatWasWrongDataApex$;
 
   feedbackByTagsBarChartData$ = this.pageDetailsService.feedbackByTagsBarChart$;
 
@@ -45,6 +57,17 @@ export class PagesDetailsFeedbackComponent implements OnInit {
       this.comparisonDateRangeLabel$,
       this.currentLang$,
     ]).subscribe(([dateRange, comparisonDateRange, lang]) => {
+      this.dyfChartLegend = [
+        this.i18n.service.translate('yes', lang),
+        this.i18n.service.translate('no', lang),
+      ];
+
+      this.whatWasWrongChartLegend = [
+        this.i18n.service.translate('d3-cant-find-info', lang),
+        this.i18n.service.translate('d3-other', lang),
+        this.i18n.service.translate('d3-hard-to-understand', lang),
+        this.i18n.service.translate('d3-error', lang),
+      ];
       this.dyfTableCols = [
         {
           field: 'name',
@@ -66,10 +89,20 @@ export class PagesDetailsFeedbackComponent implements OnInit {
       ];
 
       this.feedbackCommentsCols = [
-        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date' },
+        {
+          field: 'date',
+          header: this.i18n.service.translate('date', lang),
+          pipe: 'date',
+        },
         { field: 'tag', header: this.i18n.service.translate('tags', lang) },
-        { field: 'whats_wrong', header: this.i18n.service.translate('d3-www', lang) },
-        { field: 'comment', header: this.i18n.service.translate('comment', lang) },
+        {
+          field: 'whats_wrong',
+          header: this.i18n.service.translate('d3-www', lang),
+        },
+        {
+          field: 'comment',
+          header: this.i18n.service.translate('comment', lang),
+        },
       ];
 
       this.feedbackByTagsTableCols = [

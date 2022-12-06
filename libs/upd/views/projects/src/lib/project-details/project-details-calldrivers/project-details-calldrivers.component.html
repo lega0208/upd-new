@@ -3,23 +3,20 @@
   <span [translate]="'calldrivers-notification'"></span>
 </upd-alert>
 
-<div class="container-fluid gx-0 my-4">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <upd-charts
+      <upd-apex-bar
         [title]="'d3-tcbil'"
-        [yAxisLabel]="'Number of calls'"
-        [scaleBy]="1"
-        [showXAxisLabel]="false"
-        [showGridLines]="true"
-        [displayLegend]="'below'"
-        [groupPadding]="75"
-        [showLegend]="true"
-        [data]="calldriversChart$ | async"
-        [type]="'grouped-bar'"
+        [series]="(apexCalldriversChart$ | async) || []"
+        [xAxis]="[
+          (dateRangeLabel$ | async) || '',
+          (comparisonDateRangeLabel$ | async) || ''
+        ]"
+        [yAxis]="'Number of calls' | translate"
         [table]="calldriversTable$ | async"
         [tableCols]="calldriversCols"
-      ></upd-charts>
+      ></upd-apex-bar>
     </div>
   </div>
 </div>

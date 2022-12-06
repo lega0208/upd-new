@@ -4,6 +4,10 @@ import { DbUpdateService } from '@dua-upd/db-update';
 import { environment } from '../environments/environment';
 import { DataIntegrityService } from '@dua-upd/data-integrity';
 
+export declare enum CronCustomExpression {
+  EVERY_SUNDAY_AT_10PM = '0 0 22 * * 0',
+}
+
 @Injectable()
 export class UpdateService {
   private readonly logger = new Logger(UpdateService.name);

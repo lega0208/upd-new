@@ -23,6 +23,6 @@ export interface typeParams {
 }
 
 export interface FilterConfig<T = any> {
-  type: 'category' | 'boolean';
+  type: 'category' | 'boolean' | 'passFail';
   categories?: { name: string; value: T[keyof T] | null }[];
 }

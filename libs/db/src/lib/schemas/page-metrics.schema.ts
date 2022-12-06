@@ -1,6 +1,10 @@
-import { Prop, Schema, SchemaFactory,  } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types, FilterQuery } from 'mongoose';
-import { GscSearchTermMetrics, AccumulatorOperator, AASearchTermMetrics } from './types';
+import {
+  GscSearchTermMetrics,
+  AccumulatorOperator,
+  AASearchTermMetrics,
+} from './types';
 import { Page } from './page.schema';
 import { Task } from './task.schema';
 import { Project } from './project.schema';
@@ -247,7 +251,6 @@ export type MetricsConfig<T> = {
 //
 // }
 
-
 export async function getAggregatedPageMetrics<T>(
   this: Model<PageMetrics>,
   dateRange: string,
@@ -316,7 +319,7 @@ export async function getAggregatedPageMetrics<T>(
       },
       all_urls: {
         $first: '$page.all_urls',
-      }
+      },
     })
     .sort(metricsSort)
     .exec();
@@ -324,6 +327,7 @@ export async function getAggregatedPageMetrics<T>(
 
 PageMetricsSchema.statics = {
   getAggregatedPageMetrics,
-}
+};
 
-export type PageMetricsModel = Model<PageMetrics> & typeof PageMetricsSchema.statics;
+export type PageMetricsModel = Model<PageMetrics> &
+  typeof PageMetricsSchema.statics;

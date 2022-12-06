@@ -27,10 +27,6 @@ export class SearchAssessmentService {
   craFr = 'https://www.canada.ca/fr/agence-revenu/rechercher.html';
 
   async email(lang, notInList: notInList[], date: string) {
-    const number = `**${notInList.length}**`;
-    const notInListString = notInList.map(
-      (d) => `**${d.term}** : https://${d.url}`
-    );
     const templateId =
       lang === 'en'
         ? process.env.NOTIFY_TEMPLATE_ID_EN
@@ -51,8 +47,8 @@ export class SearchAssessmentService {
       await client.sendEmail(templateId, email, {
         personalisation: {
           first_name: 'DUA',
-          number: number,
-          bulleted_list: notInListString,
+          number: `**${notInList.length}**`,
+          bulleted_list: notInList.map((d) => `**${d.term}** : https://${d.url}`),
           date: date,
         },
       });
@@ -92,12 +88,9 @@ export class SearchAssessmentService {
         `Updating previous week's search assessment for ${lang} from ${startDate} to ${endDate}`
       );
 
-      const isSunday = dayjs.utc().day() === 0;
-
       while (
         startDate.isBefore(cutoffDate) &&
-        startDate.isAfter(dbStartDate) &&
-        isSunday
+        startDate.isAfter(dbStartDate)
       ) {
         flag = 1;
         const dateRangeFilter = {

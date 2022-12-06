@@ -29,7 +29,10 @@ import { getDbConnectionString } from './db.connection';
 import { DbService } from './db.service';
 
 export const models = {
-  callDrivers: { model: CallDriver as typeof CallDriver, schema: CallDriverSchema },
+  callDrivers: {
+    model: CallDriver as typeof CallDriver,
+    schema: CallDriverSchema,
+  },
   feedback: { model: Feedback, schema: FeedbackSchema },
   overall: { model: Overall, schema: OverallSchema },
   pageMetrics: { model: PageMetrics, schema: PageMetricsSchema },

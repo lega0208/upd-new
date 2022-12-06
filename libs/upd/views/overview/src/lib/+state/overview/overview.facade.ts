@@ -22,6 +22,7 @@ import {
   selectUrl,
 } from '@dua-upd/upd/state';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
+import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
 
 dayjs.extend(utc);
 dayjs.extend(isSameOrBefore);
@@ -50,6 +51,9 @@ export class OverviewFacade {
 
   visits$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.dateRangeData?.visits || 0)
+  );
+  comparisonVisits$ = this.overviewData$.pipe(
+    map((overviewData) => overviewData?.comparisonDateRangeData?.visits || 0)
   );
   visitsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('visits'));
 
@@ -86,6 +90,13 @@ export class OverviewFacade {
 
   topPagesVisitedWithPercentChange$ = this.overviewData$.pipe(
     mapObjectArraysWithPercentChange('topPagesVisited', 'visits', 'url')
+  );
+
+  dyfYesPercentage$ = this.overviewData$.pipe(
+    map((overviewData) => Math.round((0.31 as number) * 100) || 0)
+  );
+  dyfYesPercentagePercentChange$ = this.overviewData$.pipe(
+    map((overviewData) => 0.04)
   );
 
   top10GSC$ = this.overviewData$.pipe(
@@ -238,6 +249,346 @@ export class OverviewFacade {
       const days = visitsByDay?.length || 0;
 
       return days > 31;
+    })
+  );
+
+  currentKpiFeedback$ = this.overviewData$.pipe(
+    map((data) => {
+      const dyfYesCurrent = data?.dateRangeData?.dyf_yes || 0;
+      const visits = data?.dateRangeData?.visits || 0;
+
+      return dyfYesCurrent / visits;
+    })
+  );
+
+  apexKpiFeedback$ = combineLatest([this.overviewData$]).pipe(
+    map(([data]) => {
+      const currentFeedback = data?.dateRangeData?.dyfByDay || [];
+      const comparisonFeedback = data?.comparisonDateRangeData?.dyfByDay || [];
+
+      const currentVisits = data?.dateRangeData?.visitsByDay || [];
+      const comparisonVisits = data?.comparisonDateRangeData?.visitsByDay || [];
+
+      const currentFeedbackData = currentFeedback.map((d, idx) => {
+        return {
+          x: d.date,
+          y: (d.dyf_yes / currentVisits[idx].visits) * 1000,
+        };
+      });
+
+      const comparisonFeedbackData = comparisonFeedback.map((d, idx) => {
+        return {
+          x: currentFeedback[idx].date,
+          y: (d.dyf_yes / comparisonVisits[idx].visits) * 1000,
+        };
+      });
+
+      return [
+        {
+          name: 'Previous',
+          data: comparisonFeedbackData,
+        },
+        {
+          name: 'Current',
+          data: currentFeedbackData,
+        },
+      ];
+    })
+  );
+
+  comparisonKpiFeedback$ = combineLatest([this.overviewData$]).pipe(
+    map(([data]) => {
+      const dyfYesComparison = data?.comparisonDateRangeData?.dyf_yes || 0;
+      const visits = data?.comparisonDateRangeData?.visits || 0;
+
+      return dyfYesComparison / visits;
+    })
+  );
+
+  kpiFeedbackPercentChange$ = combineLatest([
+    this.currentKpiFeedback$,
+    this.comparisonKpiFeedback$,
+  ]).pipe(
+    map(([currentKpi, comparisonKpi]) =>
+      percentChange(currentKpi, comparisonKpi)
+    )
+  );
+
+  kpiFeedbackDifference$ = combineLatest([
+    this.currentKpiFeedback$,
+    this.comparisonKpiFeedback$,
+  ]).pipe(map(([currentKpi, comparisonKpi]) => currentKpi - comparisonKpi));
+
+  kpiUXTests$ = this.overviewData$.pipe(
+    map((data) => {
+      const uxTests = data?.projects?.uxTests || [];
+      const KpiUxTests = uxTests
+        .map((uxTest) => {
+          if (typeof uxTest?.success_rate === 'number') {
+            return uxTest.success_rate;
+          }
+          return -1;
+        })
+        .filter((successRate) => successRate >= 0);
+
+      const kpiUxTestsLength = KpiUxTests.length;
+      const kpiUxTestsSum = KpiUxTests.reduce((a, b) => a + b, 0);
+
+      return kpiUxTestsSum / kpiUxTestsLength;
+    })
+  );
+
+  apexCallDriversChart$ = combineLatest([this.calldriversTable$]).pipe(
+    map(([data]) => {
+      return data.map((d) => {
+        return {
+          name: d.name,
+          data: [d.currValue, d.prevValue],
+        };
+      }) as ApexAxisChartSeries;
+    })
+  );
+
+  apexBar$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+    this.dateRangeSelected$,
+  ]).pipe(
+    map(([data, lang, dateRangePeriod]) => {
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
+      );
+      const visitsByDay = data?.dateRangeData?.visitsByDay || [];
+      const comparisonVisitsByDay =
+        data?.comparisonDateRangeData?.visitsByDay || [];
+      const visitsByDayFinal = data?.dateRangeData?.visitsByDay.map((d) => {
+        return {
+          x: d.date,
+          y: d.visits,
+        };
+      });
+
+      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
+
+      let cntPrevVisits = 0;
+
+      const comparisonVisitsByDayFinal = visitsByDay.map((data, i) => {
+        let prevVisits = 0;
+
+        if (
+          comparisonVisitsByDay.find(
+            (d) =>
+              dayjs(d.date)
+                .utc(false)
+                .add(1, dateSelection)
+                .format('YYYY-MM-DD') ===
+              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+          )
+        ) {
+          prevVisits = comparisonVisitsByDay[cntPrevVisits].visits;
+          cntPrevVisits++;
+        }
+        return {
+          x: data.date,
+          y: prevVisits,
+        };
+      });
+
+      return [
+        {
+          name: dateRangeLabel,
+          data: visitsByDayFinal,
+        },
+        {
+          name: comparisonDateRangeLabel,
+          data: comparisonVisitsByDayFinal,
+        },
+      ] as ApexAxisChartSeries;
+    })
+  );
+
+  // todo: reorder bars? (grey then blue instead of blue then grey?)
+  //  also clean this up a bit, simplify logic instead of doing everything twice
+  apex$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+    this.dateRangeSelected$,
+  ]).pipe(
+    map(([data, lang, dateRangePeriod]) => {
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
+      );
+      const visitsByDay = data?.dateRangeData?.visitsByDay || [];
+      const comparisonVisitsByDay =
+        data?.comparisonDateRangeData?.visitsByDay || [];
+      const visitsByDayFinal = data?.dateRangeData?.visitsByDay.map((d) => {
+        return {
+          x: d.date,
+          y: d.visits,
+        };
+      });
+
+      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
+
+      let cntPrevVisits = 0;
+      let cntPrevCalls = 0;
+
+      const comparisonVisitsByDayFinal = visitsByDay.map((data, i) => {
+        let prevVisits = 0;
+
+        if (
+          comparisonVisitsByDay.find(
+            (d) =>
+              dayjs(d.date)
+                .utc(false)
+                .add(1, dateSelection)
+                .format('YYYY-MM-DD') ===
+              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+          )
+        ) {
+          prevVisits = comparisonVisitsByDay[cntPrevVisits].visits;
+          cntPrevVisits++;
+        }
+        return {
+          x: data.date,
+          y: prevVisits,
+        };
+      });
+
+      const calldriversByDay = data?.dateRangeData?.calldriversByDay || [];
+      const comparisonCalldriversByDay =
+        data?.comparisonDateRangeData?.calldriversByDay || [];
+      const calldriversByDayFinal = visitsByDay.map((data, i) => {
+        let prevCalls = 0;
+
+        if (
+          calldriversByDay.find(
+            (d) =>
+              dayjs(d.date).utc(false).format('YYYY-MM-DD') ===
+              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+          )
+        ) {
+          prevCalls = calldriversByDay[cntPrevCalls].calls;
+          cntPrevCalls++;
+        }
+        return {
+          x: data.date,
+          y: prevCalls,
+        };
+      });
+
+      cntPrevCalls = 0;
+
+      const comparisonCalldriversByDayFinal = visitsByDay.map((data, i) => {
+        let prevCalls = 0;
+
+        if (
+          comparisonCalldriversByDay.find(
+            (d) =>
+              dayjs(d.date)
+                .utc(false)
+                .add(1, dateSelection)
+                .format('YYYY-MM-DD') ===
+              dayjs(data.date).utc(false).format('YYYY-MM-DD')
+          )
+        ) {
+          prevCalls = comparisonCalldriversByDay[cntPrevCalls].calls;
+          cntPrevCalls++;
+        }
+        return {
+          x: data.date,
+          y: prevCalls,
+        };
+      });
+
+      return [
+        {
+          name: dateRangeLabel,
+          type: 'column',
+          data: visitsByDayFinal,
+        },
+        {
+          name: comparisonDateRangeLabel,
+          type: 'column',
+          data: comparisonVisitsByDayFinal,
+        },
+        {
+          name: `${this.i18n.service.translate(
+            'calls',
+            lang
+          )} ${dateRangeLabel}`,
+          type: 'line',
+          data: calldriversByDayFinal,
+        },
+        {
+          name: `${this.i18n.service.translate(
+            'calls',
+            lang
+          )} ${comparisonDateRangeLabel}`,
+          type: 'line',
+          data: comparisonCalldriversByDayFinal,
+        },
+      ] as ApexAxisChartSeries;
+
+      //   name: `${this.i18n.service.translate(
+      //     'calls',
+      //     lang
+      //   )} ${comparisonDateRangeLabel}`,
+      //   series: [],
+      // },
+      // {
+      //   name: `${this.i18n.service.translate(
+      //     'calls',
+      //     lang
+      //   )} ${dateRangeLabel}`,
+
+      // const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
+      // const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
+
+      // const isCurrZero =` visits`ByDay?.every((v) => v.visits === 0);
+      // const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
+
+      // if (!visitsByDay || (isCurrZero && isPrevZero)) {
+      //   return [] as MultiSeries;
+      // }
+    })
+  );
+
+  apexCallDrivers$ = combineLatest([this.apex$, this.currentLang$]).pipe(
+    map(([calls, lang]) => {
+      const c = [];
+
+      const currentCallDrivers = calls[2].data.map((d: any, i) => {
+        return {
+          x: d?.x,
+          y: (d?.y / (calls[0]?.data[i] as any)?.y) * 100 || 0,
+        };
+      });
+
+      const previousCallDrivers = calls[3].data.map((d: any, i) => {
+        return {
+          x: d?.x,
+          y: (d?.y / (calls[1]?.data[i] as any)?.y) * 100 || 0,
+        };
+      });
+
+      c.push({
+        name: calls[0].name,
+        type: 'line',
+        data: previousCallDrivers,
+      });
+
+      c.push({
+        name: calls[1].name,
+        type: 'line',
+        data: currentCallDrivers,
+      });
+
+      return c as ApexAxisChartSeries;
     })
   );
 
@@ -474,6 +825,19 @@ export class OverviewFacade {
     })
   );
 
+  currentCalls$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+      const currentCalls = data?.dateRangeData?.calldriversByDay || 0;
+
+      return currentCalls;
+
+      return {
+        name: this.i18n.service.translate('calls', lang),
+        value: currentCalls,
+      };
+    })
+  );
+
   currentCallVolume$ = this.overviewData$.pipe(
     map(
       (data) =>
@@ -494,13 +858,35 @@ export class OverviewFacade {
     )
   );
 
-  callPercentChange$ = combineLatest([
-    this.currentCallVolume$,
+  callPerVisits$ = combineLatest([this.currentCallVolume$, this.visits$]).pipe(
+    map(([currentCalls, visits]) => {
+      return currentCalls / visits;
+    })
+  );
+
+  callComparisonPerVisits$ = combineLatest([
     this.comparisonCallVolume$,
+    this.comparisonVisits$,
   ]).pipe(
-    map(([currentCalls, comparisonCalls]) =>
-      percentChange(currentCalls, comparisonCalls)
+    map(([comparisonCalls, comparisonVisits]) => {
+      return comparisonCalls / comparisonVisits;
+    })
+  );
+
+  callPercentChange$ = combineLatest([
+    this.callPerVisits$,
+    this.callComparisonPerVisits$,
+  ]).pipe(
+    map(([currentCalls, comparisonVisits]) =>
+      percentChange(currentCalls, comparisonVisits)
     )
+  );
+
+  callDifference$ = combineLatest([
+    this.callPerVisits$,
+    this.callComparisonPerVisits$,
+  ]).pipe(
+    map(([currentCalls, comparisonVisits]) => currentCalls - comparisonVisits)
   );
 
   //   currentCalls$ = this.overviewData$.pipe(
@@ -728,9 +1114,31 @@ export class OverviewFacade {
       const pieChartData: any = [
         data?.dateRangeData?.dyf_yes || 0,
         data?.dateRangeData?.dyf_no || 0,
-      ];
+      ] as ApexNonAxisChartSeries;
 
       const isZero = pieChartData.every((v: number) => v === 0);
+      if (isZero) {
+        return [];
+      }
+
+      return pieChartData;
+    })
+  );
+
+  whatWasWrongDataApex$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map(([data, lang]) => {
+      const pieChartData = [
+        data?.dateRangeData?.fwylf_cant_find_info || 0,
+        data?.dateRangeData?.fwylf_other || 0,
+        data?.dateRangeData?.fwylf_hard_to_understand || 0,
+        data?.dateRangeData?.fwylf_error || 0,
+      ] as ApexNonAxisChartSeries;
+
+      const isZero = pieChartData.every((v) => v === 0);
       if (isZero) {
         return [];
       }
@@ -793,7 +1201,6 @@ export class OverviewFacade {
           const rank = isFinite(d.position) ? Math.round(d.position) : '';
           const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
           const url = d.expected_result?.replace(/^https:\/\//i, '');
-
           return {
             lang: isEnglish
               ? this.i18n.service.translate('English', lang)
@@ -816,24 +1223,59 @@ export class OverviewFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
-      return data?.comparisonDateRangeData?.searchAssessmentData
-        .map((d) => {
-          const isEnglish = d.lang === 'en';
-          const rank = isFinite(d.position) ? Math.round(d.position) : '';
-          const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
-          const url = d.expected_result?.replace(/^https:\/\//i, '');
-          return {
-            lang: isEnglish
-              ? this.i18n.service.translate('English', lang)
-              : this.i18n.service.translate('French', lang),
-            query: d.query,
-            url: url,
-            position: rank,
-            pass: pass,
-            clicks: d.clicks,
-          };
-        })
-        .sort((a, b) => a.lang.localeCompare(b.lang) || b.clicks - a.clicks);
+      return data?.comparisonDateRangeData?.searchAssessmentData.map((d) => {
+        const isEnglish = d.lang === 'en';
+        const rank = isFinite(d.position) ? Math.round(d.position) : '';
+        const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
+        const url = d.expected_result?.replace(/^https:\/\//i, '');
+        return {
+          lang: isEnglish ? this.i18n.service.translate('English',lang) : this.i18n.service.translate('French',lang),
+          query: d.query,
+          url: url,
+          position: rank,
+          pass: pass,
+          clicks: d.clicks,
+        };
+      })
+      .sort((a, b) => 
+      a.lang.localeCompare(b.lang) ||
+      b.clicks - a.clicks);
+    })
+  );
+
+  currentKpiSearchAssessment$ = combineLatest([
+    this.searchAssessmentData$,
+  ]).pipe(
+    map(([searchAssessmentData]) => {
+      const kpiSearchAssessment = searchAssessmentData || [];
+      return (
+        kpiSearchAssessment.filter((d) => d.pass === 'Pass').length /
+        kpiSearchAssessment.length
+      );
+    })
+  );
+
+  comparisonKpiSearchAssessment$ = combineLatest([
+    this.comparisonSearchAssessmentData$,
+  ]).pipe(
+    map(([comparisonSearchAssessmentData]) => {
+      const kpiSearchAssessment = comparisonSearchAssessmentData || [];
+      return (
+        kpiSearchAssessment.filter((d) => d.pass === 'Pass').length /
+        kpiSearchAssessment.length
+      );
+    })
+  );
+
+  kpiSearchAssessmentPercentChange$ = combineLatest([
+    this.currentKpiSearchAssessment$,
+    this.comparisonKpiSearchAssessment$,
+  ]).pipe(
+    map(([currentKpiSearchAssessment, comparisonKpiSearchAssessment]) => {
+      return percentChange(
+        currentKpiSearchAssessment,
+        comparisonKpiSearchAssessment
+      );
     })
   );
 

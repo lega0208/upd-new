@@ -1,14 +1,31 @@
-<button class="btn btn-lg btn-outline-primary" (click)="open(mymodal)">{{buttonTitle}}</button>
-   
+<button
+  type="button"
+  class="btn floating material-icons"
+  (click)="open(mymodal)"
+>
+  question_mark
+</button>
+<!-- <span class="btn btn-lg btn-floating btn-dark insert material-icons text-white" (click)="open(mymodal)">question_mark</span> -->
 <ng-template #mymodal let-modal>
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{modalTitle}}</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    <h4 class="modal-title" id="modal-basic-title">{{ modalTitle }}</h4>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    ></button>
   </div>
-  <div class="modal-body">
+  <div class="modal-body mb-2">
     <ng-content></ng-content>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">Ok</button>
-  </div>
+  <!-- <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-outline-dark"
+      (click)="modal.close('Save click')"
+    >
+      Ok
+    </button>
+  </div> -->
 </ng-template>
