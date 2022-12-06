@@ -1191,19 +1191,26 @@ export class OverviewFacade {
   ]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
-      const searchAssessment = data?.dateRangeData?.searchAssessmentDataEn.map(
+      const searchAssessment = data?.dateRangeData?.searchAssessmentData.map(
         (d) => {
+          const isEnglish = d.lang === 'en';
           const rank = isFinite(d.position) ? Math.round(d.position) : '';
           const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
           const url = d.expected_result?.replace(/^https:\/\//i, '');
-          return {
-            query: d.query,
-            url: url,
-            position: rank,
-            pass: pass,
-          };
+
+            return {
+              lang: isEnglish ? this.i18n.service.translate('English',lang) : this.i18n.service.translate('French',lang),
+              query: d.query,
+              url: url,
+              position: rank,
+              pass: pass,
+              clicks: d.clicks,
+            };
         }
-      );
+      )
+      .sort((a, b) => 
+      a.lang.localeCompare(b.lang) ||
+      b.clicks - a.clicks);
 
       return [...(searchAssessment || [])];
     })
@@ -1214,17 +1221,23 @@ export class OverviewFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
-      return data?.comparisonDateRangeData?.searchAssessmentDataEn.map((d) => {
+      return data?.comparisonDateRangeData?.searchAssessmentData.map((d) => {
+        const isEnglish = d.lang === 'en';
         const rank = isFinite(d.position) ? Math.round(d.position) : '';
         const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
         const url = d.expected_result?.replace(/^https:\/\//i, '');
         return {
+          lang: isEnglish ? this.i18n.service.translate('English',lang) : this.i18n.service.translate('French',lang),
           query: d.query,
           url: url,
           position: rank,
           pass: pass,
+          clicks: d.clicks,
         };
-      });
+      })
+      .sort((a, b) => 
+      a.lang.localeCompare(b.lang) ||
+      b.clicks - a.clicks);
     })
   );
 

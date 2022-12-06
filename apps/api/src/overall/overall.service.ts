@@ -619,9 +619,9 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
-  const searchAssessmentDataEn = await searchAssessmentModel
+    const searchAssessmentData = await searchAssessmentModel
     .aggregate()
-    .match({ date: dateQuery, lang: 'en' })
+    .match({ date: dateQuery })
     .group({
       _id: { $toLower: '$query' },
       clicks: { $sum: '$clicks' },
@@ -637,27 +637,7 @@ async function getOverviewMetrics(
       clicks: 1,
       position: 1,
       expected_result: 1,
-    })
-    .exec();
-
-  const searchAssessmentDataFr = await searchAssessmentModel
-    .aggregate()
-    .match({ date: dateQuery, lang: 'fr' })
-    .group({
-      _id: { $toLower: '$query' },
-      clicks: { $sum: '$clicks' },
-      position: { $avg: '$expected_position' },
-      doc: { $push: '$$ROOT' },
-    })
-    .replaceRoot({
-      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
-    })
-    .project({
-      query: '$_id',
-      _id: 0,
-      clicks: 1,
-      position: 1,
-      expected_result: 1,
+      lang: 1,
     })
     .exec();
 
@@ -666,8 +646,7 @@ async function getOverviewMetrics(
     calldriversByDay,
     dyfByDay,
     calldriversEnquiry,
-    searchAssessmentDataEn,
-    searchAssessmentDataFr,
+    searchAssessmentData,
     ...aggregatedMetrics[0],
     totalFeedback,
     topPagesVisited,

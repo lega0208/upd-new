@@ -124,19 +124,13 @@ export interface OverviewAggregatedData {
     sum: number;
   }[];
   feedbackPages: { _id: string; title: string; url: string; sum: number }[];
-  searchAssessmentDataEn: {
+  searchAssessmentData: {
     lang: string;
     query: string;
     expected_result: string;
     position: number;
     date: string;
-  }[];
-  searchAssessmentDataFr: {
-    lang: string;
-    query: string;
-    expected_result: string;
-    position: number;
-    date: string;
+    clicks: number;
   }[];
 }
 

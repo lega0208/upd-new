@@ -13,6 +13,7 @@ import {
   UxTest,
   Project,
   AAItemId,
+  SearchAssessment,
 } from '../';
 import {
   arrayToDictionary,
@@ -43,6 +44,7 @@ export class DbService {
     uxTests: this.uxTests,
     projects: this.projects,
     aaItemIds: this.aaItemIds,
+    searchAssessment: this.searchAssessment,
   };
 
   constructor(
@@ -65,7 +67,9 @@ export class DbService {
     @InjectModel(Project.name, 'defaultConnection')
     private projects: Model<Project>,
     @InjectModel(AAItemId.name, 'defaultConnection')
-    private aaItemIds: Model<AAItemId>
+    private aaItemIds: Model<AAItemId>,
+    @InjectModel(SearchAssessment.name, 'defaultConnection')
+    private searchAssessment: Model<SearchAssessment>
   ) {}
 
   @AsyncLogTiming
