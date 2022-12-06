@@ -193,10 +193,18 @@ export class Overall {
   })
   gsc_searchterms?: GscSearchTermMetrics[];
 
-  @Prop({ type: [{ term: String, clicks: Number, position: Number }] })
+  @Prop({
+    type: [
+      { term: String, clicks: Number, position: Number, num_searches: Number },
+    ],
+  })
   aa_searchterms_en?: AASearchTermMetrics[];
 
-  @Prop({ type: [{ term: String, clicks: Number, position: Number }] })
+  @Prop({
+    type: [
+      { term: String, clicks: Number, position: Number, num_searches: Number },
+    ],
+  })
   aa_searchterms_fr?: AASearchTermMetrics[];
 }
 

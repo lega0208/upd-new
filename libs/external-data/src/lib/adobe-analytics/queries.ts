@@ -3,6 +3,7 @@ import {
   AdobeAnalyticsReportQuery,
   BreakdownMetricsConfig,
   CALCULATED_METRICS,
+  MetricConfig,
   MetricsConfig,
   ReportFilter,
   ReportQueryMetricId,
@@ -215,7 +216,10 @@ export const createBatchedInternalSearchQueries = (
 export const createInternalSearchQuery = (
   dateRange: DateRange,
   itemids?: string[],
-  settings: ReportSettings & { lang?: 'en' | 'fr' } = {}
+  settings: ReportSettings & {
+    lang?: 'en' | 'fr';
+    includeSearchInstances?: boolean;
+  } = {}
 ) => {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
@@ -229,6 +233,7 @@ export const createInternalSearchQuery = (
     limit: 50000,
     ...settings,
   };
+
   const langSegment: ReportFilter[] = lang
     ? [
         {
@@ -237,6 +242,16 @@ export const createInternalSearchQuery = (
         },
       ]
     : [];
+
+  const searchInstances = settings.includeSearchInstances
+    ? {
+        num_searches: {
+          id: 'metrics/event50',
+        },
+      }
+    : {};
+
+  delete settings.includeSearchInstances;
 
   return queryBuilder
     .setDimension('variables/evar50') // Site search
@@ -261,6 +276,7 @@ export const createInternalSearchQuery = (
           },
         ],
       },
+      ...searchInstances,
     })
     .setGlobalFilters([
       { type: 'segment', segmentId: SEGMENTS.cra },
