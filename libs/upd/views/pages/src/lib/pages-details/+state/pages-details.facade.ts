@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map, debounceTime, combineLatest } from 'rxjs';
-import dayjs, { QUnitType } from 'dayjs';
+import dayjs, { ManipulateType, QUnitType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
@@ -69,7 +69,7 @@ export class PagesDetailsFacade {
         };
       });
 
-      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
+      const dateSelection = dateRangePeriod.replace('ly', '') as ManipulateType;
 
       let cntPrevVisits = 0;
 
