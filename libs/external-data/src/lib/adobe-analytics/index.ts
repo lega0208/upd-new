@@ -19,9 +19,6 @@ import {
   createPhrasesSearchedOnPageQuery,
   createPageUrlItemIdsQuery,
   createWhereVisitorsCameFromQuery,
-  createPhraseItemIdsQuery,
-  createPhraseRankingQuery,
-  createPhraseMostClickedQuery,
 } from './queries';
 import {
   type AdobeAnalyticsReportQuery,
@@ -505,100 +502,6 @@ export class AdobeAnalyticsClient {
 
       return [...parsedResults, newPageMetricsData];
     }, []) as { url: string; itemid_internalsearch: string }[];
-  }
-
-  async getPhraseItemIds(
-    dateRange: DateRange,
-    lang,
-    options: ReportSettings = {}
-  ) {
-    if (!this.client || this.clientTokenIsExpired()) {
-      await this.initClient();
-    }
-
-    options = {
-      limit: 100,
-      ...options,
-    };
-
-    const phraseItemIdsQuery = createPhraseItemIdsQuery(
-      dateRange,
-      lang,
-      options
-    );
-    const results = await this.client.getReport(phraseItemIdsQuery);
-
-    const { columnIds } = results.body.columns;
-
-    return results.body.rows.reduce((parsedResults, row) => {
-      // build up results object using columnIds as keys
-      const newPageMetricsData = row.data.reduce(
-        (rowValues, value, index) => {
-          const columnId = columnIds[index];
-          rowValues[columnId] = value;
-          return rowValues;
-        },
-        {
-          phrase: row.value,
-          itemid_phrase: row.itemId,
-        }
-      );
-
-      return [...parsedResults, newPageMetricsData];
-    }, []) as { phrase: string; itemid_phrase: string }[];
-  }
-
-  async getPhrase(
-    dateRange: DateRange,
-    itemIds: string[],
-    lang = 'en',
-    options: ReportSettings = {}
-  ) {
-    if (!this.client || this.clientTokenIsExpired()) {
-      await this.initClient();
-    }
-
-    options = {
-      limit: 50000,
-      ...options,
-    };
-
-    const activityMapQuery = createPhraseRankingQuery(
-      dateRange,
-      itemIds,
-      lang,
-      options
-    );
-    const results = await this.client.getReport(activityMapQuery);
-
-    // the 'Z' means the date is UTC, so no conversion required
-    const date = new Date(dateRange.start + 'Z');
-
-    return sortArrayDesc(seperateArray(results.body.rows))
-      .map((row) => {
-        return row.map((v) => {
-          return {
-            link: v.value,
-            rank: Math.round(v.data),
-          };
-        });
-      })
-      .map((row) => {
-        return row
-          .filter((v) => {
-            return isFinite(v.rank);
-          })
-          .sort((a, b) => {
-            return a.rank - b.rank;
-          });
-      })
-      .map((row, i) => {
-        return {
-          data: [...row],
-          date: date.toISOString(),
-          itemid_phrase: itemIds[i],
-        };
-      });
   }
 
   async getActivityMap(
