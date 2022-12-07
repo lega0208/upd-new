@@ -30,28 +30,42 @@ export const withTimeout = <T>(
     });
 };
 
-export const withRetry = <T extends <U>(...args: Parameters<T>) => Promise<ReturnType<T>>>(
+export const withRetry = <
+  T extends <U>(...args: Parameters<T>) => Promise<ReturnType<T>>
+>(
   fn: T,
   retries: number,
   delay: number
 ) => {
   return <U>(...args: Parameters<T>): Promise<ReturnType<T>> =>
     new Promise((resolve, reject) => {
-      const attempt = (retries, delay) => {
+      let delayMultiplier = 1;
+
+      const attempt = (retries: number, delay: number) => {
         fn<U>(...args).then(
           (result) => {
             resolve(result);
           },
           (err) => {
-            console.error(chalk.red(`Error below occurred in ${fn.name}, retrying (${retries - 1} attempts left)`));
+            console.error(
+              chalk.red(
+                `Error below occurred in ${fn.name}, retrying (${
+                  retries - 1
+                } attempts left)`
+              )
+            );
             console.error(chalk.red(err.message));
 
             if (retries > 0) {
+              delayMultiplier++;
+
               setTimeout(() => {
                 attempt(retries - 1, delay);
-              }, delay);
+              }, delay * delayMultiplier);
             } else {
-              console.error(chalk.red(`All retry attempts for ${fn.name} failed:`));
+              console.error(
+                chalk.red(`All retry attempts for ${fn.name} failed:`)
+              );
               console.error(chalk.red(err.stack));
 
               reject(err);

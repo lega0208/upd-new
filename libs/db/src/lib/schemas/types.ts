@@ -25,6 +25,7 @@ export interface AASearchTermMetrics {
   term: string;
   clicks: number;
   position?: number;
+  num_searches?: number;
 }
 
 export interface FeedbackComment {

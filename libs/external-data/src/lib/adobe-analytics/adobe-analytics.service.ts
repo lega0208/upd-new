@@ -128,6 +128,7 @@ export class AdobeAnalyticsService {
         createInternalSearchQuery(dateRange, [], {
           limit: 400,
           lang: lang as 'en' | 'fr',
+          includeSearchInstances: true,
         }),
       {
         pre: (dateRange) =>
