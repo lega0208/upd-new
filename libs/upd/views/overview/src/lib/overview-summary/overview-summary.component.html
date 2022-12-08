@@ -2,63 +2,73 @@
   <div class="row">
     <div class="col-lg-3 col-md-12 col-sm-12">
       <upd-apex-spark-line
-        [title]="'Calls per 100 visits'"
-        [titleTooltip]="'Calls compared to visits tooltip'"
+        [title]="'kpi-calls-per-100-title'"
+        [titleTooltip]="'kpi-calls-per-100-tooltip'"
         [series]="(apexCallDrivers$ | async) || []"
         [current]="(callPerVisits$ | async) || 0"
         [comparison]="(apexCallPercentChange$ | async) || 0"
         [keyword]="'calls'"
         [scale]="100"
         [difference]="(apexCallDifference$ | async) || 0"
-        modal="Feedback decreased by {{
-          (kpiFeedbackPercentChange$ | async) || 0 | percent
-        }} compared to last week"
+        modal=" {{ 'kpi-calls-per-100-guidance' | translate }}"
       ></upd-apex-spark-line>
     </div>
     <div class="col-lg-3 col-md-12 col-sm-12">
       <upd-apex-spark-line
-        [title]="'Positive feedback per 1,000 visits'"
-        [titleTooltip]="'Calls compared to visits tooltip'"
+        [title]="'kpi-feedback-per-1000-title'"
+        [titleTooltip]="'kpi-feedback-per-1000-tooltip'"
         [series]="(apexKpiFeedback$ | async) || []"
         [current]="(currentKpiFeedback$ | async) || 0"
         [comparison]="(kpiFeedbackPercentChange$ | async) || 0"
         [scale]="1000"
         [kpiObjectiveCriteria]="feedbackKpiObjectiveCriteria"
         [difference]="(kpiFeedbackDifference$ | async) || 0"
-        modal="Feedback decreased by {{
-          (kpiFeedbackPercentChange$ | async) || 0 | percent
-        }} compared to last week"
+        modal=" {{ 'kpi-feedback-per-1000-guidance' | translate }} "
         [keyword]="'feedback'"
       ></upd-apex-spark-line>
       <!-- pass text and kpiFEedbackPercentChange$ to upd-apex-radial-bar component-->
     </div>
     <div class="col-lg-3 col-md-12 col-sm-12">
       <upd-apex-radial-bar
-        [title]="'Canada.ca search'"
-        [titleTooltip]="'Calls compared to visits tooltip'"
+        [title]="'kpi-search-assessment-title'"
+        [titleTooltip]="'kpi-search-assessment-tooltip'"
         [current]="(kpiSearchAssessment$ | async) || 0"
         [comparison]="(kpiSearchAssessmentPercentChange$ | async) || 0"
         [kpiObjectiveCriteria]="searchKpiObjectiveCriteria"
+        [postValue]="'Pass'"
+        [preLabel]="'Target'"
+        [valueLabel]="0.75"
         [keyword]="'search'"
-        modal="Feedback decreased by {{
-          (kpiFeedbackPercentChange$ | async) || 0 | percent
-        }} compared to last week"
-        >Oct. compared to Sept.
+        modal="{{ 'kpi-search-assessment-guidance' | translate }}"
+        text=""
+        >{{
+          'kpi-search-assessment-text'
+            | translate
+              : {
+                  passed: (kpiSearchAssessmentPassed$ | async)?.passed,
+                  total: (kpiSearchAssessmentPassed$ | async)?.total
+                }
+        }}
       </upd-apex-radial-bar>
     </div>
     <div class="col-lg-3 col-md-12 col-sm-12">
       <upd-apex-radial-bar
-        [title]="'UX tests avg success rate'"
-        [titleTooltip]="'Calls compared to visits tooltip'"
-        [labels]="['Target: 80%']"
-        [current]="(kpiUXTests$ | async) || 0"
+        [title]="'kpi-ux-test-title'"
+        [titleTooltip]="'kpi-ux-test-tooltip'"
+        [preLabel]="'Target'"
+        [valueLabel]="0.8"
+        [current]="(kpiUXTestsPercent$ | async) || 0"
         [kpiObjectiveCriteria]="uxTestsKpiObjectiveCriteria"
         [keyword]="'ux'"
-        modal="Feedback decreased by {{
-          (kpiFeedbackPercentChange$ | async) || 0 | percent
-        }} compared to last week"
+        modal="{{
+          'kpi-ux-test-guidance'
+            | translate: { value: (kpiUXTestsTotal$ | async) || 0 }
+        }}"
       >
-        325 tests completed
+        {{
+          'kpi-ux-test-text'
+            | translate: { total: (kpiUXTestsTotal$ | async) || 0 }
+        }}
       </upd-apex-radial-bar>
     </div>
   </div>

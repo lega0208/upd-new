@@ -15,7 +15,9 @@ export declare class SearchAssessment {
   expected_result?: string;
   expected_position?: number;
   pass?: boolean;
-  clicks: number;
+  total_searches: number;
+  total_clicks: number;
+  target_clicks: number;
 }
 export declare const SearchAssessmentSchema: import('mongoose').Schema<
   Document<SearchAssessment, any, any>,

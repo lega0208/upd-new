@@ -7,19 +7,19 @@ export const defaultKpiObjectiveStatusConfig: KpiObjectiveStatusConfig = {
   pass: {
     colour: '#26A69A',
     colourClass: 'text-success',
-    iconName: 'arrow_upward',
+    iconName: 'arrow_downward',
     message: 'kpi-met',
   },
   fail: {
     colour: '#DF2929',
     colourClass: 'text-danger',
-    iconName: 'arrow_downward',
+    iconName: 'arrow_upward',
     message: 'kpi-not-met',
   },
   partial: {
     colour: '#F57F17',
     colourClass: 'text-semisuccess',
-    iconName: 'arrow_upward',
+    iconName: 'arrow_downward',
     message: 'kpi-half-met',
   },
   none: {
@@ -51,11 +51,11 @@ export const searchKpiObjectiveCriteria: KpiObjectiveCriteria = (
   comparison: number
 ) => {
   switch (true) {
-    case comparison >= 0.1:
+    case current >= 0.75:
       return 'pass';
-    case comparison > 0.03:
+    case current > 0.6:
       return 'partial';
-    case comparison <= 0.03:
+    case current <= 0:
       return 'fail';
     default:
       return 'none';
@@ -83,12 +83,12 @@ export const feedbackKpiObjectiveCriteria: KpiObjectiveCriteria = (
   comparison: number
 ) => {
   switch (true) {
-    case comparison >= 0.2:
-      return 'pass';
-    case comparison >= 0.0 && comparison < 0.2:
-      return 'partial';
-    case comparison < 0.0:
+    case comparison > 0:
       return 'fail';
+    case comparison <= 0 && comparison > -0.02:
+      return 'partial';
+    case comparison <= -0.02:
+      return 'pass';
     default:
       return 'none';
   }

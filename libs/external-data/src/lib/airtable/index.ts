@@ -194,7 +194,9 @@ export class AirtableClient {
       expected_position: fields['Expected Position'],
       pass: fields['Pass'],
       date: fields['Date'],
-      clicks: fields['Clicks'],
+      total_searches: fields['Total searches'],
+      total_clicks: fields['Total clicks'],
+      target_clicks: fields['Target clicks'],
       url: fields['URL'],
     })) as FieldRecordQuery[];
   }
@@ -229,13 +231,8 @@ export class AirtableClient {
         }
       : {};
 
-
-    return await this.insertRecords(
-      bases.SEARCH_ASSESSMENT,
-      `${table}`,
-      data
-    );
-    }
+    return await this.insertRecords(bases.SEARCH_ASSESSMENT, `${table}`, data);
+  }
   async updateSearchAssessment(
     data: RecordData<Partial<FieldSet>>[],
     lang: lang = 'en'

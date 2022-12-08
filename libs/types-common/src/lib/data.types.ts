@@ -130,7 +130,9 @@ export interface OverviewAggregatedData {
     expected_result: string;
     position: number;
     date: string;
-    clicks: number;
+    target_clicks: number;
+    total_clicks: number;
+    total_searches: number;
   }[];
 }
 

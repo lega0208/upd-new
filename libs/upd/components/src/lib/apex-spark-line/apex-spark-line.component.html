@@ -35,10 +35,12 @@
       {{ curr }}
     </span>
     <div class="d-flex justify-content-end">
-      <span *ngIf="keyword === 'calls'">calls per 100 visits</span>
-      <span *ngIf="keyword === 'feedback'"
-        >positive feedback per 1000 visits</span
-      >
+      <span *ngIf="keyword === 'calls'">{{
+        'kpi-calls-per-100-text' | translate
+      }}</span>
+      <span *ngIf="keyword === 'feedback'">{{
+        'kpi-feedback-per-1000-text' | translate
+      }}</span>
     </div>
   </div>
 
@@ -52,8 +54,12 @@
       }}</span>
       {{ comparison | localePercent }}</span
     >
-    <span *ngIf="keyword === 'calls'">({{ diff }} calls) </span>
-    <span *ngIf="keyword === 'feedback'">({{ diff }} positive feedback)</span>
+    <span *ngIf="keyword === 'calls'"
+      >({{ diff }} {{ 'kpi-calls-per-100-label' | translate }})
+    </span>
+    <span *ngIf="keyword === 'feedback'"
+      >({{ diff }} {{ 'kpi-feedback-per-1000-label' | translate }})</span
+    >
     <ng-content></ng-content>
     <div class="d-flex push" *ngIf="modal">
       <upd-modal [modalTitle]="title">

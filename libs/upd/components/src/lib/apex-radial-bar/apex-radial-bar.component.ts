@@ -20,7 +20,7 @@ import {
   ApexXAxis,
   ApexYAxis,
   ChartComponent,
-  ChartType
+  ChartType,
 } from 'ng-apexcharts';
 import {
   ChangeDetectionStrategy,
@@ -33,7 +33,7 @@ import {
 } from '@angular/core';
 import { ColumnConfig } from '../data-table-styles/types';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { EN_CA } from '@dua-upd/upd/i18n';
+import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { KpiObjectiveStatus } from '../data-card/data-card.component';
 import { formatPercent } from '@angular/common';
 import {
@@ -85,6 +85,9 @@ export class ApexRadialBarComponent implements OnInit, OnChanges {
   @Input() kpiObjectiveCriteria = defaultKpiObjectiveCriteria;
   @Input() modal = '';
   @Input() keyword = 'calls';
+  @Input() postValue = '';
+  @Input() preLabel = '';
+  @Input() valueLabel = 0;
   type: ChartType = 'radialBar';
 
   chartOptions: Partial<ChartOptions> = {
@@ -170,8 +173,25 @@ export class ApexRadialBarComponent implements OnInit, OnChanges {
             ? formatPercent(this.comparison, locale) || '0'
             : '0';
 
-        const seriesValue = (data: number) => {
-          return `${formatPercent(Math.abs(this.current), locale)}`;
+        const postValueFunction = (data: number) => {
+          return this.postValue
+            ? `${formatPercent(
+                data / 100,
+                locale
+              )} ${this.i18n.service.translate(
+                this.postValue,
+                (locale + '-CA') as LocaleId
+              )}`
+            : `${formatPercent(data / 100, locale)}`;
+        };
+
+        const preLabelFunction = (data: number) => {
+          return this.preLabel
+            ? `${this.i18n.service.translate(
+                this.preLabel,
+                (locale + '-CA') as LocaleId
+              )} ${data}`
+            : `${data}`;
         };
 
         this.chartOptions = {
@@ -181,6 +201,13 @@ export class ApexRadialBarComponent implements OnInit, OnChanges {
           labels:
             this.labels.length === 1
               ? this.labels
+              : this.preLabel && this.valueLabel
+              ? [
+                  `${this.i18n.service.translate(
+                    this.preLabel,
+                    (locale + '-CA') as LocaleId
+                  )} ${formatPercent(this.valueLabel, locale)}`,
+                ]
               : this.comparison !== 0
               ? [comparison]
               : [''],
@@ -196,7 +223,7 @@ export class ApexRadialBarComponent implements OnInit, OnChanges {
                 value: {
                   ...this.chartOptions.plotOptions?.radialBar?.dataLabels
                     ?.value,
-                  formatter: seriesValue,
+                  formatter: postValueFunction,
                 },
               },
             },

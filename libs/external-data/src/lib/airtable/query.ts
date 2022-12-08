@@ -9,7 +9,9 @@ export type FieldRecordQuery = {
   expected_position?: number;
   most_clicks?: number;
   date: string;
-  clicks: number;
+  total_clicks: number;
+  total_searches: number;
+  target_clicks: number;
   pass?: boolean;
   url?: string;
 };
@@ -33,7 +35,9 @@ export type FieldRecord = {
   'Most Clicks Position'?: number;
   Rank?: number;
   Date?: string;
-  Clicks?: number;
+  'Total Clicks'?: number;
+  'Total Searches'?: number;
+  'Target Clicks'?: number;
 };
 
 export type CreatedFieldRecord = {

@@ -7,7 +7,10 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
 
-type searchAssessmentColTypes = GetTableProps<OverviewSearchAnalyticsComponent, 'searchAssessmentData$'>
+type searchAssessmentColTypes = GetTableProps<
+  OverviewSearchAnalyticsComponent,
+  'searchAssessmentData$'
+>;
 
 @Component({
   selector: 'upd-overview-search-analytics',
@@ -98,7 +101,7 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
           },
           {
             field: 'url',
-            header: this.i18n.service.translate('Targeted URL', lang),
+            header: this.i18n.service.translate('Target URL', lang),
             type: 'link',
             typeParams: {
               external: true,
@@ -106,8 +109,16 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
             },
           },
           {
+            field: 'total_searches',
+            header: this.i18n.service.translate('Total searches', lang),
+          },
+          {
+            field: 'target_clicks',
+            header: this.i18n.service.translate('Target URL clicks', lang),
+          },
+          {
             field: 'position',
-            header: this.i18n.service.translate('position', lang),
+            header: this.i18n.service.translate('avg-rank', lang),
           },
           {
             field: 'pass',

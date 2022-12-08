@@ -254,42 +254,53 @@ export class OverviewFacade {
 
   currentKpiFeedback$ = this.overviewData$.pipe(
     map((data) => {
-      const dyfYesCurrent = data?.dateRangeData?.dyf_yes || 0;
+      const dyfNoCurrent = data?.dateRangeData?.dyf_no || 0;
       const visits = data?.dateRangeData?.visits || 0;
 
-      return dyfYesCurrent / visits;
+      return dyfNoCurrent / visits;
     })
   );
 
-  apexKpiFeedback$ = combineLatest([this.overviewData$]).pipe(
-    map(([data]) => {
+  apexKpiFeedback$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
       const currentFeedback = data?.dateRangeData?.dyfByDay || [];
       const comparisonFeedback = data?.comparisonDateRangeData?.dyfByDay || [];
 
       const currentVisits = data?.dateRangeData?.visitsByDay || [];
       const comparisonVisits = data?.comparisonDateRangeData?.visitsByDay || [];
 
+      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
+      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+        data.comparisonDateRange || '',
+        lang
+      );
+
+      const dateFormat = lang === FR_CA ? 'D MMM' : 'MMM D';
+
       const currentFeedbackData = currentFeedback.map((d, idx) => {
         return {
-          x: d.date,
-          y: (d.dyf_yes / currentVisits[idx].visits) * 1000,
+          x: dayjs(d.date).format(dateFormat),
+          y: (d.dyf_no / currentVisits[idx].visits) * 1000,
         };
       });
 
       const comparisonFeedbackData = comparisonFeedback.map((d, idx) => {
         return {
-          x: currentFeedback[idx].date,
-          y: (d.dyf_yes / comparisonVisits[idx].visits) * 1000,
+          x: dayjs(currentFeedback[idx].date).format(dateFormat),
+          y: (d.dyf_no / comparisonVisits[idx].visits) * 1000,
         };
       });
 
       return [
         {
-          name: 'Previous',
+          name: dateRangeLabel,
           data: comparisonFeedbackData,
         },
         {
-          name: 'Current',
+          name: comparisonDateRangeLabel,
           data: currentFeedbackData,
         },
       ];
@@ -298,10 +309,10 @@ export class OverviewFacade {
 
   comparisonKpiFeedback$ = combineLatest([this.overviewData$]).pipe(
     map(([data]) => {
-      const dyfYesComparison = data?.comparisonDateRangeData?.dyf_yes || 0;
+      const dyfNoComparison = data?.comparisonDateRangeData?.dyf_no || 0;
       const visits = data?.comparisonDateRangeData?.visits || 0;
 
-      return dyfYesComparison / visits;
+      return dyfNoComparison / visits;
     })
   );
 
@@ -322,7 +333,7 @@ export class OverviewFacade {
   kpiUXTests$ = this.overviewData$.pipe(
     map((data) => {
       const uxTests = data?.projects?.uxTests || [];
-      const KpiUxTests = uxTests
+      return uxTests
         .map((uxTest) => {
           if (typeof uxTest?.success_rate === 'number') {
             return uxTest.success_rate;
@@ -330,11 +341,21 @@ export class OverviewFacade {
           return -1;
         })
         .filter((successRate) => successRate >= 0);
+    })
+  );
 
-      const kpiUxTestsLength = KpiUxTests.length;
-      const kpiUxTestsSum = KpiUxTests.reduce((a, b) => a + b, 0);
+  kpiUXTestsPercent$ = combineLatest([this.kpiUXTests$]).pipe(
+    map(([data]) => {
+      const kpiUxTestsLength = data.length;
+      const kpiUxTestsSum = data.reduce((a, b) => a + b, 0);
 
       return kpiUxTestsSum / kpiUxTestsLength;
+    })
+  );
+
+  kpiUXTestsTotal$ = combineLatest([this.kpiUXTests$]).pipe(
+    map(([data]) => {
+      return data.length;
     })
   );
 
@@ -1216,14 +1237,32 @@ export class OverviewFacade {
               : this.i18n.service.translate('French', lang),
             query: d.query,
             url: url,
-            position: rank,
+            position: rank === 0 ? '-' : rank,
             pass: pass,
-            clicks: d.clicks,
+            total_searches: d.total_searches,
+            total_clicks: d.total_clicks,
+            target_clicks: d.target_clicks,
           };
         })
-        .sort((a, b) => a.lang.localeCompare(b.lang) || b.clicks - a.clicks);
+        .sort(
+          (a, b) =>
+            a.lang.localeCompare(b.lang) || b.total_searches - a.total_searches
+        );
 
       return [...(searchAssessment || [])];
+    })
+  );
+
+  searchAssessmentPassed$ = combineLatest([
+    this.searchAssessmentData$,
+    this.currentLang$,
+  ]).pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map(([data, lang]) => {
+      return {
+        passed: data.filter((d) => d.pass === 'Pass').length,
+        total: data.length,
+      };
     })
   );
 
@@ -1232,23 +1271,29 @@ export class OverviewFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
-      return data?.comparisonDateRangeData?.searchAssessmentData.map((d) => {
-        const isEnglish = d.lang === 'en';
-        const rank = isFinite(d.position) ? Math.round(d.position) : '';
-        const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
-        const url = d.expected_result?.replace(/^https:\/\//i, '');
-        return {
-          lang: isEnglish ? this.i18n.service.translate('English',lang) : this.i18n.service.translate('French',lang),
-          query: d.query,
-          url: url,
-          position: rank,
-          pass: pass,
-          clicks: d.clicks,
-        };
-      })
-      .sort((a, b) => 
-      a.lang.localeCompare(b.lang) ||
-      b.clicks - a.clicks);
+      return data?.comparisonDateRangeData?.searchAssessmentData
+        .map((d) => {
+          const isEnglish = d.lang === 'en';
+          const rank = isFinite(d.position) ? Math.round(d.position) : '';
+          const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
+          const url = d.expected_result?.replace(/^https:\/\//i, '');
+          return {
+            lang: isEnglish
+              ? this.i18n.service.translate('English', lang)
+              : this.i18n.service.translate('French', lang),
+            query: d.query,
+            url: url,
+            position: rank,
+            pass: pass,
+            total_searches: d.total_searches,
+            total_clicks: d.total_clicks,
+            target_clicks: d.target_clicks,
+          };
+        })
+        .sort(
+          (a, b) =>
+            a.lang.localeCompare(b.lang) || b.total_searches - a.total_searches
+        );
     })
   );
 

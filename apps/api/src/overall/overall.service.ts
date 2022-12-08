@@ -131,9 +131,24 @@ export class OverallService {
       .sort((a, b) => Number(a.change) - Number(b.change))
       .slice(0, 5);
 
-    
-    const satDateRange = `${dayjs.utc().subtract(2, 'weeks').startOf('week').format('YYYY-MM-DD')}/${dayjs.utc().subtract(2, 'weeks').endOf('week').format('YYYY-MM-DD')}`;
-    const satComparisonDateRange = `${dayjs.utc().subtract(3, 'weeks').startOf('week').format('YYYY-MM-DD')}/${dayjs.utc().subtract(3, 'weeks').endOf('week').format('YYYY-MM-DD')}`;
+    const satDateRange = `${dayjs
+      .utc()
+      .subtract(2, 'weeks')
+      .startOf('week')
+      .format('YYYY-MM-DD')}/${dayjs
+      .utc()
+      .subtract(2, 'weeks')
+      .endOf('week')
+      .format('YYYY-MM-DD')}`;
+    const satComparisonDateRange = `${dayjs
+      .utc()
+      .subtract(3, 'weeks')
+      .startOf('week')
+      .format('YYYY-MM-DD')}/${dayjs
+      .utc()
+      .subtract(3, 'weeks')
+      .endOf('week')
+      .format('YYYY-MM-DD')}`;
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -415,7 +430,9 @@ async function getOverviewMetrics(
   dateQuery.$gte = new Date(startDate);
   dateQuery.$lte = new Date(endDate);
 
-  const [satStartDate, satEndDate] = satDateRange.split('/').map((d) => new Date(d));
+  const [satStartDate, satEndDate] = satDateRange
+    .split('/')
+    .map((d) => new Date(d));
 
   const satDateQuery: FilterQuery<Date> = {};
 
@@ -632,13 +649,14 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
-  
   const searchAssessmentData = await searchAssessmentModel
     .aggregate()
     .match({ date: satDateQuery })
     .group({
       _id: { $toLower: '$query' },
-      clicks: { $sum: '$clicks' },
+      total_clicks: { $sum: '$total_clicks' },
+      target_clicks: { $sum: '$target_clicks' },
+      total_searches: { $sum: '$total_searches' },
       position: { $avg: '$expected_position' },
       doc: { $push: '$$ROOT' },
     })
@@ -648,7 +666,9 @@ async function getOverviewMetrics(
     .project({
       query: '$_id',
       _id: 0,
-      clicks: 1,
+      total_clicks: 1,
+      target_clicks: 1,
+      total_searches: 1,
       position: 1,
       expected_result: 1,
       lang: 1,

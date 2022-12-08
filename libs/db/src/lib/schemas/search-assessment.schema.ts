@@ -28,7 +28,13 @@ export class SearchAssessment {
   pass = false;
 
   @Prop({ type: Number, required: true, index: true })
-  clicks = 0;
+  total_searches = 0;
+
+  @Prop({ type: Number, required: true, index: true })
+  total_clicks = 0;
+
+  @Prop({ type: Number, required: true, index: true })
+  target_clicks = 0;
 }
 
 export const SearchAssessmentSchema =
@@ -56,7 +62,9 @@ SearchAssessmentSchema.statics['getSAT'] = async function (
       expected_url: 1,
       expected_position: 1,
       pass: 1,
-      clicks: 1,
+      total_clicks: 1,
+      total_searches: 1,
+      target_clicks: 1,
     })
     .exec();
 };

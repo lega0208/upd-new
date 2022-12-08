@@ -37,11 +37,13 @@ export class OverviewSummaryComponent implements OnInit {
   kpiFeedbackPercentChange$ = this.overviewService.kpiFeedbackPercentChange$;
   kpiFeedbackDifference$ = this.overviewService.kpiFeedbackDifference$;
 
-  kpiUXTests$ = this.overviewService.kpiUXTests$;
+  kpiUXTestsPercent$ = this.overviewService.kpiUXTestsPercent$;
+  kpiUXTestsTotal$ = this.overviewService.kpiUXTestsTotal$;
 
   kpiSearchAssessment$ = this.overviewService.currentKpiSearchAssessment$;
   kpiSearchAssessmentPercentChange$ =
     this.overviewService.kpiSearchAssessmentPercentChange$;
+  kpiSearchAssessmentPassed$ = this.overviewService.searchAssessmentPassed$;
 
   uniqueVisitors$ = this.overviewService.visitors$;
   uniqueVisitorsPercentChange$ = this.overviewService.visitorsPercentChange$;
@@ -184,7 +186,10 @@ export class OverviewSummaryComponent implements OnInit {
           }),
           pipe: 'number',
         },
-        { field: 'prevName', header: this.i18n.service.translate('Dates', lang) },
+        {
+          field: 'prevName',
+          header: this.i18n.service.translate('Dates', lang),
+        },
         {
           field: 'prevValue',
           header: this.i18n.service.translate('Visits for ', lang, {
