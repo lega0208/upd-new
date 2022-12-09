@@ -5,6 +5,8 @@
   [config]="secondaryTitleCols"
   [data]="secondaryTitleData"
 >
+<div>
+</div>
   <div class="radialBar">
     <apx-chart
       *ngIf="chartOptions.chart"
@@ -62,8 +64,7 @@
     >
     <ng-content></ng-content>
     <div class="d-flex push" *ngIf="modal">
-      <upd-modal [modalTitle]="title">
-        {{ modal }}
+      <upd-modal [modalTitle]="title" [modalContent]="modal">
       </upd-modal>
     </div>
   </div>

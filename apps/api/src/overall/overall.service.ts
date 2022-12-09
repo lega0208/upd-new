@@ -649,14 +649,24 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
+    // get search assessment data, but don't merge query if there is value in en or fr
+
+
+
   const searchAssessmentData = await searchAssessmentModel
+
     .aggregate()
     .match({ date: satDateQuery })
+    // don't group by query if there is a value in en or fr
     .group({
-      _id: { $toLower: '$query' },
+      _id: {
+        query: '$query',
+        lang: '$lang',
+      },
       total_clicks: { $sum: '$total_clicks' },
       target_clicks: { $sum: '$target_clicks' },
       total_searches: { $sum: '$total_searches' },
+      expected_position: { $avg: '$expected_position' },
       position: { $avg: '$expected_position' },
       doc: { $push: '$$ROOT' },
     })
@@ -664,14 +674,14 @@ async function getOverviewMetrics(
       $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
     })
     .project({
-      query: '$_id',
+      query: '$_id.query',
+      lang: '$_id.lang',
       _id: 0,
       total_clicks: 1,
       target_clicks: 1,
       total_searches: 1,
       position: 1,
       expected_result: 1,
-      lang: 1,
     })
     .exec();
 

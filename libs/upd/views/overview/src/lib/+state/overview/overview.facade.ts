@@ -278,18 +278,16 @@ export class OverviewFacade {
         lang
       );
 
-      const dateFormat = lang === FR_CA ? 'D MMM' : 'MMM D';
-
       const currentFeedbackData = currentFeedback.map((d, idx) => {
         return {
-          x: dayjs(d.date).format(dateFormat),
+          x: d.date,
           y: (d.dyf_no / currentVisits[idx].visits) * 1000,
         };
       });
 
       const comparisonFeedbackData = comparisonFeedback.map((d, idx) => {
         return {
-          x: dayjs(currentFeedback[idx].date).format(dateFormat),
+          x: currentFeedback[idx].date,
           y: (d.dyf_no / comparisonVisits[idx].visits) * 1000,
         };
       });
@@ -297,10 +295,12 @@ export class OverviewFacade {
       return [
         {
           name: dateRangeLabel,
+          type: 'line',
           data: comparisonFeedbackData,
         },
         {
           name: comparisonDateRangeLabel,
+          type: 'line',
           data: currentFeedbackData,
         },
       ];
@@ -1159,7 +1159,6 @@ export class OverviewFacade {
     this.overviewData$,
     this.currentLang$,
   ]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
       const pieChartData = [
         data?.dateRangeData?.fwylf_cant_find_info || 0,
@@ -1181,7 +1180,6 @@ export class OverviewFacade {
     this.overviewData$,
     this.currentLang$,
   ]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
       const cantFindInfo = this.i18n.service.translate(
         'd3-cant-find-info',
@@ -1223,7 +1221,6 @@ export class OverviewFacade {
     this.overviewData$,
     this.currentLang$,
   ]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
       const searchAssessment = data?.dateRangeData?.searchAssessmentData
         .map((d) => {
@@ -1257,7 +1254,6 @@ export class OverviewFacade {
     this.searchAssessmentData$,
     this.currentLang$,
   ]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
       return {
         passed: data.filter((d) => d.pass === 'Pass').length,

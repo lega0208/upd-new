@@ -45,6 +45,8 @@ import {
   defaultKpiObjectiveStatusConfig,
   defaultKpiObjectiveCriteria,
 } from '../apex-radial-bar/kpi-objectives';
+import fr from 'apexcharts/dist/locales/fr.json';
+import en from 'apexcharts/dist/locales/en.json';
 
 export type ChartOptions = {
   annotations?: ApexAnnotations;
@@ -101,6 +103,8 @@ export class ApexSparkLineComponent implements OnInit, OnChanges {
       },
       height: 50,
       offsetY: 25,
+      locales: [fr, en],
+      defaultLocale: 'en',
       // toolbar: {
       //   show: true,
       // },

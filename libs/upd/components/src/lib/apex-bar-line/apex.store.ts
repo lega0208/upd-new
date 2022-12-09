@@ -148,7 +148,6 @@ export class ApexStore extends ComponentStore<ChartOptions> {
   readonly setSeries = this.updater(
     (state, value: ApexAxisChartSeries): ChartOptions => {
       this.setYAxis(value);
-      console.log('setSeries', value);
       if (value[0]?.data?.length > 31) {
         value[0].type = 'line';
         value[1].type = 'line';

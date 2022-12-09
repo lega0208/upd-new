@@ -40,6 +40,8 @@ import {
   defaultKpiObjectiveStatusConfig,
   defaultKpiObjectiveCriteria,
 } from './kpi-objectives';
+import fr from 'apexcharts/dist/locales/fr.json';
+import en from 'apexcharts/dist/locales/en.json';
 
 type ChartOptions = {
   annotations?: ApexAnnotations;
@@ -94,6 +96,8 @@ export class ApexRadialBarComponent implements OnInit, OnChanges {
     chart: {
       height: 350,
       type: this.type,
+      locales: [fr, en],
+      defaultLocale: 'en',
       // toolbar: {
       //   show: true,
       // },
@@ -183,15 +187,6 @@ export class ApexRadialBarComponent implements OnInit, OnChanges {
                 (locale + '-CA') as LocaleId
               )}`
             : `${formatPercent(data / 100, locale)}`;
-        };
-
-        const preLabelFunction = (data: number) => {
-          return this.preLabel
-            ? `${this.i18n.service.translate(
-                this.preLabel,
-                (locale + '-CA') as LocaleId
-              )} ${data}`
-            : `${data}`;
         };
 
         this.chartOptions = {

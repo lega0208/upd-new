@@ -183,10 +183,6 @@ export class ApexStore extends ComponentStore<ChartOptions> {
 
   readonly setSeries = this.updater(
     (state, value: ApexAxisChartSeries): ChartOptions => {
-      console.log('setSeries', value);
-      if (state?.added?.type === 'line') {
-        console.log('yep');
-      }
       if (value[0]?.data?.length > 31) {
         return {
           ...state,
