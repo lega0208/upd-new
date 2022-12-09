@@ -47,6 +47,9 @@ import {
 } from '../apex-radial-bar/kpi-objectives';
 import fr from 'apexcharts/dist/locales/fr.json';
 import en from 'apexcharts/dist/locales/en.json';
+import dayjs from 'dayjs';
+import 'dayjs/locale/en-ca';
+import 'dayjs/locale/fr-ca';
 
 export type ChartOptions = {
   annotations?: ApexAnnotations;
@@ -159,7 +162,7 @@ export class ApexSparkLineComponent implements OnInit, OnChanges {
         const locale = lang === EN_CA ? 'en' : 'fr';
 
         this.diff = (this.difference * this.scale).toLocaleString(lang, {
-          maximumFractionDigits: 1,
+          minimumFractionDigits: 1, maximumFractionDigits: 2
         });
 
         const colour = this.kpiConfig[this.kpiObjectiveStatus].colour as string;
@@ -173,6 +176,7 @@ export class ApexSparkLineComponent implements OnInit, OnChanges {
             maximumFractionDigits: 1,
           })}`;
         };
+        const dateFormat = lang === EN_CA ? 'MMM D' : 'D MMM';
 
         //     this.chartOptions = {
         //       ...this.chartOptions,
@@ -215,6 +219,12 @@ export class ApexSparkLineComponent implements OnInit, OnChanges {
                 });
               },
             },
+            x: {
+              ...this.chartOptions.tooltip?.x,
+              formatter: (val: number) => {
+                return dayjs.utc(val).locale(lang).format(dateFormat);
+              }
+            }
           },
         };
       });
