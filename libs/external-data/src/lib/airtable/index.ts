@@ -4,10 +4,10 @@ import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 
-import { FieldSet, Query } from 'airtable';
+import { FieldSet, Query, RecordData, Table } from 'airtable';
 import { QueryParams, SortParameter } from 'airtable/lib/query_params';
 
-import { squishTrim } from '@dua-upd/utils-common';
+import { squishTrim, wait } from '@dua-upd/utils-common';
 import { getATClient, AirTableAPI } from './client';
 import { bases } from './base';
 import {
@@ -18,6 +18,12 @@ import {
   FeedbackData,
   PageListData,
 } from './types';
+import {
+  CreatedFieldRecord,
+  FieldRecord,
+  FieldRecordQuery,
+  lang,
+} from './query';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -70,6 +76,94 @@ export class AirtableClient {
     return this.feedbackClient.base(baseId)(tableName).select(params);
   }
 
+  async createInsert(
+    baseId: string,
+    tableName: string,
+    fields: Partial<FieldSet>
+  ) {
+    await this.client
+      .base(baseId)(tableName)
+      .create(fields, { typecast: true })
+      .catch((err) => {
+        console.error(err);
+      });
+    return Promise.resolve();
+  }
+
+  async createUpdate(
+    baseId: string,
+    tableName: string,
+    fields: RecordData<Partial<FieldSet>>[]
+  ) {
+    await this.client
+      .base(baseId)(tableName)
+      .update(fields)
+      .catch((err) => {
+        console.error(err);
+      });
+    return Promise.resolve();
+  }
+
+  async createDestroy(baseId: string, tableName: string, id: string[]) {
+    await this.client.base(baseId)(tableName).destroy(id);
+    return Promise.resolve();
+  }
+
+  async deleteRecords(baseId: string, tableName: string, id: string[]) {
+    const chunkSize = 10;
+    const chunks = [];
+
+    for (let i = 0; i < id.length; i += chunkSize) {
+      chunks.push(id.slice(i, i + chunkSize));
+    }
+
+    for (const chunk of chunks) {
+      await this.createDestroy(baseId, tableName, chunk);
+    }
+  }
+
+  async deleteSearchAssessment(id: string[], lang: lang = 'en') {
+    return await this.deleteRecords(
+      bases.SEARCH_ASSESSMENT,
+      `CRA - ${lang.toUpperCase()}`,
+      id
+    );
+  }
+
+  async insertRecords(
+    baseId: string,
+    tableName: string,
+    records: RecordData<Partial<FieldSet>>[]
+  ) {
+    const chunkSize = 10;
+    const chunks = [];
+
+    for (let i = 0; i < records.length; i += chunkSize) {
+      chunks.push(records.slice(i, i + chunkSize));
+    }
+
+    for (const chunk of chunks) {
+      await this.createInsert(baseId, tableName, chunk);
+    }
+  }
+
+  async updateRecords(
+    baseId: string,
+    tableName: string,
+    records: RecordData<Partial<FieldSet>>[]
+  ) {
+    const chunkSize = 10;
+    const chunks = [];
+
+    for (let i = 0; i < records.length; i += chunkSize) {
+      chunks.push(records.slice(i, i + chunkSize));
+    }
+
+    for (const chunk of chunks) {
+      await this.createUpdate(baseId, tableName, chunk);
+    }
+  }
+
   async selectAll(query: Query<FieldSet>): Promise<FieldSet[]> {
     const results = [];
 
@@ -80,6 +174,75 @@ export class AirtableClient {
     });
 
     return results;
+  }
+
+  async getSearchAssessment(
+    table = 'CRA - ',
+    lastUpdatedDate?: DateType
+  ): Promise<FieldRecordQuery[]> {
+    const params = lastUpdatedDate
+      ? {
+          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
+        }
+      : {};
+    const query = this.createQuery(bases.SEARCH_ASSESSMENT, `${table}`, params);
+
+    return (await this.selectAll(query)).map(({ id, fields }) => ({
+      airtable_id: id,
+      query: fields['Query'],
+      expected_result: fields['Expected Result'],
+      expected_position: fields['Expected Position'],
+      pass: fields['Pass'],
+      date: fields['Date'],
+      total_searches: fields['Total searches'],
+      total_clicks: fields['Total clicks'],
+      target_clicks: fields['Target clicks'],
+      url: fields['URL'],
+    })) as FieldRecordQuery[];
+  }
+
+  async insertSearchAssessment(
+    data,
+    lang: lang = 'en',
+    lastUpdatedDate?: DateType
+  ) {
+    const params = lastUpdatedDate
+      ? {
+          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
+        }
+      : {};
+
+    return await this.insertRecords(
+      bases.SEARCH_ASSESSMENT,
+      `CRA - ${lang.toUpperCase()}`,
+      data
+    );
+  }
+
+  async insertExpectedDB(
+    data,
+    table = 'Expected - EN',
+    lang: lang = 'en',
+    lastUpdatedDate?: DateType
+  ) {
+    const params = lastUpdatedDate
+      ? {
+          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
+        }
+      : {};
+
+    return await this.insertRecords(bases.SEARCH_ASSESSMENT, `${table}`, data);
+  }
+  async updateSearchAssessment(
+    data: RecordData<Partial<FieldSet>>[],
+    lang: lang = 'en'
+  ) {
+    console.log(lang);
+    return await this.updateRecords(
+      bases.SEARCH_ASSESSMENT,
+      `CRA - ${lang.toUpperCase()}`,
+      data
+    );
   }
 
   async getTasks(lastUpdatedDate?: DateType): Promise<TaskData[]> {
@@ -249,7 +412,9 @@ export class AirtableClient {
     const query = this.createQuery(
       bases.TASKS_INVENTORY,
       'Unique Call Drivers',
-      { filterByFormula }
+      {
+        filterByFormula,
+      }
     );
 
     const results = (await this.selectAll(query)).map(
@@ -280,14 +445,17 @@ export class AirtableClient {
   async getPagesList(lastUpdated?: Date): Promise<PageListData[]> {
     const params = lastUpdated
       ? {
-        filterByFormula: createLastUpdatedFilterFormula(lastUpdated),
-      }
+          filterByFormula: createLastUpdatedFilterFormula(lastUpdated),
+        }
       : {};
 
     const query = this.createQuery(bases.PAGES, 'Published CRA pages', params);
 
     return (await this.selectAll(query)).map<PageListData>(({ id, fields }) => {
-      const url = squishTrim(fields['Page path'] as string).replace('https://', '');
+      const url = squishTrim(fields['Page path'] as string).replace(
+        'https://',
+        ''
+      );
 
       return {
         url,

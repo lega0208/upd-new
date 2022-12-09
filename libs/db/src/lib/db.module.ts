@@ -21,13 +21,18 @@ import {
   TaskSchema,
   UxTest,
   UxTestSchema,
+  SearchAssessment,
+  SearchAssessmentSchema,
 } from './db.schemas';
 import { ConfigModule } from '@nestjs/config';
 import { getDbConnectionString } from './db.connection';
 import { DbService } from './db.service';
 
 export const models = {
-  callDrivers: { model: CallDriver as typeof CallDriver, schema: CallDriverSchema },
+  callDrivers: {
+    model: CallDriver as typeof CallDriver,
+    schema: CallDriverSchema,
+  },
   feedback: { model: Feedback, schema: FeedbackSchema },
   overall: { model: Overall, schema: OverallSchema },
   pageMetrics: { model: PageMetrics, schema: PageMetricsSchema },
@@ -36,6 +41,7 @@ export const models = {
   tasks: { model: Task, schema: TaskSchema },
   uxTests: { model: UxTest, schema: UxTestSchema },
   projects: { model: Project, schema: ProjectSchema },
+  searchAssessment: { model: SearchAssessment, schema: SearchAssessmentSchema },
   aaItemIds: { model: AAItemId, schema: AAItemIdSchema },
 } as const;
 

@@ -40,6 +40,46 @@ export const logOneDocument = async (db: DbService) => {
  */
 export const outputAChart = async () => await outputChart('example-chart');
 
+export const avgClicksBySearchTerm = async (db: DbService) => {
+  const results = await db.collections.overall
+    .aggregate()
+    .project({ date: 1, aa_searchterms_en: 1 })
+    .match({
+      date: { $gte: new Date('2022-10-01'), $lte: new Date('2022-10-31') },
+    })
+    .unwind('$aa_searchterms_en')
+    .group({
+      _id: '$aa_searchterms_en.term',
+      avg_clicks: {
+        $avg: '$aa_searchterms_en.clicks',
+      },
+    })
+    .sort({ avg_clicks: -1 })
+    .limit(100);
+
+  outputTable('results', results);
+};
+
+export const sumClicksBySearchTerm = async (db: DbService) => {
+  const results = await db.collections.overall
+    .aggregate()
+    .project({ date: 1, aa_searchterms_en: 1 })
+    .match({
+      date: { $gte: new Date('2022-10-01'), $lte: new Date('2022-10-31') },
+    })
+    .unwind('$aa_searchterms_en')
+    .group({
+      _id: '$aa_searchterms_en.term',
+      sum_clicks: {
+        $sum: '$aa_searchterms_en.clicks',
+      },
+    })
+    .sort({ sum_clicks: -1 })
+    .limit(100);
+
+  outputTable('results', results);
+};
+
 /*
  * Or maybe a table suits you better
  */
@@ -70,7 +110,6 @@ export const findDuplicatedPageTitles = async (db: DbService) => {
 
   console.log(`${results.length} duplicated titles 😶`);
 };
-
 
 /*
  * Other stuff I've used to check data:
@@ -160,3 +199,159 @@ export const getTopVisitsOfDups = async (db: DbService) => {
  *    -Get list of urls and return metadata + response status (404 or otherwise)
  *  -get data from db for analysis and export excel file
  */
+
+export const getTopSearchTermPages = async (db: DbService) => {
+  const dateRangeFilter = {
+    date: {
+      $gte: new Date('2022-11-20'),
+      $lte: new Date('2022-11-26'),
+    },
+  };
+
+  console.time('topSearchTerms');
+
+  const topSearchTermsResults = await db.collections.overall
+    .aggregate<{ _id: string; avg_clicks: number }>()
+    .match(dateRangeFilter)
+    .project({
+      date: 1,
+      aa_searchterms_en: 1,
+    })
+    .unwind('aa_searchterms_en')
+    .project({
+      date: 1,
+      term: {
+        $toLower: '$aa_searchterms_en.term',
+      },
+      clicks: '$aa_searchterms_en.clicks',
+    })
+    // first group terms that were different cases and take the sum of their clicks
+    .group({
+      _id: {
+        date: '$date',
+        term: '$term',
+      },
+      clicks: {
+        $sum: '$clicks',
+      },
+    })
+    .group({
+      _id: '$_id.term',
+      avg_clicks: {
+        $avg: '$clicks',
+      },
+    })
+    .sort({ avg_clicks: -1 })
+    .limit(100)
+    .exec();
+
+  console.timeEnd('topSearchTerms');
+
+  logJson(topSearchTermsResults);
+
+  const topSearchTerms = topSearchTermsResults.map((result) => result._id);
+
+  console.time('searchTermsWithUrlPositions');
+
+  const searchTermsWithUrlPositions = await db.collections.pageMetrics
+    .aggregate<{
+      term: string;
+      url_positions: { url: string; position: number }[];
+    }>()
+    .project({
+      date: 1,
+      url: 1,
+      aa_searchterms: {
+        $map: {
+          input: '$aa_searchterms',
+          as: 'searchterm',
+          in: {
+            term: {
+              $toLower: '$$searchterm.term',
+            },
+            clicks: '$$searchterm.clicks',
+            position: '$$searchterm.position',
+          },
+        },
+      },
+    })
+    .match({
+      ...dateRangeFilter,
+      'aa_searchterms.term': {
+        $in: topSearchTerms,
+      },
+    })
+    .project({
+      url: 1,
+      aa_searchterms: {
+        $filter: {
+          input: '$aa_searchterms',
+          as: 'searchterm',
+          cond: {
+            $in: ['$$searchterm.term', topSearchTerms],
+          },
+        },
+      },
+    })
+    .unwind('aa_searchterms')
+    .project({
+      term: '$aa_searchterms.term',
+      url: 1,
+      position: '$aa_searchterms.position',
+    })
+    .group({
+      _id: {
+        term: '$term',
+        url: '$url',
+      },
+      position: {
+        $avg: '$position',
+      },
+    })
+    .project({
+      term: '$_id.term',
+      url_position: {
+        url: '$_id.url',
+        position: '$position',
+      },
+    })
+    .group({
+      _id: '$term',
+      url_positions: {
+        $push: '$url_position',
+      },
+    })
+    .project({ _id: 0, term: '$_id', url_positions: 1 })
+    .exec();
+
+  console.timeEnd('searchTermsWithUrlPositions');
+
+  console.log(
+    `Found results for ${searchTermsWithUrlPositions.length} searchterms`
+  );
+
+  const searchTermsWithTopUrls = searchTermsWithUrlPositions.map(
+    ({ term, url_positions }) => {
+      const sorted = url_positions.sort((a, b) => a.position - b.position);
+
+      return {
+        term,
+        url: sorted[0]?.url,
+        position: sorted[0]?.position,
+      };
+    }
+  );
+
+  logJson(searchTermsWithTopUrls);
+
+  const searchTermsWithMatches = searchTermsWithUrlPositions.map(
+    ({ term }) => term
+  );
+
+  console.log('Search terms with no matches:');
+  logJson(
+    topSearchTermsResults.filter(
+      (results) => !searchTermsWithMatches.includes(results._id)
+    )
+  );
+};

@@ -16,14 +16,21 @@ export class OverviewFeedbackComponent implements OnInit {
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
   comparisonFeedbackTable$ = this.overviewService.comparisonFeedbackTable$;
-  comparisonFeedbackPagesTable$ = this.overviewService.comparisonFeedbackPagesTable$; 
+  comparisonFeedbackPagesTable$ =
+    this.overviewService.comparisonFeedbackPagesTable$;
+
+  dyfChartApex$ = this.overviewService.dyfDataApex$;
+  dyfChartLegend: string[] = [];
+
+  whatWasWrongChartLegend: string[] = [];
+  whatWasWrongChartApex$ = this.overviewService.whatWasWrongDataApex$;
 
   dyfTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
   feedbackCols: ColumnConfig<{
     name: string;
     currValue: number;
-    percentChange: number
+    percentChange: number;
   }>[] = [];
   feedbackPagesTableCols: ColumnConfig<{
     title: string;
@@ -41,6 +48,30 @@ export class OverviewFeedbackComponent implements OnInit {
   ngOnInit() {
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+
+      this.dyfChartLegend = [
+        this.i18n.service.translate('yes', lang),
+        this.i18n.service.translate('no', lang),
+      ];
+      this.dyfTableCols = [
+        {
+          field: 'name',
+          header: this.i18n.service.translate('Selection', lang),
+        },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
+      ];
+
+      this.whatWasWrongChartLegend = [
+        this.i18n.service.translate('d3-cant-find-info', lang),
+        this.i18n.service.translate('d3-other', lang),
+        this.i18n.service.translate('d3-hard-to-understand', lang),
+        this.i18n.service.translate('d3-error', lang),
+      ];
+
       this.dyfTableCols = [
         {
           field: 'name',
@@ -88,7 +119,11 @@ export class OverviewFeedbackComponent implements OnInit {
           header: this.i18n.service.translate('# of comments', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/pages',  link: 'id', postLink: 'pagefeedback' },
+          typeParams: {
+            preLink: '/' + this.langLink + '/pages',
+            link: 'id',
+            postLink: 'pagefeedback',
+          },
         },
         {
           field: 'percentChange',

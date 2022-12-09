@@ -25,6 +25,8 @@ export class OverviewWebtrafficComponent implements OnInit {
 
   isChartDataOver31Days$ = this.overviewService.isChartDataOver31Days$;
 
+  apexBar$ = this.overviewService.apexBar$;
+
   topPagesData$ = this.overviewService.topPagesVisited$;
   topPagesWithChangeData$ =
     this.overviewService.topPagesVisitedWithPercentChange$;
@@ -42,8 +44,16 @@ export class OverviewWebtrafficComponent implements OnInit {
     private i18n: I18nFacade
   ) {}
 
-  topPagesCols: ColumnConfig<{ _id: string; visits: number; percentChange: number }>[] = [];
-  barTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: number }>[] = [];
+  topPagesCols: ColumnConfig<{
+    _id: string;
+    visits: number;
+    percentChange: number;
+  }>[] = [];
+  barTableCols: ColumnConfig<{
+    name: string;
+    currValue: number;
+    prevValue: number;
+  }>[] = [];
 
   ngOnInit() {
     this.i18n.service.onLangChange(({ lang }) => {

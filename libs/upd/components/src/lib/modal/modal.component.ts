@@ -11,6 +11,7 @@ export class ModalComponent {
 
   @Input() modalTitle = '';
   @Input() buttonTitle = '';
+  @Input() modalContent = '';
 
   closeResult = '';
 

@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig, callVolumeObjectiveCriteria } from '@dua-upd/upd-components';
+import {
+  ColumnConfig,
+  callVolumeObjectiveCriteria,
+} from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
@@ -19,6 +22,8 @@ export class OverviewCalldriversComponent implements OnInit {
 
   currentCallVolume$ = this.overviewService.currentCallVolume$;
   callPercentChange$ = this.overviewService.callPercentChange$;
+
+  apexCallDriversChart$ = this.overviewService.apexCallDriversChart$;
 
   calldriversChart$ = this.overviewService.calldriversChart$;
   calldriversTable$ = this.overviewService.calldriversTable$;
@@ -45,9 +50,9 @@ export class OverviewCalldriversComponent implements OnInit {
 
   callVolumeObjectiveCriteria = callVolumeObjectiveCriteria;
   callVolumeKpiConfig = {
-      pass: { message: 'kpi-met-volume' },
-      fail: { message: 'kpi-not-met-volume' },
-    };
+    pass: { message: 'kpi-met-volume' },
+    fail: { message: 'kpi-not-met-volume' },
+  };
 
   constructor(
     private overviewService: OverviewFacade,

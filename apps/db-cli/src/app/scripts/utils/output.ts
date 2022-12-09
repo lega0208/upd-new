@@ -88,16 +88,17 @@ export async function outputTable(
   const tableHeaders = `
     <tr>
       ${Object.keys(data[0])
-    .map((key) => `<th>${key}</th>`)
-    .join('')}
+        .map((key) => `<th>${key}</th>`)
+        .join('')}
     </tr>`;
 
-  const tableRows = data.map(
-    (row) => `
+  const tableRows = data
+    .map(
+      (row) => `
       <tr>
         ${Object.values(row)
-      .map((col) => `<td>${col}</td>`)
-      .join('')}
+          .map((col) => `<td>${col}</td>`)
+          .join('')}
       </tr>`
   ).join('');
 
@@ -115,7 +116,7 @@ ${css}
 </style>
 </head>
 <body>
-  ${tableOutput}
+${tableOutput}
 </body>
 </html>
   `;

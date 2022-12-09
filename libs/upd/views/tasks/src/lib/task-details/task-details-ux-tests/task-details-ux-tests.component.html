@@ -28,6 +28,23 @@
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
+    <div class="col">
+      <upd-apex-bar
+        [title]="'Tasks success by Test'"
+        [series]="(taskSuccessChartData$ | async) || []"
+        [yAxis]="'ux-tests' | translate"
+        [xAxis]="(taskSuccessChartLegend$ | async) || []"
+        [horizontal]="true"
+        [showPercent]="true"
+        [table]="(taskSuccessChart$ | async) || []"
+        [tableCols]="taskSuccessChartCols"
+      ></upd-apex-bar>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="container-fluid my-4 gx-0">
+  <div class="row">
     <div class="col-lg-12">
       <upd-charts
         [title]="'Tasks success by Test'"
@@ -40,7 +57,7 @@
       ></upd-charts>
     </div>
   </div>
-</div>
+</div> -->
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">

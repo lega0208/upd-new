@@ -23,6 +23,21 @@
 <div class="container-fluid gx-0">
   <div class="row">
     <div class="col">
+      <upd-apex-bar
+        [title]="'d3-tcbil'"
+        [series]="(apexCallDriversChart$ | async) || []"
+        [xAxis]="[calldriversCols[1].header, calldriversCols[2].header]"
+        [yAxis]="'Number of calls' | translate"
+        [table]="calldriversTable$ | async"
+        [tableCols]="calldriversCols"
+      ></upd-apex-bar>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="container-fluid gx-0">
+  <div class="row">
+    <div class="col">
       <upd-charts
         [title]="'d3-tcbil'"
         [yAxisLabel]="'Number of calls (in thousands)'"
@@ -38,7 +53,7 @@
       ></upd-charts>
     </div>
   </div>
-</div>
+</div> -->
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">

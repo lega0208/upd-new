@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ColumnConfig, callVolumeObjectiveCriteria } from '@dua-upd/upd-components';
+import {
+  ColumnConfig,
+  callVolumeObjectiveCriteria,
+} from '@dua-upd/upd-components';
 import { LocaleId, EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { GetTableProps } from '@dua-upd/utils-common';
@@ -44,6 +47,12 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   dyfChart$ = this.projectsDetailsService.dyfData$;
   whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
 
+  dyfChartApex$ = this.projectsDetailsService.dyfDataApex$;
+  dyfChartLegend: string[] = [];
+
+  whatWasWrongChartLegend: string[] = [];
+  whatWasWrongChartApex$ = this.projectsDetailsService.whatWasWrongDataApex$;
+
   totalCalldriver$ = this.projectsDetailsService.totalCalldriver$;
   totalCalldriverPercentChange$ =
     this.projectsDetailsService.totalCalldriverPercentChange$;
@@ -70,6 +79,19 @@ export class ProjectDetailsSummaryComponent implements OnInit {
 
     this.currentLang$.subscribe((lang) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+
+      this.dyfChartLegend = [
+        this.i18n.service.translate('yes', lang),
+        this.i18n.service.translate('no', lang),
+      ];
+
+      this.whatWasWrongChartLegend = [
+        this.i18n.service.translate('d3-cant-find-info', lang),
+        this.i18n.service.translate('d3-other', lang),
+        this.i18n.service.translate('d3-hard-to-understand', lang),
+        this.i18n.service.translate('d3-error', lang),
+      ];
+
       this.participantTasksCols = [
         {
           field: 'title',

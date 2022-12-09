@@ -6,11 +6,26 @@ import { EN_CA } from '@dua-upd/upd/i18n';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
-type VisitsByPageColType = GetTableProps<ProjectDetailsFeedbackComponent, 'visitsByPage$'>
-type DyfTableColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'dyfChart$'>
-type WhatWasWrongColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'whatWasWrongChart$'>
-type FeedbackCommentsColType = GetTableProps<ProjectDetailsFeedbackComponent, 'feedbackComments$'>
-type FeedbackByTagsColTypes = GetTableProps<ProjectDetailsFeedbackComponent, 'feedbackByTagsTable$'>
+type VisitsByPageColType = GetTableProps<
+  ProjectDetailsFeedbackComponent,
+  'visitsByPage$'
+>;
+type DyfTableColTypes = GetTableProps<
+  ProjectDetailsFeedbackComponent,
+  'dyfChart$'
+>;
+type WhatWasWrongColTypes = GetTableProps<
+  ProjectDetailsFeedbackComponent,
+  'whatWasWrongChart$'
+>;
+type FeedbackCommentsColType = GetTableProps<
+  ProjectDetailsFeedbackComponent,
+  'feedbackComments$'
+>;
+type FeedbackByTagsColTypes = GetTableProps<
+  ProjectDetailsFeedbackComponent,
+  'feedbackByTagsTable$'
+>;
 
 @Component({
   selector: 'upd-project-details-feedback',
@@ -31,7 +46,16 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   dyfTableCols: ColumnConfig<DyfTableColTypes>[] = [];
   whatWasWrongTableCols: ColumnConfig<WhatWasWrongColTypes>[] = [];
 
-  feedbackByTagsBarChartData$ = this.projectsDetailsService.feedbackByTagsBarChart$;
+  dyfChartApex$ = this.projectsDetailsService.dyfDataApex$;
+  dyfChartLegend: string[] = [];
+
+  whatWasWrongChartLegend: string[] = [];
+  whatWasWrongChartApex$ = this.projectsDetailsService.whatWasWrongDataApex$;
+
+  feedbackByTagsBarChartData$ =
+    this.projectsDetailsService.feedbackByTagsBarChart$;
+  apexFeedbackByTagsChart$ =
+    this.projectsDetailsService.apexFeedbackByTagsTable$;
 
   feedbackComments$ = this.projectsDetailsService.feedbackComments$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
@@ -40,7 +64,8 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   feedbackByTagsTableCols: ColumnConfig<FeedbackByTagsColTypes>[] = [];
 
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
-  comparisonDateRangeLabel$ = this.projectsDetailsService.comparisonDateRangeLabel$;
+  comparisonDateRangeLabel$ =
+    this.projectsDetailsService.comparisonDateRangeLabel$;
 
   constructor(
     private readonly projectsDetailsService: ProjectsDetailsFacade,
@@ -54,6 +79,18 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
       this.currentLang$,
     ]).subscribe(([dateRange, comparisonDateRange, lang]) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+
+      this.dyfChartLegend = [
+        this.i18n.service.translate('yes', lang),
+        this.i18n.service.translate('no', lang),
+      ];
+
+      this.whatWasWrongChartLegend = [
+        this.i18n.service.translate('d3-cant-find-info', lang),
+        this.i18n.service.translate('d3-other', lang),
+        this.i18n.service.translate('d3-hard-to-understand', lang),
+        this.i18n.service.translate('d3-error', lang),
+      ];
 
       this.visitsByPageCols = [
         {
@@ -96,7 +133,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
             lang
           ),
           pipe: 'percent',
-          pipeParam: '1.2'
+          pipeParam: '1.2',
         },
       ];
 
@@ -123,10 +160,20 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
 
       this.feedbackCommentsCols = [
         { field: 'url', header: this.i18n.service.translate('URL', lang) },
-        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date' },
+        {
+          field: 'date',
+          header: this.i18n.service.translate('date', lang),
+          pipe: 'date',
+        },
         { field: 'tag', header: this.i18n.service.translate('tags', lang) },
-        { field: 'whats_wrong', header: this.i18n.service.translate('d3-www', lang) },
-        { field: 'comment', header: this.i18n.service.translate('comment', lang) },
+        {
+          field: 'whats_wrong',
+          header: this.i18n.service.translate('d3-www', lang),
+        },
+        {
+          field: 'comment',
+          header: this.i18n.service.translate('comment', lang),
+        },
       ];
 
       this.feedbackByTagsTableCols = [

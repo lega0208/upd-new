@@ -23,6 +23,7 @@ import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
+import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
 
 dayjs.extend(utc);
 
@@ -252,6 +253,59 @@ export class TasksDetailsFacade {
     })
   );
 
+  apexCalldriversChart$ = combineLatest([this.calldriversTable$]).pipe(
+    map(([data]) => {
+      return data.map((d) => {
+        return {
+          name: d.name,
+          data: [d.currValue, d.prevValue],
+        };
+      });
+    })
+  );
+
+  dyfDataApex$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map(([data, lang]) => {
+      const pieChartData: any = [
+        data?.dateRangeData?.dyfYes || 0,
+        data?.dateRangeData?.dyfNo || 0,
+      ] as ApexNonAxisChartSeries;
+
+      const isZero = pieChartData.every((v: number) => v === 0);
+      if (isZero) {
+        return [];
+      }
+
+      return pieChartData;
+    })
+  );
+
+  whatWasWrongDataApex$ = combineLatest([
+    this.tasksDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    // todo: utility function for converting to SingleSeries/other chart types
+    map(([data, lang]) => {
+      const pieChartData = [
+        data?.dateRangeData?.fwylfCantFindInfo || 0,
+        data?.dateRangeData?.fwylfOther || 0,
+        data?.dateRangeData?.fwylfHardToUnderstand || 0,
+        data?.dateRangeData?.fwylfError || 0,
+      ] as ApexNonAxisChartSeries;
+
+      const isZero = pieChartData.every((v) => v === 0);
+      if (isZero) {
+        return [];
+      }
+
+      return pieChartData;
+    })
+  );
+
   callsByTopic$ = this.tasksDetailsData$.pipe(
     map((data) => {
       if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
@@ -414,6 +468,51 @@ export class TasksDetailsFacade {
     })
   );
 
+  taskSuccessChartData$ = this.tasksDetailsData$.pipe(
+    map((data) => {
+      const taskSuccessByUxTest = data?.taskSuccessByUxTest;
+      const tasksWithSuccessRate = taskSuccessByUxTest?.filter(
+        (task) => task.success_rate || task.success_rate === 0
+      );
+
+      if (!taskSuccessByUxTest || !tasksWithSuccessRate.length) {
+        return [];
+      }
+
+      const ajax: number[] = [];
+
+      taskSuccessByUxTest.map(({ title, success_rate }, idx) => {
+        ajax.push(success_rate || 0);
+      });
+      return [
+        {
+          data: ajax,
+        },
+      ] as ApexAxisChartSeries;
+    })
+  );
+
+  taskSuccessChartLegend$ = this.tasksDetailsData$.pipe(
+    map((data) => {
+      const taskSuccessByUxTest = data?.taskSuccessByUxTest;
+      const tasksWithSuccessRate = taskSuccessByUxTest?.filter(
+        (task) => task.success_rate || task.success_rate === 0
+      );
+
+      if (!taskSuccessByUxTest || !tasksWithSuccessRate.length) {
+        return [];
+      }
+
+      const name: string[] = [];
+
+      taskSuccessByUxTest.map(({ title, success_rate }, idx) => {
+        name.push(`UX Test: ${idx + 1} - ${title}`);
+      });
+
+      return name;
+    })
+  );
+
   gscTotalClicks$ = this.tasksDetailsData$.pipe(
     map((data) => data?.dateRangeData?.gscTotalClicks || 0)
   );
@@ -556,6 +655,17 @@ export class TasksDetailsFacade {
           prevValue,
         };
       });
+    })
+  );
+
+  apexFeedbackByTagsTable$ = combineLatest([this.feedbackByTagsTable$]).pipe(
+    map(([data]) => {
+      return data.map((d) => {
+        return {
+          name: d.tag,
+          data: [d.currValue, d.prevValue],
+        };
+      }) as ApexAxisChartSeries;
     })
   );
 

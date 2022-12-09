@@ -5,25 +5,25 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import { FilterQuery, Model } from 'mongoose';
-import type {
-  CallDriverModel,
-  OverallDocument,
-  ProjectDocument,
-  TaskDocument,
-  UxTestDocument,
-  FeedbackDocument,
-  PageMetricsModel,
-  PageDocument,
-} from '@dua-upd/db';
 import {
   CallDriver,
+  CallDriverModel,
   Overall,
+  OverallDocument,
   Project,
+  ProjectDocument,
   Task,
+  TaskDocument,
   UxTest,
+  UxTestDocument,
   Feedback,
+  FeedbackDocument,
   PageMetrics,
+  PageMetricsModel,
   Page,
+  PageDocument,
+  SearchAssessment,
+  SearchAssessmentDocument,
 } from '@dua-upd/db';
 import type {
   ProjectsHomeData,
@@ -94,6 +94,8 @@ export class OverallService {
     private calldriversModel: CallDriverModel,
     @InjectModel(Feedback.name, 'defaultConnection')
     private feedbackModel: Model<FeedbackDocument>,
+    @InjectModel(SearchAssessment.name, 'defaultConnection')
+    private searchAssessmentModel: Model<SearchAssessmentDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -129,6 +131,24 @@ export class OverallService {
       .sort((a, b) => Number(a.change) - Number(b.change))
       .slice(0, 5);
 
+    const satDateRange = `${dayjs
+      .utc()
+      .subtract(2, 'weeks')
+      .startOf('week')
+      .format('YYYY-MM-DD')}/${dayjs
+      .utc()
+      .subtract(2, 'weeks')
+      .endOf('week')
+      .format('YYYY-MM-DD')}`;
+    const satComparisonDateRange = `${dayjs
+      .utc()
+      .subtract(3, 'weeks')
+      .startOf('week')
+      .format('YYYY-MM-DD')}/${dayjs
+      .utc()
+      .subtract(3, 'weeks')
+      .endOf('week')
+      .format('YYYY-MM-DD')}`;
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -138,8 +158,10 @@ export class OverallService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.searchAssessmentModel,
         this.cacheManager,
-        params.dateRange
+        params.dateRange,
+        satDateRange
       ),
       comparisonDateRangeData: await getOverviewMetrics(
         this.overallModel,
@@ -147,8 +169,10 @@ export class OverallService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.searchAssessmentModel,
         this.cacheManager,
-        params.comparisonDateRange
+        params.comparisonDateRange,
+        satComparisonDateRange
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
       ...(await getUxData(testsSince2018)),
@@ -371,10 +395,18 @@ async function getProjects(
       testType: 1,
     });
 
+  const uxTests = await uxTestsModel
+    .aggregate<UxTestDocument>()
+    .project({
+      _id: 0,
+    })
+    .exec();
+
   const results = {
     ...aggregatedData,
     ...uxTest,
     projects: projectsData,
+    uxTests: uxTests,
   };
 
   return results;
@@ -386,8 +418,10 @@ async function getOverviewMetrics(
   calldriversModel: CallDriverModel,
   feedbackModel: Model<FeedbackDocument>,
   pageModel: Model<PageDocument>,
+  searchAssessmentModel: Model<SearchAssessmentDocument>,
   cacheManager: Cache,
-  dateRange: string
+  dateRange: string,
+  satDateRange: string
 ): Promise<OverviewAggregatedData> {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
@@ -396,8 +430,25 @@ async function getOverviewMetrics(
   dateQuery.$gte = new Date(startDate);
   dateQuery.$lte = new Date(endDate);
 
+  const [satStartDate, satEndDate] = satDateRange
+    .split('/')
+    .map((d) => new Date(d));
+
+  const satDateQuery: FilterQuery<Date> = {};
+
+  satDateQuery.$gte = new Date(satStartDate);
+  satDateQuery.$lte = new Date(satEndDate);
+
   const visitsByDay = await overallModel
     .find({ date: dateQuery }, { _id: 0, date: 1, visits: 1 })
+    .sort({ date: 1 })
+    .lean();
+
+  const dyfByDay = await overallModel
+    .find(
+      { date: dateQuery },
+      { _id: 0, date: 1, dyf_yes: 1, dyf_no: 1, dyf_submit: 1 }
+    )
     .sort({ date: 1 })
     .lean();
 
@@ -556,7 +607,10 @@ async function getOverviewMetrics(
 
   const aggregatedMetrics = await overallModel
     .aggregate<
-      Omit<OverviewAggregatedData, 'visitsByDay' | 'calldriversByDay'>
+      Omit<
+        OverviewAggregatedData,
+        'visitsByDay' | 'calldriversByDay' | 'dyfByDay'
+      >
     >()
     .match({
       date: dateQuery,
@@ -595,10 +649,48 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
+    // get search assessment data, but don't merge query if there is value in en or fr
+
+
+
+  const searchAssessmentData = await searchAssessmentModel
+
+    .aggregate()
+    .match({ date: satDateQuery })
+    // don't group by query if there is a value in en or fr
+    .group({
+      _id: {
+        query: '$query',
+        lang: '$lang',
+      },
+      total_clicks: { $sum: '$total_clicks' },
+      target_clicks: { $sum: '$target_clicks' },
+      total_searches: { $sum: '$total_searches' },
+      expected_position: { $avg: '$expected_position' },
+      position: { $avg: '$expected_position' },
+      doc: { $push: '$$ROOT' },
+    })
+    .replaceRoot({
+      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
+    })
+    .project({
+      query: '$_id.query',
+      lang: '$_id.lang',
+      _id: 0,
+      total_clicks: 1,
+      target_clicks: 1,
+      total_searches: 1,
+      position: 1,
+      expected_result: 1,
+    })
+    .exec();
+
   return {
     visitsByDay,
     calldriversByDay,
+    dyfByDay,
     calldriversEnquiry,
+    searchAssessmentData,
     ...aggregatedMetrics[0],
     totalFeedback,
     topPagesVisited,

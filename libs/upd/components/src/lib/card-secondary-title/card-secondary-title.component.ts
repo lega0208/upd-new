@@ -9,6 +9,8 @@ import { ColumnConfig } from '../data-table-styles/types';
 export class CardSecondaryTitleComponent {
   @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() data: Record<string, number | string>[] = [];
+  @Input() type = 'list';
+  @Input() modal = '';
 
   constructor() {}
 }

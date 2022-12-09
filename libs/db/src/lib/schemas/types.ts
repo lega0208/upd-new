@@ -53,3 +53,12 @@ export interface AttachmentData {
   url: string;
   filename: string;
 }
+
+export interface SearchAssessmentData {
+  lang: string;
+  query: string;
+  expected_url: string;
+  expected_position: number;
+  pass: boolean;
+  visits: number;
+}

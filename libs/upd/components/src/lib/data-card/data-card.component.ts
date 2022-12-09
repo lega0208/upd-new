@@ -5,7 +5,8 @@ import { LocaleNumberPipe, LocalePercentPipe } from '@dua-upd/upd/pipes';
 export type ComparisonStatus = 'good' | 'bad' | 'neutral' | 'none';
 
 export interface ComparisonStyles {
-  colourClass: string;
+  colourClass?: string;
+  colour?: string;
   iconName: string;
 }
 
@@ -95,7 +96,7 @@ const defaultKpiObjectiveCriteria: KpiObjectiveCriteria = (
   selector: 'upd-data-card',
   templateUrl: './data-card.component.html',
   styleUrls: ['./data-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DataCardComponent {
   @Input() current: number | null = null;

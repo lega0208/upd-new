@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ColumnConfig, callVolumeObjectiveCriteria } from '@dua-upd/upd-components';
+import {
+  ColumnConfig,
+  callVolumeObjectiveCriteria,
+} from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
@@ -11,7 +14,8 @@ import { TasksDetailsFacade } from '../+state/tasks-details.facade';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskDetailsSummaryComponent implements OnInit {
-  avgTaskSuccessFromLastTest$ = this.taskDetailsService.avgTaskSuccessFromLastTest$;
+  avgTaskSuccessFromLastTest$ =
+    this.taskDetailsService.avgTaskSuccessFromLastTest$;
   dateFromLastTest$ = this.taskDetailsService.dateFromLastTest$;
 
   visits$ = this.taskDetailsService.visits$;
@@ -41,11 +45,30 @@ export class TaskDetailsSummaryComponent implements OnInit {
   dyfTableCols: ColumnConfig[] = [];
   whatWasWrongTableCols: ColumnConfig[] = [];
 
-  avgTaskSuccessKpiCriteria = (successRate: number) => successRate >= 0.8 ? 'pass' : 'fail';
+  dyfChartApex$ = this.taskDetailsService.dyfDataApex$;
+  dyfChartLegend: string[] = [];
+
+  whatWasWrongChartLegend: string[] = [];
+  whatWasWrongChartApex$ = this.taskDetailsService.whatWasWrongDataApex$;
+
+  avgTaskSuccessKpiCriteria = (successRate: number) =>
+    successRate >= 0.8 ? 'pass' : 'fail';
 
   ngOnInit(): void {
     this.currentLang$.subscribe((lang) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+
+      this.dyfChartLegend = [
+        this.i18n.service.translate('yes', lang),
+        this.i18n.service.translate('no', lang),
+      ];
+
+      this.whatWasWrongChartLegend = [
+        this.i18n.service.translate('d3-cant-find-info', lang),
+        this.i18n.service.translate('d3-other', lang),
+        this.i18n.service.translate('d3-hard-to-understand', lang),
+        this.i18n.service.translate('d3-error', lang),
+      ];
 
       this.visitsByPageCols = [
         {
@@ -78,7 +101,11 @@ export class TaskDetailsSummaryComponent implements OnInit {
           field: 'title',
           header: this.i18n.service.translate('ux-test', lang),
         },
-        { field: 'date', header: this.i18n.service.translate('date', lang), pipe: 'date' },
+        {
+          field: 'date',
+          header: this.i18n.service.translate('date', lang),
+          pipe: 'date',
+        },
         {
           field: 'test_type',
           header: this.i18n.service.translate('test-type', lang),
@@ -113,5 +140,8 @@ export class TaskDetailsSummaryComponent implements OnInit {
     });
   }
 
-  constructor(private readonly taskDetailsService: TasksDetailsFacade, private i18n: I18nFacade) {}
+  constructor(
+    private readonly taskDetailsService: TasksDetailsFacade,
+    private i18n: I18nFacade
+  ) {}
 }

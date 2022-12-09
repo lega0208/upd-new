@@ -30,6 +30,21 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
+      <upd-apex-bar
+        [title]="'visits'"
+        [series]="(apexBar$ | async) || []"
+        [table]="barTable$ | async"
+        [yAxis]="'visits' | translate"
+        [type]="'date'"
+        [tableCols]="barTableCols"
+      ></upd-apex-bar>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
       <upd-charts
         [title]="'visits'"
         [displayLegend]="'below'"
@@ -42,7 +57,7 @@
       ></upd-charts>
     </div>
   </div>
-</div>
+</div> -->
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">

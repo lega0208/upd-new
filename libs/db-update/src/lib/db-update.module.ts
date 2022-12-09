@@ -4,7 +4,8 @@ import { DbModule, DbService } from '@dua-upd/db';
 import {
   AdobeAnalyticsClient, AdobeAnalyticsService,
   AirtableClient, ExternalDataModule,
-  SearchAnalyticsClient
+  SearchAnalyticsClient,
+  SearchAssessmentService
 } from '@dua-upd/external-data';
 import { DbUpdateService } from './db-update.service';
 import { OverallMetricsService } from './overall-metrics/overall-metrics.service';
@@ -38,6 +39,7 @@ import { logJson } from '@dua-upd/utils-common';
     PageUpdateService,
     PageMetricsService,
     PagesListService,
+    SearchAssessmentService,
     {
       provide: AirtableClient.name,
       useValue: new AirtableClient(),
@@ -56,6 +58,7 @@ import { logJson } from '@dua-upd/utils-common';
     PageMetricsService,
     PageUpdateService,
     PagesListService,
+    SearchAssessmentService,
   ],
 })
 export class DbUpdateModule {

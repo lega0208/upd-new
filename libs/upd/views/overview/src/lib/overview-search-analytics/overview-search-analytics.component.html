@@ -46,6 +46,24 @@
   </div>
 </div>
 
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [filter]="true"
+        [sort]="true"
+        [pagination]="true"
+        [data]="(searchAssessmentData$ | async) || []"
+        [cols]="searchAssessmentCols"
+        [title]="'SAT-title'"
+        [tooltip]="'SAT-tooltip'"
+      >
+      </upd-data-table-card>
+    </div>
+  </div>
+</div>
+
+
 <!-- <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
