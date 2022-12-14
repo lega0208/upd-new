@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { searchconsole_v1 } from '@googleapis/searchconsole';
+import { GaxiosPromise, searchconsole_v1 } from '@googleapis/searchconsole';
 import { getGscClient, Searchconsole } from './client';
 import {
   SearchAnalyticsQueryBuilder,
@@ -51,7 +51,7 @@ export type SearchAnalyticsResponse =
 export class SearchAnalyticsClient {
   private client: Searchconsole = getGscClient();
 
-  async query(query: SearchAnalyticsReportQuery) {
+  async query(query: SearchAnalyticsReportQuery): GaxiosPromise<searchconsole_v1.Schema$SearchAnalyticsQueryResponse> {
     const queryWithRetry = withRetry(
       this.client.searchanalytics.query.bind(this.client.searchanalytics),
       3,
@@ -315,7 +315,7 @@ export class SearchAnalyticsClient {
     }
 
     return results.data.rows.reduce((results, row) => {
-      const url = row.keys[0].replace('https://', '').replace('#.+', '');
+      const url = row.keys?.[0]?.replace('https://', '').replace('#.+', '') || '';
 
       if (!results[url]) {
         results[url] = {
@@ -325,16 +325,16 @@ export class SearchAnalyticsClient {
         };
       }
 
-      if (results[url].gsc_searchterms.length >= 250) {
+      if ((results[url].gsc_searchterms?.length || 0) >= 250) {
         return results;
       }
 
-      results[url].gsc_searchterms.push({
-        clicks: row.clicks,
-        impressions: row.impressions,
-        ctr: row.ctr,
-        position: row.position,
-        term: row.keys[1],
+      results[url].gsc_searchterms?.push({
+        clicks: row.clicks || 0,
+        impressions: row.impressions || 0,
+        ctr: row.ctr || 0,
+        position: row.position || 0,
+        term: row.keys?.[1] || '',
       });
 
       return results;

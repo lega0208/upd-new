@@ -1,6 +1,4 @@
-export type AirTableFields = 'table' | 'base';
-
-export type lang = 'en' | 'fr';
+export type Lang = 'en' | 'fr';
 
 export type FieldRecordQuery = {
   airtable_id: string;
@@ -34,13 +32,13 @@ export type FieldRecord = {
   'Most Clicks'?: number;
   'Most Clicks Position'?: number;
   Rank?: number;
-  Date?: string;
+  Date: string;
   'Total Clicks'?: number;
   'Total Searches'?: number;
   'Target Clicks'?: number;
 };
 
 export type CreatedFieldRecord = {
-  id: string;
+  id?: string;
   fields: FieldRecord;
 };

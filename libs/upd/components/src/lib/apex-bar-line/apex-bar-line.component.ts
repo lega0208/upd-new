@@ -34,7 +34,7 @@ export class ApexBarLineComponent implements OnInit {
     this.apexStore.setSeries(value);
   }
 
-  readonly vm$ = this.apexStore.vm$;
+  vm$ = this.apexStore.vm$;
 
   constructor(
     private i18n: I18nFacade,

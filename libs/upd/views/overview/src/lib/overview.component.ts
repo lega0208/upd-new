@@ -19,6 +19,7 @@ export class OverviewComponent implements OnInit {
 
   ngOnInit() {
     this.overviewService.init();
+    console.log('overview init');
 
     combineLatest([
       this.currentLang$

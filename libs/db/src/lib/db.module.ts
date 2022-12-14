@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { getDbConnectionString } from './db.connection';
 import {
   AAItemId,
   AAItemIdSchema,
@@ -24,9 +26,7 @@ import {
   SearchAssessment,
   SearchAssessmentSchema,
 } from './db.schemas';
-import { ConfigModule } from '@nestjs/config';
-import { getDbConnectionString } from './db.connection';
-import { DbService } from './db.service';
+import { PageVisitsViewSchema, PageVisitsView } from './db.views';
 
 export const models = {
   callDrivers: {
@@ -45,6 +45,10 @@ export const models = {
   aaItemIds: { model: AAItemId, schema: AAItemIdSchema },
 } as const;
 
+export const views = {
+  pageVisits: { model: PageVisitsView, schema: PageVisitsViewSchema },
+} as const;
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -53,10 +57,12 @@ export const models = {
       dbName: 'upd-test',
     }),
     MongooseModule.forFeature(
-      Object.values(models).map((collection) => ({
-        name: collection.model.name,
-        schema: collection.schema,
-      })),
+      [
+        ...Object.values({ ...models, ...views }).map((collection) => ({
+          name: collection.model.name,
+          schema: collection.schema,
+        })),
+      ],
       'defaultConnection'
     ),
   ],

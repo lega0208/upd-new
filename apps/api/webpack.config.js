@@ -4,7 +4,6 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = (config, context) => {
   return merge(config, {
-    devtool: 'eval-cheap-module-source-map',
     optimization: {
       nodeEnv: process.env.NODE_ENV || 'development'
     },

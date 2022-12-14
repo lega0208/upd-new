@@ -11,8 +11,9 @@
     </p>
   </ng-container>
   <ng-template #elseBlock>
-    <div *ngIf="vm$ | async as vm">
+    <div *ngIf="vm$ | async as vm" class="my-3">
       <apx-chart
+        *ngIf="vm.chart"
         #chart
         [series]="vm.series || []"
         [labels]="vm.labels || []"

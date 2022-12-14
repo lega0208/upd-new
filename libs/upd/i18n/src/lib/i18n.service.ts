@@ -50,6 +50,10 @@ export class I18nService {
     return this.translateService.instant(key, interpolateParams);
   }
 
+  instant(key: string, interpolateParams?: object) {
+    return this.translateService.instant(key, interpolateParams);
+  }
+
   // to add translations at runtime if we need to
   addTranslations(lang: LocaleId, translations: Record<string, string>) {
     this.translateService.setTranslation(lang, translations, true);

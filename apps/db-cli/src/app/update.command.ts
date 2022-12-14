@@ -55,7 +55,6 @@ export class UpdateCommand extends CommandRunner {
     await this.dbUpdateService.updateAll();
     await this.dataIntegrityService.fillMissingData();
     await this.dataIntegrityService.cleanPageUrls();
-    await this.dbUpdateService.updateSAT();
   }
 
   @Option({

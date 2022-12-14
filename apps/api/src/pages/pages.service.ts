@@ -10,6 +10,7 @@ import type {
   PageMetricsModel,
 } from '@dua-upd/db';
 import {
+  DbService,
   Feedback,
   Page,
   PageMetrics,
@@ -20,11 +21,13 @@ import type {
   PagesHomeData,
   PagesHomeAggregatedData,
 } from '@dua-upd/types-common';
-import { ApiParams } from '@dua-upd/upd/services';
+import { ApiParams } from '@dua-upd/types-common';
+import { dateRangeSplit } from '@dua-upd/utils-common';
 
 @Injectable()
 export class PagesService {
   constructor(
+    private db: DbService,
     @InjectModel(PageMetrics.name, 'defaultConnection')
     private pageMetricsModel: PageMetricsModel,
     @InjectModel(Feedback.name, 'defaultConnection')
@@ -47,30 +50,39 @@ export class PagesService {
       };
     }
 
-    const metrics: PagesHomeAggregatedData[] =
-      await this.pageMetricsModel.getAggregatedPageMetrics(
-        dateRange,
-        ['visits'],
-        {},
-        { visits: -1 }
-      );
+    const [startDate, endDate] = dateRangeSplit(dateRange);
+    const queryDateRange = {
+      start: startDate,
+      end: endDate,
+    };
+    const results =
+      (await this.db.views.pageVisits.getVisitsWithPageData(queryDateRange, this.pageModel));
 
-    const pages =
-      (await this.pageModel
-        .find(
-          { _id: { $nin: metrics.map((metric) => metric._id) } },
-          { url: 1, title: 1, all_urls: 1 }
-        )
-        .lean()
-        .exec()) ?? [];
 
-    const results = [
-      ...metrics,
-      ...pages.map((page) => ({
-        ...page,
-        visits: 0,
-      })),
-    ];
+    // const metrics: PagesHomeAggregatedData[] =
+    //   await this.pageMetricsModel.getAggregatedPageMetrics(
+    //     dateRange,
+    //     ['visits'],
+    //     {},
+    //     { visits: -1 }
+    //   );
+    //
+    // const pages =
+    //   (await this.pageModel
+    //     .find(
+    //       { _id: { $nin: metrics.map((metric) => metric._id) } },
+    //       { url: 1, title: 1, all_urls: 1 }
+    //     )
+    //     .lean()
+    //     .exec()) ?? [];
+    //
+    // const results = [
+    //   ...metrics,
+    //   ...pages.map((page) => ({
+    //     ...page,
+    //     visits: 0,
+    //   })),
+    // ];
 
     await this.cacheManager.set(cacheKey, results);
 

@@ -19,7 +19,6 @@ export class DateSelectionEffects {
         ),
         map(([, { dateRange, comparisonDateRange }]) =>
           this.router.navigate([], {
-            relativeTo: this.route,
             queryParams: {
               dateRange,
               comparisonDateRange,

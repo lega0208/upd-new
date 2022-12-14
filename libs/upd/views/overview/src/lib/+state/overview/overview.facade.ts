@@ -18,11 +18,13 @@ import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
 import {
   I18nFacade,
+  predefinedDateRanges,
   selectDatePeriodSelection,
   selectUrl,
 } from '@dua-upd/upd/state';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
+import { selectComboChartData } from './overview.selectors';
 
 dayjs.extend(utc);
 dayjs.extend(isSameOrBefore);
@@ -92,13 +94,6 @@ export class OverviewFacade {
     mapObjectArraysWithPercentChange('topPagesVisited', 'visits', 'url')
   );
 
-  dyfYesPercentage$ = this.overviewData$.pipe(
-    map((overviewData) => Math.round((0.31 as number) * 100) || 0)
-  );
-  dyfYesPercentagePercentChange$ = this.overviewData$.pipe(
-    map((overviewData) => 0.04)
-  );
-
   top10GSC$ = this.overviewData$.pipe(
     mapObjectArraysWithPercentChange('top10GSC', 'clicks')
   );
@@ -149,58 +144,6 @@ export class OverviewFacade {
     })
   );
 
-  calldriversChart$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
-      const comparisonDateRangeLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange || '',
-        lang
-      );
-
-      const dataEnquiryLine = (
-        data?.dateRangeData?.calldriversEnquiry || []
-      ).map((d) => ({
-        name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
-        value: d.sum,
-      }));
-
-      const comparisonDataEnquiryLine = (
-        data?.comparisonDateRangeData?.calldriversEnquiry || []
-      ).map((d) => ({
-        name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
-        value: d.sum,
-      }));
-
-      const isCurrZero = dataEnquiryLine.every((v) => v.value === 0);
-      const isPrevZero = comparisonDataEnquiryLine.every((v) => v.value === 0);
-
-      if (isCurrZero && isPrevZero) {
-        return [] as MultiSeries;
-      }
-
-      const dataEnquiryLineFinal = dataEnquiryLine.filter((v) => v.value > 0);
-      const comparisonDataEnquiryLineFinal = comparisonDataEnquiryLine.filter(
-        (v) => v.value > 0
-      );
-
-      const barChartData: MultiSeries = [
-        {
-          name: dateRangeLabel,
-          series: dataEnquiryLineFinal,
-        },
-        {
-          name: comparisonDateRangeLabel,
-          series: comparisonDataEnquiryLineFinal,
-        },
-      ];
-
-      return barChartData;
-    })
-  );
-
   calldriversTable$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
@@ -240,15 +183,6 @@ export class OverviewFacade {
         }
       });
       return dataEnquiryLine.filter((v) => v.currValue > 0 || v.prevValue > 0);
-    })
-  );
-
-  isChartDataOver31Days$ = this.overviewData$.pipe(
-    map((data) => {
-      const visitsByDay = data?.dateRangeData?.visitsByDay;
-      const days = visitsByDay?.length || 0;
-
-      return days > 31;
     })
   );
 
@@ -432,161 +366,18 @@ export class OverviewFacade {
 
   // todo: reorder bars? (grey then blue instead of blue then grey?)
   //  also clean this up a bit, simplify logic instead of doing everything twice
-  apex$ = combineLatest([
-    this.overviewData$,
+  comboChartData$ = this.store.select(selectComboChartData)
+  apexCallDrivers$ = combineLatest([
+    this.comboChartData$,
     this.currentLang$,
-    this.dateRangeSelected$,
   ]).pipe(
-    map(([data, lang, dateRangePeriod]) => {
-      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
-      const comparisonDateRangeLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange || '',
-        lang
-      );
-      const visitsByDay = data?.dateRangeData?.visitsByDay || [];
-      const comparisonVisitsByDay =
-        data?.comparisonDateRangeData?.visitsByDay || [];
-      const visitsByDayFinal = data?.dateRangeData?.visitsByDay.map((d) => {
-        return {
-          x: d.date,
-          y: d.visits,
-        };
-      });
-
-      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
-
-      let cntPrevVisits = 0;
-      let cntPrevCalls = 0;
-
-      const comparisonVisitsByDayFinal = visitsByDay.map((data, i) => {
-        let prevVisits = 0;
-
-        if (
-          comparisonVisitsByDay.find(
-            (d) =>
-              dayjs(d.date)
-                .utc(false)
-                .add(1, dateSelection)
-                .format('YYYY-MM-DD') ===
-              dayjs(data.date).utc(false).format('YYYY-MM-DD')
-          )
-        ) {
-          prevVisits = comparisonVisitsByDay[cntPrevVisits].visits;
-          cntPrevVisits++;
-        }
-        return {
-          x: data.date,
-          y: prevVisits,
-        };
-      });
-
-      const calldriversByDay = data?.dateRangeData?.calldriversByDay || [];
-      const comparisonCalldriversByDay =
-        data?.comparisonDateRangeData?.calldriversByDay || [];
-      const calldriversByDayFinal = visitsByDay.map((data, i) => {
-        let prevCalls = 0;
-
-        if (
-          calldriversByDay.find(
-            (d) =>
-              dayjs(d.date).utc(false).format('YYYY-MM-DD') ===
-              dayjs(data.date).utc(false).format('YYYY-MM-DD')
-          )
-        ) {
-          prevCalls = calldriversByDay[cntPrevCalls].calls;
-          cntPrevCalls++;
-        }
-        return {
-          x: data.date,
-          y: prevCalls,
-        };
-      });
-
-      cntPrevCalls = 0;
-
-      const comparisonCalldriversByDayFinal = visitsByDay.map((data, i) => {
-        let prevCalls = 0;
-
-        if (
-          comparisonCalldriversByDay.find(
-            (d) =>
-              dayjs(d.date)
-                .utc(false)
-                .add(1, dateSelection)
-                .format('YYYY-MM-DD') ===
-              dayjs(data.date).utc(false).format('YYYY-MM-DD')
-          )
-        ) {
-          prevCalls = comparisonCalldriversByDay[cntPrevCalls].calls;
-          cntPrevCalls++;
-        }
-        return {
-          x: data.date,
-          y: prevCalls,
-        };
-      });
-
-      return [
-        {
-          name: dateRangeLabel,
-          type: 'column',
-          data: visitsByDayFinal,
-        },
-        {
-          name: comparisonDateRangeLabel,
-          type: 'column',
-          data: comparisonVisitsByDayFinal,
-        },
-        {
-          name: `${this.i18n.service.translate(
-            'calls',
-            lang
-          )} ${dateRangeLabel}`,
-          type: 'line',
-          data: calldriversByDayFinal,
-        },
-        {
-          name: `${this.i18n.service.translate(
-            'calls',
-            lang
-          )} ${comparisonDateRangeLabel}`,
-          type: 'line',
-          data: comparisonCalldriversByDayFinal,
-        },
-      ] as ApexAxisChartSeries;
-
-      //   name: `${this.i18n.service.translate(
-      //     'calls',
-      //     lang
-      //   )} ${comparisonDateRangeLabel}`,
-      //   series: [],
-      // },
-      // {
-      //   name: `${this.i18n.service.translate(
-      //     'calls',
-      //     lang
-      //   )} ${dateRangeLabel}`,
-
-      // const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
-      // const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
-
-      // const isCurrZero =` visits`ByDay?.every((v) => v.visits === 0);
-      // const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
-
-      // if (!visitsByDay || (isCurrZero && isPrevZero)) {
-      //   return [] as MultiSeries;
-      // }
-    })
-  );
-
-  apexCallDrivers$ = combineLatest([this.apex$, this.currentLang$]).pipe(
     map(([calls, lang]) => {
       const c = [];
 
       const currentCallDrivers = calls[2].data.map((d: any, i) => {
         return {
-          x: d?.x,
-          y: (d?.y / (calls[0]?.data[i] as any)?.y) * 100 || 0,
+          x: d.x,
+          y: (d.y / (calls[0]?.data[i] as any)?.y) * 100 || 0,
         };
       });
 
@@ -613,8 +404,6 @@ export class OverviewFacade {
     })
   );
 
-  // todo: reorder bars? (grey then blue instead of blue then grey?)
-  //  also clean this up a bit, simplify logic instead of doing everything twice
   visitsByDay$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
@@ -721,144 +510,6 @@ export class OverviewFacade {
     })
   );
 
-  calldriversByDay$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-    this.dateRangeSelected$,
-  ]).pipe(
-    map(([data, lang, dateRangePeriod]) => {
-      const calldriversByDay = data?.dateRangeData?.calldriversByDay || [];
-      const comparisonCalldriversByDay =
-        data?.comparisonDateRangeData?.calldriversByDay || [];
-      const visitsByDay = data?.dateRangeData?.visitsByDay || [];
-
-      const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
-      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
-
-      let cntPrevCalls = 0,
-        cntCurrCalls = 0;
-
-      const callDriversByDay = visitsByDay.map((data, i) => {
-        let calls = 0,
-          prevCalls = 0,
-          prevDate = new Date();
-
-        if (calldriversByDay.find((d) => d.date === data.date)) {
-          calls = calldriversByDay[cntCurrCalls].calls;
-          cntCurrCalls++;
-        }
-        if (
-          comparisonCalldriversByDay.find(
-            (d) =>
-              dayjs.utc(d.date).add(1, dateSelection).format('YYYY-MM-DD') ===
-              dayjs.utc(data.date).format('YYYY-MM-DD')
-          )
-        ) {
-          prevCalls = comparisonCalldriversByDay[cntPrevCalls].calls;
-          prevDate = comparisonCalldriversByDay[cntPrevCalls].date;
-          cntPrevCalls++;
-        }
-        return {
-          name: dayjs.utc(data.date).locale(lang).format(dateFormat),
-          currDate: data.date,
-          prevDate: prevDate,
-          currValue: calls,
-          prevValue: prevCalls,
-        };
-      });
-
-      const dateRangeSeries = callDriversByDay.map((data, i) => {
-        return {
-          name: data.name,
-          value: data.currValue,
-          extra: {
-            current: dayjs.utc(data.currDate).locale(lang).format('YYYY-MM-DD'),
-            previous: dayjs
-              .utc(data.prevDate)
-              .locale(lang)
-              .format('YYYY-MM-DD'),
-          },
-        };
-      });
-
-      const comparisonDateRangeSeries = callDriversByDay.map((data, i) => {
-        return {
-          name: data.name,
-          value: data.prevValue,
-        };
-      });
-
-      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
-      const comparisonDateRangeLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange || '',
-        lang
-      );
-
-      if (!calldriversByDay.length || !comparisonCalldriversByDay.length) {
-        return [
-          {
-            name: `${this.i18n.service.translate(
-              'calls',
-              lang
-            )} ${comparisonDateRangeLabel}`,
-            series: [],
-          },
-          {
-            name: `${this.i18n.service.translate(
-              'calls',
-              lang
-            )} ${dateRangeLabel}`,
-            series: [],
-          },
-        ] as MultiSeries;
-      }
-
-      return [
-        {
-          name: `${this.i18n.service.translate(
-            'calls',
-            lang
-          )} ${dateRangeLabel}`,
-          series: dateRangeSeries,
-        },
-        {
-          name: `${this.i18n.service.translate(
-            'calls',
-            lang
-          )} ${comparisonDateRangeLabel}`,
-          series: comparisonDateRangeSeries,
-        },
-      ];
-    })
-  );
-
-  chartMerge$ = combineLatest([
-    this.dateRangeSelected$,
-    this.visitsByDay$,
-    this.calldriversByDay$,
-  ]).pipe(
-    map(([dateRangePeriod, bar, calls]) => {
-      const isOver =
-        dateRangePeriod !== 'weekly' && dateRangePeriod !== 'monthly' ? 1 : 0;
-      if (!isOver) return;
-
-      return [...bar, ...calls];
-    })
-  );
-
-  currentCalls$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => {
-      const currentCalls = data?.dateRangeData?.calldriversByDay || 0;
-
-      return currentCalls;
-
-      return {
-        name: this.i18n.service.translate('calls', lang),
-        value: currentCalls,
-      };
-    })
-  );
-
   currentCallVolume$ = this.overviewData$.pipe(
     map(
       (data) =>
@@ -919,14 +570,9 @@ export class OverviewFacade {
     map(([currentCalls, comparisonVisits]) => currentCalls - comparisonVisits)
   );
 
-  //   currentCalls$ = this.overviewData$.pipe(
-  //     pluck('dateRangeData', 'calldriversEnquiry', 'sum')
-  //   );
-
-  // todo: reorder bars? (grey then blue instead of blue then grey?)
-  //  also clean this up a bit, simplify logic instead of doing everything twice
   barTable$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
+      console.log('barTable');
       const visitsByDay = data?.dateRangeData?.visitsByDay;
       const comparisonVisitsByDay =
         data?.comparisonDateRangeData?.visitsByDay || [];

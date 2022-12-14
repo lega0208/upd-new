@@ -1,12 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { DbUpdateService } from '@dua-upd/db-update';
-import { environment } from '../environments/environment';
 import { DataIntegrityService } from '@dua-upd/data-integrity';
 
-export declare enum CronCustomExpression {
-  EVERY_SUNDAY_AT_10PM = '0 0 22 * * 0',
-}
+export const EVERY_SUNDAY_AT_11PM = '0 0 23 * * 0' as const;
 
 @Injectable()
 export class UpdateService {
@@ -18,11 +15,7 @@ export class UpdateService {
     private dbUpdateService: DbUpdateService
   ) {}
 
-  @Cron(
-    environment.production
-      ? CronExpression.EVERY_DAY_AT_10PM
-      : CronExpression.EVERY_MINUTE
-  )
+  @Cron(CronExpression.EVERY_DAY_AT_10PM)
   async updateDatabase() {
     if (this.isRunning) {
       return;
@@ -35,15 +28,29 @@ export class UpdateService {
 
       await this.dataIntegrityService.fillMissingData();
       await this.dataIntegrityService.cleanPageUrls();
-      
-      if (new Date().getDay() === 0) {
-        await this.dbUpdateService.updateSAT();
-      }
     } catch (error) {
       this.logger.error(error);
+    } finally {
+      this.isRunning = false;
     }
 
-    this.isRunning = false;
     this.logger.log('Database updates completed.');
+  }
+
+  @Cron(EVERY_SUNDAY_AT_11PM)
+  async runSAT() {
+    if (this.isRunning) {
+      return;
+    }
+
+    try {
+      this.isRunning = true;
+
+      await this.dbUpdateService.updateSAT();
+    } catch (error) {
+      this.logger.error(error);
+    } finally {
+      this.isRunning = false;
+    }
   }
 }

@@ -25,7 +25,7 @@ export class OverviewCalldriversComponent implements OnInit {
 
   apexCallDriversChart$ = this.overviewService.apexCallDriversChart$;
 
-  calldriversChart$ = this.overviewService.calldriversChart$;
+  // calldriversChart$ = this.overviewService.calldriversChart$;
   calldriversTable$ = this.overviewService.calldriversTable$;
   calldriversCols: ColumnConfig<{
     name: string;

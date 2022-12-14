@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ReturnedData, StorageCache } from './storage-cache.decorator';
 import {
+  ApiParams,
   OverviewData,
   PageDetailsData,
   PagesHomeData,
@@ -10,12 +11,6 @@ import {
   TaskDetailsData,
   ProjectsDetailsData
 } from '@dua-upd/types-common';
-
-export type ApiParams = {
-  dateRange: string;
-  comparisonDateRange?: string;
-  id?: string;
-};
 
 @Injectable()
 export class ApiService {

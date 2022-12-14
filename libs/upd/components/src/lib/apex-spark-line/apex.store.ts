@@ -83,6 +83,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
       },
       stroke: {
         lineCap: 'round',
+        width: 0.5
       },
       dataLabels: {
         enabled: true,

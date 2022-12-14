@@ -6,6 +6,13 @@ import type {
   GscSearchTermMetrics,
   TopCalldriverTopics,
 } from '@dua-upd/db';
+import { Types } from 'mongoose';
+
+export type ApiParams = {
+  dateRange: string;
+  comparisonDateRange?: string;
+  id?: string;
+};
 
 export interface ViewData<T> {
   dateRange: string;
@@ -108,8 +115,8 @@ export interface OverviewAggregatedData {
   enquiryLineC9: number;
   enquiryLineITE: number;
   enquiryLineEService: number;
-  visitsByDay: { date: Date; visits: number }[];
-  calldriversByDay: { date: Date; calls: number }[];
+  visitsByDay: { date: string; visits: number }[];
+  calldriversByDay: { date: string; calls: number }[];
   dyfByDay: {
     date: Date;
     dyf_yes: number;
@@ -174,7 +181,7 @@ export interface OverviewData
 }
 
 export interface TasksHomeAggregatedData {
-  _id: string;
+  _id: string | Types.ObjectId;
   title: string;
   group: string;
   topic: string;

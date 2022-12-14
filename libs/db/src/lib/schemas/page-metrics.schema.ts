@@ -239,18 +239,6 @@ export type MetricsConfig<T> = {
   [key in AccumulatorOperator]?: keyof Partial<T>;
 };
 
-// export type GetAggregatedMetrics = <T>(
-//   dateRange: string,
-//   selectedMetrics: (keyof T | MetricsConfig<T>)[],
-//   pagesFilter?: FilterQuery<PageMetrics>,
-//   sortConfig?: { [key in keyof Partial<T>]: 1 | -1 }
-// ) => Promise<T[]>;
-
-// export interface PageMetricsModel extends Model<PageMetrics> {
-//   getAggregatedPageMetrics: GetAggregatedMetrics;
-//
-// }
-
 export async function getAggregatedPageMetrics<T>(
   this: Model<PageMetrics>,
   dateRange: string,
@@ -285,7 +273,6 @@ export async function getAggregatedPageMetrics<T>(
   const pagesFilterQuery = pagesFilter || {};
 
   return await this.aggregate<T>()
-    .sort({ date: 1 })
     .match({
       date: {
         $gte: startDate,
