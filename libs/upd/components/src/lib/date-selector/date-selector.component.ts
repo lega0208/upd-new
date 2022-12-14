@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
 import { combineLatest, map } from 'rxjs';
-import { DateSelectionFacade, DateRangePeriod } from '@dua-upd/upd/state';
+import {
+  DateSelectionFacade,
+  DateRangePeriod,
+  dateRangePeriods,
+} from '@dua-upd/upd/state';
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 
@@ -10,7 +14,30 @@ import 'dayjs/locale/fr-ca';
 
 @Component({
   selector: 'upd-date-selector',
-  templateUrl: './date-selector.component.html',
+  template: `
+    <div class="row mb-4 mt-1 d-block">
+      <upd-dropdown
+        id="range-button"
+        icon="calendar_today"
+        [label]="displayFormatSelectedPeriod$ | async"
+        [options]="selectionOptions"
+        [onSelect]="selectPeriod.bind(this)"
+      ></upd-dropdown>
+
+      <span class="text-secondary ps-3 pe-2 text-nowrap dates-header-week">
+        <strong>{{ displayFormatDateRange$ | async }}</strong>
+      </span>
+      <span
+        class="text-secondary ps-0 pe-0 text-nowrap dates-header-week"
+        data-i18n="compared_to"
+        translate="compared_to"
+      >
+      </span>
+      <span class="text-secondary ps-2 pe-0 text-nowrap dates-header-week">
+        <strong>{{ displayFormatComparisonDateRange$ | async }}</strong>
+      </span>
+    </div>
+  `,
   styleUrls: ['./date-selector.component.css'],
 })
 export class DateSelectorComponent {
@@ -38,7 +65,7 @@ export class DateSelectorComponent {
     map(({ comparisonDateRange }) => comparisonDateRange)
   );
 
-  selectionOptions = ['weekly', 'monthly', 'quarterly'].map((period) => ({
+  selectionOptions = dateRangePeriods.map((period) => ({
     value: period as DateRangePeriod,
     label: periodToDisplayFormat(period as DateRangePeriod),
   }));
@@ -56,10 +83,11 @@ export class DateSelectorComponent {
 export const dateRangeToDisplayFormat = (date: string, lang: LocaleId) =>
   date
     .split('/')
-    .map((d) =>
-      dayjs(d)
-        .locale(lang)
-        .format(lang === 'en-CA' ? 'MMM DD' : 'DD MMM')
+    .map(
+      (d, i) =>
+        dayjs(d)
+          .locale(lang)
+          .format(lang === 'en-CA' ? 'MMM DD YYYY' : 'DD MMM YYYY') // only add year to end date
     )
     .join(' - ');
 

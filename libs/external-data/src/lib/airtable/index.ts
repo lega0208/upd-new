@@ -22,7 +22,7 @@ import {
   CreatedFieldRecord,
   FieldRecord,
   FieldRecordQuery,
-  lang,
+  Lang,
 } from './query';
 
 dayjs.extend(utc);
@@ -122,7 +122,7 @@ export class AirtableClient {
     }
   }
 
-  async deleteSearchAssessment(id: string[], lang: lang = 'en') {
+  async deleteSearchAssessment(id: string[], lang: Lang = 'en') {
     return await this.deleteRecords(
       bases.SEARCH_ASSESSMENT,
       `CRA - ${lang.toUpperCase()}`,
@@ -165,7 +165,7 @@ export class AirtableClient {
   }
 
   async selectAll(query: Query<FieldSet>): Promise<FieldSet[]> {
-    const results = [];
+    const results: FieldSet[] = [];
 
     await query.eachPage((records, nextPage) => {
       results.push(...records.map((r) => r._rawJson));
@@ -203,7 +203,7 @@ export class AirtableClient {
 
   async insertSearchAssessment(
     data,
-    lang: lang = 'en',
+    lang: Lang = 'en',
     lastUpdatedDate?: DateType
   ) {
     const params = lastUpdatedDate
@@ -219,23 +219,13 @@ export class AirtableClient {
     );
   }
 
-  async insertExpectedDB(
-    data,
-    table = 'Expected - EN',
-    lang: lang = 'en',
-    lastUpdatedDate?: DateType
-  ) {
-    const params = lastUpdatedDate
-      ? {
-          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
-        }
-      : {};
-
+  async insertExpectedDB(data, table = 'Expected - EN') {
     return await this.insertRecords(bases.SEARCH_ASSESSMENT, `${table}`, data);
   }
+
   async updateSearchAssessment(
     data: RecordData<Partial<FieldSet>>[],
-    lang: lang = 'en'
+    lang: Lang = 'en'
   ) {
     console.log(lang);
     return await this.updateRecords(

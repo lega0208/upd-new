@@ -19,8 +19,6 @@ import { combineLatest } from 'rxjs';
 export class OverviewSummaryComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
-
-  chartMerge$ = this.overviewService.chartMerge$;
   searchKpiObjectiveCriteria = searchKpiObjectiveCriteria;
   uxTestsKpiObjectiveCriteria = uxTestsKpiObjectiveCriteria;
   feedbackKpiObjectiveCriteria = feedbackKpiObjectiveCriteria;
@@ -31,7 +29,7 @@ export class OverviewSummaryComponent implements OnInit {
   loading$ = this.overviewService.loading$;
   error$ = this.overviewService.error$;
 
-  apex$ = this.overviewService.apex$;
+  comboChartData$ = this.overviewService.comboChartData$;
 
   currentKpiFeedback$ = this.overviewService.currentKpiFeedback$;
   kpiFeedbackPercentChange$ = this.overviewService.kpiFeedbackPercentChange$;
@@ -75,15 +73,13 @@ export class OverviewSummaryComponent implements OnInit {
   dyfChartApex$ = this.overviewService.dyfDataApex$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
 
-  barChartData$ = this.overviewService.visitsByDay$;
-  calldriversChartData$ = this.overviewService.calldriversByDay$;
+  // barChartData$ = this.overviewService.visitsByDay$;
+  // calldriversChartData$ = this.overviewService.calldriversByDay$;
 
   barTable$ = this.overviewService.tableMerge$;
 
   dateRangeLabel$ = this.overviewService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
-
-  isChartDataOver31Days$ = this.overviewService.isChartDataOver31Days$;
   dyfChartLegend: string[] = [];
   langLink = 'en';
   chartCols: ColumnConfig = { field: '', header: '' };

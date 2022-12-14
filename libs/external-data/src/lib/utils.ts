@@ -9,7 +9,7 @@ dayjs.extend(utc);
 
 export const withTimeout = <T>(
   fn: () => Promise<T>,
-  timeout
+  timeout: number
 ): (() => Promise<T>) => {
   return () =>
     new Promise((resolve, reject) => {

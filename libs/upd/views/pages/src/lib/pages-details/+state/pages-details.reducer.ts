@@ -46,7 +46,6 @@ const reducer = createReducer(
           ...state,
           loading: false,
           loaded: true,
-          start: true,
           error: null,
         }
       : {
@@ -54,7 +53,6 @@ const reducer = createReducer(
           data: { ...data },
           loading: false,
           loaded: true,
-          start: true,
           error: null,
         }
   ),
@@ -62,7 +60,6 @@ const reducer = createReducer(
     ...state,
     loading: false,
     loaded: true,
-    start: true,
     error,
   }))
 );

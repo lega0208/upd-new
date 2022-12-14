@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { type FilterQuery, Model } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Connection, type FilterQuery, Model } from 'mongoose';
 import {
   models,
   CallDriver,
@@ -21,6 +21,7 @@ import {
   logJson,
 } from '@dua-upd/utils-common';
 import { AnyBulkWriteOperation } from 'mongodb';
+import { PageVisits, PageVisitsView } from './db.views';
 
 /**
  * This service is primarily for accessing all collection models from the same place
@@ -47,6 +48,13 @@ export class DbService {
     searchAssessment: this.searchAssessment,
   };
 
+  readonly views = {
+    pageVisits: new PageVisitsView(
+      this.pageVisits,
+      this.collections.pageMetrics
+    ),
+  };
+
   constructor(
     @InjectModel(CallDriver.name, 'defaultConnection')
     private callDrivers: Model<CallDriver>,
@@ -69,7 +77,9 @@ export class DbService {
     @InjectModel(AAItemId.name, 'defaultConnection')
     private aaItemIds: Model<AAItemId>,
     @InjectModel(SearchAssessment.name, 'defaultConnection')
-    private searchAssessment: Model<SearchAssessment>
+    private searchAssessment: Model<SearchAssessment>,
+    @InjectModel(PageVisitsView.name, 'defaultConnection')
+    private pageVisits: Model<PageVisits>
   ) {}
 
   @AsyncLogTiming

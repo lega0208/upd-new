@@ -29,11 +29,12 @@ import type {
   ProjectStatus,
   ProjectsHomeData,
 } from '@dua-upd/types-common';
-import { ApiParams } from '@dua-upd/upd/services';
+import { ApiParams } from '@dua-upd/types-common';
 import { dateRangeSplit } from '@dua-upd/utils-common/date';
 import {
   getAvgSuccessFromLastTests,
-  getLatestTest, getLatestTestData,
+  getLatestTest,
+  getLatestTestData,
 } from '@dua-upd/utils-common/data';
 
 dayjs.extend(utc);
@@ -378,10 +379,7 @@ export class ProjectsService {
 
     const dateFromLastTest: Date | null = lastTest?.date || null;
 
-    const {
-      percentChange,
-      avgTestSuccess
-    } = getLatestTestData(uxTests);
+    const { percentChange, avgTestSuccess } = getLatestTestData(uxTests);
 
     const tasks = populatedProjectDoc.tasks as Task[];
 

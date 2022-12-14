@@ -1,6 +1,6 @@
 import { StorageService } from './storage/storage.service';
 import { catchError, combineLatest, lastValueFrom, map, mergeMap, Observable, tap, toArray } from 'rxjs';
-import { ApiParams } from './api.service';
+import { ApiParams } from '@dua-upd/types-common';
 import { ServicesModule } from './services.module';
 
 /*

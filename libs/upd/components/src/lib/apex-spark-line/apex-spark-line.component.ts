@@ -9,7 +9,7 @@ import {
   ApexLegend,
   ApexMarkers,
   ApexNoData,
-  ApexNonAxisChartSeries,
+  ApexNonAxisChartSeries, ApexOptions,
   ApexPlotOptions,
   ApexResponsive,
   ApexStates,
@@ -81,7 +81,7 @@ export type ChartOptions = {
   styleUrls: ['./apex-spark-line.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ApexSparkLineComponent implements OnInit, OnChanges {
+export class ApexSparkLineComponent implements OnChanges {
   @ViewChild('chart', { static: false }) chart!: ChartComponent;
   @Input() secondaryTitleCols: ColumnConfig = { field: '', header: '' };
   @Input() secondaryTitleData: Record<string, number | string>[] = [];
@@ -98,7 +98,7 @@ export class ApexSparkLineComponent implements OnInit, OnChanges {
   @Input() scale = 100;
   type: ChartType = 'line';
 
-  chartOptions: Partial<ChartOptions> = {
+  chartOptions: Partial<ApexOptions> = {
     chart: {
       type: 'line',
       sparkline: {
@@ -108,9 +108,10 @@ export class ApexSparkLineComponent implements OnInit, OnChanges {
       offsetY: 25,
       locales: [fr, en],
       defaultLocale: 'en',
-      // toolbar: {
-      //   show: true,
-      // },
+    },
+    stroke: {
+      curve: 'smooth',
+      width: 1.8,
     },
     xaxis: {
       type: 'datetime',
@@ -153,8 +154,6 @@ export class ApexSparkLineComponent implements OnInit, OnChanges {
 
     return mergedConfig;
   }
-
-  ngOnInit(): void {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['current'] || changes['comparison'] || changes['series']) {

@@ -1,65 +1,19 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import {
-  filter,
-  tap,
-  map,
-  withLatestFrom,
-  pairwise,
-  skip,
-} from 'rxjs/operators';
-import { Observable } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
 import {
-  ApexAnnotations,
   ApexAxisChartSeries,
   ApexChart,
-  ApexDataLabels,
-  ApexFill,
-  ApexGrid,
-  ApexLegend,
-  ApexMarkers,
-  ApexNonAxisChartSeries,
-  ApexPlotOptions,
-  ApexResponsive,
-  ApexStates,
-  ApexStroke,
-  ApexTheme,
-  ApexTitleSubtitle,
-  ApexTooltip,
-  ApexXAxis,
   ApexYAxis,
+  ApexOptions
 } from 'ng-apexcharts';
 
 import fr from 'apexcharts/dist/locales/fr.json';
 import en from 'apexcharts/dist/locales/en.json';
 import { EN_CA } from '@dua-upd/upd/i18n';
 
-export interface ChartOptions {
-  chart: ApexChart;
-  annotations?: ApexAnnotations;
-  colors?: string[];
-  dataLabels?: ApexDataLabels;
-  series?: ApexAxisChartSeries | ApexNonAxisChartSeries;
-  stroke?: ApexStroke;
-  labels?: string[];
-  legend?: ApexLegend;
-  fill?: ApexFill;
-  tooltip?: ApexTooltip;
-  plotOptions?: ApexPlotOptions;
-  responsive?: ApexResponsive[];
-  markers?: ApexMarkers;
-  xaxis?: ApexXAxis;
-  yaxis?: ApexYAxis | ApexYAxis[];
-  grid?: ApexGrid;
-  states?: ApexStates;
-  title?: ApexTitleSubtitle;
-  subtitle?: ApexTitleSubtitle;
-  theme?: ApexTheme;
-}
-
 @Injectable()
-export class ApexStore extends ComponentStore<ChartOptions> {
+export class ApexStore extends ComponentStore<ApexOptions> {
   constructor(private i18n: I18nFacade) {
     super({
       legend: {
@@ -83,9 +37,13 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         type: 'line',
         locales: [fr, en],
         defaultLocale: 'en',
+        fontFamily: 'Noto Sans',
         toolbar: {
+          offsetY: -1,
+          offsetX: -103,
           tools: {
-            download: '<span class="material-icons">download</span>',
+            download:
+              '<span class="material-icons align-middle">download</span>',
           },
         },
       },
@@ -103,6 +61,10 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         '#C5C5FF',
         '#1A8361',
       ],
+      fill: {
+        type: 'solid',
+        opacity: 1
+      },
       xaxis: {
         type: 'datetime',
         title: {
@@ -130,7 +92,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           fontSize: '14px',
         },
       },
-      stroke: { width: [0, 0, 3, 3], curve: 'smooth' },
+      stroke: { width: [3, 3, 3, 3], curve: 'smooth', lineCap: 'round' },
       series: [],
       dataLabels: {
         enabled: false,
@@ -139,44 +101,35 @@ export class ApexStore extends ComponentStore<ChartOptions> {
   }
 
   readonly setColours = this.updater(
-    (state, value: string[]): ChartOptions => ({
+    (state, value: string[]): ApexOptions => ({
       ...state,
       colors: value ? value : [],
     })
   );
 
   readonly setSeries = this.updater(
-    (state, value: ApexAxisChartSeries): ChartOptions => {
+    (state, value: ApexAxisChartSeries): ApexOptions => {
       this.setYAxis(value);
-      if (value[0]?.data?.length > 31) {
-        value[0].type = 'line';
-        value[1].type = 'line';
-        return {
-          ...state,
-          series: value ? value : [],
-          stroke: { width: [3, 3, 3, 3], curve: 'smooth' },
-        };
-      }
+
       return {
         ...state,
         series: value ? value : [],
-        stroke: { width: [0, 0, 3, 3], curve: 'smooth' },
       };
     }
   );
 
   readonly setLocale = this.updater(
-    (state, value: string): ChartOptions => ({
+    (state, value: string): ApexOptions => ({
       ...state,
       chart: {
         ...state.chart,
         defaultLocale: value === EN_CA ? 'en' : 'fr',
-      },
+      } as ApexChart,
     })
   );
 
   readonly setYAxis = this.updater(
-    (state, value: ApexAxisChartSeries): ChartOptions => {
+    (state, value: ApexAxisChartSeries): ApexOptions => {
       const firstDataSet: number[] = [0, 1]
         .map((p: number) => {
           return value[p].data;
@@ -200,8 +153,8 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         });
 
       let secondMax = secondDataSet;
-      if (value[0]?.data?.length > 31) {
-        secondMax = firstDataSet;
+      if (value[0]?.data?.length > 7) {
+        secondMax = firstDataSet.map((val) => Math.round(val / 5));
       }
       return {
         ...state,
@@ -218,6 +171,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
                 style: {
                   fontSize: '16px',
                 },
+                offsetX: -10
               },
               max: getMax(firstDataSet),
               tickAmount: 5,
@@ -238,6 +192,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
                   fontSize: '16px',
                   color: '#f37d35',
                 },
+                offsetX: 10
               },
               labels: {
                 style: {
@@ -279,6 +234,14 @@ export class ApexStore extends ComponentStore<ChartOptions> {
             },
           };
         }),
+        chart: {
+          ...state.chart,
+          type: state.chart?.type || 'line',
+          toolbar: {
+            ...state.chart?.toolbar,
+            offsetX: value[0]?.data?.length > 31 ? -124 : -103,
+          }
+        }
       };
     }
   );

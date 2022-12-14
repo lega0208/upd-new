@@ -9,7 +9,7 @@ export class CallDriver {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
-  @Prop({ type: String, required: true, unique: true })
+  @Prop({ type: String })
   airtable_id = '';
 
   @Prop({ type: Date, required: true, index: true })

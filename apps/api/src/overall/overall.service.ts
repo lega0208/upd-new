@@ -6,6 +6,7 @@ import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import { FilterQuery, Model } from 'mongoose';
 import {
+  DbService,
   CallDriver,
   CallDriverModel,
   Overall,
@@ -26,13 +27,14 @@ import {
   SearchAssessmentDocument,
 } from '@dua-upd/db';
 import type {
+  ApiParams,
   ProjectsHomeData,
   OverviewAggregatedData,
   OverviewData,
   OverviewUxData,
   OverviewProjectData,
 } from '@dua-upd/types-common';
-import { ApiParams } from '@dua-upd/upd/services';
+import { AsyncLogTiming, dateRangeSplit } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -78,6 +80,7 @@ const projectStatusSwitchExpression = {
 @Injectable()
 export class OverallService {
   constructor(
+    private db: DbService,
     @InjectModel(Overall.name, 'defaultConnection')
     private overallModel: Model<OverallDocument>,
     @InjectModel(Page.name, 'defaultConnection')
@@ -99,7 +102,7 @@ export class OverallService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  // todo: precache everything on startup
+  @AsyncLogTiming
   async getMetrics(params: ApiParams): Promise<OverviewData> {
     const cacheKey = `OverviewMetrics-${params.dateRange}`;
     const cachedData = await this.cacheManager.store.get<OverviewData>(
@@ -149,6 +152,7 @@ export class OverallService {
       .subtract(3, 'weeks')
       .endOf('week')
       .format('YYYY-MM-DD')}`;
+
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -158,6 +162,7 @@ export class OverallService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.db,
         this.searchAssessmentModel,
         this.cacheManager,
         params.dateRange,
@@ -169,6 +174,7 @@ export class OverallService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.db,
         this.searchAssessmentModel,
         this.cacheManager,
         params.comparisonDateRange,
@@ -418,6 +424,7 @@ async function getOverviewMetrics(
   calldriversModel: CallDriverModel,
   feedbackModel: Model<FeedbackDocument>,
   pageModel: Model<PageDocument>,
+  db: DbService,
   searchAssessmentModel: Model<SearchAssessmentDocument>,
   cacheManager: Cache,
   dateRange: string,
@@ -439,10 +446,16 @@ async function getOverviewMetrics(
   satDateQuery.$gte = new Date(satStartDate);
   satDateQuery.$lte = new Date(satEndDate);
 
-  const visitsByDay = await overallModel
-    .find({ date: dateQuery }, { _id: 0, date: 1, visits: 1 })
-    .sort({ date: 1 })
-    .lean();
+  const visitsByDay = (
+    await overallModel
+      .find({ date: dateQuery }, { _id: 0, date: 1, visits: 1 })
+      .sort({ date: 1 })
+      .lean()
+      .exec()
+  ).map((visits) => ({
+    ...visits,
+    date: visits.date.toISOString(),
+  }));
 
   const dyfByDay = await overallModel
     .find(
@@ -496,33 +509,24 @@ async function getOverviewMetrics(
     })
     .exec();
 
-  const topPagesVisited = await PageMetricsModel.aggregate()
-    .sort({ date: 1, url: 1 })
-    .match({ date: dateQuery })
-    .group({ _id: '$url', visits: { $sum: '$visits' } })
-    .sort({ visits: -1 })
-    .limit(10)
-    .exec();
+  const [start, end] = dateRangeSplit(dateRange);
+
+  const topPagesVisited = (
+    await db.views.pageVisits.getVisitsWithPageData({ start, end }, pageModel)
+  ).slice(0, 10);
 
   const top10GSC = await overallModel
     .aggregate()
+    .project({ date: 1, gsc_searchterms: 1 })
     .sort({ date: 1 })
     .match({ date: dateQuery })
     .unwind('$gsc_searchterms')
-    .project({
-      term: '$gsc_searchterms.term',
-      clicks: '$gsc_searchterms.clicks',
-      impressions: '$gsc_searchterms.impressions',
-      ctr: '$gsc_searchterms.ctr',
-      position: '$gsc_searchterms.position',
-    })
-    .sort({ term: 1 })
     .group({
-      _id: '$term',
-      clicks: { $sum: '$clicks' },
-      impressions: { $sum: '$impressions' },
-      ctr: { $avg: '$ctr' },
-      position: { $avg: '$position' },
+      _id: '$gsc_searchterms.term',
+      clicks: { $sum: '$gsc_searchterms.clicks' },
+      impressions: { $sum: '$gsc_searchterms.impressions' },
+      ctr: { $avg: '$gsc_searchterms.ctr' },
+      position: { $avg: '$gsc_searchterms.position' },
     })
     .sort({ clicks: -1 })
     .limit(10)
@@ -649,12 +653,9 @@ async function getOverviewMetrics(
     .project({ _id: 0 })
     .exec();
 
-    // get search assessment data, but don't merge query if there is value in en or fr
-
-
+  // get search assessment data, but don't merge query if there is value in en or fr
 
   const searchAssessmentData = await searchAssessmentModel
-
     .aggregate()
     .match({ date: satDateQuery })
     // don't group by query if there is a value in en or fr

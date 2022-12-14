@@ -23,7 +23,6 @@ export class OverviewWebtrafficComponent implements OnInit {
   pageViews$ = this.overviewService.views$;
   pageViewsPercentChange$ = this.overviewService.viewsPercentChange$;
 
-  isChartDataOver31Days$ = this.overviewService.isChartDataOver31Days$;
 
   apexBar$ = this.overviewService.apexBar$;
 
@@ -46,6 +45,7 @@ export class OverviewWebtrafficComponent implements OnInit {
 
   topPagesCols: ColumnConfig<{
     _id: string;
+    url: string;
     visits: number;
     percentChange: number;
   }>[] = [];
@@ -67,10 +67,10 @@ export class OverviewWebtrafficComponent implements OnInit {
     ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
       this.topPagesCols = [
         {
-          field: '_id',
+          field: 'url',
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
-          typeParams: { link: '_id', external: true },
+          typeParams: { link: 'url', external: true },
         },
         {
           field: 'visits',

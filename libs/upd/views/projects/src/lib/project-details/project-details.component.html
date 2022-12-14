@@ -2,17 +2,21 @@
   <span class="material-icons align-top">west</span>
   <a [routerLink]="['/', langLink, 'projects']" [translate]="'menu-projects'"></a>
 </div>
-<h2 class="h3 pt-2 pb-2">
-  <span [translate]="'project'"></span>: {{ title$ | async }}
-  <span class="h5 d-inline-block mb-0 align-top ms-1">
+<ng-container *ngIf="loaded$">
+  <h2 class="h3 pt-2 pb-2">
+    <span [translate]="'project'"></span>: {{ title$ | async }}
+    <span class="h5 d-inline-block mb-0 align-top ms-1">
     <upd-project-status-label
       [statusText]="(status$ | async) || 'Unknown'"
     ></upd-project-status-label>
   </span>
-</h2>
+  </h2>
+</ng-container>
 
 <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
 <upd-date-selector
   *ngIf="!((currentRoute$ | async) || '').endsWith('uxtests')"
   ></upd-date-selector>
-<router-outlet></router-outlet>
+<ng-container *ngIf="loaded$">
+  <router-outlet></router-outlet>
+</ng-container>

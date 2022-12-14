@@ -48,7 +48,11 @@
           "optimization": false,
           "vendorChunk": true,
           "extractLicenses": false,
-          "sourceMap": true,
+          "sourceMap": {
+            "scripts": true,
+            "styles": true,
+            "vendor": true
+          },
           "namedChunks": true,
           "verbose": true,
           "buildLibsFromSource": true
@@ -63,7 +67,9 @@
           "browserTarget": "upd:build:production"
         },
         "development": {
-          "browserTarget": "upd:build:development"
+          "browserTarget": "upd:build:development",
+          "hmr": true,
+          "liveReload": false
         }
       },
       "defaultConfiguration": "development",

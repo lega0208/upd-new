@@ -40,7 +40,6 @@
         [valueLabel]="0.75"
         [keyword]="'search'"
         modal="{{ 'kpi-search-assessment-guidance' | translate }}"
-        text=""
         >{{
           'kpi-search-assessment-text'
             | translate
@@ -73,7 +72,7 @@
     </div>
   </div>
 </div>
-<!-- 
+<!--
     <div class="col-lg-3 col-md-12 col-sm-12">
       <upd-apex-charts
         [title]="'Negative comments to visits'"
@@ -111,8 +110,8 @@
     <div class="col">
       <upd-apex-bar-line
         [title]="'d3-visits-compared-to-calls'"
-        [series]="(apex$ | async) || []"
-        [table]="barTable$ | async"
+        [series]="(comboChartData$ | async) || []"
+        [table]="(barTable$ | async) || []"
         [tableCols]="barTableCols"
         [colours]="['#2E5EA7', '#B5C2CC', '#f37d35', '#fbbc4d']"
         [secondaryTitleData]="chartData"

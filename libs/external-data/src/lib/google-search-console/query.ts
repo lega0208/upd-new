@@ -107,7 +107,7 @@ export class SearchAnalyticsQueryBuilder {
     };
   }
 
-  public hasDuplicates(array) {
+  public hasDuplicates(array: unknown[]) {
     return new Set(array).size !== array.length;
   }
 }

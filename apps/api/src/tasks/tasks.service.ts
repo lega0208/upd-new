@@ -12,6 +12,7 @@ import type {
 } from '@dua-upd/db';
 import {
   CallDriver,
+  DbService,
   Feedback,
   PageMetrics,
   Project,
@@ -24,7 +25,7 @@ import type {
   TasksHomeAggregatedData,
   TaskDetailsAggregatedData,
 } from '@dua-upd/types-common';
-import type { ApiParams } from '@dua-upd/upd/services';
+import type { ApiParams } from '@dua-upd/types-common';
 import {
   getAvgSuccessFromLastTests,
   getLatestTest,
@@ -34,6 +35,7 @@ import {
 @Injectable()
 export class TasksService {
   constructor(
+    private db: DbService,
     @InjectModel(Project.name, 'defaultConnection')
     private projectModel: Model<ProjectDocument>,
     @InjectModel(Task.name, 'defaultConnection')
@@ -59,77 +61,15 @@ export class TasksService {
       return cachedData;
     }
 
-    const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+    const [start, end] = dateRange.split('/').map((d) => new Date(d));
 
-    const tasksData = await this.pageMetricsModel
-      .aggregate<TasksHomeAggregatedData>()
-      .sort({ tasks: 1, date: 1 }) // todo: add index for this sort
-      .match({
-        $and: [
-          {
-            tasks: { $exists: true },
-          },
-          {
-            tasks: { $ne: null },
-          },
-          {
-            tasks: { $not: { $size: 0 } },
-          },
-          { date: { $gte: startDate, $lte: endDate } },
-        ],
-      })
-      .project({ date: 1, visits: 1, tasks: 1 })
-      .unwind({ path: '$tasks' })
-      .sort({ tasks: 1 })
-      .group({
-        _id: '$tasks',
-        visits: {
-          $sum: '$visits',
-        },
-      })
-      .lookup({
-        from: 'tasks',
-        localField: '_id',
-        foreignField: '_id',
-        as: 'task',
-      })
-      .replaceRoot({
-        $mergeObjects: [{ $first: '$task' }, { visits: '$visits' }],
-      })
-      .sort({ title: 'asc' })
-      .allowDiskUse(true)
-      .exec();
-
-    const tasksWithoutMetrics = (
-      await this.taskModel
-        .find(
-          {
-            _id: { $nin: tasksData.map((task) => task._id) },
-          },
-          {
-            title: 1,
-            group: 1,
-            topic: 1,
-            subtopic: 1,
-          }
-        )
-        .sort({ title: 1 })
-        .lean()
-        .exec()
-    ).map((task) => ({
-      ...task,
-      visits: 0,
-    })) as TasksHomeAggregatedData[];
-
-    const tasks = [...tasksData, ...tasksWithoutMetrics].sort((a, b) => {
-      if (a.visits < b.visits) {
-        return 1;
-      }
-      if (a.visits > b.visits) {
-        return -1;
-      }
-      return 0;
-    });
+    const tasks = await this.db.views.pageVisits.getVisitsWithTaskData(
+      {
+        start,
+        end,
+      },
+      this.taskModel
+    );
 
     const results = {
       dateRange,
