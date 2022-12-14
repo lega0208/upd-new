@@ -37,7 +37,7 @@ export class UpdateService {
     this.logger.log('Database updates completed.');
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(EVERY_SUNDAY_AT_11PM)
   async runSAT() {
     if (this.isRunning) {
       return;
