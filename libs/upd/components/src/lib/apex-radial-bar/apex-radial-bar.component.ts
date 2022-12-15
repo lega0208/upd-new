@@ -74,7 +74,7 @@ type ChartOptions = {
   styleUrls: ['./apex-radial-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ApexRadialBarComponent implements OnInit, OnChanges {
+export class ApexRadialBarComponent implements OnChanges {
   @ViewChild('chart', { static: false }) chart!: ChartComponent;
   @Input() secondaryTitleCols: ColumnConfig = { field: '', header: '' };
   @Input() secondaryTitleData: Record<string, number | string>[] = [];
@@ -144,19 +144,114 @@ export class ApexRadialBarComponent implements OnInit, OnChanges {
     },
     responsive: [
       {
-        breakpoint: 1592,
+        breakpoint: 1600,
         options: {
           chart: {
             height: 300,
           },
+          plotOptions: {
+            radialBar: {
+              dataLabels: {
+                name: {
+                  fontSize: '16px',
+                },
+                value: {
+                  offsetY: -55,
+                  fontSize: '26px',
+                }
+              }
+            }
+          }
+        },
+      },
+      {
+        breakpoint: 1400,
+        options: {
+          chart: {
+            height: 250,
+          },
+          plotOptions: {
+            radialBar: {
+              dataLabels: {
+                name: {
+                  fontSize: '16px',
+                },
+                value: {
+                  offsetY: -40,
+                  fontSize: '26px',
+                }
+              }
+            }
+          }
+        },
+      },
+      {
+        breakpoint: 1300,
+        options: {
+          chart: {
+            height: 200,
+          },
+          plotOptions: {
+            radialBar: {
+              dataLabels: {
+                name: {
+                  fontSize: '12px',
+                },
+                value: {
+                  offsetY: -40,
+                  fontSize: '20px',
+                }
+              }
+            }
+          }
+        },
+      },
+      {
+        breakpoint: 1100,
+        options: {
+          chart: {
+            height: 170,
+          },
+          plotOptions: {
+            radialBar: {
+              dataLabels: {
+                name: {
+                  fontSize: '10px',
+                },
+                value: {
+                  offsetY: -30,
+                  fontSize: '20px',
+                }
+              }
+            }
+          }
+        },
+      },
+      {
+        breakpoint: 992,
+        options: {
+          chart: {
+            height: 350,
+          },
+          plotOptions: {
+            radialBar: {
+              dataLabels: {
+                name: {
+                  fontSize: '18px',
+                },
+                value: {
+                  offsetY: -55,
+                  fontSize: '32px',
+                }
+              }
+            }
+          }
         },
       },
     ],
   };
 
   constructor(private i18n: I18nFacade) {}
-
-  ngOnInit(): void {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['current'] || changes['comparison'] || changes['labels']) {
