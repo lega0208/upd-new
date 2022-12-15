@@ -228,12 +228,12 @@ export class OverviewFacade {
 
       return [
         {
-          name: dateRangeLabel,
+          name: comparisonDateRangeLabel,
           type: 'line',
           data: comparisonFeedbackData,
         },
         {
-          name: comparisonDateRangeLabel,
+          name: dateRangeLabel,
           type: 'line',
           data: currentFeedbackData,
         },
@@ -389,13 +389,13 @@ export class OverviewFacade {
       });
 
       c.push({
-        name: calls[0].name,
+        name: calls[1].name,
         type: 'line',
         data: previousCallDrivers,
       });
 
       c.push({
-        name: calls[1].name,
+        name: calls[0].name,
         type: 'line',
         data: currentCallDrivers,
       });
