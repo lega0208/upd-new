@@ -35,29 +35,11 @@
         [series]="(apexBar$ | async) || []"
         [table]="barTable$ | async"
         [yAxis]="'visits' | translate"
-        [type]="'date'"
         [tableCols]="barTableCols"
       ></upd-apex-bar>
     </div>
   </div>
 </div>
-
-<!-- <div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-charts
-        [title]="'visits'"
-        [displayLegend]="'below'"
-        [showLegend]="true"
-        [data]="barChartData$ | async"
-        type="grouped-bar"
-        [convertToLine]="(isChartDataOver31Days$ | async) || false"
-        [table]="barTable$ | async"
-        [tableCols]="barTableCols"
-      ></upd-charts>
-    </div>
-  </div>
-</div> -->
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">

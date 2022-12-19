@@ -221,7 +221,7 @@ export class PagesService {
       dateRangeData: {
         ...dateRangeData,
         visitsByDay: dateRangeDataByDay.map((data) => ({
-          date: data.date,
+          date: data.date.toISOString(),
           visits: data.visits,
         })),
         feedbackByTags: await this.feedbackModel.getCommentsByTag(

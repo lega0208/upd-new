@@ -24,7 +24,12 @@ import {
 } from '@dua-upd/upd/state';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
-import { selectComboChartData } from './overview.selectors';
+import {
+  selectComboChartData,
+  selectComboChartTable,
+  selectVisitsByDayChartData,
+  selectVisitsByDayChartTable
+} from './overview.selectors';
 
 dayjs.extend(utc);
 dayjs.extend(isSameOrBefore);
@@ -91,7 +96,8 @@ export class OverviewFacade {
   );
 
   topPagesVisitedWithPercentChange$ = this.overviewData$.pipe(
-    mapObjectArraysWithPercentChange('topPagesVisited', 'visits', 'url')
+    mapObjectArraysWithPercentChange('topPagesVisited', 'visits', 'url'),
+    map((topPages) => topPages?.sort((a, b) => b.visits - a.visits))
   );
 
   top10GSC$ = this.overviewData$.pipe(
@@ -304,68 +310,8 @@ export class OverviewFacade {
     })
   );
 
-  apexBar$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-    this.dateRangeSelected$,
-  ]).pipe(
-    map(([data, lang, dateRangePeriod]) => {
-      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
-      const comparisonDateRangeLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange || '',
-        lang
-      );
-      const visitsByDay = data?.dateRangeData?.visitsByDay || [];
-      const comparisonVisitsByDay =
-        data?.comparisonDateRangeData?.visitsByDay || [];
-      const visitsByDayFinal = data?.dateRangeData?.visitsByDay.map((d) => {
-        return {
-          x: d.date,
-          y: d.visits,
-        };
-      });
+  apexBar$ = this.store.select(selectVisitsByDayChartData);
 
-      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
-
-      let cntPrevVisits = 0;
-
-      const comparisonVisitsByDayFinal = visitsByDay.map((data, i) => {
-        let prevVisits = 0;
-
-        if (
-          comparisonVisitsByDay.find(
-            (d) =>
-              dayjs(d.date)
-                .utc(false)
-                .add(1, dateSelection)
-                .format('YYYY-MM-DD') ===
-              dayjs(data.date).utc(false).format('YYYY-MM-DD')
-          )
-        ) {
-          prevVisits = comparisonVisitsByDay[cntPrevVisits].visits;
-          cntPrevVisits++;
-        }
-        return {
-          x: data.date,
-          y: prevVisits,
-        };
-      });
-
-      return [
-        {
-          name: dateRangeLabel,
-          data: visitsByDayFinal,
-        },
-        {
-          name: comparisonDateRangeLabel,
-          data: comparisonVisitsByDayFinal,
-        },
-      ] as ApexAxisChartSeries;
-    })
-  );
-
-  // todo: reorder bars? (grey then blue instead of blue then grey?)
-  //  also clean this up a bit, simplify logic instead of doing everything twice
   comboChartData$ = this.store.select(selectComboChartData)
   apexCallDrivers$ = combineLatest([
     this.comboChartData$,
@@ -401,112 +347,6 @@ export class OverviewFacade {
       });
 
       return c as ApexAxisChartSeries;
-    })
-  );
-
-  visitsByDay$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-    this.dateRangeSelected$,
-  ]).pipe(
-    map(([data, lang, dateRangePeriod]) => {
-      const visitsByDay = data?.dateRangeData?.visitsByDay;
-      const comparisonVisitsByDay =
-        data?.comparisonDateRangeData?.visitsByDay || [];
-
-      const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
-      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
-
-      const isCurrZero = visitsByDay?.every((v) => v.visits === 0);
-      const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
-
-      if (!visitsByDay || (isCurrZero && isPrevZero)) {
-        return [] as MultiSeries;
-      }
-
-      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
-
-      const dateRangeDates = visitsByDay.map(({ date }) => date);
-
-      const dateRangeSeries = visitsByDay.map(({ visits }) => ({
-        name: dateRangeLabel, // todo: date label (x-axis) formatting based on date range length
-        value: visits || 0,
-      }));
-
-      const comparisonDateRangeLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange || '',
-        lang
-      );
-
-      const comparisonDateRangeSeries = comparisonVisitsByDay.map(
-        ({ date, visits }) => ({
-          name: comparisonDateRangeLabel,
-          date: date,
-          value: visits || 0,
-        })
-      );
-
-      let visitsByDayData: MultiSeries = [];
-      let cntPrevVisits = 0;
-
-      const visitsByDaySeries = visitsByDay.map((data, i) => {
-        let prevVisits = 0;
-
-        if (
-          comparisonVisitsByDay.find(
-            (d) =>
-              dayjs.utc(d.date).add(1, dateSelection).format('YYYY-MM-DD') ===
-              dayjs.utc(data.date).format('YYYY-MM-DD')
-          )
-        ) {
-          prevVisits = comparisonVisitsByDay[cntPrevVisits].visits;
-          cntPrevVisits++;
-        }
-        return {
-          name: dayjs.utc(data.date).locale(lang).format(dateFormat),
-          value: prevVisits,
-        };
-      });
-
-      if (dateRangePeriod !== 'weekly' && dateRangePeriod !== 'monthly') {
-        visitsByDayData = [
-          {
-            name: dateRangeLabel,
-            series: dateRangeSeries.map(({ value }, i) => ({
-              name: dayjs
-                .utc(dateRangeDates[i])
-                .locale(lang)
-                .format(dateFormat),
-              value: value || 0,
-            })),
-          },
-        ];
-
-        if (
-          data?.comparisonDateRangeData &&
-          typeof data?.comparisonDateRange === 'string'
-        ) {
-          visitsByDayData.push({
-            name: comparisonDateRangeLabel,
-            series: visitsByDaySeries,
-          });
-        }
-      } else {
-        visitsByDayData = dateRangeDates.map((date, i) => {
-          const series = [dateRangeSeries[i]];
-
-          if (comparisonDateRangeSeries[i] !== undefined) {
-            series.push(comparisonDateRangeSeries[i]);
-          }
-
-          return {
-            name: dayjs.utc(date).locale(lang).format(dateFormat),
-            series,
-          };
-        });
-      }
-
-      return visitsByDayData;
     })
   );
 
@@ -570,186 +410,9 @@ export class OverviewFacade {
     map(([currentCalls, comparisonVisits]) => currentCalls - comparisonVisits)
   );
 
-  barTable$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => {
-      console.log('barTable');
-      const visitsByDay = data?.dateRangeData?.visitsByDay;
-      const comparisonVisitsByDay =
-        data?.comparisonDateRangeData?.visitsByDay || [];
-      const days = visitsByDay?.length || 0;
-      const prevDays = comparisonVisitsByDay?.length || 0;
-      const maxDays = Math.max(days, prevDays);
-      const granularity = Math.ceil(days / 7);
-      const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
-      let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
-      let [prevStartDate] = (data.comparisonDateRange || '')
-        .split('/')
-        .map((d) => new Date(d));
+  barTable$ = this.store.select(selectVisitsByDayChartTable);
 
-      if (!visitsByDay) {
-        return [] as MultiSeries;
-      }
-
-      const dateRangeSeries = visitsByDay.map(({ date, visits }) => ({
-        date,
-        visits,
-      }));
-      const comparisonDateRangeSeries = comparisonVisitsByDay.map(
-        ({ visits }) => ({
-          visits,
-        })
-      );
-
-      let dayCount = 0;
-
-      while (dayCount < maxDays) {
-        const prevMonthDays = getMonthlyDays(prevStartDate);
-        const currMonthDays = getMonthlyDays(startDate);
-
-        if (currMonthDays > prevMonthDays) {
-          // if the current month has more days than the previous month,
-          // we need to pad the previous month with zeros
-
-          const daysToPad = currMonthDays - prevMonthDays;
-          comparisonDateRangeSeries.splice(
-            dayCount + prevMonthDays,
-            0,
-            ...Array(daysToPad).fill({
-              date: '*',
-              visits: 0,
-            })
-          );
-
-          dayCount += currMonthDays;
-        } else {
-          // if the current month has less days than the previous month,
-          // we need to pad the current month with zeros
-
-          const daysToPad = prevMonthDays - currMonthDays;
-
-          dateRangeSeries.splice(
-            dayCount + currMonthDays,
-            0,
-            ...Array(daysToPad).fill({
-              date: '*',
-              visits: 0,
-            })
-          );
-
-          dayCount += prevMonthDays;
-        }
-
-        prevStartDate = dayjs.utc(prevStartDate).add(1, 'month').toDate();
-        startDate = dayjs.utc(startDate).add(1, 'month').toDate();
-      }
-
-      const dateRangeDates = dateRangeSeries.map(({ date }) => date);
-
-      const visitsByDayData = dateRangeDates.map((date, i) => {
-        return {
-          name: dayjs.utc(date).locale(lang).format(dateFormat),
-          currValue: dateRangeSeries[i]?.visits || 0,
-          prevValue: comparisonDateRangeSeries[i]?.visits || 0,
-        };
-      });
-
-      return visitsByDayData;
-    })
-  );
-
-  tableMerge$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-    this.dateRangeSelected$,
-  ]).pipe(
-    map(([data, lang, dateRangePeriod]) => {
-      const visitsByDay = data?.dateRangeData?.visitsByDay;
-      const calldriversByDay = data?.dateRangeData?.calldriversByDay || [];
-      const comparisonVisitsByDay =
-        data?.comparisonDateRangeData?.visitsByDay || [];
-      const comparisonCalldriversByDay =
-        data?.comparisonDateRangeData?.calldriversByDay || [];
-
-      const dateFormat = dateRangePeriod === 'weekly' ? 'dddd, MMM D' : 'MMM D';
-      const dateSelection = dateRangePeriod.replace('ly', '') as QUnitType;
-
-      if (!visitsByDay) {
-        return [] as MultiSeries;
-      }
-
-      const dateRangeSeries = visitsByDay.map(({ date, visits }) => ({
-        date,
-        visits,
-      }));
-      const dateRangeSeriesCall = calldriversByDay.map(({ date, calls }) => ({
-        date,
-        calls,
-      }));
-
-      const comparisonDateRangeSeries = comparisonVisitsByDay.map(
-        ({ date, visits }) => ({
-          date,
-          visits,
-        })
-      );
-      const comparisonDateRangeSeriesCall = comparisonCalldriversByDay.map(
-        ({ date, calls }) => ({
-          date,
-          calls,
-        })
-      );
-
-      let cntPrevVisits = 0,
-        cntCurrCalls = 0,
-        cntPrevCalls = 0;
-
-      const visitsByDayData = dateRangeSeries.map((data, i) => {
-        let prevVisits = 0,
-          calls = 0,
-          prevCalls = 0;
-
-        if (dateRangeSeriesCall.find((d) => d.date === data.date)) {
-          calls = dateRangeSeriesCall[cntCurrCalls].calls;
-          cntCurrCalls++;
-        }
-        if (
-          comparisonDateRangeSeries.find(
-            (d) =>
-              dayjs.utc(d.date).add(1, dateSelection).format('YYYY-MM-DD') ===
-              dayjs.utc(data.date).format('YYYY-MM-DD')
-          )
-        ) {
-          prevVisits = comparisonDateRangeSeries[cntPrevVisits].visits;
-          cntPrevVisits++;
-        }
-        if (
-          comparisonDateRangeSeriesCall.find(
-            (d) =>
-              dayjs.utc(d.date).add(1, dateSelection).format('YYYY-MM-DD') ===
-              dayjs.utc(data.date).format('YYYY-MM-DD')
-          )
-        ) {
-          prevCalls = comparisonDateRangeSeriesCall[cntPrevCalls].calls;
-          cntPrevCalls++;
-        }
-        return {
-          name: dayjs.utc(data.date).locale(lang).format(dateFormat),
-          currValue: dateRangeSeries[i]?.visits || 0,
-          prevValue: prevVisits,
-          callCurrValue: calls,
-          callPrevValue: prevCalls,
-          prevName: comparisonDateRangeSeries[i]
-            ? dayjs
-                .utc(comparisonDateRangeSeries[i].date)
-                .locale(lang)
-                .format(dateFormat)
-            : '',
-        };
-      });
-
-      return visitsByDayData;
-    })
-  );
+  tableMerge$ = this.store.select(selectComboChartTable);
 
   dateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang))
@@ -787,7 +450,7 @@ export class OverviewFacade {
   dyfDataApex$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
-      const pieChartData: any = [
+      const pieChartData = [
         data?.dateRangeData?.dyf_yes || 0,
         data?.dateRangeData?.dyf_no || 0,
       ] as ApexNonAxisChartSeries;
@@ -1185,10 +848,6 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
 
   return `${formattedStartDate}-${formattedEndDate}`;
-};
-
-const getMonthlyDays = (date: Date) => {
-  return dayjs.utc(date).daysInMonth();
 };
 
 type DateRangeDataIndexKey = keyof OverviewAggregatedData &

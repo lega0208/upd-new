@@ -66,16 +66,17 @@ export class PagesDetailsWebtrafficComponent implements OnInit {
       ];
 
       this.barTableCols = [
-        { field: 'name', header: this.i18n.service.translate('Dates', lang) },
+        { field: 'date', header: this.i18n.service.translate('Dates', lang) },
         {
-          field: 'currValue',
+          field: 'visits',
           header: this.i18n.service.translate('Visits for ', lang, {
             value: dateRange,
           }),
           pipe: 'number',
         },
+        { field: 'prevDate', header: this.i18n.service.translate('Dates', lang) },
         {
-          field: 'prevValue',
+          field: 'prevVisits',
           header: this.i18n.service.translate('Visits for ', lang, {
             value: comparisonDateRange,
           }),

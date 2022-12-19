@@ -17,6 +17,7 @@ import { PageAggregatedData, PageDetailsData } from '@dua-upd/types-common';
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
+import { selectVisitsByDayChartData, selectVisitsByDayChartTable } from './pages-details.selectors';
 
 dayjs.extend(utc);
 
@@ -48,65 +49,7 @@ export class PagesDetailsFacade {
     )
   );
 
-  apexBar$ = combineLatest([
-    this.pagesDetailsData$,
-    this.currentLang$,
-    this.dateRangeSelected$,
-  ]).pipe(
-    map(([data, lang, dateRangePeriod]) => {
-      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
-      const comparisonDateRangeLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange || '',
-        lang
-      );
-      const visitsByDay = data?.dateRangeData?.visitsByDay || [];
-      const comparisonVisitsByDay =
-        data?.comparisonDateRangeData?.visitsByDay || [];
-      const visitsByDayFinal = data?.dateRangeData?.visitsByDay.map((d) => {
-        return {
-          x: d.date,
-          y: d.visits,
-        };
-      });
-
-      const dateSelection = dateRangePeriod.replace('ly', '') as ManipulateType;
-
-      let cntPrevVisits = 0;
-
-      const comparisonVisitsByDayFinal = visitsByDay.map((data, i) => {
-        let prevVisits = 0;
-
-        if (
-          comparisonVisitsByDay.find(
-            (d) =>
-              dayjs(d.date)
-                .utc(false)
-                .add(1, dateSelection)
-                .format('YYYY-MM-DD') ===
-              dayjs(data.date).utc(false).format('YYYY-MM-DD')
-          )
-        ) {
-          prevVisits = comparisonVisitsByDay[cntPrevVisits].visits;
-          cntPrevVisits++;
-        }
-        return {
-          x: data.date,
-          y: prevVisits,
-        };
-      });
-
-      return [
-        {
-          name: dateRangeLabel,
-          data: visitsByDayFinal,
-        },
-        {
-          name: comparisonDateRangeLabel,
-          data: comparisonVisitsByDayFinal,
-        },
-      ] as ApexAxisChartSeries;
-    })
-  );
+  apexBar$ = this.store.select(selectVisitsByDayChartData);
 
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
@@ -371,91 +314,7 @@ export class PagesDetailsFacade {
     })
   );
 
-  barTable$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
-    map(([data, lang]) => {
-      const visitsByDay = data?.dateRangeData?.visitsByDay;
-      const comparisonVisitsByDay =
-        data?.comparisonDateRangeData?.visitsByDay || [];
-      const days = visitsByDay?.length || 0;
-      const prevDays = comparisonVisitsByDay?.length || 0;
-      const maxDays = Math.max(days, prevDays);
-      const granularity = Math.ceil(days / 7);
-      const dateFormat = granularity > 1 ? 'MMM D' : 'dddd';
-      let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
-      let [prevStartDate] = (data.comparisonDateRange || '')
-        .split('/')
-        .map((d) => new Date(d));
-
-      if (!visitsByDay) {
-        return [] as MultiSeries;
-      }
-
-      const dateRangeSeries = visitsByDay.map(({ date, visits }) => ({
-        date,
-        visits,
-      }));
-      const comparisonDateRangeSeries = comparisonVisitsByDay.map(
-        ({ visits }) => ({
-          visits,
-        })
-      );
-
-      let dayCount = 0;
-
-      while (dayCount < maxDays) {
-        const prevMonthDays = getMonthlyDays(prevStartDate);
-        const currMonthDays = getMonthlyDays(startDate);
-
-        if (currMonthDays > prevMonthDays) {
-          // if the current month has more days than the previous month,
-          // we need to pad the previous month with zeros
-
-          const daysToPad = currMonthDays - prevMonthDays;
-          comparisonDateRangeSeries.splice(
-            dayCount + prevMonthDays,
-            0,
-            ...Array(daysToPad).fill({
-              date: '*',
-              visits: 0,
-            })
-          );
-
-          dayCount += currMonthDays;
-        } else {
-          // if the current month has less days than the previous month,
-          // we need to pad the current month with zeros
-
-          const daysToPad = prevMonthDays - currMonthDays;
-
-          dateRangeSeries.splice(
-            dayCount + currMonthDays,
-            0,
-            ...Array(daysToPad).fill({
-              date: '*',
-              visits: 0,
-            })
-          );
-
-          dayCount += prevMonthDays;
-        }
-
-        prevStartDate = dayjs.utc(prevStartDate).add(1, 'month').toDate();
-        startDate = dayjs.utc(startDate).add(1, 'month').toDate();
-      }
-
-      const dateRangeDates = dateRangeSeries.map(({ date }) => date);
-
-      const visitsByDayData = dateRangeDates.map((date, i) => {
-        return {
-          name: dayjs.utc(date).locale(lang).format(dateFormat),
-          currValue: dateRangeSeries[i]?.visits || 0,
-          prevValue: comparisonDateRangeSeries[i]?.visits || 0,
-        };
-      });
-
-      return visitsByDayData;
-    })
-  );
+  barTable$ = this.store.select(selectVisitsByDayChartTable);
 
   visitsByDeviceTypeTable$ = combineLatest([
     this.pagesDetailsData$,

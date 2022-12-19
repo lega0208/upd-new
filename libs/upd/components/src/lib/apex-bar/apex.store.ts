@@ -1,65 +1,22 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import {
-  filter,
-  tap,
-  map,
-  withLatestFrom,
-  pairwise,
-  skip,
-  take,
-} from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
 import {
-  ApexAnnotations,
   ApexAxisChartSeries,
   ApexChart,
-  ApexDataLabels,
-  ApexFill,
-  ApexGrid,
-  ApexLegend,
-  ApexMarkers,
-  ApexNonAxisChartSeries,
-  ApexPlotOptions,
-  ApexResponsive,
-  ApexStates,
-  ApexStroke,
-  ApexTheme,
-  ApexTitleSubtitle,
-  ApexTooltip,
-  ApexXAxis,
+  ApexOptions,
   ApexYAxis,
-  ChartType,
 } from 'ng-apexcharts';
 
-import fr from 'apexcharts/dist/locales/fr.json';
-import en from 'apexcharts/dist/locales/en.json';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import { state } from '@angular/animations';
 import { formatPercent } from '@angular/common';
+import { createBaseConfig } from '../apex-base/apex.config.base';
 
-export interface ChartOptions {
+export interface ChartOptions extends ApexOptions {
   chart: ApexChart;
-  annotations?: ApexAnnotations;
-  colors?: string[];
-  dataLabels?: ApexDataLabels;
-  series?: ApexAxisChartSeries | ApexNonAxisChartSeries;
-  stroke?: ApexStroke;
-  labels?: string[];
-  legend?: ApexLegend;
-  fill?: ApexFill;
-  tooltip?: ApexTooltip;
-  plotOptions?: ApexPlotOptions;
-  responsive?: ApexResponsive[];
-  markers?: ApexMarkers;
-  xaxis?: ApexXAxis;
   yaxis?: ApexYAxis;
-  grid?: ApexGrid;
-  states?: ApexStates;
-  title?: ApexTitleSubtitle;
-  subtitle?: ApexTitleSubtitle;
-  theme?: ApexTheme;
   added?: {
     type?: string;
     isPercent?: boolean;
@@ -70,109 +27,16 @@ export interface ChartOptions {
 export class ApexStore extends ComponentStore<ChartOptions> {
   constructor(private i18n: I18nFacade) {
     super({
-      chart: {
-        height: 375,
-        type: 'bar',
-        locales: [fr, en],
-        defaultLocale: 'en',
-        toolbar: {
-          tools: {
-            download: '<span class="material-icons">download</span>',
-          },
-        },
-      },
-      colors: [
-        '#2E5EA7',
-        '#64B5F6',
-        '#26A69A',
-        '#FBC02D',
-        '#1DE9B6',
-        '#F57F17',
-        '#602E9C',
-        '#2196F3',
-        '#DE4CAE',
-        '#C3680A',
-        '#C5C5FF',
-        '#1A8361',
-      ],
-      xaxis: {
-        type: 'datetime',
-        axisBorder: {
-          show: true,
-        },
-        labels: {
-          style: {
-            fontSize: '14px',
-          },
-        },
-      },
-      yaxis: {
-        axisTicks: {
-          show: true,
-        },
-        axisBorder: {
-          show: true,
-        },
-        labels: {
-          style: {
-            fontSize: '14px',
-          },
-          formatter: (val: number) => {
-            // if (val >= 10 ** 3 && val < 10 ** 6) {
-            //   return (val / 1000).toFixed(0) + ' K';
-            // } else if (val >= 10 ** 6) {
-            //   return (val / 1000000).toFixed(0) + ' M';
-            // }
-
-            // return val.toString();
-
-            return val.toLocaleString(this.i18n.service.currentLang, {
-              maximumFractionDigits: 0,
-            });
-          },
-        },
-        title: {
-          style: {
-            fontSize: '16px',
-          },
-        },
-      },
-
-      tooltip: {
-        enabled: true,
-        shared: true,
-        intersect: false,
-        y: {
-          formatter: (val: number) => {
-            return val.toLocaleString(this.i18n.service.currentLang, {
-              maximumFractionDigits: 0,
-            });
-          },
-        },
-        style: {
-          fontSize: '14px',
-        },
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      series: [],
-      legend: {
-        show: true,
-        showForSingleSeries: true,
-        showForNullSeries: true,
-        showForZeroSeries: true,
-        position: 'bottom',
-        fontSize: '14px',
-        horizontalAlign: 'left',
-      },
+      ...createBaseConfig((val: number) =>
+        val.toLocaleString(this.i18n.service.currentLang, {
+          maximumFractionDigits: 0,
+        })
+      ),
       added: {
         isPercent: false,
       },
-    });
+    } as ChartOptions);
   }
-
-  isPercent = false;
 
   readonly setColours = this.updater(
     (state, value: string[]): ChartOptions => ({
@@ -192,6 +56,9 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           },
           series: value ? value : [],
           stroke: { width: [3, 3, 3, 3], curve: 'smooth' },
+          fill: {
+            opacity: [1, 0.8]
+          }
         };
       }
       return {
@@ -232,8 +99,6 @@ export class ApexStore extends ComponentStore<ChartOptions> {
       },
     })
   );
-
-  // if
 
   readonly getIsPercent = this.select((state) => state.added?.isPercent);
 
@@ -305,20 +170,9 @@ export class ApexStore extends ComponentStore<ChartOptions> {
       chart: {
         ...state.chart,
         defaultLocale: value === EN_CA ? 'en' : 'fr',
-      },
+      } as ApexChart,
     })
   );
-
-  // // get type @Input from parent component
-  // readonly setType = this.updater(
-  //   (state, value: string): ChartOptions => ({
-  //     ...state,
-  //     added: {
-  //       ...state.added,
-  //       type: value,
-  //     },
-  //   })
-  // );
 
   readonly type$ = this.select((state) => state.added?.type);
 

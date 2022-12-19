@@ -36,6 +36,7 @@ import {
   getLatestTest,
   getLatestTestData,
 } from '@dua-upd/utils-common/data';
+import { AsyncLogTiming } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
 
@@ -302,6 +303,7 @@ export class ProjectsService {
     return results;
   }
 
+  @AsyncLogTiming
   async getProjectDetails(params: ApiParams): Promise<ProjectsDetailsData> {
     if (!params.id) {
       throw Error(
@@ -444,7 +446,23 @@ async function getAggregatedProjectMetrics(
   const projectMetrics = (
     await pageMetricsModel
       .aggregate<ProjectDetailsAggregatedData>()
-      .sort({ date: 1, projects: 1 })
+      .project({
+        date: 1,
+        url: 1,
+        page: 1,
+        projects: 1,
+        visits: 1,
+        dyf_yes: 1,
+        dyf_no: 1,
+        fwylf_cant_find_info: 1,
+        fwylf_hard_to_understand: 1,
+        fwylf_other: 1,
+        fwylf_error: 1,
+        gsc_total_clicks: 1,
+        gsc_total_impressions: 1,
+        gsc_total_ctr: 1,
+        gsc_total_position: 1,
+      })
       .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
       .group({
         _id: '$url',

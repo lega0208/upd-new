@@ -252,6 +252,7 @@
   "kpi-ux-test-tooltip": "Taux de réussite moyen pour tous les tests de l’expérience utilisateur",
   "kpi-ux-test-guidance": "<strong>Qu'est-ce que c'est?</strong>  <br />Le pourcentage du taux de réussite moyen pour tous les tests de l’expérience utilisateur réalisés depuis 2018.<br />L'objectif pour cet indicateur de performance clé est de 80%.<br /><br /><strong>Comment cet ICR est-il calculé?</strong>  <br />A: La somme des taux de réussite des tests de l’expérience utilisateur (en pourcentage) de tous les tests de l’expérience utilisateur<br />B: Le nombre total de tests de l’expérience utilisateur<br /> <br />A/B<br /><br /><div class=\"text-end\"><a href=\"/fr/overview/uxtests\">Visionner plus de données de résultats de tests de l’expérience utilisateurs</a></div>",
   "kpi-ux-test-text": "{{total}} tests terminés",
+  "Total searches": "Recherches totales",
 
   "Projects in progress": "Projets en cours",
   "Projects in planning": "Projets en planification",
