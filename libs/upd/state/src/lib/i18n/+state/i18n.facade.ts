@@ -1,21 +1,21 @@
 import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import { Store } from '@ngrx/store';
 
 import { init, setLang } from './i18n.actions';
-import { I18nState } from './i18n.reducer';
 import { selectCurrentLang } from './i18n.selectors';
 import { I18nService, LocaleId } from '@dua-upd/upd/i18n';
-
 @Injectable()
 export class I18nFacade {
   /**
    * Combine pieces of state using createSelector,
    * and expose them as observables through the facade.
    */
-  currentLang$ = this.store.pipe(select(selectCurrentLang));
+  currentLang$ = this.store.select(selectCurrentLang);
 
   constructor(
-    private readonly store: Store<I18nState>,
+    private readonly store: Store,
     private i18nService: I18nService
   ) {}
 
@@ -24,6 +24,7 @@ export class I18nFacade {
    * or more tasks in your Effects.
    */
   init() {
+    registerLocaleData(localeFr);
     this.store.dispatch(init());
   }
 
