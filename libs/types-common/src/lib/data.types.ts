@@ -78,7 +78,7 @@ export type PageDetailsMetrics = Pick<
 >;
 
 export interface PageAggregatedData extends PageDetailsMetrics {
-  visitsByDay: { date: Date; visits: number }[];
+  visitsByDay: { date: string; visits: number }[];
   feedbackByTags: { tag: string; numComments: number }[];
 }
 

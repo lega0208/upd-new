@@ -25,11 +25,6 @@ export class ApexBarComponent implements OnInit {
   @Input() titleTooltip = '';
   @Input() table: any;
   @Input() tableCols: ColumnConfig[] = [];
-  @Input() type = 'bar';
-
-  // @Input() set type(value: string) {
-  //   this.apexStore.setType(value);
-  // }
 
   @Input() set showPercent(value: boolean) {
     this.apexStore.showPercent(value);

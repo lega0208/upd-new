@@ -11,7 +11,6 @@ import { combineLatest } from 'rxjs';
   styleUrls: ['./overview-webtraffic.component.css'],
 })
 export class OverviewWebtrafficComponent implements OnInit {
-  currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
   uniqueVisitors$ = this.overviewService.visitors$;
@@ -23,17 +22,12 @@ export class OverviewWebtrafficComponent implements OnInit {
   pageViews$ = this.overviewService.views$;
   pageViewsPercentChange$ = this.overviewService.viewsPercentChange$;
 
-
   apexBar$ = this.overviewService.apexBar$;
 
-  topPagesData$ = this.overviewService.topPagesVisited$;
   topPagesWithChangeData$ =
     this.overviewService.topPagesVisitedWithPercentChange$;
 
-  barChartData$ = this.overviewService.visitsByDay$;
   barTable$ = this.overviewService.barTable$;
-
-  label = 'Visits';
 
   dateRangeLabel$ = this.overviewService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
@@ -49,17 +43,15 @@ export class OverviewWebtrafficComponent implements OnInit {
     visits: number;
     percentChange: number;
   }>[] = [];
+
   barTableCols: ColumnConfig<{
-    name: string;
-    currValue: number;
-    prevValue: number;
+    date: string;
+    visits: number;
+    prevDate: string;
+    prevVisits: number;
   }>[] = [];
 
   ngOnInit() {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
     combineLatest([
       this.currentLang$,
       this.dateRangeLabel$,
@@ -84,16 +76,20 @@ export class OverviewWebtrafficComponent implements OnInit {
         },
       ];
       this.barTableCols = [
-        { field: 'name', header: this.i18n.service.translate('Dates', lang) },
+        { field: 'date', header: this.i18n.service.translate('Dates', lang) },
         {
-          field: 'currValue',
+          field: 'visits',
           header: this.i18n.service.translate('Visits for ', lang, {
             value: dateRange,
           }),
           pipe: 'number',
         },
         {
-          field: 'prevValue',
+          field: 'prevDate',
+          header: this.i18n.service.translate('Dates', lang),
+        },
+        {
+          field: 'prevVisits',
           header: this.i18n.service.translate('Visits for ', lang, {
             value: comparisonDateRange,
           }),

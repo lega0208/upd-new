@@ -87,8 +87,6 @@ export class OverviewSummaryComponent implements OnInit {
   donutChartCols: ColumnConfig = { field: '', header: '' };
   donutChartData: { text: string; link: string }[] = [];
 
-  yAxisVisits = '';
-  yAxisCallVolume = '';
   whatWasWrongChartLegend: string[] = [];
   whatWasWrongChartApex$ = this.overviewService.whatWasWrongDataApex$;
 
@@ -100,12 +98,12 @@ export class OverviewSummaryComponent implements OnInit {
   dyfTableCols: ColumnConfig<{ name: string; value: string }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: string }>[] = [];
   barTableCols: ColumnConfig<{
-    name: string;
-    currValue: string;
-    callCurrValue: string;
-    prevValue: string;
-    callPrevValue: string;
-    prevName: string;
+    date: string;
+    visits: string;
+    calls: string;
+    prevDate: string;
+    prevVisits: string;
+    prevCalls: string;
   }>[] = [];
   taskSurveyCols: ColumnConfig[] = [];
 
@@ -140,9 +138,6 @@ export class OverviewSummaryComponent implements OnInit {
         this.i18n.service.translate('d3-error', lang),
       ];
 
-      this.yAxisVisits = this.i18n.service.translate('visits', lang);
-      this.yAxisCallVolume = this.i18n.service.translate('Call volume', lang);
-
       this.dyfChartLegend = [
         this.i18n.service.translate('yes', lang),
         this.i18n.service.translate('no', lang),
@@ -167,34 +162,34 @@ export class OverviewSummaryComponent implements OnInit {
         },
       ];
       this.barTableCols = [
-        { field: 'name', header: this.i18n.service.translate('Dates', lang) },
+        { field: 'date', header: this.i18n.service.translate('Dates', lang) },
         {
-          field: 'currValue',
+          field: 'visits',
           header: this.i18n.service.translate('Visits for ', lang, {
             value: dateRange,
           }),
           pipe: 'number',
         },
         {
-          field: 'callCurrValue',
+          field: 'calls',
           header: this.i18n.service.translate('Calls for ', lang, {
             value: dateRange,
           }),
           pipe: 'number',
         },
         {
-          field: 'prevName',
+          field: 'prevDate',
           header: this.i18n.service.translate('Dates', lang),
         },
         {
-          field: 'prevValue',
+          field: 'prevVisits',
           header: this.i18n.service.translate('Visits for ', lang, {
             value: comparisonDateRange,
           }),
           pipe: 'number',
         },
         {
-          field: 'callPrevValue',
+          field: 'prevCalls',
           header: this.i18n.service.translate('Calls for ', lang, {
             value: comparisonDateRange,
           }),

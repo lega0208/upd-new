@@ -19,7 +19,8 @@
     "jsonwebtoken": "^8.5.1",
     "dotenv": "^10.0.0",
     "helmet": "^5.0.1",
-    "mongoose": "^6.2.10",
+    "mongoose": "^6.7.3",
+    "notifications-node-client": "^5.2.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.5.0",
     "tslib": "^2.0.0"

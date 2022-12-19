@@ -5,99 +5,37 @@ import {
   ApexAxisChartSeries,
   ApexChart,
   ApexYAxis,
-  ApexOptions
+  ApexOptions,
 } from 'ng-apexcharts';
 
-import fr from 'apexcharts/dist/locales/fr.json';
-import en from 'apexcharts/dist/locales/en.json';
 import { EN_CA } from '@dua-upd/upd/i18n';
+import { mergeDeepRight } from 'rambdax';
+import { createBaseConfig } from '../apex-base/apex.config.base';
 
 @Injectable()
 export class ApexStore extends ComponentStore<ApexOptions> {
   constructor(private i18n: I18nFacade) {
-    super({
-      legend: {
-        show: true,
-        showForSingleSeries: true,
-        showForNullSeries: true,
-        showForZeroSeries: true,
-        position: 'bottom',
-        fontSize: '14px',
-        horizontalAlign: 'left',
-        markers: {
-          strokeWidth: 0.5,
-          width: 20,
-          height: 20,
-          radius: 5,
-          offsetY: 5,
-        },
-      },
-      chart: {
-        height: 375,
-        type: 'line',
-        locales: [fr, en],
-        defaultLocale: 'en',
-        fontFamily: 'Noto Sans',
-        toolbar: {
-          offsetY: -1,
-          offsetX: -103,
-          tools: {
-            download:
-              '<span class="material-icons align-middle">download</span>',
+    super(
+      mergeDeepRight(
+        createBaseConfig((val: number) =>
+          val.toLocaleString(this.i18n.service.currentLang, {
+            maximumFractionDigits: 0,
+          })
+        ),
+        {
+          toolbar: {
+            offsetY: -1,
+            offsetX: -103,
+            tools: {
+              download:
+                '<span class="material-icons align-middle">download</span>',
+            },
           },
-        },
-      },
-      colors: [
-        '#2E5EA7',
-        '#64B5F6',
-        '#26A69A',
-        '#FBC02D',
-        '#1DE9B6',
-        '#F57F17',
-        '#602E9C',
-        '#2196F3',
-        '#DE4CAE',
-        '#C3680A',
-        '#C5C5FF',
-        '#1A8361',
-      ],
-      fill: {
-        type: 'solid',
-        opacity: 1
-      },
-      xaxis: {
-        type: 'datetime',
-        title: {
-          style: {
-            fontSize: '14px',
-          },
-        },
-        axisBorder: {
-          show: true,
-        },
-      },
-      yaxis: [],
-      tooltip: {
-        enabled: true,
-        shared: true,
-        intersect: false,
-        y: {
-          formatter: (val: number) => {
-            return val.toLocaleString(this.i18n.service.currentLang, {
-              maximumFractionDigits: 0,
-            });
-          },
-        },
-        style: {
-          fontSize: '14px',
-        },
-      },
-      stroke: { width: [3, 3, 3, 3], curve: 'smooth', lineCap: 'round' },
-      series: [],
-      dataLabels: {
-        enabled: false,
-      },
-    });
+          stroke: { width: [3, 3, 3, 3], curve: 'smooth', lineCap: 'square' },
+          yaxis: [],
+        } as ApexOptions
+      )
+    );
   }
 
   readonly setColours = this.updater(
@@ -171,7 +109,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
                 style: {
                   fontSize: '16px',
                 },
-                offsetX: -10
+                offsetX: -10,
               },
               max: getMax(firstDataSet),
               tickAmount: 5,
@@ -192,7 +130,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
                   fontSize: '16px',
                   color: '#f37d35',
                 },
-                offsetX: 10
+                offsetX: 10,
               },
               labels: {
                 style: {
@@ -211,8 +149,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
               seriesName: value[2].name,
             };
           }
-          return {
-            ...yAxisOpt,
+          return mergeDeepRight(yAxisOpt, {
             min: 0,
             axisTicks: {
               show: true,
@@ -221,9 +158,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
               show: true,
             },
             labels: {
-              ...yAxisOpt.labels,
               style: {
-                ...yAxisOpt.labels?.style,
                 fontSize: '14px',
               },
               formatter: (val: number) => {
@@ -232,7 +167,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
                 });
               },
             },
-          };
+          })
         }),
         chart: {
           ...state.chart,
@@ -240,8 +175,11 @@ export class ApexStore extends ComponentStore<ApexOptions> {
           toolbar: {
             ...state.chart?.toolbar,
             offsetX: value[0]?.data?.length > 31 ? -124 : -103,
-          }
-        }
+          },
+        },
+        fill: {
+          opacity: value[0]?.data?.length > 31 ? [1, 0.75, 1, 0.75] : 1,
+        },
       };
     }
   );

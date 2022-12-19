@@ -1,16 +1,21 @@
-import { createFeatureSelector, createSelector, Selector } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { ApexAxisChartSeries } from 'ng-apexcharts';
-import { FR_CA, I18nModule, I18nService, LocaleId } from '@dua-upd/upd/i18n';
+import { I18nModule, I18nService } from '@dua-upd/upd/i18n';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import {
   DateRangePeriod,
   selectComparisonDateRange,
   selectCurrentLang,
   selectDatePeriodSelection,
-  selectDateRange, selectDateRangeLabel,
+  selectDateRange,
+  selectDateRangeLabel,
   selectPeriodDates,
 } from '@dua-upd/upd/state';
 import { OVERVIEW_FEATURE_KEY, OverviewState } from './overview.reducer';
+import { arrayToDictionary } from '@dua-upd/utils-common';
+
+dayjs.extend(utc);
 
 export type DateTimeSeriesData = {
   x: string;
@@ -128,7 +133,7 @@ export const selectComparisonCallsByDaySeries = createSelector(
 );
 
 // comboChartData$
-export const selectComboChartType = createSelector(
+export const selectChartType = createSelector(
   selectDatePeriodSelection,
   (dateRangePeriod) =>
     (['weekly', 'monthly'] as DateRangePeriod[]).includes(dateRangePeriod)
@@ -167,7 +172,7 @@ export const selectCallsVisitsComboChartData = createSelector(
   selectCurrentDateRangeLabel,
   selectVisitsByDaySeries,
   selectCallsByDaySeries,
-  selectComboChartType,
+  selectChartType,
   toVisitsCallsChartSeries('visits', 'calls')
 );
 
@@ -175,7 +180,7 @@ export const selectComparisonCallsVisitsComboChartData = createSelector(
   selectComparisonDateRangeLabel,
   selectComparisonVisitsByDaySeries,
   selectComparisonCallsByDaySeries,
-  selectComboChartType,
+  selectChartType,
   toVisitsCallsChartSeries('visits', 'calls')
 );
 
@@ -184,4 +189,64 @@ export const selectComboChartData = createSelector(
   selectComparisonCallsVisitsComboChartData,
   // pretty hacky, but this works for now
   (data, prevData) => [data[0], prevData[0], data[1], prevData[1]]
+);
+
+export const selectVisitsByDayChartData = createSelector(
+  selectCallsVisitsComboChartData,
+  selectComparisonCallsVisitsComboChartData,
+  // pretty hacky, but this works for now
+  (data, prevData) => [data[0], prevData[0]]
+);
+
+export const selectComboChartTable = createSelector(
+  selectPeriodDates,
+  selectVisitsByDay,
+  selectCallsByDay,
+  selectComparisonVisitsByDay,
+  selectComparisonCallsByDay,
+  selectCurrentLang,
+  selectDatePeriodSelection,
+  (dates, visits, calls, prevVisits, prevCalls, lang, dateRangePeriod) => {
+    const visitsDict = arrayToDictionary(visits, 'date');
+    const callsDict = arrayToDictionary(calls, 'date');
+    const prevVisitsDict = arrayToDictionary(prevVisits, 'date');
+    const prevCallsDict = arrayToDictionary(prevCalls, 'date');
+
+    // *** extract date/label stuff for reuse
+    // potentially also colConfigs
+
+    const dateFormat =
+      dateRangePeriod === 'weekly' ? 'dddd, MMM D' : 'MMM D YYYY';
+
+    return [...dates].map(([prevDate, currentDate]) => ({
+      date: dayjs.utc(currentDate).locale(lang).format(dateFormat),
+      visits: visitsDict[currentDate]?.visits,
+      calls: callsDict[currentDate]?.calls,
+      prevDate: dayjs.utc(prevDate).locale(lang).format(dateFormat),
+      prevVisits: prevVisitsDict[prevDate]?.visits,
+      prevCalls: prevCallsDict[prevDate]?.calls,
+    }));
+  }
+);
+
+export const selectVisitsByDayChartTable = createSelector(
+  selectPeriodDates,
+  selectVisitsByDay,
+  selectComparisonVisitsByDay,
+  selectCurrentLang,
+  selectDatePeriodSelection,
+  (dates, visits, prevVisits, lang, dateRangePeriod) => {
+    const visitsDict = arrayToDictionary(visits, 'date');
+    const prevVisitsDict = arrayToDictionary(prevVisits, 'date');
+
+    const dateFormat =
+      dateRangePeriod === 'weekly' ? 'dddd, MMM D' : 'MMM D YYYY';
+
+    return [...dates].map(([prevDate, currentDate]) => ({
+      date: dayjs.utc(currentDate).locale(lang).format(dateFormat),
+      visits: visitsDict[currentDate]?.visits,
+      prevDate: dayjs.utc(prevDate).locale(lang).format(dateFormat),
+      prevVisits: prevVisitsDict[prevDate]?.visits,
+    }));
+  }
 );
