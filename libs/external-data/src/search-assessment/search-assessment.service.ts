@@ -204,7 +204,7 @@ export class SearchAssessmentService {
                   'Expected Result': expected?.url || '',
                   'Expected Position':
                     Math.round(expected?.position as number) || 0,
-                  Pass: expected?.position && +expected?.position <= 3,
+                  Pass: expected?.position && +expected?.position <= 3 ? true : false,
                   '1st Result': sorted[0]?.url || '',
                   '1st Position': sorted[0]?.position || 0,
                   '2nd Result': sorted[1]?.url || '',
@@ -334,7 +334,7 @@ export class SearchAssessmentService {
               'Expected Result': expected?.url || '',
               'Expected Position':
                 Math.round(expected?.position as number) || 0,
-              Pass: expected?.position && +expected.position <= 3,
+              Pass: expected?.position && +expected.position <= 3 ? true : false,
               '1st Result': sorted[0]?.url || '',
               '1st Position': sorted[0]?.position || 0,
               '2nd Result': sorted[1]?.url || '',
@@ -455,7 +455,7 @@ export class SearchAssessmentService {
               Pass:
                 expected?.position &&
                 +expected.position <= 3 &&
-                expected?.position !== 0,
+                expected?.position !== 0  ? true : false,
               '1st Result': sorted[0]?.url || '',
               '1st Position': sorted[0]?.position || 0,
               '2nd Result': sorted[1]?.url || '',
