@@ -26,7 +26,7 @@ export class ApexBarComponent implements OnInit {
   @Input() table: any;
   @Input() tableCols: ColumnConfig[] = [];
 
-  @Input() set showPercent(value: boolean) {
+  @Input() set showPercent(value: { isPercent: boolean, showTitleTooltip: boolean, showMarker: boolean, shared: boolean} ) {
     this.apexStore.showPercent(value);
   }
   @Input() set colours(value: string[]) {
@@ -45,8 +45,8 @@ export class ApexBarComponent implements OnInit {
     this.apexStore.setYAxis(value);
   }
 
-  @Input() set horizontal(value: boolean) {
-    this.apexStore.setHorizontal(value);
+  @Input() set horizontal( value: { isHorizontal: boolean, colorDistributed: boolean} ) {
+    this.apexStore.setHorizontal( value );
   }
 
   readonly vm$ = this.apexStore.vm$;

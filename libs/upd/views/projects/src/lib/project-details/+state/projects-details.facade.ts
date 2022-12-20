@@ -5,11 +5,6 @@ import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
-import {
-  BubbleChartMultiSeries,
-  MultiSeries,
-  SingleSeries,
-} from '@amonsour/ngx-charts';
 
 import {
   GetTableProps,
@@ -183,7 +178,7 @@ export class ProjectsDetailsFacade {
       const isPrevZero = comparisonDataEnquiryLine.every((v) => v.value === 0);
 
       if (isCurrZero && isPrevZero) {
-        return [] as MultiSeries;
+        return [];
       }
 
       const dataEnquiryLineFinal = dataEnquiryLine.filter((v) => v.value > 0);
@@ -191,7 +186,7 @@ export class ProjectsDetailsFacade {
         (v) => v.value > 0
       );
 
-      const barChartData: MultiSeries = [
+      const barChartData = [
         {
           name: dateRangeLabel,
           series: dataEnquiryLineFinal,
@@ -361,7 +356,7 @@ export class ProjectsDetailsFacade {
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
 
-      const pieChartData: SingleSeries = [
+      const pieChartData = [
         { name: yes, value: data?.dateRangeData?.dyfYes || 0 },
         { name: no, value: data?.dateRangeData?.dyfNo || 0 },
       ];
@@ -392,7 +387,7 @@ export class ProjectsDetailsFacade {
       );
       const error = this.i18n.service.translate('d3-error', lang);
 
-      const pieChartData: SingleSeries = [
+      const pieChartData = [
         {
           name: cantFindInfo,
           value: data?.dateRangeData?.fwylfCantFindInfo || 0,
@@ -475,6 +470,42 @@ export class ProjectsDetailsFacade {
       });
     })
   );
+
+  apexTaskSuccessByUxTest$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const uxTests = data?.taskSuccessByUxTest;
+      const tasks = data?.tasks;
+
+      const categories = tasks.map(task => task.title);
+
+      const uniqueTestTypes = [...new Set(uxTests.map(item => item.test_type))];
+
+      const series: ApexAxisChartSeries = [];
+
+      uniqueTestTypes.forEach(testType => {
+        const data = categories.map(category => {
+          const tasks = uxTests.filter(task => task.tasks.split("; ").includes(category) && task.test_type === testType && task.success_rate !== null && task.success_rate !== undefined);
+          const taskSuccessRates = tasks.map(task => task.success_rate) as number[];
+          const totalSuccessRates = taskSuccessRates.reduce((acc, val) => acc + val, 0);
+          return tasks.length > 0 ? totalSuccessRates / tasks.length : null;
+        }) as number[];
+      
+        const name = this.i18n.service.translate(testType as string, lang);
+      
+        series.push({ name, data });
+      });
+      
+      const xaxis = categories.map(category => {
+        return this.i18n.service.translate(category, lang);
+      });
+
+      return { series, xaxis };
+    })
+  );
+
   taskSuccessByUxTestKpi$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,
@@ -599,62 +630,6 @@ export class ProjectsDetailsFacade {
     )
   );
 
-  bubbleChart$ = combineLatest([
-    this.projectsDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const taskSuccessByUxData = data?.taskSuccessByUxTest;
-
-      const taskSeries = taskSuccessByUxData.map(
-        ({ success_rate, test_type }) => {
-          if (!success_rate && success_rate !== 0) {
-            return null;
-          }
-
-          const i18nTestType = test_type
-            ? this.i18n.service.translate(test_type, lang)
-            : '';
-
-          return {
-            name: i18nTestType,
-            x: i18nTestType,
-            y: success_rate,
-            r: 10,
-          };
-        }
-      );
-
-      return taskSuccessByUxData
-        .map(({ tasks, test_type }, i) => {
-          const series = [taskSeries[i]];
-
-          const i18nTestType = test_type
-            ? this.i18n.service.translate(test_type, lang)
-            : '';
-
-          const i18nTasks = tasks
-            .split('; ')
-            .map((task) => {
-              return task ? this.i18n.service.translate(task, lang) : task;
-            })
-            .join('; ');
-
-          if (!series[0]) {
-            return null;
-          }
-
-          return {
-            name: i18nTasks
-              ? `${i18nTasks} – ${i18nTestType}`
-              : `${i18nTestType} ${i + 1}`,
-            series,
-          };
-        })
-        .filter((taskValues) => !!taskValues) as BubbleChartMultiSeries;
-    })
-  );
-
   feedbackComments$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,
@@ -687,7 +662,7 @@ export class ProjectsDetailsFacade {
       );
 
       if (isCurrZero && isPrevZero) {
-        return [] as MultiSeries;
+        return [];
       }
 
       const dateRange = data.dateRange;
@@ -835,7 +810,7 @@ export class ProjectsDetailsFacade {
         .filter((v) => v.name !== null && v.name !== '')
         .sort((a, b) => {
           return a.series.length < b.series.length ? 1 : -1;
-        }) as MultiSeries;
+        })
 
       return taskSuccess;
     })

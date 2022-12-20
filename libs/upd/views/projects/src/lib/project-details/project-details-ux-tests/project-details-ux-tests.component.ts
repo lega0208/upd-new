@@ -25,8 +25,9 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
 
   lineChart = lineChart;
 
-  bubbleChart$ = this.projectsDetailsService.bubbleChart$;
   lineTaskChart$ = this.projectsDetailsService.lineTaskChart$;
+
+  apexTaskSuccessByUxTest$ = this.projectsDetailsService.apexTaskSuccessByUxTest$;
 
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;

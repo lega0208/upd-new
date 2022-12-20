@@ -17,7 +17,6 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { SliderModule } from 'primeng/slider';
 import { CalendarModule } from 'primeng/calendar';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { NgxChartsModule } from '@amonsour/ngx-charts';
 import { PipesModule } from '@dua-upd/upd/pipes';
 import { DataCardComponent } from './data-card/data-card.component';
 import { DataTableComponent } from './data-table/data-table.component';
@@ -27,12 +26,6 @@ import { NavTabsComponent } from './nav-tabs/nav-tabs.component';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import {
-  ComboGroupedVerticalBarLineChartComponent,
-  ComboSeriesVerticalComponent,
-  ComboBubbleLineChartComponent,
-  ChartsComponent,
-} from './charts';
 import { AlertComponent } from './alert/alert.component';
 import { AccordionComponent } from './accordion/accordion.component';
 import { ModalComponent } from './modal/modal.component';
@@ -64,8 +57,6 @@ import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.compon
     NgbPopoverModule,
     NgbModalModule,
     NgbTooltipModule,
-    NgxChartsModule,
-    NgApexchartsModule,
     TableModule,
     ButtonModule,
     InputTextModule,
@@ -78,20 +69,17 @@ import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.compon
     CalendarModule,
     InputNumberModule,
     PipesModule,
+    NgApexchartsModule,
   ],
   declarations: [
     CardComponent,
     DataTableComponent,
     DateSelectorComponent,
     DateSelectorDropdownComponent,
-    ComboGroupedVerticalBarLineChartComponent,
-    ComboSeriesVerticalComponent,
-    ComboBubbleLineChartComponent,
     NavTabsComponent,
     DataCardComponent,
     AlertComponent,
     AccordionComponent,
-    ChartsComponent,
     ModalComponent,
     DataTableStylesComponent,
     ProjectStatusLabelComponent,
@@ -111,7 +99,6 @@ import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.compon
   ],
   exports: [
     NgbPopoverModule,
-    NgxChartsModule,
     TableModule,
     ButtonModule,
     InputTextModule,
@@ -119,14 +106,10 @@ import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.compon
     DataTableComponent,
     DateSelectorComponent,
     DateSelectorDropdownComponent,
-    ComboGroupedVerticalBarLineChartComponent,
-    ComboSeriesVerticalComponent,
-    ComboBubbleLineChartComponent,
     NavTabsComponent,
     DataCardComponent,
     AlertComponent,
     AccordionComponent,
-    ChartsComponent,
     ModalComponent,
     DataTableStylesComponent,
     ProjectStatusLabelComponent,

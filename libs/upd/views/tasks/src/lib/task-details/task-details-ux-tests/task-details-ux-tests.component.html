@@ -34,8 +34,8 @@
         [series]="(taskSuccessChartData$ | async) || []"
         [yAxis]="'ux-tests' | translate"
         [xAxis]="(taskSuccessChartLegend$ | async) || []"
-        [horizontal]="true"
-        [showPercent]="true"
+        [horizontal]="{isHorizontal: true, colorDistributed: true}"
+        [showPercent]="{ isPercent: true, showTitleTooltip: false, showMarker: true, shared: false}"
         [table]="(taskSuccessChart$ | async) || []"
         [tableCols]="taskSuccessChartCols"
       ></upd-apex-bar>

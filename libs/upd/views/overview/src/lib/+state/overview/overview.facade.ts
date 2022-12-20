@@ -9,7 +9,6 @@ import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
 
-import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewAggregatedData, OverviewData } from '@dua-upd/types-common';
 import { percentChange } from '@dua-upd/utils-common';
@@ -433,7 +432,7 @@ export class OverviewFacade {
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
 
-      const pieChartData: SingleSeries = [
+      const pieChartData = [
         { name: yes, value: data?.dateRangeData?.dyf_yes || 0 },
         { name: no, value: data?.dateRangeData?.dyf_no || 0 },
       ];
@@ -501,7 +500,7 @@ export class OverviewFacade {
       );
       const error = this.i18n.service.translate('d3-error', lang);
 
-      const pieChartData: SingleSeries = [
+      const pieChartData = [
         {
           name: cantFindInfo,
           value: data?.dateRangeData?.fwylf_cant_find_info || 0,

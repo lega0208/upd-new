@@ -12,7 +12,6 @@ import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 export class TaskDetailsCalldriversComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
 
-  calldriversChart$ = this.taskDetailsService.calldriversChart$;
   calldriversTable$ = this.taskDetailsService.calldriversTable$;
   calldriversCols: ColumnConfig[] = [];
 
