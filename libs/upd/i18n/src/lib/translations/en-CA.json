@@ -232,7 +232,7 @@
   "Target URL": "Target URL",
   "Target URL clicks": "Target URL clicks",
   "Target": "Target:",
-  "SAT-title": "Top search term assessment (English and French) from Canada.ca",
+  "SAT-title": "Top search term assessment (English and French) from Canada.ca - {{start}} to {{end}}",
   "SAT-tooltip": "Assessment of the Top English and French search terms on canada.ca and their corresponding target URL.",
   "English": "English",
   "French": "French",
