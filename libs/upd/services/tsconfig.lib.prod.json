@@ -2,7 +2,7 @@
   "extends": "./tsconfig.lib.json",
   "compilerOptions": {
     "declarationMap": false,
-    "lib": ["ES2020", "dom", "dom.iterable"]
+    "lib": ["ESNext", "dom", "dom.iterable"]
   },
   "angularCompilerOptions": {}
 }

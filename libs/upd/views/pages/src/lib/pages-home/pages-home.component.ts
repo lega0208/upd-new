@@ -19,6 +19,8 @@ export class PagesHomeComponent implements OnInit {
 
   columns: ColumnConfig<PagesHomeAggregatedData>[] = [];
 
+  searchFields = this.columns.map((col) => col.field).concat(['all_urls'])
+
   ngOnInit() {
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
       this.columns = [

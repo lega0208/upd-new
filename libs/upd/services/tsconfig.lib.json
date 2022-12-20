@@ -6,7 +6,7 @@
     "declarationMap": true,
     "inlineSources": true,
     "types": [],
-    "lib": ["ES2020", "dom", "dom.iterable"]
+    "lib": ["ESNext", "dom", "dom.iterable"]
   },
   "exclude": [
     "src/test-setup.ts",

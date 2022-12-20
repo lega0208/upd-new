@@ -311,8 +311,10 @@ export class AirtableClient {
       .filter(({ fields }) => !!fields['Url'])
       .map(({ id, fields }) => ({
         airtable_id: id,
-        title: fields['Page Title'],
-        url: fields['Url'],
+        title: squishTrim(fields['Page Title'] as string)
+          .replaceAll('Ã¢â‚¬â€œ', '–')
+          .replaceAll('Ã¢â‚¬â„¢', "'"),
+        url: squishTrim(fields['Url']).replace('https://', ''),
         tasks: fields['Tasks'],
       })) as PageData[];
   }
