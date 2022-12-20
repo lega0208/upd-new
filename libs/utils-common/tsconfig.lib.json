@@ -4,7 +4,7 @@
     "outDir": "../../dist/out-tsc",
     "declaration": true,
     "types": [],
-    "lib": ["es2021"]
+    "lib": ["ESNext"]
   },
   "include": ["**/*.ts"],
   "exclude": ["**/*.spec.ts", "jest.config.ts"]

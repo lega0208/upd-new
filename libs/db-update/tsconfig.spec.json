@@ -4,7 +4,7 @@
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
     "types": ["jest", "node"],
-    "lib": ["es2020"]
+    "lib": ["ESNext"]
   },
   "include": [
     "**/*.test.ts",
