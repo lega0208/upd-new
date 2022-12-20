@@ -34,8 +34,6 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   dyfTableCols: ColumnConfig[] = [];
   whatWasWrongTableCols: ColumnConfig[] = [];
 
-  feedbackByTagsBarChartData$ = this.taskDetailsService.feedbackByTagsBarChart$;
-
   feedbackComments$ = this.taskDetailsService.feedbackComments$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
 

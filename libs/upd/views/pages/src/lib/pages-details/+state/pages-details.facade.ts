@@ -5,7 +5,6 @@ import dayjs, { ManipulateType, QUnitType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade, selectDatePeriodSelection } from '@dua-upd/upd/state';
@@ -128,7 +127,7 @@ export class PagesDetailsFacade {
         .map((d) => new Date(d));
 
       if (!visitsByDay) {
-        return [] as MultiSeries;
+        return [];
       }
 
       const isWeekly = dateRangePeriod === 'weekly' ? true : false;
@@ -137,7 +136,7 @@ export class PagesDetailsFacade {
       const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);
 
       if (isCurrZero && isPrevZero) {
-        return [] as MultiSeries;
+        return [];
       }
 
       const dateRangeDates = visitsByDay.map(({ date }) => date);
@@ -208,7 +207,7 @@ export class PagesDetailsFacade {
         }
       }
 
-      let visitsByDayData: MultiSeries = [];
+      let visitsByDayData = [];
 
       visitsByDayData = [
         {
@@ -296,10 +295,10 @@ export class PagesDetailsFacade {
       const isPrevZero = comparisonDataByDeviceType.every((v) => v.value === 0);
 
       if (isCurrZero && isPrevZero) {
-        return [] as MultiSeries;
+        return [];
       }
 
-      const barChartData: MultiSeries = [
+      const barChartData = [
         {
           name: dateRangeLabel,
           series: dataByDeviceType,
@@ -515,7 +514,7 @@ export class PagesDetailsFacade {
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
 
-      const pieChartData: SingleSeries = [
+      const pieChartData = [
         { name: yes, value: data?.dateRangeData?.dyf_yes || 0 },
         { name: no, value: data?.dateRangeData?.dyf_no || 0 },
       ];
@@ -546,7 +545,7 @@ export class PagesDetailsFacade {
       );
       const error = this.i18n.service.translate('d3-error', lang);
 
-      const pieChartData: SingleSeries = [
+      const pieChartData = [
         {
           name: cantFindInfo,
           value: data?.dateRangeData?.fwylf_cant_find_info || 0,
@@ -620,7 +619,7 @@ export class PagesDetailsFacade {
       );
 
       if (isCurrZero && isPrevZero) {
-        return [] as MultiSeries;
+        return [];
       }
 
       const dateRange = data.dateRange;
@@ -678,6 +677,25 @@ export class PagesDetailsFacade {
       });
     })
   );
+
+  apexFeedbackByTagsData$ = combineLatest([
+    this.feedbackByTagsTable$,
+  ]).pipe(
+    map(([feedbackByTagsTable]) => {
+      const isZero = feedbackByTagsTable.every(
+        (v) => v.currValue === 0 && v.prevValue === 0
+      );
+      if (isZero) {
+        return [];
+      }
+
+      return feedbackByTagsTable.map((feedback) => ({
+        name: feedback.tag,
+        data: [feedback.currValue, feedback.prevValue],
+      })) as ApexAxisChartSeries;
+    })
+  );
+
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
 

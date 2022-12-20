@@ -213,7 +213,7 @@ export class ApexSparkLineComponent implements OnChanges {
             y: {
               ...this.chartOptions.tooltip?.y,
               formatter: (val: number) => {
-                return val.toLocaleString(this.i18n.service.currentLang, {
+                return val.toLocaleString(locale, {
                   maximumFractionDigits: 2,
                 });
               },

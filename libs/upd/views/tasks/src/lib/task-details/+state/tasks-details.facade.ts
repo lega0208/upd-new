@@ -21,7 +21,6 @@ import {
 } from '@dua-upd/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
-import { MultiSeries, SingleSeries } from '@amonsour/ngx-charts';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
 
@@ -188,7 +187,7 @@ export class TasksDetailsFacade {
       const isPrevZero = comparisonDataEnquiryLine.every((v) => v.value === 0);
 
       if (isCurrZero && isPrevZero) {
-        return [] as MultiSeries;
+        return [];
       }
 
       const dataEnquiryLineFinal = dataEnquiryLine.filter((v) => v.value > 0);
@@ -196,7 +195,7 @@ export class TasksDetailsFacade {
         (v) => v.value > 0
       );
 
-      const barChartData: MultiSeries = [
+      const barChartData  = [
         {
           name: dateRangeLabel,
           series: dataEnquiryLineFinal,
@@ -395,7 +394,7 @@ export class TasksDetailsFacade {
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
 
-      const pieChartData: SingleSeries = [
+      const pieChartData = [
         { name: yes, value: data?.dateRangeData?.dyfYes || 0 },
         { name: no, value: data?.dateRangeData?.dyfNo || 0 },
       ];
@@ -425,7 +424,7 @@ export class TasksDetailsFacade {
       );
       const error = this.i18n.service.translate('d3-error', lang);
 
-      const pieChartData: SingleSeries = [
+      const pieChartData = [
         {
           name: cantFindInfo,
           value: data?.dateRangeData?.fwylfCantFindInfo || 0,
@@ -599,7 +598,7 @@ export class TasksDetailsFacade {
       );
 
       if (isCurrZero && isPrevZero) {
-        return [] as MultiSeries;
+        return [];
       }
 
       const dateRange = data.dateRange;

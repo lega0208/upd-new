@@ -36,6 +36,7 @@ export class PagesDetailsFeedbackComponent implements OnInit {
   whatWasWrongChartApex$ = this.pageDetailsService.whatWasWrongDataApex$;
 
   feedbackByTagsBarChartData$ = this.pageDetailsService.feedbackByTagsBarChart$;
+  apexFeedbackByTagsData$ = this.pageDetailsService.apexFeedbackByTagsData$;
 
   feedbackComments$ = this.pageDetailsService.feedbackComments$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];

@@ -74,15 +74,15 @@ export class ApexStore extends ComponentStore<ChartOptions> {
   );
 
   readonly setHorizontal = this.updater(
-    (state, value: boolean): ChartOptions => {
+    (state, value: { isHorizontal: boolean, colorDistributed: boolean}): ChartOptions => {
       return {
         ...state,
         plotOptions: {
           ...state.plotOptions,
           bar: {
             ...state.plotOptions?.bar,
-            distributed: true,
-            horizontal: value,
+            distributed: value?.colorDistributed,
+            horizontal: value?.isHorizontal,
           },
         },
       };
@@ -115,8 +115,19 @@ export class ApexStore extends ComponentStore<ChartOptions> {
     };
   });
 
-  readonly showPercent = this.updater((state, value: boolean): ChartOptions => {
-    if (value) {
+  readonly showPercent = this.updater((state, value: { isPercent: boolean, showTitleTooltip: boolean, showMarker: boolean, shared: boolean}): ChartOptions => {
+    if (value?.isPercent) {
+
+      let titleTooltip = (seriesName: string) => {
+        return seriesName;
+      };
+      
+      if (!value?.showTitleTooltip) {
+        titleTooltip = () => {
+          return '';
+        };
+      }
+      
       return {
         ...state,
         yaxis: {
@@ -139,30 +150,34 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         },
         tooltip: {
           ...state.tooltip,
-          shared: false,
+          shared: value?.shared,
+          marker: {
+            show: value?.showMarker,
+        },
           x: {
             show: true,
           },
           y: {
+            
             formatter: (value, { series, seriesIndex, dataPointIndex, w }) => {
+              if ( value === null || value === undefined) {
+                return '-';
+              }
               return `${formatPercent(
                 value,
                 this.i18n.service.currentLang
-              )} success rate`;
+              )} ${this.i18n.service.translate('success rate', this.i18n.service.currentLang)}`;
             },
             title: {
-              formatter: () => {
-                return '';
-              },
+              formatter: titleTooltip,
             },
+            
           },
         },
       };
     }
     return state;
   });
-
-  readonly isPercent$ = this.select((state) => state.added?.isPercent);
 
   readonly setLocale = this.updater(
     (state, value: string): ChartOptions => ({
