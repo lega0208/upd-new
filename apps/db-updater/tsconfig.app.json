@@ -5,7 +5,7 @@
     "module": "esnext",
     "types": ["node"],
     "emitDecoratorMetadata": true,
-    "lib": ["es2020"]
+    "lib": ["ESNext"]
   },
   "exclude": ["**/*.spec.ts", "**/*.test.ts", "jest.config.ts"],
   "include": ["**/*.ts"]
