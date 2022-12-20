@@ -48,8 +48,11 @@ import {
 import fr from 'apexcharts/dist/locales/fr.json';
 import en from 'apexcharts/dist/locales/en.json';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
+
+dayjs.extend(utc);
 
 export type ChartOptions = {
   annotations?: ApexAnnotations;
