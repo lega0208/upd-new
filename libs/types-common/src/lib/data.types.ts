@@ -17,6 +17,8 @@ export type ApiParams = {
 export interface ViewData<T> {
   dateRange: string;
   comparisonDateRange?: string;
+  satDateRange?: string;
+  satComparisonDateRange?: string;
   dateRangeData?: T;
   comparisonDateRangeData?: T;
 }

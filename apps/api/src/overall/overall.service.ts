@@ -134,28 +134,35 @@ export class OverallService {
       .sort((a, b) => Number(a.change) - Number(b.change))
       .slice(0, 5);
 
+    const satDateStart = await this.searchAssessmentModel
+    .find({})
+    .sort({ date: -1 })
+    .limit(1)
+    .exec();
+
     const satDateRange = `${dayjs
-      .utc()
-      .subtract(2, 'weeks')
-      .startOf('week')
+      .utc(satDateStart[0]?.date)
+      .startOf('day')
       .format('YYYY-MM-DD')}/${dayjs
-      .utc()
-      .subtract(2, 'weeks')
+      .utc(satDateStart[0]?.date)
       .endOf('week')
       .format('YYYY-MM-DD')}`;
     const satComparisonDateRange = `${dayjs
-      .utc()
-      .subtract(3, 'weeks')
+      .utc(satDateStart[0]?.date)
+      .subtract(1, 'weeks')
       .startOf('week')
+      .startOf('day')
       .format('YYYY-MM-DD')}/${dayjs
-      .utc()
-      .subtract(3, 'weeks')
+      .utc(satDateStart[0]?.date)
+      .subtract(1, 'weeks')
       .endOf('week')
       .format('YYYY-MM-DD')}`;
 
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
+      satDateRange,
+      satComparisonDateRange,
       dateRangeData: await getOverviewMetrics(
         this.overallModel,
         this.pageMetricsModel,
