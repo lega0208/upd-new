@@ -2,11 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
-import dayjs from 'dayjs';
 
 type searchAssessmentColTypes = GetTableProps<
   OverviewSearchAnalyticsComponent,
@@ -36,6 +34,8 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
 
   GSCSearchTermsCols: ColumnConfig<GscSearchTermsRow>[] = [];
   searchAssessmentCols: ColumnConfig<searchAssessmentColTypes>[] = [];
+
+  satDateRangeLabel$ = this.overviewService.satDateRangeLabel$;
   satStart = '';
   satEnd = '';
 
@@ -45,21 +45,10 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    combineLatest([this.searchAssessmentData$, this.currentLang$]).subscribe(
-      ([data, lang]) => {
-        const dateFormat = lang === FR_CA ? 'D MMM' : 'MMM D';
-        this.satStart = `${dayjs
-          .utc()
-          .subtract(2, 'weeks')
-          .startOf('week')
-          .locale(lang)
-          .format(dateFormat)}`;
-        this.satEnd = `${dayjs
-          .utc()
-          .subtract(2, 'weeks')
-          .endOf('week')
-          .locale(lang)
-          .format(dateFormat)}`;
+    combineLatest([this.searchAssessmentData$, this.currentLang$, this.satDateRangeLabel$]).subscribe(
+      ([data, lang, satDateRange]) => {
+        this.satStart = satDateRange.split('-')[0];
+        this.satEnd = satDateRange.split('-')[1];
 
         // this.CanSearchTermsCols = [
         //   { field: 'Search terms', header: this.i18n.service.translate('search-terms', lang) },

@@ -426,6 +426,10 @@ export class OverviewFacade {
     )
   );
 
+  satDateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => getWeeklyDatesLabel(data.satDateRange || '', lang))
+  );
+
   dyfData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
