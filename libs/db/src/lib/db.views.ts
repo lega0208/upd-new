@@ -84,8 +84,6 @@ export abstract class DbView<T extends DbViewType, Source> {
 
   async getOrUpdate(dateRange: DateRange) {
     if (await this.needsUpdate(dateRange)) {
-      console.log('needsUpdate');
-
       await this.sourceModel
         .aggregate<T>(this.pipelineCreator(dateRange))
         .exec();
@@ -97,6 +95,10 @@ export abstract class DbView<T extends DbViewType, Source> {
     };
 
     return (await this.model.findOne({ _id: queryId }).lean().exec()) as T;
+  }
+
+  async clearAll() {
+    return this.model.deleteMany({});
   }
 }
 

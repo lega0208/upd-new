@@ -135,6 +135,10 @@ export class DbUpdateService {
     }
   }
 
+  async consolidateDuplicatePages() {
+    return await this.pagesService.consolidateDuplicatePages();
+  }
+
   @AsyncLogTiming
   async createPagesFromPageList() {
     this.logger.log(`Checking for new pages in Published Pages list...`);
