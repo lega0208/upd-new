@@ -33,8 +33,9 @@ import type {
   OverviewData,
   OverviewUxData,
   OverviewProjectData,
+  ProjectsHomeProject,
 } from '@dua-upd/types-common';
-import { AsyncLogTiming, dateRangeSplit } from '@dua-upd/utils-common';
+import { AsyncLogTiming, dateRangeSplit, getLatestTestData, logJson } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -346,8 +347,10 @@ async function getProjects(
         .exec()
     )[0] || defaultData;
 
+  
+
   const projectsData = await projectModel
-    .aggregate<OverviewProjectData>()
+    .aggregate<ProjectsHomeProject>()
     .lookup({
       from: 'ux_tests',
       let: { project_id: '$_id' },
@@ -373,6 +376,13 @@ async function getProjects(
             },
             avgSuccessRate: {
               $avg: '$success_rate',
+            },
+            uxTests: {
+              $push: {
+                success_rate: '$success_rate',
+                date: '$date',
+                test_type: '$test_type',
+              },
             },
             statuses: {
               $addToSet: '$status',
@@ -406,7 +416,24 @@ async function getProjects(
       status: 1,
       totalUsers: 1,
       testType: 1,
+      uxTests: 1,
     });
+
+    const avgUxTest = [];
+
+    for (const data of projectsData) {
+      const { percentChange, avgTestSuccess, total } = getLatestTestData(data.uxTests);
+
+      data.lastAvgSuccessRate = avgTestSuccess;
+
+      if (avgTestSuccess !== null) {
+        avgUxTest.push({ percentChange, avgTestSuccess, total });
+      }
+    }
+    
+    
+  const avgTestSuccessAvg = avgUxTest.reduce((acc, data) => acc + data.avgTestSuccess, 0) / avgUxTest.length;
+  const testsCompleted = avgUxTest.reduce((acc, data) => acc + data.total, 0);
 
   const uxTests = await uxTestsModel
     .aggregate<UxTestDocument>()
@@ -420,6 +447,9 @@ async function getProjects(
     ...uxTest,
     projects: projectsData,
     uxTests: uxTests,
+    avgUxTest,
+    avgTestSuccessAvg,
+    testsCompleted
   };
 
   return results;
