@@ -106,6 +106,12 @@ export class OverviewFacade {
   projects$ = this.overviewData$.pipe(
     map((data) => data?.projects?.projects || [])
   );
+  kpiLastAvgSuccessRate$ = this.overviewData$.pipe(
+    map((data) => data?.projects?.avgTestSuccessAvg || 0)
+  );
+  kpiTestsCompleted$ = this.overviewData$.pipe(
+    map((data) => data?.projects?.testsCompleted || 0)
+  );
   testTypeTranslations$ = combineLatest([
     this.projects$,
     this.currentLang$,

@@ -258,7 +258,9 @@ export interface ProjectsHomeProject {
   startDate?: Date;
   launchDate?: Date;
   avgSuccessRate?: number;
+  lastAvgSuccessRate?: number;
   status: ProjectStatus;
+  uxTests?: { date?: Date; success_rate?: number; test_type?: string }[];
 }
 
 export interface ProjectsHomeData {
@@ -269,6 +271,8 @@ export interface ProjectsHomeData {
   numDelayed: number;
   completedCOPS: number;
   projects: ProjectsHomeProject[];
+  avgTestSuccessAvg?: number;
+  testsCompleted?: number;
 }
 
 export interface VisitsByPage {

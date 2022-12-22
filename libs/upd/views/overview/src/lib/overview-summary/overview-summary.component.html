@@ -56,17 +56,17 @@
         [titleTooltip]="'kpi-ux-test-tooltip'"
         [preLabel]="'Target'"
         [valueLabel]="0.8"
-        [current]="(kpiUXTestsPercent$ | async) || 0"
+        [current]="(kpiLastAvgSuccessRate$ | async) || 0"
         [kpiObjectiveCriteria]="uxTestsKpiObjectiveCriteria"
         [keyword]="'ux'"
         modal="{{
           'kpi-ux-test-guidance'
-            | translate: { value: (kpiUXTestsTotal$ | async) || 0 }
+            | translate: { value: (kpiTestsCompleted$ | async) || 0 }
         }}"
       >
         {{
           'kpi-ux-test-text'
-            | translate: { total: (kpiUXTestsTotal$ | async) || 0 }
+            | translate: { total: (kpiTestsCompleted$ | async) || 0 }
         }}
       </upd-apex-radial-bar>
     </div>
