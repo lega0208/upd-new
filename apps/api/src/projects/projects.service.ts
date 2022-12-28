@@ -259,6 +259,14 @@ export class ProjectsService {
               launchDate: {
                 $max: '$launch_date',
               },
+
+            uxTests: {
+              $push: {
+                success_rate: '$success_rate',
+                date: '$date',
+                test_type: '$test_type',
+              },
+            },
               avgSuccessRate: {
                 $avg: '$success_rate',
               },
@@ -286,11 +294,18 @@ export class ProjectsService {
         launchDate: 1,
         avgSuccessRate: 1,
         status: 1,
+        uxTests: 1,
       });
 
     const completedCOPS = projectsData.filter(
       (data) => data.cops && data.status === 'Complete'
     ).length;
+
+    for (const data of projectsData) {
+      const { percentChange, avgTestSuccess, total } = getLatestTestData(data.uxTests);
+
+      data.lastAvgSuccessRate = avgTestSuccess;
+    }
 
     const results = {
       ...aggregatedData,

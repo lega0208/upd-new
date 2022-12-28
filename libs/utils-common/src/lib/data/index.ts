@@ -177,6 +177,7 @@ export function getAvgTestSuccessByDate<
 export interface TestSuccessWithPercentChange {
   avgTestSuccess: number | null;
   percentChange: number | null;
+  total: number | null;
 }
 
 export function getLatestTestData<
@@ -190,6 +191,7 @@ export function getLatestTestData<
     return {
       avgTestSuccess: null,
       percentChange: null,
+      total: null,
     };
   }
 
@@ -229,6 +231,7 @@ export function getLatestTestData<
           return {
             avgTestSuccess,
             percentChange,
+            total: testsByType[testType]?.length
           };
         }
       }
@@ -236,6 +239,7 @@ export function getLatestTestData<
       return {
         avgTestSuccess,
         percentChange: null,
+        total: testsByType[testType]?.length
       };
     }
   }
@@ -243,5 +247,6 @@ export function getLatestTestData<
   return {
     avgTestSuccess: null,
     percentChange: null,
+    total: null
   };
 }
