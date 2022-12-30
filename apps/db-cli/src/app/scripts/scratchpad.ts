@@ -16,12 +16,16 @@ export const findDuplicatePageUrls = async (db: DbService) => {
   await db.getDuplicatedPages();
 };
 
+/////@@>.asda/sd.
+/// figure out some shit like this but for all the fucked up french pages
 export const fixPagesFromAirtable = async (db: DbService, dbUpdate: DbUpdateService) => {
   console.time('fixPagesFromAirtable');
   // delete pages that need to be repopulated
   const objectIdsToDelete = [
-    new Types.ObjectId('63867f9f2b89cb3c58edafdf'),
-    new Types.ObjectId('63867f9f2b89cb3c58edafe0'),
+    new Types.ObjectId('63867f9f2b89cb3c58edb002'),
+    new Types.ObjectId('63867f9f2b89cb3c58edafe2'),
+    new Types.ObjectId('63867f9f2b89cb3c58edafe9'),
+    new Types.ObjectId('63867f9f2b89cb3c58edaff6'),
   ]
   await db.collections.pages.deleteMany({ _id: { $in: objectIdsToDelete } });
 
@@ -66,6 +70,10 @@ export const fixPagesFromAirtable = async (db: DbService, dbUpdate: DbUpdateServ
       end: new Date('2022-10-26'),
     },
     // weekly
+    {
+      start: new Date('2022-12-18'),
+      end: new Date('2022-12-24'),
+    },
     {
       start: new Date('2022-12-11'),
       end: new Date('2022-12-17'),
