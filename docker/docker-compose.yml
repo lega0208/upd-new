@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: "ghcr.io/upd-new/nginx:latest"
+    image: "ghcr.io/lega0208/upd-new/nginx:latest"
     build:
       pull: true
     ports:
@@ -19,7 +19,7 @@ services:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
   web:
-    image: "ghcr.io/upd-new/web:latest"
+    image: "ghcr.io/lega0208/upd-new/web:latest"
     build:
       pull: true
     container_name: web
@@ -33,7 +33,7 @@ services:
     depends_on:
       - mongodb
   db-updater:
-    image: "ghcr.io/upd-new/db-updater:latest"
+    image: "ghcr.io/lega0208/upd-new/db-updater:latest"
     build:
       pull: true
     container_name: db-updater
