@@ -11,6 +11,4 @@ export class CardSecondaryTitleComponent {
   @Input() data: Record<string, number | string>[] = [];
   @Input() type = 'list';
   @Input() modal = '';
-
-  constructor() {}
 }
