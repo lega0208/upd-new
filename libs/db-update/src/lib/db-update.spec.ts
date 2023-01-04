@@ -12,7 +12,6 @@ import {
   UxTest,
 } from '@dua-upd/db';
 import { connect, Types, disconnect } from 'mongoose';
-import { updateCalldriverData } from './airtable/calldrivers';
 
 // need to set a bigger timout because AA is super slow :)
 // jest.setTimeout(30 * 60 * 1000);

@@ -23,6 +23,7 @@ import { logJson } from '@dua-upd/utils-common';
     CacheModule.register({ ttl: 12 * 60 * 60 }),
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: process.env.DOTENV_CONFIG_PATH || '.env',
     }),
     DbModule,
     ExternalDataModule,

@@ -347,7 +347,7 @@ async function getProjects(
         .exec()
     )[0] || defaultData;
 
-  
+
 
   const projectsData = await projectModel
     .aggregate<ProjectsHomeProject>()
@@ -430,8 +430,8 @@ async function getProjects(
         avgUxTest.push({ percentChange, avgTestSuccess, total });
       }
     }
-    
-    
+
+
   const avgTestSuccessAvg = avgUxTest.reduce((acc, data) => acc + data.avgTestSuccess, 0) / avgUxTest.length;
   const testsCompleted = avgUxTest.reduce((acc, data) => acc + data.total, 0);
 

@@ -8,7 +8,7 @@ import {
   SearchFilter,
 } from './query';
 import { DataState, Dimension } from './gsc-property';
-import { GscSearchTermMetrics, Overall, PageMetrics } from '@dua-upd/db';
+import { GscSearchTermMetrics, IOverall, IPageMetrics } from '@dua-upd/types-common';
 import { wait } from '@dua-upd/utils-common';
 import { DateRange } from '../types';
 import { singleDatesFromDateRange, withRetry } from '../utils';
@@ -83,13 +83,13 @@ export class SearchAnalyticsClient {
       promises.push(mergedDateResults);
     }
 
-    return await Promise.all<Overall[]>(promises);
+    return await Promise.all<IOverall[]>(promises);
   }
 
   async getOverallTotals(
     date: string,
     options?: SearchAnalyticsQueryOptions
-  ): Promise<Partial<Overall>> {
+  ): Promise<Partial<IOverall>> {
     const queryBuilder = new SearchAnalyticsQueryBuilder();
 
     const query = queryBuilder
@@ -114,14 +114,14 @@ export class SearchAnalyticsClient {
           gsc_total_impressions: row.impressions,
           gsc_total_ctr: row.ctr,
           gsc_total_position: row.position,
-        } as Partial<Overall>)
+        } as Partial<IOverall>)
     )[0];
   }
 
   async getOverallSearchTerms(
     date: string,
     options?: SearchAnalyticsQueryOptions
-  ): Promise<Partial<Overall>> {
+  ): Promise<Partial<IOverall>> {
     const queryBuilder = new SearchAnalyticsQueryBuilder();
 
     const query = queryBuilder
@@ -158,7 +158,7 @@ export class SearchAnalyticsClient {
   async getPageMetrics(
     dateRange: DateRange | Date,
     options?: SearchAnalyticsPageQueryOptions & {
-      onComplete?: (data: Partial<PageMetrics>[]) => Promise<void>;
+      onComplete?: (data: Partial<IPageMetrics>[]) => Promise<void>;
     }
   ) {
     const dates =
@@ -166,7 +166,7 @@ export class SearchAnalyticsClient {
         ? [dayjs.utc(dateRange).format('YYYY-MM-DD')]
         : (singleDatesFromDateRange(dateRange, 'YYYY-MM-DD', true) as string[]);
     console.log('GSC getPageMetrics dates:', dates);
-    const promises: Promise<Partial<PageMetrics>[]>[] = [];
+    const promises: Promise<Partial<IPageMetrics>[]>[] = [];
 
     for (const date of dates) {
       const mergedDateResults = Promise.all([
@@ -207,7 +207,7 @@ export class SearchAnalyticsClient {
           return {
             ...pageResults,
             ...totals,
-          } as Partial<PageMetrics>;
+          } as Partial<IPageMetrics>;
         });
 
         return [...resultsWithTotals, ...resultsWithoutTotals];
@@ -232,7 +232,7 @@ export class SearchAnalyticsClient {
   async getPageTotals(
     date: string,
     options?: SearchAnalyticsPageQueryOptions
-  ): Promise<Record<string, Partial<PageMetrics>>> {
+  ): Promise<Record<string, Partial<IPageMetrics>>> {
     const queryBuilder = new SearchAnalyticsQueryBuilder();
 
     const pageFilter: SearchFilter =
@@ -272,19 +272,19 @@ export class SearchAnalyticsClient {
             gsc_total_impressions: row.impressions,
             gsc_total_ctr: row.ctr,
             gsc_total_position: row.position,
-          } as Partial<PageMetrics>)
+          } as Partial<IPageMetrics>)
       )
       .reduce((results, pageMetrics) => {
         results[pageMetrics.url] = pageMetrics;
 
         return results;
-      }, {} as Record<string, Partial<PageMetrics>>);
+      }, {} as Record<string, Partial<IPageMetrics>>);
   }
 
   async getPageSearchTerms(
     date: string,
     options?: SearchAnalyticsPageQueryOptions
-  ): Promise<Record<string, Partial<PageMetrics>>> {
+  ): Promise<Record<string, Partial<IPageMetrics>>> {
     const queryBuilder = new SearchAnalyticsQueryBuilder();
 
     const pageFilter: SearchFilter =
@@ -338,6 +338,6 @@ export class SearchAnalyticsClient {
       });
 
       return results;
-    }, {} as Record<string, Partial<PageMetrics>>);
+    }, {} as Record<string, Partial<IPageMetrics>>);
   }
 }

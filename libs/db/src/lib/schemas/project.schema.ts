@@ -1,13 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types } from 'mongoose';
+import { model, Document, Types } from 'mongoose';
 import { Page } from './page.schema';
 import { UxTest } from './ux-test.schema';
 import { Task } from './task.schema';
+import { IProject } from '@dua-upd/types-common';
 
 export type ProjectDocument = Project & Document;
 
 @Schema()
-export class Project {
+export class Project implements IProject {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 

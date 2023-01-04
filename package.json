@@ -8,7 +8,7 @@
     "start": "nx run-many --target=serve --projects=api,upd --parallel",
     "dev": "nx run-many --target=serve --projects=api,upd --parallel",
     "build": "nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel=false",
-    "build:parallel": "nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel",
+    "build:parallel": "nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --prod",
     "compodoc": "nx run upd:compodoc --serve --port 8081",
     "db-cli": "node -r @swc-node/register apps/db-cli/src/main.ts",
     "db-updater": "npm run db-cli update",

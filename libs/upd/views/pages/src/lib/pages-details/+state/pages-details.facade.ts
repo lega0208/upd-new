@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map, debounceTime, combineLatest } from 'rxjs';
-import dayjs, { ManipulateType, QUnitType } from 'dayjs';
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
@@ -10,8 +10,7 @@ import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade, selectDatePeriodSelection } from '@dua-upd/upd/state';
 import { percentChange } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
-import type { GscSearchTermMetrics } from '@dua-upd/db';
-import { PageAggregatedData, PageDetailsData } from '@dua-upd/types-common';
+import { GscSearchTermMetrics, PageAggregatedData, PageDetailsData } from '@dua-upd/types-common';
 
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';

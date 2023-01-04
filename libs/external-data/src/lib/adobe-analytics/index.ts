@@ -1,12 +1,13 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { type AASearchTermMetrics, Overall, PageMetrics } from '@dua-upd/db';
+import { Overall, PageMetrics } from '@dua-upd/db';
 import {
   wait,
   sortArrayDesc,
   seperateArray,
   AsyncLogTiming,
 } from '@dua-upd/utils-common';
+import type { AASearchTermMetrics } from '@dua-upd/types-common';
 import { AnalyticsCoreAPI, getAAClient } from './client';
 import {
   createActivityMapQuery,

@@ -4,7 +4,6 @@ import { Cache } from 'cache-manager';
 import { Model, Types } from 'mongoose';
 import type {
   FeedbackModel,
-  GscSearchTermMetrics,
   MetricsConfig,
   PageDocument,
   PageMetricsModel,
@@ -16,12 +15,13 @@ import {
   PageMetrics,
 } from '@dua-upd/db';
 import type {
+  ApiParams,
+  GscSearchTermMetrics,
   PageAggregatedData,
   PageDetailsData,
   PagesHomeData,
   PagesHomeAggregatedData,
 } from '@dua-upd/types-common';
-import { ApiParams } from '@dua-upd/types-common';
 import { dateRangeSplit } from '@dua-upd/utils-common';
 
 @Injectable()

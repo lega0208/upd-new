@@ -4,7 +4,6 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "defaultConfiguration": "production",
       "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -14,17 +13,16 @@
         "assets": ["apps/db-updater/src/assets"],
         "deleteOutputPath": false,
         "target": "node",
+        "generatePackageJson": true,
         "compiler": "tsc",
         "generateIndexHtml": false,
         "runtimeChunk": false,
-        "webpackConfig": "apps/db-updater/webpack.config.js"
+        "optimization": false,
+        "externalDependencies": "all",
+        "inspect": false
       },
       "configurations": {
         "production": {
-          "optimization": false,
-          "externalDependencies": "all",
-          "extractLicenses": false,
-          "inspect": false,
           "fileReplacements": [
             {
               "replace": "apps/db-updater/src/environments/environment.ts",

@@ -27,6 +27,7 @@ import {
   SearchAssessmentSchema,
 } from './db.schemas';
 import { PageVisitsViewSchema, PageVisitsView } from './db.views';
+import { DbService } from './db.service';
 
 export const models = {
   callDrivers: {
@@ -51,10 +52,8 @@ export const views = {
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    MongooseModule.forRoot(getDbConnectionString(), {
-      connectionName: 'defaultConnection',
-      dbName: 'upd-test',
+    ConfigModule.forRoot({
+      envFilePath: process.env.DOTENV_CONFIG_PATH || '.env',
     }),
     MongooseModule.forFeature(
       [
@@ -69,4 +68,14 @@ export const views = {
   providers: [],
   exports: [MongooseModule],
 })
-export class DbModule {}
+export class DbModule {
+  static forRoot(production: boolean, dbName?: string) {
+    const connectionString = getDbConnectionString(production, dbName);
+    console.log(connectionString);
+
+    return MongooseModule.forRoot(connectionString, {
+      connectionName: 'defaultConnection',
+      dbName: 'upd-test',
+    });
+  }
+}

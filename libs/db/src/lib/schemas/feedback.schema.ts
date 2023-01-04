@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types } from 'mongoose';
-import { FeedbackComment } from './types';
+import { FeedbackComment, IFeedback } from '@dua-upd/types-common';
 
 export type FeedbackDocument = Feedback & Document;
 
 @Schema({ collection: 'feedback' })
-export class Feedback {
+export class Feedback implements IFeedback {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
@@ -43,12 +43,6 @@ export class Feedback {
 export const FeedbackSchema = SchemaFactory.createForClass(Feedback);
 
 FeedbackSchema.index({ url: 1, date: 1 });
-
-export const feedbackModel = model(Feedback.name, FeedbackSchema);
-
-export function getFeedbackModel() {
-  return feedbackModel;
-}
 
 FeedbackSchema.statics['getCommentsByTag'] = async function (
   this: Model<Feedback>,

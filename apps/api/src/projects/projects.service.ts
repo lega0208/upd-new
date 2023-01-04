@@ -6,7 +6,6 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import type {
   CallDriverModel,
-  FeedbackComment,
   FeedbackModel,
   PageDocument,
   PageMetricsModel,
@@ -23,6 +22,7 @@ import {
   UxTest,
 } from '@dua-upd/db';
 import type {
+  FeedbackComment,
   ProjectsDetailsData,
   ProjectDetailsAggregatedData,
   ProjectsHomeProject,

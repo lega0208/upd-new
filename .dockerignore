@@ -3,8 +3,7 @@ node_modules
 .vscode/
 .git/
 .swc
-apps
-libs
 tools
 tmp
 docker/certbot/conf/keys
+dist

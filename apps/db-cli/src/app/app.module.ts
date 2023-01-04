@@ -1,6 +1,6 @@
 import { Module, ConsoleLogger } from '@nestjs/common';
 import { DataIntegrityModule } from '@dua-upd/data-integrity';
-import { DbService } from '@dua-upd/db';
+import { DbModule, DbService } from '@dua-upd/db';
 import { DbUpdateModule } from '@dua-upd/db-update';
 import { UpdateCommand, UpdateQuestions } from './update.command';
 import { RepopulateCommand, RepopulateQuestions } from './repopulate.command';
@@ -12,9 +12,14 @@ import {
   PopulatePagesPrompt,
   PopulateCollectionOptionsPrompt,
 } from './populate.questions';
+import { environment } from '../environments/environment';
 
 @Module({
-  imports: [DataIntegrityModule, DbUpdateModule],
+  imports: [
+    DataIntegrityModule,
+    DbUpdateModule,
+    DbModule.forRoot(environment.production),
+  ],
   providers: [
     ConsoleLogger,
     DbService,

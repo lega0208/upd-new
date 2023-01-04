@@ -15,6 +15,7 @@ describe('SearchAssessmentService', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
+          envFilePath: process.env.DOTENV_CONFIG_PATH || '.env',
         }),
         DbModule,
       ],

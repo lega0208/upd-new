@@ -1,14 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types } from 'mongoose';
-import { AttachmentData } from './types';
+import { model, Document, Types } from 'mongoose';
 import { Page } from './page.schema';
 import { Project } from './project.schema';
 import { Task } from './task.schema';
+import { AttachmentData, IUxTest } from '@dua-upd/types-common';
 
 export type UxTestDocument = UxTest & Document;
 
 @Schema({ collection: 'ux_tests' })
-export class UxTest {
+export class UxTest implements IUxTest {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 

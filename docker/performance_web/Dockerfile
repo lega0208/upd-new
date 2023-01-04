@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:16-alpine3.15
+FROM node:16-alpine3.17
 
 RUN apk update && apk add tzdata
 
