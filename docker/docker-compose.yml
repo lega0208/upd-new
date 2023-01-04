@@ -1,11 +1,11 @@
 services:
   nginx:
-    image: "ghcr.io/lega0208/upd-new/nginx:latest"
+    image: 'ghcr.io/lega0208/upd-new/nginx:latest'
     build:
       pull: true
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     depends_on:
       - web
     restart: unless-stopped
@@ -19,13 +19,13 @@ services:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
   web:
-    image: "ghcr.io/lega0208/upd-new/web:latest"
+    image: 'ghcr.io/lega0208/upd-new/web:latest'
     build:
       pull: true
     container_name: web
     restart: unless-stopped
     ports:
-      - "9000"
+      - '9000'
     secrets:
       - .env
     environment:
@@ -33,13 +33,13 @@ services:
     depends_on:
       - mongodb
   db-updater:
-    image: "ghcr.io/lega0208/upd-new/db-updater:latest"
+    image: 'ghcr.io/lega0208/upd-new/db-updater:latest'
     build:
       pull: true
     container_name: db-updater
     restart: unless-stopped
     ports:
-      - "9001"
+      - '9001'
     secrets:
       - .env
       - secret.pem
