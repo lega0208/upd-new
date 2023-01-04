@@ -1,12 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types } from 'mongoose';
-import type { SearchAssessmentData } from './types';
+import type { SearchAssessmentData } from '@dua-upd/types-common';
 
 export type SearchAssessmentDocument = SearchAssessment & Document;
 
 @Schema({ collection: 'search_assessment' })
 export class SearchAssessment {
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: Date, required: true, index: true })

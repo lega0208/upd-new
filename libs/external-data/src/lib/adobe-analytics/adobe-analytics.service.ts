@@ -1,14 +1,14 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import {
-  AAItemId,
-  AASearchTermMetrics,
-  Overall,
-  PageMetrics,
-} from '@dua-upd/db';
 import chalk from 'chalk';
 import { logJson, wait } from '@dua-upd/utils-common';
+import {
+  AASearchTermMetrics,
+  IAAItemId,
+  IOverall,
+  IPageMetrics,
+} from '@dua-upd/types-common';
 import { DateRange } from '../types';
 import {
   AdobeAnalyticsClient,
@@ -48,7 +48,7 @@ export class AdobeAnalyticsService {
     dateRange: DateRange,
     options?: {
       onComplete?: <U>(
-        data: Overall[]
+        data: IOverall[]
       ) => U extends Promise<unknown> ? U : Promise<U>;
       inclusiveDateRange?: boolean;
     }
@@ -57,7 +57,7 @@ export class AdobeAnalyticsService {
       ? dayjs.utc(dateRange.end).add(1, 'day').format('YYYY-MM-DD')
       : dateRange.end;
 
-    return await this.client.executeQuery<Overall>(
+    return await this.client.executeQuery<IOverall>(
       createOverallMetricsQuery({
         start: toQueryFormat(dateRange.start),
         end: toQueryFormat(endDate),
@@ -75,10 +75,10 @@ export class AdobeAnalyticsService {
   async getPageMetrics(
     dateRange: DateRange,
     options?: {
-      onComplete?: (results: Partial<PageMetrics>[]) => Promise<void>;
+      onComplete?: (results: Partial<IPageMetrics>[]) => Promise<void>;
     } & PageMetricsQueryOptions
   ) {
-    return await this.client.executeMultiDayQuery<PageMetrics>(
+    return await this.client.executeMultiDayQuery<IPageMetrics>(
       {
         start: toQueryFormat(dateRange.start),
         end: toQueryFormat(dateRange.end),
@@ -107,7 +107,7 @@ export class AdobeAnalyticsService {
       }
     );
 
-    return await this.client.executeQuery<AAItemId>(query);
+    return await this.client.executeQuery<IAAItemId>(query);
   }
 
   async getOverallSearchTerms(
@@ -141,7 +141,7 @@ export class AdobeAnalyticsService {
     );
   }
 
-  async getPageSearchTerms(dateRange: DateRange, itemIdDocs: AAItemId[]) {
+  async getPageSearchTerms(dateRange: DateRange, itemIdDocs: IAAItemId[]) {
     const itemIds = itemIdDocs.map(({ itemId }) => itemId);
 
     const queries = createBatchedInternalSearchQueries(dateRange, itemIds);

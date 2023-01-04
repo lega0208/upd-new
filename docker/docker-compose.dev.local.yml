@@ -1,31 +1,26 @@
 services:
   nginx:
-    image: 'ghcr.io/lega0208/upd-new/nginx:latest'
+    image: "upd_nginx"
     build:
-      pull: true
+      context: ../
+      dockerfile: docker/performance_base/Dockerfile
+      target: nginx-dev
     ports:
-      - '80:80'
-      - '443:443'
+      - "8080:8080"
     depends_on:
       - web
     restart: unless-stopped
-    container_name: nginx
-    volumes:
-      - ./certbot/www:/var/www/certbot/:ro
-      - ./certbot/conf/:/etc/nginx/ssl/:ro
-  certbot:
-    image: certbot/certbot:latest
-    volumes:
-      - ./certbot/www/:/var/www/certbot/:rw
-      - ./certbot/conf/:/etc/letsencrypt/:rw
+    container_name: upd_nginx
   web:
-    image: 'ghcr.io/lega0208/upd-new/web:latest'
-    build:
-      pull: true
-    container_name: web
+    image: "upd_web"
+    container_name: upd_web
     restart: unless-stopped
+    build:
+      context: ../
+      dockerfile: docker/performance_base/Dockerfile
+      target: web
     ports:
-      - '9000'
+      - "9000"
     secrets:
       - .env
     environment:
@@ -33,13 +28,15 @@ services:
     depends_on:
       - mongodb
   db-updater:
-    image: 'ghcr.io/lega0208/upd-new/db-updater:latest'
-    build:
-      pull: true
-    container_name: db-updater
+    image: "upd_db-updater"
+    container_name: upd_db-updater
     restart: unless-stopped
+    build:
+      context: ../
+      dockerfile: docker/performance_base/Dockerfile
+      target: db-updater
     ports:
-      - '9001'
+      - "9001"
     secrets:
       - .env
       - secret.pem
@@ -66,7 +63,7 @@ volumes:
     driver_opts:
       o: bind
       type: none
-      device: /datadrive/db/data
+      device: "Z:/docker-db"
 secrets:
   .env:
     file: ../.env
@@ -74,3 +71,5 @@ secrets:
     file: ../keys/secret.pem
   service-account-credentials.json:
     file: ../keys/service-account-credentials.json
+
+

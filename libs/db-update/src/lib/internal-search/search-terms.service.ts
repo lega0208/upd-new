@@ -1,30 +1,27 @@
-import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import chalk from 'chalk';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { Types } from 'mongoose';
 import {
   arrayToDictionary,
   logJson,
-  normalizeUTCDate,
   prettyJson,
   today,
 } from '@dua-upd/utils-common';
-import {
-  AAItemId,
+import { DbService, PageMetrics } from '@dua-upd/db';
+import type {
+  IAAItemId,
+  IOverall,
   AASearchTermMetrics,
-  DbService,
-  Overall,
-  PageMetrics,
-} from '@dua-upd/db';
+} from '@dua-upd/types-common';
 import {
   AdobeAnalyticsService,
   DateRange,
-  SearchTermResult,
   InternalSearchResult,
   queryDateFormat,
   singleDatesFromDateRange,
 } from '@dua-upd/external-data';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { writeFile } from 'node:fs/promises';
 
@@ -41,7 +38,7 @@ export class InternalSearchTermsService {
   /*
    * ItemId stuff
    */
-  async addPageRefsAndUpsertValidItemIds(itemIds: AAItemId[]) {
+  async addPageRefsAndUpsertValidItemIds(itemIds: IAAItemId[]) {
     this.logger.log(
       chalk.blueBright('Finding valid Page references and inserting...')
     );
@@ -62,12 +59,15 @@ export class InternalSearchTermsService {
 
         return { fullUrlItemIds, partialUrlItemIds };
       },
-      { fullUrlItemIds: [] as AAItemId[], partialUrlItemIds: [] as AAItemId[] }
+      {
+        fullUrlItemIds: [] as IAAItemId[],
+        partialUrlItemIds: [] as IAAItemId[],
+      }
     );
 
     // Declaring these here to provide count after
-    const partialsToInsert: AAItemId[] = [];
-    const itemIdsToInsert: AAItemId[] = [];
+    const partialsToInsert: IAAItemId[] = [];
+    const itemIdsToInsert: IAAItemId[] = [];
 
     /*
      * Step 1: Deal with partials
@@ -168,7 +168,7 @@ export class InternalSearchTermsService {
         );
 
         await this.db.collections.aaItemIds.bulkWrite(
-          updateOps as AnyBulkWriteOperation<AAItemId>[]
+          updateOps as AnyBulkWriteOperation<IAAItemId>[]
         );
       }
     }
@@ -247,7 +247,7 @@ export class InternalSearchTermsService {
         );
 
         await this.db.collections.aaItemIds.bulkWrite(
-          updateOps as AnyBulkWriteOperation<AAItemId>[]
+          updateOps as AnyBulkWriteOperation<IAAItemId>[]
         );
       }
     }
@@ -269,7 +269,7 @@ export class InternalSearchTermsService {
     }
   }
 
-  async insertItemIdsIfNew(itemIds: AAItemId[]) {
+  async insertItemIdsIfNew(itemIds: IAAItemId[]) {
     // pull existing itemIds from db & compare number
     const itemIdsModel = this.db.collections.aaItemIds;
 
@@ -396,7 +396,7 @@ export class InternalSearchTermsService {
 
         const propName = `aa_searchterms_${lang}`;
 
-        const insertDocument: Partial<Overall> = {
+        const insertDocument: Partial<IOverall> = {
           date,
           [propName]: results.map((result) => {
             delete result.date;

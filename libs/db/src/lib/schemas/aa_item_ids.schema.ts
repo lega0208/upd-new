@@ -1,22 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-
-export type AAItemIdTypes = 'internalSearch' | 'activityMap' | 'urlLast255' | 'pageUrl';
-
-export interface AAItemIdInterface {
-  _id: Types.ObjectId;
-  type: AAItemIdTypes;
-  page?: Types.ObjectId;
-  itemId: string;
-  value: string;
-}
+import type { IAAItemId, AAItemIdTypes } from '@dua-upd/types-common';
 
 export type AAItemIdsDocument = AAItemId & Document;
 
 @Schema({ collection: 'aa_item_ids' })
-export class AAItemId
-  implements AAItemIdInterface
-{
+export class AAItemId implements IAAItemId {
   @Prop({ type: Types.ObjectId, required: true })
   _id = new Types.ObjectId();
 

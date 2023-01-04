@@ -55,7 +55,7 @@
           },
           "namedChunks": true,
           "verbose": true,
-          "buildLibsFromSource": true
+          "buildLibsFromSource": false
         }
       },
       "defaultConfiguration": "production"

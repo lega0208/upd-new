@@ -1,11 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types } from 'mongoose';
-import type { CallsByTopic, TopCalldriverTopics } from './types';
+import type {
+  CallsByTopic,
+  ICallDriver,
+  TopCalldriverTopics,
+} from '@dua-upd/types-common';
 
 export type CallDriverDocument = CallDriver & Document;
 
 @Schema()
-export class CallDriver {
+export class CallDriver implements ICallDriver {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 

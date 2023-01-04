@@ -1,12 +1,15 @@
-import { Page, PageMetrics, Task, UxTest } from '@dua-upd/db';
+import { Types } from 'mongoose';
 import type {
   AttachmentData,
   CallsByTopic,
   FeedbackComment,
   GscSearchTermMetrics,
   TopCalldriverTopics,
-} from '@dua-upd/db';
-import { Types } from 'mongoose';
+  IPage,
+  IPageMetrics,
+  ITask,
+  IUxTest,
+} from './schema.types';
 
 export type ApiParams = {
   dateRange: string;
@@ -29,7 +32,7 @@ export interface EntityDetailsData<T> extends ViewData<T> {
 }
 
 export type PagesHomeAggregatedData = Pick<
-  Page,
+  IPage,
   '_id' | 'url' | 'title' | 'all_urls'
 > & {
   visits: number;
@@ -37,7 +40,7 @@ export type PagesHomeAggregatedData = Pick<
 export type PagesHomeData = ViewData<PagesHomeAggregatedData[]>;
 
 export type PageDetailsMetrics = Pick<
-  PageMetrics,
+  IPageMetrics,
   | 'visits'
   | 'visitors'
   | 'views'
@@ -89,7 +92,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   topSearchTermsIncrease?: GscSearchTermMetrics[];
   topSearchTermsDecrease?: GscSearchTermMetrics[];
   top25GSCSearchTerms?: GscSearchTermMetrics[];
-  tasks?: Task[];
+  tasks?: ITask[];
   projects?: {
     id: string;
     title: string;
@@ -310,8 +313,8 @@ export interface ProjectsDetailsData
   avgTaskSuccessFromLastTest: number | null;
   avgSuccessPercentChange: number | null;
   dateFromLastTest: Date;
-  taskSuccessByUxTest: (Partial<UxTest> & { tasks: string })[];
-  tasks: Pick<Task, '_id' | 'title'>[];
+  taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
+  tasks: Pick<ITask, '_id' | 'title'>[];
   feedbackComments: FeedbackComment[];
 }
 

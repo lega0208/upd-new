@@ -2,7 +2,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import {
   Document,
   model,
-  Model,
   Types,
 } from 'mongoose';
 import { Task } from './task.schema';

@@ -16,8 +16,7 @@
         "compiler": "tsc",
         "generateIndexHtml": false,
         "runtimeChunk": false,
-        "target": "node",
-        "webpackConfig": "apps/db-cli/webpack.config.js"
+        "target": "node"
       },
       "configurations": {
         "production": {

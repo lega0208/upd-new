@@ -9,6 +9,7 @@ import { DbModule, DbService } from '@dua-upd/db';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: process.env.DOTENV_CONFIG_PATH || '.env',
     }),
     DbModule,
   ],

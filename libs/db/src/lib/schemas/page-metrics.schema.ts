@@ -4,7 +4,8 @@ import {
   GscSearchTermMetrics,
   AccumulatorOperator,
   AASearchTermMetrics,
-} from './types';
+  IPageMetrics,
+} from '@dua-upd/types-common';
 import { Page } from './page.schema';
 import { Task } from './task.schema';
 import { Project } from './project.schema';
@@ -13,7 +14,7 @@ import { UxTest } from './ux-test.schema';
 export type PageMetricsDocument = PageMetrics & Document;
 
 @Schema({ collection: 'pages_metrics' })
-export class PageMetrics {
+export class PageMetrics implements IPageMetrics {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
@@ -22,9 +23,6 @@ export class PageMetrics {
 
   @Prop({ required: true, type: Date, index: true })
   date = new Date(0);
-
-  @Prop({ type: String })
-  aa_item_id?: string;
 
   @Prop({ type: Number })
   dyf_submit = 0;

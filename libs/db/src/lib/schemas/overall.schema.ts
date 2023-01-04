@@ -1,11 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types } from 'mongoose';
-import { GscSearchTermMetrics, AASearchTermMetrics } from './types';
+import { model, Document, Types } from 'mongoose';
+import {
+  GscSearchTermMetrics,
+  AASearchTermMetrics,
+  IOverall,
+} from '@dua-upd/types-common';
 
 export type OverallDocument = Overall & Document;
 
 @Schema({ collection: 'overall_metrics' })
-export class Overall {
+export class Overall implements IOverall {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
