@@ -28,8 +28,9 @@ jobs:
       parallel-commands-on-agents: |
         npx nx affected --target=lint --parallel=3
         npx nx affected --target=build --parallel=3 --prod
-      install-commands: 'npm ci --prefer-offline --no-audit'
-
+      install-commands: npm ci --prefer-offline --no-audit
+      artifacts-name: nx-dist
+      artifacts-path: dist/
 
   agents:
     name: Nx Cloud - Agents
@@ -40,4 +41,4 @@ jobs:
     with:
       runs-on: ubuntu-latest
       number-of-agents: 3
-      install-commands: 'npm ci --prefer-offline --no-audit'
+      install-commands: npm ci --prefer-offline --no-audit
