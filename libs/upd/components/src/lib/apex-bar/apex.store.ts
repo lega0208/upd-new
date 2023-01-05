@@ -134,8 +134,11 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           ...state.yaxis,
           min: 0,
           max: 1,
-
           tickAmount: 0,
+          title: {
+            ...state?.yaxis?.title,
+            offsetX: 0,
+          },
         },
         xaxis: {
           ...state.xaxis,
