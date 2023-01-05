@@ -24,14 +24,14 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 16.18.1
 
       - name: Use the node_modules cache if available [npm]
         id: use-npm-cache
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-16-modules-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-16.18.1-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install dependencies
         if: steps.use-npm-cache.outputs.cache-hit != 'true'
@@ -51,8 +51,9 @@ jobs:
       parallel-commands-on-agents: |
         npx nx daemon && npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel=3 --prod
       install-commands: npm install
+      node-version: 16.18.1
       artifacts-name: nx-dist
-      artifacts-path: dist/
+      artifacts-path: dist/apps/
 
   agents:
     if: github.event.pull_request.merged == true
@@ -66,6 +67,7 @@ jobs:
       runs-on: ubuntu-latest
       number-of-agents: 3
       install-commands: npm install
+      node-version: 16.18.1
 
   build-and-push-image:
     if: github.event.pull_request.merged == true
@@ -93,7 +95,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: nx-dist
-          path: dist/
+
+      - run: ls -l
 
       - name: Build and push Docker image (web)
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
