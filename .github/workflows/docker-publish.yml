@@ -12,6 +12,57 @@ env:
   REPO_NAME: ${{ github.repository }}
 
 jobs:
+  cache-deps:
+    name: Pull request merge - Validate npm cache for main branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout [main]
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Use the node_modules cache if available [npm]
+        id: use-npm-cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-16-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.use-npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+  build:
+    name: Pull request merge - Build
+    needs: cache-deps
+    uses: nrwl/ci/.github/workflows/nx-cloud-main.yml@v0.11.2
+    secrets:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+      NX_CLOUD_AUTH_TOKEN: ${{ secrets.NX_CLOUD_AUTH_TOKEN }}
+    with:
+      runs-on: ubuntu-latest
+      number-of-agents: 3
+      parallel-commands-on-agents: |
+        npx nx daemon && npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel=3 --prod
+      install-commands: npm install
+      artifacts-name: nx-dist
+      artifacts-path: dist/
+
+  agents:
+    name: Nx Cloud - Agents
+    uses: nrwl/ci/.github/workflows/nx-cloud-agents.yml@v0.11.2
+    secrets:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+      NX_CLOUD_AUTH_TOKEN: ${{ secrets.NX_CLOUD_AUTH_TOKEN }}
+    with:
+      runs-on: ubuntu-latest
+      number-of-agents: 3
+      install-commands: npm install
+
   build-and-push-image:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest

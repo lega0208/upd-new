@@ -21,16 +21,12 @@ jobs:
       NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
       NX_CLOUD_AUTH_TOKEN: ${{ secrets.NX_CLOUD_AUTH_TOKEN }}
     with:
-      runs-on: ubuntu-latest
       number-of-agents: 3
       parallel-commands: |
         npx nx-cloud record -- npx nx workspace-lint
       parallel-commands-on-agents: |
         npx nx affected --target=lint --parallel=3
-        npx nx affected --target=build --parallel=3 --prod
-      install-commands: npm ci --prefer-offline --no-audit
-      artifacts-name: nx-dist
-      artifacts-path: dist/
+        npx nx daemon && npx nx affected --target=build --parallel=3 --prod
 
   agents:
     name: Nx Cloud - Agents
@@ -39,6 +35,4 @@ jobs:
       NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
       NX_CLOUD_AUTH_TOKEN: ${{ secrets.NX_CLOUD_AUTH_TOKEN }}
     with:
-      runs-on: ubuntu-latest
       number-of-agents: 3
-      install-commands: npm ci --prefer-offline --no-audit
