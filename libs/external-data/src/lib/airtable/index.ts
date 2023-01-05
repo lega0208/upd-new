@@ -7,7 +7,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { FieldSet, Query, RecordData, Table } from 'airtable';
 import { QueryParams, SortParameter } from 'airtable/lib/query_params';
 
-import { squishTrim, wait } from '@dua-upd/utils-common';
+import { logJson, squishTrim, wait } from "@dua-upd/utils-common";
 import { getATClient, AirTableAPI } from './client';
 import { bases } from './base';
 import {

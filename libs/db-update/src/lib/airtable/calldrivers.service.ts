@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CallDriver, CallDriverDocument } from '@dua-upd/db';
 import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
+import chalk from 'chalk';
 
 @Injectable()
 export class CalldriversService {
@@ -11,7 +12,7 @@ export class CalldriversService {
     @Inject(AirtableClient.name) private airtableClient: AirtableClient,
     private logger: ConsoleLogger,
     @InjectModel(CallDriver.name, 'defaultConnection')
-    private calldriverModel: Model<CallDriverDocument>,
+    private calldriverModel: Model<CallDriverDocument>
   ) {}
 
   async updateCalldrivers(endDate?: DateType) {
@@ -30,26 +31,32 @@ export class CalldriversService {
       end: (endDate || dayjs().utc(true).subtract(1, 'day')) as DateType,
     } as DateRange;
 
-    const calldriversData: CallDriver[] = (
-      await this.airtableClient.getCalldrivers(dateRange)
-    ).map(
-      (calldriverData) =>
-        ({
-          _id: new Types.ObjectId(),
-          calls: 0,
-          impact: 0,
-          tpc_id: 999999,
-          ...calldriverData,
-        } as CallDriver)
-    );
+    try {
+      const calldriversData: CallDriver[] = (
+        await this.airtableClient.getCalldrivers(dateRange)
+      ).map(
+        (calldriverData) =>
+          ({
+            _id: new Types.ObjectId(),
+            calls: 0,
+            impact: 0,
+            tpc_id: 999999,
+            ...calldriverData,
+          } as CallDriver)
+      );
 
-    if (calldriversData.length === 0) {
-      this.logger.log('Calldrivers already up-to-date.');
-      return;
+      if (calldriversData.length === 0) {
+        this.logger.log('Calldrivers already up-to-date.');
+        return;
+      }
+
+      await this.calldriverModel.insertMany(calldriversData);
+
+      this.logger.log(
+        `Successfully inserted ${calldriversData.length} Calldriver documents.`
+      );
+    } catch (err) {
+      console.error(chalk.redBright(err));
     }
-
-    await this.calldriverModel.insertMany(calldriversData);
-
-    this.logger.log(`Successfully inserted ${calldriversData.length} Calldriver documents.`);
   }
 }
