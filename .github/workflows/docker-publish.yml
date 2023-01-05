@@ -95,6 +95,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: nx-dist
+          path: dist/apps/
 
       - run: ls -l
 
