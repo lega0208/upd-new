@@ -13,6 +13,7 @@ env:
 
 jobs:
   cache-deps:
+    if: github.event.pull_request.merged == true
     name: Pull request merge - Validate npm cache for main branch
     runs-on: ubuntu-latest
     steps:
@@ -37,6 +38,7 @@ jobs:
         run: npm ci
 
   build:
+    if: github.event.pull_request.merged == true
     name: Pull request merge - Build
     needs: cache-deps
     uses: nrwl/ci/.github/workflows/nx-cloud-main.yml@v0.11.2
@@ -53,7 +55,9 @@ jobs:
       artifacts-path: dist/
 
   agents:
+    if: github.event.pull_request.merged == true
     name: Nx Cloud - Agents
+    needs: cache-deps
     uses: nrwl/ci/.github/workflows/nx-cloud-agents.yml@v0.11.2
     secrets:
       NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
@@ -65,6 +69,7 @@ jobs:
 
   build-and-push-image:
     if: github.event.pull_request.merged == true
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
