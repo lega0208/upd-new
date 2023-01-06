@@ -7,7 +7,6 @@ RUN --mount=type=cache,target=/home/node/.npm npm ci
 COPY ./angular.json ./nx.json /tsconfig.base.json ./
 COPY ./apps/ ./apps
 COPY ./libs/ ./libs
-ENV NX_DAEMON=true
 RUN npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --prod --parallel
 RUN rm -r /builder/node_modules && rm -r /builder/.angular && rm -r /builder/tmp
 
@@ -24,14 +23,7 @@ FROM node_base as web
 COPY --from=apps apps/api/package.json .
 RUN --mount=type=cache,target=/home/node/.npm npm install
 COPY --from=apps apps/api/ .
-EXPOSE 9000
-USER node
-CMD ["pm2-runtime", "main.js"]
-
-FROM node_base as web_ci
-COPY dist/apps/api/package.json .
-RUN --mount=type=cache,target=/home/node/.npm npm install
-COPY dist/apps/api/ .
+#COPY .env .
 EXPOSE 9000
 USER node
 CMD ["pm2-runtime", "main.js"]
@@ -42,16 +34,10 @@ COPY --from=apps apps/db-updater/package.json .
 RUN --mount=type=cache,target=/home/node/.npm npm install
 COPY --from=apps apps/db-updater/ .
 COPY --from=apps apps/db-cli/ db-cli/
-EXPOSE 9001
-USER node
-CMD ["pm2-runtime", "main.js"]
-
-FROM node_base as db-updater_ci
-RUN echo -e '#!/bin/sh\nnode db-cli/main.js "$@"' >> /bin/db-cli && chmod +x /bin/db-cli
-COPY dist/apps/db-updater/package.json .
-RUN --mount=type=cache,target=/home/node/.npm npm install
-COPY dist/apps/db-updater/ .
-COPY dist/apps/db-cli/ db-cli/
+#COPY .env .
+#COPY keys keys/
+#COPY .env db-cli/
+#COPY keys db-cli/keys/
 EXPOSE 9001
 USER node
 CMD ["pm2-runtime", "main.js"]
@@ -60,14 +46,6 @@ FROM nginx:alpine as nginx
 RUN apk update && apk add tzdata
 ENV TZ=America/Toronto
 COPY --from=apps apps/upd/ /var/www/html/
-COPY docker/performance_nginx/nginx.conf /etc/nginx/nginx.conf
-EXPOSE 80
-EXPOSE 443
-
-FROM nginx:alpine as nginx_ci
-RUN apk update && apk add tzdata
-ENV TZ=America/Toronto
-COPY dist/apps/upd/ /var/www/html/
 COPY docker/performance_nginx/nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80
 EXPOSE 443
