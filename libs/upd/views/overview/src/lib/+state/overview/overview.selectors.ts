@@ -1,4 +1,8 @@
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import {
+  createFeatureSelector,
+  createSelector,
+  MemoizedSelector,
+} from '@ngrx/store';
 import { ApexAxisChartSeries } from 'ng-apexcharts';
 import { I18nModule, I18nService } from '@dua-upd/upd/i18n';
 import dayjs from 'dayjs';
@@ -13,7 +17,7 @@ import {
   selectPeriodDates,
 } from '@dua-upd/upd/state';
 import { OVERVIEW_FEATURE_KEY, OverviewState } from './overview.reducer';
-import { arrayToDictionary } from '@dua-upd/utils-common';
+import { arrayToDictionary, logJson } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
 
@@ -132,6 +136,79 @@ export const selectComparisonCallsByDaySeries = createSelector(
       }))
 );
 
+// Calls per 100 visits
+export const selectCallsPerVisits = createSelector(
+  selectCallsByDay,
+  selectVisitsByDay,
+  (callsByDay, visitsByDay) => {
+    const callsByDateDict = arrayToDictionary(callsByDay, 'date');
+
+    return visitsByDay
+      .map(({ date, visits }) => {
+        const calls = callsByDateDict[date]?.calls;
+
+        return {
+          x: date,
+          y: calls ? (calls / visits) * 100 : 0,
+        };
+      })
+      .filter(({ y }) => y);
+  }
+);
+
+export const selectComparisonCallsPerVisits = createSelector(
+  selectComparisonCallsByDay,
+  selectComparisonVisitsByDay,
+  selectPeriodDates,
+  (callsByDay, visitsByDay, dates) => {
+    const callsByDateDict = arrayToDictionary(callsByDay, 'date');
+
+    return visitsByDay
+      .filter(({ date }) => dates.has(date))
+      .map(({ date, visits }) => {
+        const calls = callsByDateDict[date]?.calls;
+
+        return {
+          x: dates.get(date) as string,
+          y: calls ? (calls / visits) * 100 : 0,
+        };
+      })
+      .filter(({ y }) => y);
+  }
+);
+
+export const toCallsPerVisitsSeries =
+  (label: string) =>
+  (datesLabel: string, callsPerVisits: DateTimeSeriesData) => {
+    const i18n = I18nModule.injector.get<I18nService>(I18nService);
+
+    return {
+      name: `${i18n.instant(label) || label} – ${datesLabel}`,
+      type: 'line',
+      data: callsPerVisits,
+    };
+  };
+
+export const selectCallsPerVisitsSeries = createSelector(
+  selectCurrentDateRangeLabel,
+  selectCallsPerVisits,
+  selectDatePeriodSelection,
+  toCallsPerVisitsSeries('kpi-calls-per-100-title')
+);
+
+export const selectComparisonCallsPerVisitsSeries = createSelector(
+  selectComparisonDateRangeLabel,
+  selectComparisonCallsPerVisits,
+  selectDatePeriodSelection,
+  toCallsPerVisitsSeries('kpi-calls-per-100-title')
+);
+
+export const selectCallsPerVisitsChartData = createSelector(
+  selectCallsPerVisitsSeries,
+  selectComparisonCallsPerVisitsSeries,
+  (current, comparison) => [current, comparison]
+);
+
 // comboChartData$
 export const selectChartType = createSelector(
   selectDatePeriodSelection,
@@ -165,7 +242,7 @@ export const toVisitsCallsChartSeries =
         type: 'line',
         data: calls,
       },
-    ] as ApexAxisChartSeries;
+    ];
   };
 
 export const selectCallsVisitsComboChartData = createSelector(

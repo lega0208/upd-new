@@ -24,10 +24,11 @@ import {
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
 import {
+  selectCallsPerVisitsChartData,
   selectComboChartData,
   selectComboChartTable,
   selectVisitsByDayChartData,
-  selectVisitsByDayChartTable
+  selectVisitsByDayChartTable,
 } from './overview.selectors';
 
 dayjs.extend(utc);
@@ -317,43 +318,8 @@ export class OverviewFacade {
 
   apexBar$ = this.store.select(selectVisitsByDayChartData);
 
-  comboChartData$ = this.store.select(selectComboChartData)
-  apexCallDrivers$ = combineLatest([
-    this.comboChartData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([calls, lang]) => {
-      const c = [];
-
-      const currentCallDrivers = calls[2].data.map((d: any, i) => {
-        return {
-          x: d.x,
-          y: (d.y / (calls[0]?.data[i] as any)?.y) * 100 || 0,
-        };
-      });
-
-      const previousCallDrivers = calls[3].data.map((d: any, i) => {
-        return {
-          x: d?.x,
-          y: (d?.y / (calls[1]?.data[i] as any)?.y) * 100 || 0,
-        };
-      });
-
-      c.push({
-        name: calls[1].name,
-        type: 'line',
-        data: previousCallDrivers,
-      });
-
-      c.push({
-        name: calls[0].name,
-        type: 'line',
-        data: currentCallDrivers,
-      });
-
-      return c as ApexAxisChartSeries;
-    })
-  );
+  comboChartData$ = this.store.select(selectComboChartData);
+  apexCallDrivers$ = this.store.select(selectCallsPerVisitsChartData);
 
   currentCallVolume$ = this.overviewData$.pipe(
     map(
@@ -432,7 +398,10 @@ export class OverviewFacade {
     )
   );
 
-  satDateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+  satDateRangeLabel$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
     map(([data, lang]) => getWeeklyDatesLabel(data.satDateRange || '', lang))
   );
 
