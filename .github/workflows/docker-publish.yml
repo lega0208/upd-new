@@ -12,8 +12,34 @@ env:
   REPO_NAME: ${{ github.repository }}
 
 jobs:
+  cache-deps:
+    if: github.event.pull_request.merged == true
+    name: Pull request merge - Validate npm cache for main branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout [main]
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.18.1
+
+      - name: Use the node_modules cache if available [npm]
+        id: use-npm-cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-16.18.1-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.use-npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
   build-and-push-image:
     if: github.event.pull_request.merged == true
+    needs: cache-deps
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,7 +60,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build and push Docker image (web)
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: docker/performance_base/Dockerfile
@@ -45,7 +71,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and push Docker image (nginx)
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: docker/performance_base/Dockerfile
@@ -56,7 +82,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and push Docker image (db-updater)
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: docker/performance_base/Dockerfile
