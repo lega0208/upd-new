@@ -235,11 +235,9 @@ export interface IOverall extends IMetrics {
 
 export interface IPageMetrics extends IMetrics {
   url: string;
-
   aa_searchterms?: AASearchTermMetrics[];
-  page?: Types.ObjectId | IPage
+  page?: Types.ObjectId | IPage;
 }
-
 
 /*
  * Page interface

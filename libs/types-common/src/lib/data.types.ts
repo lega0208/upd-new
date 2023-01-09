@@ -157,32 +157,43 @@ export interface OverviewUxData {
   copsTestsCompletedSince2018: number;
 }
 
-export type OverviewProject = ProjectsHomeProject & {
+export interface OverviewProject extends ProjectsHomeProject {
   testType?: string[];
   totalUsers: number;
-};
+}
 
 export interface OverviewProjectData
   extends Omit<ProjectsHomeData, 'projects'> {
   projects: OverviewProject[];
-  uxTests: {
-    title: string;
-    date: Date;
-    test_type: string;
-    success_rate: number | null;
-    total_users: number;
-    scenario: string;
-    attachments: AttachmentData[];
-  }[];
 }
+
+export type OverallSearchTerm = {
+  term: string;
+  total_searches: number;
+  searches_change?: number;
+  clicks: number;
+  ctr: number;
+  position: number;
+};
 
 export interface OverviewData
   extends ViewData<OverviewAggregatedData>,
     OverviewUxData {
   projects?: OverviewProjectData;
+  uxTests: {
+    title: string;
+    date?: Date;
+    test_type?: string;
+    success_rate?: number | null;
+    total_users?: number;
+    scenario?: string;
+    attachments?: AttachmentData[];
+  }[];
   top5CalldriverTopics: TopCalldriverTopics[];
   top5IncreasedCalldriverTopics: TopCalldriverTopics[];
   top5DecreasedCalldriverTopics: TopCalldriverTopics[];
+  searchTermsEn: OverallSearchTerm[];
+  searchTermsFr: OverallSearchTerm[];
 }
 
 export interface TasksHomeAggregatedData {

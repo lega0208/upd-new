@@ -55,7 +55,9 @@
         [pagination]="true"
         [data]="(searchAssessmentData$ | async) || []"
         [cols]="searchAssessmentCols"
-        [title]="'SAT-title' | translate: { start: (satStart) || 0, end: (satEnd) || 0 }"
+        [title]="
+          'SAT-title' | translate: { start: satStart || 0, end: satEnd || 0 }
+        "
         [tooltip]="'SAT-tooltip'"
       >
       </upd-data-table-card>
@@ -63,19 +65,30 @@
   </div>
 </div>
 
-
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [filter]="false"
         [sort]="true"
-        [pagination]="true"
-        [data]="CanSearchTerms"
-        [cols]="CanSearchTermsCols"
-        [title]="'search-terms-canada'"
+        [data]="(topSearchTermsEn$ | async) || []"
+        [cols]="(searchTermsColConfig$ | async) || []"
+        [title]="('top-terms-canada.ca' | translate) + ' &ndash; ' + ('English' | translate)"
       >
       </upd-data-table-card>
     </div>
   </div>
-</div> -->
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [sort]="true"
+        [data]="(topSearchTermsFr$ | async) || []"
+        [cols]="(searchTermsColConfig$ | async) || []"
+        [title]="('top-terms-canada.ca' | translate) + ' &ndash; ' + ('French' | translate)"
+      >
+      </upd-data-table-card>
+    </div>
+  </div>
+</div>

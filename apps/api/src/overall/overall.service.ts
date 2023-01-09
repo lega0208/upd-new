@@ -33,9 +33,10 @@ import type {
   OverviewData,
   OverviewUxData,
   OverviewProjectData,
-  ProjectsHomeProject,
-} from '@dua-upd/types-common';
-import { AsyncLogTiming, dateRangeSplit, getLatestTestData, logJson } from '@dua-upd/utils-common';
+  ProjectsHomeProject, OverviewProject
+} from "@dua-upd/types-common";
+import { arrayToDictionary, AsyncLogTiming, dateRangeSplit, getLatestTestData, logJson } from "@dua-upd/utils-common";
+import { OverallSearchTerm } from "@dua-upd/types-common";
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -136,25 +137,23 @@ export class OverallService {
       .slice(0, 5);
 
     const satDateStart = await this.searchAssessmentModel
-    .find({})
+    .findOne()
     .sort({ date: -1 })
-    .limit(1)
     .exec();
 
     const satDateRange = `${dayjs
-      .utc(satDateStart[0]?.date)
+      .utc(satDateStart?.date)
       .startOf('day')
       .format('YYYY-MM-DD')}/${dayjs
-      .utc(satDateStart[0]?.date)
+      .utc(satDateStart?.date)
       .endOf('week')
       .format('YYYY-MM-DD')}`;
     const satComparisonDateRange = `${dayjs
-      .utc(satDateStart[0]?.date)
+      .utc(satDateStart?.date)
       .subtract(1, 'weeks')
       .startOf('week')
-      .startOf('day')
       .format('YYYY-MM-DD')}/${dayjs
-      .utc(satDateStart[0]?.date)
+      .utc(satDateStart?.date)
       .subtract(1, 'weeks')
       .endOf('week')
       .format('YYYY-MM-DD')}`;
@@ -189,22 +188,120 @@ export class OverallService {
         satComparisonDateRange
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
+      uxTests: (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [],
       ...(await getUxData(testsSince2018)),
       top5CalldriverTopics,
       top5IncreasedCalldriverTopics,
       top5DecreasedCalldriverTopics,
-    } as OverviewData;
+      searchTermsEn: await this.getTopSearchTerms(params, 'en'),
+      searchTermsFr: await this.getTopSearchTerms(params, 'fr'),
+    };
 
     await this.cacheManager.set(cacheKey, results);
 
     return results;
+  }
+
+  async getTopSearchTerms({ dateRange, comparisonDateRange }: ApiParams, lang: 'en' | 'fr') {
+    const [startDate, endDate] = dateRangeSplit(dateRange);
+    const [prevStartDate, prevEndDate] = dateRangeSplit(comparisonDateRange);
+
+    const searchTermsPropName = `aa_searchterms_${lang}`
+
+    const results =
+      (await this.overallModel
+        .aggregate<OverallSearchTerm>()
+        .project({ date: 1, [searchTermsPropName]: 1 })
+        .match({
+          date: { $gte: startDate, $lte: endDate },
+        })
+        .unwind(`$${searchTermsPropName}`)
+        .addFields({
+          [`${searchTermsPropName}.term`]: {
+            $toLower: `$${searchTermsPropName}.term`,
+          },
+        })
+        .group({
+          _id: `$${searchTermsPropName}.term`,
+          total_searches: {
+            $sum: `$${searchTermsPropName}.num_searches`,
+          },
+          clicks: {
+            $sum: `$${searchTermsPropName}.clicks`,
+          },
+          position: {
+            $avg: `$${searchTermsPropName}.position`,
+          },
+        })
+        .sort({ total_searches: -1 })
+        .limit(50)
+        .project({
+          _id: 0,
+          term: '$_id',
+          total_searches: 1,
+          clicks: 1,
+          ctr: {
+            $round: [{ $divide: ['$clicks', '$total_searches'] }, 2],
+          },
+          position: {
+            $round: ['$position', 2],
+          },
+        })
+        .exec()) || [];
+
+    const prevResults =
+      (await this.overallModel
+        .aggregate<Pick<OverallSearchTerm, 'term' | 'total_searches'>>()
+        .project({ date: 1, [searchTermsPropName]: 1 })
+        .match({
+          date: { $gte: prevStartDate, $lte: prevEndDate },
+        })
+        .unwind(`$${searchTermsPropName}`)
+        .addFields({
+          [`${searchTermsPropName}.term`]: {
+            $toLower: `$${searchTermsPropName}.term`,
+          },
+        })
+        .match({
+          [`${searchTermsPropName}.term`]: {
+            $in: results.map(({ term }) => term),
+          },
+        })
+        .group({
+          _id: `$${searchTermsPropName}.term`,
+          total_searches: {
+            $sum: `$${searchTermsPropName}.num_searches`,
+          },
+        })
+        .project({
+          _id: 0,
+          term: '$_id',
+          total_searches: 1,
+        })
+        .exec()) || [];
+
+    const prevResultsDict = arrayToDictionary(prevResults, 'term');
+
+    return results.map((result) => {
+      const prevSearches = prevResultsDict[result.term]?.total_searches;
+      const searches_change =
+        typeof prevSearches === 'number' && prevSearches !== 0
+          ? Math.round(((result.total_searches - prevSearches) / prevSearches) * 100) / 100
+          : 0;
+
+      return {
+        ...result,
+        prevSearches,
+        searches_change,
+      };
+    });
   }
 }
 
 async function getProjects(
   projectModel: Model<ProjectDocument>,
   uxTestsModel: Model<UxTestDocument>
-): Promise<ProjectsHomeData> {
+): Promise<OverviewProjectData> {
   const defaultData = {
     numInProgress: 0,
     numCompletedLast6Months: 0,
@@ -350,7 +447,7 @@ async function getProjects(
 
 
   const projectsData = await projectModel
-    .aggregate<ProjectsHomeProject>()
+    .aggregate<OverviewProject>()
     .lookup({
       from: 'ux_tests',
       let: { project_id: '$_id' },
@@ -435,24 +532,14 @@ async function getProjects(
   const avgTestSuccessAvg = avgUxTest.reduce((acc, data) => acc + data.avgTestSuccess, 0) / avgUxTest.length;
   const testsCompleted = avgUxTest.reduce((acc, data) => acc + data.total, 0);
 
-  const uxTests = await uxTestsModel
-    .aggregate<UxTestDocument>()
-    .project({
-      _id: 0,
-    })
-    .exec();
-
-  const results = {
+  return {
     ...aggregatedData,
     ...uxTest,
     projects: projectsData,
-    uxTests: uxTests,
     avgUxTest,
     avgTestSuccessAvg,
     testsCompleted
   };
-
-  return results;
 }
 
 async function getOverviewMetrics(
