@@ -16,8 +16,6 @@ export const findDuplicatePageUrls = async (db: DbService) => {
   await db.getDuplicatedPages();
 };
 
-/////@@>.asda/sd.
-/// figure out some shit like this but for all the fucked up french pages
 export const fixPagesFromAirtable = async (db: DbService, dbUpdate: DbUpdateService) => {
   console.time('fixPagesFromAirtable');
   // delete pages that need to be repopulated

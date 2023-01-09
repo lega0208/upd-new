@@ -39,6 +39,10 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
   satStart = '';
   satEnd = '';
 
+  topSearchTermsEn$ = this.overviewService.top20SearchTermsEn$;
+  topSearchTermsFr$ = this.overviewService.top20SearchTermsFr$;
+  searchTermsColConfig$ = this.overviewService.searchTermsColConfig$;
+
   constructor(
     private overviewService: OverviewFacade,
     private i18n: I18nFacade
@@ -58,7 +62,7 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
         this.GSCSearchTermsCols = [
           {
             field: '_id',
-            header: this.i18n.service.translate('search-terms', lang),
+            header: this.i18n.service.translate('search-term', lang),
           },
           {
             field: 'clicks',
@@ -91,7 +95,7 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
         this.searchAssessmentCols = [
           {
             field: 'query',
-            header: this.i18n.service.translate('search-terms', lang),
+            header: this.i18n.service.translate('search-term', lang),
           },
           {
             field: 'lang',

@@ -11,7 +11,7 @@ import 'dayjs/locale/fr-ca';
 
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewAggregatedData, OverviewData } from '@dua-upd/types-common';
-import { percentChange } from '@dua-upd/utils-common';
+import { percentChange, UnwrapObservable } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
@@ -277,17 +277,12 @@ export class OverviewFacade {
   ]).pipe(map(([currentKpi, comparisonKpi]) => currentKpi - comparisonKpi));
 
   kpiUXTests$ = this.overviewData$.pipe(
-    map((data) => {
-      const uxTests = data?.projects?.uxTests || [];
-      return uxTests
-        .map((uxTest) => {
-          if (typeof uxTest?.success_rate === 'number') {
-            return uxTest.success_rate;
-          }
-          return -1;
-        })
-        .filter((successRate) => successRate >= 0);
-    })
+    map(
+      (data) =>
+        data?.uxTests
+          ?.filter((uxTest) => typeof uxTest.success_rate === 'number')
+          .map(({ success_rate }) => success_rate as number) || []
+    )
   );
 
   kpiUXTestsPercent$ = combineLatest([this.kpiUXTests$]).pipe(
@@ -804,6 +799,29 @@ export class OverviewFacade {
       { field: 'change', header: 'comparison', pipe: 'percent' },
     ]
   );
+
+  top20SearchTermsEn$ = this.overviewData$.pipe(
+    map((data) => data?.searchTermsEn)
+  );
+  top20SearchTermsFr$ = this.overviewData$.pipe(
+    map((data) => data?.searchTermsFr)
+  );
+
+  searchTermsColConfig$ = createColConfigWithI18n<
+    UnwrapObservable<typeof this.top20SearchTermsEn$>
+  >(this.i18n.service, [
+    { field: 'term', header: 'search-term' },
+    { field: 'total_searches', header: 'Total searches', pipe: 'number' },
+    { field: 'searches_change', header: 'comparison-for-searches', pipe: 'percent' },
+    { field: 'clicks', header: 'clicks', pipe: 'number' },
+    { field: 'ctr', header: 'ctr', pipe: 'percent' },
+    {
+      field: 'position',
+      header: 'position',
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
+  ]);
 
   error$ = this.store.select(OverviewSelectors.selectOverviewError);
 
