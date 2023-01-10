@@ -23,7 +23,6 @@ FROM node_base as web
 COPY --from=apps apps/api/package.json .
 RUN --mount=type=cache,target=/home/node/.npm npm install
 COPY --from=apps apps/api/ .
-#COPY .env .
 EXPOSE 9000
 USER node
 CMD ["pm2-runtime", "main.js"]
@@ -34,10 +33,6 @@ COPY --from=apps apps/db-updater/package.json .
 RUN --mount=type=cache,target=/home/node/.npm npm install
 COPY --from=apps apps/db-updater/ .
 COPY --from=apps apps/db-cli/ db-cli/
-#COPY .env .
-#COPY keys keys/
-#COPY .env db-cli/
-#COPY keys db-cli/keys/
 EXPOSE 9001
 USER node
 CMD ["pm2-runtime", "main.js"]
