@@ -8,14 +8,22 @@ import 'dayjs/locale/fr-ca';
 
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade, selectDatePeriodSelection } from '@dua-upd/upd/state';
-import { percentChange } from '@dua-upd/utils-common';
+import { percentChange, UnwrapObservable } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
-import { GscSearchTermMetrics, PageAggregatedData, PageDetailsData } from '@dua-upd/types-common';
+import {
+  GscSearchTermMetrics,
+  PageAggregatedData,
+  PageDetailsData,
+} from '@dua-upd/types-common';
 
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
-import { selectVisitsByDayChartData, selectVisitsByDayChartTable } from './pages-details.selectors';
+import {
+  selectVisitsByDayChartData,
+  selectVisitsByDayChartTable,
+} from './pages-details.selectors';
+import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 
 dayjs.extend(utc);
 
@@ -677,9 +685,7 @@ export class PagesDetailsFacade {
     })
   );
 
-  apexFeedbackByTagsData$ = combineLatest([
-    this.feedbackByTagsTable$,
-  ]).pipe(
+  apexFeedbackByTagsData$ = combineLatest([this.feedbackByTagsTable$]).pipe(
     map(([feedbackByTagsTable]) => {
       const isZero = feedbackByTagsTable.every(
         (v) => v.currValue === 0 && v.prevValue === 0
@@ -695,6 +701,23 @@ export class PagesDetailsFacade {
     })
   );
 
+  topSearchTerms$ = this.pagesDetailsData$.pipe(
+    map((data) => data?.searchTerms)
+  );
+
+  searchTermsColConfig$ = createColConfigWithI18n<
+    UnwrapObservable<typeof this.topSearchTerms$>
+  >(this.i18n.service, [
+    { field: 'term', header: 'search-term' },
+    { field: 'clicks', header: 'clicks', pipe: 'number' },
+    { field: 'clicksChange', header: 'comparison-for-clicks', pipe: 'percent' },
+    {
+      field: 'position',
+      header: 'position',
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
+  ]);
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
 

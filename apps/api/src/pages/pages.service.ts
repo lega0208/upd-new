@@ -8,12 +8,7 @@ import type {
   PageDocument,
   PageMetricsModel,
 } from '@dua-upd/db';
-import {
-  DbService,
-  Feedback,
-  Page,
-  PageMetrics,
-} from '@dua-upd/db';
+import { DbService, Feedback, Page, PageMetrics } from '@dua-upd/db';
 import type {
   ApiParams,
   GscSearchTermMetrics,
@@ -22,7 +17,8 @@ import type {
   PagesHomeData,
   PagesHomeAggregatedData,
 } from '@dua-upd/types-common';
-import { dateRangeSplit } from '@dua-upd/utils-common';
+import { arrayToDictionary, dateRangeSplit } from '@dua-upd/utils-common';
+import { InternalSearchTerm } from '@dua-upd/types-common';
 
 @Injectable()
 export class PagesService {
@@ -55,9 +51,10 @@ export class PagesService {
       start: startDate,
       end: endDate,
     };
-    const results =
-      (await this.db.views.pageVisits.getVisitsWithPageData(queryDateRange, this.pageModel));
-
+    const results = await this.db.views.pageVisits.getVisitsWithPageData(
+      queryDateRange,
+      this.pageModel
+    );
 
     // const metrics: PagesHomeAggregatedData[] =
     //   await this.pageMetricsModel.getAggregatedPageMetrics(
@@ -247,6 +244,7 @@ export class PagesService {
       feedbackComments: await this.feedbackModel.getComments(params.dateRange, [
         page.url,
       ]),
+      searchTerms: await this.getTopSearchTerms(params),
     } as PageDetailsData;
 
     await this.cacheManager.set(cacheKey, results);
@@ -295,6 +293,96 @@ export class PagesService {
       ...result,
       gsc_searchterms: result.gsc_searchterms.flat(),
     }));
+  }
+
+  async getTopSearchTerms({ dateRange, comparisonDateRange, id }: ApiParams) {
+    const [startDate, endDate] = dateRangeSplit(dateRange);
+    const [prevStartDate, prevEndDate] = dateRangeSplit(comparisonDateRange);
+
+    const results =
+      (await this.pageMetricsModel
+        .aggregate<InternalSearchTerm>()
+        .project({ date: 1, aa_searchterms: 1, page: 1 })
+        .match({
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+          page: new Types.ObjectId(id),
+        })
+        .unwind('$aa_searchterms')
+        .addFields({
+          'aa_searchterms.term': {
+            $toLower: '$aa_searchterms.term',
+          },
+        })
+        .group({
+          _id: '$aa_searchterms.term',
+          clicks: {
+            $sum: '$aa_searchterms.clicks',
+          },
+          position: {
+            $avg: '$aa_searchterms.position',
+          },
+        })
+        .sort({ clicks: -1 })
+        .limit(10)
+        .project({
+          _id: 0,
+          term: '$_id',
+          clicks: 1,
+          position: {
+            $round: ['$position', 2],
+          },
+        })
+        .exec()) || [];
+
+    const prevResults =
+      (await this.pageMetricsModel
+        .aggregate<Pick<InternalSearchTerm, 'term' | 'clicks'>>()
+        .project({ date: 1, aa_searchterms: 1, page: 1 })
+        .match({
+          date: { $gte: prevStartDate, $lte: prevEndDate },
+          page: new Types.ObjectId(id),
+        })
+        .unwind('$aa_searchterms')
+        .addFields({
+          'aa_searchterms.term': {
+            $toLower: '$aa_searchterms.term',
+          },
+        })
+        .match({
+          'aa_searchterms.term': {
+            $in: results.map(({ term }) => term),
+          },
+        })
+        .group({
+          _id: '$aa_searchterms.term',
+          clicks: {
+            $sum: '$aa_searchterms.clicks',
+          },
+        })
+        .project({
+          _id: 0,
+          term: '$_id',
+          clicks: 1,
+        })
+        .exec()) || [];
+
+    const prevResultsDict = arrayToDictionary(prevResults, 'term');
+
+    return results.map((result) => {
+      const prevClicks = prevResultsDict[result.term]?.clicks;
+      const clicksChange =
+        typeof prevClicks === 'number' && prevClicks !== 0
+          ? Math.round(((result.clicks - prevClicks) / prevClicks) * 100) / 100
+          : null;
+
+      return {
+        ...result,
+        clicksChange,
+      };
+    });
   }
 }
 

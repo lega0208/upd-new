@@ -1,43 +1,58 @@
 <div class="container-fluid gx-0">
-    <div class="row">
-      <div class="col">
-        <upd-data-card
-          [current]="gscTotalImpressions$ | async"
-          [comparison]="gscTotalImpressionsPercentChange$ | async"
-          [title]="'total-impressions-google'"
-          [tooltip]="'tooltip-impressions-task-google'"
-        ></upd-data-card>
-      </div>
-      <div class="col">
-        <upd-data-card
-          [current]="gscTotalCtr$ | async"
-          [pipe]="'percent'"
-          [comparison]="gscTotalCtrPercentChange$ | async"
-          [title]="'ctr-google'"
-          [tooltip]="'tooltip-ctr-google'"
-        ></upd-data-card>
-      </div>
-      <div class="col">
-        <upd-data-card
-          [current]="gscTotalPosition$ | async"
-          [pipeParams]="'1.0-2'"
-          [comparison]="gscTotalPositionPercentChange$ | async"
-          [title]="'avg-rank-google'"
-          [tooltip]="'tooltip-avg-rank-task-google'"
-        ></upd-data-card>
-      </div>
+  <div class="row">
+    <div class="col">
+      <upd-data-card
+        [current]="gscTotalImpressions$ | async"
+        [comparison]="gscTotalImpressionsPercentChange$ | async"
+        [title]="'total-impressions-google'"
+        [tooltip]="'tooltip-impressions-task-google'"
+      ></upd-data-card>
+    </div>
+    <div class="col">
+      <upd-data-card
+        [current]="gscTotalCtr$ | async"
+        [pipe]="'percent'"
+        [comparison]="gscTotalCtrPercentChange$ | async"
+        [title]="'ctr-google'"
+        [tooltip]="'tooltip-ctr-google'"
+      ></upd-data-card>
+    </div>
+    <div class="col">
+      <upd-data-card
+        [current]="gscTotalPosition$ | async"
+        [pipeParams]="'1.0-2'"
+        [comparison]="gscTotalPositionPercentChange$ | async"
+        [title]="'avg-rank-google'"
+        [tooltip]="'tooltip-avg-rank-task-google'"
+      ></upd-data-card>
     </div>
   </div>
+</div>
 
 <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col">
-        <upd-data-table-card
-      [data]="(visitsByPage$ | async) || []"
-      [cols]="visitsByPageCols"
-      [title]="'Breakdown by Page - Search from Google'"
-    >
-    </upd-data-table-card>
-      </div>
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [data]="(visitsByPage$ | async) || []"
+        [cols]="visitsByPageCols"
+        [title]="'Breakdown by Page - Search from Google'"
+      >
+      </upd-data-table-card>
     </div>
   </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [sort]="true"
+        [data]="(topSearchTerms$ | async) || []"
+        [cols]="(searchTermsColConfig$ | async) || []"
+        [title]="'top10-terms-canada.ca' | translate"
+        [pagination]="false"
+      >
+      </upd-data-table-card>
+    </div>
+  </div>
+</div>

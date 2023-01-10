@@ -45,19 +45,20 @@
   </div>
 </div>
 
-<!-- <div class="container-fluid my-4 gx-0">
+<div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [data]="(searchTermsCanada$ | async) || []"
-        [cols]="searchTermsCanadaCols"
+        [sort]="true"
+        [data]="(topSearchTerms$ | async) || []"
+        [cols]="(searchTermsColConfig$ | async) || []"
+        [title]="'top10-terms-canada.ca' | translate"
         [pagination]="false"
-        [title]="'search-terms-canada'"
       >
       </upd-data-table-card>
     </div>
   </div>
-</div> -->
+</div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">

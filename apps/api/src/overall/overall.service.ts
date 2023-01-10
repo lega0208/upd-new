@@ -284,15 +284,15 @@ export class OverallService {
 
     return results.map((result) => {
       const prevSearches = prevResultsDict[result.term]?.total_searches;
-      const searches_change =
+      const searchesChange =
         typeof prevSearches === 'number' && prevSearches !== 0
           ? Math.round(((result.total_searches - prevSearches) / prevSearches) * 100) / 100
-          : 0;
+          : null;
 
       return {
         ...result,
         prevSearches,
-        searches_change,
+        searchesChange,
       };
     });
   }

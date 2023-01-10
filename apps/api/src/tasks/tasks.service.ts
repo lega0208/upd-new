@@ -22,7 +22,6 @@ import {
 import type {
   TaskDetailsData,
   TasksHomeData,
-  TasksHomeAggregatedData,
   TaskDetailsAggregatedData,
 } from '@dua-upd/types-common';
 import type { ApiParams } from '@dua-upd/types-common';
@@ -30,7 +29,9 @@ import {
   getAvgSuccessFromLastTests,
   getLatestTest,
   dateRangeSplit,
+  arrayToDictionary,
 } from '@dua-upd/utils-common';
+import { InternalSearchTerm } from '@dua-upd/types-common';
 
 @Injectable()
 export class TasksService {
@@ -152,6 +153,7 @@ export class TasksService {
       avgTaskSuccessFromLastTest: null, // todo: better handle N/A
       dateFromLastTest: null,
       feedbackComments: [],
+      searchTerms: await this.getTopSearchTerms(params),
     };
 
     const uxTests: UxTest[] = (<UxTestDocument[]>task.ux_tests).map((test) =>
@@ -194,6 +196,96 @@ export class TasksService {
     await this.cacheManager.set(cacheKey, returnData);
 
     return returnData;
+  }
+
+  async getTopSearchTerms({ dateRange, comparisonDateRange, id }: ApiParams) {
+    const [startDate, endDate] = dateRangeSplit(dateRange);
+    const [prevStartDate, prevEndDate] = dateRangeSplit(comparisonDateRange);
+
+    const results =
+      (await this.pageMetricsModel
+        .aggregate<InternalSearchTerm>()
+        .project({ date: 1, aa_searchterms: 1, tasks: 1 })
+        .match({
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+          tasks: new Types.ObjectId(id),
+        })
+        .unwind('$aa_searchterms')
+        .addFields({
+          'aa_searchterms.term': {
+            $toLower: '$aa_searchterms.term',
+          },
+        })
+        .group({
+          _id: '$aa_searchterms.term',
+          clicks: {
+            $sum: '$aa_searchterms.clicks',
+          },
+          position: {
+            $avg: '$aa_searchterms.position',
+          },
+        })
+        .sort({ clicks: -1 })
+        .limit(10)
+        .project({
+          _id: 0,
+          term: '$_id',
+          clicks: 1,
+          position: {
+            $round: ['$position', 2],
+          },
+        })
+        .exec()) || [];
+
+    const prevResults =
+      (await this.pageMetricsModel
+        .aggregate<Pick<InternalSearchTerm, 'term' | 'clicks'>>()
+        .project({ date: 1, aa_searchterms: 1, tasks: 1 })
+        .match({
+          date: { $gte: prevStartDate, $lte: prevEndDate },
+          tasks: new Types.ObjectId(id),
+        })
+        .unwind('$aa_searchterms')
+        .addFields({
+          'aa_searchterms.term': {
+            $toLower: '$aa_searchterms.term',
+          },
+        })
+        .match({
+          'aa_searchterms.term': {
+            $in: results.map(({ term }) => term),
+          },
+        })
+        .group({
+          _id: '$aa_searchterms.term',
+          clicks: {
+            $sum: '$aa_searchterms.clicks',
+          },
+        })
+        .project({
+          _id: 0,
+          term: '$_id',
+          clicks: 1,
+        })
+        .exec()) || [];
+
+    const prevResultsDict = arrayToDictionary(prevResults, 'term');
+
+    return results.map((result) => {
+      const prevClicks = prevResultsDict[result.term]?.clicks;
+      const clicksChange =
+        typeof prevClicks === 'number' && prevClicks !== 0
+          ? Math.round(((result.clicks - prevClicks) / prevClicks) * 100) / 100
+          : null;
+
+      return {
+        ...result,
+        clicksChange,
+      };
+    });
   }
 }
 

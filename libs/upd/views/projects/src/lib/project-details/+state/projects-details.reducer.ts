@@ -29,6 +29,7 @@ export const projectDetailsInitialState: ProjectsDetailsState = {
     taskSuccessByUxTest: [],
     tasks: [],
     feedbackComments: [],
+    searchTerms: [],
   },
   loaded: false,
   error: null,
