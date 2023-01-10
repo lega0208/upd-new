@@ -98,6 +98,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
     title: string;
   }[];
   feedbackComments: FeedbackComment[];
+  searchTerms: InternalSearchTerm[]
 }
 
 export interface OverviewAggregatedData {
@@ -170,7 +171,7 @@ export interface OverviewProjectData
 export type OverallSearchTerm = {
   term: string;
   total_searches: number;
-  searches_change?: number;
+  searchesChange?: number | null;
   clicks: number;
   ctr: number;
   position: number;
@@ -196,6 +197,13 @@ export interface OverviewData
   searchTermsFr: OverallSearchTerm[];
 }
 
+export type InternalSearchTerm = {
+  term: string;
+  clicks: number;
+  clicksChange?: number | null;
+  position: number;
+};
+
 export interface TasksHomeAggregatedData {
   _id: string | Types.ObjectId;
   title: string;
@@ -204,6 +212,7 @@ export interface TasksHomeAggregatedData {
   subtopic: string;
   visits: number;
 }
+
 export type TasksHomeData = ViewData<TasksHomeAggregatedData[]>;
 
 export interface TaskDetailsMetrics {
@@ -246,6 +255,7 @@ export interface TaskDetailsData
     title: string;
   }[];
   feedbackComments: FeedbackComment[];
+  searchTerms: InternalSearchTerm[];
 }
 
 export type ProjectStatus =
@@ -327,6 +337,7 @@ export interface ProjectsDetailsData
   taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
   tasks: Pick<ITask, '_id' | 'title'>[];
   feedbackComments: FeedbackComment[];
+  searchTerms: InternalSearchTerm[];
 }
 
 export interface TaskKpi {

@@ -812,7 +812,7 @@ export class OverviewFacade {
   >(this.i18n.service, [
     { field: 'term', header: 'search-term' },
     { field: 'total_searches', header: 'Total searches', pipe: 'number' },
-    { field: 'searches_change', header: 'comparison-for-searches', pipe: 'percent' },
+    { field: 'searchesChange', header: 'comparison-for-searches', pipe: 'percent' },
     { field: 'clicks', header: 'clicks', pipe: 'number' },
     { field: 'ctr', header: 'ctr', pipe: 'percent' },
     {

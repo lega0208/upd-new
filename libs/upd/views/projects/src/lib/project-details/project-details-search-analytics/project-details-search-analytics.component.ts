@@ -7,8 +7,10 @@ import { EN_CA } from '@dua-upd/upd/i18n';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
-
-type VisitsByPageColTypes = GetTableProps<ProjectDetailsSearchAnalyticsComponent, 'visitsByPage$'>
+type VisitsByPageColTypes = GetTableProps<
+  ProjectDetailsSearchAnalyticsComponent,
+  'visitsByPage$'
+>;
 
 @Component({
   selector: 'upd-project-details-search-analytics',
@@ -41,6 +43,15 @@ export class ProjectDetailsSearchAnalyticsComponent implements OnInit {
       )
     );
   visitsByPageCols: ColumnConfig<VisitsByPageColTypes>[] = [];
+
+  topSearchTerms$ = this.projectsDetailsService.topSearchTerms$;
+
+  searchTermsColConfig$ = this.projectsDetailsService.searchTermsColConfig$;
+
+  constructor(
+    private readonly projectsDetailsService: ProjectsDetailsFacade,
+    private i18n: I18nFacade
+  ) {}
 
   ngOnInit(): void {
     this.i18n.service.onLangChange(({ lang }) => {
@@ -87,8 +98,8 @@ export class ProjectDetailsSearchAnalyticsComponent implements OnInit {
           field: 'gscTotalPosition',
           header: this.i18n.service.translate('position', lang),
           pipe: 'number',
+          pipeParam: '1.0-2',
         },
-        // { field: '0', header: this.i18n.service.translate('comparison-for-clicks', lang), pipe: 'percent' },
         {
           field: 'percentChange',
           header: this.i18n.service.translate('comparison-for-clicks', lang),
@@ -98,9 +109,4 @@ export class ProjectDetailsSearchAnalyticsComponent implements OnInit {
       ];
     });
   }
-
-  constructor(
-    private readonly projectsDetailsService: ProjectsDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 }

@@ -10,6 +10,7 @@ import {
   GetTableProps,
   percentChange,
   PickByType,
+  UnwrapObservable,
 } from '@dua-upd/utils-common';
 import { I18nFacade, selectUrl } from '@dua-upd/upd/state';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
@@ -479,26 +480,39 @@ export class ProjectsDetailsFacade {
       const uxTests = data?.taskSuccessByUxTest;
       const tasks = data?.tasks;
 
-      const categories = tasks.map(task => task.title);
+      const categories = tasks.map((task) => task.title);
 
-      const uniqueTestTypes = [...new Set(uxTests.map(item => item.test_type))];
+      const uniqueTestTypes = [
+        ...new Set(uxTests.map((item) => item.test_type)),
+      ];
 
       const series: ApexAxisChartSeries = [];
 
-      uniqueTestTypes.forEach(testType => {
-        const data = categories.map(category => {
-          const tasks = uxTests.filter(task => task.tasks.split("; ").includes(category) && task.test_type === testType && task.success_rate !== null && task.success_rate !== undefined);
-          const taskSuccessRates = tasks.map(task => task.success_rate) as number[];
-          const totalSuccessRates = taskSuccessRates.reduce((acc, val) => acc + val, 0);
+      uniqueTestTypes.forEach((testType) => {
+        const data = categories.map((category) => {
+          const tasks = uxTests.filter(
+            (task) =>
+              task.tasks.split('; ').includes(category) &&
+              task.test_type === testType &&
+              task.success_rate !== null &&
+              task.success_rate !== undefined
+          );
+          const taskSuccessRates = tasks.map(
+            (task) => task.success_rate
+          ) as number[];
+          const totalSuccessRates = taskSuccessRates.reduce(
+            (acc, val) => acc + val,
+            0
+          );
           return tasks.length > 0 ? totalSuccessRates / tasks.length : null;
         }) as number[];
-      
+
         const name = this.i18n.service.translate(testType as string, lang);
-      
+
         series.push({ name, data });
       });
-      
-      const xaxis = categories.map(category => {
+
+      const xaxis = categories.map((category) => {
         return this.i18n.service.translate(category, lang);
       });
 
@@ -810,7 +824,7 @@ export class ProjectsDetailsFacade {
         .filter((v) => v.name !== null && v.name !== '')
         .sort((a, b) => {
           return a.series.length < b.series.length ? 1 : -1;
-        })
+        });
 
       return taskSuccess;
     })
@@ -834,12 +848,26 @@ export class ProjectsDetailsFacade {
     )
   );
 
+  topSearchTerms$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.searchTerms)
+  );
+
+  searchTermsColConfig$ = createColConfigWithI18n<
+    UnwrapObservable<typeof this.topSearchTerms$>
+  >(this.i18n.service, [
+    { field: 'term', header: 'search-term' },
+    { field: 'clicks', header: 'clicks', pipe: 'number' },
+    { field: 'clicksChange', header: 'comparison-for-clicks', pipe: 'percent' },
+    {
+      field: 'position',
+      header: 'position',
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
+  ]);
+
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
 
-  /**
-   * Use the initialization action to perform one
-   * or more tasks in your Effects.
-   */
   init() {
     this.store.dispatch(ProjectsDetailsActions.loadProjectsDetailsInit());
   }

@@ -30,19 +30,20 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
 
   topGSCSearchTerms$ = this.pageDetailsService.top25GSCSearchTerms$;
 
-  searchTermsCanada$ = this.pageDetailsService.topSearchTermsIncrease$;
+  topSearchTerms$ = this.pageDetailsService.topSearchTerms$;
+
+  searchTermsColConfig$ = this.pageDetailsService.searchTermsColConfig$;
 
   referrerType$ = this.pageDetailsService.referrerType$;
 
+  topGSCSearchTermsCols: ColumnConfig<GscSearchTermsColTypes>[] = [];
+  searchTermsCanadaCols: ColumnConfig[] = [];
+  referrerTypeCols: ColumnConfig<ReferrerTypeColTypes>[] = [];
 
   constructor(
     private pageDetailsService: PagesDetailsFacade,
     private i18n: I18nFacade
   ) {}
-
-  topGSCSearchTermsCols: ColumnConfig<GscSearchTermsColTypes>[] = [];
-  searchTermsCanadaCols: ColumnConfig[] = [];
-  referrerTypeCols: ColumnConfig<ReferrerTypeColTypes>[] = [];
 
   ngOnInit(): void {
     this.i18n.service.onLangChange(({ lang }) => {

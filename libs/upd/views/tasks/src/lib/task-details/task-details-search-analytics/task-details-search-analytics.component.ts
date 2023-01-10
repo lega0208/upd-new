@@ -30,6 +30,10 @@ export class TaskDetailsSearchAnalyticsComponent implements OnInit {
   visitsByPage$ = this.taskDetailsService.visitsByPageGSCWithPercentChange$;
   visitsByPageCols: ColumnConfig[] = [];
 
+  topSearchTerms$ = this.taskDetailsService.topSearchTerms$;
+
+  searchTermsColConfig$ = this.taskDetailsService.searchTermsColConfig$;
+
   ngOnInit(): void {
     this.i18n.service.onLangChange(({ lang }) => {
       this.currentLang = lang as LocaleId;

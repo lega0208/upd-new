@@ -17,7 +17,7 @@ import {
 import {
   GetTableProps,
   percentChange,
-  PickByType,
+  PickByType, UnwrapObservable
 } from '@dua-upd/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
@@ -667,6 +667,24 @@ export class TasksDetailsFacade {
       }) as ApexAxisChartSeries;
     })
   );
+
+  topSearchTerms$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.searchTerms)
+  );
+
+  searchTermsColConfig$ = createColConfigWithI18n<
+    UnwrapObservable<typeof this.topSearchTerms$>
+  >(this.i18n.service, [
+    { field: 'term', header: 'search-term' },
+    { field: 'clicks', header: 'clicks', pipe: 'number' },
+    { field: 'clicksChange', header: 'comparison-for-clicks', pipe: 'percent' },
+    {
+      field: 'position',
+      header: 'position',
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
+  ]);
 
   error$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsError);
 
