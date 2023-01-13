@@ -6,6 +6,7 @@ import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter, map, mergeMap, withLatestFrom } from 'rxjs';
 import { PrimeNGConfig, Translation } from 'primeng/api';
+import { FilterService } from 'primeng/api';
 import { fader } from './app.animations';
 import packageJson from 'package.json';
 
@@ -21,13 +22,15 @@ export class AppComponent implements OnInit {
   title = 'Usability Performance Dashboard';
   updVersion = packageJson.version;
 
+
   constructor(
     private i18n: I18nFacade,
     private contexts: ChildrenOutletContexts,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private titleService: Title,
-    private primeNgConfig: PrimeNGConfig
+    private primeNgConfig: PrimeNGConfig,
+    private filterService: FilterService
   ) {}
 
   ngOnInit() {
@@ -58,6 +61,20 @@ export class AppComponent implements OnInit {
       .subscribe((translations) =>
         this.primeNgConfig.setTranslation(translations as Translation)
       );
+
+    const customEquals = 'custom-equals';
+
+    this.filterService.register(customEquals, (value:unknown, filter: string | null | undefined): boolean => {
+        if (filter === undefined || filter === null || filter.trim() === '') {
+            return true;
+        }
+
+        if (value === undefined || value === null) {
+            return false;
+        }
+
+        return value.toString() === filter.toString();
+    });
   }
 
   getRouteAnimationData() {
