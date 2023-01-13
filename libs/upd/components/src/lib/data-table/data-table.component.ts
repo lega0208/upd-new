@@ -6,6 +6,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Table } from 'primeng/table';
+import { equals } from 'rambdax';
 import { ColumnConfig } from '../data-table-styles/types';
 
 @Component({
@@ -31,14 +32,47 @@ export class DataTableComponent<T> implements OnChanges {
   @Input() id?: string;
   @Input() placeholderText = 'dt_search_keyword';
 
+  colFilters = Object.fromEntries(
+    this.cols
+      .filter((col) => col.filterConfig)
+      .map((col) => [col.header, [] as string[]])
+  );
+
+  setFilters(colHeader: string, filters: string[]) {
+    this.colFilters[colHeader] = filters;
+
+    console.log(this.colFilters);
+  }
+
+  resetFilters() {
+    if (this.table?.filters && Object.keys(this.table.filters).length) {
+      this.table.filters = {};
+    }
+
+    this.colFilters = Object.fromEntries(
+      this.cols
+        .filter((col) => col.filterConfig)
+        .map((col) => [col.header, [] as string[]])
+    );
+  }
+
   ngOnChanges(changes: SimpleChanges) {
     const colChanges = changes['cols'];
 
-    if (
-      colChanges &&
-      colChanges.previousValue?.length !== 0 &&
-      colChanges.currentValue !== colChanges.previousValue
-    ) {
+    if (!colChanges?.previousValue || colChanges.previousValue.length === 0) {
+      return;
+    }
+
+    const prevHeaders = colChanges.previousValue.map(
+      (col: ColumnConfig) => col.header
+    );
+    const currentHeaders = colChanges.currentValue.map(
+      (col: ColumnConfig) => col.header
+    );
+
+    if (!equals(prevHeaders, currentHeaders)) {
+      this.resetFilters();
+      this.table?._filter();
       this.table?.clearState();
     }
   }
@@ -47,8 +81,10 @@ export class DataTableComponent<T> implements OnChanges {
     return this.cols.map((obj) => obj.field);
   }
 
-  getEventValue(event: Event) :string {
-    return (event.target as HTMLInputElement).value.replace(/^.+?(?=www\.)/i, '');
+  getEventValue(event: Event): string {
+    return (event.target as HTMLInputElement).value.replace(
+      /^.+?(?=www\.)/i,
+      ''
+    );
   }
-
 }

@@ -115,7 +115,7 @@
                       optionValue="value"
                       optionLabel="name"
                       [placeholder]="'Options'"
-                      (onChange)="filter($event.value)"
+                      (onChange)="filter($event.value); setFilters(col.header, $event.value)"
                       [filter]="false"
                       [showHeader]="false"
                     >
