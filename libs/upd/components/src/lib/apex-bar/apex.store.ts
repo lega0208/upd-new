@@ -13,6 +13,8 @@ import {
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { formatPercent } from '@angular/common';
 import { createBaseConfig } from '../apex-base/apex.config.base';
+import { mergeDeepRight } from 'rambdax';
+import { sum } from '@dua-upd/utils-common';
 
 export interface ChartOptions extends ApexOptions {
   chart: ApexChart;
@@ -57,8 +59,8 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           series: value ? value : [],
           stroke: { width: [3, 3, 3, 3], curve: 'smooth' },
           fill: {
-            opacity: [1, 0.8]
-          }
+            opacity: [1, 0.8],
+          },
         };
       }
       return {
@@ -74,7 +76,10 @@ export class ApexStore extends ComponentStore<ChartOptions> {
   );
 
   readonly setHorizontal = this.updater(
-    (state, value: { isHorizontal: boolean, colorDistributed: boolean}): ChartOptions => {
+    (
+      state,
+      value: { isHorizontal: boolean; colorDistributed: boolean }
+    ): ChartOptions => {
       return {
         ...state,
         plotOptions: {
@@ -90,97 +95,107 @@ export class ApexStore extends ComponentStore<ChartOptions> {
   );
 
   readonly setXAxis = this.updater(
-    (state, value: string[]): ChartOptions => ({
-      ...state,
-      xaxis: {
-        ...state.xaxis,
-        type: 'category',
-        categories: value,
-      },
-    })
+    (state, value: string[]): ChartOptions =>
+      mergeDeepRight(state, {
+        xaxis: {
+          type: 'category',
+          categories: value,
+        },
+      })
   );
 
   readonly getIsPercent = this.select((state) => state.added?.isPercent);
 
-  readonly setYAxis = this.updater((state, value: string): ChartOptions => {
-    return {
-      ...state,
-      yaxis: {
-        ...state.yaxis,
-        title: {
-          ...state?.yaxis?.title,
-          text: value,
+  readonly setYAxis = this.updater(
+    (state, value: string): ChartOptions =>
+      mergeDeepRight(state, {
+        yaxis: {
+          title: {
+            text: value,
+          },
         },
-      },
-    };
-  });
+      })
+  );
 
-  readonly showPercent = this.updater((state, value: { isPercent: boolean, showTitleTooltip: boolean, showMarker: boolean, shared: boolean}): ChartOptions => {
-    if (value?.isPercent) {
+  readonly showPercent = this.updater(
+    (
+      state,
+      value: {
+        isPercent: boolean;
+        showTitleTooltip: boolean;
+        showMarker: boolean;
+        shared: boolean;
+      }
+    ): ChartOptions => {
+      if (value?.isPercent) {
+        let titleTooltip = (seriesName: string) => {
+          return seriesName;
+        };
 
-      let titleTooltip = (seriesName: string) => {
-        return seriesName;
-      };
-      
-      if (!value?.showTitleTooltip) {
-        titleTooltip = () => {
-          return '';
+        if (!value?.showTitleTooltip) {
+          titleTooltip = () => {
+            return '';
+          };
+        }
+
+        return {
+          ...state,
+          yaxis: {
+            ...state.yaxis,
+            min: 0,
+            max: 1,
+            tickAmount: 0,
+            title: {
+              ...state?.yaxis?.title,
+              offsetX: 0,
+            },
+          },
+          xaxis: {
+            ...state.xaxis,
+            tickAmount: 5,
+
+            labels: {
+              ...state.xaxis?.labels,
+              formatter: (val: string) => {
+                return formatPercent(+val, this.i18n.service.currentLang);
+              },
+            },
+          },
+          tooltip: {
+            ...state.tooltip,
+            shared: value?.shared,
+            marker: {
+              show: value?.showMarker,
+            },
+            x: {
+              show: true,
+            },
+            y: {
+              formatter: (
+                value,
+                { series, seriesIndex, dataPointIndex, w }
+              ) => {
+                if (value === null || value === undefined) {
+                  return '-';
+                }
+                return `${formatPercent(
+                  value,
+                  this.i18n.service.currentLang
+                )} ${this.i18n.service.translate(
+                  'success rate',
+                  this.i18n.service.currentLang
+                )}`;
+              },
+              title: {
+                formatter: titleTooltip,
+              },
+            },
+          },
         };
       }
-      
-      return {
-        ...state,
-        yaxis: {
-          ...state.yaxis,
-          min: 0,
-          max: 1,
-          tickAmount: 0,
-          title: {
-            ...state?.yaxis?.title,
-            offsetX: 0,
-          },
-        },
-        xaxis: {
-          ...state.xaxis,
-          tickAmount: 5,
-
-          labels: {
-            ...state.xaxis?.labels,
-            formatter: (val: string) => {
-              return formatPercent(+val, this.i18n.service.currentLang);
-            },
-          },
-        },
-        tooltip: {
-          ...state.tooltip,
-          shared: value?.shared,
-          marker: {
-            show: value?.showMarker,
-        },
-          x: {
-            show: true,
-          },
-          y: {
-            
-            formatter: (value, { series, seriesIndex, dataPointIndex, w }) => {
-              if ( value === null || value === undefined) {
-                return '-';
-              }
-              return `${formatPercent(
-                value,
-                this.i18n.service.currentLang
-              )} ${this.i18n.service.translate('success rate', this.i18n.service.currentLang)}`;
-            },
-            title: {
-              formatter: titleTooltip,
-            },
-            
-          },
-        },
-      };
+      return state;
     }
-    return state;
-  });
+  );
 
   readonly setLocale = this.updater(
     (state, value: string): ChartOptions => ({
@@ -192,22 +207,22 @@ export class ApexStore extends ComponentStore<ChartOptions> {
     })
   );
 
-  readonly type$ = this.select((state) => state.added?.type);
-
-  readonly setLine = this.effect((type$: Observable<string>) => {
-    return type$.pipe(
-      tap((type) => {
-        if (type === 'line') {
-          this.setSeries([
-            {
-              name: 'Series 1',
-              data: [31, 40, 28, 51, 42, 109, 100],
-            },
-          ]);
-        }
-      })
-    );
-  });
-
   readonly vm$ = this.select(this.state$, (state) => state);
+  readonly hasData$ = this.select(
+    this.vm$,
+    (state) =>
+      sum(
+        state?.series
+          ?.flat()
+          .map(
+            (series) =>
+              (
+                (typeof series === 'object' &&
+                  'data' in series &&
+                  series.data) ||
+                []
+              ).length
+          ) || []
+      ) > 0
+  );
 }

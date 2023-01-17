@@ -13,7 +13,7 @@
   <ng-template #elseBlock>
     <div *ngIf="vm$ | async as vm" class="my-3">
       <apx-chart
-        *ngIf="vm.chart"
+        *ngIf="vm.chart && (hasData$ | async)"
         #chart
         [series]="vm.series || []"
         [labels]="vm.labels || []"

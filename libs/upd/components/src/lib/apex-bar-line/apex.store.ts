@@ -11,6 +11,7 @@ import {
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { mergeDeepRight } from 'rambdax';
 import { createBaseConfig } from '../apex-base/apex.config.base';
+import { sum } from '@dua-upd/utils-common';
 
 @Injectable()
 export class ApexStore extends ComponentStore<ApexOptions> {
@@ -96,6 +97,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
       }
       return {
         ...state,
+        series: value,
         yaxis: value.map((s, i) => {
           let yAxisOpt: ApexYAxis = {};
           if (i === 0) {
@@ -149,7 +151,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
               seriesName: value[2].name,
             };
           }
-          return mergeDeepRight(yAxisOpt, {
+          return mergeDeepRight<ApexYAxis>(yAxisOpt, {
             min: 0,
             axisTicks: {
               show: true,
@@ -167,7 +169,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
                 });
               },
             },
-          })
+          });
         }),
         chart: {
           ...state.chart,
@@ -185,6 +187,23 @@ export class ApexStore extends ComponentStore<ApexOptions> {
   );
 
   readonly vm$ = this.select(this.state$, (state) => state);
+  readonly hasData$ = this.select(
+    this.vm$,
+    (state) =>
+      sum(
+        state?.series
+          ?.flat()
+          .map(
+            (series) =>
+              (
+                (typeof series === 'object' &&
+                  'data' in series &&
+                  series.data) ||
+                []
+              ).length
+          ) || []
+      ) > 0
+  );
 }
 
 export function getMax(values: number[]): number {

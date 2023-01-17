@@ -50,6 +50,7 @@ export class ApexBarComponent implements OnInit {
   }
 
   readonly vm$ = this.apexStore.vm$;
+  readonly hasData$ = this.apexStore.hasData$;
 
   constructor(
     private i18n: I18nFacade,

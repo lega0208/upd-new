@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { OverviewFacade } from './+state/overview/overview.facade';
 
 import { I18nFacade } from '@dua-upd/upd/state';
@@ -7,9 +7,10 @@ import { combineLatest } from 'rxjs';
 @Component({
   selector: 'upd-overview',
   templateUrl: './overview.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OverviewComponent implements OnInit {
-  navTabs: { href: string; title: string }[] = []
+  navTabs: { href: string; title: string }[] = [];
 
   currentLang$ = this.i18n.currentLang$;
   loading$ = this.overviewService.loading$;
@@ -19,7 +20,6 @@ export class OverviewComponent implements OnInit {
 
   ngOnInit() {
     this.overviewService.init();
-    console.log('overview init');
 
     combineLatest([
       this.currentLang$
