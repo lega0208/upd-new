@@ -9,19 +9,19 @@
 </div>
   <div class="radialBar">
     <apx-chart
-      *ngIf="chartOptions.chart"
       #chart
-      [series]="chartOptions.series || []"
+      *ngIf="hasData"
+      [series]="series || []"
       [labels]="chartOptions.labels || []"
       [legend]="chartOptions.legend || {}"
-      [chart]="chartOptions.chart"
+      [chart]="chartConfig"
       [yaxis]="chartOptions.yaxis || []"
       [xaxis]="chartOptions.xaxis || {}"
       [stroke]="chartOptions.stroke || {}"
       [plotOptions]="chartOptions.plotOptions || {}"
       [markers]="chartOptions.markers || {}"
       [fill]="chartOptions.fill || {}"
-      [colors]="chartOptions.colors || []"
+      [colors]="colors"
       [dataLabels]="chartOptions.dataLabels || {}"
       [tooltip]="chartOptions.tooltip || {}"
     ></apx-chart>

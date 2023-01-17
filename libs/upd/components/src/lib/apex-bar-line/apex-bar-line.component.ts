@@ -9,6 +9,8 @@ import { ApexAxisChartSeries, ChartComponent } from 'ng-apexcharts';
 import { ColumnConfig } from '../data-table-styles/types';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ApexStore } from './apex.store';
+import { map, tap } from 'rxjs/operators';
+import { sum } from '@dua-upd/utils-common';
 
 @Component({
   selector: 'upd-apex-bar-line',
@@ -31,11 +33,11 @@ export class ApexBarLineComponent implements OnInit {
   }
 
   @Input() set series(value: ApexAxisChartSeries) {
-    this.apexStore.setSeries(value);
+    this.apexStore.setYAxis(value);
   }
 
   vm$ = this.apexStore.vm$;
-
+  hasData$ = this.apexStore.hasData$;
   constructor(
     private i18n: I18nFacade,
     private readonly apexStore: ApexStore

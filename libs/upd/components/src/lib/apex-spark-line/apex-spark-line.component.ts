@@ -1,24 +1,7 @@
 import {
-  ApexAnnotations,
   ApexAxisChartSeries,
   ApexChart,
-  ApexDataLabels,
-  ApexFill,
-  ApexForecastDataPoints,
-  ApexGrid,
-  ApexLegend,
-  ApexMarkers,
-  ApexNoData,
-  ApexNonAxisChartSeries, ApexOptions,
-  ApexPlotOptions,
-  ApexResponsive,
-  ApexStates,
-  ApexStroke,
-  ApexTheme,
-  ApexTitleSubtitle,
-  ApexTooltip,
-  ApexXAxis,
-  ApexYAxis,
+  ApexOptions,
   ChartComponent,
   ChartType
 } from 'ng-apexcharts';
@@ -35,12 +18,10 @@ import { ColumnConfig } from '../data-table-styles/types';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import {
-  comparisonStyling,
   KpiObjectiveStatus,
   KpiObjectiveStatusConfig,
-  KpiOptionalConfig,
+  KpiOptionalConfig
 } from '../data-card/data-card.component';
-import { formatPercent } from '@angular/common';
 import {
   defaultKpiObjectiveStatusConfig,
   defaultKpiObjectiveCriteria,
@@ -51,40 +32,18 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
+import { mergeDeepRight } from 'rambdax';
+import { sum } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
 
-export type ChartOptions = {
-  annotations?: ApexAnnotations;
-  chart?: ApexChart;
-  colors?: string[];
-  dataLabels?: ApexDataLabels;
-  fill?: ApexFill;
-  forecastDataPoints?: ApexForecastDataPoints;
-  grid?: ApexGrid;
-  labels?: string[];
-  legend?: ApexLegend;
-  markers?: ApexMarkers;
-  noData?: ApexNoData;
-  plotOptions?: ApexPlotOptions;
-  responsive?: ApexResponsive[];
-  series: ApexAxisChartSeries | ApexNonAxisChartSeries;
-  states?: ApexStates;
-  stroke?: ApexStroke;
-  subtitle?: ApexTitleSubtitle;
-  theme?: ApexTheme;
-  title?: ApexTitleSubtitle;
-  tooltip?: ApexTooltip;
-  xaxis?: ApexXAxis;
-  yaxis?: ApexYAxis | ApexYAxis[];
-};
 @Component({
   selector: 'upd-apex-spark-line',
   templateUrl: './apex-spark-line.component.html',
   styleUrls: ['./apex-spark-line.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ApexSparkLineComponent implements OnChanges {
+export class ApexSparkLineComponent {
   @ViewChild('chart', { static: false }) chart!: ChartComponent;
   @Input() secondaryTitleCols: ColumnConfig = { field: '', header: '' };
   @Input() secondaryTitleData: Record<string, number | string>[] = [];
@@ -95,23 +54,43 @@ export class ApexSparkLineComponent implements OnChanges {
   @Input() labels: string[] = [''];
   @Input() seriesLabel = 'visits';
   @Input() kpiObjectiveCriteria = defaultKpiObjectiveCriteria;
+  @Input() kpiStylesConfig: KpiOptionalConfig = {};
   @Input() modal = '';
   @Input() keyword = 'calls';
   @Input() series: ApexAxisChartSeries = [];
   @Input() scale = 100;
+  @Input() difference = 0;
   type: ChartType = 'line';
 
-  chartOptions: Partial<ApexOptions> = {
-    chart: {
-      type: 'line',
-      sparkline: {
-        enabled: true,
-      },
-      height: 50,
-      offsetY: 25,
-      locales: [fr, en],
-      defaultLocale: 'en',
+  get hasData() {
+    return sum(
+      this.series
+        ?.flat()
+        .map(
+          (series) =>
+            (
+              (typeof series === 'object' &&
+                'data' in series &&
+                series.data) ||
+              []
+            ).length
+        ) || []
+    ) > 0
+  }
+  readonly chartConfig: ApexChart = {
+    type: 'line',
+    sparkline: {
+      enabled: true,
     },
+    height: 50,
+    offsetY: 25,
+    locales: [fr, en],
+    defaultLocale: 'en',
+  }
+
+  chartOptions: Partial<ApexOptions> = {
+    chart: this.chartConfig,
+    labels: this.labels,
     stroke: {
       curve: 'smooth',
       width: 1.8,
@@ -123,113 +102,73 @@ export class ApexSparkLineComponent implements OnChanges {
       fixed: {
         enabled: false,
       },
+      y: {
+        formatter: (val: number) => {
+          return val?.toLocaleString(this.i18n.service.currentLang, {
+            maximumFractionDigits: 2,
+          });
+        },
+      },
       x: {
         show: true,
+        formatter: (val: number) => {
+          const lang = this.i18n.service.currentLang;
+          const dateFormat = lang === EN_CA ? 'MMM D' : 'D MMM';
+
+          return dayjs
+            .utc(val)
+            .locale(this.i18n.service.currentLang)
+            .format(dateFormat);
+        },
       },
       inverseOrder: true,
     },
   };
-  curr = '';
-  @Input() kpiStylesConfig: KpiOptionalConfig = {};
-  @Input() difference = 0;
-  diff = '';
 
   constructor(private i18n: I18nFacade) {}
 
   get kpiObjectiveStatus() {
-    return typeof this.current === 'number'
-      ? this.kpiObjectiveCriteria(this.current, this.comparison || 0)
-      : 'none';
+    return this.kpiObjectiveCriteria(this.current, this.comparison || 0);
   }
 
   get kpiConfig(): KpiObjectiveStatusConfig {
-    const mergedConfig = { ...defaultKpiObjectiveStatusConfig };
-
-    // merge any provided config options with defaults
-    for (const key of Object.keys(
-      this.kpiStylesConfig
-    ) as KpiObjectiveStatus[]) {
-      mergedConfig[key] = {
-        ...mergedConfig[key],
-        ...this.kpiStylesConfig[key],
-      };
-    }
-
-    return mergedConfig;
+    return mergeDeepRight(defaultKpiObjectiveStatusConfig, this.kpiStylesConfig);
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['current'] || changes['comparison'] || changes['series']) {
-      this.i18n.currentLang$.subscribe((lang) => {
-        const locale = lang === EN_CA ? 'en' : 'fr';
+  colours = ['#DEDEDE', this.kpiConfig[this.kpiObjectiveStatus].colour];
+  get colors() {
+    this.colours[1] = this.kpiConfig[this.kpiObjectiveStatus].colour;
 
-        this.diff = (this.difference * this.scale).toLocaleString(lang, {
-          minimumFractionDigits: 1, maximumFractionDigits: 2
-        });
+    return this.colours;
+  }
 
-        const colour = this.kpiConfig[this.kpiObjectiveStatus].colour as string;
+  // ngOnChanges(changes: SimpleChanges): void {
+  //   const current = changes['current'];
+  //   const comparison = changes['comparison'];
+  //
+  //   if ((current?.currentValue !== current?.previousValue || comparison?.currentValue !== comparison?.previousValue)) {
+  //     const newStatus = this.kpiObjectiveCriteria(current.currentValue || 0, comparison.currentValue || 0);
+  //     this.colour = ['#DEDEDE', this.kpiConfig[newStatus].colour];
+  //     console.log(this.colour)
+  //   }
+  // }
 
-        this.curr = Math.abs(this.current * this.scale).toLocaleString(locale, {
-          maximumFractionDigits: 1,
-        });
+  get diff() {
+    return (this.difference * this.scale).toLocaleString(
+      this.i18n.service.currentLang,
+      {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 2,
+      }
+    );
+  }
 
-        const seriesValue = (data: number) => {
-          return `${Math.abs(this.current * 100).toLocaleString(locale, {
-            maximumFractionDigits: 1,
-          })}`;
-        };
-        const dateFormat = lang === EN_CA ? 'MMM D' : 'D MMM';
-
-        //     this.chartOptions = {
-        //       ...this.chartOptions,
-        //       series: [Math.abs(this.comparison * 100)],
-        //       fill: { colors: [colour] },
-        //       labels: this.comparison !== 0 ? [comparison] : [''],
-        //       plotOptions: {
-        //         radialBar: {
-        //           ...this.chartOptions.plotOptions?.radialBar,
-        //           dataLabels: {
-        //             ...this.chartOptions.plotOptions?.radialBar?.dataLabels,
-        //             name: {
-        //               ...this.chartOptions.plotOptions?.radialBar?.dataLabels?.name,
-        //               color: colour,
-        //             },
-        //             value: {
-        //               ...this.chartOptions.plotOptions?.radialBar?.dataLabels
-        //                 ?.value,
-        //               formatter: seriesValue,
-        //             },
-        //           },
-        //         },
-        //       },
-        //     };
-        //   });
-        // }
-
-        this.chartOptions = {
-          ...this.chartOptions,
-          series: this.series,
-          colors: ['#DEDEDE', colour],
-          labels: this.labels,
-          tooltip: {
-            ...this.chartOptions.tooltip,
-            y: {
-              ...this.chartOptions.tooltip?.y,
-              formatter: (val: number) => {
-                return val.toLocaleString(locale, {
-                  maximumFractionDigits: 2,
-                });
-              },
-            },
-            x: {
-              ...this.chartOptions.tooltip?.x,
-              formatter: (val: number) => {
-                return dayjs.utc(val).locale(lang).format(dateFormat);
-              }
-            }
-          },
-        };
-      });
-    }
+  get curr() {
+    return Math.abs(this.current * this.scale).toLocaleString(
+      this.i18n.service.currentLang,
+      {
+        maximumFractionDigits: 1,
+      }
+    );
   }
 }
