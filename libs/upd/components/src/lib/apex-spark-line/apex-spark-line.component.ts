@@ -3,24 +3,20 @@ import {
   ApexChart,
   ApexOptions,
   ChartComponent,
-  ChartType
+  ChartType,
 } from 'ng-apexcharts';
 import {
   ChangeDetectionStrategy,
   Component,
   Input,
-  OnChanges,
-  OnInit,
-  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { ColumnConfig } from '../data-table-styles/types';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import {
-  KpiObjectiveStatus,
   KpiObjectiveStatusConfig,
-  KpiOptionalConfig
+  KpiOptionalConfig,
 } from '../data-card/data-card.component';
 import {
   defaultKpiObjectiveStatusConfig,
@@ -63,20 +59,23 @@ export class ApexSparkLineComponent {
   type: ChartType = 'line';
 
   get hasData() {
-    return sum(
-      this.series
-        ?.flat()
-        .map(
-          (series) =>
-            (
-              (typeof series === 'object' &&
-                'data' in series &&
-                series.data) ||
-              []
-            ).length
-        ) || []
-    ) > 0
+    return (
+      sum(
+        this.series
+          ?.flat()
+          .map(
+            (series) =>
+              (
+                (typeof series === 'object' &&
+                  'data' in series &&
+                  series.data) ||
+                []
+              ).length
+          ) || []
+      ) > 0
+    );
   }
+
   readonly chartConfig: ApexChart = {
     type: 'line',
     sparkline: {
@@ -86,7 +85,7 @@ export class ApexSparkLineComponent {
     offsetY: 25,
     locales: [fr, en],
     defaultLocale: 'en',
-  }
+  };
 
   chartOptions: Partial<ApexOptions> = {
     chart: this.chartConfig,
@@ -132,26 +131,19 @@ export class ApexSparkLineComponent {
   }
 
   get kpiConfig(): KpiObjectiveStatusConfig {
-    return mergeDeepRight(defaultKpiObjectiveStatusConfig, this.kpiStylesConfig);
+    return mergeDeepRight(
+      defaultKpiObjectiveStatusConfig,
+      this.kpiStylesConfig
+    );
   }
 
   colours = ['#DEDEDE', this.kpiConfig[this.kpiObjectiveStatus].colour];
+
   get colors() {
     this.colours[1] = this.kpiConfig[this.kpiObjectiveStatus].colour;
 
     return this.colours;
   }
-
-  // ngOnChanges(changes: SimpleChanges): void {
-  //   const current = changes['current'];
-  //   const comparison = changes['comparison'];
-  //
-  //   if ((current?.currentValue !== current?.previousValue || comparison?.currentValue !== comparison?.previousValue)) {
-  //     const newStatus = this.kpiObjectiveCriteria(current.currentValue || 0, comparison.currentValue || 0);
-  //     this.colour = ['#DEDEDE', this.kpiConfig[newStatus].colour];
-  //     console.log(this.colour)
-  //   }
-  // }
 
   get diff() {
     return (this.difference * this.scale).toLocaleString(

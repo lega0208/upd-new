@@ -68,8 +68,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
   );
 
   readonly setYAxis = this.updater(
-    (state, value: ApexAxisChartSeries = []): ApexOptions => {
-      console.log('setYAxis');
+    (state, value: ApexAxisChartSeries): ApexOptions => {
       const firstDataSet: number[] = [0, 1]
         .map((p: number) => {
           return value[p].data;
