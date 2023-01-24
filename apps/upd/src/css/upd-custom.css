@@ -479,9 +479,9 @@ margin: 0px 20px 0px 20px;
 }
 
 .p-datatable.p-datatable-sm .p-datatable-header {
-  /* padding: 0.5rem 0.5rem; */
+  /* padding: 0.5rem 0.5rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; */
   font-size: 1.125rem;
   color: #000;
 }

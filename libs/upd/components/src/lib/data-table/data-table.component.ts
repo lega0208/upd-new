@@ -31,6 +31,8 @@ export class DataTableComponent<T> implements OnChanges {
   @Input() exports = true;
   @Input() id?: string;
   @Input() placeholderText = 'dt_search_keyword';
+  
+  keys: string[] = [];
 
   colFilters = Object.fromEntries(
     this.cols
@@ -38,10 +40,8 @@ export class DataTableComponent<T> implements OnChanges {
       .map((col) => [col.header, [] as string[]])
   );
 
-  setFilters(colHeader: string, filters: string[]) {
-    this.colFilters[colHeader] = filters;
-
-    console.log(this.colFilters);
+  setFilters(colField: string, colHeader: string, filters: string[]) {
+    this.colFilters[`${colHeader}:${colField}`] = filters;
   }
 
   resetFilters() {
@@ -54,6 +54,31 @@ export class DataTableComponent<T> implements OnChanges {
         .filter((col) => col.filterConfig)
         .map((col) => [col.header, [] as string[]])
     );
+  }
+
+  deleteFilter(colHeader: string, filter: string) {
+        this.colFilters[colHeader] = this.colFilters[colHeader].filter(
+          (f) => f !== filter
+        );
+
+        this.table?.filter(this.colFilters[colHeader], colHeader.split(":")[1], 'in');
+
+        (this.table?.filters as any)[colHeader.split(':')[1]] =
+          [
+            {
+            value: this.colFilters[colHeader].length === 0 ? null : this.colFilters[colHeader],
+            matchMode: 'in',
+            operator: 'and',
+          }];
+
+        if (Object.values(this.colFilters).every((v) => v.length === 0)) {
+          this.colFilters = {};
+        }
+}
+
+  clearAll() {
+    this.colFilters = {};
+    this.table?.clear();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -86,5 +111,9 @@ export class DataTableComponent<T> implements OnChanges {
       /^.+?(?=www\.)/i,
       ''
     );
+  }
+
+  ngAfterContentChecked() {
+    this.keys = Object.keys(this.colFilters);
   }
 }
