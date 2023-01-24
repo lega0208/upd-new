@@ -253,6 +253,12 @@ export class AirtableClient {
       ux_tests: fields['User Testing Projects'],
       user_type: fields['User Type'],
       pages: fields['Pages'],
+      program: squishTrim(fields['Program']),
+      service: squishTrim(fields['Services']),
+      user_journey: squishTrim(fields['User Journey']),
+      status: squishTrim(fields['Status']),
+      channel: fields['Channel'],
+      core: fields['Core'],
     })) as TaskData[];
   }
 
@@ -296,6 +302,7 @@ export class AirtableClient {
       status: squishTrim(fields['Status']),
       cops: fields['COPS'],
       attachments: fields['Attachments (Ex. Scorecard)'],
+      description: fields['Project Description'],
     })) as UxTestData[];
   }
 

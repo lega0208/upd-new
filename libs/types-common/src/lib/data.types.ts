@@ -211,6 +211,12 @@ export interface TasksHomeAggregatedData {
   topic: string;
   subtopic: string;
   visits: number;
+  program: string;
+  service: string;
+  user_journey: string;
+  status: string;
+  core: string[];
+  channel: string[];
 }
 
 export type TasksHomeData = ViewData<TasksHomeAggregatedData[]>;

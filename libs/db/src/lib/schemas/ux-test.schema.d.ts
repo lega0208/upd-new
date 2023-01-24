@@ -35,6 +35,7 @@ export declare class UxTest {
   status?: string;
   cops?: boolean;
   attachments?: string[];
+  desciption?: string;
 }
 export declare const UxTestSchema: import('mongoose').Schema<
   Document<UxTest, any, any>,

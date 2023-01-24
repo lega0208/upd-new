@@ -44,6 +44,24 @@ export class Task implements ITask {
 
   @Prop({ type: [Number] })
   tpc_ids: number[] = [];
+
+  @Prop({ type: String })
+  program = '';
+
+  @Prop({ type: String })
+  service = '';
+
+  @Prop({ type: String })
+  user_journey = '';
+
+  @Prop({ type: String })
+  status = '';
+
+  @Prop({ type: [String] })
+  channel: string[] = [];
+
+  @Prop({ type: [String] })
+  core: string[] = [];
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

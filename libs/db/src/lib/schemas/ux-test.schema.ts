@@ -80,6 +80,9 @@ export class UxTest implements IUxTest {
 
   @Prop({ type: [{ id: String, url: String, filename: String }] })
   attachments?: AttachmentData[];
+
+  @Prop({ type: String })
+  description?: string;
 }
 
 export const UxTestSchema = SchemaFactory.createForClass(UxTest);
