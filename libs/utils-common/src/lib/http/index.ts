@@ -1,4 +1,4 @@
-import { load } from 'cheerio';
+import { load } from 'cheerio/lib/slim';
 import axios from 'axios';
 import { batchAwait, squishTrim } from '../utils-common';
 import { LoggerService } from '@nestjs/common';
