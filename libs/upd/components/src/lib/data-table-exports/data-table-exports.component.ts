@@ -25,6 +25,7 @@ import { ProjectStatus } from '@dua-upd/types-common';
   providers: [NgbPopoverConfig],
 })
 export class DataTableExportsComponent<T> {
+  utf8Encoder = new TextEncoder();
   exportOptions: DropdownOption<'csv' | 'pdf' | 'xlsx'>[] = [
     {
       label: 'CSV',
@@ -100,9 +101,7 @@ export class DataTableExportsComponent<T> {
           formattedRow[colKey] =
             projectStatuses[(<unknown>row[col.field as keyof T]) as string];
         } else {
-          formattedRow[colKey] = (<unknown>(
-            row[col.field as keyof T]
-          )) as string;
+          formattedRow[colKey] = (<unknown>row[col.field as keyof T]) as string;
         }
 
         return formattedRow;
@@ -114,21 +113,33 @@ export class DataTableExportsComponent<T> {
     if (this.data.length) {
       const data = await this.getFormattedExportData(true);
 
-      const headerRow = Object.keys(data[0]).map((header: string) => `"${header}"`);
-      const dataRows = data.map((row) => Object.values(row).map((cellData) => `"${cellData}"`));
+      const headerRow = Object.keys(data[0]).map(
+        (header: string) => `"${header}"`
+      );
+      const dataRows = data.map((row) =>
+        Object.values(row).map((cellData) => `"${cellData}"`)
+      );
 
-      const csvData = [
-        headerRow,
-        ...dataRows,
-      ];
+      const csvData = [headerRow, ...dataRows];
 
       const csvOutput = csvData.map((csvRow) => csvRow.join(',')).join('\n');
 
-      const blob = new Blob([csvOutput], { type: 'text/csv;charset=utf-8;' });
+      // UTF-8 Byte-order mark (so that Excel knows to use UTF-8)
+      // https://en.wikipedia.org/wiki/Byte_order_mark#Byte_order_marks_by_encoding
+      const BOM = Uint8Array.from([0xEF, 0xBB, 0xBF]);
+
+      const encodedCsv = this.utf8Encoder.encode(csvOutput);
+
+      const blob = new Blob([BOM, encodedCsv], {
+        type: 'text/csv;charset=utf-8;',
+        endings: 'native',
+      });
 
       const date = dayjs().format('YYYY-MM-DD');
 
-      FileSaver.saveAs(blob, `upd-data-table_export_${date}.csv`);
+      FileSaver.saveAs(blob, `upd-data-table_export_${date}.csv`, {
+        autoBom: false,
+      });
     }
   }
 
@@ -141,13 +152,14 @@ export class DataTableExportsComponent<T> {
         title: obj.header,
       }));
 
-      const minCellWidth = columnsExport.length === 1 ? 100 : 100 / (columnsExport.length - 1);
+      const minCellWidth =
+        columnsExport.length === 1 ? 100 : 100 / (columnsExport.length - 1);
 
       const doc = new jsPdf.default('p', 'mm', 'a4');
 
       autoTable(doc, {
         styles: { halign: 'left' },
-        body: await this.getFormattedExportData() as RowInput[],
+        body: (await this.getFormattedExportData()) as RowInput[],
         bodyStyles: { overflow: 'linebreak', minCellWidth: minCellWidth },
         columns: columnsExport,
       });
@@ -190,8 +202,9 @@ export class DataTableExportsComponent<T> {
   saveAsExcelFile(buffer: ArrayBuffer, fileName: string) {
     const date = dayjs().format('YYYY-MM-DD');
 
-    const data: Blob = new Blob([buffer], {
+    const data = new Blob([buffer], {
       type: 'application/octet-stream',
+      endings: 'native',
     });
 
     FileSaver.saveAs(data, `${fileName}_export_${date}.xlsx`);
