@@ -1,5 +1,15 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
+    <div class="col-lg-12">
+    <upd-card
+    [title]="'Project description'"
+  >{{ projectDesc$ }}</upd-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
     <div class="col-lg-4 col-sm-12">
       <upd-data-card
         [current]="avgTaskSuccessFromLastTest$ | async"
@@ -75,6 +85,39 @@
         [tableCols]="whatWasWrongTableCols"
         [table]="whatWasWrongChart$ | async"
       ></upd-apex-donut>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+      [data]="(memberList$ | async) || []"
+      [cols]="memberListCols"
+      [sort]="false"
+      [filter]="false"
+      [pagination]="false"
+      [title]="'Members'"
+    >
+    </upd-data-table-card>
+
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-12">
+    <upd-card
+    [title]="'Timeline'"
+  >
+  <p>Start Date: {{ startDate$ }}</p>
+  <p>Launch Date: {{ launchDate$ }}</p>
+  <p>Completed: {{ completedField$ }}</p>
+  <p>Year review: {{ yearReview$ }}</p>
+
+</upd-card>
     </div>
   </div>
 </div>
