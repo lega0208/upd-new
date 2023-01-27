@@ -6,6 +6,7 @@ import {
 import { LocaleId, EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { GetTableProps } from '@dua-upd/utils-common';
+import { combineLatest, Observable, of } from 'rxjs';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 type ParticipantTasksColTypes = GetTableProps<
@@ -63,6 +64,21 @@ export class ProjectDetailsSummaryComponent implements OnInit {
     fail: { message: 'kpi-not-met-volume' },
   };
 
+  memberList = [
+    {role: 'Role name 1', projectLead: 'Name 1', vendor: 'Product name 1'}, 
+    {role: 'Role name 2', projectLead: 'Name 2', vendor: 'Product name 2'}, 
+    {role: 'Role name 3', projectLead: 'Name 3', vendor: 'Product name 3'}
+  ]
+  memberList$: Observable<any> = of(this.memberList);
+  memberListCols: ColumnConfig[] = [];
+
+  projectDesc$ = 'This is the description of the project.';
+
+  startDate$ = 'Jan 1';
+  launchDate$ = 'Jan 1';
+  completedField$ = 'Test string for completed field'
+  yearReview$ = 'Test string for year review field'
+
   constructor(
     private readonly projectsDetailsService: ProjectsDetailsFacade,
     private i18n: I18nFacade
@@ -118,6 +134,23 @@ export class ProjectDetailsSummaryComponent implements OnInit {
           header: this.i18n.service.translate('visits', lang),
           pipe: 'number',
         },
+      ];
+    });
+
+    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+      this.memberListCols = [
+        {
+          field: 'role',
+          header: this.i18n.service.translate('Role', lang),
+        },
+        {
+          field: 'projectLead',
+          header: this.i18n.service.translate('Name', lang)
+        },
+        {
+          field: 'vendor',
+          header: this.i18n.service.translate('Product', lang),
+        }
       ];
     });
   }
