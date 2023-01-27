@@ -72,6 +72,7 @@
     "mongoose": "^6.7.3",
     "nest-commander": "^3.1.0",
     "ng-apexcharts": "^1.7.4",
+    "ngrx-store-localstorage": "^14.0.0",
     "ngx-google-analytics": "^14.0.0",
     "notifications-node-client": "^6.0.0",
     "pm2": "^5.2.2",
