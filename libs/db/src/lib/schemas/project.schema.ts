@@ -23,6 +23,9 @@ export class Project implements IProject {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }] })
   tasks?: Types.ObjectId[] | Task[];
+
+  @Prop({ type: String })
+  description?: string;
 }
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);

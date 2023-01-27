@@ -29,18 +29,23 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-12">
-<upd-apex-bar
-[title]="'Tasks success by test'"
-[series]="(apexTaskSuccessByUxTest$ | async)?.series || []"
-[yAxis]="'ux-tests' | translate"
-[xAxis]="(apexTaskSuccessByUxTest$ | async)?.xaxis || []"
-[horizontal]="{isHorizontal: true, colorDistributed: false}"
-[showPercent]="{ isPercent: true, showTitleTooltip: true, showMarker: true, shared: true }"
-[table]="(taskSuccessByUxTest$ | async) || []"
-[tableCols]="taskSuccessRateCols"
-></upd-apex-bar>
-</div>
-</div>
+      <upd-apex-bar
+        [title]="'Tasks success by test'"
+        [series]="(apexTaskSuccessByUxTest$ | async)?.series || []"
+        [yAxis]="'ux-tests' | translate"
+        [xAxis]="(apexTaskSuccessByUxTest$ | async)?.xaxis || []"
+        [horizontal]="{ isHorizontal: true, colorDistributed: false }"
+        [showPercent]="{
+          isPercent: true,
+          showTitleTooltip: true,
+          showMarker: true,
+          shared: true
+        }"
+        [table]="(taskSuccessByUxTest$ | async) || []"
+        [tableCols]="taskSuccessRateCols"
+      ></upd-apex-bar>
+    </div>
+  </div>
 </div>
 
 <div class="container-fluid my-4 gx-0">
@@ -60,29 +65,31 @@
   </div>
 </div>
 
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-data-table-card
-        [data]="(taskSuccessByUxTestKpi$ | async) || []"
-        [cols]="successRateCols"
-        [sort]="true"
-        [pagination]="false"
-        [filter]="false"
-        [kpi]="true"
-        [title]="'Task success by UX test'"
-        sortField="task"
-      >
-      </upd-data-table-card>
+<ng-container *ngIf="taskSuccessByUxTestKpi$ | async as taskSuccessKpi">
+  <div class="container-fluid my-4 gx-0" *ngIf="successRateCols.length">
+    <div class="row">
+      <div class="col">
+        <upd-data-table-card
+          [data]="taskSuccessKpi"
+          [cols]="successRateCols"
+          [sort]="true"
+          [pagination]="false"
+          [filter]="false"
+          [kpi]="true"
+          [title]="'Task success by UX test'"
+          sortField="task"
+        >
+        </upd-data-table-card>
+      </div>
     </div>
   </div>
-</div>
+</ng-container>
 
-<div *ngIf="(documents$ | async) as documents" class="container-fluid my-4 gx-0">
+<div *ngIf="documents$ | async as documents" class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [data]="documents|| []"
+        [data]="documents || []"
         [cols]="documentsCols"
         [sort]="false"
         [pagination]="false"

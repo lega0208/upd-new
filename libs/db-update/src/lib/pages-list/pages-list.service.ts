@@ -5,9 +5,9 @@ import {
   Injectable,
 } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
-import { PageMetrics, PagesList } from '@dua-upd/db';
+import { PagesList } from '@dua-upd/db';
+import { IPageMetrics } from '@dua-upd/types-common';
 import { AirtableService } from '../airtable/airtable.service';
-import { logJson } from '@dua-upd/utils-common';
 
 @Injectable()
 export class PagesListService {
@@ -20,9 +20,7 @@ export class PagesListService {
   ) {}
 
   private async getOrSetCache() {
-    const cached = await this.cacheManager.get<
-      PagesList[]
-      >('pagesList');
+    const cached = await this.cacheManager.get<PagesList[]>('pagesList');
 
     if (cached) {
       return cached;
@@ -73,7 +71,7 @@ export class PagesListService {
     );
   }
 
-  async repairUrls(pageMetrics: Partial<PageMetrics>[]) {
+  async repairUrls(pageMetrics: Partial<IPageMetrics>[]) {
     const pagesListDictionary = await this.getPagesListDictionary().then(
       ({ en, fr }) => ({
         ...en,

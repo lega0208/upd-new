@@ -1,47 +1,30 @@
 import { createReducer, on, Action } from '@ngrx/store';
 import { zip } from 'rambdax';
-import dayjs, { Dayjs, OpUnitType, QUnitType } from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import quarterOfYear from 'dayjs/plugin/quarterOfYear';
+import {
+  DateRange,
+  Dayjs,
+  DateRangeType,
+  DateRangeConfig,
+  dateRangeConfigs,
+  datesFromDateRange,
+} from '@dua-upd/utils-common';
 
 import * as DateSelectionActions from './date-selection.actions';
-import { DateRangePeriod, dateRangePeriods } from './date-selection.models';
 
-dayjs.extend(utc);
-dayjs.extend(quarterOfYear);
-
-export type DateRange = {
-  start: Dayjs;
-  end: Dayjs;
-};
-
-export function datesFromDateRange(
-  dateRange: DateRange,
-  format: string | false = 'YYYY-MM-DD',
-  inclusive = false
-): Date[] | string[] {
-  const dates: Dayjs[] = [];
-
-  let currentDate = dayjs.utc(dateRange.start);
-
-  const endDate = inclusive
-    ? dayjs.utc(dateRange.end).add(1, 'day')
-    : dayjs.utc(dateRange.end);
-
-  while (!currentDate.isSame(endDate, 'day')) {
-    dates.push(currentDate);
-    currentDate = currentDate.add(1, 'day');
-  }
-
-  return format
-    ? dates.map((date) => date.format(format))
-    : dates.map((date) => date.toDate());
+export interface DateRangePeriod {
+  type: DateRangeType;
+  // translation key for dropdown label
+  label: string;
+  dateRange: DateRange<Dayjs>;
+  comparisonDateRange: DateRange<Dayjs>;
+  // Maps comparison dates to current dates (both as ISOString)
+  dates: Map<string, string>;
 }
 
 export const DATE_SELECTION_FEATURE_KEY = 'dateSelection';
 
 export interface DateSelectionState {
-  periodSelection: DateRangePeriod;
+  periodSelection: DateRangeType;
   dateRange: string;
   comparisonDateRange: string;
 }
@@ -50,34 +33,39 @@ export interface DateSelectionPartialState {
   readonly [DATE_SELECTION_FEATURE_KEY]: DateSelectionState;
 }
 
-const initialPeriodSelection = 'weekly';
-
 export const predefinedDateRanges = Object.fromEntries(
-  dateRangePeriods.map((periodType) => [
-    periodType,
-    getPeriodDateRanges(periodType),
+  dateRangeConfigs.map((config) => [
+    config.type,
+    createPredefinedDateRange(config),
   ])
 );
 
+const initialPeriodSelection = predefinedDateRanges['week'];
 export const initialState: DateSelectionState = {
   // set initial required properties
-  periodSelection: initialPeriodSelection,
-  dateRange: predefinedDateRanges[initialPeriodSelection].dateRange,
-  comparisonDateRange:
-    predefinedDateRanges[initialPeriodSelection].comparisonDateRange,
+  periodSelection: initialPeriodSelection.type,
+  dateRange: toDateRangeString(initialPeriodSelection.dateRange),
+  comparisonDateRange: toDateRangeString(
+    initialPeriodSelection.comparisonDateRange
+  ),
 };
 
 const reducer = createReducer(
   initialState,
-  on(DateSelectionActions.selectDatePeriod, (state, { selection }) => {
-    const selectionData = predefinedDateRanges[selection];
+  on(
+    DateSelectionActions.selectDatePeriod,
+    (state, { selection }): DateSelectionState => {
+      const selectedPeriod = predefinedDateRanges[selection];
 
-    return {
-      periodSelection: selection,
-      dateRange: selectionData.dateRange,
-      comparisonDateRange: selectionData.comparisonDateRange,
-    };
-  })
+      return {
+        periodSelection: selection,
+        dateRange: toDateRangeString(selectedPeriod.dateRange),
+        comparisonDateRange: toDateRangeString(
+          selectedPeriod.comparisonDateRange
+        ),
+      };
+    }
+  )
 );
 
 export function dateSelectionReducer(
@@ -87,49 +75,30 @@ export function dateSelectionReducer(
   return reducer(state, action);
 }
 
-export function getDateRangeFromPeriodType(periodType: DateRangePeriod) {
-  const periodName = periodType.replace(/ly$/, '') as OpUnitType & QUnitType;
-
-  const end = dayjs.utc().startOf(periodName).subtract(1, 'day');
-
-  const start = end.subtract(1, 'day').startOf(periodName);
-
-  return { start, end };
-}
-
-export function getPeriodDateRanges(periodType: DateRangePeriod) {
-  const periodName = periodType.replace(/ly$/, '') as OpUnitType & QUnitType;
-  const dateRange = getDateRangeFromPeriodType(periodType);
+export function createPredefinedDateRange(
+  config: DateRangeConfig
+): DateRangePeriod {
+  const dateRange = config.getDateRange();
 
   const daysBetween = dateRange.end.diff(dateRange.start, 'days');
 
-  const startDay = dateRange.start.day();
-
-  const prevStart = dateRange.start
-    .subtract(1, periodName)
-    .startOf(periodName)
-    .day(startDay); // align weekday
-
-  const prevEnd = prevStart.add(daysBetween, 'days');
-
-  const prevDateRange = {
-    start: prevStart,
-    end: prevEnd,
+  const comparisonDateRange = {
+    start: config.getComparisonDate(dateRange.start),
+    end: config.getComparisonDate(dateRange.end),
   };
 
-  const prevDaysBetween = prevEnd.diff(prevStart, 'days');
+  const prevDaysBetween = comparisonDateRange.end.diff(
+    comparisonDateRange.start,
+    'days'
+  );
 
   if (daysBetween !== prevDaysBetween) {
-    throw new Error('days between dateRanges should be equal');
+    throw Error('days between dateRanges should be equal');
   }
 
-  const currentDates = datesFromDateRange(
-    dateRange,
-    false,
-    true
-  ) as Date[];
+  const currentDates = datesFromDateRange(dateRange, false, true) as Date[];
   const prevDates = datesFromDateRange(
-    prevDateRange,
+    comparisonDateRange,
     false,
     true
   ) as Date[];
@@ -137,21 +106,21 @@ export function getPeriodDateRanges(periodType: DateRangePeriod) {
   const dates = new Map(
     zip(
       prevDates.map((date) => date.toISOString()),
-      currentDates.map((date) => date.toISOString()),
+      currentDates.map((date) => date.toISOString())
     ) as [string, string][]
   );
 
-  const dateRangeString = `${dateRange.start.format(
-    'YYYY-MM-DD'
-  )}/${dateRange.end.format('YYYY-MM-DD')}`;
-
-  const prevDateRangeString = `${prevDateRange.start.format(
-    'YYYY-MM-DD'
-  )}/${prevDateRange.end.format('YYYY-MM-DD')}`;
-
   return {
+    type: config.type,
+    label: config.label,
+    dateRange,
+    comparisonDateRange,
     dates,
-    dateRange: dateRangeString,
-    comparisonDateRange: prevDateRangeString,
   };
+}
+
+export function toDateRangeString(dateRange: DateRange<Dayjs>) {
+  return `${dateRange.start.format('YYYY-MM-DD')}/${dateRange.end.format(
+    'YYYY-MM-DD'
+  )}`;
 }

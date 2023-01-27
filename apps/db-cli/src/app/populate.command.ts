@@ -1,5 +1,6 @@
 import { ConsoleLogger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import chalk from 'chalk';
 import { Model, Types } from 'mongoose';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { Command, CommandRunner, InquirerService } from 'nest-commander';
@@ -11,6 +12,7 @@ import {
   PageMetrics,
   PageMetricsDocument,
 } from '@dua-upd/db';
+import { IPageMetrics } from '@dua-upd/types-common';
 import {
   AirtableService,
   DbUpdateService,
@@ -24,7 +26,6 @@ import {
   DateRange,
   GoogleSearchConsoleService,
 } from '@dua-upd/external-data';
-import chalk from 'chalk';
 
 export interface PopulatePipelineConfig<T> {
   dataSources: Record<string, () => Promise<T[] | void>>;
@@ -311,7 +312,7 @@ export class PopulateCommand extends CommandRunner {
     dateRange: DateRange
   ): PopulatePipelineConfig<Partial<PageMetrics>> {
     const insertFunc = async (
-      data: Partial<PageMetrics>[],
+      data: Partial<IPageMetrics>[],
       datasourceName?: string
     ) => {
       if (data.length) {
@@ -422,12 +423,14 @@ export class PopulateCommand extends CommandRunner {
           });
         }
 
-        console.log(chalk.green('Page Metrics updates completed successfully ✔ '));
+        console.log(
+          chalk.green('Page Metrics updates completed successfully ✔ ')
+        );
       },
     };
   }
 
-  async getCollectionOptions(options: Record<string, any>) {
+  async getCollectionOptions(options: Record<string, unknown>) {
     return await this.inquirerService.prompt<{
       startDate: string;
       endDate: string;

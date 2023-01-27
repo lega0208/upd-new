@@ -5,13 +5,14 @@ import {
 } from './pages-details.reducer';
 import {
   DateRangePeriod,
-  selectComparisonDateRange, selectCurrentLang,
+  selectComparisonDateRange,
+  selectCurrentLang,
   selectDatePeriodSelection,
   selectDateRange,
   selectDateRangeLabel,
   selectPeriodDates,
 } from '@dua-upd/upd/state';
-import { arrayToDictionary } from '@dua-upd/utils-common';
+import { arrayToDictionary, DateRangeType } from '@dua-upd/utils-common';
 import dayjs from 'dayjs';
 
 // Lookup the 'PagesDetails' feature state managed by NgRx
@@ -50,13 +51,10 @@ export const selectComparisonData = createSelector(
   ({ comparisonDateRangeData }) => comparisonDateRangeData
 );
 
-export const selectCurrentDateRangeLabel = selectDateRangeLabel(
-  selectCurrentData,
-  selectDateRange
-);
+export const selectCurrentDateRangeLabel =
+  selectDateRangeLabel(selectDateRange);
 
 export const selectComparisonDateRangeLabel = selectDateRangeLabel(
-  selectComparisonData,
   selectComparisonDateRange
 );
 
@@ -96,11 +94,10 @@ export const selectComparisonVisitsByDaySeries = createSelector(
 export const selectChartType = createSelector(
   selectDatePeriodSelection,
   (dateRangePeriod) =>
-    (['weekly', 'monthly'] as DateRangePeriod[]).includes(dateRangePeriod)
+    (['week', 'month'] as DateRangeType[]).includes(dateRangePeriod)
       ? 'column'
       : 'line'
 );
-
 
 export const selectCurrentVisitsByDayChartData = createSelector(
   selectCurrentDateRangeLabel,
@@ -141,7 +138,7 @@ export const selectVisitsByDayChartTable = createSelector(
     const prevVisitsDict = arrayToDictionary(prevVisits, 'date');
 
     const dateFormat =
-      dateRangePeriod === 'weekly' ? 'dddd, MMM D' : 'MMM D YYYY';
+      dateRangePeriod === 'week' ? 'dddd, MMM D' : 'MMM D YYYY';
 
     return [...dates].map(([prevDate, currentDate]) => ({
       date: dayjs.utc(currentDate).locale(lang).format(dateFormat),

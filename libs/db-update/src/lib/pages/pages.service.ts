@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import axios from 'axios';
-import cheerio from 'cheerio';
+import cheerio from 'cheerio/lib/slim';
 import type {
   PageDocument,
   PageMetricsModel,

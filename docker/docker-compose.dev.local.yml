@@ -51,6 +51,8 @@ services:
     image: mongo:4.4
     container_name: upd_mongo
     restart: unless-stopped
+    ports:
+      - '27017:27017'
     volumes:
       - type: volume
         source: db-data

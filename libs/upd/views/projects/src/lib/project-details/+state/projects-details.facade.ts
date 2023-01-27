@@ -477,8 +477,17 @@ export class ProjectsDetailsFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
-      const uxTests = data?.taskSuccessByUxTest;
-      const tasks = data?.tasks;
+      const uxTests = data?.taskSuccessByUxTest.filter(
+        (uxTest) => uxTest.success_rate ?? false
+      );
+
+      const tasksWithSuccessRate = uxTests
+        ?.map((uxTest) => uxTest.tasks.split('; ') || [])
+        .flat();
+
+      const tasks = data?.tasks.filter(({ title }) =>
+        tasksWithSuccessRate.includes(title)
+      );
 
       const categories = tasks.map((task) => task.title);
 
@@ -507,7 +516,9 @@ export class ProjectsDetailsFacade {
           return tasks.length > 0 ? totalSuccessRates / tasks.length : null;
         }) as number[];
 
-        const name = this.i18n.service.translate(testType as string, lang);
+        const name = testType
+          ? this.i18n.service.translate(testType as string, lang)
+          : testType;
 
         series.push({ name, data });
       });

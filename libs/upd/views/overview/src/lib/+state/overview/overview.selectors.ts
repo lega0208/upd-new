@@ -1,23 +1,20 @@
-import {
-  createFeatureSelector,
-  createSelector,
-  MemoizedSelector,
-} from '@ngrx/store';
-import { ApexAxisChartSeries } from 'ng-apexcharts';
+import { createFeatureSelector, createSelector, Selector } from '@ngrx/store';
 import { I18nModule, I18nService } from '@dua-upd/upd/i18n';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {
-  DateRangePeriod,
   selectComparisonDateRange,
   selectCurrentLang,
   selectDatePeriodSelection,
   selectDateRange,
   selectDateRangeLabel,
+  selectNumberOfDaysInPeriod,
   selectPeriodDates,
 } from '@dua-upd/upd/state';
 import { OVERVIEW_FEATURE_KEY, OverviewState } from './overview.reducer';
-import { arrayToDictionary, logJson } from '@dua-upd/utils-common';
+import { arrayToDictionary, DateRangeType } from '@dua-upd/utils-common';
+import { OverviewAggregatedData } from '@dua-upd/types-common';
+import { ApexAxisChartSeries } from 'ng-apexcharts';
 
 dayjs.extend(utc);
 
@@ -62,13 +59,10 @@ export const selectComparisonData = createSelector(
   ({ comparisonDateRangeData }) => comparisonDateRangeData
 );
 
-export const selectCurrentDateRangeLabel = selectDateRangeLabel(
-  selectCurrentData,
-  selectDateRange
-);
+export const selectCurrentDateRangeLabel =
+  selectDateRangeLabel(selectDateRange);
 
 export const selectComparisonDateRangeLabel = selectDateRangeLabel(
-  selectComparisonData,
   selectComparisonDateRange
 );
 
@@ -206,16 +200,13 @@ export const selectComparisonCallsPerVisitsSeries = createSelector(
 export const selectCallsPerVisitsChartData = createSelector(
   selectCallsPerVisitsSeries,
   selectComparisonCallsPerVisitsSeries,
-  (current, comparison) => [current, comparison]
+  (current, comparison) => [comparison, current]
 );
 
 // comboChartData$
 export const selectChartType = createSelector(
-  selectDatePeriodSelection,
-  (dateRangePeriod) =>
-    (['weekly', 'monthly'] as DateRangePeriod[]).includes(dateRangePeriod)
-      ? 'column'
-      : 'line'
+  selectNumberOfDaysInPeriod,
+  (numDays) => (numDays <= 31 ? 'column' : 'line')
 );
 
 export const toVisitsCallsChartSeries =
@@ -293,7 +284,7 @@ export const selectComboChartTable = createSelector(
     // potentially also colConfigs
 
     const dateFormat =
-      dateRangePeriod === 'weekly' ? 'dddd, MMM D' : 'MMM D YYYY';
+      dateRangePeriod === 'week' ? 'dddd, MMM D' : 'MMM D YYYY';
 
     return [...dates].map(([prevDate, currentDate]) => ({
       date: dayjs.utc(currentDate).locale(lang).format(dateFormat),
@@ -317,7 +308,7 @@ export const selectVisitsByDayChartTable = createSelector(
     const prevVisitsDict = arrayToDictionary(prevVisits, 'date');
 
     const dateFormat =
-      dateRangePeriod === 'weekly' ? 'dddd, MMM D' : 'MMM D YYYY';
+      dateRangePeriod === 'week' ? 'dddd, MMM D' : 'MMM D YYYY';
 
     return [...dates].map(([prevDate, currentDate]) => ({
       date: dayjs.utc(currentDate).locale(lang).format(dateFormat),
@@ -325,5 +316,59 @@ export const selectVisitsByDayChartTable = createSelector(
       prevDate: dayjs.utc(prevDate).locale(lang).format(dateFormat),
       prevVisits: prevVisitsDict[prevDate]?.visits,
     }));
+  }
+);
+
+// Feedback to visits ratio
+export const selectDyfNoPerVisitsSeries = createSelector(
+  selectOverviewData,
+  selectCurrentDateRangeLabel,
+  selectComparisonDateRangeLabel,
+  selectPeriodDates,
+  (
+    { dateRangeData, comparisonDateRangeData },
+    dateRangeLabel,
+    comparisonDateRangeLabel,
+    dates
+  ) => {
+    const dyfByDay = dateRangeData?.dyfByDay || [];
+    const visitsByDay = dateRangeData?.visitsByDay || [];
+    const dyfDict = arrayToDictionary(dyfByDay, 'date');
+
+    const dyfNoPerVisitsSeries = visitsByDay.map(({ date, visits }) => ({
+      x: date,
+      y: visits ? ((dyfDict[date]?.dyf_no || 0) / visits) * 1000 : NaN,
+    }));
+
+    const comparisonDyfByDay = comparisonDateRangeData?.dyfByDay || [];
+    const comparisonVisitsByDay = comparisonDateRangeData?.visitsByDay || [];
+    const comparisonDyfDict = arrayToDictionary(comparisonDyfByDay, 'date');
+
+    const comparisonDyfNoPerVisitsSeries = comparisonVisitsByDay
+      .filter(({ date }) => dates.has(date))
+      .map(({ date, visits }) => {
+        const currentDate = dates.get(date);
+
+        return {
+          x: currentDate,
+          y:
+            visits && currentDate
+              ? ((comparisonDyfDict[date]?.dyf_no || 0) / visits) * 1000
+              : NaN,
+        };
+      });
+
+    return [
+      {
+        name: comparisonDateRangeLabel,
+        type: 'line',
+        data: comparisonDyfNoPerVisitsSeries,
+      },
+      {
+        name: dateRangeLabel,
+        type: 'line',
+        data: dyfNoPerVisitsSeries,
+      },
+    ];
   }
 );

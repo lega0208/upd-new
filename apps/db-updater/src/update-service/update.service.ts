@@ -15,7 +15,7 @@ export class UpdateService {
     private dbUpdateService: DbUpdateService
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_10PM)
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async updateDatabase() {
     if (this.isRunning) {
       return;
@@ -28,6 +28,8 @@ export class UpdateService {
 
       await this.dataIntegrityService.fillMissingData();
       await this.dataIntegrityService.cleanPageUrls();
+
+      await this.dbUpdateService.recalculateViews();
     } catch (error) {
       this.logger.error(error);
     } finally {

@@ -43,6 +43,7 @@ export class PagesHomeComponent implements OnInit {
     });
 
     this.pagesHomeService.fetchData();
+    this.searchFields = this.columns.map((col) => col.field).concat(['all_urls'])
   }
 
   constructor(

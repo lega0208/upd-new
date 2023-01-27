@@ -210,6 +210,12 @@ export interface TasksHomeAggregatedData {
   group: string;
   topic: string;
   subtopic: string;
+  program?: string;
+  service?: string;
+  user_journey?: string;
+  status?: string;
+  core?: string[];
+  channel?: string[];
   visits: number;
 }
 

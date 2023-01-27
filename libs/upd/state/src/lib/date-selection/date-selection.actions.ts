@@ -1,7 +1,7 @@
 import { createAction, props } from '@ngrx/store';
-import { DateRangePeriod } from './date-selection.models';
+import { DateRangeType } from '@dua-upd/utils-common';
 
 export const selectDatePeriod = createAction(
   '[DateSelection] Select Date Period',
-  props<{ selection: DateRangePeriod }>(),
+  props<{ selection: DateRangeType }>(),
 )

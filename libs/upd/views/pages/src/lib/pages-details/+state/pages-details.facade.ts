@@ -127,7 +127,7 @@ export class PagesDetailsFacade {
       const days = visitsByDay?.length || 0;
       const prevDays = comparisonVisitsByDay?.length || 0;
       const maxDays = Math.max(days, prevDays);
-      const dateFormat = dateRangePeriod === 'weekly' ? 'dddd' : 'MMM D';
+      const dateFormat = dateRangePeriod === 'week' ? 'dddd' : 'MMM D';
       let [startDate] = data.dateRange.split('/').map((d) => new Date(d));
       let [prevStartDate] = (data.comparisonDateRange || '')
         .split('/')
@@ -137,7 +137,7 @@ export class PagesDetailsFacade {
         return [];
       }
 
-      const isWeekly = dateRangePeriod === 'weekly' ? true : false;
+      const isWeekly = dateRangePeriod === 'week';
 
       const isCurrZero = visitsByDay.every((v) => v.visits === 0);
       const isPrevZero = comparisonVisitsByDay.every((v) => v.visits === 0);

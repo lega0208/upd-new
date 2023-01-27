@@ -4,10 +4,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { StoreModule } from '@ngrx/store';
+import { ActionReducer, StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { routerReducer, StoreRouterConnectingModule } from '@ngrx/router-store';
+import {
+  type RouterReducerState,
+  routerReducer,
+  StoreRouterConnectingModule,
+} from '@ngrx/router-store';
+import { localStorageSync } from 'ngrx-store-localstorage';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -25,6 +30,8 @@ import {
   I18nFacade,
   actionSanitizer,
   stateSanitizer,
+  DateSelectionState,
+  I18nState,
 } from '@dua-upd/upd/state';
 
 import { environment } from '../environments/environment';
@@ -34,6 +41,20 @@ import {
   NgxGoogleAnalyticsModule,
   NgxGoogleAnalyticsRouterModule,
 } from 'ngx-google-analytics';
+
+interface RootState {
+  dateSelection: DateSelectionState;
+  router: RouterReducerState;
+  i18n: I18nState;
+}
+
+const localStorageSyncReducer = (
+  reducer: ActionReducer<RootState>
+): ActionReducer<RootState> =>
+  localStorageSync({
+    keys: ['dateSelection', 'router', 'i18n'],
+    rehydrate: true,
+  })(reducer);
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidebarComponent],
@@ -50,7 +71,7 @@ import {
         i18n: i18nReducer,
       },
       {
-        metaReducers: !environment.production ? [] : [],
+        metaReducers: !environment.production ? [localStorageSyncReducer] : [],
         runtimeChecks: {
           strictActionImmutability: true,
           strictStateImmutability: true,

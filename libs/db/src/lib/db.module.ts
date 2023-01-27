@@ -27,7 +27,6 @@ import {
   SearchAssessmentSchema,
 } from './db.schemas';
 import { PageVisitsViewSchema, PageVisitsView } from './db.views';
-import { DbService } from './db.service';
 
 export const models = {
   callDrivers: {

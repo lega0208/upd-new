@@ -3,7 +3,7 @@ import { ColumnConfig } from '@dua-upd/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { LocaleId } from '@dua-upd/upd/i18n';
-import { combineLatest } from 'rxjs';
+import { combineLatest, tap } from 'rxjs';
 
 @Component({
   selector: 'upd-overview-webtraffic',
@@ -22,7 +22,7 @@ export class OverviewWebtrafficComponent implements OnInit {
   pageViews$ = this.overviewService.views$;
   pageViewsPercentChange$ = this.overviewService.viewsPercentChange$;
 
-  apexBar$ = this.overviewService.apexBar$;
+  apexBar$ = this.overviewService.apexBar$.pipe(tap((console.log)));
 
   topPagesWithChangeData$ =
     this.overviewService.topPagesVisitedWithPercentChange$;

@@ -1,4 +1,15 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  difference,
+  filter,
+  flatten,
+  intersection,
+  keys,
+  map,
+  pipe,
+  piped,
+  uniq,
+} from 'rambdax';
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
@@ -9,7 +20,7 @@ import { GetTableProps } from '@dua-upd/utils-common';
 type DocumentsColTypes = GetTableProps<
   ProjectDetailsUxTestsComponent,
   'documents$'
-  >;
+>;
 
 @Component({
   selector: 'upd-project-details-ux-tests',
@@ -21,13 +32,9 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
-  baseline = '';
 
-  lineChart = lineChart;
-
-  lineTaskChart$ = this.projectsDetailsService.lineTaskChart$;
-
-  apexTaskSuccessByUxTest$ = this.projectsDetailsService.apexTaskSuccessByUxTest$;
+  apexTaskSuccessByUxTest$ =
+    this.projectsDetailsService.apexTaskSuccessByUxTest$;
 
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
@@ -44,7 +51,7 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
 
   constructor(
     private readonly projectsDetailsService: ProjectsDetailsFacade,
-    private i18n: I18nFacade,
+    private i18n: I18nFacade
   ) {}
 
   participantTasksCols: ColumnConfig[] = [];
@@ -96,66 +103,63 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
           },
         ];
 
-        this.successRateCols = [
-          { field: 'task', header: this.i18n.service.translate('task', lang) },
+        const testTypesWithSuccessRate = piped(
+          kpiData,
+          map(
+            pipe(
+              filter(
+                (val: number | boolean | string, key: string) =>
+                  !['isChange', 'task'].includes(key) && !isNaN(val as number)
+              ),
+              keys
+            )
+          ),
+          (keys) => flatten<string>(keys),
+          uniq
+        );
+
+        if (!testTypesWithSuccessRate.length) {
+          return;
+        }
+
+        const startCols = [
+          {
+            field: 'task',
+            header: this.i18n.service.translate('task', lang),
+          } as ColumnConfig,
         ];
-        if (kpiData.some((d) => d.Baseline >= 0)) {
-          this.successRateCols.push({
+
+        if (testTypesWithSuccessRate.includes('Baseline')) {
+          startCols.push({
             field: 'Baseline',
             header: this.i18n.service.translate('Baseline', lang),
             pipe: 'percent',
           });
         }
-        if (kpiData.some((d) => d.Exploratory >= 0)) {
-          this.successRateCols.push({
-            field: 'Exploratory',
-            header: this.i18n.service.translate('Exploratory', lang),
+
+        const middleCols = piped(
+          testTypesWithSuccessRate,
+          (testTypes) =>
+            difference(testTypes, ['Baseline', 'Validation', 'change']),
+          map((key: string) => ({
+            field: key,
+            header: this.i18n.service.translate(key, lang),
             pipe: 'percent',
-          });
-        }
-        if (kpiData.some((d) => d['Spot Check'] >= 0)) {
-          this.successRateCols.push({
-            field: 'Spot Check',
-            header: this.i18n.service.translate('Spot Check', lang),
+          }))
+        );
+
+        const endCols = piped(
+          testTypesWithSuccessRate,
+          (testTypes) => intersection(testTypes, ['Validation', 'change']),
+          map((key) => ({
+            field: key,
+            header: this.i18n.service.translate(key, lang),
             pipe: 'percent',
-          });
-        }
-        if (kpiData.some((d) => d.Validation >= 0)) {
-          this.successRateCols.push({
-            field: 'Validation',
-            header: this.i18n.service.translate('Validation', lang),
-            pipe: 'percent',
-          });
-        }
-        if (kpiData.some((d) => d.change >= 0)) {
-          this.successRateCols.push({
-            field: 'change',
-            header: this.i18n.service.translate('comparison', lang),
-            pipe: 'percent',
-          });
-        }
+          }))
+        );
+
+        this.successRateCols = flatten([startCols, middleCols, endCols]);
       }
     );
   }
 }
-
-const lineChart = [
-  {
-    name: 'Finding Child Tax Benefit (CCB) Amount	',
-    series: [
-      {
-        name: 'Baseline',
-        value: 0.25,
-      },
-    ],
-  },
-  {
-    name: 'Change banking information (MyAccount)',
-    series: [
-      {
-        name: 'Baseline',
-        value: 0.5,
-      },
-    ],
-  },
-];

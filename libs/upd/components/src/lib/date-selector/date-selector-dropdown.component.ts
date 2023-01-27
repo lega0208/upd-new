@@ -24,7 +24,7 @@ import { TranslateService } from '@ngx-translate/core';
           ngbDropdownItem
           translate
         >
-          {{ selectionOption.label }}
+          {{ selectionOption.label | translate }}
         </button>
       </div>
     </div>

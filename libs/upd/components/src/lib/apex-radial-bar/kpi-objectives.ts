@@ -55,7 +55,7 @@ export const searchKpiObjectiveCriteria: KpiObjectiveCriteria = (
       return 'pass';
     case current > 0.6:
       return 'partial';
-    case current <= 0:
+    case current <= 0.6:
       return 'fail';
     default:
       return 'none';

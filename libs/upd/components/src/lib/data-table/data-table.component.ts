@@ -31,7 +31,7 @@ export class DataTableComponent<T> implements OnChanges {
   @Input() exports = true;
   @Input() id?: string;
   @Input() placeholderText = 'dt_search_keyword';
-  
+
   keys: string[] = [];
 
   colFilters = Object.fromEntries(
@@ -41,6 +41,11 @@ export class DataTableComponent<T> implements OnChanges {
   );
 
   setFilters(colField: string, colHeader: string, filters: string[]) {
+    if (!filters.length) {
+      delete this.colFilters[`${colHeader}:${colField}`];
+
+      return;
+    }
     this.colFilters[`${colHeader}:${colField}`] = filters;
   }
 
@@ -49,32 +54,37 @@ export class DataTableComponent<T> implements OnChanges {
       this.table.filters = {};
     }
 
-    this.colFilters = Object.fromEntries(
-      this.cols
-        .filter((col) => col.filterConfig)
-        .map((col) => [col.header, [] as string[]])
-    );
+    this.colFilters = {};
+
+    console.log(this.colFilters);
   }
 
   deleteFilter(colHeader: string, filter: string) {
-        this.colFilters[colHeader] = this.colFilters[colHeader].filter(
-          (f) => f !== filter
-        );
+    this.colFilters[colHeader] = this.colFilters[colHeader].filter(
+      (f) => f !== filter
+    );
 
-        this.table?.filter(this.colFilters[colHeader], colHeader.split(":")[1], 'in');
+    this.table?.filter(
+      this.colFilters[colHeader],
+      colHeader.split(':')[1],
+      'in'
+    );
 
-        (this.table?.filters as any)[colHeader.split(':')[1]] =
-          [
-            {
-            value: this.colFilters[colHeader].length === 0 ? null : this.colFilters[colHeader],
-            matchMode: 'in',
-            operator: 'and',
-          }];
+    this.table.filters[colHeader.split(':')[1]] = [
+      {
+        value:
+          this.colFilters[colHeader].length === 0
+            ? null
+            : this.colFilters[colHeader],
+        matchMode: 'in',
+        operator: 'and',
+      },
+    ];
 
-        if (Object.values(this.colFilters).every((v) => v.length === 0)) {
-          this.colFilters = {};
-        }
-}
+    if (Object.values(this.colFilters).every((v) => v.length === 0)) {
+      this.colFilters = {};
+    }
+  }
 
   clearAll() {
     this.colFilters = {};
