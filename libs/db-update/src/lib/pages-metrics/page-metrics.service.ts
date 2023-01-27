@@ -7,6 +7,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { Model, Types } from 'mongoose';
 import { arrayToDictionary, today } from '@dua-upd/utils-common';
+import { IPageMetrics } from '@dua-upd/types-common';
 import {
   Page,
   PageMetrics,
@@ -101,7 +102,7 @@ export class PageMetricsService {
 
       const pipelineConfig = this.createPageMetricsPipelineConfig(dateRange);
 
-      const pipeline = assemblePipeline<Partial<PageMetrics>>(pipelineConfig);
+      const pipeline = assemblePipeline<Partial<IPageMetrics>>(pipelineConfig);
 
       await pipeline();
 
@@ -442,9 +443,9 @@ export class PageMetricsService {
 
   createPageMetricsPipelineConfig(
     dateRange: DateRange
-  ): PipelineConfig<Partial<PageMetrics>> {
+  ): PipelineConfig<Partial<IPageMetrics>> {
     const insertFunc = async (
-      data: Partial<PageMetrics>[],
+      data: Partial<IPageMetrics>[],
       datasourceName?: string
     ) => {
       if (data.length) {

@@ -10,6 +10,12 @@ export interface TaskData {
   user_type?: string[];
   ux_tests?: string[];
   pages?: string[];
+  program?: string;
+  service?: string;
+  user_journey?: string;
+  status?: string;
+  channel?: string[];
+  core?: string[];
 }
 
 export interface CalldriverData {
@@ -48,6 +54,7 @@ export interface UxTestData {
   status?: string;
   cops?: boolean;
   attachments?: AttachmentData[];
+  description?: string;
 }
 
 export interface AttachmentData {
