@@ -3,7 +3,8 @@ import { Store } from '@ngrx/store';
 
 import * as DateSelectionActions from './date-selection.actions';
 import * as DateSelectionSelectors from './date-selection.selectors';
-import { DateRangePeriod } from './date-selection.models';
+import { DateRangeType } from '@dua-upd/utils-common';
+import { selectPeriodSelectionLabel } from './date-selection.selectors';
 
 @Injectable()
 export class DateSelectionFacade {
@@ -16,9 +17,11 @@ export class DateSelectionFacade {
     DateSelectionSelectors.selectDatePeriodSelection
   );
 
+  periodSelectionLabel$ = this.store.select(selectPeriodSelectionLabel);
+
   constructor(private readonly store: Store) {}
 
-  selectDatePeriod(selection: DateRangePeriod) {
+  selectDatePeriod(selection: DateRangeType) {
     this.store.dispatch(DateSelectionActions.selectDatePeriod({ selection }));
   }
 }

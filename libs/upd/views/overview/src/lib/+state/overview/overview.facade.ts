@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, debounceTime, map, mergeMap, of, pluck } from 'rxjs';
+import { combineLatest, debounceTime, map, mergeMap, of, pluck, tap } from 'rxjs';
 
 import dayjs, { QUnitType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -26,9 +26,9 @@ import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
 import {
   selectCallsPerVisitsChartData,
   selectComboChartData,
-  selectComboChartTable,
+  selectComboChartTable, selectDyfNoPerVisitsSeries,
   selectVisitsByDayChartData,
-  selectVisitsByDayChartTable,
+  selectVisitsByDayChartTable
 } from './overview.selectors';
 
 dayjs.extend(utc);
@@ -207,51 +207,7 @@ export class OverviewFacade {
     })
   );
 
-  apexKpiFeedback$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const currentFeedback = data?.dateRangeData?.dyfByDay || [];
-      const comparisonFeedback = data?.comparisonDateRangeData?.dyfByDay || [];
-
-      const currentVisits = data?.dateRangeData?.visitsByDay || [];
-      const comparisonVisits = data?.comparisonDateRangeData?.visitsByDay || [];
-
-      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange, lang);
-      const comparisonDateRangeLabel = getWeeklyDatesLabel(
-        data.comparisonDateRange || '',
-        lang
-      );
-
-      const currentFeedbackData = currentFeedback.map((d, idx) => {
-        return {
-          x: d.date,
-          y: (d.dyf_no / currentVisits[idx].visits) * 1000,
-        };
-      });
-
-      const comparisonFeedbackData = comparisonFeedback.map((d, idx) => {
-        return {
-          x: currentFeedback[idx].date,
-          y: (d.dyf_no / comparisonVisits[idx].visits) * 1000,
-        };
-      });
-
-      return [
-        {
-          name: comparisonDateRangeLabel,
-          type: 'line',
-          data: comparisonFeedbackData,
-        },
-        {
-          name: dateRangeLabel,
-          type: 'line',
-          data: currentFeedbackData,
-        },
-      ];
-    })
-  );
+  apexKpiFeedback$ = this.store.select(selectDyfNoPerVisitsSeries);
 
   comparisonKpiFeedback$ = combineLatest([this.overviewData$]).pipe(
     map(([data]) => {

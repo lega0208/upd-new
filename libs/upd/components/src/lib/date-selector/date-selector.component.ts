@@ -2,15 +2,12 @@ import { Component } from '@angular/core';
 import { combineLatest, map } from 'rxjs';
 import {
   DateSelectionFacade,
-  DateRangePeriod,
-  dateRangePeriods,
+  DateRangePeriod, selectPeriodSelectionLabel
 } from '@dua-upd/upd/state';
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 
-import dayjs from 'dayjs';
-import 'dayjs/locale/en-ca';
-import 'dayjs/locale/fr-ca';
+import { dateRangeConfigs, dayjs, DateRangeType } from '@dua-upd/utils-common';
 
 @Component({
   selector: 'upd-date-selector',
@@ -19,7 +16,7 @@ import 'dayjs/locale/fr-ca';
       <upd-dropdown
         id="range-button"
         icon="calendar_today"
-        [label]="displayFormatSelectedPeriod$ | async"
+        [label]="periodSelectionLabel$ | async"
         [options]="selectionOptions"
         [onSelect]="selectPeriod.bind(this)"
       ></upd-dropdown>
@@ -43,9 +40,7 @@ import 'dayjs/locale/fr-ca';
 export class DateSelectorComponent {
   selectedPeriod$ = this.selectorService.dateSelectionPeriod$;
 
-  displayFormatSelectedPeriod$ = this.selectedPeriod$.pipe(
-    map((period) => periodToDisplayFormat(period))
-  );
+  periodSelectionLabel$ = this.selectorService.periodSelectionLabel$;
 
   displayFormatDateRanges$ = combineLatest([
     this.selectorService.dateRanges$,
@@ -65,9 +60,9 @@ export class DateSelectorComponent {
     map(({ comparisonDateRange }) => comparisonDateRange)
   );
 
-  selectionOptions = dateRangePeriods.map((period) => ({
-    value: period as DateRangePeriod,
-    label: periodToDisplayFormat(period as DateRangePeriod),
+  selectionOptions = dateRangeConfigs.map((config) => ({
+    value: config.type,
+    label: config.label,
   }));
 
   constructor(
@@ -75,7 +70,7 @@ export class DateSelectorComponent {
     private selectorService: DateSelectionFacade
   ) {}
 
-  selectPeriod(period: DateRangePeriod) {
+  selectPeriod(period: DateRangeType) {
     this.selectorService.selectDatePeriod(period);
   }
 }
@@ -84,12 +79,9 @@ export const dateRangeToDisplayFormat = (date: string, lang: LocaleId) =>
   date
     .split('/')
     .map(
-      (d, i) =>
+      (d) =>
         dayjs(d)
           .locale(lang)
           .format(lang === 'en-CA' ? 'MMM DD YYYY' : 'DD MMM YYYY') // only add year to end date
     )
     .join(' - ');
-
-export const periodToDisplayFormat = (period: DateRangePeriod) =>
-  period.replace(/^(.+)ly$/, 'Last $1');

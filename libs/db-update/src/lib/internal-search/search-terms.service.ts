@@ -23,7 +23,8 @@ import {
 } from '@dua-upd/external-data';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { writeFile } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
 dayjs.extend(utc);
 
@@ -739,14 +740,22 @@ export class InternalSearchTermsService {
       logJson(bulkWriteResults);
 
       if (noMetricsMatchSet.size > 0) {
-        await writeFile(
-          `./searchterms-noMatch-${dateRange.start.replace(
-            /^(\d{4}-\d{2}-\d{2}).+/,
-            '$1'
-          )}.json`,
-          prettyJson([...noMetricsMatchSet]),
-          'utf8'
-        );
+        try {
+          if (!existsSync('./logs')) {
+            await mkdir('./logs');
+          }
+
+          await writeFile(
+            `./logs/searchterms-noMatch-${dateRange.start.replace(
+              /^(\d{4}-\d{2}-\d{2}).+/,
+              '$1'
+            )}.json`,
+            prettyJson([...noMetricsMatchSet]),
+            'utf8'
+          );
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
   }

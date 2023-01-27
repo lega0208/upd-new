@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Connection, type FilterQuery, Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { type FilterQuery, Model } from 'mongoose';
 import {
-  models,
   CallDriver,
   Feedback,
   Overall,
@@ -16,7 +15,6 @@ import {
   SearchAssessment,
 } from '../';
 import {
-  arrayToDictionary,
   AsyncLogTiming,
   logJson,
 } from '@dua-upd/utils-common';

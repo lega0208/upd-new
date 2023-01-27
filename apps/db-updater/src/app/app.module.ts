@@ -9,7 +9,7 @@ import {
 import { DbUpdateModule } from '@dua-upd/db-update';
 import { UpdateService } from '../update-service/update.service';
 import { ConfigModule } from '@nestjs/config';
-import { DbModule } from '@dua-upd/db';
+import { DbModule, DbService } from '@dua-upd/db';
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { DbModule } from '@dua-upd/db';
     ScheduleModule.forRoot(),
     DataIntegrityModule,
     DbUpdateModule,
-    DbModule.forRoot(environment.production)
+    DbModule.forRoot(environment.production),
   ],
   providers: [UpdateService, DataIntegrityService, ConsoleLogger],
 })

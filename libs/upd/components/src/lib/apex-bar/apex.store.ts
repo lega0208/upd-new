@@ -70,7 +70,9 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           type: 'bar',
         },
         series: value ? value : [],
-        stroke: { width: [0, 0, 0, 0], curve: 'smooth' },
+        fill: {
+          opacity: 1,
+        },
       };
     }
   );
@@ -103,8 +105,6 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         },
       })
   );
-
-  readonly getIsPercent = this.select((state) => state.added?.isPercent);
 
   readonly setYAxis = this.updater(
     (state, value: string): ChartOptions =>
@@ -171,10 +171,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
               show: true,
             },
             y: {
-              formatter: (
-                value,
-                { series, seriesIndex, dataPointIndex, w }
-              ) => {
+              formatter: (value) => {
                 if (value === null || value === undefined) {
                   return '-';
                 }

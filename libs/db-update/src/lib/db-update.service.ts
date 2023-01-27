@@ -1,9 +1,9 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import chalk from 'chalk';
 import { Model, Types } from 'mongoose';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import {
+  DbService,
   Overall,
   Page,
   PageMetrics,
@@ -16,14 +16,12 @@ import type {
   PageMetricsModel,
 } from '@dua-upd/db';
 import {
-  DateRange,
   DateType,
-  queryDateFormat,
   SearchAnalyticsClient,
   SearchAssessmentService,
   withRetry,
 } from '@dua-upd/external-data';
-import { AsyncLogTiming, wait } from '@dua-upd/utils-common';
+import { AsyncLogTiming, dateRangeConfigs } from '@dua-upd/utils-common';
 import { CalldriversService } from './airtable/calldrivers.service';
 import { FeedbackService } from './airtable/feedback.service';
 import { AirtableService } from './airtable/airtable.service';
@@ -32,11 +30,10 @@ import { PageUpdateService } from './pages/pages.service';
 import { PageMetricsService } from './pages-metrics/page-metrics.service';
 import { InternalSearchTermsService } from './internal-search/search-terms.service';
 
-dayjs.extend(utc);
-
 @Injectable()
 export class DbUpdateService {
   constructor(
+    private db: DbService,
     @Inject(SearchAnalyticsClient.name)
     private gscClient: SearchAnalyticsClient,
     private logger: ConsoleLogger,
@@ -56,7 +53,9 @@ export class DbUpdateService {
     private pageMetricsModel: PageMetricsModel,
     @InjectModel(PagesList.name, 'defaultConnection')
     private pagesListModel: Model<PagesListDocument>
-  ) {}
+  ) {
+    this.logger.setContext('DbUpdater');
+  }
 
   async updateSAT() {
     this.logger.log('Starting search assessment...');
@@ -115,9 +114,11 @@ export class DbUpdateService {
         .upsertOverallSearchTerms()
         .catch((err) => this.logger.error(err.stack));
 
-      await this.pageMetricsService.updatePageMetrics().catch((err) =>
-        this.logger.error('Error updating Page Metrics data', err)
-      );
+      await this.pageMetricsService
+        .updatePageMetrics()
+        .catch((err) =>
+          this.logger.error('Error updating Page Metrics data', err)
+        );
 
       await this.internalSearchService
         .upsertPageSearchTerms()
@@ -272,5 +273,62 @@ export class DbUpdateService {
 
   async repopulateFeedback() {
     return await this.feedbackService.repopulateFeedback();
+  }
+
+  async recalculateViews() {
+    const dateRanges = dateRangeConfigs
+      .map((config) => {
+        const dateRange = config.getDateRange();
+        const comparisonDateRange = {
+          start: config.getComparisonDate(dateRange.start),
+          end: config.getComparisonDate(dateRange.end),
+        };
+
+        return [
+          {
+            start: dateRange.start.format('YYYY-MM-DD'),
+            end: dateRange.end.format('YYYY-MM-DD'),
+          },
+          {
+            start: comparisonDateRange.start.format('YYYY-MM-DD'),
+            end: comparisonDateRange.end.format('YYYY-MM-DD'),
+          },
+        ];
+      })
+      .flat();
+
+    const pageVisits = this.db.views.pageVisits;
+
+    try {
+      for (const dateRange of dateRanges) {
+        this.logger.log(
+          chalk.blueBright(
+            'Recalculating page visits view for dateRange: ',
+            JSON.stringify(dateRange, null, 2)
+          )
+        );
+
+        const result = await pageVisits.getOrUpdate(dateRange, true);
+
+        if (!result?.pageVisits?.length) {
+          this.logger.error(
+            chalk.red(
+              'Recalculation failed or contains no results for dateRange: ',
+              JSON.stringify(dateRange, null, 2)
+            )
+          );
+
+          continue;
+        }
+
+        this.logger.log(chalk.green('Date range successfully recalculated.'));
+      }
+    } catch (err) {
+      this.logger.error(err.message, err.stack)
+    }
+
+    // add to db-updater
+
+    // consider moving updates to ~2 am?
   }
 }

@@ -1,29 +1,23 @@
-import {
-  Document,
-  model as mongooseModel,
-  Model,
-  ObjectId,
-  PipelineStage,
-  Schema,
-  Types,
-} from 'mongoose';
+import { Model, PipelineStage, Schema, Types } from 'mongoose';
 import dayjs, { ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import {
+  arrayToDictionary,
+  DateRange,
+  logJson,
+  sum,
+} from '@dua-upd/utils-common';
 import { Page, PageMetrics, Task } from '../';
-import { arrayToDictionary, logJson, sum } from '@dua-upd/utils-common';
+import { IPage } from '@dua-upd/types-common';
+
 dayjs.extend(utc);
 
 /**
  * classes for defining of on-demand materialized views
  */
 
-type DateRange = {
-  start: string | Date;
-  end: string | Date;
-};
-
 export interface DbViewType {
-  _id: DateRange;
+  _id: DateRange<string | Date>;
   lastUpdated: Date;
 }
 
@@ -31,7 +25,7 @@ export interface DbViewConfig<T extends DbViewType, Source> {
   collectionName: `view_${string}`;
   sourceModel: Model<Source>;
   model: Model<T>;
-  pipelineCreator: (dateRange: DateRange) => PipelineStage[];
+  pipelineCreator: (dateRange: DateRange<string | Date>) => PipelineStage[];
   maxAge: [number, ManipulateType];
 }
 
@@ -39,7 +33,7 @@ export abstract class DbView<T extends DbViewType, Source> {
   collectionName: `view_${string}`;
   sourceModel: Model<Source>;
   model: Model<T>;
-  pipelineCreator: (dateRange: DateRange) => PipelineStage[];
+  pipelineCreator: (dateRange: DateRange<string | Date>) => PipelineStage[];
   maxAge: [number, ManipulateType];
 
   protected constructor(config: DbViewConfig<T, Source>) {
@@ -50,7 +44,7 @@ export abstract class DbView<T extends DbViewType, Source> {
     this.maxAge = config.maxAge;
   }
 
-  private async getLastUpdated(dateRange: DateRange) {
+  private async getLastUpdated(dateRange: DateRange<string | Date>) {
     const results = await this.model
       .findOne(
         {
@@ -64,13 +58,10 @@ export abstract class DbView<T extends DbViewType, Source> {
       .lean()
       .exec();
 
-    console.log('getLastUpdated:');
-    logJson(results);
-
     return results?.lastUpdated || null;
   }
 
-  private async needsUpdate(dateRange: DateRange) {
+  private async needsUpdate(dateRange: DateRange<string | Date>) {
     const lastUpdated = await this.getLastUpdated(dateRange);
 
     if (!lastUpdated) {
@@ -82,8 +73,8 @@ export abstract class DbView<T extends DbViewType, Source> {
     return dayjs.utc().isAfter(expiryDate);
   }
 
-  async getOrUpdate(dateRange: DateRange) {
-    if (await this.needsUpdate(dateRange)) {
+  async getOrUpdate(dateRange: DateRange<string | Date>, forceUpdate = false) {
+    if ((await this.needsUpdate(dateRange)) || forceUpdate) {
       await this.sourceModel
         .aggregate<T>(this.pipelineCreator(dateRange))
         .exec();
@@ -114,7 +105,7 @@ const viewsBaseSchema = {
 
 export interface PageVisits extends DbViewType {
   // the _id in the pageVisits objects are Page references and not ids from pages_metrics
-  pageVisits: (Page & { visits: number })[];
+  pageVisits: (IPage & { visits: number })[];
 }
 
 const COLLECTION_NAME = 'view_page_visits' as const;
@@ -128,10 +119,10 @@ export class PageVisitsView
     pageMetricsModel: Model<PageMetrics>
   ) {
     const collectionName = COLLECTION_NAME;
-    const maxAge: [number, ManipulateType] = [1, 'year'];
+    const maxAge: [number, ManipulateType] = [1, 'week'];
     const sourceModel = pageMetricsModel;
     const model = pageVisitsModel;
-    const pipelineCreator = (dateRange: DateRange) => [
+    const pipelineCreator = (dateRange: DateRange<string | Date>) => [
       {
         $match: {
           date: {
@@ -197,7 +188,10 @@ export class PageVisitsView
     });
   }
 
-  async getVisitsWithPageData(dateRange: DateRange, pageModel: Model<Page>) {
+  async getVisitsWithPageData(
+    dateRange: DateRange<string | Date>,
+    pageModel: Model<Page>
+  ) {
     const visits = (await this.getOrUpdate(dateRange))?.pageVisits || [];
 
     const visitsDictionary = arrayToDictionary(visits, '_id');
@@ -222,7 +216,10 @@ export class PageVisitsView
       .sort((a, b) => b.visits - a.visits);
   }
 
-  async getVisitsWithTaskData(dateRange: DateRange, taskModel: Model<Task>) {
+  async getVisitsWithTaskData(
+    dateRange: DateRange<string | Date>,
+    taskModel: Model<Task>
+  ) {
     const visits = (await this.getOrUpdate(dateRange))?.pageVisits || [];
 
     const visitsDictionary = arrayToDictionary(visits, '_id');
@@ -232,9 +229,10 @@ export class PageVisitsView
     const tasksWithVisits = await Promise.all(
       tasks.map((task) =>
         task.populate('pages').then((task) => {
-          const pageVisits = task.pages?.map(
-            (page) => visitsDictionary[page._id.toString()]?.visits || 0
-          ) || [];
+          const pageVisits =
+            task.pages?.map(
+              (page) => visitsDictionary[page._id.toString()]?.visits || 0
+            ) || [];
 
           return {
             ...task.toObject(),

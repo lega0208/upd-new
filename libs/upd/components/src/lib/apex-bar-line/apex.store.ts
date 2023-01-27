@@ -32,7 +32,6 @@ export class ApexStore extends ComponentStore<ApexOptions> {
                 '<span class="material-icons align-middle">download</span>',
             },
           },
-          stroke: { width: [3, 3, 3, 3], curve: 'smooth', lineCap: 'square' },
           yaxis: [],
         } as ApexOptions
       )

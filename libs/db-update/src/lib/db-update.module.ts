@@ -2,10 +2,9 @@ import { CacheModule, ConsoleLogger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DbModule, DbService } from '@dua-upd/db';
 import {
-  AdobeAnalyticsClient, AdobeAnalyticsService,
-  AirtableClient, ExternalDataModule,
-  SearchAnalyticsClient,
-  SearchAssessmentService
+  AirtableClient,
+  ExternalDataModule,
+  SearchAssessmentService,
 } from '@dua-upd/external-data';
 import { DbUpdateService } from './db-update.service';
 import { OverallMetricsService } from './overall-metrics/overall-metrics.service';
@@ -16,7 +15,6 @@ import { PageUpdateService } from './pages/pages.service';
 import { PageMetricsService } from './pages-metrics/page-metrics.service';
 import { PagesListService } from './pages-list/pages-list.service';
 import { InternalSearchTermsService } from './internal-search/search-terms.service';
-import { logJson } from '@dua-upd/utils-common';
 
 @Module({
   imports: [
@@ -51,6 +49,7 @@ import { logJson } from '@dua-upd/utils-common';
     AirtableService,
     CalldriversService,
     DbModule,
+    DbService,
     DbUpdateService,
     ExternalDataModule,
     FeedbackService,
@@ -62,5 +61,4 @@ import { logJson } from '@dua-upd/utils-common';
     SearchAssessmentService,
   ],
 })
-export class DbUpdateModule {
-}
+export class DbUpdateModule {}

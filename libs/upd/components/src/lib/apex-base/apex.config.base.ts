@@ -50,7 +50,12 @@ export const createBaseConfig = (formatter: (val: number) => string) => ({
   ],
   fill: {
     type: 'solid',
-    opacity: 1
+    opacity: 1,
+  },
+  stroke: {
+    width: 3,
+    curve: 'smooth',
+    lineCap: 'round',
   },
   xaxis: {
     type: 'datetime',
@@ -58,6 +63,7 @@ export const createBaseConfig = (formatter: (val: number) => string) => ({
       style: {
         fontSize: '14px',
       },
+      hideOverlappingLabels: true
     },
     axisBorder: {
       show: true,
