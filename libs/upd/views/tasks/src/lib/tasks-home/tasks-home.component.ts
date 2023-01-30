@@ -40,6 +40,30 @@ export class TasksHomeComponent implements OnInit {
             typeParam: '_id',
           },
           {
+            field: 'program',
+            header: this.i18n.service.translate('Program', lang),
+            filterConfig: {
+              type: 'category',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'program',
+              }),
+            },
+          },
+          {
+            field: 'user_type',
+            header: this.i18n.service.translate('Audience', lang),
+            filterConfig: {
+              type: 'category',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'user_type',
+              }),
+            },
+          },
+          {
             field: 'topic',
             header: this.i18n.service.translate('category', lang),
             filterConfig: {

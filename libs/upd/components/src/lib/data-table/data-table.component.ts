@@ -2,6 +2,7 @@ import {
   Component,
   Input,
   OnChanges,
+  OnInit,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
@@ -89,6 +90,35 @@ export class DataTableComponent<T> implements OnChanges {
   clearAll() {
     this.colFilters = {};
     this.table?.clear();
+  }
+
+  removeColFilter(header: string, field: string, filter: string[]) {
+    const colHeader = `${header}:${field}`;
+
+    if ( filter === null ) return;
+
+    filter.map((value) => {
+      this.colFilters[colHeader] = this.colFilters[colHeader].filter(
+        (f) => f !== value
+      );
+
+      this.table?.filter(this.colFilters[colHeader], field, 'in');
+
+      this.table.filters[field] = [
+        {
+          value:
+            this.colFilters[colHeader].length === 0
+              ? null
+              : this.colFilters[colHeader],
+          matchMode: 'in',
+          operator: 'and',
+        },
+      ];
+    });
+
+    if (Object.values(this.colFilters).every((v) => v.length === 0)) {
+      this.colFilters = {};
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
