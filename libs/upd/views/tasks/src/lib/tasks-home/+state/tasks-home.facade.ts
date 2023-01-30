@@ -34,6 +34,17 @@ export class TasksHomeFacade {
         subtopic: row.subtopic
           ? this.i18n.service.translate(row.subtopic || '', lang)
           : '',
+        program: row.program
+          ? this.i18n.service.translate(row.program || '', lang)
+          : '',
+        user_type:
+          row.user_type.length > 0
+            ? row.user_type
+                .map((userType) =>
+                  this.i18n.service.translate(userType || '', lang)
+                )
+                .join(', ')
+            : '',
       }));
     })
   );

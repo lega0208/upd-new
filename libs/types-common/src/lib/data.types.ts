@@ -98,7 +98,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
     title: string;
   }[];
   feedbackComments: FeedbackComment[];
-  searchTerms: InternalSearchTerm[]
+  searchTerms: InternalSearchTerm[];
 }
 
 export interface OverviewAggregatedData {
@@ -217,6 +217,7 @@ export interface TasksHomeAggregatedData {
   core?: string[];
   channel?: string[];
   visits: number;
+  user_type: string[];
 }
 
 export type TasksHomeData = ViewData<TasksHomeAggregatedData[]>;
