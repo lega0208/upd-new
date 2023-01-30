@@ -32,7 +32,7 @@ import { ProjectsDetailsFacade } from './project-details/+state/projects-details
 import { ProjectDetailsDetailsComponent } from './project-details/project-details-details/project-details-details.component';
 import { ProjectDetailsUxTestsComponent } from './project-details/project-details-ux-tests/project-details-ux-tests.component';
 import { I18nModule } from '@dua-upd/upd/i18n';
-import { PipesModule } from '@dua-upd/upd/pipes';
+import { LocaleDatePipe, PipesModule } from '@dua-upd/upd/pipes';
 
 @NgModule({
 	imports: [
@@ -62,6 +62,6 @@ import { PipesModule } from '@dua-upd/upd/pipes';
     ProjectDetailsCalldriversComponent,
     ProjectDetailsDetailsComponent,
   ],
-  providers: [ProjectsHomeFacade, ProjectsDetailsFacade, ApiService],
+  providers: [ProjectsHomeFacade, ProjectsDetailsFacade, ApiService, LocaleDatePipe],
 })
 export class ProjectsModule {}

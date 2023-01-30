@@ -130,6 +130,17 @@ export class TasksService {
     const returnData: TaskDetailsData = {
       _id: task._id.toString(),
       title: task.title,
+      group: task.group,
+      subgroup: task.subgroup,
+      topic: task.topic,
+      subtopic: task.subtopic,
+      user_type: task.user_type,
+      program: task.program,
+      service: task.service,
+      user_journey: task.user_journey,
+      status: task.status,
+      channel: task.channel,
+      core: task.core,
       projects,
       dateRange: params.dateRange,
       dateRangeData: await getTaskAggregatedData(

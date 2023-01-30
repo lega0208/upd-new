@@ -31,11 +31,7 @@ import type {
 } from '@dua-upd/types-common';
 import { ApiParams, InternalSearchTerm } from '@dua-upd/types-common';
 import { dateRangeSplit } from '@dua-upd/utils-common/date';
-import {
-  getAvgSuccessFromLastTests,
-  getLatestTest,
-  getLatestTestData,
-} from '@dua-upd/utils-common/data';
+import { getLatestTest, getLatestTestData } from '@dua-upd/utils-common/data';
 import { arrayToDictionary, AsyncLogTiming } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
@@ -302,9 +298,7 @@ export class ProjectsService {
     ).length;
 
     for (const data of projectsData) {
-      const { percentChange, avgTestSuccess, total } = getLatestTestData(
-        data.uxTests
-      );
+      const { avgTestSuccess } = getLatestTestData(data.uxTests);
 
       data.lastAvgSuccessRate = avgTestSuccess;
     }
@@ -373,6 +367,8 @@ export class ProjectsService {
         .map((test) => test.status as ProjectStatus)
     );
 
+    const description = populatedProjectDoc.description;
+
     const uxTests = populatedProjectDoc.ux_tests.map((uxTest) => {
       uxTest = uxTest._doc;
 
@@ -402,6 +398,12 @@ export class ProjectsService {
 
     const tasks = populatedProjectDoc.tasks as Task[];
 
+    const startDate = uxTests.find((uxTest) => uxTest.date)?.date.toISOString();
+    const launchDate = uxTests
+      .find((uxTest) => uxTest.launch_date)
+      ?.launch_date.toISOString();
+    const members = uxTests.find((uxTest) => uxTest.project_lead)?.project_lead;
+
     const results = {
       _id: populatedProjectDoc._id.toString(),
       dateRange: params.dateRange,
@@ -426,6 +428,10 @@ export class ProjectsService {
       ),
       title,
       status,
+      description,
+      startDate,
+      launchDate,
+      members,
       avgTaskSuccessFromLastTest: avgTestSuccess,
       avgSuccessPercentChange: percentChange,
       dateFromLastTest,
