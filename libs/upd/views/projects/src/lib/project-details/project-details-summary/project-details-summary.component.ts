@@ -65,17 +65,17 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   };
 
   memberList = [
-    {role: 'Role name 1', projectLead: 'Name 1', vendor: 'Product name 1'}, 
-    {role: 'Role name 2', projectLead: 'Name 2', vendor: 'Product name 2'}, 
+    {role: 'Role name 1', projectLead: 'Name 1', vendor: 'Product name 1'},
+    {role: 'Role name 2', projectLead: 'Name 2', vendor: 'Product name 2'},
     {role: 'Role name 3', projectLead: 'Name 3', vendor: 'Product name 3'}
   ]
-  memberList$: Observable<any> = of(this.memberList);
+  memberList$ = this.projectsDetailsService.members$;
   memberListCols: ColumnConfig[] = [];
 
-  projectDesc$ = 'This is the description of the project.';
+  description$ = this.projectsDetailsService.description$;
 
-  startDate$ = 'Jan 1';
-  launchDate$ = 'Jan 1';
+  startDate$ = this.projectsDetailsService.startDate$;
+  launchDate$ = this.projectsDetailsService.launchDate$;
   completedField$ = 'Test string for completed field'
   yearReview$ = 'Test string for year review field'
 
@@ -140,17 +140,13 @@ export class ProjectDetailsSummaryComponent implements OnInit {
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
       this.memberListCols = [
         {
-          field: 'role',
-          header: this.i18n.service.translate('Role', lang),
-        },
-        {
-          field: 'projectLead',
+          field: 'name',
           header: this.i18n.service.translate('Name', lang)
         },
         {
-          field: 'vendor',
-          header: this.i18n.service.translate('Product', lang),
-        }
+          field: 'role',
+          header: this.i18n.service.translate('Role', lang),
+        },
       ];
     });
   }

@@ -17,8 +17,8 @@ export class LocaleNumberPipe implements PipeTransform {
 export class LocaleDatePipe implements PipeTransform {
   constructor(private i18n: I18nService, private _ref: ChangeDetectorRef) {}
 
-  transform(value?: Date | null, format = 'mediumDate', lang?: LocaleId) {
-    return value instanceof Date
+  transform(value?: string | Date | null, format = 'mediumDate', lang?: LocaleId) {
+    return (value instanceof Date || typeof value === 'string')
       ? formatDate(value, format, lang ?? this.i18n.currentLang, 'UTC')
       : value;
   }

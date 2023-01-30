@@ -59,6 +59,10 @@ export class ProjectsDetailsFacade {
   );
   status$ = this.projectsDetailsData$.pipe(map((data) => data?.status));
 
+  description$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.description)
+  );
+
   avgTaskSuccessFromLastTest$ = this.projectsDetailsData$.pipe(
     map((data) => data?.avgTaskSuccessFromLastTest)
   );
@@ -876,6 +880,24 @@ export class ProjectsDetailsFacade {
       pipeParam: '1.0-2',
     },
   ]);
+
+  startDate$ = this.projectsDetailsData$.pipe(
+    map(({ startDate }) => startDate)
+  );
+  launchDate$ = this.projectsDetailsData$.pipe(
+    map(({ launchDate }) => launchDate)
+  );
+  members$ = this.projectsDetailsData$.pipe(
+    map(({ members }) =>
+      (members || '')
+        .split(', ')
+        .filter((member) => member)
+        .map((member) => ({
+          name: member,
+          role: 'Project lead',
+        }))
+    )
+  );
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
 

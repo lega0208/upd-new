@@ -1,6 +1,6 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, LeanDocument } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   AirtableClient,
   PageData,
@@ -98,7 +98,10 @@ export class AirtableService {
         // *** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ <-
         // if Page -> check allUrlsDict for url match -> set to proper _id
         // (+ if this doesn't fix updating the airtable_id, could maybe update it "inline")
-        idsMap.set(doc.airtable_id, allUrlsDict[doc['url']]?._id || new Types.ObjectId());
+        idsMap.set(
+          doc.airtable_id,
+          allUrlsDict[doc['url']]?._id || new Types.ObjectId()
+        );
       }
       return {
         ...doc,
@@ -166,6 +169,7 @@ export class AirtableService {
         ux_tests: uxTests.map((uxTest) => uxTest._id),
         pages: pageObjectIds,
         tasks: taskObjectIds,
+        description: uxTests.find((uxTest) => uxTest.description)?.description,
       };
     }) as Project[];
   }
@@ -390,9 +394,8 @@ export class AirtableService {
       return;
     }
 
-
-    const updatedPages = airtableList.filter((page) =>
-      page.url && currentUrlsDict[page.url]
+    const updatedPages = airtableList.filter(
+      (page) => page.url && currentUrlsDict[page.url]
     );
 
     const updateOps = updatedPages.map((page) => ({

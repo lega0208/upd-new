@@ -16,13 +16,16 @@ import {
 } from '@dua-upd/types-common';
 import {
   GetTableProps,
+  KeysOfType,
   percentChange,
-  PickByType, UnwrapObservable
+  PickByType,
+  UnwrapObservable,
 } from '@dua-upd/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
+import { selectTasksDetailsDataWithI18n } from './tasks-details.selectors';
 
 dayjs.extend(utc);
 
@@ -44,14 +47,46 @@ export class TasksDetailsFacade {
 
   currentRoute$ = this.store.select(selectRoute);
 
-  titleHeader$ = combineLatest([
-    this.tasksDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) =>
-      data.title ? this.i18n.service.translate(data.title, lang) : data.title
-    )
-  );
+  titleHeader$ = this.getTranslatedProp('title');
+
+  group$ = this.getTranslatedProp('group');
+  subgroup$ = this.getTranslatedProp('subgroup');
+  topic$ = this.getTranslatedProp('topic');
+  subtopic$ = this.getTranslatedProp('subtopic');
+  program$ = this.getTranslatedProp('program');
+  service$ = this.getTranslatedProp('service');
+  userJourney$ = this.getTranslatedProp('user_journey');
+  status$ = this.getTranslatedProp('status');
+
+  userType$ = this.store
+    .select(selectTasksDetailsDataWithI18n)
+    .pipe(
+      map(([data, lang]) =>
+        data?.user_type.map((userType) =>
+          userType ? this.i18n.service.translate(userType, lang) : userType
+        )
+      )
+    );
+
+  channel$ = this.store
+    .select(selectTasksDetailsDataWithI18n)
+    .pipe(
+      map(([data, lang]) =>
+        data?.channel.map((channel) =>
+          channel ? this.i18n.service.translate(channel, lang) : channel
+        )
+      )
+    );
+
+  core$ = this.store
+    .select(selectTasksDetailsDataWithI18n)
+    .pipe(
+      map(([data, lang]) =>
+        data?.core.map((core) =>
+          core ? this.i18n.service.translate(core, lang) : core
+        )
+      )
+    );
 
   avgTaskSuccessFromLastTest$ = this.tasksDetailsData$.pipe(
     map((data) => data.avgTaskSuccessFromLastTest)
@@ -195,7 +230,7 @@ export class TasksDetailsFacade {
         (v) => v.value > 0
       );
 
-      const barChartData  = [
+      const barChartData = [
         {
           name: dateRangeLabel,
           series: dataEnquiryLineFinal,
@@ -696,6 +731,18 @@ export class TasksDetailsFacade {
    */
   init() {
     this.store.dispatch(TasksDetailsActions.loadTasksDetailsInit());
+  }
+
+  getTranslatedProp(propName: KeysOfType<TaskDetailsData, string>) {
+    return this.store
+      .select(selectTasksDetailsDataWithI18n)
+      .pipe(
+        map(([data, lang]) =>
+          data[propName]
+            ? this.i18n.service.translate(data[propName], lang)
+            : data[propName]
+        )
+      );
   }
 }
 

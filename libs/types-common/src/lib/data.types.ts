@@ -246,6 +246,17 @@ export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
 
 export interface TaskDetailsData
   extends EntityDetailsData<TaskDetailsAggregatedData> {
+  group: string;
+  subgroup: string;
+  topic: string;
+  subtopic: string;
+  user_type: string[];
+  program: string;
+  service: string;
+  user_journey: string;
+  status: string;
+  channel: string[];
+  core: string[];
   avgTaskSuccessFromLastTest: number;
   dateFromLastTest: Date;
   taskSuccessByUxTest: {
@@ -338,6 +349,10 @@ export interface ProjectDetailsAggregatedData {
 export interface ProjectsDetailsData
   extends EntityDetailsData<ProjectDetailsAggregatedData> {
   status: ProjectStatus;
+  description?: string;
+  startDate: string | undefined;
+  launchDate: string | undefined;
+  members: string | undefined;
   avgTaskSuccessFromLastTest: number | null;
   avgSuccessPercentChange: number | null;
   dateFromLastTest: Date;
