@@ -130,6 +130,7 @@
                   [showAddButton]="false"
                   [showApplyButton]="false"
                   [hideOnClear]="true"
+                  [showClearButton]="false"
                 >
                   <ng-template
                     pTemplate="filter"
@@ -157,6 +158,13 @@
                         </div>
                       </ng-template>
                     </p-multiSelect>
+                    <button
+                      pButton
+                      type="button"
+                      label="Clear"
+                      class="p-button-outlined pt-2"
+                      (click)="removeColFilter(col.header, col.field, value)"
+                    ></button>
                   </ng-template>
                 </p-columnFilter>
               </ng-template>
