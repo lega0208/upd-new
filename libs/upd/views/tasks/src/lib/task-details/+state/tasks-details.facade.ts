@@ -49,44 +49,41 @@ export class TasksDetailsFacade {
 
   titleHeader$ = this.getTranslatedProp('title');
 
-  group$ = this.getTranslatedProp('group');
-  subgroup$ = this.getTranslatedProp('subgroup');
-  topic$ = this.getTranslatedProp('topic');
-  subtopic$ = this.getTranslatedProp('subtopic');
-  program$ = this.getTranslatedProp('program');
-  service$ = this.getTranslatedProp('service');
-  userJourney$ = this.getTranslatedProp('user_journey');
-  status$ = this.getTranslatedProp('status');
+  detailsTable$ = this.store.select(selectTasksDetailsDataWithI18n).pipe(
+    map(([data, lang]) => {
+      const detailsFieldNames = [
+        'group',
+        'subgroup',
+        'topic',
+        'subtopic',
+        'channel',
+        'core',
+        'program',
+        'service',
+        'user_journey',
+        'status',
+        'user_type',
+      ] as const;
 
-  userType$ = this.store
-    .select(selectTasksDetailsDataWithI18n)
-    .pipe(
-      map(([data, lang]) =>
-        data?.user_type.map((userType) =>
-          userType ? this.i18n.service.translate(userType, lang) : userType
-        )
-      )
-    );
+      return detailsFieldNames.map((fieldName) => {
+        const value = data?.[fieldName];
 
-  channel$ = this.store
-    .select(selectTasksDetailsDataWithI18n)
-    .pipe(
-      map(([data, lang]) =>
-        data?.channel.map((channel) =>
-          channel ? this.i18n.service.translate(channel, lang) : channel
-        )
-      )
-    );
+        if (Array.isArray(value)) {
+          return [
+            this.i18n.service.translate(fieldName, lang),
+            value
+              .map((valItem) => this.i18n.service.translate(valItem, lang))
+              .join(', '),
+          ];
+        }
 
-  core$ = this.store
-    .select(selectTasksDetailsDataWithI18n)
-    .pipe(
-      map(([data, lang]) =>
-        data?.core.map((core) =>
-          core ? this.i18n.service.translate(core, lang) : core
-        )
-      )
-    );
+        return [
+          this.i18n.service.translate(fieldName, lang),
+          value ? this.i18n.service.translate(value, lang) : value,
+        ];
+      });
+    })
+  );
 
   avgTaskSuccessFromLastTest$ = this.tasksDetailsData$.pipe(
     map((data) => data.avgTaskSuccessFromLastTest)
