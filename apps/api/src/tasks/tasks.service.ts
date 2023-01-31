@@ -101,7 +101,6 @@ export class TasksService {
     const task = await this.taskModel
       .findById(new Types.ObjectId(params.id), {
         airtable_id: 0,
-        user_type: 0,
       })
       .populate(['pages', 'ux_tests', 'projects'])
       .exec();
