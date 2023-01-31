@@ -8,10 +8,14 @@ export type DbEntity = {
  * Gets the most recent test, or any with a success rate if no dates are present
  * @param uxTests
  */
-export const getLatestTest = <T extends { date?: Date }>(uxTests: T[]) =>
+export const getLatestTest = <T extends { date?: Date, success_rate?: number }>(uxTests: T[]) =>
   uxTests.reduce((latestTest, test) => {
     if (!latestTest || typeof latestTest?.date !== 'object') {
       return test;
+    }
+
+    if (!test.success_rate) {
+      return latestTest;
     }
 
     if (test.date && test.date > latestTest.date) {
