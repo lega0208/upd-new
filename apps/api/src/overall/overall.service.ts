@@ -241,7 +241,11 @@ export class OverallService {
           total_searches: 1,
           clicks: 1,
           ctr: {
-            $round: [{ $divide: ['$clicks', '$total_searches'] }, 2],
+            $cond: {
+              if: { $eq: ['$total_searches', 0] },
+              then: 0,
+              else: { $round: [{ $divide: ['$clicks', '$total_searches'] }, 2] },
+            },
           },
           position: {
             $round: ['$position', 2],
