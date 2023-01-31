@@ -103,13 +103,13 @@
           [sort]="false"
           [filter]="false"
           [pagination]="false"
-          [title]="'Members'"
+          [title]="'Members' | translate"
         >
         </upd-data-table-card>
       </ng-container>
       <ng-template #noMembers>
         <upd-card [title]="'Members'">
-          <p>Members list not available.</p>
+          <p>{{ 'Members list not available' | translate }}.</p>
         </upd-card>
       </ng-template>
     </div>
@@ -127,7 +127,7 @@
           <p>Launch Date: {{ launchDate$ | async | localeDate }}</p>
         </ng-container>
         <ng-template #noTimeline>
-          <p>Timeline not available.</p>
+          <p>{{ 'Timeline not available' | translate }}.</p>
         </ng-template>
       </upd-card>
     </div>
