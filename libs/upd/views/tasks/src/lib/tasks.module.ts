@@ -32,6 +32,7 @@ import { TasksDetailsEffects } from './task-details/+state/tasks-details.effects
 import { TasksDetailsFacade } from './task-details/+state/tasks-details.facade';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import { PipesModule } from '@dua-upd/upd/pipes';
+import { TaskDetailsDetailsComponent } from './task-details/task-details-details/task-details-details.component';
 
 @NgModule({
 	imports: [
@@ -56,6 +57,7 @@ import { PipesModule } from '@dua-upd/upd/pipes';
     TaskDetailsFeedbackComponent,
     TaskDetailsCalldriversComponent,
     TaskDetailsUxTestsComponent,
+    TaskDetailsDetailsComponent,
   ],
   providers: [ApiService, TasksHomeFacade, TasksDetailsFacade],
 })

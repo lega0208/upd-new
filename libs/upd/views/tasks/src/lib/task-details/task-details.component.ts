@@ -59,6 +59,10 @@ export class TaskDetailsComponent implements OnInit {
           href: 'uxtests',
           title: this.i18n.service.translate('tab-uxtests', lang),
         },
+        {
+          href: 'details',
+          title: this.i18n.service.translate('tab-details', lang),
+        },
       ];
 
       this.projectsCol = {

@@ -10,6 +10,7 @@ import { TaskDetailsSearchAnalyticsComponent } from './task-details/task-details
 import { TaskDetailsFeedbackComponent } from './task-details/task-details-feedback/task-details-feedback.component';
 import { TaskDetailsCalldriversComponent } from './task-details/task-details-calldrivers/task-details-calldrivers.component';
 import { TaskDetailsUxTestsComponent } from './task-details/task-details-ux-tests/task-details-ux-tests.component';
+import { TaskDetailsDetailsComponent } from './task-details/task-details-details/task-details-details.component';
 
 const routes: Routes = [
   {
@@ -28,6 +29,7 @@ const routes: Routes = [
           { path: 'pagefeedback', component: TaskDetailsFeedbackComponent, data: {title: 'Tasks | Page feedback'} },
           { path: 'calldrivers', component: TaskDetailsCalldriversComponent, data: {title: 'Tasks | Call drivers'} },
           { path: 'uxtests', component: TaskDetailsUxTestsComponent, data: {title: 'Tasks | UX tests'} },
+          { path: 'details', component: TaskDetailsDetailsComponent, data: {title: 'Tasks | Details'} },
         ],
       },
     ],
