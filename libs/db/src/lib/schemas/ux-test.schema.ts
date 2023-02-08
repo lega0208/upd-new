@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory, PropOptions } from '@nestjs/mongoose';
 import { model, Document, Types } from 'mongoose';
 import { Page } from './page.schema';
 import { Project } from './project.schema';
@@ -77,9 +77,6 @@ export class UxTest implements IUxTest {
 
   @Prop({ type: Boolean })
   cops?: boolean;
-
-  @Prop({ type: [{ id: String, url: String, filename: String }] })
-  attachments?: AttachmentData[];
 }
 
 export const UxTestSchema = SchemaFactory.createForClass(UxTest);

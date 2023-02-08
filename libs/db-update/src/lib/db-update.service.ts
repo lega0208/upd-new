@@ -114,11 +114,15 @@ export class DbUpdateService {
         .upsertOverallSearchTerms()
         .catch((err) => this.logger.error(err.stack));
 
-      await this.pageMetricsService
-        .updatePageMetrics()
-        .catch((err) =>
-          this.logger.error('Error updating Page Metrics data', err)
-        );
+
+      await Promise.allSettled([
+        await this.pageMetricsService
+          .updatePageMetrics()
+          .catch((err) =>
+            this.logger.error('Error updating Page Metrics data', err)
+          ),
+        await this.airtableService.uploadProjectAttachmentsAndUpdateUrls(),
+      ])
 
       await this.internalSearchService
         .upsertPageSearchTerms()

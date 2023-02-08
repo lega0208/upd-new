@@ -3,7 +3,7 @@ import { model, Document, Types } from 'mongoose';
 import { Page } from './page.schema';
 import { UxTest } from './ux-test.schema';
 import { Task } from './task.schema';
-import { IProject } from '@dua-upd/types-common';
+import { AttachmentData, IProject } from '@dua-upd/types-common';
 
 export type ProjectDocument = Project & Document;
 
@@ -26,6 +26,19 @@ export class Project implements IProject {
 
   @Prop({ type: String })
   description?: string;
+
+  @Prop({
+    type: [
+      {
+        id: String,
+        url: String,
+        filename: String,
+        size: Number,
+        storage_url: String,
+      },
+    ],
+  })
+  attachments?: AttachmentData[];
 }
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);

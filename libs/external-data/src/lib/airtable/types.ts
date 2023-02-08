@@ -12,7 +12,7 @@ export interface TaskData {
   pages?: string[];
   program?: string;
   service?: string;
-  user_journey?: string;
+  user_journey?: string[];
   status?: string;
   channel?: string[];
   core?: string[];
@@ -61,7 +61,7 @@ export interface AttachmentData {
   id: string;
   url: string;
   filename: string;
-  size?: number;
+  size: number;
   type?: string;
   thumbnails?: {
     small?: ThumbnailData;

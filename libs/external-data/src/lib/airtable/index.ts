@@ -255,7 +255,7 @@ export class AirtableClient {
       pages: fields['Pages'],
       program: squishTrim(fields['Program']),
       service: squishTrim(fields['Services']),
-      user_journey: squishTrim(fields['User Journey']),
+      user_journey: fields['User Journey']?.map(squishTrim),
       status: squishTrim(fields['Status']),
       channel: fields['Channel']?.map(squishTrim),
       core: fields['Core']?.map(squishTrim),
@@ -335,7 +335,7 @@ export class AirtableClient {
       .map(({ id, fields }) => ({
         airtable_id: id,
         title: squishTrim(fields['Page Title'] as string)
-          .replaceAll('Ã¢â‚¬â€œ', '–')
+          ?.replaceAll('Ã¢â‚¬â€œ', '–')
           .replaceAll('Ã¢â‚¬â„¢', "'"),
         url: squishTrim(fields['Url']).replace('https://', ''),
         tasks: fields['Tasks'],

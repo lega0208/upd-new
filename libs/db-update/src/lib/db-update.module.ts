@@ -1,5 +1,6 @@
 import { CacheModule, ConsoleLogger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { BlobStorageModule } from '@dua-upd/blob-storage';
 import { DbModule, DbService } from '@dua-upd/db';
 import {
   AirtableClient,
@@ -25,6 +26,7 @@ import { InternalSearchTermsService } from './internal-search/search-terms.servi
     }),
     DbModule,
     ExternalDataModule,
+    BlobStorageModule
   ],
   providers: [
     AirtableService,

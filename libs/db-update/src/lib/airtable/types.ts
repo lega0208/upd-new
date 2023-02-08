@@ -1,5 +1,5 @@
 import { PageData, TaskData, UxTestData } from '@dua-upd/external-data';
-import { Page, Project, Task, UxTest } from '@dua-upd/db';
+import { IPage, IProject, ITask, IUxTest } from '@dua-upd/types-common';
 
 export type UxApiDataType = TaskData | UxTestData | PageData;
 export interface UxApiData {
@@ -8,10 +8,10 @@ export interface UxApiData {
   pageData: PageData[];
   tasksTopicsMap: Record<string, number[]>;
 }
-export type UxDataType = Task | UxTest | Page | Project;
+export type UxDataType = ITask | IUxTest | IPage | IProject;
 export interface UxData {
-  tasks: Task[];
-  uxTests: UxTest[];
-  pages: Page[];
-  projects: Project[];
+  tasks: ITask[];
+  uxTests: IUxTest[];
+  pages: IPage[];
+  projects: IProject[];
 }

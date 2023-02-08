@@ -299,6 +299,11 @@ export interface ITask {
   pages?: Types.ObjectId[] | IPage[];
 
   tpc_ids: number[];
+  program?: string;
+  user_journey?: string[];
+  status?: string;
+  channel?: string[];
+  core?: string[];
 }
 
 /*
@@ -314,6 +319,8 @@ export interface IProject {
   pages?: Types.ObjectId[] | IPage[];
 
   tasks?: Types.ObjectId[] | ITask[];
+  description?: string;
+  attachments?: AttachmentData[];
 }
 
 /*
@@ -373,6 +380,8 @@ export interface AttachmentData {
   id: string;
   url: string;
   filename: string;
+  size: number;
+  storage_url?: string;
 }
 
 export interface SearchAssessmentData {

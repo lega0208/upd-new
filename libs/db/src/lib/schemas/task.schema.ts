@@ -51,8 +51,8 @@ export class Task implements ITask {
   @Prop({ type: String })
   service = '';
 
-  @Prop({ type: String })
-  user_journey = '';
+  @Prop({ type: [String] })
+  user_journey: string[] = [];
 
   @Prop({ type: String })
   status = '';
