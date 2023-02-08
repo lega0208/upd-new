@@ -105,11 +105,19 @@ export class TasksService {
       .populate(['pages', 'ux_tests', 'projects'])
       .exec();
 
-    const projects = (task.projects || [])
-      .map((project) => {
-        return { id: project._id, title: project.title };
-      })
-      .flat();
+    const projects = (task.projects || []).map((project) => ({
+      _id: project._id,
+      id: project._id,
+      title: project.title,
+      attachments: project.attachments.map((attachment) => {
+        attachment.storage_url = attachment.storage_url.replace(
+          /^https:\/\//,
+          ''
+        );
+
+        return attachment;
+      }),
+    }));
 
     const taskUrls = task.pages
       .map((page) => {
@@ -181,7 +189,6 @@ export class TasksService {
               success_rate: uxTest.success_rate,
               total_users: uxTest.total_users,
               scenario: uxTest.scenario,
-              attachments: uxTest.attachments,
             }
         )
         .filter((uxTest) => !!uxTest)

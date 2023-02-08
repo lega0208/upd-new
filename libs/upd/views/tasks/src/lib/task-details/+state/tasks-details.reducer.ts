@@ -28,7 +28,7 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     user_type: [],
     program: '',
     service: '',
-    user_journey: '',
+    user_journey: [],
     status: '',
     channel: [],
     core: [],

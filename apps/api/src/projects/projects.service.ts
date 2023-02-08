@@ -342,7 +342,7 @@ export class ProjectsService {
     const projectUrls = await getUniqueProjectUrls(projectDoc);
 
     const populatedProjectDoc = (await this.projectsModel
-      .findById(projectId, { title: 1, tasks: 1, ux_tests: 1 })
+      .findById(projectId, { title: 1, tasks: 1, ux_tests: 1, attachments: 1 })
       .populate([
         {
           path: 'tasks',
@@ -443,6 +443,14 @@ export class ProjectsService {
         this.feedbackModel
       ),
       searchTerms: await this.getTopSearchTerms(params),
+      attachments: populatedProjectDoc.attachments.map((attachment) => {
+        attachment.storage_url = attachment.storage_url.replace(
+          /^https:\/\//,
+          ''
+        );
+
+        return attachment;
+      }),
     };
 
     await this.cacheManager.set(cacheKey, results);

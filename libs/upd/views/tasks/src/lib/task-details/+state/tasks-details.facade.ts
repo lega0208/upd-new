@@ -10,6 +10,7 @@ import 'dayjs/esm/locale/fr-ca';
 import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import {
+  AttachmentData,
   TaskDetailsAggregatedData,
   TaskDetailsData,
   VisitsByPage,
@@ -162,17 +163,18 @@ export class TasksDetailsFacade {
 
   documents$ = this.tasksDetailsData$.pipe(
     map((data) =>
-      data?.taskSuccessByUxTest
-        .map((d) => {
-          return d.attachments.map((a) => {
-            const url = a.url.replace('https://', '');
-            return {
-              filename: a.filename,
-              url: url,
-            };
-          });
-        })
-        .flat()
+      data?.projects
+        .reduce(
+          (attachments, project) => [
+            ...attachments,
+            ...(project.attachments || []),
+          ],
+          [] as AttachmentData[]
+        )
+        .map((attachment) => ({
+          url: attachment.storage_url,
+          filename: attachment.filename,
+        }))
     )
   );
 
