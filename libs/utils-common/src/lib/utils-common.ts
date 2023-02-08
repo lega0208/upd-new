@@ -5,8 +5,11 @@ export function wait(ms: number): Promise<void> {
 
 // Removes double-spaces and trims the string
 export function squishTrim<T extends string>(str?: T) {
-  return ((str as string)?.replaceAll(/\s{2,}/g, ' ').trim() as T) || '';
+  return (str?.replaceAll(/\s{2,}/g, ' ').trim() as T) || '';
 }
+
+export const hasDuplicates = <T>(array: T[]) =>
+  array.length !== 0 && new Set(array).size !== array.length;
 
 // Used for measuring function execution time
 //  -credit: https://leefreeman.xyz/2020/05/08/typescript-decorators/

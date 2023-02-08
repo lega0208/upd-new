@@ -1,4 +1,4 @@
-import { batchAwait, wait } from './utils-common';
+import { batchAwait, hasDuplicates, wait } from './utils-common';
 import { HttpClient } from './http';
 
 describe('batchAwait', () => {
@@ -60,10 +60,11 @@ describe('batchAwait', () => {
 
     const delay = { delay: 1 };
 
-    const mapFn = (ms: number) => wait(ms).then(() => {
-      delay.delay = 20;
-      return true;
-    });
+    const mapFn = (ms: number) =>
+      wait(ms).then(() => {
+        delay.delay = 20;
+        return true;
+      });
 
     await batchAwait(ms, mapFn, batchSize, delay);
 
@@ -125,7 +126,7 @@ describe('HttpClient', () => {
       'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/registering-your-business/bro-eligibility.html',
       'www.canada.ca/en/revenue-agency/services/child-family-benefits/gsthstc-apply.html',
       'www.canada.ca/en/revenue-agency/services/forms-publications/td1-personal-tax-credits-returns/td1-forms-pay-received-on-january-1-later/td1bc.html',
-      'www.canada.ca/en/revenue-agency/services/scientific-research-experimental-development-tax-incentive-program/eligibility-work-investment-tax-credits-policy.html'
+      'www.canada.ca/en/revenue-agency/services/scientific-research-experimental-development-tax-incentive-program/eligibility-work-investment-tax-credits-policy.html',
     ];
 
     const results = await httpClient.getCurrentTitlesAndUrls(urls);
@@ -133,5 +134,59 @@ describe('HttpClient', () => {
     console.log(results);
 
     expect(results.length).toBe(urls.length);
-  })
+  });
+});
+
+describe('hasDuplicates', () => {
+  const emptyArray: unknown[] = [];
+  const arraysWithDups = [
+    [1, 2, 3, 4, 1],
+    [1, 2, 3, 4, 4],
+    [1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1],
+  ];
+  const stringArraysWithDups = [
+    ['these', 'are', 'words', 'but', 'are', 'words', 'even', 'real?'],
+    ['asd', 'zazzz', 'asd'],
+    ['', 'asd', '', 'asd'],
+    ['z', '', 'z', ''],
+    [1, 2, 3, 4, 1].map((num) => num.toString()),
+    [0, 0, 0, 0, 1].map((num) => num.toString()),
+  ];
+
+  const arraysWithoutDups = [
+    [1, 2, 3, 4, 5],
+    [0, 1, 2, 3, 4],
+  ];
+
+  const stringArraysWithoutDups = [
+    ['these', 'are', 'real', 'words'],
+    ['z', 'asd', 'faff', 'fluff']
+  ];
+
+  it('should not find duplicates in empty arrays', () => {
+    expect(hasDuplicates(emptyArray)).toBe(false);
+  });
+
+  it('should return true if there are duplicates', () => {
+    for (const array of arraysWithDups) {
+      expect(hasDuplicates(array)).toBe(true);
+    }
+
+    for (const array of stringArraysWithDups) {
+      expect(hasDuplicates(array)).toBe(true);
+    }
+  });
+
+  it('should return false if there aren\'t duplicates', () => {
+    for (const array of arraysWithoutDups) {
+      expect(hasDuplicates(array)).toBe(false);
+    }
+
+    for (const array of stringArraysWithoutDups) {
+      expect(hasDuplicates(array)).toBe(false);
+    }
+  });
 });
