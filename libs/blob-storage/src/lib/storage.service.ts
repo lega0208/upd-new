@@ -39,9 +39,6 @@ export class BlobStorageService {
         blobDefinition.containerName
       );
 
-      // fix dis: -> assign full object directly
-      //
-      // if not work: maybe pass models to constructor from static method?
       this.blobModels[modelName] = container.createBlobsClient({
         path: blobDefinition.path,
         overwrite: blobDefinition['overwrite'],
