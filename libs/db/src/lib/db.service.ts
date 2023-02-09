@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { type FilterQuery, Model } from 'mongoose';
+import { type FilterQuery, Model, Types } from 'mongoose';
 import {
   CallDriver,
   Feedback,
@@ -14,10 +14,7 @@ import {
   AAItemId,
   SearchAssessment,
 } from '../';
-import {
-  AsyncLogTiming,
-  logJson,
-} from '@dua-upd/utils-common';
+import { AsyncLogTiming, logJson, prettyJson } from '@dua-upd/utils-common';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { PageVisits, PageVisitsView } from './db.views';
 
@@ -279,6 +276,117 @@ export class DbService {
       bulkWriteOps as AnyBulkWriteOperation<PageMetrics>[],
       { ordered: false }
     );
+  }
+
+  @AsyncLogTiming
+  async addMissingAirtableRefsToPageMetrics() {
+    console.log('Checking for missing refs in pages_metrics');
+
+    const projects =
+      (await this.projects.find({}, { title: 1, pages: 1 }).lean().exec()) ||
+      [];
+    const tasks =
+      (await this.tasks.find({}, { title: 1, pages: 1 }).lean().exec()) || [];
+    const uxTests =
+      (await this.uxTests.find({}, { title: 1, pages: 1 }).lean().exec()) || [];
+
+    for (const project of projects) {
+      let metricsMissingRefs = await this.pageMetrics
+        .find(
+          {
+            page: { $in: project.pages },
+            projects: { $not: { $elemMatch: { $eq: project._id } } },
+          },
+          { _id: 0, page: 1, projects: 1 }
+        )
+        .lean()
+        .exec();
+
+      if (metricsMissingRefs.length) {
+        console.log(
+          `Found ${metricsMissingRefs.length} page metrics missing refs for Project: ${project.title}`
+        );
+
+        const results = await this.pageMetrics.updateMany(
+          {
+            page: { $in: project.pages },
+            projects: { $not: { $elemMatch: { $eq: project._id } } },
+          },
+          {
+            $addToSet: { projects: project._id },
+          }
+        );
+
+        console.log('updateResult: ', prettyJson(results));
+      }
+
+      // free memory
+      metricsMissingRefs = null;
+    }
+
+    for (const task of tasks) {
+      let metricsMissingRefs = await this.pageMetrics
+        .find({
+          page: { $in: task.pages },
+          tasks: { $not: { $elemMatch: { $eq: task._id } } },
+        })
+        .lean()
+        .exec();
+
+      if (metricsMissingRefs.length) {
+        console.log(
+          `Found ${metricsMissingRefs.length} page metrics missing refs for Task: ${task.title}`
+        );
+
+        const results = await this.pageMetrics.updateMany(
+          {
+            page: { $in: task.pages },
+            tasks: { $not: { $elemMatch: { $eq: task._id } } },
+          },
+          {
+            $addToSet: { tasks: task._id },
+          }
+        );
+
+        console.log('updateResult: ', prettyJson(results));
+      }
+
+      // free memory
+      metricsMissingRefs = null;
+    }
+
+    for (const uxTest of uxTests) {
+      let metricsMissingRefs = await this.pageMetrics
+        .find({
+          page: { $in: uxTest.pages },
+          ux_tests: { $not: { $elemMatch: { $eq: uxTest._id } } },
+        })
+        .lean()
+        .exec();
+
+      if (metricsMissingRefs.length) {
+        console.log(
+          `Found ${metricsMissingRefs.length} page metrics missing refs for UX Test: ${uxTest.title}`
+        );
+
+        const results = await this.pageMetrics.updateMany(
+          {
+            page: { $in: uxTest.pages },
+            ux_tests: { $not: { $elemMatch: { $eq: uxTest._id } } },
+          },
+          {
+            $addToSet: { ux_tests: uxTest._id },
+          }
+        );
+
+        console.log('updateResult: ', prettyJson(results));
+      }
+
+      // free memory
+      metricsMissingRefs = null;
+    }
+
+    console.log('Finished adding missing refs to pages_metrics.')
   }
 
   @AsyncLogTiming

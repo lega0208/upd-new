@@ -205,7 +205,7 @@ export class BlobClient {
   }
 
   async sizesAreDifferent(fileSizeBytes: number) {
-    if (!await this.client.exists()) {
+    if (!(await this.client.exists())) {
       return true;
     }
 
@@ -235,13 +235,10 @@ export class BlobClient {
     sourceUrl: string,
     fileSizeBytes: number
   ): Promise<BlobBeginCopyFromURLResponse | void> {
-    console.log(sourceUrl);
-    console.log(fileSizeBytes);
     if (await this.sizesAreDifferent(fileSizeBytes)) {
+      console.log(`File is new or updated. Uploading: ${this.filename}`);
       return await this.copyFromUrl(sourceUrl);
     }
-
-    console.log('Files are the same. No changes made.');
   }
 
   async downloadToFile(blobName: string, destinationFilePath: string) {
