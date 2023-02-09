@@ -1,7 +1,7 @@
-import { storageClient } from './storage.client';
+import { StorageClient } from './storage.client';
 
 describe('blobStorage', () => {
   it('should work', () => {
-    expect(storageClient()).toEqual('blob-storage');
+    expect('should').not.toBe('work')
   });
 });

@@ -188,7 +188,6 @@ export interface OverviewData
     success_rate?: number | null;
     total_users?: number;
     scenario?: string;
-    attachments?: AttachmentData[];
   }[];
   top5CalldriverTopics: TopCalldriverTopics[];
   top5IncreasedCalldriverTopics: TopCalldriverTopics[];
@@ -212,7 +211,7 @@ export interface TasksHomeAggregatedData {
   subtopic: string;
   program?: string;
   service?: string;
-  user_journey?: string;
+  user_journey?: string[];
   status?: string;
   core?: string[];
   channel?: string[];
@@ -253,7 +252,7 @@ export interface TaskDetailsData
   user_type: string[];
   program: string;
   service: string;
-  user_journey: string;
+  user_journey: string[];
   status: string;
   channel: string[];
   core: string[];
@@ -266,11 +265,11 @@ export interface TaskDetailsData
     success_rate: number | null;
     total_users: number;
     scenario: string;
-    attachments: AttachmentData[];
   }[];
   projects: {
     id: string;
     title: string;
+    attachments: AttachmentData[];
   }[];
   feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
@@ -360,6 +359,7 @@ export interface ProjectsDetailsData
   tasks: Pick<ITask, '_id' | 'title'>[];
   feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
+  attachments: AttachmentData[];
 }
 
 export interface TaskKpi {

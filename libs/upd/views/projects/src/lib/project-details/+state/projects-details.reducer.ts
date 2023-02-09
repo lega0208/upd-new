@@ -33,6 +33,7 @@ export const projectDetailsInitialState: ProjectsDetailsState = {
     tasks: [],
     feedbackComments: [],
     searchTerms: [],
+    attachments: [],
   },
   loaded: false,
   error: null,

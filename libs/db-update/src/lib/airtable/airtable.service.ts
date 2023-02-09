@@ -19,6 +19,11 @@ import {
 import type { UxApiData, UxApiDataType, UxData } from './types';
 import { arrayToDictionary, WithObjectId } from '@dua-upd/utils-common';
 import { assertHasUrl, assertObjectId } from './utils';
+import { AttachmentData, IPage, ITask } from '@dua-upd/types-common';
+import { BlobStorageService } from '@dua-upd/blob-storage';
+import { BlobBeginCopyFromURLResponse } from '@azure/storage-blob';
+import chalk from 'chalk';
+import { AnyBulkWriteOperation } from 'mongodb';
 
 @Injectable()
 export class AirtableService {
@@ -36,7 +41,9 @@ export class AirtableService {
     private projectModel: Model<Project>,
     @InjectModel(Task.name, 'defaultConnection') private taskModel: Model<Task>,
     @InjectModel(UxTest.name, 'defaultConnection')
-    private uxTestModel: Model<UxTest>
+    private uxTestModel: Model<UxTest>,
+    @Inject(BlobStorageService.name)
+    private blobService: BlobStorageService
   ) {}
 
   async getUxData(): Promise<UxApiData> {
@@ -163,6 +170,17 @@ export class AirtableService {
         (project) => project.title === projectTitle
       );
 
+      // get de-duplicated attachments
+      const attachments = uxTests.reduce((attachments, uxTest) => {
+        for (const attachment of uxTest.attachments || []) {
+          if (!attachments[attachment.filename]) {
+            attachments[attachment.filename] = attachment;
+          }
+        }
+
+        return attachments;
+      }, {} as Record<string, AttachmentData>);
+
       return {
         _id: existingProject?._id || new Types.ObjectId(),
         title: projectTitle,
@@ -170,6 +188,7 @@ export class AirtableService {
         pages: pageObjectIds,
         tasks: taskObjectIds,
         description: uxTests.find((uxTest) => uxTest.description)?.description,
+        attachments: Object.values(attachments),
       };
     }) as Project[];
   }
@@ -248,7 +267,7 @@ export class AirtableService {
           airtableIdToObjectIdMaps.pages.get(pageAirtableId)
         ),
         tpc_ids,
-      } as Task;
+      } as ITask;
     });
 
     const pagesWithRefs = pagesWithIds.map((page) => {
@@ -273,7 +292,7 @@ export class AirtableService {
         ux_tests: ux_tests.map((uxTest) => uxTest._id) as Types.ObjectId[],
         projects,
         tasks,
-      } as Page;
+      } as IPage;
     });
 
     return {
@@ -312,12 +331,14 @@ export class AirtableService {
     }));
 
     this.logger.log('Writing Pages to db');
-    await this.pageModel.bulkWrite(pageUpdateOps);
+    await this.pageModel.bulkWrite(
+      pageUpdateOps as AnyBulkWriteOperation<Page>[]
+    );
 
     const taskUpdateOps = tasks.map((task) => ({
       replaceOne: {
         filter: { _id: task._id },
-        replacement: task,
+        replacement: task as Task,
         upsert: true,
       },
     }));
@@ -335,7 +356,7 @@ export class AirtableService {
     const uxTestUpdateOps = uxTests.map((uxTest) => ({
       replaceOne: {
         filter: { _id: uxTest._id },
-        replacement: uxTest,
+        replacement: uxTest as UxTest,
         upsert: true,
       },
     }));
@@ -360,7 +381,9 @@ export class AirtableService {
       },
     }));
     this.logger.log('Writing Projects to db');
-    await this.projectModel.bulkWrite(projectUpdateOps);
+    await this.projectModel.bulkWrite(
+      projectUpdateOps as AnyBulkWriteOperation<Project>[]
+    );
 
     this.logger.log('Pruning old Projects');
     const currentProjectIds = projects.map((project) => project._id);
@@ -428,5 +451,79 @@ export class AirtableService {
     }
 
     return publishedPagesList;
+  }
+
+  async uploadProjectAttachmentsAndUpdateUrls() {
+    const projectsWithAttachments = await this.projectModel
+      .find(
+        { attachments: { $not: { $size: 0 } } },
+        { title: 1, attachments: 1 }
+      )
+      .exec();
+
+    const promises = [];
+
+    for (const project of projectsWithAttachments) {
+      const promise = Promise.all(
+        project.attachments.map(({ url, filename, size }) => {
+          const blobClient =
+            this.blobService.blobModels.project_attachments.blob(filename);
+
+          const response = blobClient.copyFromUrlIfDifferent(url, size);
+
+          return (response || Promise.resolve()).then((response) => ({
+            response,
+            blobClient,
+          }));
+        })
+      )
+        .then((results) => {
+          for (const result of results) {
+            const fileName = result.blobClient.filename;
+            const blobUrl = result.blobClient.url;
+
+            if (result.response) {
+              if (result.response.copyStatus !== 'success') {
+                this.logger.warn(
+                  chalk.yellow(
+                    `File ${fileName} has a copy status of ${result.response.copyStatus}`
+                  )
+                );
+              }
+            }
+
+            const attachmentIndex = project.attachments.findIndex(
+              ({ filename }) => filename === fileName
+            );
+
+            project.attachments[attachmentIndex].storage_url = blobUrl;
+            project.attachments[attachmentIndex].storage_url = blobUrl;
+          }
+
+          return project.save();
+        })
+        .catch((err) =>
+          this.logger.error(
+            `An error occurred uploading attachments for ${project.title}: `,
+            err.stack
+          )
+        );
+
+      promises.push(promise);
+    }
+
+    const results = await Promise.allSettled(promises);
+
+    const rejectedResults = results.filter(
+      (result) => result.status === 'rejected'
+    );
+
+    if (rejectedResults.length) {
+      this.logger.error(
+        `${rejectedResults.length} Projects had errors uploading attachments`
+      );
+    }
+
+    this.logger.log('Finished uploading attachments');
   }
 }
