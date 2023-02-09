@@ -44,7 +44,6 @@ export class BlobStorageService {
         overwrite: blobDefinition['overwrite'],
       });
     }
-    console.log(this.blobModels)
 
     return this;
   }

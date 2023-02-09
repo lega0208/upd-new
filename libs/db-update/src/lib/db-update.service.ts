@@ -114,7 +114,6 @@ export class DbUpdateService {
         .upsertOverallSearchTerms()
         .catch((err) => this.logger.error(err.stack));
 
-
       await Promise.allSettled([
         await this.pageMetricsService
           .updatePageMetrics()
@@ -122,7 +121,7 @@ export class DbUpdateService {
             this.logger.error('Error updating Page Metrics data', err)
           ),
         await this.airtableService.uploadProjectAttachmentsAndUpdateUrls(),
-      ])
+      ]);
 
       await this.internalSearchService
         .upsertPageSearchTerms()
@@ -132,6 +131,8 @@ export class DbUpdateService {
 
       // run this again in case we've created duplicates from the published pages list
       await this.pagesService.consolidateDuplicatePages();
+
+      await this.db.addMissingAirtableRefsToPageMetrics();
 
       this.logger.log('Database updates completed.');
     } catch (error) {
@@ -328,7 +329,7 @@ export class DbUpdateService {
         this.logger.log(chalk.green('Date range successfully recalculated.'));
       }
     } catch (err) {
-      this.logger.error(err.message, err.stack)
+      this.logger.error(err.message, err.stack);
     }
 
     // add to db-updater
