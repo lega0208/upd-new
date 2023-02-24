@@ -32,7 +32,7 @@
       <upd-apex-radial-bar
         [title]="'kpi-search-assessment-title'"
         [titleTooltip]="'kpi-search-assessment-tooltip'"
-        [current]="0.6"
+        [current]="(kpiSearchAssessment$ | async) || 0"
         [comparison]="(kpiSearchAssessmentPercentChange$ | async) || 0"
         [kpiObjectiveCriteria]="searchKpiObjectiveCriteria"
         [postValue]="'Pass'"
