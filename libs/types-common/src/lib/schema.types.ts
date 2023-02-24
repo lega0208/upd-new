@@ -28,6 +28,11 @@ export interface CallsByTopic {
   calls: number;
 }
 
+export interface CallsByTasks {
+  title: string;
+  calls: number;
+}
+
 export interface TopCalldriverTopics extends CallsByTopic {
   change: number | 'Infinity';
 }
@@ -290,6 +295,8 @@ export interface ITask {
 
   subtopic: string;
 
+  sub_subtopic: string[];
+
   user_type: string[];
 
   ux_tests?: Types.ObjectId[] | IUxTest[];
@@ -297,6 +304,8 @@ export interface ITask {
   projects?: Types.ObjectId[] | IProject[];
 
   pages?: Types.ObjectId[] | IPage[];
+
+  date?: string;
 
   tpc_ids: number[];
   program?: string;

@@ -141,6 +141,7 @@ export class TasksService {
       subgroup: task.subgroup,
       topic: task.topic,
       subtopic: task.subtopic,
+      sub_subtopic: task.sub_subtopic,
       user_type: task.user_type,
       program: task.program,
       service: task.service,
