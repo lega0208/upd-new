@@ -3,12 +3,21 @@
 <upd-date-selector></upd-date-selector>
 
 <div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <upd-data-card
-      [current]="totalTasks$ | async"
-      [title]="'tasks'"
-      [tooltip]="'tooltip-total-tasks'"
-    ></upd-data-card>
+  <div class="row"> 
+    <div class="col">
+      <upd-data-card
+        [current]="totalTasks$ | async"
+        [title]="'tasks'"
+        [tooltip]="'tooltip-total-tasks'"
+      ></upd-data-card>
+    </div>
+    <div class="col">
+      <upd-data-card
+        [current]="totalVisits$ | async"
+        [title]="'total-visits'"
+        [tooltip]="'tooltip-total-visits-tasks'"
+      ></upd-data-card>
+    </div>
   </div>
 </div>
 
