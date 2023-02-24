@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types } from 'mongoose';
 import type {
+  CallsByTasks,
   CallsByTopic,
   ICallDriver,
   TopCalldriverTopics,
@@ -107,6 +108,47 @@ CallDriverSchema.statics['getCallsByEnquiryLineFromIds'] = async function (
     .exec();
 };
 
+CallDriverSchema.statics['getCallsByTaskFromIds'] = async function (
+  dateRange: string,
+  documentIds: number[]
+): Promise<CallsByTasks[]> {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  return this.aggregate([
+    {
+      $match: {
+        tpc_id: { $in: documentIds },
+        date: { $gte: startDate, $lte: endDate },
+      },
+    },
+    {
+      $lookup: {
+        from: 'tasks',
+        localField: 'tpc_id',
+        foreignField: 'tpc_ids',
+        as: 'task',
+      },
+    },
+    {
+      $unwind: '$task',
+    },
+    {
+      $group: {
+        _id: '$task._id',
+        title: { $first: '$task.title' },
+        calls: { $sum: '$calls' },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        title: 1,
+        calls: 1,
+      },
+    },
+  ]).exec();
+};
+
 CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
   dateRange: string,
   comparisonDateRange: string,
@@ -174,4 +216,8 @@ export interface CallDriverModel extends Model<CallDriver> {
     comparisonDateRange: string,
     tpcIds?: number[]
   ): Promise<TopCalldriverTopics[]>;
+  getCallsByTaskFromIds(
+    dateRange: string,
+    documentIds: number[]
+  ): Promise<CallsByTasks[]>;
 }

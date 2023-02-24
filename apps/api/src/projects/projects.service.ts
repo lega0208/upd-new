@@ -641,6 +641,8 @@ async function getAggregatedProjectMetrics(
   const project = await projectModel.findById(id).populate('tasks');
   const tasks = (project?.tasks || []) as unknown[];
 
+  const taskIds = tasks.map((task: Types.ObjectId | Task) => task._id);
+
   const tpcIds = tasks
     .filter((task: Types.ObjectId | Task) => 'tpc_ids' in task)
     .map((task: Task) => task.tpc_ids)
@@ -666,6 +668,59 @@ async function getAggregatedProjectMetrics(
     documentIds
   );
 
+  const callsByTasks = await calldriversModel.getCallsByTaskFromIds(
+    dateRange,
+    tpcIds
+  );
+
+  const pageMetricsByTasks = await pageMetricsModel
+    .aggregate<Partial<ProjectDetailsAggregatedData> & { title: string }>()
+    .match({
+      date: { $gte: startDate, $lte: endDate },
+      tasks: { $elemMatch: { $in: taskIds } },
+      projects: id,
+    })
+    .lookup({
+      from: 'tasks',
+      localField: 'tasks',
+      foreignField: '_id',
+      as: 'task',
+    })
+    .unwind('$task')
+    .match({ 'task._id': { $in: taskIds } })
+    .group({
+      _id: { taskId: '$task._id', taskTitle: '$task.title' },
+      page: { $first: '$page' },
+      visits: { $sum: '$visits' },
+      dyfYes: { $sum: '$dyf_yes' },
+      dyfNo: { $sum: '$dyf_no' },
+      fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
+      fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
+      fwylfOther: { $sum: '$fwylf_other' },
+      fwylfError: { $sum: '$fwylf_error' },
+      gscTotalClicks: { $sum: '$gsc_total_clicks' },
+      gscTotalImpressions: { $sum: '$gsc_total_impressions' },
+      gscTotalCtr: { $avg: '$gsc_total_ctr' },
+      gscTotalPosition: { $avg: '$gsc_total_position' },
+    })
+    .project({
+      _id: 0,
+      title: '$_id.taskTitle',
+      pages: 1, // add this line to include the page array in the output
+      visits: 1,
+      dyfYes: 1,
+      dyfNo: 1,
+      fwylfCantFindInfo: 1,
+      fwylfHardToUnderstand: 1,
+      fwylfOther: 1,
+      fwylfError: 1,
+      gscTotalClicks: 1,
+      gscTotalImpressions: 1,
+      gscTotalCtr: 1,
+      gscTotalPosition: 1,
+    })
+    .exec();
+
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
   return {
@@ -674,6 +729,8 @@ async function getAggregatedProjectMetrics(
     callsByTopic,
     totalCalldrivers,
     feedbackByTags,
+    callsByTasks,
+    pageMetricsByTasks,
   };
 }
 
