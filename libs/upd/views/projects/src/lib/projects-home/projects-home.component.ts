@@ -47,6 +47,8 @@ export class ProjectsHomeComponent implements OnInit {
             header: this.i18n.service.translate('Name', lang),
             type: 'link',
             typeParam: '_id',
+            displayFilterOptions: false,
+            displayTable: true,
           },
           {
             field: 'cops',
@@ -56,6 +58,8 @@ export class ProjectsHomeComponent implements OnInit {
             filterConfig: {
               type: 'boolean',
             },
+            displayFilterOptions: true,
+            displayTable: true,
           },
           {
             field: 'status',
@@ -70,17 +74,23 @@ export class ProjectsHomeComponent implements OnInit {
                 field: 'status',
               }),
             },
+            displayFilterOptions: true,
+            displayTable: true,
           },
           {
             field: 'startDate',
             header: this.i18n.service.translate('Start date', lang),
             pipe: 'date',
             pipeParam: lang === FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY',
+            displayFilterOptions: false,
+            displayTable: true,
           },
           {
-            field: 'avgSuccessRate',
+            field: 'lastAvgSuccessRate',
             header: this.i18n.service.translate('Average success rate', lang),
             pipe: 'percent',
+            displayFilterOptions: false,
+            displayTable: true,
           },
         ];
       }

@@ -1,0 +1,51 @@
+<div *ngIf="vm$ | async as vm">
+  <p-treeSelect
+    #treeSelect
+    [filter]="true"
+    [(ngModel)]="selectedItems"
+    selectionMode="checkbox"
+    [options]="vm"
+    placeholder="Filter"
+    (onNodeSelect)="onNodeSelect($event)"
+    (onNodeUnselect)="onNodeUnselect($event)"
+    [ngClass]="{ 'custom-treeselect': true }"
+  >
+    <ng-template pTemplate="value">
+      <div class="d-flex justify-content-between align-items-bottom">
+        <span
+          ><span class="pi pi-filter"></span> {{ 'Filter' | translate }}</span
+        >&NonBreakingSpace;
+        <span
+          class="badge"
+          [ngClass]="nodeSelectionCount === 0 ? 'bg-unknown' : 'bg-primary'"
+          >{{ nodeSelectionCount }}</span
+        >
+      </div>
+    </ng-template>
+  </p-treeSelect>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col p-0">
+      <ng-container *ngIf="nodeSelectionCount > 0">
+        <ng-container *ngFor="let node of selectedNodes">
+          <span class="badge-blue"
+            ><span class="p-1" style="vertical-align: text-top"
+              >{{ node.value }}: {{ node.label }}</span
+            >
+            <button
+              type="button"
+              class="btn-close btn-close-white me-1"
+              aria-label="Close"
+              (click)="deleteFilter(node)"
+            ></button
+          ></span>
+        </ng-container>
+        <a (click)="clearNodes()" class="black">{{
+          'Clear all' | translate
+        }}</a>
+      </ng-container>
+    </div>
+  </div>
+</div>

@@ -17,6 +17,8 @@
     id="tasks-home-"
     [data]="(tasksHomeData$ | async) || []"
     [cols]="columns"
+    [filter]="false"
+    [filterTree]="true"
     [searchFields]="searchFields"
     [displayRows]="25"
     [loading]="(loading$ | async) !== false"
