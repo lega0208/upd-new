@@ -52,6 +52,10 @@ export class TasksHomeFacade {
     map((tasksData) => tasksData.length)
   );
 
+  totalVisits$ = this.tasksHomeTableData$.pipe(
+    map((tasksData) => tasksData.reduce((a, b) => a + b.visits, 0))
+  );
+
   error$ = this.store.pipe(select(TasksHomeSelectors.getTasksHomeError));
 
   constructor(
