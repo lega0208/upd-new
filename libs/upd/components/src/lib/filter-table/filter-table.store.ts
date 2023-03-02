@@ -7,33 +7,37 @@ import { TreeNode } from 'primeng/api';
 import { ColumnConfig } from '../data-table-styles/types';
 
 @Injectable()
-export class FilterTableStore extends ComponentStore<TreeNode[]> {
+export class FilterTableStore<T extends { [s: string]: unknown; }> extends ComponentStore<TreeNode[]> {
   constructor(private readonly i18n: I18nFacade) {
     super([{ label: 'Loading...' }]);
   }
 
-  readonly setData = this.updater((state, value: any): TreeNode[] => {
+  readonly setData = this.updater((state, value: [T[], ColumnConfig<T>[]]): TreeNode[] => {
     const map = new Map();
-    const cols: ColumnConfig[] = value[1];
+    const cols: ColumnConfig<T>[] = value[1];
+    const data: T[] = value[0];
 
-    value[0].forEach((item: any) => {
-      Object.entries(item).forEach(([key, value]) => {
+    for (const item of data) {
+      for (const [key, val] of Object.entries(item)) {
         if (!map.has(key)) {
           map.set(key, new Set());
         }
-        if (Array.isArray(value)) {
-          value.forEach((v) => map.get(key).add(v));
+        if (Array.isArray(val)) {
+          for (const v of val) {
+            map.get(key).add(v);
+          }
         } else {
-          map.get(key).add(value);
+          map.get(key).add(val);
         }
-      });
-    });
+      }
+    }
 
     const nodes: TreeNode[] = [];
-    map.forEach((value, key) => {
+    
+    for (const [key, value] of map.entries()) {
       const column = cols.find((col) => col.field === key);
       if (!column?.displayFilterOptions) {
-        return;
+        continue;
       }
       const header = column?.header || key;
       nodes.push({
@@ -43,7 +47,6 @@ export class FilterTableStore extends ComponentStore<TreeNode[]> {
         children: Array.from(value as Set<string>)
           .filter((v) => v !== '')
           .map((v) => {
-            // const l = column.pipe === 'date' ? this.datePipe.transform(v, column.pipeParam, 'UTC', 'en')?.toString() : v;
             return {
               label: v,
               data: `${key}:${v}`,
@@ -51,7 +54,8 @@ export class FilterTableStore extends ComponentStore<TreeNode[]> {
             };
           }),
       });
-    });
+    }
+
     return nodes;
   });
 

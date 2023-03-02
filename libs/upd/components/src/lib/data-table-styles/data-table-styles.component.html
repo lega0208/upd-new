@@ -103,16 +103,9 @@
   {{ numberVal }}
 </ng-container>
 
-<ng-container *ngIf="isArray(data[config.field])" translate>
-  <ng-container *ngFor="let item of array; let idx = index"
-    >{{ config.translate
-    ? (item.toString() || '' | translate: undefined:currentLang)
-    : item
-}}<ng-container *ngIf="!(idx === array.length - 1)"
-      >,&NonBreakingSpace;</ng-container
-    >
+<ng-container *ngIf="isArray(data[config.field])">
+  {{ array | translateArray | arrayToText }}
   </ng-container>
-</ng-container>
 
 <ng-container *ngIf="!hasType && !hasPipe && !isArray(data[config.field])">
   {{

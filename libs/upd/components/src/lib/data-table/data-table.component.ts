@@ -57,8 +57,6 @@ export class DataTableComponent<T> implements OnChanges {
     }
 
     this.colFilters = {};
-
-    console.log(this.colFilters);
   }
 
   deleteFilter(colHeader: string, filter: string) {
