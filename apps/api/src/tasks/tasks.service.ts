@@ -352,7 +352,6 @@ async function getTaskAggregatedData(
     .group({
       _id: '$url',
       page: { $first: '$page' },
-      views: { $sum: '$views' },
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyf_yes' },
       dyfNo: { $sum: '$dyf_no' },
@@ -382,7 +381,6 @@ async function getTaskAggregatedData(
     .sort({ title: 1 })
     .group({
       _id: 'null',
-      views: { $sum: '$views' },
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyfYes' },
       dyfNo: { $sum: '$dyfNo' },
