@@ -118,7 +118,7 @@ export class TasksHomeFacade {
           field: 'calls',
           header: this.i18n.service.translate('calls', lang),
           pipe: 'number',
-        }
+        },
       ] as ColumnConfig[];
     })
   );
@@ -129,6 +129,10 @@ export class TasksHomeFacade {
 
   totalVisits$ = this.tasksHomeTableData$.pipe(
     map((tasksData) => tasksData.reduce((a, b) => a + b.visits, 0))
+  );
+
+  totalCalls$ = this.tasksHomeTableData$.pipe(
+    map((tasksData) => tasksData.reduce((a, b) => a + b.calls, 0))
   );
 
   error$ = this.store.pipe(select(TasksHomeSelectors.getTasksHomeError));
