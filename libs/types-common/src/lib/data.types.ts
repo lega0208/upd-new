@@ -220,6 +220,7 @@ export interface TasksHomeAggregatedData {
   channel?: string[];
   visits: number;
   user_type: string[];
+  calls: number;
 }
 
 export type TasksHomeData = ViewData<TasksHomeAggregatedData[]>;

@@ -108,45 +108,26 @@ CallDriverSchema.statics['getCallsByEnquiryLineFromIds'] = async function (
     .exec();
 };
 
-CallDriverSchema.statics['getCallsByTaskFromIds'] = async function (
+CallDriverSchema.statics['getCallsByTpcId'] = async function (
   dateRange: string,
-  documentIds: number[]
+  tpcIds: number[]
 ): Promise<CallsByTasks[]> {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-  return this.aggregate([
-    {
-      $match: {
-        tpc_id: { $in: documentIds },
+  return this.aggregate()
+  .match({
         date: { $gte: startDate, $lte: endDate },
-      },
-    },
-    {
-      $lookup: {
-        from: 'tasks',
-        localField: 'tpc_id',
-        foreignField: 'tpc_ids',
-        as: 'task',
-      },
-    },
-    {
-      $unwind: '$task',
-    },
-    {
-      $group: {
-        _id: '$task._id',
-        title: { $first: '$task.title' },
+        tpc_id: { $in: tpcIds },
+      })
+    .group({
+        _id: '$tpc_id',
         calls: { $sum: '$calls' },
-      },
-    },
-    {
-      $project: {
+    })
+    .project({
         _id: 0,
-        title: 1,
         calls: 1,
-      },
-    },
-  ]).exec();
+      })
+    .exec();
 };
 
 CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
@@ -216,8 +197,8 @@ export interface CallDriverModel extends Model<CallDriver> {
     comparisonDateRange: string,
     tpcIds?: number[]
   ): Promise<TopCalldriverTopics[]>;
-  getCallsByTaskFromIds(
+  getCallsByTpcId(
     dateRange: string,
-    documentIds: number[]
+    tpcIds: number[]
   ): Promise<CallsByTasks[]>;
 }

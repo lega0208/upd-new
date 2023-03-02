@@ -668,7 +668,7 @@ async function getAggregatedProjectMetrics(
     documentIds
   );
 
-  const callsByTasks = await calldriversModel.getCallsByTaskFromIds(
+  const callsByTasks = await calldriversModel.getCallsByTpcId(
     dateRange,
     tpcIds
   );
@@ -704,9 +704,9 @@ async function getAggregatedProjectMetrics(
       gscTotalPosition: { $avg: '$gsc_total_position' },
     })
     .project({
-      _id: 0,
+      _id: '$_id.taskId',
       title: '$_id.taskTitle',
-      pages: 1, // add this line to include the page array in the output
+      pages: 1,
       visits: 1,
       dyfYes: 1,
       dyfNo: 1,

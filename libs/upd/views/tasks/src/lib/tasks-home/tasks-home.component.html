@@ -16,7 +16,7 @@
   <upd-data-table
     id="tasks-home-"
     [data]="(tasksHomeData$ | async) || []"
-    [cols]="columns"
+    [cols]="(tasksHomeColumns$ | async) || []"
     [filter]="false"
     [filterTree]="true"
     [searchFields]="searchFields"

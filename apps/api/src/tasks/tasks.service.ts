@@ -72,9 +72,23 @@ export class TasksService {
       this.taskModel
     );
 
+    const tpcIds = tasks.map((t) => t.tpc_ids);
+
+    const callsByTasks = [];
+
+    for (const tpcId of tpcIds) {
+      const calls = (await this.calldriversModel.getCallsByTpcId(dateRange, tpcId)).reduce((a, b) => a + b.calls, 0);
+      callsByTasks.push({calls});
+    }
+
+    const task = tasks.map((task, index) => ({
+      ...task,
+      calls: callsByTasks[index]?.calls ?? 0
+    }));
+
     const results = {
       dateRange,
-      dateRangeData: tasks,
+      dateRangeData: task,
     };
 
     await this.cacheManager.set(cacheKey, results);

@@ -197,7 +197,7 @@
       <ng-template #elseBlock>
         <th
           *ngFor="let col of columns"
-          [hidden]="col.displayFilterOptions && !col.displayTable"
+          [hidden]="!col.displayTable"
         >
           <ng-container *ngIf="col.tooltip">
             <span

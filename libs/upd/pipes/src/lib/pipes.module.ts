@@ -35,10 +35,27 @@ export class LocalePercentPipe implements PipeTransform {
   }
 }
 
+@Pipe({ name: 'translateArray', pure: true })
+export class TranslateArrayPipe implements PipeTransform {
+  constructor(private i18n: I18nService) {}
+
+  transform(values: string[]): string[] {
+    return values.map((value) => this.i18n.translate(value, this.i18n.currentLang));
+  }
+}
+
+@Pipe({ name: 'arrayToText', pure: true })
+export class ArrayToTextPipe implements PipeTransform {
+  transform(values: string[]): string {
+    return values.join(', ');
+  }
+}
+
+
 @NgModule({
   imports: [I18nModule],
-  declarations: [LocaleNumberPipe, LocaleDatePipe, LocalePercentPipe],
-  providers: [LocaleNumberPipe, LocaleDatePipe, LocalePercentPipe],
-  exports: [LocaleNumberPipe, LocaleDatePipe, LocalePercentPipe],
+  declarations: [LocaleNumberPipe, LocaleDatePipe, LocalePercentPipe, TranslateArrayPipe, ArrayToTextPipe],
+  providers: [LocaleNumberPipe, LocaleDatePipe, LocalePercentPipe, TranslateArrayPipe, ArrayToTextPipe],
+  exports: [LocaleNumberPipe, LocaleDatePipe, LocalePercentPipe, TranslateArrayPipe, ArrayToTextPipe],
 })
 export class PipesModule {}
