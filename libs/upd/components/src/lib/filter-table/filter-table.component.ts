@@ -176,14 +176,14 @@ export class FilterTableComponent<T extends { [s: string]: unknown; }> implement
 
   filterMode = (data: T[], header: string) => {
     const d = data
-      .map((v: any) => v[header])
-      .filter((v: any) => v !== null && v !== undefined && v !== '');
+            .map((v) => v[header])
+      .filter((v) => v !== null && v !== undefined && v !== '');
   
-    if (d.every((v: any) => typeof v === 'boolean')) {
+    if (d.every((v) => typeof v === 'boolean')) {
       return 'equals';
-    } else if (d.every((v: any) => Array.isArray(v))) {
+    } else if (d.every((v) => Array.isArray(v))) {
       return 'arrayFilter';
-    } else if (d.every((v: any) => isValidDate(v))) {
+    } else if (d.every((v) => isValidDate(v as string))) {
       return 'arrayFilter';
     } else {
       return 'in';
@@ -208,10 +208,10 @@ const arrayFilter = (value: string[], filters: string[]): boolean => {
   return filters.some((v) => value.includes(v));
 };
 
-function isValidDate(str: string) {
-  const noSpace = str.replace(/\s/g, '');
-  if (noSpace.length < 3) {
+function isValidDate(value: string) {
+  const date = value.replace(/\s/g, '');
+  if (date.length < 3) {
     return false;
   }
-  return Date.parse(noSpace) > 0;
+  return Date.parse(date) > 0;
 }

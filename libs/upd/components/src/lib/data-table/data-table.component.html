@@ -111,7 +111,7 @@
         <th
           *ngFor="let col of columns"
           [pSortableColumn]="col.field"
-          [hidden]="col.displayFilterOptions && !col.displayTable"
+          [hidden]="col.hideTable"
         >
           <div class="text-nowrap d-flex align-items-center">
             <ng-container *ngIf="col.tooltip">
@@ -197,7 +197,7 @@
       <ng-template #elseBlock>
         <th
           *ngFor="let col of columns"
-          [hidden]="!col.displayTable"
+          [hidden]="col.hideTable"
         >
           <ng-container *ngIf="col.tooltip">
             <span
@@ -229,7 +229,7 @@
             (rowData[col.field] >= 0.8 ||
               (col.field === 'change' && rowData[col.field] >= 0.2))
         }"
-        [hidden]="col.displayFilterOptions && !col.displayTable"
+        [hidden]="col.hideTable"
       >
         <span
           class="p-column-title datatable-headers"

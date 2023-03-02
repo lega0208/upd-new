@@ -674,10 +674,9 @@ async function getAggregatedProjectMetrics(
   );
 
   const pageMetricsByTasks = await pageMetricsModel
-    .aggregate<Partial<ProjectDetailsAggregatedData> & { title: string }>()
+    .aggregate<Partial<ProjectDetailsAggregatedData>>()
     .match({
       date: { $gte: startDate, $lte: endDate },
-      tasks: { $elemMatch: { $in: taskIds } },
       projects: id,
     })
     .lookup({
@@ -689,7 +688,7 @@ async function getAggregatedProjectMetrics(
     .unwind('$task')
     .match({ 'task._id': { $in: taskIds } })
     .group({
-      _id: { taskId: '$task._id', taskTitle: '$task.title' },
+      _id: '$task._id',
       page: { $first: '$page' },
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyf_yes' },
@@ -703,23 +702,22 @@ async function getAggregatedProjectMetrics(
       gscTotalCtr: { $avg: '$gsc_total_ctr' },
       gscTotalPosition: { $avg: '$gsc_total_position' },
     })
-    .project({
-      _id: '$_id.taskId',
-      title: '$_id.taskTitle',
-      pages: 1,
-      visits: 1,
-      dyfYes: 1,
-      dyfNo: 1,
-      fwylfCantFindInfo: 1,
-      fwylfHardToUnderstand: 1,
-      fwylfOther: 1,
-      fwylfError: 1,
-      gscTotalClicks: 1,
-      gscTotalImpressions: 1,
-      gscTotalCtr: 1,
-      gscTotalPosition: 1,
-    })
     .exec();
+
+  const tasksDict = arrayToDictionary(tasks as Task[], '_id');
+
+  const metricsByTask = pageMetricsByTasks.map((metrics) => {
+    const { title } =
+      tasksDict[
+        (
+          metrics as Partial<ProjectDetailsAggregatedData & { _id: string }>
+        )._id.toString()
+      ];
+    return {
+      ...metrics,
+      title,
+    };
+  });
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
@@ -730,7 +728,7 @@ async function getAggregatedProjectMetrics(
     totalCalldrivers,
     feedbackByTags,
     callsByTasks,
-    pageMetricsByTasks,
+    pageMetricsByTasks: metricsByTask,
   };
 }
 

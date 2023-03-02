@@ -7,7 +7,7 @@ import { TreeNode } from 'primeng/api';
 import { ColumnConfig } from '../data-table-styles/types';
 
 @Injectable()
-export class FilterTableStore<T extends { [s: string]: unknown; }> extends ComponentStore<TreeNode[]> {
+export class FilterTableStore<T extends { [key: string]: unknown; }> extends ComponentStore<TreeNode[]> {
   constructor(private readonly i18n: I18nFacade) {
     super([{ label: 'Loading...' }]);
   }
@@ -36,7 +36,7 @@ export class FilterTableStore<T extends { [s: string]: unknown; }> extends Compo
     
     for (const [key, value] of map.entries()) {
       const column = cols.find((col) => col.field === key);
-      if (!column?.displayFilterOptions) {
+      if (!column) {
         continue;
       }
       const header = column?.header || key;

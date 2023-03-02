@@ -72,18 +72,19 @@ export class TasksService {
       this.taskModel
     );
 
-    const tpcIds = tasks.map((t) => t.tpc_ids);
+    const callsByTasks: { [key: string]: number } = {};
 
-    const callsByTasks = [];
+    for (const task of tasks as Task[]) {
+      const calls = (
+        await this.calldriversModel.getCallsByTpcId(dateRange, task.tpc_ids)
+      ).reduce((a, b) => a + b.calls, 0);
 
-    for (const tpcId of tpcIds) {
-      const calls = (await this.calldriversModel.getCallsByTpcId(dateRange, tpcId)).reduce((a, b) => a + b.calls, 0);
-      callsByTasks.push({calls});
+      callsByTasks[task._id.toString()] = calls;
     }
 
-    const task = tasks.map((task, index) => ({
+    const task = tasks.map((task) => ({
       ...task,
-      calls: callsByTasks[index]?.calls ?? 0
+      calls: callsByTasks[task._id.toString()] ?? 0,
     }));
 
     const results = {
@@ -351,6 +352,7 @@ async function getTaskAggregatedData(
     .group({
       _id: '$url',
       page: { $first: '$page' },
+      views: { $sum: '$views' },
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyf_yes' },
       dyfNo: { $sum: '$dyf_no' },
@@ -380,6 +382,7 @@ async function getTaskAggregatedData(
     .sort({ title: 1 })
     .group({
       _id: 'null',
+      views: { $sum: '$views' },
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyfYes' },
       dyfNo: { $sum: '$dyfNo' },
