@@ -675,20 +675,30 @@ async function getAggregatedProjectMetrics(
 
   const pageMetricsByTasks = await pageMetricsModel
     .aggregate<Partial<ProjectDetailsAggregatedData>>()
+    .project({
+      page: 1,
+      projects: 1,
+      tasks: 1,
+      date: 1,
+      visits: 1,
+      dyf_yes: 1,
+      dyf_no: 1,
+      fwylf_cant_find_info: 1,
+      fwylf_hard_to_understand: 1,
+      fwylf_other: 1,
+      fwylf_error: 1,
+      gsc_total_clicks: 1,
+      gsc_total_impressions: 1,
+      gsc_total_ctr: 1,
+      gsc_total_position: 1,
+    })
     .match({
       date: { $gte: startDate, $lte: endDate },
       projects: id,
     })
-    .lookup({
-      from: 'tasks',
-      localField: 'tasks',
-      foreignField: '_id',
-      as: 'task',
-    })
-    .unwind('$task')
-    .match({ 'task._id': { $in: taskIds } })
+    .unwind('$tasks')
     .group({
-      _id: '$task._id',
+      _id: '$tasks',
       page: { $first: '$page' },
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyf_yes' },
@@ -707,12 +717,11 @@ async function getAggregatedProjectMetrics(
   const tasksDict = arrayToDictionary(tasks as Task[], '_id');
 
   const metricsByTask = pageMetricsByTasks.map((metrics) => {
-    const { title } =
-      tasksDict[
-        (
-          metrics as Partial<ProjectDetailsAggregatedData & { _id: string }>
-        )._id.toString()
-      ];
+    const task = tasksDict[(
+      metrics as Partial<ProjectDetailsAggregatedData & { _id: string }>
+    )._id.toString()];
+    const title = task ? task.title : undefined;
+    
     return {
       ...metrics,
       title,
