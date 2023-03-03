@@ -20,7 +20,6 @@ interface SelectedNode {
   label: string;
   value: string;
 }
-[];
 
 interface SelectedItem {
   key: string;
@@ -33,7 +32,9 @@ interface SelectedItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [FilterTableStore],
 })
-export class FilterTableComponent<T extends { [s: string]: unknown; }> implements OnInit {
+export class FilterTableComponent<T extends { [s: string]: unknown }>
+  implements OnInit
+{
   @Input() cols: ColumnConfig<T>[] = [];
   _data: T[] = [];
   @Input() set data(value: T[]) {
@@ -92,35 +93,42 @@ export class FilterTableComponent<T extends { [s: string]: unknown; }> implement
   }
 
   private handleNodeSelectUnselect(
-    { node }: { node: TreeNode },
-    isSelect: boolean
+    { node }: { node: TreeNode<string> },
+    selected: boolean
   ) {
     const { label, data, parent } = node;
+
+    if (!data) {
+      return;
+    }
+
     const parentValue = parent?.label as string;
-    const selectedNode = node.children
-      ? node.children.map((child) => ({
-          header: `${data.split(':')[0]}:${child.data.split(':')[1]}`,
-          label: child.label as string,
-          value: label as string,
-        }))
-      : [
-          {
-            header: data,
-            label: label as string,
-            value: parentValue,
-          },
-        ];
-    selectedNode.forEach((node) => {
+
+    const selectedNode = node.children?.map((child) => ({
+      header: `${data?.split(':')[0]}:${child?.data?.split(':')[1]}`,
+      label: child.label as string,
+      value: label as string,
+    })) ?? [
+      {
+        header: data,
+        label: label as string,
+        value: parentValue,
+      },
+    ];
+
+    for (const node of selectedNode) {
       const nodeExists = this.selectedNodes.find(
         ({ header, label }) =>
-          header.includes(data.split(':')[0]) && label === node.label
+          header.includes(data?.split(':')?.[0]) && label === node.label
       );
-      if ((isSelect && !nodeExists) || (!isSelect && nodeExists)) {
-        isSelect
+
+      if ((selected && !nodeExists) || (!selected && nodeExists)) {
+        selected
           ? this.selectedNodes.push(node)
           : this.deleteSelectedNode(node);
       }
-    });
+    }
+
     this.tableFilter(data);
   }
 
@@ -160,30 +168,30 @@ export class FilterTableComponent<T extends { [s: string]: unknown; }> implement
   }
 
   private tableFilter(header: string) {
-    const [data] = header.split(':');
+    const [column] = header.split(':');
     const filteredData = this.selectedNodes
-      .filter((node) => node.header.includes(data))
+      .filter((node) => node.header.includes(column))
       .map((node) => node.header.split(':')[1]);
 
-    const filterType = this.filterMode(this.data, data);
+    const filterType = this.filterMode(this.data, column);
 
-    this.table?.filter(filteredData, data, filterType);
+    this.table?.filter(filteredData, column, filterType);
   }
 
   get nodeSelectionCount() {
     return this.selectedNodes.length;
   }
 
-  filterMode = (data: T[], header: string) => {
-    const d = data
-            .map((v) => v[header])
-      .filter((v) => v !== null && v !== undefined && v !== '');
-  
-    if (d.every((v) => typeof v === 'boolean')) {
+  filterMode = (data: T[], column: string) => {
+    const columnValues = data
+      .map((row) => row[column])
+      .filter((value) => value || value === 0);
+
+    if (columnValues.every((v) => typeof v === 'boolean')) {
       return 'equals';
-    } else if (d.every((v) => Array.isArray(v))) {
+    } else if (columnValues.every((v) => Array.isArray(v))) {
       return 'arrayFilter';
-    } else if (d.every((v) => isValidDate(v as string))) {
+    } else if (columnValues.every((v) => isValidDate(v as string))) {
       return 'arrayFilter';
     } else {
       return 'in';
@@ -192,16 +200,11 @@ export class FilterTableComponent<T extends { [s: string]: unknown; }> implement
 }
 
 const arrayFilter = (value: string[], filters: string[]): boolean => {
-  if (
-    filters === undefined ||
-    filters === null ||
-    filters.length === 0 ||
-    !filters
-  ) {
+  if (!filters?.length) {
     return true;
   }
 
-  if (value === undefined || value === null || !value) {
+  if (!value) {
     return false;
   }
 

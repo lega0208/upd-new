@@ -8,15 +8,18 @@
     placeholder="Filter"
     (onNodeSelect)="onNodeSelect($event)"
     (onNodeUnselect)="onNodeUnselect($event)"
-    [ngClass]="{ 'custom-treeselect': true }"
+    [ngClass]="{ 'custom-treeselect': true, 'text-nowrap': true }"
   >
     <ng-template pTemplate="value">
-      <div class="d-flex justify-content-between align-items-bottom">
+      <div
+        class="d-flex justify-content-between align-items-bottom content-end"
+      >
         <span
           ><span class="pi pi-filter"></span> {{ 'Filter' | translate }}</span
         >&NonBreakingSpace;
         <span
-          class="badge"
+          class="badge h-100 align-self-center text-center"
+          style="padding: 0.25em 0.32em"
           [ngClass]="nodeSelectionCount === 0 ? 'bg-unknown' : 'bg-primary'"
           >{{ nodeSelectionCount }}</span
         >

@@ -638,10 +638,8 @@ async function getAggregatedProjectMetrics(
       .exec()
   )[0];
 
-  const project = await projectModel.findById(id).populate('tasks');
-  const tasks = (project?.tasks || []) as unknown[];
-
-  const taskIds = tasks.map((task: Types.ObjectId | Task) => task._id);
+  const project = await projectModel.findById(id).populate<{ tasks: Task[] }>('tasks');
+  const tasks = (project?.tasks || []);
 
   const tpcIds = tasks
     .filter((task: Types.ObjectId | Task) => 'tpc_ids' in task)
@@ -673,10 +671,25 @@ async function getAggregatedProjectMetrics(
     tpcIds
   );
 
+  type TaskMetrics = {
+    _id: Types.ObjectId;
+    page: number;
+    visits: number;
+    dyfYes: number;
+    dyfNo: number;
+    fwylfCantFindInfo: number;
+    fwylfHardToUnderstand: number;
+    fwylfOther: number;
+    fwylfError: number;
+    gscTotalClicks: number;
+    gscTotalImpressions: number;
+    gscTotalCtr: number;
+    gscTotalPosition: number;
+  }
+
   const pageMetricsByTasks = await pageMetricsModel
-    .aggregate<Partial<ProjectDetailsAggregatedData>>()
+    .aggregate<TaskMetrics>()
     .project({
-      page: 1,
       projects: 1,
       tasks: 1,
       date: 1,
@@ -699,7 +712,6 @@ async function getAggregatedProjectMetrics(
     .unwind('$tasks')
     .group({
       _id: '$tasks',
-      page: { $first: '$page' },
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyf_yes' },
       dyfNo: { $sum: '$dyf_no' },
@@ -717,11 +729,9 @@ async function getAggregatedProjectMetrics(
   const tasksDict = arrayToDictionary(tasks as Task[], '_id');
 
   const metricsByTask = pageMetricsByTasks.map((metrics) => {
-    const task = tasksDict[(
-      metrics as Partial<ProjectDetailsAggregatedData & { _id: string }>
-    )._id.toString()];
-    const title = task ? task.title : undefined;
-    
+    const task = tasksDict[metrics._id.toString()];
+    const title = task?.title;
+
     return {
       ...metrics,
       title,

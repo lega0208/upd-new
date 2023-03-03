@@ -115,18 +115,18 @@ CallDriverSchema.statics['getCallsByTpcId'] = async function (
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
   return this.aggregate()
-  .match({
-        date: { $gte: startDate, $lte: endDate },
-        tpc_id: { $in: tpcIds },
-      })
+    .match({
+      date: { $gte: startDate, $lte: endDate },
+      tpc_id: { $in: tpcIds },
+    })
     .group({
-        _id: '$tpc_id',
-        calls: { $sum: '$calls' },
+      _id: '$tpc_id',
+      calls: { $sum: '$calls' },
     })
     .project({
-        _id: 0,
-        calls: 1,
-      })
+      _id: 0,
+      calls: 1,
+    })
     .exec();
 };
 
@@ -197,8 +197,5 @@ export interface CallDriverModel extends Model<CallDriver> {
     comparisonDateRange: string,
     tpcIds?: number[]
   ): Promise<TopCalldriverTopics[]>;
-  getCallsByTpcId(
-    dateRange: string,
-    tpcIds: number[]
-  ): Promise<CallsByTasks[]>;
+  getCallsByTpcId(dateRange: string, tpcIds: number[]): Promise<CallsByTasks[]>;
 }

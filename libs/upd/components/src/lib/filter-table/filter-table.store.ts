@@ -33,7 +33,7 @@ export class FilterTableStore<T extends { [key: string]: unknown; }> extends Com
     }
 
     const nodes: TreeNode[] = [];
-    
+
     for (const [key, value] of map.entries()) {
       const column = cols.find((col) => col.field === key);
       if (!column) {
