@@ -31,6 +31,9 @@ export class Task implements ITask {
   subtopic = '';
 
   @Prop({ type: [String] })
+  sub_subtopic: string[] = [];
+
+  @Prop({ type: [String] })
   user_type: string[] = [];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }] })

@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import type {
   AttachmentData,
   CallsByTopic,
+  CallsByTasks,
   FeedbackComment,
   GscSearchTermMetrics,
   TopCalldriverTopics,
@@ -207,8 +208,10 @@ export interface TasksHomeAggregatedData {
   _id: string | Types.ObjectId;
   title: string;
   group: string;
+  subgroup: string;
   topic: string;
   subtopic: string;
+  sub_subtopic?: string[];
   program?: string;
   service?: string;
   user_journey?: string[];
@@ -217,6 +220,7 @@ export interface TasksHomeAggregatedData {
   channel?: string[];
   visits: number;
   user_type: string[];
+  calls: number;
 }
 
 export type TasksHomeData = ViewData<TasksHomeAggregatedData[]>;
@@ -249,6 +253,7 @@ export interface TaskDetailsData
   subgroup: string;
   topic: string;
   subtopic: string;
+  sub_subtopic: string[];
   user_type: string[];
   program: string;
   service: string;
@@ -342,7 +347,11 @@ export interface ProjectDetailsAggregatedData {
   feedbackByTags: { tag: string; numComments: number }[];
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
+  callsByTasks: CallsByTasks[];
   totalCalldrivers: number;
+  pageMetricsByTasks: (Partial<ProjectDetailsAggregatedData> & {
+    title: string;
+  })[];
 }
 
 export interface ProjectsDetailsData

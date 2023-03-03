@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types } from 'mongoose';
 import type {
+  CallsByTasks,
   CallsByTopic,
   ICallDriver,
   TopCalldriverTopics,
@@ -107,6 +108,28 @@ CallDriverSchema.statics['getCallsByEnquiryLineFromIds'] = async function (
     .exec();
 };
 
+CallDriverSchema.statics['getCallsByTpcId'] = async function (
+  dateRange: string,
+  tpcIds: number[]
+): Promise<CallsByTasks[]> {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  return this.aggregate()
+    .match({
+      date: { $gte: startDate, $lte: endDate },
+      tpc_id: { $in: tpcIds },
+    })
+    .group({
+      _id: '$tpc_id',
+      calls: { $sum: '$calls' },
+    })
+    .project({
+      _id: 0,
+      calls: 1,
+    })
+    .exec();
+};
+
 CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
   dateRange: string,
   comparisonDateRange: string,
@@ -174,4 +197,5 @@ export interface CallDriverModel extends Model<CallDriver> {
     comparisonDateRange: string,
     tpcIds?: number[]
   ): Promise<TopCalldriverTopics[]>;
+  getCallsByTpcId(dateRange: string, tpcIds: number[]): Promise<CallsByTasks[]>;
 }

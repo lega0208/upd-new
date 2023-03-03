@@ -25,6 +25,7 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     subgroup: '',
     topic: '',
     subtopic: '',
+    sub_subtopic: [],
     user_type: [],
     program: '',
     service: '',

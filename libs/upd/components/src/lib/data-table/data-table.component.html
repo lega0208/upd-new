@@ -27,7 +27,7 @@
         <ng-container *ngIf="captionTitle">
           {{ captionTitle | translate }}
         </ng-container>
-        <div ngClass="searh-url-field">
+        <div *ngIf="!filterTree" ngClass="searh-url-field">
           <span *ngIf="filter" class="p-input-icon-left p-ml-auto">
             <i class="pi pi-search"></i>
             <input
@@ -38,6 +38,13 @@
             />
           </span>
         </div>
+        <upd-filter-table
+          *ngIf="filterTree"
+          [cols]="cols"
+          [data]="data || []"
+          [table]="table"
+        ></upd-filter-table>
+
         <upd-data-table-exports
           id="data-table-{{ id }}"
           *ngIf="exports"
@@ -46,7 +53,15 @@
         ></upd-data-table-exports>
       </div>
 
-      <div class="container">
+      <!-- <upd-filter-table
+        *ngIf="filter"
+        [cols]="cols"
+        [data]="data || []"
+        [table]="table"
+        (tableUpdate)="updateTableFilter($event)"
+      ></upd-filter-table> -->
+
+      <!-- <div class="container">
         <div class="row">
           <div class="col p-0">
             <ng-container *ngIf="(colFilters | json) !== ({} | json)">
@@ -65,11 +80,13 @@
                   ></span>
                 </ng-container>
               </ng-container>
-              <a (click)="clearAll()" class="black">Clear all</a>
+              <a (click)="clearAll()" class="black">{{
+                'Clear all' | translate
+              }}</a>
             </ng-container>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
   </ng-template>
   <ng-template pTemplate="header" let-columns>
@@ -91,7 +108,11 @@
     <tr>
       <div *ngIf="sort; then thenBlock; else elseBlock"></div>
       <ng-template #thenBlock>
-        <th *ngFor="let col of columns" [pSortableColumn]="col.field">
+        <th
+          *ngFor="let col of columns"
+          [pSortableColumn]="col.field"
+          [hidden]="col.hideTable"
+        >
           <div class="text-nowrap d-flex align-items-center">
             <ng-container *ngIf="col.tooltip">
               <span
@@ -109,6 +130,7 @@
             <p-sortIcon [field]="col.field"></p-sortIcon>
             <ng-template [ngIf]="col.filterConfig">
               <!-- Boolean Filtering -->
+
               <ng-template [ngIf]="col.filterConfig.type === 'boolean'">
                 <p-columnFilter
                   type="boolean"
@@ -173,7 +195,10 @@
         </th>
       </ng-template>
       <ng-template #elseBlock>
-        <th *ngFor="let col of columns">
+        <th
+          *ngFor="let col of columns"
+          [hidden]="col.hideTable"
+        >
           <ng-container *ngIf="col.tooltip">
             <span
               class="p-column-title datatable-headers"
@@ -204,6 +229,7 @@
             (rowData[col.field] >= 0.8 ||
               (col.field === 'change' && rowData[col.field] >= 0.2))
         }"
+        [hidden]="col.hideTable"
       >
         <span
           class="p-column-title datatable-headers"

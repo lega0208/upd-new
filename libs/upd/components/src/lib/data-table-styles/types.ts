@@ -13,6 +13,7 @@ export interface ColumnConfig<T = any> {
   tooltip?: string;
   translate?: boolean;
   filterConfig?: FilterConfig<T>;
+  hideTable?: boolean;
 }
 
 export interface typeParams {

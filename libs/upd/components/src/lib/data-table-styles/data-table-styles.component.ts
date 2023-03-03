@@ -20,6 +20,7 @@ export class DataTableStylesComponent implements OnInit, OnChanges {
   @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() href = '';
   @Input() data: Record<string, number | string> = {};
+  array: string[] = [];
 
   numberVal: number | string = 0;
 
@@ -46,7 +47,11 @@ export class DataTableStylesComponent implements OnInit, OnChanges {
         ) || '';
     }
 
-    if (this.config.type === 'label' && this.config.typeParam !== 'cops' && this.config.typeParam !== 'passFail')
+    if (
+      this.config.type === 'label' &&
+      this.config.typeParam !== 'cops' &&
+      this.config.typeParam !== 'passFail'
+    )
       this.isProjectLabel = true;
 
     this.projectLabel = this.data[this.config.field] as ProjectStatus;
@@ -58,6 +63,15 @@ export class DataTableStylesComponent implements OnInit, OnChanges {
         'text-danger': this.data[this.config.field] < 0,
         'text-success': this.data[this.config.field] > 0,
       };
+    }
+  }
+
+  isArray(obj: any) {
+    if (Array.isArray(obj)) {
+      this.array = obj;
+      return true;
+    } else {
+      return false;
     }
   }
 

@@ -72,9 +72,24 @@ export class TasksService {
       this.taskModel
     );
 
+    const callsByTasks: { [key: string]: number } = {};
+
+    for (const task of tasks as Task[]) {
+      const calls = (
+        await this.calldriversModel.getCallsByTpcId(dateRange, task.tpc_ids)
+      ).reduce((a, b) => a + b.calls, 0);
+
+      callsByTasks[task._id.toString()] = calls;
+    }
+
+    const task = tasks.map((task) => ({
+      ...task,
+      calls: callsByTasks[task._id.toString()] ?? 0,
+    }));
+
     const results = {
       dateRange,
-      dateRangeData: tasks,
+      dateRangeData: task,
     };
 
     await this.cacheManager.set(cacheKey, results);
@@ -141,6 +156,7 @@ export class TasksService {
       subgroup: task.subgroup,
       topic: task.topic,
       subtopic: task.subtopic,
+      sub_subtopic: task.sub_subtopic,
       user_type: task.user_type,
       program: task.program,
       service: task.service,

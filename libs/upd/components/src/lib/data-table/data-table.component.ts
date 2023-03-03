@@ -22,6 +22,7 @@ export class DataTableComponent<T> implements OnChanges {
   @Input() sort = true;
   @Input() pagination = true;
   @Input() filter = true;
+  @Input() filterTree = false;
   @Input() cols: ColumnConfig[] = [];
   @Input() searchFields: string[] = [];
   @Input() captionTitle = '';
@@ -56,8 +57,6 @@ export class DataTableComponent<T> implements OnChanges {
     }
 
     this.colFilters = {};
-
-    console.log(this.colFilters);
   }
 
   deleteFilter(colHeader: string, filter: string) {
@@ -95,7 +94,7 @@ export class DataTableComponent<T> implements OnChanges {
   removeColFilter(header: string, field: string, filter: string[]) {
     const colHeader = `${header}:${field}`;
 
-    if ( filter === null ) return;
+    if (filter === null) return;
 
     filter.map((value) => {
       this.colFilters[colHeader] = this.colFilters[colHeader].filter(

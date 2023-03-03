@@ -78,7 +78,7 @@ export class ProjectsHomeComponent implements OnInit {
             pipeParam: lang === FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY',
           },
           {
-            field: 'avgSuccessRate',
+            field: 'lastAvgSuccessRate',
             header: this.i18n.service.translate('Average success rate', lang),
             pipe: 'percent',
           },

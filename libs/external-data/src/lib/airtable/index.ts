@@ -250,6 +250,7 @@ export class AirtableClient {
       subgroup: squishTrim(fields['Sub-Group']),
       topic: squishTrim(fields['Topic']),
       subtopic: squishTrim(fields['Sub Topic']),
+      sub_subtopic: fields['Sub-sub-Topic']?.map(squishTrim),
       ux_tests: fields['User Testing Projects'],
       user_type: fields['User Type']?.map(squishTrim),
       pages: fields['Pages'],
