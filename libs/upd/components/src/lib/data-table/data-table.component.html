@@ -48,7 +48,7 @@
         <upd-data-table-exports
           id="data-table-{{ id }}"
           *ngIf="exports"
-          [cols]="cols"
+          [cols]="exportCols"
           [data]="data || []"
         ></upd-data-table-exports>
       </div>
@@ -152,7 +152,6 @@
                   [showAddButton]="false"
                   [showApplyButton]="false"
                   [hideOnClear]="true"
-                  [showClearButton]="false"
                 >
                   <ng-template
                     pTemplate="filter"
@@ -167,7 +166,6 @@
                       [placeholder]="'Options'"
                       (onChange)="
                         filter($event.value);
-                        setFilters(col.field, col.header, $event.value)
                       "
                       [filter]="false"
                       [showHeader]="false"
@@ -180,13 +178,6 @@
                         </div>
                       </ng-template>
                     </p-multiSelect>
-                    <button
-                      pButton
-                      type="button"
-                      label="Clear"
-                      class="p-button-outlined pt-2"
-                      (click)="removeColFilter(col.header, col.field, value)"
-                    ></button>
                   </ng-template>
                 </p-columnFilter>
               </ng-template>
