@@ -36,7 +36,7 @@ export class FilterTableStore<T extends { [key: string]: unknown; }> extends Com
 
     for (const [key, value] of map.entries()) {
       const column = cols.find((col) => col.field === key);
-      if (!column) {
+      if (!column || column.pipe === 'number') {
         continue;
       }
       const header = column?.header || key;
