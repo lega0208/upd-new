@@ -15,11 +15,13 @@ services:
     volumes:
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
+
   certbot:
     image: certbot/certbot:latest
     volumes:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
+
   web:
     image: "upd_web"
     container_name: upd_web
@@ -36,6 +38,7 @@ services:
       DOTENV_CONFIG_PATH: /run/secrets/.env
     depends_on:
       - mongodb
+
   db-updater:
     image: "upd_db-updater"
     container_name: upd_db-updater
@@ -56,6 +59,7 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/service-account-credentials.json
     depends_on:
       - mongodb
+
   mongodb:
     image: mongo:4.4
     container_name: upd_mongo
@@ -68,7 +72,6 @@ services:
         target: /data
         volume:
           nocopy: true
-
 
   python:
     image: jupyter/scipy-notebook:latest
