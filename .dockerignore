@@ -7,3 +7,4 @@ tools
 tmp
 docker/certbot/conf/keys
 dist
+logs

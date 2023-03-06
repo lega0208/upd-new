@@ -44,3 +44,5 @@ nx-cloud.env
 /keys
 keys/*
 docker/certbot
+
+/logs
