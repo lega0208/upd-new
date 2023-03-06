@@ -59,6 +59,18 @@ services:
         target: /data
         volume:
           nocopy: true
+
+  python:
+    image: jupyter/scipy-notebook:latest
+    container_name: python-jupyter
+    restart: on-failure
+    ports:
+      - 8888:8888
+    volumes:
+      - python:/tmp/
+    depends_on:
+      - mongodb
+
 volumes:
   db-data:
     driver: local
@@ -66,6 +78,8 @@ volumes:
       o: bind
       type: none
       device: "Z:/docker-db"
+  python:
+
 secrets:
   .env:
     file: ../.env
