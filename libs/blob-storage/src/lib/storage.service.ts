@@ -11,16 +11,20 @@ export interface BlobDefinition {
 export class BlobStorageService {
   private storageClient = new StorageClient();
 
-  readonly blobDefinitions = {
+  readonly blobDefinitions: Record<Readonly<string>, BlobDefinition> = {
     project_attachments: {
       path: 'project_attachments',
       containerName: 'documents',
       overwrite: true,
     },
     db_updates: {
-      path: 'db-updates',
+      path: 'db_updates',
       containerName: 'logs',
     },
+    aa_responses: {
+      path: 'aa_raw',
+      containerName: 'raw-data'
+    }
   } as const;
 
   readonly blobModels: Record<
@@ -29,6 +33,7 @@ export class BlobStorageService {
   > = {
     db_updates: null,
     project_attachments: null,
+    aa_responses: null,
   };
 
   private async configureBlobs() {
