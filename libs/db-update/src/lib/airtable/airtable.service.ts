@@ -17,7 +17,11 @@ import {
   UxTest,
 } from '@dua-upd/db';
 import type { UxApiData, UxApiDataType, UxData } from './types';
-import { arrayToDictionary, WithObjectId } from '@dua-upd/utils-common';
+import {
+  arrayToDictionary,
+  logJson,
+  WithObjectId,
+} from '@dua-upd/utils-common';
 import { assertHasUrl, assertObjectId } from './utils';
 import { AttachmentData, IPage, ITask } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
@@ -148,9 +152,13 @@ export class AirtableService {
         }, new Set()),
       ] as string[];
 
-      const pageObjectIds = pageAirtableIds.map((pageAirtableId) =>
-        idMaps.pages.get(pageAirtableId)
-      );
+      const pageObjectIds = [
+        ...new Set(
+          pageAirtableIds.map((pageAirtableId) =>
+            idMaps.pages.get(pageAirtableId)
+          )
+        ),
+      ] as Types.ObjectId[];
 
       const taskAirtableIds = [
         ...uxTests.reduce((taskIds, uxTest) => {
@@ -232,12 +240,18 @@ export class AirtableService {
         (project) => project.title === uxTest.title
       );
 
+      const pages = [
+        ...new Set(
+          (uxTest.pages || []).map((pageAirtableId) =>
+            airtableIdToObjectIdMaps.pages.get(pageAirtableId)
+          )
+        ),
+      ] as Types.ObjectId[];
+
       return {
         ...uxTest,
         project: project?._id,
-        pages: (uxTest.pages || []).map((pageAirtableId) =>
-          airtableIdToObjectIdMaps.pages.get(pageAirtableId)
-        ) as Types.ObjectId[],
+        pages,
         tasks: (uxTest.tasks || []).map((taskAirtableId) =>
           airtableIdToObjectIdMaps.tasks.get(taskAirtableId)
         ),
@@ -259,13 +273,19 @@ export class AirtableService {
 
       const tpc_ids = tasksTopicsMap[task.airtable_id] || [];
 
+      const pages = [
+        ...new Set(
+          (task.pages || []).map((pageAirtableId) =>
+            airtableIdToObjectIdMaps.pages.get(pageAirtableId)
+          )
+        ),
+      ] as Types.ObjectId[];
+
       return {
         ...task,
         ux_tests: ux_tests.map((uxTest) => uxTest._id) as Types.ObjectId[],
         projects,
-        pages: (task.pages || []).map((pageAirtableId) =>
-          airtableIdToObjectIdMaps.pages.get(pageAirtableId)
-        ),
+        pages,
         tpc_ids,
       } as ITask;
     });

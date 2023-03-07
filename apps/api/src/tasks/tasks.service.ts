@@ -29,7 +29,7 @@ import {
   getAvgSuccessFromLastTests,
   getLatestTest,
   dateRangeSplit,
-  arrayToDictionary,
+  arrayToDictionary, logJson
 } from '@dua-upd/utils-common';
 import { InternalSearchTerm } from '@dua-upd/types-common';
 
@@ -125,7 +125,7 @@ export class TasksService {
       id: project._id,
       title: project.title,
       attachments: project.attachments.map((attachment) => {
-        attachment.storage_url = attachment.storage_url.replace(
+        attachment.storage_url = attachment.storage_url?.replace(
           /^https:\/\//,
           ''
         );
