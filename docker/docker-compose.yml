@@ -71,14 +71,11 @@ services:
       - 8888:8888
     volumes:
       - python:/tmp/
-      - ./certbot/conf/:/ssl/:ro
     environment:
-      USE_HTTPS: "yes"
-      PASSWORD: ${NOTEBOOK_PASSWORD}
+      RESTARTABLE: 'yes'
     command: >
       start-notebook.sh
-      --NotebookApp.certfile=/ssl/live/cra-arc.alpha.canada.ca/fullchain.pem
-      --NotebookApp.keyfile=/ssl/live/cra-arc.alpha.canada.ca/privkey.pem
+      --LabApp.token=''
     depends_on:
       - mongodb
 

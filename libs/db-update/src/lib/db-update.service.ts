@@ -132,8 +132,6 @@ export class DbUpdateService {
       // run this again in case we've created duplicates from the published pages list
       await this.pagesService.consolidateDuplicatePages();
 
-      await this.db.addMissingAirtableRefsToPageMetrics();
-
       this.logger.log('Database updates completed.');
     } catch (error) {
       this.logger.error(error);
