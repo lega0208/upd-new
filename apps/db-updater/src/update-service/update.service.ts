@@ -2,8 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { DbUpdateService } from '@dua-upd/db-update';
 import { DataIntegrityService } from '@dua-upd/data-integrity';
+import { DbService } from '@dua-upd/db';
 
 export const EVERY_SUNDAY_AT_11PM = '0 0 23 * * 0' as const;
+export const EVERY_SATURDAY_AT_11PM = '0 0 23 * * 6' as const;
 
 @Injectable()
 export class UpdateService {
@@ -12,7 +14,8 @@ export class UpdateService {
 
   constructor(
     private dataIntegrityService: DataIntegrityService,
-    private dbUpdateService: DbUpdateService
+    private dbUpdateService: DbUpdateService,
+    private db: DbService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
@@ -37,6 +40,15 @@ export class UpdateService {
     }
 
     this.logger.log('Database updates completed.');
+  }
+
+  @Cron(EVERY_SATURDAY_AT_11PM)
+  async addMissingAirtableRefsToPageMetrics() {
+    try {
+      await this.db.addMissingAirtableRefsToPageMetrics()
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   @Cron(EVERY_SUNDAY_AT_11PM)
