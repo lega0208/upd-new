@@ -75,18 +75,18 @@ export class FilterTableStore<T extends { [key: string]: unknown; }> extends Com
       };
     });
 
-    return sort(nodes);
+    return sortNodes(nodes);
   });
 
   readonly vm$ = this.select(this.state$, (state) => state);
 }
 
 
-function sort(array: TreeNode[]): TreeNode[] {
-  for (const node of array) {
+function sortNodes(nodes: TreeNode[]): TreeNode[] {
+  for (const node of nodes) {
     if (node.children) {
-      sort(node.children);
+      sortNodes(node.children);
     }
   } 
-  return array.sort((a, b) => (a.label as string).localeCompare(b.label as string));
+  return nodes.sort((a, b) => (a.label as string).localeCompare(b.label as string));
 }
