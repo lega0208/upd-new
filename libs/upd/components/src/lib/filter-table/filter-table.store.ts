@@ -60,7 +60,7 @@ export class FilterTableStore<T extends { [key: string]: unknown; }> extends Com
   });
 
   readonly setLabels = this.updater((state, lang: LocaleId): TreeNode[] => {
-    return state.map((node) => {
+    const nodes = state.map((node) => {
       const [key, label] = node.data.split(':');
       return {
         ...node,
@@ -74,7 +74,19 @@ export class FilterTableStore<T extends { [key: string]: unknown; }> extends Com
         }),
       };
     });
+
+    return sortNodes(nodes);
   });
 
   readonly vm$ = this.select(this.state$, (state) => state);
+}
+
+
+function sortNodes(nodes: TreeNode[]): TreeNode[] {
+  for (const node of nodes) {
+    if (node.children) {
+      sortNodes(node.children);
+    }
+  } 
+  return nodes.sort((a, b) => (a.label as string).localeCompare(b.label as string));
 }

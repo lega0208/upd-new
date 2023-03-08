@@ -23,7 +23,7 @@ export class TasksHomeFacade {
     map(([tasksHomeData]) => {
       return (tasksHomeData?.dateRangeData || []).map((row) => ({
         ...row,
-        title: row.title ? row.title.replace(/\s+/g, ' ') : '',
+        task: row.title ? row.title.replace(/\s+/g, ' ') : '',
         group: row.group || '',
         subgroup: row.subgroup || '',
         topic: row.topic || '',
@@ -77,7 +77,7 @@ export class TasksHomeFacade {
           hideTable: true,
         },
         {
-          field: 'title',
+          field: 'task',
           header: this.i18n.service.translate('task', lang),
           type: 'link',
           typeParam: '_id',
