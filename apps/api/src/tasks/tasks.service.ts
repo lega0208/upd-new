@@ -167,6 +167,7 @@ export class TasksService {
       projects,
       dateRange: params.dateRange,
       dateRangeData: await getTaskAggregatedData(
+        new Types.ObjectId(params.id),
         this.pageMetricsModel,
         this.calldriversModel,
         this.feedbackModel,
@@ -176,6 +177,7 @@ export class TasksService {
       ),
       comparisonDateRange: params.comparisonDateRange,
       comparisonDateRangeData: await getTaskAggregatedData(
+        new Types.ObjectId(params.id),
         this.pageMetricsModel,
         this.calldriversModel,
         this.feedbackModel,
@@ -323,6 +325,7 @@ export class TasksService {
 }
 
 async function getTaskAggregatedData(
+  taskId: Types.ObjectId,
   pageMetricsModel: PageMetricsModel,
   calldriversModel: CallDriverModel,
   feedbackModel: FeedbackModel,
@@ -344,14 +347,28 @@ async function getTaskAggregatedData(
 
   const results = await pageMetricsModel
     .aggregate<TaskDetailsAggregatedData>()
-    .sort({ date: -1, url: 1 })
+    .project({
+      date: 1,
+      page: 1,
+      visits: 1,
+      tasks: 1,
+      dyf_yes: 1,
+      dyf_no: 1,
+      fwylf_cant_find_info: 1,
+      fwylf_error: 1,
+      fwylf_hard_to_understand: 1,
+      fwylf_other: 1,
+      gsc_total_clicks: 1,
+      gsc_total_impressions: 1,
+      gsc_total_ctr: 1,
+      gsc_total_position: 1
+    })
     .match({
       date: dateQuery,
-      url: { $in: pageUrls },
+      tasks: taskId,
     })
     .group({
-      _id: '$url',
-      page: { $first: '$page' },
+      _id: '$page',
       visits: { $sum: '$visits' },
       dyfYes: { $sum: '$dyf_yes' },
       dyfNo: { $sum: '$dyf_no' },
@@ -366,7 +383,7 @@ async function getTaskAggregatedData(
     })
     .lookup({
       from: 'pages',
-      localField: 'page',
+      localField: '_id',
       foreignField: '_id',
       as: 'page',
     })
@@ -406,6 +423,7 @@ async function getTaskAggregatedData(
       { _id: 1 }
     )
     .lean()
+
     .exec();
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
