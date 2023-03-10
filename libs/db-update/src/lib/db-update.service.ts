@@ -29,6 +29,7 @@ import { OverallMetricsService } from './overall-metrics/overall-metrics.service
 import { PageUpdateService } from './pages/pages.service';
 import { PageMetricsService } from './pages-metrics/page-metrics.service';
 import { InternalSearchTermsService } from './internal-search/search-terms.service';
+import { ActivityMapService } from './activity-map/activity-map.service';
 
 @Injectable()
 export class DbUpdateService {
@@ -44,6 +45,7 @@ export class DbUpdateService {
     private pagesService: PageUpdateService,
     private pageMetricsService: PageMetricsService,
     private internalSearchService: InternalSearchTermsService,
+    private activityMapService: ActivityMapService,
     private searchAssessmentService: SearchAssessmentService,
     @InjectModel(Overall.name, 'defaultConnection')
     private overallMetricsModel: Model<OverallDocument>,
@@ -62,6 +64,12 @@ export class DbUpdateService {
     await this.searchAssessmentService.upsertPreviousSearchAssessment();
     await this.searchAssessmentService.getLatestSearchAssessment();
     this.logger.log('Search assessment successfully updated.');
+  }
+
+  async updateActivityMap() {
+    this.logger.log('Starting activity map...');
+    await this.activityMapService.upsertPageActivityMap();
+    this.logger.log('Activity map successfully updated.');
   }
 
   async updateAll() {
