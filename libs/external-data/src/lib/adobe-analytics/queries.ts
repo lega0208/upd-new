@@ -166,41 +166,6 @@ export const createCXTasksQuery = (
     .build();
 };
 
-export const createActivityMapQuery = (
-  dateRange: DateRange,
-  itemIds: string[],
-  settings: ReportSettings = {}
-) => {
-  const queryBuilder = new AdobeAnalyticsQueryBuilder();
-
-  const querySettings: ReportSettings = {
-    nonesBehavior: 'return-nones',
-    countRepeatInstances: true,
-    ...settings,
-  };
-
-  return queryBuilder
-    .setDimension('variables/clickmaplink') // Site search
-    .setMetrics({
-      activityMap: {
-        id: 'metrics/clickmaplinkinstances',
-        filters: [
-          {
-            itemIds: itemIds,
-            type: 'breakdown',
-            dimension: 'variables/clickmappage',
-          },
-        ],
-      },
-    })
-    .setGlobalFilters([
-      { type: 'segment', segmentId: SEGMENTS.cra },
-      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
-    ])
-    .setSettings(querySettings)
-    .build();
-};
-
 export const createBatchedInternalSearchQueries = (
   dateRange: DateRange,
   itemIds?: string[],
@@ -372,7 +337,7 @@ export const createActivityMapItemIdsQuery = (
 
   return queryBuilder
     .setDimension('variables/clickmappage') // Site search
-    .setMetrics({ visits: 'metrics/clickmaplinkinstances' } as MetricsConfig)
+    .setMetrics({ clicks: 'metrics/clickmaplinkinstances' } as MetricsConfig)
     .setGlobalFilters([
       { type: 'segment', segmentId: SEGMENTS.cra },
       { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
@@ -463,4 +428,56 @@ export const createPageUrlItemIdsQuery = (
     ])
     .setSettings(querySettings)
     .build();
+};
+
+export const createBatchedActivityMapQueries = (
+  dateRange: DateRange,
+  itemIds?: string[],
+  settings: ReportSettings = {}
+) =>
+  chunkMap(
+    itemIds,
+    (itemIdsBatch) => createActivityMapQuery(dateRange, itemIdsBatch, settings),
+    200
+  );
+
+export const createActivityMapQuery = (
+  dateRange: DateRange,
+  itemids?: string[],
+  settings: ReportSettings & {
+    lang?: 'en' | 'fr';
+    includeSearchInstances?: boolean;
+  } = {}
+) => {
+  const queryBuilder = new AdobeAnalyticsQueryBuilder();
+
+  delete settings.lang;
+
+  const querySettings: ReportSettings = {
+    nonesBehavior: 'exclude-nones',
+    countRepeatInstances: true,
+    limit: 50000,
+    ...settings,
+  };
+
+  return queryBuilder
+    .setDimension('variables/clickmaplink')
+    .setMetrics({
+      activityMap: {
+        id: 'metrics/clickmaplinkinstances',
+        filters: [
+          {
+            itemIds: itemids,
+            type: 'breakdown',
+            dimension: 'variables/clickmappage',
+          },
+        ],
+      },
+    })
+    .setGlobalFilters([
+      { type: 'segment', segmentId: SEGMENTS.cra },
+      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
+    ])
+    .setSettings(querySettings)
+    .build(false);
 };

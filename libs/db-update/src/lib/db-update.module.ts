@@ -16,6 +16,7 @@ import { PageUpdateService } from './pages/pages.service';
 import { PageMetricsService } from './pages-metrics/page-metrics.service';
 import { PagesListService } from './pages-list/pages-list.service';
 import { InternalSearchTermsService } from './internal-search/search-terms.service';
+import { ActivityMapService } from './activity-map/activity-map.service';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { InternalSearchTermsService } from './internal-search/search-terms.servi
     }),
     DbModule,
     ExternalDataModule,
-    BlobStorageModule
+    BlobStorageModule,
   ],
   providers: [
     AirtableService,
@@ -35,6 +36,7 @@ import { InternalSearchTermsService } from './internal-search/search-terms.servi
     DbService,
     DbUpdateService,
     InternalSearchTermsService,
+    ActivityMapService,
     FeedbackService,
     OverallMetricsService,
     PageUpdateService,
@@ -56,6 +58,7 @@ import { InternalSearchTermsService } from './internal-search/search-terms.servi
     ExternalDataModule,
     FeedbackService,
     InternalSearchTermsService,
+    ActivityMapService,
     OverallMetricsService,
     PageMetricsService,
     PageUpdateService,

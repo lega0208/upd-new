@@ -725,6 +725,16 @@ export function createRowsParser<T>(
             type: 'internalSearch',
           } as T)
       );
+  } else if (dimension === 'variables/clickmappage') {
+    return (columnIds: string[], rows: AAResultsRow[]) =>
+      rows.map(
+        (row) =>
+          ({
+            itemId: row.itemId,
+            value: row.value,
+            type: 'activityMap',
+          } as T)
+      );
   }
 
   const metricFilter = query.metricContainer.metricFilters?.[0];

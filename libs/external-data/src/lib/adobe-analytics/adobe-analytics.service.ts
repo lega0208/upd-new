@@ -12,6 +12,8 @@ import {
 import { DateRange } from '../types';
 import {
   AdobeAnalyticsClient,
+  createActivityMapItemIdsQuery,
+  createBatchedActivityMapQueries,
   createBatchedInternalSearchQueries,
   createInternalSearchItemIdsQuery,
   createInternalSearchQuery,
@@ -33,6 +35,13 @@ export type SearchTermResult = {
 export type InternalSearchResult = {
   date?: Date;
   aa_searchterms: AASearchTermMetrics[];
+  itemId?: string;
+};
+
+export type ActivityMapResult = {
+  url: string;
+  date?: Date;
+  aa_activitymap: AASearchTermMetrics[];
   itemId?: string;
 };
 
@@ -156,6 +165,48 @@ export class AdobeAnalyticsService {
             pre: (date) =>
               this.logger.log(
                 `Dispatching (query ${i + 1}) searchterms for ${date}`
+              ),
+          },
+        }
+      );
+
+      queryPromises.push(
+        promise.catch((err) => this.logger.error(chalk.red(err.stack)))
+      );
+
+      await wait(520);
+    }
+
+    return (await Promise.all(queryPromises)).flat();
+  }
+
+  async getActivityMapItemIds({ start, end }: DateRange) {
+    const query = createActivityMapItemIdsQuery(
+      {
+        start: toQueryFormat(start),
+        end: toQueryFormat(end),
+      },
+      {
+        limit: 50000,
+      }
+    );
+
+    return await this.client.executeQuery<IAAItemId>(query);
+  }
+
+  async getPageActivityMap(dateRange: DateRange, itemIdDocs: IAAItemId[]) {
+    const itemIds = itemIdDocs.map(({ itemId }) => itemId);
+    const queries = createBatchedActivityMapQueries(dateRange, itemIds);
+    const queryPromises: Promise<ActivityMapResult[]>[] = [];
+
+    for (const [i, query] of queries.entries()) {
+      const promise = this.client.executeQueryWithRetry<ActivityMapResult>(
+        query,
+        {
+          hooks: {
+            pre: (date) =>
+              this.logger.log(
+                `Dispatching (query ${i + 1}) activity map for ${date}`
               ),
           },
         }

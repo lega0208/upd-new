@@ -8,4 +8,5 @@ export * from './lib/pages/pages.service';
 export * from './lib/pages-metrics/page-metrics.service';
 export * from './lib/pages-list/pages-list.service';
 export * from './lib/internal-search/search-terms.service';
+export * from './lib/activity-map/activity-map.service';
 export * from './lib/pipelines';
