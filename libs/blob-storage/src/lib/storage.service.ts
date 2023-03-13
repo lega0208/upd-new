@@ -21,7 +21,7 @@ export class BlobStorageService {
       path: 'db_updates',
       containerName: 'logs',
     },
-    aa_responses: {
+    aa_raw: {
       path: 'aa_raw',
       containerName: 'raw-data'
     }
@@ -33,7 +33,7 @@ export class BlobStorageService {
   > = {
     db_updates: null,
     project_attachments: null,
-    aa_responses: null,
+    aa_raw: null,
   };
 
   private async configureBlobs() {
