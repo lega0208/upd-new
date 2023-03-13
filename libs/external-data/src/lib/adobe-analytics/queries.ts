@@ -330,7 +330,7 @@ export const createActivityMapItemIdsQuery = (
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 
   const querySettings: ReportSettings = {
-    nonesBehavior: 'return-nones',
+    nonesBehavior: 'exclude-nones',
     countRepeatInstances: true,
     ...settings,
   };
