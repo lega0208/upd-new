@@ -17,9 +17,15 @@ import {
   ContainerClient,
 } from '@azure/storage-blob';
 import chalk from 'chalk';
-import { stat } from 'fs/promises';
+import { stat, writeFile } from 'fs/promises';
 import { makeFileUploadProgressLogger } from './storage.utils';
 import { prettyJson } from '@dua-upd/utils-common';
+import { Buffer } from 'buffer';
+import {
+  CompressionAlgorithm,
+  compressString,
+  decompressString,
+} from '@dua-upd/node-utils';
 
 const connectionString = process.env['AZURE_STORAGE_CONNECTION_STRING'];
 
@@ -89,6 +95,7 @@ export type BlobsConfig = {
   path: string;
   container: ContainerClient;
   overwrite?: boolean;
+  compression?: CompressionAlgorithm;
 };
 
 /**
@@ -153,10 +160,11 @@ export class BlobClient {
   private readonly container: ContainerClient;
   private overwrite = false;
   readonly blobType: BlobType;
+  private compression?: CompressionAlgorithm | void;
 
-  private readonly client: AzureBlobClient;
-  private readonly name: string;
-  public readonly filename: string;
+  private client: AzureBlobClient;
+  private name: string;
+  public filename: string;
 
   constructor(
     blobName: string,
@@ -181,6 +189,10 @@ export class BlobClient {
     this.name = this.client.name;
     this.filename = blobName;
 
+    if (config.compression) {
+      this.setCompression(config.compression);
+    }
+
     if (!this.path) {
       throw Error(
         'Expected a non-empty path in BlobsConfig, but none was provided.'
@@ -202,6 +214,28 @@ export class BlobClient {
 
   async setCacheControl(cacheControl: string) {
     return await this.client.setHTTPHeaders({ blobCacheControl: cacheControl });
+  }
+
+  setCompression(algorithm: CompressionAlgorithm | void): BlobClient {
+    this.compression = algorithm;
+
+    if (algorithm && !this.name.endsWith(`.${algorithm}`)) {
+      this.filename += `.${algorithm}`;
+
+      if (this.blobType === 'append') {
+        this.client = this.container.getAppendBlobClient(
+          `${this.path}/${this.filename}`
+        );
+      } else {
+        this.client = this.container.getBlockBlobClient(
+          `${this.path}/${this.filename}`
+        );
+      }
+
+      this.name = this.client.name;
+    }
+
+    return this;
   }
 
   async sizesAreDifferent(fileSizeBytes: number) {
@@ -241,14 +275,41 @@ export class BlobClient {
     }
   }
 
-  async downloadToFile(blobName: string, destinationFilePath: string) {
+  async downloadToFile(destinationFilePath: string, decompressData = false) {
     if (!(await this.client.exists())) {
-      throw Error(`The requested blob "${blobName}" does not exist`);
+      throw Error(`The requested blob "${this.client.name}" does not exist`);
     }
 
-    return await this.client.downloadToFile(destinationFilePath, 0, undefined, {
-      onProgress: (event) => console.log(event),
-    });
+    if (decompressData && this.compression) {
+      const compression = this.compression;
+
+      return this.client
+        .downloadToBuffer()
+        .then((dataBuffer) => decompressString(dataBuffer, compression))
+        .then((decompressed) =>
+          writeFile(destinationFilePath, decompressed, 'utf-8')
+        )
+        .catch((err) => {
+          console.error(
+            chalk.red('Error downloading and/or decompressing file:')
+          );
+          console.error(err.stack);
+        });
+    }
+
+    try {
+      return await this.client.downloadToFile(
+        destinationFilePath,
+        0,
+        undefined,
+        {
+          onProgress: (event) => console.log(event),
+        }
+      );
+    } catch (err) {
+      console.error(chalk.red('Error uploading string to storage:'));
+      console.error(err.stack);
+    }
   }
 
   async uploadFromFile(filepathToUpload: string) {
@@ -279,6 +340,63 @@ export class BlobClient {
     }
 
     console.log('Files are the same. No changes made.');
+  }
+
+  async uploadFromString(string: string, compression = this.compression) {
+    if (!(this.client instanceof BlockBlobClient)) {
+      throw Error('uploadFromString() can only be called on BlockBlobClients');
+    }
+
+    const blobExists = await this.client.exists();
+
+    if (blobExists && !this.overwrite) {
+      throw Error(
+        `Error uploading blob: "${this.name}" already exists and overwrite = false`
+      );
+    }
+
+    const stringBuffer = compression
+      ? await compressString(string, compression)
+      : Buffer.from(string);
+
+    const fileBytesSize = stringBuffer.byteLength;
+    const progressLogger = makeFileUploadProgressLogger(fileBytesSize);
+
+    if (await this.sizesAreDifferent(fileBytesSize)) {
+      try {
+        return await this.client.uploadData(stringBuffer, {
+          onProgress: progressLogger,
+        });
+      } catch (err) {
+        console.error(chalk.red('Error uploading string to storage:'));
+        console.error(err.stack);
+      }
+    }
+
+    console.log('Files are the same. No changes made.');
+  }
+
+  async downloadToString(decompressData = false) {
+    if (!(await this.client.exists())) {
+      throw Error(`The requested blob "${this.client.name}" does not exist`);
+    }
+
+    try {
+      const blobSizeBytes = await this.getSize();
+
+      const destinationBuffer = Buffer.allocUnsafe(blobSizeBytes);
+
+      await this.client.downloadToBuffer(destinationBuffer, 0, undefined, {
+        onProgress: (event) => console.log(event),
+      });
+
+      return decompressData && this.compression
+        ? await decompressString(destinationBuffer, this.compression)
+        : destinationBuffer.toString('utf-8');
+    } catch (err) {
+      console.error(chalk.red('Error downloading file to string:'));
+      console.error(err.stack);
+    }
   }
 
   async appendLines(lines: string[]) {
