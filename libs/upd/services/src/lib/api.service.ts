@@ -48,4 +48,8 @@ export class ApiService {
   getProjectsDetailsData(params: ApiParams) {
     return this.get<ProjectsDetailsData>('/api/projects/details', params);
   }
+
+  getInternalSearchData(params: ApiParams) {
+    return this.get('/api/internal-search/terms', params);
+  }
 }
