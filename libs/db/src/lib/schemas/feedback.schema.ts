@@ -56,14 +56,16 @@ FeedbackSchema.statics['getCommentsByTag'] = async function (
       url: { $in: urls },
       date: { $gte: startDate, $lte: endDate },
     })
-    .unwind('$tags')
+    .unwind({ path: '$tags', preserveNullAndEmptyArrays: true })
     .group({
       _id: '$tags',
       numComments: { $sum: 1 },
     })
     .project({
       _id: 0,
-      tag: '$_id',
+      tag: {
+        $ifNull: [ '$_id', 'n/a' ]
+      },
       numComments: 1,
     })
     .exec();

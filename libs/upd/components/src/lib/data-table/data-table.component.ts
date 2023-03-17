@@ -9,6 +9,7 @@ import {
 import { Table } from 'primeng/table';
 import { equals } from 'rambdax';
 import { ColumnConfig } from '../data-table-styles/types';
+import { SelectedNode } from '../filter-table/filter-table.component';
 
 @Component({
   selector: 'upd-data-table',
@@ -33,6 +34,8 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
   @Input() exports = true;
   @Input() id?: string;
   @Input() placeholderText = 'dt_search_keyword';
+  @Input() selectedNodes: SelectedNode[] = [];
+  @Input() node: SelectedNode | null = null;
   exportCols: ColumnConfig[] = [];
 
   ngOnInit() {
@@ -68,5 +71,13 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
       /^.+?(?=www\.)/i,
       ''
     );
+  }
+
+  updateSelectedNodes(nodes: SelectedNode[]) {
+    this.selectedNodes = nodes;
+  }
+
+  removeNode(node: SelectedNode) {
+    this.node = node;
   }
 }

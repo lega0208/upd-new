@@ -6,6 +6,7 @@ import { TasksModule } from '../tasks/tasks.module';
 import { ProjectsModule } from '../projects/projects.module';
 import { environment } from '../environments/environment';
 import { DbModule } from '@dua-upd/db';
+import { InternalSearchModule } from '../internal-search/internal-search.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DbModule } from '@dua-upd/db';
     OverallModule,
     TasksModule,
     ProjectsModule,
+    InternalSearchModule
   ],
   providers: [],
 })

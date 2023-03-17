@@ -1,9 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  EventEmitter,
   Input,
   OnInit,
+  Output,
   ViewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
@@ -15,7 +18,7 @@ import { FilterTableStore } from './filter-table.store';
 import { FilterService } from 'primeng/api';
 import { ColumnConfig } from '../data-table-styles/types';
 
-interface SelectedNode {
+export interface SelectedNode {
   header: string;
   label: string;
   value: string;
@@ -31,6 +34,7 @@ interface SelectedItem {
   styleUrls: ['./filter-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [FilterTableStore],
+  encapsulation: ViewEncapsulation.None,
 })
 export class FilterTableComponent<T extends { [s: string]: unknown }>
   implements OnInit
@@ -52,8 +56,17 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
     return this._data;
   }
 
+
+  @Input() set removedNode(node: SelectedNode | null) {
+    if (node) {
+      this.deleteFilter(node);
+    }
+  }
+
   selectedItems: SelectedItem[] = [];
   selectedNodes: SelectedNode[] = [];
+
+  @Output() changedSelectedNodes = new EventEmitter<SelectedNode[]>();
 
   @Input() table!: Table;
   @ViewChild('treeSelect') treeSelect!: TreeSelect;
@@ -75,12 +88,12 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
 
     if (this.selectedNodes.length > 0) {
       for (const node of this.selectedNodes) {
-        const [data, child] = node.header.split(':');
+        const [data, child] = node.header.split('|');
         node.label = this.i18n.service.translate(child, lang);
         node.value = this.i18n.service.translate(data, lang);
 
         headers.add(node.header);
-        headers.add(`${data}:${data}`);
+        headers.add(`${data}|${data}`);
       }
 
       this.selectedItems = Array.from(headers).map((header) => {
@@ -105,7 +118,7 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
     const parentValue = parent?.label as string;
 
     const selectedNode = node.children?.map((child) => ({
-      header: `${data?.split(':')[0]}:${child?.data?.split(':')[1]}`,
+      header: `${data?.split('|')[0]}|${child?.data?.split('|')[1]}`,
       label: child.label as string,
       value: label as string,
     })) ?? [
@@ -119,7 +132,7 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
     for (const node of selectedNode) {
       const nodeExists = this.selectedNodes.find(
         ({ header, label }) =>
-          header.includes(data?.split(':')?.[0]) && label === node.label
+          header.includes(data?.split('|')?.[0]) && label === node.label
       );
 
       if ((selected && !nodeExists) || (!selected && nodeExists)) {
@@ -128,6 +141,8 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
           : this.deleteSelectedNode(node);
       }
     }
+
+    this.changedSelectedNodes.emit(this.selectedNodes);
 
     this.tableFilter(data);
   }
@@ -155,12 +170,14 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
     this.selectedNodes = [];
     this.table.filters = {};
     this.table?.clear();
+    this.changedSelectedNodes.emit(this.selectedNodes);
   }
 
   deleteFilter(node: SelectedNode) {
     this.selectedNodes = this.selectedNodes.filter(
       (n) => n.header !== node.header || n.label !== node.label
     );
+    this.changedSelectedNodes.emit(this.selectedNodes);
     this.tableFilter(node.header);
     this.treeSelect.value = this.treeSelect.value.filter(
       (n: { key: string; label: string }) => n.key !== node.header
@@ -168,10 +185,10 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
   }
 
   private tableFilter(header: string) {
-    const [column] = header.split(':');
+    const [column] = header.split('|');
     const filteredData = this.selectedNodes
       .filter((node) => node.header.includes(column))
-      .map((node) => node.header.split(':')[1]);
+      .map((node) => node.header.split('|')[1]);
 
     const filterType = this.filterMode(this.data, column);
 

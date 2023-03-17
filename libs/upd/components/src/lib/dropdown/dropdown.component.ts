@@ -14,7 +14,7 @@ export interface DropdownOption<T> {
     <div ngbDropdown [class]="'d-' + display">
       <button
         [id]="id"
-        class="btn bg-{{ bg }} border border-1 dropdown-toggle {{
+        class="btn bg-{{ bg }} border border-1 dropdown-toggle dropdown-height {{
           styleClasses
         }}"
         ngbDropdownToggle
@@ -44,7 +44,13 @@ export interface DropdownOption<T> {
       </div>
     </div>
   `,
-  styles: [],
+  styles: [
+    `
+      .dropdown-height {
+        height: 42px;
+      }
+    `,
+  ]
 })
 export class DropdownComponent<T> {
   @Input() @Required id!: string;

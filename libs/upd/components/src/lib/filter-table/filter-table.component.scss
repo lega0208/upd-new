@@ -1,23 +1,13 @@
-.bg-white {
-  background-color: white !important;
-}
-.badge-blue {
-  background-color: #2e5ea7;
-  color: #fff;
-  border-radius: 25px;
-  padding: 4px 6px;
-  margin: 8px 3px 3px;
-  font-size: 14px;
-  display: inline-block;
-}
-.badge-blue:first-child {
-  margin-left: 0px;
-}
-.black {
+.blackText {
+  font-size: 16px !important;
   padding: 5px;
   color: #333;
   cursor: pointer;
 }
-.black:hover {
+.blackText:hover {
   color: #000;
+}
+
+.p-treenode-content.p-treenode-selectable:has(.p-checkbox .pi-minus) {
+  background-color: #E3F2FD !important;
 }

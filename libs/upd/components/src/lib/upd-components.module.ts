@@ -48,6 +48,7 @@ import { ApexBarComponent } from './apex-bar/apex-bar.component';
 import { ApexDonutComponent } from './apex-donut/apex-donut.component';
 import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.component';
 import { FilterTableComponent } from './filter-table/filter-table.component';
+import { FilterTableSelectionComponent } from './filter-table-selection/filter-table-selection.component';
 
 @NgModule({
   imports: [
@@ -100,6 +101,7 @@ import { FilterTableComponent } from './filter-table/filter-table.component';
     ApexDonutComponent,
     ApexSparkLineComponent,
     FilterTableComponent,
+    FilterTableSelectionComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -130,6 +132,7 @@ import { FilterTableComponent } from './filter-table/filter-table.component';
     ApexDonutComponent,
     ApexSparkLineComponent,
     FilterTableComponent,
+    FilterTableSelectionComponent,
   ],
 })
 export class UpdComponentsModule {}

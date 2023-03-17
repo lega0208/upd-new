@@ -25,10 +25,9 @@ export class TasksHomeFacade {
         ...row,
         task: row.title ? row.title.replace(/\s+/g, ' ') : '',
         group: row.group || '',
-        subgroup: row.subgroup || '',
+        tasks_subgroup: row.subgroup || '',
         topic: row.topic || '',
-        subtopic: row.subtopic || '',
-        sub_subtopic: row.sub_subtopic || '',
+        tasks_subtopic: row.subtopic || '',
         program: row.program || '',
         user_type:
           row.user_type.length > 0
@@ -47,8 +46,8 @@ export class TasksHomeFacade {
           hideTable: true,
         },
         {
-          field: 'subgroup',
-          header: this.i18n.service.translate('subgroup', lang),
+          field: 'tasks_subgroup',
+          header: this.i18n.service.translate('tasks_subgroup', lang),
           hideTable: true,
         },
         {
@@ -99,15 +98,9 @@ export class TasksHomeFacade {
           translate: true,
         },
         {
-          field: 'subtopic',
-          header: this.i18n.service.translate('sub-topic', lang),
+          field: 'tasks_subtopic',
+          header: this.i18n.service.translate('tasks_subtopic', lang),
           translate: true,
-        },
-
-        {
-          field: 'sub_subtopic',
-          header: this.i18n.service.translate('sub-subtopic', lang),
-          hideTable: true,
         },
         {
           field: 'visits',
