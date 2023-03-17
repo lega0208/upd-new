@@ -21,6 +21,7 @@
       "@dua-upd/db": ["libs/db/src/index.ts"],
       "@dua-upd/db-update": ["libs/db-update/src/index.ts"],
       "@dua-upd/external-data": ["libs/external-data/src/index.ts"],
+      "@dua-upd/node-utils": ["libs/node-utils/src/index.ts"],
       "@dua-upd/types-common": ["libs/types-common/src/index.ts"],
       "@dua-upd/upd-components": ["libs/upd/components/src/index.ts"],
       "@dua-upd/upd/i18n": ["libs/upd/i18n/src/index.ts"],

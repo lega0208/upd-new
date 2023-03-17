@@ -1,7 +1,6 @@
 import type { TransferProgressEvent } from '@azure/core-http';
 import { throttle } from 'rambdax';
-
-export const bytesToMbs = (bytes: number) => Math.round(bytes / 10) / 100000;
+import { bytesToMbs } from '@dua-upd/node-utils';
 
 export const makeFileUploadProgressLogger = (fileSizeBytes: number) => {
   const fileMbs = bytesToMbs(fileSizeBytes);
