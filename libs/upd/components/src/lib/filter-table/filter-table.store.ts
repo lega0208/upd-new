@@ -36,21 +36,21 @@ export class FilterTableStore<T extends { [key: string]: unknown; }> extends Com
 
     for (const [key, value] of map.entries()) {
       const column = cols.find((col) => col.field === key);
-      if (!column || column.pipe === 'number') {
+      if (!column || column.pipe === 'number' || column.field === 'task') {
         continue;
       }
       const header = column?.header || key;
       nodes.push({
         label: header,
-        data: `${key}:${header}`,
-        key: `${key}:${header}`,
+        data: `${key}|${header}`,
+        key: `${key}|${header}`,
         children: Array.from(value as Set<string>)
           .filter((v) => v !== '')
           .map((v) => {
             return {
               label: v,
-              data: `${key}:${v}`,
-              key: `${key}:${v}`,
+              data: `${key}|${v}`,
+              key: `${key}|${v}`,
             };
           }),
       });
@@ -60,13 +60,14 @@ export class FilterTableStore<T extends { [key: string]: unknown; }> extends Com
   });
 
   readonly setLabels = this.updater((state, lang: LocaleId): TreeNode[] => {
+    
     const nodes = state.map((node) => {
-      const [key, label] = node.data.split(':');
+      const [key, label] = node.data.split('|');
       return {
         ...node,
         label: this.i18n.service.translate(label, lang),
         children: (node.children as TreeNode[]).map((child) => {
-          const [key, label] = child.data.split(':');
+          const [key, label] = child.data.split('|');
           return {
             ...child,
             label: this.i18n.service.translate(label, lang),
@@ -76,6 +77,7 @@ export class FilterTableStore<T extends { [key: string]: unknown; }> extends Com
     });
 
     return sortNodes(nodes);
+
   });
 
   readonly vm$ = this.select(this.state$, (state) => state);

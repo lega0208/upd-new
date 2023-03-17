@@ -13,23 +13,6 @@ td.validation-kpi-not-met + td.bg-green {
 .exportButtons {
   margin: 0px 5px 5px 0px;
 }
-.badge-blue {
-  background-color: #2E5EA7;
-  color: #FFF;
-  border-radius: 25px;
-  padding:  4px 6px;
-  margin: 8px 3px 3px;
-  font-size: 14px;
-  display: inline-block;
-}
-.badge-blue:first-child {
-  margin-left: 0px;
-}
-.black {
-  padding: 5px;
-  color: #333;
-  cursor: pointer;
-}
-.black:hover {
-  color: #000;
-}
+.grouped{
+  display:flex;
+  }

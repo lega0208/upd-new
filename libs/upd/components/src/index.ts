@@ -25,3 +25,4 @@ export * from './lib/apex-bar-line/apex-bar-line.component';
 export * from './lib/apex-donut/apex-donut.component';
 export * from './lib/apex-radial-bar/kpi-objectives';
 export * from './lib/filter-table/filter-table.component';
+export * from './lib/filter-table-selection/filter-table-selection.component';

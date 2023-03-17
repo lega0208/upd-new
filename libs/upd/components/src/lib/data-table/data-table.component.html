@@ -27,7 +27,7 @@
         <ng-container *ngIf="captionTitle">
           {{ captionTitle | translate }}
         </ng-container>
-        <div *ngIf="!filterTree" ngClass="searh-url-field">
+        <div ngClass="searh-url-field">
           <span *ngIf="filter" class="p-input-icon-left p-ml-auto">
             <i class="pi pi-search"></i>
             <input
@@ -38,11 +38,14 @@
             />
           </span>
         </div>
+        <div class="grouped">
         <upd-filter-table
           *ngIf="filterTree"
           [cols]="cols"
           [data]="data || []"
           [table]="table"
+          (changedSelectedNodes)="updateSelectedNodes($event)"
+          [removedNode]="node"
         ></upd-filter-table>
 
         <upd-data-table-exports
@@ -52,6 +55,13 @@
           [data]="data || []"
         ></upd-data-table-exports>
       </div>
+      </div>
+
+      <upd-filter-table-selection
+        *ngIf="filterTree"
+        [selectedNodes]="selectedNodes"
+        (nodeRemoved)="removeNode($event)"
+      ></upd-filter-table-selection>
 
       <!-- <upd-filter-table
         *ngIf="filter"
