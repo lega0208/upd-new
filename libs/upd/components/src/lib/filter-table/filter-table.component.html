@@ -5,33 +5,45 @@
     }}</a>
   </ng-container>
   <p-treeSelect
-  #treeSelect
-  [filter]="true"
-  [(ngModel)]="selectedItems"
-  selectionMode="checkbox"
-  [options]="vm"
-  placeholder="Filter"
-  (onNodeSelect)="onNodeSelect($event)"
-  (onNodeUnselect)="onNodeUnselect($event)"
-  [ngClass]="{ 'custom-treeselect': true }"
-  [panelStyle]="{ 'position': 'absolute', 'right': 0, 'left': 'auto', 'width': '30vw' }"
->
-  <ng-template pTemplate="value">
-    <div
-      class="d-flex justify-content-between align-items-bottom content-end"
-      #rightPanel
-      style="display: flex; justify-content: flex-end; align-items: center;"
-    >
-      <span
-        ><span class="pi pi-filter"></span> {{ 'Filter' | translate }}</span
-      >&NonBreakingSpace;
-      <span
-        class="badge h-100 align-self-center text-center"
-        style="padding: 0.25em 0.32em"
-        [ngClass]="nodeSelectionCount === 0 ? 'bg-unknown' : 'bg-primary'"
-        >{{ nodeSelectionCount }}</span
+    #treeSelect
+    [filter]="true"
+    [(ngModel)]="selectedItems"
+    selectionMode="checkbox"
+    [options]="vm"
+    placeholder="Filter"
+    (onNodeSelect)="onNodeSelect($event)"
+    (onNodeUnselect)="onNodeUnselect($event)"
+    [ngClass]="{ 'custom-treeselect': true }"
+    [panelStyle]="{
+      position: 'absolute',
+      right: 0,
+      left: 'auto',
+      width: '30vw'
+    }"
+  >
+    <ng-template pTemplate="value">
+      <div
+        class="d-flex justify-content-between align-items-bottom content-end"
+        #rightPanel
+        style="
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          color: rgb(33, 37, 41);
+        "
       >
-    </div>
-  </ng-template>
-</p-treeSelect>
+        <span
+          ><span class="pi pi-filter"></span>
+          {{ 'Filter' | translate }}
+        </span
+        >&NonBreakingSpace;
+        <span
+          class="badge h-100 align-self-center text-center"
+          style="padding: 0.25em 0.32em"
+          [ngClass]="nodeSelectionCount === 0 ? 'bg-unknown' : 'bg-primary'"
+          >{{ nodeSelectionCount }}</span
+        >
+      </div>
+    </ng-template>
+  </p-treeSelect>
 </div>

@@ -517,3 +517,11 @@ margin: 0px 20px 0px 20px;
   border-radius: 5px;
   padding: 6px 10px;
 }
+
+.p-dropdown-trigger > .pi.pi-chevron-down {
+  color: rgb(33, 37, 41);
+}
+
+.p-treeselect-trigger > .p-treeselect-trigger-icon.pi.pi-chevron-down {
+  color: rgb(33, 37, 41);
+}
