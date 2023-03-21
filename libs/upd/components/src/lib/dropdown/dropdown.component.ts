@@ -11,43 +11,44 @@ export interface DropdownOption<T> {
 @Component({
   selector: 'upd-dropdown',
   template: `
-    <div ngbDropdown [class]="'d-' + display">
-      <button
-        [id]="id"
-        class="btn bg-{{ bg }} border border-1 dropdown-toggle dropdown-height {{
-          styleClasses
-        }}"
-        ngbDropdownToggle
-      >
-        <span
-          *ngIf="icon"
-          class="material-icons align-top pe-1"
-          aria-hidden="true"
+    <p-dropdown [options]="options" optionLabel="label" optionValue="value">
+        <ng-template pTemplate="selectedItem">
+          <div style="color: rgb(33, 37, 41);">
+          <span
+            *ngIf="icon"
+            class="material-icons align-top pe-1 "
+            aria-hidden="true"
           >{{ icon }}</span
-        >
-        <span>{{ label || '' | translate }}</span>
-      </button>
-      <div ngbDropdownMenu [attr.aria-labelledby]="id" class="w-1">
-        <button
-          *ngFor="let option of options"
+          >
+            <span class="dropdown-label">{{ label || '' | translate }}</span>
+          </div>
+        </ng-template>
+
+      <ng-template pTemplate="item" let-option>
+        <div
           (click)="onSelect(option.value)"
-          ngbDropdownItem
           [class]="option.styleClasses || ''"
         >
           <span
             *ngIf="option.icon"
             class="pe-1 pi pi-{{ option.icon }} me-2"
             aria-hidden="true"
-            ></span
+          ></span
           >{{ option.label | translate }}
-        </button>
-      </div>
-    </div>
+        </div>
+      </ng-template>
+    </p-dropdown>
+
+
   `,
   styles: [
     `
       .dropdown-height {
         height: 42px;
+      }
+      .dropdown-label {
+        font-family: 'Noto Sans', sans-serif;
+        font-size: 1rem;
       }
     `,
   ]
