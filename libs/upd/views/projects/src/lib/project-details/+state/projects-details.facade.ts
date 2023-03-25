@@ -270,9 +270,9 @@ export class ProjectsDetailsFacade {
         );
 
         return {
-          topic: `${callsByTopic.tpc_id}.topic`,
-          subtopic: `${callsByTopic.tpc_id}.sub-topic`,
-          sub_subtopic: `${callsByTopic.tpc_id}.sub-subtopic`,
+          topic: callsByTopic.topic || '',
+          subtopic: callsByTopic.subtopic || '',
+          sub_subtopic: callsByTopic.sub_subtopic || '',
           calls: callsByTopic.calls,
           comparison: !previousCalls?.calls
             ? Infinity
