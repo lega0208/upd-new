@@ -32,7 +32,6 @@ export class OverviewCalldriversComponent implements OnInit {
     currValue: number;
     prevValue: number;
   }>[] = [];
-  chartsCols: ColumnConfig[] = [];
 
   top5CalldriverTopics$ = this.overviewService.top5CalldriverTopics$;
   top5CalldriverTopicsConfig$ =
@@ -69,25 +68,6 @@ export class OverviewCalldriversComponent implements OnInit {
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
     ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
-      this.chartsCols = [
-        { field: 'Topic', header: this.i18n.service.translate('topic', lang) },
-        {
-          field: this.i18n.service.translate('Number of calls for', lang, {
-            value: ' Feb 27-Mar 05',
-          }),
-          header: this.i18n.service.translate('Number of calls for', lang, {
-            value: ' Feb 27-Mar 05',
-          }),
-        },
-        {
-          field: this.i18n.service.translate('Number of calls for', lang, {
-            value: ' Mar 06-Mar 12',
-          }),
-          header: this.i18n.service.translate('Number of calls for', lang, {
-            value: ' Mar 06-Mar 12',
-          }),
-        },
-      ];
       this.calldriversCols = [
         {
           field: 'name',

@@ -1,6 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, debounceTime, map, mergeMap, of, pluck, tap } from 'rxjs';
+import {
+  combineLatest,
+  debounceTime,
+  map,
+  mergeMap,
+  of,
+  pluck,
+  tap,
+} from 'rxjs';
 
 import dayjs, { QUnitType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -26,9 +34,10 @@ import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
 import {
   selectCallsPerVisitsChartData,
   selectComboChartData,
-  selectComboChartTable, selectDyfNoPerVisitsSeries,
+  selectComboChartTable,
+  selectDyfNoPerVisitsSeries,
   selectVisitsByDayChartData,
-  selectVisitsByDayChartTable
+  selectVisitsByDayChartTable,
 } from './overview.selectors';
 
 dayjs.extend(utc);
@@ -693,9 +702,9 @@ export class OverviewFacade {
   top5CalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
       data.top5CalldriverTopics.map((topicData) => ({
-        topic: `${topicData.tpc_id}.topic`,
-        subtopic: `${topicData.tpc_id}.sub-topic`,
-        sub_subtopic: `${topicData.tpc_id}.sub-subtopic`,
+        topic: topicData.topic || '',
+        subtopic: topicData.subtopic || '',
+        sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
         change: topicData.change === 'Infinity' ? Infinity : topicData.change,
       }))
@@ -713,9 +722,9 @@ export class OverviewFacade {
   top5IncreasedCalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
       data.top5IncreasedCalldriverTopics.map((topicData) => ({
-        topic: `${topicData.tpc_id}.topic`,
-        subtopic: `${topicData.tpc_id}.sub-topic`,
-        sub_subtopic: `${topicData.tpc_id}.sub-subtopic`,
+        topic: topicData.topic || '',
+        subtopic: topicData.subtopic || '',
+        sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
         change: topicData.change === 'Infinity' ? Infinity : topicData.change,
       }))
@@ -736,9 +745,9 @@ export class OverviewFacade {
   top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
       data.top5DecreasedCalldriverTopics.map((topicData) => ({
-        topic: `${topicData.tpc_id}.topic`,
-        subtopic: `${topicData.tpc_id}.sub-topic`,
-        sub_subtopic: `${topicData.tpc_id}.sub-subtopic`,
+        topic: topicData.topic || '',
+        subtopic: topicData.subtopic || '',
+        sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
         change: topicData.change === 'Infinity' ? Infinity : topicData.change,
       }))
@@ -768,7 +777,11 @@ export class OverviewFacade {
   >(this.i18n.service, [
     { field: 'term', header: 'search-term' },
     { field: 'total_searches', header: 'Total searches', pipe: 'number' },
-    { field: 'searchesChange', header: 'comparison-for-searches', pipe: 'percent' },
+    {
+      field: 'searchesChange',
+      header: 'comparison-for-searches',
+      pipe: 'percent',
+    },
     { field: 'clicks', header: 'clicks', pipe: 'number' },
     { field: 'ctr', header: 'ctr', pipe: 'percent' },
     {

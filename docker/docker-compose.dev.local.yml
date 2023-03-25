@@ -48,7 +48,7 @@ services:
     depends_on:
       - mongodb
   mongodb:
-    image: mongo:4.4
+    image: mongo:6
     container_name: upd_mongo
     restart: unless-stopped
     ports:

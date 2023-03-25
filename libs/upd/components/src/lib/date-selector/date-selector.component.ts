@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { combineLatest, map } from 'rxjs';
 import {
   DateSelectionFacade,
-  DateRangePeriod, selectPeriodSelectionLabel
 } from '@dua-upd/upd/state';
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';

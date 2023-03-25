@@ -1,7 +1,7 @@
 import { DbService } from '@dua-upd/db';
-import { DbUpdateService } from '@dua-upd/db-update';
-import { Types } from 'mongoose';
-import { logJson } from '@dua-upd/utils-common';
+import { logJson, prettyJson } from '@dua-upd/utils-common';
+import { readFile, writeFile } from 'fs/promises';
+import { difference, zip } from 'rambdax';
 
 /*
  *  Export any function and it'll show up with the "run-script" command.
@@ -10,83 +10,87 @@ import { logJson } from '@dua-upd/utils-common';
  *  Which, as of writing this comment, is the following:
  *
  *  const scriptDependencies: Parameters<DbScript> = [this.db, this.dbUpdateService]; (DbService and DbUpdateService)
-*/
+ */
 
 export const findDuplicatePageUrls = async (db: DbService) => {
   await db.getDuplicatedPages();
 };
 
-export const fixPagesFromAirtable = async (db: DbService, dbUpdate: DbUpdateService) => {
-  console.time('fixPagesFromAirtable');
-  // delete pages that need to be repopulated
-  const objectIdsToDelete = [
-    new Types.ObjectId('63867f9f2b89cb3c58edb002'),
-    new Types.ObjectId('63867f9f2b89cb3c58edafe2'),
-    new Types.ObjectId('63867f9f2b89cb3c58edafe9'),
-    new Types.ObjectId('63867f9f2b89cb3c58edaff6'),
-  ]
-  await db.collections.pages.deleteMany({ _id: { $in: objectIdsToDelete } });
+export const reformatI18n = async (db: DbService) => {
+  const en = JSON.parse(
+    await readFile(
+      'libs/upd/i18n/src/lib/translations/calldrivers_en-CA.json',
+      'utf-8'
+    )
+  );
 
-  // update airtable data
-  await dbUpdate.updateUxData();
+  const fr = JSON.parse(
+    await readFile(
+      'libs/upd/i18n/src/lib/translations/calldrivers_fr-CA.json',
+      'utf-8'
+    )
+  );
 
-  // consolidate duplicate pages
-  await dbUpdate.consolidateDuplicatePages();
+  const enKeys = Object.keys(en);
+  const frKeys = Object.keys(fr);
 
-  // run validatePageRefs with filter for old ids
-  await db.validatePageMetricsRefs({ page: { $in: objectIdsToDelete } });
+  const inEnNotFr = difference(enKeys, frKeys);
+  const inFrNotEn = difference(frKeys, enKeys);
 
-  // clear pageVisits view and repopulate
-  await db.views.pageVisits.clearAll()
-
-  const dateRangesToRepopulate = [
-    // yearly
-    {
-      start: new Date('2021-01-01'),
-      end: new Date('2021-12-31'),
-    },
-    {
-      start: new Date('2020-01-03'),
-      end: new Date('2021-01-01'),
-    },
-    // quarterly
-    {
-      start: new Date('2022-07-01'),
-      end: new Date('2022-09-30'),
-    },
-    {
-      start: new Date('2022-04-01'),
-      end: new Date('2022-07-01'),
-    },
-    // monthly
-    {
-      start: new Date('2022-11-01'),
-      end: new Date('2022-11-30'),
-    },
-    {
-      start: new Date('2022-09-27'),
-      end: new Date('2022-10-26'),
-    },
-    // weekly
-    {
-      start: new Date('2022-12-18'),
-      end: new Date('2022-12-24'),
-    },
-    {
-      start: new Date('2022-12-11'),
-      end: new Date('2022-12-17'),
-    },
-    {
-      start: new Date('2022-12-04'),
-      end: new Date('2022-12-10'),
-    },
-  ];
-
-  for (const dateRange of dateRangesToRepopulate) {
-    console.log('Repopulating date range:');
-    logJson(dateRange);
-    await db.views.pageVisits.getOrUpdate(dateRange);
+  if (inEnNotFr.length || inFrNotEn.length) {
+    throw Error(
+      `en/fr files have mismatched keys:
+      in en, not fr: ${prettyJson(inEnNotFr)}
+      in fr, not en: ${prettyJson(inFrNotEn)}`
+    );
   }
 
-  console.timeEnd('fixPagesFromAirtable');
-}
+  const translationMap = {
+    enquiry_line: new Map<string, string>(),
+    topic: new Map<string, string>(),
+    subtopic: new Map<string, string>(),
+    sub_subtopic: new Map<string, string>(),
+  };
+
+  for (const key of enKeys) {
+    const enTranslations = en[key];
+    const frTranslations = fr[key];
+
+    translationMap.enquiry_line.set(
+      enTranslations['inquiry line'],
+      frTranslations['inquiry line']
+    );
+
+    translationMap.topic.set(enTranslations['topic'], frTranslations['topic']);
+
+    translationMap.subtopic.set(
+      enTranslations['sub-topic'],
+      frTranslations['sub-topic']
+    );
+
+    translationMap.sub_subtopic.set(
+      enTranslations['sub-subtopic'],
+      frTranslations['sub-subtopic']
+    );
+  }
+
+  const enOut = Object.fromEntries(
+    Object.values(translationMap)
+      .map((v) => [...v.entries()].map(([k]) => [k, k]))
+      .flat()
+  );
+  const frOut = Object.fromEntries(
+    Object.values(translationMap)
+      .map((translation) => [...translation])
+      .flat()
+  );
+
+  await writeFile(
+    'libs/upd/i18n/src/lib/translations/calldrivers_en-CA2.json',
+    prettyJson(enOut)
+  );
+  await writeFile(
+    'libs/upd/i18n/src/lib/translations/calldrivers_fr-CA2.json',
+    prettyJson(frOut)
+  );
+};
