@@ -75,6 +75,7 @@ export class DbModule {
     return MongooseModule.forRoot(connectionString, {
       connectionName: 'defaultConnection',
       dbName: 'upd-test',
+      compressors: ['zstd'],
     });
   }
 }
