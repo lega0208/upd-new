@@ -9,6 +9,7 @@
  */
 
 import {
+  AppendBlobClient,
   BlobBeginCopyFromURLResponse,
   BlobClient as AzureBlobClient,
   BlobItem,
@@ -19,13 +20,14 @@ import {
 import chalk from 'chalk';
 import { stat, writeFile } from 'fs/promises';
 import { makeFileUploadProgressLogger } from './storage.utils';
-import { prettyJson } from '@dua-upd/utils-common';
+import { logJson, prettyJson } from '@dua-upd/utils-common';
 import { Buffer } from 'buffer';
 import {
   CompressionAlgorithm,
   compressString,
   decompressString,
 } from '@dua-upd/node-utils';
+import { RegisteredBlobModel } from './storage.service';
 
 const connectionString = process.env['AZURE_STORAGE_CONNECTION_STRING'];
 
@@ -93,7 +95,7 @@ export class StorageClient {
  */
 export type BlobsConfig = {
   path: string;
-  container: ContainerClient;
+  container: StorageContainer;
   overwrite?: boolean;
   compression?: CompressionAlgorithm;
 };
@@ -113,17 +115,36 @@ export class StorageContainer {
   ) {}
 
   createBlobsClient(config: Omit<BlobsConfig, 'container'>): BlobModel {
-    return new BlobModel({ ...config, container: this.container });
+    return new BlobModel({ ...config, container: this });
   }
 
-  async listBlobs() {
-    const blobs: BlobItem[] = [];
+  getClient() {
+    return this.container;
+  }
 
-    for await (const blobPromise of this.container.listBlobsFlat()) {
-      blobs.push(blobPromise);
+  async listBlobs(prefix?: RegisteredBlobModel) {
+    for await (const blobInfo of this.container.listBlobsFlat(
+      prefix && { prefix }
+    )) {
+      logJson(blobInfo);
+    }
+  }
+
+  async mapBlobs<T>(
+    mapFunc: (item: BlobItem) => T,
+    prefix?: RegisteredBlobModel
+  ) {
+    const returnVals: T[] = [];
+
+    for await (const blobInfo of this.container.listBlobsFlat(
+      prefix && { prefix }
+    )) {
+      const mappedVal = await mapFunc(blobInfo);
+
+      returnVals.push(mappedVal);
     }
 
-    return blobs;
+    return returnVals;
   }
 }
 
@@ -136,12 +157,20 @@ export class StorageContainer {
  * using the provided config.
  */
 export class BlobModel {
+  private readonly container: StorageContainer;
+
   constructor(private readonly config: BlobsConfig) {
     if (!this.config.path) {
       throw Error(
         'Expected a non-empty path in BlobsConfig, but none was provided.'
       );
     }
+
+    this.container = this.config.container;
+  }
+
+  getContainer() {
+    return this.container;
   }
 
   blob(blobName: string, blobType?: BlobType) {
@@ -157,7 +186,7 @@ export class BlobModel {
  */
 export class BlobClient {
   private readonly path: string;
-  private readonly container: ContainerClient;
+  private readonly container: StorageContainer;
   private overwrite = false;
   readonly blobType: BlobType;
   private compression?: CompressionAlgorithm | void;
@@ -177,13 +206,13 @@ export class BlobClient {
     this.blobType = blobType;
 
     if (blobType === 'append') {
-      this.client = this.container.getAppendBlobClient(
-        `${config.path}/${blobName}`
-      );
+      this.client = this.container
+        .getClient()
+        .getAppendBlobClient(`${config.path}/${blobName}`);
     } else {
-      this.client = this.container.getBlockBlobClient(
-        `${config.path}/${blobName}`
-      );
+      this.client = this.container
+        .getClient()
+        .getBlockBlobClient(`${config.path}/${blobName}`);
     }
 
     this.name = this.client.name;
@@ -223,13 +252,13 @@ export class BlobClient {
       this.filename += `.${algorithm}`;
 
       if (this.blobType === 'append') {
-        this.client = this.container.getAppendBlobClient(
-          `${this.path}/${this.filename}`
-        );
+        this.client = this.container
+          .getClient()
+          .getAppendBlobClient(`${this.path}/${this.filename}`);
       } else {
-        this.client = this.container.getBlockBlobClient(
-          `${this.path}/${this.filename}`
-        );
+        this.client = this.container
+          .getClient()
+          .getBlockBlobClient(`${this.path}/${this.filename}`);
       }
 
       this.name = this.client.name;
@@ -399,7 +428,23 @@ export class BlobClient {
     }
   }
 
-  async appendLines(lines: string[]) {
-    // todo for AppendBlob
+  async append(text: string) {
+    if (!(this.client instanceof AppendBlobClient)) {
+      throw Error('append() can only be called on AppendBlobClients');
+    }
+
+    try {
+      await this.client.createIfNotExists({
+        blobHTTPHeaders: {
+          blobContentType: 'text/plain',
+          blobContentEncoding: 'UTF-8',
+        },
+      });
+
+      await this.client.appendBlock(text, Buffer.from(text).byteLength);
+    } catch (err) {
+      console.error(chalk.red('Error appending to blob: ', this.client.name));
+      console.error(err.stack);
+    }
   }
 }

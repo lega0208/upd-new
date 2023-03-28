@@ -13,6 +13,7 @@ import {
   Project,
   AAItemId,
   SearchAssessment,
+  PageMetricsTS,
 } from '../';
 import { AsyncLogTiming, logJson, prettyJson } from '@dua-upd/utils-common';
 import { AnyBulkWriteOperation } from 'mongodb';
@@ -34,6 +35,7 @@ export class DbService {
     feedback: this.feedback,
     overall: this.overall,
     pageMetrics: this.pageMetrics,
+    pageMetricsTS: this.pageMetricsTS,
     pages: this.pages,
     pagesList: this.pagesList,
     tasks: this.tasks,
@@ -41,14 +43,14 @@ export class DbService {
     projects: this.projects,
     aaItemIds: this.aaItemIds,
     searchAssessment: this.searchAssessment,
-  };
+  } as const;
 
   readonly views = {
     pageVisits: new PageVisitsView(
       this.pageVisits,
       this.collections.pageMetrics
     ),
-  };
+  } as const;
 
   constructor(
     @InjectModel(CallDriver.name, 'defaultConnection')
@@ -59,6 +61,8 @@ export class DbService {
     private overall: Model<Overall>,
     @InjectModel(PageMetrics.name, 'defaultConnection')
     private pageMetrics: Model<PageMetrics>,
+    @InjectModel(PageMetricsTS.name, 'defaultConnection')
+    private pageMetricsTS: Model<PageMetricsTS>,
     @InjectModel(Page.name, 'defaultConnection')
     private pages: Model<Page>,
     @InjectModel(PagesList.name, 'defaultConnection')
@@ -386,7 +390,7 @@ export class DbService {
       metricsMissingRefs = null;
     }
 
-    console.log('Finished adding missing refs to pages_metrics.')
+    console.log('Finished adding missing refs to pages_metrics.');
   }
 
   @AsyncLogTiming

@@ -14,6 +14,8 @@ import {
   Page,
   PageMetrics,
   PageMetricsSchema,
+  PageMetricsTS,
+  PageMetricsTSSchema,
   PageSchema,
   PagesList,
   PagesListSchema,
@@ -36,6 +38,7 @@ export const models = {
   feedback: { model: Feedback, schema: FeedbackSchema },
   overall: { model: Overall, schema: OverallSchema },
   pageMetrics: { model: PageMetrics, schema: PageMetricsSchema },
+  pageMetricsTS: { model: PageMetricsTS, schema: PageMetricsTSSchema },
   pages: { model: Page, schema: PageSchema },
   pagesList: { model: PagesList, schema: PagesListSchema },
   tasks: { model: Task, schema: TaskSchema },
@@ -75,6 +78,8 @@ export class DbModule {
     return MongooseModule.forRoot(connectionString, {
       connectionName: 'defaultConnection',
       dbName: 'upd-test',
+      compressors: ['zstd'],
+      retryWrites: false,
     });
   }
 }

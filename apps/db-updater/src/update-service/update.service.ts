@@ -27,14 +27,14 @@ export class UpdateService {
     try {
       this.isRunning = true;
 
-      await this.dbUpdateService.updateAll();
+      await this.dbUpdateService.updateAll(true);
 
       await this.dataIntegrityService.fillMissingData();
       await this.dataIntegrityService.cleanPageUrls();
 
-      await this.dbUpdateService.recalculateViews();
+      await this.dbUpdateService.recalculateViews(true);
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error(error.stack);
     } finally {
       this.isRunning = false;
     }
@@ -47,7 +47,7 @@ export class UpdateService {
     try {
       await this.db.addMissingAirtableRefsToPageMetrics()
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error(error.stack);
     }
   }
 

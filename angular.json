@@ -9,6 +9,7 @@
     "db-update": "libs/db-update",
     "db-updater": "apps/db-updater",
     "external-data": "libs/external-data",
+    "logger": "libs/logger",
     "node-utils": "libs/node-utils",
     "types-common": "libs/types-common",
     "upd": "apps/upd",

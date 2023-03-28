@@ -7,11 +7,24 @@ export interface BlobDefinition {
   overwrite?: boolean;
 }
 
+/*
+ * Use this variable as the primary Blob Model "registry".
+ * Once you add the model name here, you can let the type errors guide you.
+ */
+export const blobModels = [
+  'project_attachments',
+  'db_updates',
+  'aa_raw',
+] as const;
+
+export type BlobModels = typeof blobModels;
+export type RegisteredBlobModel = BlobModels[number];
+
 @Injectable()
 export class BlobStorageService {
   private storageClient = new StorageClient();
 
-  readonly blobDefinitions: Record<Readonly<string>, BlobDefinition> = {
+  private readonly blobDefinitions: Record<RegisteredBlobModel, BlobDefinition> = {
     project_attachments: {
       path: 'project_attachments',
       containerName: 'documents',
@@ -23,20 +36,17 @@ export class BlobStorageService {
     },
     aa_raw: {
       path: 'aa_raw',
-      containerName: 'raw-data'
-    }
+      containerName: 'raw-data',
+    },
   } as const;
 
-  readonly blobModels: Record<
-    keyof BlobStorageService['blobDefinitions'],
-    BlobModel
-  > = {
+  readonly blobModels: Record<RegisteredBlobModel, BlobModel> = {
     db_updates: null,
     project_attachments: null,
     aa_raw: null,
   };
 
-  private async configureBlobs() {
+  private async configureBlobs(): Promise<BlobStorageService> {
     for (const [modelName, blobDefinition] of Object.entries(
       this.blobDefinitions
     )) {

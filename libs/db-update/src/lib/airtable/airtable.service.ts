@@ -1,12 +1,8 @@
-import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { AnyBulkWriteOperation } from 'mongodb';
 import { Model, Types } from 'mongoose';
-import {
-  AirtableClient,
-  PageData,
-  TaskData,
-  UxTestData,
-} from '@dua-upd/external-data';
+import { BlobStorageService } from '@dua-upd/blob-storage';
 import {
   CallDriver,
   Feedback,
@@ -16,24 +12,24 @@ import {
   Task,
   UxTest,
 } from '@dua-upd/db';
-import type { UxApiData, UxApiDataType, UxData } from './types';
 import {
-  arrayToDictionary,
-  logJson,
-  WithObjectId,
-} from '@dua-upd/utils-common';
-import { assertHasUrl, assertObjectId } from './utils';
+  AirtableClient,
+  PageData,
+  TaskData,
+  UxTestData,
+} from '@dua-upd/external-data';
+import { BlobLogger } from '@dua-upd/logger';
 import { AttachmentData, IPage, ITask } from '@dua-upd/types-common';
-import { BlobStorageService } from '@dua-upd/blob-storage';
-import { BlobBeginCopyFromURLResponse } from '@azure/storage-blob';
-import chalk from 'chalk';
-import { AnyBulkWriteOperation } from 'mongodb';
+import { arrayToDictionary, WithObjectId } from '@dua-upd/utils-common';
+import type { UxApiData, UxApiDataType, UxData } from './types';
+import { assertHasUrl, assertObjectId } from './utils';
 
 @Injectable()
 export class AirtableService {
   constructor(
     @Inject(AirtableClient.name) private airtableClient: AirtableClient,
-    private logger: ConsoleLogger,
+    @Inject('DB_UPDATE_LOGGER')
+    private logger: BlobLogger,
     @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriverModel: Model<CallDriver>,
     @InjectModel(Feedback.name, 'defaultConnection')
@@ -505,9 +501,7 @@ export class AirtableService {
             if (result.response) {
               if (result.response.copyStatus !== 'success') {
                 this.logger.warn(
-                  chalk.yellow(
-                    `File ${fileName} has a copy status of ${result.response.copyStatus}`
-                  )
+                  `File ${fileName} has a copy status of ${result.response.copyStatus}`
                 );
               }
             }
@@ -524,8 +518,7 @@ export class AirtableService {
         })
         .catch((err) =>
           this.logger.error(
-            `An error occurred uploading attachments for ${project.title}: `,
-            err.stack
+            `An error occurred uploading attachments for ${project.title}: \n${err.stack}`
           )
         );
 

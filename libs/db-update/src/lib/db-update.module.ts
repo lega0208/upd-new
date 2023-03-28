@@ -1,6 +1,8 @@
 import { CacheModule, ConsoleLogger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import dayjs from 'dayjs';
 import { BlobStorageModule } from '@dua-upd/blob-storage';
+import { LoggerModule } from '@dua-upd/logger';
 import { DbModule, DbService } from '@dua-upd/db';
 import {
   AirtableClient,
@@ -18,6 +20,9 @@ import { PagesListService } from './pages-list/pages-list.service';
 import { InternalSearchTermsService } from './internal-search/search-terms.service';
 import { ActivityMapService } from './activity-map/activity-map.service';
 
+const date = dayjs().format('YYYY-MM-DD');
+const month = dayjs().format('YYYY-MM');
+
 @Module({
   imports: [
     CacheModule.register({ ttl: 12 * 60 * 60 }),
@@ -28,6 +33,15 @@ import { ActivityMapService } from './activity-map/activity-map.service';
     DbModule,
     ExternalDataModule,
     BlobStorageModule,
+    LoggerModule.withBlobLogger('DB_UPDATE_LOGGER', {
+      blobModel: 'db_updates',
+      context: 'db-update',
+      logLevelTargets: {
+        error: `${month}/db-update_errors_${date}`,
+        warn: `${month}/db-update_${date}`,
+        log: `${month}/db-update-${date}`,
+      },
+    }),
   ],
   providers: [
     AirtableService,

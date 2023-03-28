@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+
 // Utility function for to help with rate-limiting within async functions
 export function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -254,4 +256,59 @@ export function chunkMap<T, ReturnT>(
   }
 
   return chunks;
+}
+
+// Thanks ChatGPT
+export class TimingUtility {
+  private previousIterationEndTime = Date.now();
+  private iterationDurations: number[] = [];
+  private iterationCount = 0;
+  private averageDuration = 1500;
+
+  constructor(private totalIterations: number) {}
+
+  private calculateAverage(): void {
+    const sum = this.iterationDurations.reduce(
+      (total, duration) => total + duration,
+      0
+    );
+    this.averageDuration = sum / this.iterationDurations.length;
+  }
+
+  private formatTimeRemaining(milliseconds: number): string {
+    const seconds = Math.ceil(milliseconds / 1000);
+    const minutes = (seconds / 60).toFixed(2);
+    return seconds > 60
+      ? `${minutes} minute${seconds < 120 ? '' : 's'}`
+      : `${seconds} second${seconds === 1 ? '' : 's'}`;
+  }
+
+  private formatIterationCount() {
+    const lessThan10 = this.iterationCount < 10 ? '0' : '';
+    const lessThan100 = this.iterationCount < 100 ? '0' : '';
+    return `${lessThan10}${lessThan100}${this.iterationCount}`;
+  }
+
+  public logIteration(customMessage?: string): void {
+    const iterationStartTime = Date.now();
+    const iterationDuration =
+      iterationStartTime - this.previousIterationEndTime;
+    this.iterationDurations.push(iterationDuration);
+    this.iterationCount++;
+    this.calculateAverage();
+    const timeRemaining = this.formatTimeRemaining(
+      (this.totalIterations - this.iterationCount) * this.averageDuration
+    );
+    const message =
+      `${chalk.green('✔')}  ${chalk.dim(new Date().toLocaleTimeString())} | ` +
+      `${chalk.bold(this.formatIterationCount())}: ${chalk.yellow(
+        `${iterationDuration}ms`
+      )} | ` +
+      `${chalk.blue(`Average: ${this.averageDuration.toFixed(2)}ms`)} | ` +
+      `${chalk.magenta(`Time remaining: ${timeRemaining}`)} | ${
+        customMessage || ''
+      }\r`;
+    console.log(message);
+    this.previousIterationEndTime = Date.now();
+  }
 }
