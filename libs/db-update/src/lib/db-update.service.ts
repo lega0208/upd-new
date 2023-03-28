@@ -1,6 +1,5 @@
-import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import chalk from 'chalk';
 import { Model, Types } from 'mongoose';
 import {
   DbService,
@@ -21,7 +20,12 @@ import {
   SearchAssessmentService,
   withRetry,
 } from '@dua-upd/external-data';
-import { AsyncLogTiming, dateRangeConfigs } from '@dua-upd/utils-common';
+import { BlobLogger } from '@dua-upd/logger';
+import {
+  AsyncLogTiming,
+  dateRangeConfigs,
+  prettyJson,
+} from '@dua-upd/utils-common';
 import { CalldriversService } from './airtable/calldrivers.service';
 import { FeedbackService } from './airtable/feedback.service';
 import { AirtableService } from './airtable/airtable.service';
@@ -30,14 +34,16 @@ import { PageUpdateService } from './pages/pages.service';
 import { PageMetricsService } from './pages-metrics/page-metrics.service';
 import { InternalSearchTermsService } from './internal-search/search-terms.service';
 import { ActivityMapService } from './activity-map/activity-map.service';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class DbUpdateService {
   constructor(
     private db: DbService,
+    @Inject('DB_UPDATE_LOGGER')
+    private logger: BlobLogger,
     @Inject(SearchAnalyticsClient.name)
     private gscClient: SearchAnalyticsClient,
-    private logger: ConsoleLogger,
     private airtableService: AirtableService,
     private calldriversService: CalldriversService,
     private feedbackService: FeedbackService,
@@ -72,7 +78,18 @@ export class DbUpdateService {
     this.logger.log('Activity map successfully updated.');
   }
 
-  async updateAll() {
+  async updateAll(logToBlobs = false) {
+    if (logToBlobs) {
+      const date = dayjs().format('YYYY-MM-DD');
+      const month = dayjs().format('YYYY-MM');
+
+      this.logger.setLogLevelTargets({
+        error: `${month}/db-update_errors_${date}`,
+        warn: `${month}/db-update_${date}`,
+        log: `${month}/db-update-${date}`,
+      });
+    }
+
     this.logger.log('Starting database updates...');
 
     try {
@@ -90,15 +107,15 @@ export class DbUpdateService {
           4,
           1000
         )().catch((err) =>
-          this.logger.error('Error updating overall metrics', err.stack)
+          this.logger.error(`Error updating overall metrics\n${err.stack}`)
         ),
         withRetry(this.updateUxData.bind(this), 4, 1000)().catch((err) =>
-          this.logger.error('Error updating UX data', err.stack)
+          this.logger.error(`Error updating UX data\n${err.stack}`)
         ),
       ]);
 
       await withRetry(this.updateFeedback.bind(this), 4, 1000)().catch((err) =>
-        this.logger.error('Error updating Feedback data', err.stack)
+        this.logger.error(`Error updating Feedback data\n${err.stack}`)
       );
 
       await Promise.allSettled([
@@ -109,7 +126,7 @@ export class DbUpdateService {
           4,
           1000
         )().catch((err) =>
-          this.logger.error('Error updating Calldrivers data', err.stack)
+          this.logger.error(`Error updating Calldrivers data\n${err.stack}`)
         ),
         // withRetry(this.pagesService.updatePages.bind(this.pagesService), 4, 1000)().catch((err) =>
         //   this.logger.error('Error updating Page data', err)
@@ -126,7 +143,7 @@ export class DbUpdateService {
         await this.pageMetricsService
           .updatePageMetrics()
           .catch((err) =>
-            this.logger.error('Error updating Page Metrics data', err)
+            this.logger.error(`Error updating Page metrics data\n${err.stack}`)
           ),
         await this.airtableService.uploadProjectAttachmentsAndUpdateUrls(),
       ]);
@@ -286,7 +303,18 @@ export class DbUpdateService {
     return await this.feedbackService.repopulateFeedback();
   }
 
-  async recalculateViews() {
+  async recalculateViews(logToBlobs = false) {
+    if (logToBlobs) {
+      const date = dayjs().format('YYYY-MM-DD');
+      const month = dayjs().format('YYYY-MM');
+
+      this.logger.setLogLevelTargets({
+        error: `${month}/db-update_errors_${date}`,
+        warn: `${month}/db-update_${date}`,
+        log: `${month}/db-update-${date}`,
+      });
+    }
+
     const dateRanges = dateRangeConfigs
       .map((config) => {
         const dateRange = config.getDateRange();
@@ -312,34 +340,26 @@ export class DbUpdateService {
 
     try {
       for (const dateRange of dateRanges) {
-        this.logger.log(
-          chalk.blueBright(
-            'Recalculating page visits view for dateRange: ',
-            JSON.stringify(dateRange, null, 2)
-          )
+        this.logger.info(
+          'Recalculating page visits view for dateRange: ',
+          JSON.stringify(dateRange, null, 2)
         );
 
         const result = await pageVisits.getOrUpdate(dateRange, true);
 
         if (!result?.pageVisits?.length) {
           this.logger.error(
-            chalk.red(
-              'Recalculation failed or contains no results for dateRange: ',
-              JSON.stringify(dateRange, null, 2)
-            )
+            'Recalculation failed or contains no results for dateRange: ' +
+              prettyJson(dateRange)
           );
 
           continue;
         }
 
-        this.logger.log(chalk.green('Date range successfully recalculated.'));
+        this.logger.info('Date range successfully recalculated.');
       }
     } catch (err) {
-      this.logger.error(err.message, err.stack);
+      this.logger.error(err.stack);
     }
-
-    // add to db-updater
-
-    // consider moving updates to ~2 am?
   }
 }

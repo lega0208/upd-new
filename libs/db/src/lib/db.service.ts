@@ -41,14 +41,14 @@ export class DbService {
     projects: this.projects,
     aaItemIds: this.aaItemIds,
     searchAssessment: this.searchAssessment,
-  };
+  } as const;
 
   readonly views = {
     pageVisits: new PageVisitsView(
       this.pageVisits,
       this.collections.pageMetrics
     ),
-  };
+  } as const;
 
   constructor(
     @InjectModel(CallDriver.name, 'defaultConnection')

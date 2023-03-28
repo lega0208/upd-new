@@ -1,0 +1,9 @@
+{
+  "name": "@dua-upd/logger",
+  "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "@swc/helpers": "~0.4.11"
+  },
+  "devDependencies": {}
+}
