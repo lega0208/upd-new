@@ -33,10 +33,17 @@ import type {
   OverviewData,
   OverviewUxData,
   OverviewProjectData,
-  ProjectsHomeProject, OverviewProject
-} from "@dua-upd/types-common";
-import { arrayToDictionary, AsyncLogTiming, dateRangeSplit, getLatestTestData, logJson } from "@dua-upd/utils-common";
-import { OverallSearchTerm } from "@dua-upd/types-common";
+  ProjectsHomeProject,
+  OverviewProject,
+} from '@dua-upd/types-common';
+import {
+  arrayToDictionary,
+  AsyncLogTiming,
+  dateRangeSplit,
+  getLatestTestData,
+  logJson,
+} from '@dua-upd/utils-common';
+import { OverallSearchTerm } from '@dua-upd/types-common';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -137,9 +144,9 @@ export class OverallService {
       .slice(0, 5);
 
     const satDateStart = await this.searchAssessmentModel
-    .findOne()
-    .sort({ date: -1 })
-    .exec();
+      .findOne()
+      .sort({ date: -1 })
+      .exec();
 
     const satDateRange = `${dayjs
       .utc(satDateStart?.date)
@@ -188,7 +195,8 @@ export class OverallService {
         satComparisonDateRange
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
-      uxTests: (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [],
+      uxTests:
+        (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [],
       ...(await getUxData(testsSince2018)),
       top5CalldriverTopics,
       top5IncreasedCalldriverTopics,
@@ -202,11 +210,14 @@ export class OverallService {
     return results;
   }
 
-  async getTopSearchTerms({ dateRange, comparisonDateRange }: ApiParams, lang: 'en' | 'fr') {
+  async getTopSearchTerms(
+    { dateRange, comparisonDateRange }: ApiParams,
+    lang: 'en' | 'fr'
+  ) {
     const [startDate, endDate] = dateRangeSplit(dateRange);
     const [prevStartDate, prevEndDate] = dateRangeSplit(comparisonDateRange);
 
-    const searchTermsPropName = `aa_searchterms_${lang}`
+    const searchTermsPropName = `aa_searchterms_${lang}`;
 
     const results =
       (await this.overallModel
@@ -244,7 +255,9 @@ export class OverallService {
             $cond: {
               if: { $eq: ['$total_searches', 0] },
               then: 0,
-              else: { $round: [{ $divide: ['$clicks', '$total_searches'] }, 2] },
+              else: {
+                $round: [{ $divide: ['$clicks', '$total_searches'] }, 2],
+              },
             },
           },
           position: {
@@ -290,7 +303,9 @@ export class OverallService {
       const prevSearches = prevResultsDict[result.term]?.total_searches;
       const searchesChange =
         typeof prevSearches === 'number' && prevSearches !== 0
-          ? Math.round(((result.total_searches - prevSearches) / prevSearches) * 100) / 100
+          ? Math.round(
+              ((result.total_searches - prevSearches) / prevSearches) * 100
+            ) / 100
           : null;
 
       return {
@@ -448,8 +463,6 @@ async function getProjects(
         .exec()
     )[0] || defaultData;
 
-
-
   const projectsData = await projectModel
     .aggregate<OverviewProject>()
     .lookup({
@@ -520,36 +533,35 @@ async function getProjects(
       uxTests: 1,
     });
 
-    const avgUxTest = [];
+  const avgUxTest: {
+    percentChange: number;
+    avgTestSuccess: number;
+    total: number;
+  }[] = [];
 
-    for (const data of projectsData) {
-      const { percentChange, avgTestSuccess, total } = getLatestTestData(data.uxTests);
+  for (const data of projectsData) {
+    const { percentChange, avgTestSuccess, total } = getLatestTestData(
+      data.uxTests
+    );
 
-      data.lastAvgSuccessRate = avgTestSuccess;
+    data.lastAvgSuccessRate = avgTestSuccess;
 
-      if (avgTestSuccess !== null) {
-        avgUxTest.push({ percentChange, avgTestSuccess, total });
-      }
+    if (avgTestSuccess !== null) {
+      avgUxTest.push({ percentChange, avgTestSuccess, total });
     }
-  
-  //const avgTestSuccessAvg = avgUxTest.reduce((acc, data) => acc + data.avgTestSuccess, 0) / avgUxTest.length;
-  //const testsCompleted = avgUxTest.reduce((acc, data) => acc + data.total, 0);
+  }
 
   // UX Tests KPI updates - Latest average success rate for UX tests with Validation only
-    const kpiUxTestsSuccessRates = [];
-    
-    for (const data of projectsData) {
-      for (const test of data.uxTests) {
-        if (test.test_type === 'Validation') {
-            if (test.success_rate) {
-              kpiUxTestsSuccessRates.push(test.success_rate);
-            }
-        }
-      }
-    } 
- 
-    const avgTestSuccessAvg = kpiUxTestsSuccessRates.reduce((acc, success) => acc + success, 0) / kpiUxTestsSuccessRates.length;
-    const testsCompleted = kpiUxTestsSuccessRates.length;
+  const kpiUxTestsSuccessRates = projectsData
+    .flatMap((project) => project.uxTests)
+    .filter((test) => test.test_type === 'Validation' && test.success_rate)
+    .map((test) => test.success_rate);
+
+  const testsCompleted = kpiUxTestsSuccessRates.length;
+
+  const avgTestSuccessAvg =
+    kpiUxTestsSuccessRates.reduce((acc, success) => acc + success, 0) /
+    testsCompleted;
 
   return {
     ...aggregatedData,
@@ -557,7 +569,7 @@ async function getProjects(
     projects: projectsData,
     avgUxTest,
     avgTestSuccessAvg,
-    testsCompleted
+    testsCompleted,
   };
 }
 
