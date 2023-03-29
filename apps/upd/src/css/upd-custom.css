@@ -525,3 +525,7 @@ margin: 0px 20px 0px 20px;
 .p-treeselect-trigger > .p-treeselect-trigger-icon.pi.pi-chevron-down {
   color: rgb(33, 37, 41);
 }
+
+.p-treeselect {
+  margin: 0 10px;
+}
