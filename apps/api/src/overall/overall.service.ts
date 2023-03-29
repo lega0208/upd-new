@@ -531,10 +531,25 @@ async function getProjects(
         avgUxTest.push({ percentChange, avgTestSuccess, total });
       }
     }
+  
+  //const avgTestSuccessAvg = avgUxTest.reduce((acc, data) => acc + data.avgTestSuccess, 0) / avgUxTest.length;
+  //const testsCompleted = avgUxTest.reduce((acc, data) => acc + data.total, 0);
 
-
-  const avgTestSuccessAvg = avgUxTest.reduce((acc, data) => acc + data.avgTestSuccess, 0) / avgUxTest.length;
-  const testsCompleted = avgUxTest.reduce((acc, data) => acc + data.total, 0);
+  // UX Tests KPI updates - Latest average success rate for UX tests with Validation only
+    const kpiUxTestsSuccessRates = [];
+    
+    for (const data of projectsData) {
+      for (const test of data.uxTests) {
+        if (test.test_type === 'Validation') {
+            if (test.success_rate) {
+              kpiUxTestsSuccessRates.push(test.success_rate);
+            }
+        }
+      }
+    } 
+ 
+    const avgTestSuccessAvg = kpiUxTestsSuccessRates.reduce((acc, success) => acc + success, 0) / kpiUxTestsSuccessRates.length;
+    const testsCompleted = kpiUxTestsSuccessRates.length;
 
   return {
     ...aggregatedData,
