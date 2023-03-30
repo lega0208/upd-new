@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { Config } from 'jest';
 
 export default {
@@ -11,5 +12,5 @@ export default {
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   reporters: ['default'],
-  verbose: true
+  verbose: true,
 } as Config;

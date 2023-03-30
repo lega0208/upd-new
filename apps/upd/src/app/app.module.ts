@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { LocationStrategy } from '@angular/common';
+import { LocationStrategy, NgOptimizedImage } from "@angular/common";
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -90,6 +90,7 @@ const localStorageSyncReducer = (
       ? NgxGoogleAnalyticsModule.forRoot(environment.gaTrackingId)
       : [],
     environment.production ? NgxGoogleAnalyticsRouterModule : [],
+    NgOptimizedImage,
   ],
   providers: [
     Title,

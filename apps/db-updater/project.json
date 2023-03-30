@@ -1,4 +1,5 @@
 {
+  "name": "db-updater",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/db-updater/src",
   "projectType": "application",

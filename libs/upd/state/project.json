@@ -1,4 +1,5 @@
 {
+  "name": "upd-state",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/upd/state/src",
   "projectType": "library",

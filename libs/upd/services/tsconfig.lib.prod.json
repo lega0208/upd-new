@@ -2,7 +2,9 @@
   "extends": "./tsconfig.lib.json",
   "compilerOptions": {
     "declarationMap": false,
-    "lib": ["ESNext", "dom", "dom.iterable"]
+    "lib": ["ESNext", "dom", "dom.iterable"],
+    "target": "ES2022",
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {}
 }
