@@ -1,4 +1,5 @@
 {
+  "name": "upd-utils",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/upd/utils/src",
   "projectType": "library",

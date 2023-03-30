@@ -1,6 +1,6 @@
 {
   "jsc": {
-    "target": "es2021",
+    "target": "es2017",
     "parser": {
       "syntax": "typescript",
       "decorators": true,
@@ -15,10 +15,17 @@
     "loose": true
   },
   "module": {
-    "type": "es6",
+    "type": "commonjs",
     "strict": true,
     "noInterop": true
   },
   "sourceMaps": true,
-  "exclude": ["./src/**/.*.spec.ts$","./**/.*.spec.ts$","./src/**/jest-setup.ts$","./**/jest-setup.ts$","./**/.*.js$"]
+  "exclude": [
+    "jest.config.ts",
+    ".*.spec.tsx?$",
+    ".*.test.tsx?$",
+    "./src/jest-setup.ts$",
+    "./**/jest-setup.ts$",
+    ".*.js$"
+  ]
 }

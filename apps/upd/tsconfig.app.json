@@ -3,8 +3,9 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "types": [],
-    "target": "es2020",
-    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+    "target": "ES2022",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "useDefineForClassFields": false
   },
   "files": ["src/main.ts", "src/polyfills.ts"],
   "include": ["src/**/*.d.ts"],

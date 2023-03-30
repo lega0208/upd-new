@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { type FilterQuery, Model, Types } from 'mongoose';
+import { type Filter } from 'mongodb';
 import {
   CallDriver,
   Feedback,
@@ -197,7 +198,7 @@ export class DbService {
             bulkWriteOps.push({
               updateMany: {
                 filter: {
-                  ...filter,
+                  ...(filter as Filter<PageMetrics>),
                   url,
                   page: {
                     $ne: matchingPage._id,
@@ -253,7 +254,7 @@ export class DbService {
             bulkWriteOps.push({
               updateMany: {
                 filter: {
-                  ...filter,
+                  ...(filter as Filter<PageMetrics>),
                   url,
                   page: {
                     $ne: matchingPage._id,

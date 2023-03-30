@@ -20,5 +20,11 @@
     "noInterop": false
   },
   "sourceMaps": true,
-  "exclude": ["./src/**/.*.spec.ts$","./**/.*.spec.ts$","./src/**/jest-setup.ts$","./**/jest-setup.ts$","./**/.*.js$"]
+  "exclude": [
+    "./src/**/.*.spec.ts$",
+    "./**/.*.spec.ts$",
+    "./src/**/jest-setup.ts$",
+    "./**/jest-setup.ts$",
+    "./**/.*.js$"
+  ]
 }

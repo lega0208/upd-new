@@ -39,11 +39,11 @@ export class PagesListService {
 
     const pagesList = await this.airtableService.getPagesList();
 
-    return await this.cacheManager.set<PagesList[]>('pagesList', pagesList);
+    return await this.cacheManager.set('pagesList', pagesList);
   }
 
   async getPagesList() {
-    const pagesList: PagesList[] = await this.getOrSetCache();
+    const pagesList: PagesList[] = (await this.getOrSetCache()) || [];
 
     if (!pagesList.length) {
       throw Error('PagesList is empty');

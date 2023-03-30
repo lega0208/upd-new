@@ -29,7 +29,7 @@ export interface DbViewConfig<T extends DbViewType, Source> {
   maxAge: [number, ManipulateType];
 }
 
-export abstract class DbView<T extends DbViewType, Source> {
+export abstract class DbView<T extends DbViewType & { lastUpdated: Date }, Source> {
   collectionName: `view_${string}`;
   sourceModel: Model<Source>;
   model: Model<T>;
@@ -56,7 +56,7 @@ export abstract class DbView<T extends DbViewType, Source> {
         { lastUpdated: 1 }
       )
       .lean()
-      .exec();
+      .exec() as T | null;
 
     return results?.lastUpdated || null;
   }
