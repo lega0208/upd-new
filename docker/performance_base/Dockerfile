@@ -7,9 +7,9 @@ RUN --mount=type=cache,target=/home/node/.npm npm ci
 COPY ./nx.json /tsconfig.base.json ./
 COPY ./apps/ ./apps
 COPY ./libs/ ./libs
-RUN nx daemon --start
+RUN npx nx daemon --start
 RUN npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --prod --parallel
-RUN nx daemon --stop
+RUN npx nx daemon --stop
 RUN rm -r /builder/node_modules && rm -r /builder/.angular && rm -r /builder/tmp
 
 FROM alpine:latest as apps
