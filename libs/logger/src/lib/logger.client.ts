@@ -46,7 +46,7 @@ export class BlobLogger extends CustomLogger {
   log(message: string, ...text: unknown[]) {
     super.log(message, ...text);
 
-    const mergedMessage = `${message} ${text.map(prettyJson).join(' ')}`;
+    const mergedMessage = `${message} ${text.join(' ')}`;
 
     const formattedMessage = this.toFormat(mergedMessage, this.context, 'log');
 
@@ -61,7 +61,7 @@ export class BlobLogger extends CustomLogger {
   info(message: string, ...text: unknown[]) {
     super.info(message, ...text);
 
-    const mergedMessage = `${message} ${text.map(prettyJson).join(' ')}`;
+    const mergedMessage = `${message} ${text.join(' ')}`;
 
     const formattedMessage = this.toFormat(mergedMessage, this.context, 'log');
 
@@ -76,7 +76,7 @@ export class BlobLogger extends CustomLogger {
   accent(message: string, ...text: unknown[]) {
     super.accent(message, ...text);
 
-    const mergedMessage = `${message} ${text.map(prettyJson).join(' ')}`;
+    const mergedMessage = `${message} ${text.join(' ')}`;
 
     const formattedMessage = this.toFormat(mergedMessage, this.context, 'log');
 
@@ -108,7 +108,7 @@ export class BlobLogger extends CustomLogger {
   warn(message: string, ...text: unknown[]) {
     super.warn(message, ...text);
 
-    const mergedMessage = `${message} ${text.map(prettyJson).join(' ')}`;
+    const mergedMessage = `${message} ${text.join(' ')}`;
 
     const formattedMessage = this.toFormat(mergedMessage, this.context, 'warn');
 
