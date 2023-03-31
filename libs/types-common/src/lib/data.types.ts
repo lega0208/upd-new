@@ -223,7 +223,12 @@ export interface TasksHomeAggregatedData {
   calls: number;
 }
 
-export type TasksHomeData = ViewData<TasksHomeAggregatedData[]>;
+export type TasksHomeData = ViewData<TasksHomeAggregatedData[]> & {
+  totalVisits: number;
+  percentChange: number;
+  totalCalls: number;
+  percentChangeCalls: number;
+};
 
 export interface TaskDetailsMetrics {
   visits: number;

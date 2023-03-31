@@ -296,3 +296,13 @@ export const exportTempTimeSeries = async (db: DbService) => {
     timer.logIteration(`Inserted metrics for ${date.toISOString().slice(0, 10)}`);
   }
 };
+
+export const test = async (db: DbService) => {
+  const tpcIds = await db.collections.tasks.find({tpc_ids: {$not: {$size: 0}}},{tpc_ids: 1}).lean().exec();
+  const allIds = tpcIds.reduce((idsArray, tpcIds) => idsArray.concat(tpcIds.tpc_ids), []);
+  const uniqueIds = [...new Set(allIds)];
+
+  const callDrivers = await db.collections.callDrivers.aggregate().match({ tpc_id: {$in: uniqueIds }, date: {$gte: new Date("2023-01-01")}});
+  logJson(callDrivers);
+
+};

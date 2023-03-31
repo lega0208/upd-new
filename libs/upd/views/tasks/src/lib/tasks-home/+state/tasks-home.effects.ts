@@ -18,8 +18,8 @@ export class TasksHomeEffects {
     return this.actions$.pipe(
       ofType(TasksHomeActions.loadTasksHomeInit),
       concatLatestFrom(() => this.store.select(selectDateRanges)),
-      mergeMap(([, { dateRange }]) =>
-        this.api.getTasksHomeData({ dateRange }).pipe(
+      mergeMap(([, { dateRange, comparisonDateRange }]) =>
+        this.api.getTasksHomeData({ dateRange, comparisonDateRange }).pipe(
           map((data) => TasksHomeActions.loadTasksHomeSuccess({ data })),
           catchError(() => EMPTY)
         )

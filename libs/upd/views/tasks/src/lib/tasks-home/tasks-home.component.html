@@ -16,6 +16,7 @@
         [current]="totalVisits$ | async"
         [title]="'total-visits'"
         [tooltip]="'tooltip-total-visits-tasks'"
+        [comparison]="totalVisitsChange$ | async"
       ></upd-data-card>
     </div>
     <div class="col">
@@ -23,6 +24,7 @@
         [current]="totalCalls$ | async"
         [title]="'total-calls'"
         [tooltip]="'tooltip-total-calls-tasks'"
+        [comparison]="totalCallsChange$ | async"
       ></upd-data-card>
     </div>
   </div>
