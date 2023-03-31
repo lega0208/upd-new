@@ -136,7 +136,9 @@ export class LogsElement extends HTMLElement {
             <h3>Status: ${this.mostRecentStatus}</h3>
             ${
               this.mostRecentError
-                ? `<hr/><h3>Error: ${formatDate(this.mostRecentError)}</h3>`
+                ? `<hr/><h3>Most recent error: ${formatDate(
+                    this.mostRecentError
+                  )}</h3>`
                 : ''
             }
           </div>
