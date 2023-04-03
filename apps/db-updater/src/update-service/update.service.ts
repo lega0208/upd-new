@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { DbUpdateService } from '@dua-upd/db-update';
 import { DataIntegrityService } from '@dua-upd/data-integrity';
 import { DbService } from '@dua-upd/db';
+import { environment } from '../environments/environment';
 
 export const EVERY_SUNDAY_AT_11PM = '0 0 23 * * 0' as const;
 export const EVERY_SATURDAY_AT_11PM = '0 0 23 * * 6' as const;
@@ -27,7 +28,7 @@ export class UpdateService {
     try {
       this.isRunning = true;
 
-      await this.dbUpdateService.updateAll(true);
+      await this.dbUpdateService.updateAll(environment.production);
 
       await this.dataIntegrityService.fillMissingData();
       await this.dataIntegrityService.cleanPageUrls();
