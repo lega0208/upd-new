@@ -120,13 +120,21 @@ export class TasksHomeFacade {
     map((tasksData) => tasksData.length)
   );
 
-  totalVisits$ = this.tasksHomeTableData$.pipe(
-    map((tasksData) => tasksData.reduce((a, b) => a + b.visits, 0))
-  );
+  totalVisits$ = this.tasksHomeData$.pipe(
+    map((tasksData) => tasksData.totalVisits || 0
+  ));
 
-  totalCalls$ = this.tasksHomeTableData$.pipe(
-    map((tasksData) => tasksData.reduce((a, b) => a + b.calls, 0))
-  );
+  totalCalls$ = this.tasksHomeData$.pipe(
+    map((tasksData) => tasksData.totalCalls || 0
+  ));
+
+  totalVisitsChange$ = this.tasksHomeData$.pipe(
+    map((tasksData) => tasksData.percentChange || 0
+  ));
+
+  totalCallsChange$ = this.tasksHomeData$.pipe(
+    map((tasksData) => tasksData.percentChangeCalls || 0
+  ));
 
   error$ = this.store.pipe(select(TasksHomeSelectors.getTasksHomeError));
 
