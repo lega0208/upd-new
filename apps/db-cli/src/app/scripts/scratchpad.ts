@@ -296,4 +296,3 @@ export const exportTempTimeSeries = async (db: DbService) => {
     timer.logIteration(`Inserted metrics for ${date.toISOString().slice(0, 10)}`);
   }
 };
-
