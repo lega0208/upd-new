@@ -14,7 +14,7 @@
         "tsConfig": "apps/db-cli/tsconfig.app.json",
         "assets": ["apps/db-cli/src/assets"],
         "deleteOutputPath": false,
-        "compiler": "swc",
+        "compiler": "tsc",
         "generateIndexHtml": false,
         "runtimeChunk": false,
         "target": "node"
