@@ -73,7 +73,7 @@ export interface FeedbackComment {
 export interface IFeedback {
   _id: Types.ObjectId;
 
-  airtable_id: string;
+  airtable_id?: string;
 
   url: string;
 
