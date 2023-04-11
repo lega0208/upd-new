@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types } from 'mongoose';
+import { Document, Model, Types } from 'mongoose';
 import { FeedbackComment, IFeedback } from '@dua-upd/types-common';
 
 export type FeedbackDocument = Feedback & Document;
@@ -9,8 +9,8 @@ export class Feedback implements IFeedback {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
-  @Prop({ type: String, required: true })
-  airtable_id = '';
+  @Prop({ type: String })
+  airtable_id? = '';
 
   @Prop({ type: String, required: true, index: true })
   url = '';

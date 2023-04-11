@@ -15,7 +15,7 @@
         "deleteOutputPath": false,
         "target": "node",
         "generatePackageJson": true,
-        "compiler": "tsc",
+        "compiler": "swc",
         "generateIndexHtml": false,
         "runtimeChunk": false,
         "optimization": false,

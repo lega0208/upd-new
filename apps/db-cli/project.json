@@ -14,7 +14,7 @@
         "tsConfig": "apps/db-cli/tsconfig.app.json",
         "assets": ["apps/db-cli/src/assets"],
         "deleteOutputPath": false,
-        "compiler": "tsc",
+        "compiler": "swc",
         "generateIndexHtml": false,
         "runtimeChunk": false,
         "target": "node"
@@ -24,6 +24,7 @@
           "optimization": false,
           "externalDependencies": [
             "@adobe/aio-lib-analytics",
+            "@mongodb-js/zstd",
             "@nestjs/microservices",
             "@nestjs/websockets/socket-module",
             "@nestjs/microservices/microservices-module",
