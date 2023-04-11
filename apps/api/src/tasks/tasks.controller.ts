@@ -6,8 +6,8 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get('home')
-  getTasksHomeData(@Query('dateRange') dateRange: string) {
-    return this.tasksService.getTasksHomeData(dateRange);
+  getTasksHomeData(@Query('dateRange') dateRange: string, @Query('comparisonDateRange') comparisonDateRange: string) {
+    return this.tasksService.getTasksHomeData(dateRange, comparisonDateRange);
   }
 
   @Get('details')

@@ -29,7 +29,9 @@ import {
   getAvgSuccessFromLastTests,
   getLatestTest,
   dateRangeSplit,
-  arrayToDictionary, logJson
+  arrayToDictionary,
+  logJson,
+  percentChange,
 } from '@dua-upd/utils-common';
 import { InternalSearchTerm } from '@dua-upd/types-common';
 
@@ -52,8 +54,11 @@ export class TasksService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  async getTasksHomeData(dateRange: string): Promise<TasksHomeData> {
-    const cacheKey = `getTasksHomeData-${dateRange}`;
+  async getTasksHomeData(
+    dateRange: string,
+    comparisonDateRange: string
+  ): Promise<TasksHomeData> {
+    const cacheKey = `getTasksHomeData-${dateRange}-${comparisonDateRange}`;
     const cachedData = await this.cacheManager.store.get<TasksHomeData>(
       cacheKey
     );
@@ -63,6 +68,108 @@ export class TasksService {
     }
 
     const [start, end] = dateRange.split('/').map((d) => new Date(d));
+
+    const totalVisits = (
+      await this.pageMetricsModel
+        .aggregate<{ totalVisits: number }>()
+        .match({
+          tasks: {
+            $exists: true,
+          },
+          date: {
+            $gte: new Date(start),
+            $lte: new Date(end),
+          },
+        })
+        .project({
+          date: 1,
+          visits: 1,
+          tasks: 1,
+        })
+        .group({
+          _id: null,
+          totalVisits: {
+            $sum: '$visits',
+          },
+        })
+    )?.[0]?.totalVisits;
+
+    const tpcIds = await this.db.collections.tasks.find({tpc_ids: {$not: {$size: 0}}},{tpc_ids: 1}).lean().exec();
+    const allIds = tpcIds.reduce((idsArray, tpcIds) => idsArray.concat(tpcIds.tpc_ids), []);
+    const uniqueIds = [...new Set(allIds)];
+
+    const totalCalls = (
+      await this.db.collections.callDrivers
+        .aggregate<{ totalCalls: number }>()
+        .match({
+          tpc_id: { $in: uniqueIds },
+          date: { $gte: new Date(start), $lte: new Date(end) },
+        })
+        .project({
+          date: 1,
+          calls: 1,
+          tasks: 1,
+        })
+        .group({
+          _id: null,
+          totalCalls: {
+            $sum: '$calls',
+          },
+        })
+    )?.[0]?.totalCalls;
+
+    const [comparisonStart, comparisonEnd] = comparisonDateRange
+      .split('/')
+      .map((d) => new Date(d));
+
+    const previousVisits = (
+      await this.pageMetricsModel
+        .aggregate<{ totalVisits: number }>()
+        .match({
+          tasks: {
+            $exists: true,
+          },
+          date: {
+            $gte: new Date(comparisonStart),
+            $lte: new Date(comparisonEnd),
+          },
+        })
+        .project({
+          date: 1,
+          visits: 1,
+          tasks: 1,
+        })
+        .group({
+          _id: null,
+          totalVisits: {
+            $sum: '$visits',
+          },
+        })
+    )?.[0]?.totalVisits;
+
+    const previousCallDrivers = (
+      await this.db.collections.callDrivers
+        .aggregate<{ totalCalls: number }>()
+        .match({
+          tpc_id: { $in: uniqueIds },
+          date: { $gte: new Date(comparisonStart), $lte: new Date(comparisonEnd) },
+        })
+        .project({
+          date: 1,
+          calls: 1,
+          tasks: 1,
+        })
+        .group({
+          _id: null,
+          totalCalls: {
+            $sum: '$calls',
+          },
+        })
+    )?.[0]?.totalCalls;
+
+    const change = percentChange(totalVisits, previousVisits);
+
+    const changeCallDrivers = percentChange(totalCalls, previousCallDrivers);
 
     const tasks = await this.db.views.pageVisits.getVisitsWithTaskData(
       {
@@ -90,6 +197,10 @@ export class TasksService {
     const results = {
       dateRange,
       dateRangeData: task,
+      totalVisits,
+      percentChange: change,
+      totalCalls,
+      percentChangeCalls: changeCallDrivers,
     };
 
     await this.cacheManager.set(cacheKey, results);
@@ -361,7 +472,7 @@ async function getTaskAggregatedData(
       gsc_total_clicks: 1,
       gsc_total_impressions: 1,
       gsc_total_ctr: 1,
-      gsc_total_position: 1
+      gsc_total_position: 1,
     })
     .match({
       date: dateQuery,
