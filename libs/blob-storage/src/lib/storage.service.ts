@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { BlobModel, StorageClient } from './storage.client';
+import { CompressionAlgorithm } from '@dua-upd/node-utils';
 
 export interface BlobDefinition {
   containerName: string;
   path: string;
   overwrite?: boolean;
+  compression?: CompressionAlgorithm;
 }
 
 /*
@@ -15,6 +17,7 @@ export const blobModels = [
   'project_attachments',
   'db_updates',
   'aa_raw',
+  'feedback',
 ] as const;
 
 export type BlobModels = typeof blobModels;
@@ -38,12 +41,18 @@ export class BlobStorageService {
       path: 'aa_raw',
       containerName: 'raw-data',
     },
+    feedback: {
+      path: 'feedback',
+      containerName: 'raw-data',
+      compression: 'zstd',
+    }
   } as const;
 
   readonly blobModels: Record<RegisteredBlobModel, BlobModel> = {
     db_updates: null,
     project_attachments: null,
     aa_raw: null,
+    feedback: null,
   };
 
   private async configureBlobs(): Promise<BlobStorageService> {
@@ -57,6 +66,7 @@ export class BlobStorageService {
       this.blobModels[modelName] = container.createBlobsClient({
         path: blobDefinition.path,
         overwrite: blobDefinition['overwrite'],
+        compression: blobDefinition['compression'],
       });
     }
 

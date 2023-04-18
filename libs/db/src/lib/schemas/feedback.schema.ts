@@ -24,8 +24,8 @@ export class Feedback implements IFeedback {
   @Prop({ type: String })
   comment = '';
 
-  @Prop({ type: [String] })
-  tags?: string[] = [];
+  @Prop({ type: [String], default: undefined })
+  tags?: string[];
 
   @Prop({ type: String })
   status?: string;

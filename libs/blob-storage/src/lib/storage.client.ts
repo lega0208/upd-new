@@ -12,9 +12,12 @@ import {
   AppendBlobClient,
   BlobBeginCopyFromURLResponse,
   BlobClient as AzureBlobClient,
+  BlobDownloadOptions,
+  BlobDownloadToBufferOptions,
   BlobItem,
   BlobServiceClient,
   BlockBlobClient,
+  BlockBlobParallelUploadOptions,
   ContainerClient,
 } from '@azure/storage-blob';
 import chalk from 'chalk';
@@ -304,16 +307,25 @@ export class BlobClient {
     }
   }
 
-  async downloadToFile(destinationFilePath: string, decompressData = false) {
+  async downloadToFile(
+    destinationFilePath: string,
+    options?: BlobDownloadToBufferOptions & { decompressData?: boolean; }
+  ) {
     if (!(await this.client.exists())) {
       throw Error(`The requested blob "${this.client.name}" does not exist`);
     }
 
-    if (decompressData && this.compression) {
+    if (this.compression && options?.decompressData !== false) {
       const compression = this.compression;
 
+      const opts: BlobDownloadToBufferOptions = {
+        blockSize: options?.blockSize || 4_194_304,
+        concurrency: options?.concurrency || 20,
+        onProgress: options?.onProgress,
+      }
+
       return this.client
-        .downloadToBuffer()
+        .downloadToBuffer(0, undefined, opts)
         .then((dataBuffer) => decompressString(dataBuffer, compression))
         .then((decompressed) =>
           writeFile(destinationFilePath, decompressed, 'utf-8')
@@ -371,7 +383,12 @@ export class BlobClient {
     console.log('Files are the same. No changes made.');
   }
 
-  async uploadFromString(string: string, compression = this.compression) {
+  async uploadFromString(
+    string: string,
+    options?: BlockBlobParallelUploadOptions & {
+      compression?: CompressionAlgorithm;
+    }
+  ) {
     if (!(this.client instanceof BlockBlobClient)) {
       throw Error('uploadFromString() can only be called on BlockBlobClients');
     }
@@ -384,6 +401,9 @@ export class BlobClient {
       );
     }
 
+    const compression = options?.compression || this.compression;
+    const blockSize = options?.blockSize || 4_194_304;
+
     const stringBuffer = compression
       ? await compressString(string, compression)
       : Buffer.from(string);
@@ -394,7 +414,13 @@ export class BlobClient {
     if (await this.sizesAreDifferent(fileBytesSize)) {
       try {
         return await this.client.uploadData(stringBuffer, {
+          blockSize,
+          maxSingleShotSize: options?.maxSingleShotSize,
           onProgress: progressLogger,
+          concurrency: options?.concurrency,
+          blobHTTPHeaders: options?.blobHTTPHeaders,
+          metadata: options?.metadata,
+          tags: options?.tags,
         });
       } catch (err) {
         console.error(chalk.red('Error uploading string to storage:'));
@@ -405,10 +431,14 @@ export class BlobClient {
     console.log('Files are the same. No changes made.');
   }
 
-  async downloadToString(decompressData = false) {
+  async downloadToString(
+    options?: BlobDownloadToBufferOptions & { decompressData?: boolean }
+  ) {
     if (!(await this.client.exists())) {
       throw Error(`The requested blob "${this.client.name}" does not exist`);
     }
+
+    const blockSize = options?.blockSize || 4_194_304;
 
     try {
       const blobSizeBytes = await this.getSize();
@@ -417,9 +447,11 @@ export class BlobClient {
 
       await this.client.downloadToBuffer(destinationBuffer, 0, undefined, {
         onProgress: (event) => console.log(event),
+        blockSize,
+        concurrency: options?.concurrency,
       });
 
-      return decompressData && this.compression
+      return this.compression && options?.decompressData !== false
         ? await decompressString(destinationBuffer, this.compression)
         : destinationBuffer.toString('utf-8');
     } catch (err) {

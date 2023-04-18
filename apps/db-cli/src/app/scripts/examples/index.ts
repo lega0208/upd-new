@@ -23,6 +23,9 @@ import { Types } from 'mongoose';
 import { DbService } from '@dua-upd/db';
 import { logJson } from '@dua-upd/utils-common';
 import { outputChart, outputTable } from '../utils/output';
+import { readFile } from 'fs/promises';
+import { bytesToMbs, CompressionAlgorithm, compressString, decompressString } from '@dua-upd/node-utils';
+import { startTimer } from '../utils/misc';
 
 /*
  * Simplest example, finds one document in pages_metrics and logs it
@@ -354,4 +357,50 @@ export const getTopSearchTermPages = async (db: DbService) => {
       (results) => !searchTermsWithMatches.includes(results._id)
     )
   );
+};
+
+
+export const benchCompression = async () => {
+  const file = 'feedback_cleanest_2021-04-01_2023-04-16.json';
+
+  const _data = await readFile(file, 'utf-8');
+
+  for (const algo of ['lz4', 'brotli', 'zstd'] as CompressionAlgorithm[]) {
+    const data = `${_data}`;
+    const originalSize = Buffer.from(data).byteLength;
+    const originalSizeMB = bytesToMbs(originalSize);
+
+    if (algo === 'brotli' && originalSize > 16_777_216) {
+      console.log(
+        `File too big: ${originalSizeMB}MB\n` +
+        `Brotli compression only supports files up to 16MB\n`
+      );
+
+      continue;
+    }
+
+    const compressTimer = startTimer(algo);
+
+    const compressed = await compressString(data, algo);
+
+    compressTimer('compress');
+
+    const compressedSize = Buffer.from(compressed).byteLength;
+    const compressedSizeMB = bytesToMbs(compressedSize);
+
+    const compressionRatio = (
+      (1 - compressedSize / originalSize) *
+      100
+    ).toFixed(2);
+
+    const decompressTimer = startTimer(algo);
+
+    await decompressString(compressed, algo);
+
+    decompressTimer('decompress');
+
+    console.log(`Original size: ${originalSizeMB}MB`);
+    console.log(`Compressed size: ${compressedSizeMB}MB`);
+    console.log(`Compression ratio: ${compressionRatio}%\n`);
+  }
 };
