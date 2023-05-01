@@ -24,6 +24,7 @@
           "optimization": false,
           "externalDependencies": [
             "@adobe/aio-lib-analytics",
+            "@mongodb-js/zstd",
             "@nestjs/microservices",
             "@nestjs/websockets/socket-module",
             "@nestjs/microservices/microservices-module",

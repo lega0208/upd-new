@@ -23,10 +23,9 @@ export class FeedbackService {
   async updateFeedbackData(endDate?: DateType) {
     this.logger.log('Updating Feedback data');
 
-    const latestDataDate: Date | null = await this.feedbackModel
+    const latestDataDate: Date | null = (await this.feedbackModel
       .findOne({}, { date: 1 })
-      .sort({ date: -1 })
-      .transform((doc) => doc?.get('date'));
+      .sort({ date: -1 }))?.date;
 
     const dateRange = {
       start: dayjs(latestDataDate || '2020-01-01')

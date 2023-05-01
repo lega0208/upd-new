@@ -65,6 +65,17 @@ export class DbUpdateService {
     this.logger.setContext('DbUpdater');
   }
 
+  private setBlobLogTargets() {
+    const date = dayjs().format('YYYY-MM-DD');
+    const month = dayjs().format('YYYY-MM');
+
+    this.logger.setLogLevelTargets({
+      error: `${month}/db-update_errors_${date}`,
+      warn: `${month}/db-update_${date}`,
+      log: `${month}/db-update_${date}`,
+    });
+  }
+
   async updateSAT() {
     this.logger.log('Starting search assessment...');
     await this.searchAssessmentService.upsertPreviousSearchAssessment();
@@ -80,14 +91,7 @@ export class DbUpdateService {
 
   async updateAll(logToBlobs = false) {
     if (logToBlobs) {
-      const date = dayjs().format('YYYY-MM-DD');
-      const month = dayjs().format('YYYY-MM');
-
-      this.logger.setLogLevelTargets({
-        error: `${month}/db-update_errors_${date}`,
-        warn: `${month}/db-update_${date}`,
-        log: `${month}/db-update-${date}`,
-      });
+      this.setBlobLogTargets();
     }
 
     this.logger.log('Starting database updates...');
@@ -305,14 +309,7 @@ export class DbUpdateService {
 
   async recalculateViews(logToBlobs = false) {
     if (logToBlobs) {
-      const date = dayjs().format('YYYY-MM-DD');
-      const month = dayjs().format('YYYY-MM');
-
-      this.logger.setLogLevelTargets({
-        error: `${month}/db-update_errors_${date}`,
-        warn: `${month}/db-update_${date}`,
-        log: `${month}/db-update-${date}`,
-      });
+      this.setBlobLogTargets();
     }
 
     const dateRanges = dateRangeConfigs
