@@ -10,6 +10,8 @@ import { Page } from './page.schema';
 import { Task } from './task.schema';
 import { Project } from './project.schema';
 import { UxTest } from './ux-test.schema';
+import { DateRange } from '@dua-upd/utils-common';
+import { PageMetricsTS } from './page-metrics-ts.schema';
 
 export type PageMetricsDocument = PageMetrics & Document;
 
@@ -238,7 +240,7 @@ export type MetricsConfig<T> = {
 };
 
 export async function getAggregatedPageMetrics<T>(
-  this: Model<PageMetrics>,
+  this: PageMetricsModel,
   dateRange: string,
   selectedMetrics: (keyof T | MetricsConfig<T>)[],
   pagesFilter?: FilterQuery<PageMetrics>,
@@ -310,9 +312,114 @@ export async function getAggregatedPageMetrics<T>(
     .exec();
 }
 
+export async function toTimeSeries(
+  this: PageMetricsModel,
+  dateRange: DateRange<Date>
+) {
+  return await this.aggregate<PageMetricsTS>()
+    .match({ date: { $gte: dateRange.start, $lte: dateRange.end } })
+    .addFields({
+      meta: {
+        url: '$url',
+        page: '$page',
+        projects: {
+          $cond: {
+            if: {
+              $eq: [{ $size: { $ifNull: ['$projects', []] } }, 0],
+            },
+            then: '$$REMOVE',
+            else: '$projects',
+          },
+        },
+        tasks: {
+          $cond: {
+            if: {
+              $eq: [{ $size: { $ifNull: ['$tasks', []] } }, 0],
+            },
+            then: '$$REMOVE',
+            else: '$tasks',
+          },
+        },
+        ux_tests: {
+          $cond: {
+            if: {
+              $eq: [{ $size: { $ifNull: ['$ux_tests', []] } }, 0],
+            },
+            then: '$$REMOVE',
+            else: '$ux_tests',
+          },
+        },
+      },
+      average_time_spent: {
+        $ifNull: [{ $round: ['$average_time_spent', 2] }, 0],
+      },
+      bouncerate: { $ifNull: [{ $round: ['$bouncerate', 2] }, 0] },
+      gsc_total_ctr: { $ifNull: [{ $round: ['$gsc_total_ctr', 2] }, 0] },
+      gsc_total_impressions: {
+        $ifNull: [{ $round: ['$gsc_total_impressions', 2] }, 0],
+      },
+      gsc_total_position: {
+        $ifNull: [{ $round: ['$gsc_total_position', 2] }, 0],
+      },
+      gsc_searchterms: {
+        $cond: {
+          if: {
+            $eq: [{ $size: { $ifNull: ['$gsc_searchterms', []] } }, 0],
+          },
+          then: '$$REMOVE',
+          else: {
+            $map: {
+              input: '$gsc_searchterms',
+              as: 'searchterm',
+              in: {
+                clicks: '$$searchterm.clicks',
+                ctr: { $round: ['$$searchterm.ctr', 2] },
+                impressions: '$$searchterm.impressions',
+                position: { $round: ['$$searchterm.position', 2] },
+                term: '$$searchterm.term',
+              },
+            },
+          },
+        },
+      },
+      aa_searchterms: {
+        $cond: {
+          if: {
+            $eq: [{ $size: { $ifNull: ['$aa_searchterms', []] } }, 0],
+          },
+          then: '$$REMOVE',
+          else: {
+            $map: {
+              input: '$aa_searchterms',
+              as: 'searchterm',
+              in: {
+                term: '$$searchterm.term',
+                clicks: '$$searchterm.clicks',
+                position: '$$searchterm.position',
+              },
+            },
+          },
+        },
+      },
+    })
+    .project({
+      page: 0,
+      projects: 0,
+      tasks: 0,
+      ux_tests: 0,
+      url: 0,
+    })
+    .exec();
+}
+
 PageMetricsSchema.statics = {
   getAggregatedPageMetrics,
+  toTimeSeries,
 };
 
-export type PageMetricsModel = Model<PageMetrics> &
-  typeof PageMetricsSchema.statics;
+export type PageMetricsModel = Model<PageMetrics> & {
+  getAggregatedPageMetrics: typeof getAggregatedPageMetrics;
+  toTimeSeries: typeof toTimeSeries;
+};
+
+PageMetricsSchema.static('toTimeSeries', toTimeSeries);
