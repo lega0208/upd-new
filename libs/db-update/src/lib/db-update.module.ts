@@ -19,6 +19,7 @@ import { PageMetricsService } from './pages-metrics/page-metrics.service';
 import { PagesListService } from './pages-list/pages-list.service';
 import { InternalSearchTermsService } from './internal-search/search-terms.service';
 import { ActivityMapService } from './activity-map/activity-map.service';
+import { UrlsService } from './urls/urls.service';
 
 const date = dayjs().format('YYYY-MM-DD');
 const month = dayjs().format('YYYY-MM');
@@ -61,6 +62,7 @@ const month = dayjs().format('YYYY-MM');
       provide: AirtableClient.name,
       useValue: new AirtableClient(),
     },
+    UrlsService,
   ],
   exports: [
     AirtableClient.name,

@@ -236,6 +236,10 @@ export class BlobClient {
     return this.client.url;
   }
 
+  exists() {
+    return this.client.exists();
+  }
+
   async getProperties() {
     return this.client.getProperties();
   }

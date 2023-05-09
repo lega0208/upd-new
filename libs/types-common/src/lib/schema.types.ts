@@ -385,6 +385,19 @@ export interface IUxTest {
   attachments?: AttachmentData[];
 }
 
+export interface IUrl {
+  _id: Types.ObjectId;
+  url: string;
+  title?: string;
+  page?: Types.ObjectId;
+  redirect?: string;
+  last_checked?: Date;
+  last_modified?: Date;
+  is_404?: boolean;
+  latest_hash?: string;
+  latest_snapshot?: string;
+}
+
 export interface AttachmentData {
   id: string;
   url: string;

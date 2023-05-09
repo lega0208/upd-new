@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { type FilterQuery, Model, Types } from 'mongoose';
+import { type FilterQuery, Model } from 'mongoose';
 import { type Filter } from 'mongodb';
 import {
   CallDriver,
@@ -15,6 +15,8 @@ import {
   AAItemId,
   SearchAssessment,
   PageMetricsTS,
+  type PageMetricsModel,
+  Url,
 } from '../';
 import { AsyncLogTiming, logJson, prettyJson } from '@dua-upd/utils-common';
 import { AnyBulkWriteOperation } from 'mongodb';
@@ -25,8 +27,11 @@ import { PageVisits, PageVisitsView } from './db.views';
  * via DbService.collections
  *
  * MongoDB references:
+ *
  * [CRUD Operations docs]{@link https://www.mongodb.com/docs/v4.4/crud/}
+ *
  * [Aggregation pipeline explainer]{@link https://www.mongodb.com/docs/v4.4/core/aggregation-pipeline/}
+ *
  * [Aggregation pipeline reference]{@link https://www.mongodb.com/docs/v4.4/reference/aggregation/}
  */
 @Injectable()
@@ -44,6 +49,7 @@ export class DbService {
     projects: this.projects,
     aaItemIds: this.aaItemIds,
     searchAssessment: this.searchAssessment,
+    urls: this.urls,
   } as const;
 
   readonly views = {
@@ -61,7 +67,7 @@ export class DbService {
     @InjectModel(Overall.name, 'defaultConnection')
     private overall: Model<Overall>,
     @InjectModel(PageMetrics.name, 'defaultConnection')
-    private pageMetrics: Model<PageMetrics>,
+    private pageMetrics: PageMetricsModel,
     @InjectModel(PageMetricsTS.name, 'defaultConnection')
     private pageMetricsTS: Model<PageMetricsTS>,
     @InjectModel(Page.name, 'defaultConnection')
@@ -79,8 +85,51 @@ export class DbService {
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessment: Model<SearchAssessment>,
     @InjectModel(PageVisitsView.name, 'defaultConnection')
-    private pageVisits: Model<PageVisits>
+    private pageVisits: Model<PageVisits>,
+    @InjectModel(Url.name, 'defaultConnection')
+    private urls: Model<Url>
   ) {}
+
+  @AsyncLogTiming
+  async syncPageMetricsTimeSeries() {
+    const mostRecentTimeSeries = (
+      await this.pageMetricsTS
+        .findOne<{ date: Date }>({}, { date: 1 }, { sort: { date: -1 } })
+        .exec()
+    )?.date;
+
+    const mostRecentPageMetrics = (
+      await this.pageMetrics
+        .findOne<{ date: Date }>({}, { date: 1 }, { sort: { date: -1 } })
+        .exec()
+    )?.date;
+
+    if (!mostRecentPageMetrics) {
+      throw Error('No data found in the `pages_metrics` collection');
+    }
+
+    if (!mostRecentTimeSeries) {
+      throw Error(
+        'No time series data found in pageMetricsTS collection.\n' +
+          'This is not a good way to populate the collection from scratch, mongodump/mongorestore should be used instead.'
+      );
+    }
+
+    const uniqueDates = await this.pageMetrics
+      .distinct<Date>('date', { date: { $gt: mostRecentTimeSeries } })
+      .exec();
+
+    uniqueDates.sort((a, b) => a.getTime() - b.getTime());
+
+    for (const date of uniqueDates) {
+      const metrics = await this.pageMetrics.toTimeSeries({
+        start: date,
+        end: date,
+      });
+
+      await this.pageMetricsTS.insertMany(metrics);
+    }
+  }
 
   @AsyncLogTiming
   async validatePageMetricsRefs(filter: FilterQuery<PageMetrics> = {}) {

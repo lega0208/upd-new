@@ -220,7 +220,7 @@ export async function batchAwait<T, U>(
   batchSize: number,
   delay: number | { delay: number } = 0
 ): Promise<U[]> {
-  const promises = [];
+  const promises: Promise<U>[] = [];
 
   for (const params of paramsArray) {
     const promise = fn(params);
@@ -311,4 +311,57 @@ export class TimingUtility {
     console.log(message);
     this.previousIterationEndTime = Date.now();
   }
+}
+
+/*
+ * Decorator for retrying failed http requests
+ */
+export function Retry(retries: number, delay: number) {
+  return function (
+    target: object,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (
+      ...args: Parameters<typeof originalMethod>[]
+    ) {
+      let delayMultiplier = 1;
+
+      const attempt = async (
+        retries: number,
+        delay: number
+      ): Promise<ReturnType<typeof originalMethod>> => {
+        try {
+          return await originalMethod.apply(this, args);
+        } catch (err) {
+          console.error(
+            chalk.red(
+              `Error occurred in ${originalMethod.name}, retrying (${retries} attempts left)`
+            )
+          );
+
+          if (retries > 0) {
+            delayMultiplier++;
+
+            await wait(delay * delayMultiplier);
+
+            return await attempt(retries - 1, delay);
+          } else {
+            console.error(
+              chalk.red(`All retry attempts for ${originalMethod.name} failed:`)
+            );
+            console.error(chalk.red(err));
+
+            throw err;
+          }
+        }
+      };
+
+      return attempt(retries, delay);
+    };
+
+    return descriptor;
+  };
 }

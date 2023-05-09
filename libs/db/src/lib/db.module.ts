@@ -28,6 +28,8 @@ import {
   UxTestSchema,
   SearchAssessment,
   SearchAssessmentSchema,
+  Url,
+  UrlSchema,
 } from './db.schemas';
 import { PageVisitsViewSchema, PageVisitsView } from './db.views';
 
@@ -47,6 +49,7 @@ export const models = {
   projects: { model: Project, schema: ProjectSchema },
   searchAssessment: { model: SearchAssessment, schema: SearchAssessmentSchema },
   aaItemIds: { model: AAItemId, schema: AAItemIdSchema },
+  urls: { model: Url, schema: UrlSchema },
 } as const;
 
 export const views = {

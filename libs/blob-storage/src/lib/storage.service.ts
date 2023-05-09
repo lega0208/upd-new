@@ -18,6 +18,7 @@ export const blobModels = [
   'db_updates',
   'aa_raw',
   'feedback',
+  'urls'
 ] as const;
 
 export type BlobModels = typeof blobModels;
@@ -45,6 +46,11 @@ export class BlobStorageService {
       path: 'feedback',
       containerName: 'raw-data',
       compression: 'zstd',
+    },
+    urls: {
+      path: 'urls',
+      containerName: 'raw-data',
+      compression: 'zstd',
     }
   } as const;
 
@@ -53,6 +59,7 @@ export class BlobStorageService {
     project_attachments: null,
     aa_raw: null,
     feedback: null,
+    urls: null
   };
 
   private async configureBlobs(): Promise<BlobStorageService> {
