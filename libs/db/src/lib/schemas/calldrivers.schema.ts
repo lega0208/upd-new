@@ -6,6 +6,7 @@ import type {
   ICallDriver,
   TopCalldriverTopics,
 } from '@dua-upd/types-common';
+import { percentChange } from '@dua-upd/utils-common';
 
 export type CallDriverDocument = CallDriver & Document;
 
@@ -179,7 +180,7 @@ CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
         ...currentData,
         change: !previousData?.calls
           ? 'Infinity'
-          : (currentData?.calls ?? 0 - previousData.calls) / previousData.calls,
+          : percentChange(currentData.calls, previousData.calls),
       };
     })
     .sort((a, b) => (b.calls ?? 0) - (a.calls ?? 0));
