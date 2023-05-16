@@ -204,7 +204,7 @@ export class ReadabilityService {
     const sentence = this.sentenceCount(text);
     const syllables = this.syllableCountFr(text);
     const wordsPerSentence = word / sentence;
-    const asw = syllables / word;
+    const syllablesPerWord = syllables / word;
 
     // Kandel-Moles formula
     return readability.fleschReadingEaseToGrade(207 - 1.015 * asl - 73.6 * asw);
