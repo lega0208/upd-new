@@ -77,8 +77,8 @@ export class ReadabilityService {
         final_fk = this.fleschKincaidGradeFr(postText);
       } else {
         syllables = readability.syllableCount(postText);
-        original_fk = readability.fleschReadingEase(preText);
-        final_fk = readability.fleschReadingEase(postText);
+        original_fk = readability.fleschKincaidGrade(preText);
+        final_fk = readability.fleschKincaidGrade(postText);
       }
 
       // HTML string to be parsed
