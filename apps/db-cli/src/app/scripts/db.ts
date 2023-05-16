@@ -1,5 +1,5 @@
 import { DbService } from '@dua-upd/db';
-import { DbUpdateService } from '@dua-upd/db-update';
+import { DbUpdateService, UrlsService } from '@dua-upd/db-update';
 import { readFile, writeFile } from 'fs/promises';
 import { Types } from 'mongoose';
 import { IFeedback } from '@dua-upd/types-common';
@@ -74,4 +74,15 @@ export async function repopulateFeedbackFromSnapshot(
   await db.collections.feedback.deleteMany({});
 
   await db.collections.feedback.insertMany(feedback);
+}
+
+
+export async function syncUrlsCollection(
+  _,
+  __,
+  ___,
+  blob: BlobStorageService,
+  urlsService: UrlsService
+) {
+  await urlsService.updateUrls();
 }

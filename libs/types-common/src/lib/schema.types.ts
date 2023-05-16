@@ -385,6 +385,10 @@ export interface IUxTest {
   attachments?: AttachmentData[];
 }
 
+export interface UrlHash {
+  hash: string;
+  date: Date;
+}
 export interface IUrl {
   _id: Types.ObjectId;
   url: string;
@@ -394,7 +398,7 @@ export interface IUrl {
   last_checked?: Date;
   last_modified?: Date;
   is_404?: boolean;
-  latest_hash?: string;
+  hashes?: UrlHash[];
   latest_snapshot?: string;
 }
 

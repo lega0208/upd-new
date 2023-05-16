@@ -1,7 +1,7 @@
 import { LoggerService } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
-import cheerio from 'cheerio/lib/slim';
-import { batchAwait, Retry, squishTrim } from '../utils-common';
+import * as cheerio from 'cheerio/lib/slim';
+import { batchAwait, Retry, squishTrim, TimingUtility } from '../utils-common';
 import { RateLimitUtils } from './utils';
 import { Observable } from 'rxjs';
 
@@ -15,6 +15,7 @@ export type HttpClientOptions = {
 
 export type HttpClientResponse = {
   url: string;
+  title?: string;
   body?: string;
   is404: boolean;
   redirect?: string;
@@ -22,8 +23,11 @@ export type HttpClientResponse = {
   error?: Error;
 };
 
+const titleRegex = /<title>[\s\S]+?<\/title>/i;
+const canadaDotCaRegex = /\s+(-|&nbsp;|&ndash;)\s+Canada\.ca/i;
+
 export class HttpClient {
-  private rateLimitDelay = 10;
+  private rateLimitDelay = 15;
   private delayContainer = { delay: this.rateLimitDelay };
   private readonly batchSize: number;
   private readonly logger: LoggerService | Console = console;
@@ -32,7 +36,7 @@ export class HttpClient {
   private rateLimitUtils = new RateLimitUtils();
 
   constructor(options: HttpClientOptions = {}) {
-    this.rateLimitDelay = options.rateLimitDelay || this.rateLimitDelay;
+    this.delay = options.rateLimitDelay || this.rateLimitDelay;
     this.batchSize = options.batchSize || 100;
     this.logger = options.logger || this.logger;
     this.rateLimitStats = options.rateLimitStats || false;
@@ -44,14 +48,14 @@ export class HttpClient {
     this.delayContainer.delay = delay;
   }
 
-  @Retry(4, 500)
+  @Retry(4, 250)
   async get(url: string): Promise<HttpClientResponse> {
     if (this.rateLimitStats) {
       this.rateLimitUtils.incrementRequests();
       this.rateLimitUtils.updateStats();
     }
 
-    const rateLimitExceededRegex = /503/;
+    const rateLimitExceededRegex = /503|Access Denied/;
     const notFoundRegex = /404/;
 
     const protocolRegex = /^https?:\/\//;
@@ -81,11 +85,25 @@ export class HttpClient {
         return Promise.reject(new Error(`404: ${url}`));
       }
 
+      const rawTitle = (titleRegex.exec(response.data) || [''])[0].replace(
+        canadaDotCaRegex,
+        ''
+      );
+
+      const title = squishTrim(cheerio.load(rawTitle)('title').text());
+
+      if (title === 'Access Denied') {
+        // there's a warning about a locally caught error,
+        // but we need to throw an error for the retry decorator to work
+        throw new Error('Access Denied');
+      }
+
       const redirect = isRedirect ? { redirect: responseUrl } : {};
 
       return {
-        url,
+        url: url.replace('https://', ''),
         body: response.data,
+        title,
         ...redirect,
         is404,
       };
@@ -115,7 +133,7 @@ export class HttpClient {
 
           this.rateLimitUtils.reset();
 
-          this.delay += 10;
+          this.delay = this.rateLimitDelay + 10;
         }
 
         if (notFoundRegex.test(e.message)) {
@@ -136,9 +154,30 @@ export class HttpClient {
 
   async getAll<T>(
     urls: string[],
-    callback: (data: HttpClientResponse) => T = (data) => data as T
+    callback: (data: HttpClientResponse) => T = (data) => data as T,
+    logProgress = false
   ) {
-    const batchFunc = async (url: string) => this.get(url).then(callback);
+    const progressTimer = new TimingUtility(urls.length);
+
+    if (this.rateLimitStats && !this.rateLimitUtils.startTime) {
+      this.rateLimitUtils.startTimer();
+    }
+
+    const batchFunc = async (url: string) =>
+      this.get(url).then(async (result) => {
+        try {
+          return await callback(result);
+        } catch (err) {
+          this.logger.error(`Error in callback for ${url}:`);
+          this.logger.error((err as Error).stack);
+
+          return;
+        } finally {
+          if (logProgress) {
+            progressTimer.logIteration();
+          }
+        }
+      });
 
     return await batchAwait(
       urls,
@@ -146,13 +185,5 @@ export class HttpClient {
       this.batchSize,
       this.delayContainer
     );
-  }
-
-  getAllObservable(urls: string[]) {
-    return new Observable<HttpClientResponse>((subscriber) => {
-      this.getAll(urls, (data) => subscriber.next(data))
-        .then(() => subscriber.complete())
-        .catch((err) => subscriber.error(err));
-    });
   }
 }

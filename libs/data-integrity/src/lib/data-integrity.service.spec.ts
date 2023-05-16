@@ -4,13 +4,14 @@ import { DbModule } from '@dua-upd/db';
 import { DbUpdateModule, DbUpdateService } from '@dua-upd/db-update';
 import { DataIntegrityService } from './data-integrity.service';
 import { filterInvalidUrls } from './utils';
+import { environment } from '../environments/environment';
 
 describe('DataIntegrityService', () => {
   let service: DataIntegrityService;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [DbModule, DbUpdateModule],
+      imports: [DbModule, DbUpdateModule.register(environment.production)],
       providers: [DataIntegrityService, DbUpdateService, ConsoleLogger],
       exports: [
         DataIntegrityService,

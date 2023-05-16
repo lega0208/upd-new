@@ -274,6 +274,10 @@ export class BlobClient {
     return this;
   }
 
+  async setMetadata(metadata: { [p: string]: string }) {
+    await this.client.setMetadata(metadata);
+  }
+
   async sizesAreDifferent(fileSizeBytes: number) {
     if (!(await this.client.exists())) {
       return true;
@@ -313,7 +317,7 @@ export class BlobClient {
 
   async downloadToFile(
     destinationFilePath: string,
-    options?: BlobDownloadToBufferOptions & { decompressData?: boolean; }
+    options?: BlobDownloadToBufferOptions & { decompressData?: boolean }
   ) {
     if (!(await this.client.exists())) {
       throw Error(`The requested blob "${this.client.name}" does not exist`);
@@ -326,7 +330,7 @@ export class BlobClient {
         blockSize: options?.blockSize || 4_194_304,
         concurrency: options?.concurrency || 20,
         onProgress: options?.onProgress,
-      }
+      };
 
       return this.client
         .downloadToBuffer(0, undefined, opts)
@@ -391,6 +395,7 @@ export class BlobClient {
     string: string,
     options?: BlockBlobParallelUploadOptions & {
       compression?: CompressionAlgorithm;
+      logProgress?: boolean;
     }
   ) {
     if (!(this.client instanceof BlockBlobClient)) {
@@ -413,14 +418,17 @@ export class BlobClient {
       : Buffer.from(string);
 
     const fileBytesSize = stringBuffer.byteLength;
-    const progressLogger = makeFileUploadProgressLogger(fileBytesSize);
+
+    const onProgress = options?.logProgress
+      ? { onProgress: makeFileUploadProgressLogger(fileBytesSize) }
+      : {};
 
     if (await this.sizesAreDifferent(fileBytesSize)) {
       try {
         return await this.client.uploadData(stringBuffer, {
           blockSize,
           maxSingleShotSize: options?.maxSingleShotSize,
-          onProgress: progressLogger,
+          ...onProgress,
           concurrency: options?.concurrency,
           blobHTTPHeaders: options?.blobHTTPHeaders,
           metadata: options?.metadata,

@@ -75,13 +75,13 @@ export const views = {
   exports: [MongooseModule],
 })
 export class DbModule {
-  static forRoot(production: boolean, dbName?: string) {
+  static forRoot(production: boolean, dbName = 'upd-test') {
     const connectionString = getDbConnectionString(production, dbName);
     console.log(connectionString);
 
     return MongooseModule.forRoot(connectionString, {
       connectionName: 'defaultConnection',
-      dbName: 'upd-test',
+      dbName,
       compressors: ['zstd', 'snappy'],
       retryWrites: false,
     });

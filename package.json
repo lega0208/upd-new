@@ -69,6 +69,7 @@
     "dotenv": "^10.0.0",
     "file-saver": "^2.0.5",
     "helmet": "^5.0.1",
+    "html-minifier-terser": "^7.2.0",
     "jsonwebtoken": "^9.0.0",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.5.28",

@@ -338,7 +338,8 @@ export function Retry(retries: number, delay: number) {
         } catch (err) {
           console.error(
             chalk.red(
-              `Error occurred in ${originalMethod.name}, retrying (${retries} attempts left)`
+              `Error occurred in ${originalMethod.name}, retrying (${retries} attempts left)` +
+              `\n${err}`
             )
           );
 
@@ -347,7 +348,7 @@ export function Retry(retries: number, delay: number) {
 
             await wait(delay * delayMultiplier);
 
-            return await attempt(retries - 1, delay);
+            return await attempt(retries - 1, delay * delayMultiplier);
           } else {
             console.error(
               chalk.red(`All retry attempts for ${originalMethod.name} failed:`)
