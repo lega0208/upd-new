@@ -19,65 +19,77 @@ import { PageMetricsService } from './pages-metrics/page-metrics.service';
 import { PagesListService } from './pages-list/pages-list.service';
 import { InternalSearchTermsService } from './internal-search/search-terms.service';
 import { ActivityMapService } from './activity-map/activity-map.service';
+import { UrlsService } from './urls/urls.service';
 
 const date = dayjs().format('YYYY-MM-DD');
 const month = dayjs().format('YYYY-MM');
 
-@Module({
-  imports: [
-    CacheModule.register({ ttl: 12 * 60 * 60 }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: process.env.DOTENV_CONFIG_PATH || '.env',
-    }),
-    DbModule,
-    ExternalDataModule,
-    BlobStorageModule,
-    LoggerModule.withBlobLogger('DB_UPDATE_LOGGER', {
-      blobModel: 'db_updates',
-      context: 'db-update',
-      logLevelTargets: {
-        error: `${month}/db-update_errors_${date}`,
-        warn: `${month}/db-update_${date}`,
-        log: `${month}/db-update-${date}`,
-      },
-    }),
-  ],
-  providers: [
-    AirtableService,
-    CalldriversService,
-    ConsoleLogger,
-    DbService,
-    DbUpdateService,
-    InternalSearchTermsService,
-    ActivityMapService,
-    FeedbackService,
-    OverallMetricsService,
-    PageUpdateService,
-    PageMetricsService,
-    PagesListService,
-    SearchAssessmentService,
-    {
-      provide: AirtableClient.name,
-      useValue: new AirtableClient(),
-    },
-  ],
-  exports: [
-    AirtableClient.name,
-    AirtableService,
-    CalldriversService,
-    DbModule,
-    DbService,
-    DbUpdateService,
-    ExternalDataModule,
-    FeedbackService,
-    InternalSearchTermsService,
-    ActivityMapService,
-    OverallMetricsService,
-    PageMetricsService,
-    PageUpdateService,
-    PagesListService,
-    SearchAssessmentService,
-  ],
-})
-export class DbUpdateModule {}
+@Module({})
+export class DbUpdateModule {
+  static register(production = false) {
+    return {
+      module: DbUpdateModule,
+      imports: [
+        CacheModule.register({ ttl: 12 * 60 * 60 }),
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: process.env.DOTENV_CONFIG_PATH || '.env',
+        }),
+        DbModule,
+        ExternalDataModule,
+        BlobStorageModule,
+        LoggerModule.withBlobLogger('DB_UPDATE_LOGGER', {
+          blobModel: 'db_updates',
+          context: 'db-update',
+          logLevelTargets: {
+            error: `${month}/db-update_errors_${date}`,
+            warn: `${month}/db-update_${date}`,
+            log: `${month}/db-update-${date}`,
+          },
+        }),
+      ],
+      providers: [
+        AirtableService,
+        CalldriversService,
+        ConsoleLogger,
+        DbService,
+        DbUpdateService,
+        InternalSearchTermsService,
+        ActivityMapService,
+        FeedbackService,
+        OverallMetricsService,
+        PageUpdateService,
+        PageMetricsService,
+        PagesListService,
+        SearchAssessmentService,
+        UrlsService,
+        {
+          provide: AirtableClient.name,
+          useValue: new AirtableClient(),
+        },
+        {
+          provide: 'ENV',
+          useValue: production,
+        },
+      ],
+      exports: [
+        AirtableClient.name,
+        AirtableService,
+        CalldriversService,
+        DbModule,
+        DbService,
+        DbUpdateService,
+        ExternalDataModule,
+        FeedbackService,
+        InternalSearchTermsService,
+        ActivityMapService,
+        OverallMetricsService,
+        PageMetricsService,
+        PageUpdateService,
+        PagesListService,
+        SearchAssessmentService,
+        UrlsService,
+      ],
+    };
+  }
+}

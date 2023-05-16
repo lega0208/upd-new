@@ -18,13 +18,5 @@
     "type": "es6",
     "strict": true,
     "noInterop": false
-  },
-  "exclude": [
-    "jest.config.js",
-    "./src/**/.*.spec.ts$",
-    "./**/.*.spec.ts$",
-    "./src/**/jest-setup.ts$",
-    "./**/jest-setup.ts$",
-    "./**/.*.js$"
-  ]
+  }
 }

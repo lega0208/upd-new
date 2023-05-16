@@ -10,3 +10,4 @@ export * from './lib/pages-list/pages-list.service';
 export * from './lib/internal-search/search-terms.service';
 export * from './lib/activity-map/activity-map.service';
 export * from './lib/pipelines';
+export * from './lib/urls/urls.service';

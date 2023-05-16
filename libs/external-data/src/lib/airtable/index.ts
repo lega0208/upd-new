@@ -243,24 +243,26 @@ export class AirtableClient {
       : {};
     const query = this.createQuery(bases.TASKS_INVENTORY, 'Tasks', params);
 
-    return (await this.selectAll(query)).map(({ id, fields }) => ({
-      airtable_id: id,
-      title: squishTrim(fields['Task']),
-      group: squishTrim(fields['Group']),
-      subgroup: squishTrim(fields['Sub-Group']),
-      topic: squishTrim(fields['Topic']),
-      subtopic: squishTrim(fields['Sub Topic']),
-      sub_subtopic: fields['Sub-sub-Topic']?.map(squishTrim),
-      ux_tests: fields['User Testing Projects'],
-      user_type: fields['User Type']?.map(squishTrim),
-      pages: fields['Pages'],
-      program: squishTrim(fields['Program']),
-      service: squishTrim(fields['Services']),
-      user_journey: fields['User Journey']?.map(squishTrim),
-      status: squishTrim(fields['Status']),
-      channel: fields['Channel']?.map(squishTrim),
-      core: fields['Core']?.map(squishTrim),
-    })) as TaskData[];
+    return (await this.selectAll(query))
+      .filter(({ fields }) => Object.values(fields).some((value) => value))
+      .map(({ id, fields }) => ({
+        airtable_id: id,
+        title: squishTrim(fields['Task']),
+        group: squishTrim(fields['Group']),
+        subgroup: squishTrim(fields['Sub-Group']),
+        topic: squishTrim(fields['Topic']),
+        subtopic: squishTrim(fields['Sub Topic']),
+        sub_subtopic: fields['Sub-sub-Topic']?.map(squishTrim),
+        ux_tests: fields['User Testing Projects'],
+        user_type: fields['User Type']?.map(squishTrim),
+        pages: fields['Pages'],
+        program: squishTrim(fields['Program']),
+        service: squishTrim(fields['Services']),
+        user_journey: fields['User Journey']?.map(squishTrim),
+        status: squishTrim(fields['Status']),
+        channel: fields['Channel']?.map(squishTrim),
+        core: fields['Core']?.map(squishTrim),
+      })) as TaskData[];
   }
 
   async getUxTests(lastUpdatedDate?: DateType): Promise<UxTestData[]> {
@@ -275,52 +277,58 @@ export class AirtableClient {
       params
     );
 
-    return (await this.selectAll(query)).map(({ id, fields }) => {
-      const results = {
-        airtable_id: id,
-        date: fields['Date']
-          ? dayjs.utc(fields['Date']).toDate()
-          : fields['Date'],
-        title: fields['UX Research Project Title'],
-        success_rate: fields['Success Rate'],
-        test_type: fields['Test Type'],
-        session_type: Array.isArray(fields['Session Type'])
-          ? fields['Session Type'][0]
-          : undefined,
-        scenario: fields['Scenario/Questions'],
-        tasks: fields['Task'],
-        subtasks: fields['Sub-Task'],
-        pages: fields['Pages_RecordIds'],
-        vendor: fields['Vendor'],
-        version_tested: fields['Version Tested'],
-        github_repo: fields['GitHub Repo'],
-        total_users: fields['# of Users'],
-        successful_users: fields['Succesful Users'],
-        program: fields['Program/Service'],
-        branch: fields['Branch'],
-        audience: fields['Audience'],
-        project_lead: fields['Project Lead'],
-        launch_date: fields['Launch Date'],
-        status: fields['Status'],
-        cops: fields['COPS'],
-        attachments: fields['Attachments (Ex. Scorecard)'],
-        description: fields['Project Description'],
-      };
+    return (await this.selectAll(query))
+      .filter(({ fields }) => Object.values(fields).some((value) => value))
+      .map(({ id, fields }) => {
+        const results = {
+          airtable_id: id,
+          date: fields['Date']
+            ? dayjs.utc(fields['Date']).toDate()
+            : fields['Date'],
+          title: fields['UX Research Project Title'],
+          success_rate: fields['Success Rate'],
+          test_type: fields['Test Type'],
+          session_type: Array.isArray(fields['Session Type'])
+            ? fields['Session Type'][0]
+            : undefined,
+          scenario: fields['Scenario/Questions'],
+          tasks: fields['Task'],
+          subtasks: fields['Sub-Task'],
+          pages: fields['Pages_RecordIds'],
+          vendor: fields['Vendor'],
+          version_tested: fields['Version Tested'],
+          github_repo: fields['GitHub Repo'],
+          total_users: fields['# of Users'],
+          successful_users: fields['Succesful Users'],
+          program: fields['Program/Service'],
+          branch: fields['Branch'],
+          audience: fields['Audience'],
+          project_lead: fields['Project Lead'],
+          launch_date: fields['Launch Date'],
+          status: fields['Status'],
+          cops: fields['COPS'],
+          attachments: fields['Attachments (Ex. Scorecard)'],
+          description: fields['Project Description'],
+        };
 
-      return Object.fromEntries(
-        Object.entries(results).map(([key, val]) => {
-          if (typeof val === 'string') {
-            return [key, squishTrim(val)];
-          }
+        return Object.fromEntries(
+          Object.entries(results).map(([key, val]) => {
+            if (typeof val === 'string') {
+              return [key, squishTrim(val)];
+            }
 
-          if (Array.isArray(val) && val.length && typeof val[0] === 'string') {
-            return [key, val.map(squishTrim)];
-          }
+            if (
+              Array.isArray(val) &&
+              val.length &&
+              typeof val[0] === 'string'
+            ) {
+              return [key, val.map(squishTrim)];
+            }
 
-          return [key, val];
-        })
-      ) as UxTestData;
-    });
+            return [key, val];
+          })
+        ) as UxTestData;
+      });
   }
 
   async getPages(lastUpdatedDate?: DateType): Promise<PageData[]> {

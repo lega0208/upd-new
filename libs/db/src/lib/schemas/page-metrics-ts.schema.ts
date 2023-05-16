@@ -228,108 +228,21 @@ export class PageMetricsTS {
 
 export const PageMetricsTSSchema = SchemaFactory.createForClass(PageMetricsTS);
 
-PageMetricsTSSchema.index({ date: 1, 'meta.url': 1 }, { unique: true });
+PageMetricsTSSchema.index({ date: -1, 'meta.url': 1 }, { background: true, unique: true });
 PageMetricsTSSchema.index(
-  { date: 1, 'meta.page': 1 },
+  { date: -1, 'meta.page': 1 },
   { background: true, partialFilterExpression: { 'meta.page': { $exists: true } } }
 );
 PageMetricsTSSchema.index(
-  { date: 1, 'meta.projects': 1 },
+  { date: -1, 'meta.projects': 1 },
   { background: true, partialFilterExpression: { 'meta.projects': { $exists: true } } }
 );
 PageMetricsTSSchema.index(
-  { date: 1, 'meta.tasks': 1 },
+  { date: -1, 'meta.tasks': 1 },
   { background: true, partialFilterExpression: { 'meta.tasks': { $exists: true } } }
 );
 PageMetricsTSSchema.index(
-  { date: 1, 'meta.ux_tests': 1 },
+  { date: -1, 'meta.ux_tests': 1 },
   { background: true, partialFilterExpression: { 'meta.ux_tests': { $exists: true } } }
 );
 
-// export function getPageMetricsModel() {
-//   return model(PageMetrics.name, PageMetricsSchema);
-// }
-
-// export type MetricsConfig<T> = {
-//   [key in AccumulatorOperator]?: keyof Partial<T>;
-// };
-
-// export async function getAggregatedPageMetrics<T>(
-//   this: Model<PageMetrics>,
-//   dateRange: string,
-//   selectedMetrics: (keyof T | MetricsConfig<T>)[],
-//   pagesFilter?: FilterQuery<PageMetrics>,
-//   sortConfig?: { [key in keyof Partial<T>]: 1 | -1 }
-// ): Promise<T[]> {
-//   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
-//
-//   const metricsProjections: Record<string, number> = {};
-//   const metricsGroupAggregations: Record<
-//     string,
-//     { [key in AccumulatorOperator]?: string }
-//   > = {};
-//   const metricsSort: Record<string, 1 | -1> = sortConfig || {};
-//
-//   for (const [i, metric] of selectedMetrics.entries()) {
-//     const metricName =
-//       typeof metric === 'string' ? metric : Object.values(metric)[0];
-//     const metricOperator =
-//       typeof metric === 'string' ? '$sum' : Object.keys(metric)[0];
-//
-//     metricsProjections[metricName] = 1;
-//     metricsGroupAggregations[metricName] = {
-//       [metricOperator]: `$${metricName}`,
-//     };
-//
-//     if (!sortConfig && i === 0) {
-//       metricsSort[metricName] = -1;
-//     }
-//   }
-//   const pagesFilterQuery = pagesFilter || {};
-//
-//   return await this.aggregate<T>()
-//     .match({
-//       date: {
-//         $gte: startDate,
-//         $lte: endDate,
-//       },
-//       page: { $exists: true },
-//       ...pagesFilterQuery,
-//     })
-//     .project({
-//       page: 1,
-//       date: 1,
-//       ...metricsProjections,
-//     })
-//     .group({
-//       _id: '$page',
-//       ...metricsGroupAggregations,
-//     })
-//     .lookup({
-//       from: 'pages',
-//       localField: '_id',
-//       foreignField: '_id',
-//       as: 'page',
-//     })
-//     .project({
-//       ...metricsProjections,
-//       url: {
-//         $first: '$page.url',
-//       },
-//       title: {
-//         $first: '$page.title',
-//       },
-//       all_urls: {
-//         $first: '$page.all_urls',
-//       },
-//     })
-//     .sort(metricsSort)
-//     .exec();
-// }
-//
-// PageMetricsSchema.statics = {
-//   getAggregatedPageMetrics,
-// };
-//
-// export type PageMetricsModel = Model<PageMetrics> &
-//   typeof PageMetricsSchema.statics;

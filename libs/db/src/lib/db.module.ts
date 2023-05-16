@@ -28,6 +28,8 @@ import {
   UxTestSchema,
   SearchAssessment,
   SearchAssessmentSchema,
+  Url,
+  UrlSchema,
 } from './db.schemas';
 import { PageVisitsViewSchema, PageVisitsView } from './db.views';
 
@@ -47,6 +49,7 @@ export const models = {
   projects: { model: Project, schema: ProjectSchema },
   searchAssessment: { model: SearchAssessment, schema: SearchAssessmentSchema },
   aaItemIds: { model: AAItemId, schema: AAItemIdSchema },
+  urls: { model: Url, schema: UrlSchema },
 } as const;
 
 export const views = {
@@ -72,13 +75,13 @@ export const views = {
   exports: [MongooseModule],
 })
 export class DbModule {
-  static forRoot(production: boolean, dbName?: string) {
+  static forRoot(production: boolean, dbName = 'upd-test') {
     const connectionString = getDbConnectionString(production, dbName);
     console.log(connectionString);
 
     return MongooseModule.forRoot(connectionString, {
       connectionName: 'defaultConnection',
-      dbName: 'upd-test',
+      dbName,
       compressors: ['zstd', 'snappy'],
       retryWrites: false,
     });

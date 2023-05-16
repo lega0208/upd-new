@@ -1,17 +1,17 @@
+import { Inject } from '@nestjs/common';
+import chalk from 'chalk';
 import {
   Command,
   CommandRunner,
   InquirerService,
   Option,
 } from 'nest-commander';
-import { DbUpdateService } from '@dua-upd/db-update';
+import { BlobStorageService } from '@dua-upd/blob-storage';
 import { DataIntegrityService } from '@dua-upd/data-integrity';
 import { DbService } from '@dua-upd/db';
-import * as scripts from './scripts';
-import chalk from 'chalk';
+import { DbUpdateService, UrlsService } from '@dua-upd/db-update';
 import { LoggerService } from '@dua-upd/logger';
-import { BlobStorageService } from '@dua-upd/blob-storage';
-import { Inject } from '@nestjs/common';
+import * as scripts from './scripts';
 
 // Use this interface to add any other dependencies to be passed as args
 export type DbScript<Args extends unknown[] = unknown[]> = (
@@ -30,7 +30,8 @@ export class RunScriptCommand extends CommandRunner {
     private readonly dbUpdateService: DbUpdateService,
     private readonly db: DbService,
     private readonly logger: LoggerService,
-    @Inject(BlobStorageService.name) private readonly blob: BlobStorageService
+    @Inject(BlobStorageService.name) private readonly blob: BlobStorageService,
+    private readonly urlService: UrlsService,
   ) {
     super();
   }
@@ -42,6 +43,7 @@ export class RunScriptCommand extends CommandRunner {
       this.dbUpdateService,
       this.logger,
       this.blob,
+      this.urlService,
     ];
 
     try {

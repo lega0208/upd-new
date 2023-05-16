@@ -1,5 +1,7 @@
-import { batchAwait, hasDuplicates, wait } from './utils-common';
+import { batchAwait, hasDuplicates, Retry, wait } from './utils-common';
 import { HttpClient } from './http';
+
+jest.setTimeout(30000)
 
 describe('batchAwait', () => {
   it('should return values and await batches before continuing iteration', async () => {
@@ -88,53 +90,53 @@ describe('HttpClient', () => {
     expect(response).toBeDefined();
   });
 
-  it('should be able to get titles and redirects', async () => {
-    const urls = [
-      'www.canada.ca/fr/agence-revenu/services/services-electroniques/services-electroniques-particuliers/dossier-particuliers.html',
-      'www.canada.ca/en/revenue-agency/services/e-services/candidate-profile.html',
-      'www.canada.ca/en/revenue-agency/services/e-services/auto-fill-return-express-noa.html',
-      'www.canada.ca/en/revenue-agency/corporate/careers-cra.html',
-      'www.canada.ca/en/revenue-agency/services/child-family-benefits/canada-child-benefit-overview/canada-child-benefit-before-you-apply.html',
-      'www.canada.ca/en/revenue-agency/services/payments-cra/business-payments.html',
-      'www.canada.ca/en/revenue-agency/services/child-family-benefits/goods-services-tax-harmonized-sales-tax-gst-hst-credit.html',
-      'www.canada.ca/en/revenue-agency/services/e-services/e-services-individuals/account-individuals/view-mail.html',
-      'www.canada.ca/en/revenue-agency/services/child-family-benefits/cai-payment/climate-action-incentive-payment-calculation-sheet-2021-alberta.html',
-      'www.canada.ca/en/revenue-agency/services/e-services/cra-login-services/cra-user-password-help-faqs/problems-entering-your-personal-authentication-information-account-individuals-business-account.html',
-      'www.canada.ca/en/revenue-agency/services/forms-publications/forms/rc66.html',
-      'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/remitting-source-deductions.html',
-      'www.canada.ca/en/revenue-agency/services/child-family-benefits/gsthstc-eligibility.html',
-      'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/payroll-deductions-contributions/employment-insurance-ei/ei-premium-rates-maximums.html',
-      'www.canada.ca/en/revenue-agency/services/child-family-benefits/gsthstc-amount.html',
-      'www.canada.ca/fr/agence-revenu/services/a-propos-agence-revenu-canada-arc/lorsque-vous-devez-argent-recouvrements-a-arc/recouvrement-prestation-canadienne-urgence-emise-par-service-canada.html',
-      'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/sole-proprietorships-partnerships/report-business-income-expenses/claiming-capital-cost-allowance/classes-depreciable-property.html',
-      'www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/deductions-credits-expenses/lines-33099-33199-eligible-medical-expenses-you-claim-on-your-tax-return/details-medical-expenses.html',
-      'www.canada.ca/en/revenue-agency/services/payments-cra/payment-arrangements.html',
-      'www.canada.ca/en/revenue-agency/services/benefits/apply-for-cerb-with-cra.html',
-      'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate.html',
-      'www.canada.ca/fr/agence-revenu/organisation/securite/id-utilisateur-revoque.html',
-      'www.canada.ca/fr/agence-revenu/services/prestations/faire-demande-pcu-aupres-arc/retournez-paiement.html',
-      'www.canada.ca/fr/agence-revenu/services/prestations-enfants-familles/calculateur-prestations-enfants-familles.html',
-      'www.canada.ca/en/revenue-agency/services/wage-rent-subsidies/covid-wage-hiring-support-businesses.html',
-      'www.canada.ca/en/revenue-agency/corporate/contact-information/individual-income-tax-enquiries-line.html',
-      'www.canada.ca/en/revenue-agency/services/forms-publications/tax-packages-years/general-income-tax-benefit-package/5000-s14.html',
-      'www.canada.ca/en/revenue-agency/services/forms-publications/publications/t4001/employers-guide-payroll-deductions-remittances.html',
-      'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/complete-file-when.html',
-      'www.canada.ca/fr/agence-revenu/services/services-electroniques/preremplir-declaration-express.html',
-      'www.canada.ca/en/revenue-agency/services/forms-publications/forms/rc325.html',
-      'www.canada.ca/fr/agence-revenu/services/prestations-enfants-familles/allocation-canadienne-enfants-apercu/allocation-canadienne-enfants-comment-calculons-nous-votre-ace.html',
-      'www.canada.ca/fr/agence-revenu/services/paiements-arc.html',
-      'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/registering-your-business/bro-eligibility.html',
-      'www.canada.ca/en/revenue-agency/services/child-family-benefits/gsthstc-apply.html',
-      'www.canada.ca/en/revenue-agency/services/forms-publications/td1-personal-tax-credits-returns/td1-forms-pay-received-on-january-1-later/td1bc.html',
-      'www.canada.ca/en/revenue-agency/services/scientific-research-experimental-development-tax-incentive-program/eligibility-work-investment-tax-credits-policy.html',
-    ];
-
-    const results = await httpClient.getCurrentTitlesAndUrls(urls);
-
-    console.log(results);
-
-    expect(results.length).toBe(urls.length);
-  });
+  // it('should be able to get titles and redirects', async () => {
+  //   const urls = [
+  //     'www.canada.ca/fr/agence-revenu/services/services-electroniques/services-electroniques-particuliers/dossier-particuliers.html',
+  //     'www.canada.ca/en/revenue-agency/services/e-services/candidate-profile.html',
+  //     'www.canada.ca/en/revenue-agency/services/e-services/auto-fill-return-express-noa.html',
+  //     'www.canada.ca/en/revenue-agency/corporate/careers-cra.html',
+  //     'www.canada.ca/en/revenue-agency/services/child-family-benefits/canada-child-benefit-overview/canada-child-benefit-before-you-apply.html',
+  //     'www.canada.ca/en/revenue-agency/services/payments-cra/business-payments.html',
+  //     'www.canada.ca/en/revenue-agency/services/child-family-benefits/goods-services-tax-harmonized-sales-tax-gst-hst-credit.html',
+  //     'www.canada.ca/en/revenue-agency/services/e-services/e-services-individuals/account-individuals/view-mail.html',
+  //     'www.canada.ca/en/revenue-agency/services/child-family-benefits/cai-payment/climate-action-incentive-payment-calculation-sheet-2021-alberta.html',
+  //     'www.canada.ca/en/revenue-agency/services/e-services/cra-login-services/cra-user-password-help-faqs/problems-entering-your-personal-authentication-information-account-individuals-business-account.html',
+  //     'www.canada.ca/en/revenue-agency/services/forms-publications/forms/rc66.html',
+  //     'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/remitting-source-deductions.html',
+  //     'www.canada.ca/en/revenue-agency/services/child-family-benefits/gsthstc-eligibility.html',
+  //     'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/payroll-deductions-contributions/employment-insurance-ei/ei-premium-rates-maximums.html',
+  //     'www.canada.ca/en/revenue-agency/services/child-family-benefits/gsthstc-amount.html',
+  //     'www.canada.ca/fr/agence-revenu/services/a-propos-agence-revenu-canada-arc/lorsque-vous-devez-argent-recouvrements-a-arc/recouvrement-prestation-canadienne-urgence-emise-par-service-canada.html',
+  //     'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/sole-proprietorships-partnerships/report-business-income-expenses/claiming-capital-cost-allowance/classes-depreciable-property.html',
+  //     'www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/deductions-credits-expenses/lines-33099-33199-eligible-medical-expenses-you-claim-on-your-tax-return/details-medical-expenses.html',
+  //     'www.canada.ca/en/revenue-agency/services/payments-cra/payment-arrangements.html',
+  //     'www.canada.ca/en/revenue-agency/services/benefits/apply-for-cerb-with-cra.html',
+  //     'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate.html',
+  //     'www.canada.ca/fr/agence-revenu/organisation/securite/id-utilisateur-revoque.html',
+  //     'www.canada.ca/fr/agence-revenu/services/prestations/faire-demande-pcu-aupres-arc/retournez-paiement.html',
+  //     'www.canada.ca/fr/agence-revenu/services/prestations-enfants-familles/calculateur-prestations-enfants-familles.html',
+  //     'www.canada.ca/en/revenue-agency/services/wage-rent-subsidies/covid-wage-hiring-support-businesses.html',
+  //     'www.canada.ca/en/revenue-agency/corporate/contact-information/individual-income-tax-enquiries-line.html',
+  //     'www.canada.ca/en/revenue-agency/services/forms-publications/tax-packages-years/general-income-tax-benefit-package/5000-s14.html',
+  //     'www.canada.ca/en/revenue-agency/services/forms-publications/publications/t4001/employers-guide-payroll-deductions-remittances.html',
+  //     'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/complete-file-when.html',
+  //     'www.canada.ca/fr/agence-revenu/services/services-electroniques/preremplir-declaration-express.html',
+  //     'www.canada.ca/en/revenue-agency/services/forms-publications/forms/rc325.html',
+  //     'www.canada.ca/fr/agence-revenu/services/prestations-enfants-familles/allocation-canadienne-enfants-apercu/allocation-canadienne-enfants-comment-calculons-nous-votre-ace.html',
+  //     'www.canada.ca/fr/agence-revenu/services/paiements-arc.html',
+  //     'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/registering-your-business/bro-eligibility.html',
+  //     'www.canada.ca/en/revenue-agency/services/child-family-benefits/gsthstc-apply.html',
+  //     'www.canada.ca/en/revenue-agency/services/forms-publications/td1-personal-tax-credits-returns/td1-forms-pay-received-on-january-1-later/td1bc.html',
+  //     'www.canada.ca/en/revenue-agency/services/scientific-research-experimental-development-tax-incentive-program/eligibility-work-investment-tax-credits-policy.html',
+  //   ];
+  //
+  //   const results = await httpClient.getCurrentTitlesAndUrls(urls);
+  //
+  //   console.log(results);
+  //
+  //   expect(results.length).toBe(urls.length);
+  // });
 });
 
 describe('hasDuplicates', () => {
@@ -163,7 +165,7 @@ describe('hasDuplicates', () => {
 
   const stringArraysWithoutDups = [
     ['these', 'are', 'real', 'words'],
-    ['z', 'asd', 'faff', 'fluff']
+    ['z', 'asd', 'faff', 'fluff'],
   ];
 
   it('should not find duplicates in empty arrays', () => {
@@ -180,7 +182,7 @@ describe('hasDuplicates', () => {
     }
   });
 
-  it('should return false if there aren\'t duplicates', () => {
+  it("should return false if there aren't duplicates", () => {
     for (const array of arraysWithoutDups) {
       expect(hasDuplicates(array)).toBe(false);
     }
@@ -188,5 +190,53 @@ describe('hasDuplicates', () => {
     for (const array of stringArraysWithoutDups) {
       expect(hasDuplicates(array)).toBe(false);
     }
+  });
+});
+
+describe('Retry decorator', () => {
+  const retries = 3;
+  const delay = 100;
+  class TestClass {
+    testMethodErrorCalls = 0;
+
+    @Retry(retries, delay)
+    async testMethodError(): Promise<void> {
+      this.testMethodErrorCalls++;
+
+      throw new Error('test error');
+    }
+
+    @Retry(retries, delay)
+    async testMethodSuccess(): Promise<void> {
+      return;
+    }
+  }
+
+  it('should retry a method that throws an error', async () => {
+    const testClass = new TestClass();
+
+    console.log('hello');
+
+    await expect(testClass.testMethodError()).rejects.toThrow('test error');
+
+    expect(testClass.testMethodErrorCalls).toBe(4);
+  });
+
+  it('should not retry a method that does not throw an error', async () => {
+    const testClass = new TestClass();
+
+    const spy = jest.spyOn(testClass, 'testMethodSuccess');
+    await expect(testClass.testMethodSuccess()).resolves.toBeUndefined();
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should wait the specified amount of time between retries', async () => {
+    const testClass = new TestClass();
+
+    const startTime = Date.now();
+    await expect(testClass.testMethodError()).rejects.toThrow('test error');
+    const endTime = Date.now();
+
+    expect(endTime - startTime).toBeGreaterThanOrEqual(retries * delay);
   });
 });

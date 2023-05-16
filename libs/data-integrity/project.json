@@ -5,7 +5,7 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
+      "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/data-integrity",
@@ -13,15 +13,20 @@
         "packageJson": "libs/data-integrity/package.json",
         "main": "libs/data-integrity/src/index.ts",
         "extractLicenses": false,
-        "assets": []
-      }
-    },
-    "serve": {
-      "executor": "@nrwl/node:node",
-      "options": {
-        "buildTarget": "data-integrity:build",
-        "watch": false,
-        "inspect": false
+        "assets": [],
+        "target": "node",
+        "compiler": "swc",
+        "generateIndexHtml": false
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "libs/data-integrity/src/environments/environment.ts",
+              "with": "libs/data-integrity/src/environments/environment.prod.ts"
+            }
+          ]
+        }
       }
     },
     "lint": {
