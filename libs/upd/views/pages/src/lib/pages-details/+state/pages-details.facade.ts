@@ -14,6 +14,7 @@ import {
   GscSearchTermMetrics,
   PageAggregatedData,
   PageDetailsData,
+  ReadabilityData,
 } from '@dua-upd/types-common';
 
 import * as PagesDetailsActions from './pages-details.actions';
@@ -718,6 +719,15 @@ export class PagesDetailsFacade {
       pipeParam: '1.0-2',
     },
   ]);
+
+  readability$ = this.pagesDetailsData$.pipe(
+    map((data) => {
+      return {
+        latest: data?.readability[0],
+        archive: data?.readability,
+      };
+    })
+  );
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
 
