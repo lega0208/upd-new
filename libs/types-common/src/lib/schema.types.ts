@@ -431,7 +431,7 @@ export interface ReadabilityData {
   original_score: string;
   ppoints: string;
   pratio: string;
-  data_word: [string, number][];
+  data_word: { word: string; count: number }[];
   total_score: number;
   total_words: number;
   total_sentences: number;
