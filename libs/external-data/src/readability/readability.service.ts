@@ -100,7 +100,7 @@ export class ReadabilityService {
       else fkpoints = this.toFixedNumber(60 - (final_fk - 6) * 5, 2);
 
       // calculate points for number of words between headings
-      let hpoints: number;
+      let header_points: number;
       if (hratio <= 40) hpoints = 20;
       else if (hratio >= 200) hpoints = 0;
       else hpoints = this.toFixedNumber(20 - (hratio - 40) * 0.125, 2);
