@@ -106,7 +106,7 @@ export class ReadabilityService {
       else hpoints = this.toFixedNumber(20 - (hratio - 40) * 0.125, 2);
 
       // calculate points for number of words per paragraph
-      let ppoints: number;
+      let paragraph_points: number;
       if (pratio <= 30) ppoints = 20;
       else if (pratio >= 80) ppoints = 0;
       else ppoints = this.toFixedNumber(20 - (pratio - 30) * 0.4, 2);
