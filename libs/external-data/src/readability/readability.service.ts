@@ -94,7 +94,7 @@ export class ReadabilityService {
       const len_par = paragraphs.length;
       const avg_words_per_paragraph = word / len_par;
 
-      let fkpoints: number;
+      let fk_points: number;
       if (final_fk <= 6) fkpoints = 60;
       else if (final_fk >= 18) fkpoints = 0;
       else fkpoints = this.toFixedNumber(60 - (final_fk - 6) * 5, 2);
