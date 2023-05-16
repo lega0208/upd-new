@@ -8,6 +8,7 @@ export const PROJECTS_DETAILS_FEATURE_KEY = 'projectsDetails';
 export interface ProjectsDetailsState {
   data: ProjectsDetailsData;
   loaded: boolean; // has the ProjectsDetails list been loaded
+  loading: boolean; // is the ProjectsDetails list currently being loaded
   error?: string | null; // last known error (if any)
 }
 
@@ -36,6 +37,7 @@ export const projectDetailsInitialState: ProjectsDetailsState = {
     attachments: [],
   },
   loaded: false,
+  loading: false,
   error: null,
 };
 
@@ -44,6 +46,7 @@ const reducer = createReducer(
   on(ProjectsDetailsActions.loadProjectsDetailsInit, (state) => ({
     ...state,
     loaded: false,
+    loading: true,
     error: null,
   })),
   on(ProjectsDetailsActions.loadProjectsDetailsSuccess, (state, { data }) =>
@@ -51,17 +54,20 @@ const reducer = createReducer(
       ? {
         ...state,
         loaded: true,
+        loading: false,
         error: null,
       }
       : {
         ...state,
         data: { ...data },
         loaded: true,
+        loading: false,
         error: null,
       }),
   on(ProjectsDetailsActions.loadProjectsDetailsError, (state, { error }) => ({
     ...state,
     loaded: true,
+    loading: false,
     error,
   }))
 );

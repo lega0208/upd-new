@@ -44,6 +44,8 @@ export class ProjectsDetailsFacade {
     ProjectsDetailsSelectors.selectProjectsDetailsLoaded
   );
 
+  loading$ = this.store.select(ProjectsDetailsSelectors.selectProjectsDetailsLoading);
+
   projectsDetailsData$ = this.store.select(
     ProjectsDetailsSelectors.selectProjectsDetailsData
   );
@@ -889,6 +891,8 @@ export class ProjectsDetailsFacade {
         }))
     )
   );
+
+  error$ = this.store.select(ProjectsDetailsSelectors.selectProjectsDetailsError);
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
 
