@@ -203,7 +203,7 @@ export class ReadabilityService {
     const word = readability.lexiconCount(text);
     const sentence = this.sentenceCount(text);
     const syllables = this.syllableCountFr(text);
-    const asl = word / sentence;
+    const wordsPerSentence = word / sentence;
     const asw = syllables / word;
 
     // Kandel-Moles formula
