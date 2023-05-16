@@ -92,7 +92,7 @@ export class ReadabilityService {
       // get all paragraphs and all bulleted list, and calculate how many words per paragraph on average
       const paragraphs = mainHtml('p, ul');
       const len_par = paragraphs.length;
-      const pratio = word / len_par;
+      const avg_words_per_paragraph = word / len_par;
 
       let fkpoints: number;
       if (final_fk <= 6) fkpoints = 60;
