@@ -87,7 +87,7 @@ export class ReadabilityService {
       // get all headings and calculate how many words on average between headings
       const headings = mainHtml('h1, h2, h3, h4, h5, h6');
       const len_headings = headings.length;
-      const hratio = word / len_headings;
+      const avg_words_per_header = word / len_headings;
 
       // get all paragraphs and all bulleted list, and calculate how many words per paragraph on average
       const paragraphs = mainHtml('p, ul');
