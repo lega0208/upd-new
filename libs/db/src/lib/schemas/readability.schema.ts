@@ -10,7 +10,7 @@ export class Readability {
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: String, required: true })
-  url = '';
+  url: string;
 
   @Prop({ type: Date, required: true })
   date = new Date(0);
