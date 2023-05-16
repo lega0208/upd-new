@@ -117,7 +117,7 @@ export class ReadabilityService {
       const words = await this.removeStopwords(postText, lang);
       const wordCount = await this.wordCount(words);
 
-      const dataWord =
+      const wordCounts =
         Object.entries(wordCount)
           .sort(([wordA, countA], [wordB, countB]) => countB - countA)
           .slice(0, 20)
