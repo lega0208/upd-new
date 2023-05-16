@@ -8,6 +8,7 @@ export type ReadabilityDocument = Readability & Document;
 export class Readability {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
+
   @Prop({ type: Types.ObjectId, required: true, index: true })
   page: Types.ObjectId;
   
