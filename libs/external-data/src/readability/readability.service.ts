@@ -95,24 +95,24 @@ export class ReadabilityService {
       const avg_words_per_paragraph = word / len_par;
 
       let fk_points: number;
-      if (final_fk <= 6) fkpoints = 60;
-      else if (final_fk >= 18) fkpoints = 0;
-      else fkpoints = this.toFixedNumber(60 - (final_fk - 6) * 5, 2);
+      if (final_fk <= 6) fk_points = 60;
+      else if (final_fk >= 18) fk_points = 0;
+      else fk_points = this.toFixedNumber(60 - (final_fk - 6) * 5, 2);
 
       // calculate points for number of words between headings
       let header_points: number;
-      if (hratio <= 40) hpoints = 20;
-      else if (hratio >= 200) hpoints = 0;
-      else hpoints = this.toFixedNumber(20 - (hratio - 40) * 0.125, 2);
+      if (avg_words_per_header <= 40) header_points = 20;
+      else if (avg_words_per_header >= 200) header_points = 0;
+      else header_points = this.toFixedNumber(20 - (avg_words_per_header - 40) * 0.125, 2);
 
       // calculate points for number of words per paragraph
       let paragraph_points: number;
-      if (pratio <= 30) ppoints = 20;
-      else if (pratio >= 80) ppoints = 0;
-      else ppoints = this.toFixedNumber(20 - (pratio - 30) * 0.4, 2);
+      if (avg_words_per_paragraph <= 30) paragraph_points = 20;
+      else if (avg_words_per_paragraph >= 80) paragraph_points = 0;
+      else paragraph_points = this.toFixedNumber(20 - (avg_words_per_paragraph - 30) * 0.4, 2);
 
       // add all points
-      const total_score = fkpoints + hpoints + ppoints;
+      const total_score = fk_points + header_points + paragraph_points;
 
       const words = await this.removeStopwords(postText, lang);
       const wordCount = await this.wordCount(words);
@@ -129,19 +129,18 @@ export class ReadabilityService {
         _id: new Types.ObjectId(),
         original_score: original_fk,
         final_fk_score: final_fk,
-        fkpoints: fkpoints,
-        pratio: pratio,
-        hratio: hratio,
-        len_par: len_par,
-        len_headings: len_headings,
-        total_score: total_score,
-        ppoints: ppoints,
-        hpoints: hpoints,
-        total_words: word,
-        syllables: syllables,
-        data_word: dataWord,
+        fk_points: fk_points,
+        avg_words_per_paragraph: avg_words_per_paragraph,
+        avg_words_per_header: avg_words_per_header,
+        paragraph_points: paragraph_points,
+        header_points: header_points,
+        word_counts: wordCounts,
         total_sentences: sentence,
         total_syllables: syllables,
+        total_paragraph: len_par,
+        total_headings: len_headings,
+        total_words: word,
+        total_score: total_score,
       };
 
       await this.db.collections.readability.insertMany({
@@ -207,7 +206,7 @@ export class ReadabilityService {
     const syllablesPerWord = syllables / word;
 
     // Kandel-Moles formula
-    return readability.fleschReadingEaseToGrade(207 - 1.015 * asl - 73.6 * asw);
+    return readability.fleschReadingEaseToGrade(207 - 1.015 * wordsPerSentence - 73.6 * syllablesPerWord);
   }
 
   sentenceCount(text: string): number {

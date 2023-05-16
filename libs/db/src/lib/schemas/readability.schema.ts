@@ -13,51 +13,51 @@ export class Readability {
   url: string;
 
   @Prop({ type: Date, required: true })
-  date = new Date(0);
-
-  @Prop({ type: String, required: true })
-  final_fk_score = '0';
-
-  @Prop({ type: String, required: true })
-  fkpoints = '0';
-
-  @Prop({ type: String, required: true })
-  hpoints = '0';
-
-  @Prop({ type: String, required: true })
-  hratio = '0';
+  date: Date = new Date(0);
 
   @Prop({ type: Number, required: true })
-  len_headings = 0;
+  original_score: number;
 
   @Prop({ type: Number, required: true })
-  len_par = 0;
+  final_fk_score: number;
 
-  @Prop({ type: String, required: true })
-  original_score = '0';
+  @Prop({ type: Number, required: true })
+  fk_points: number;
 
-  @Prop({ type: String, required: true })
-  ppoints = '0';
+  @Prop({ type: Number, required: true })
+  avg_words_per_paragraph: number;
 
-  @Prop({ type: String, required: true })
-  pratio = '0';
+  @Prop({ type: Number, required: true })
+  avg_words_per_header: number;
+
+  @Prop({ type: Number, required: true })
+  paragraph_points: number;
+
+  @Prop({ type: Number, required: true })
+  header_points: number;
 
   @Prop({
     type: [{ word: String, count: Number }],
   })
-  data_word: { word: string; count: number }[];
+  word_counts: { word: string; count: number }[];
 
   @Prop({ type: Number, required: true })
-  total_score = 0;
+  total_sentences: number;
 
   @Prop({ type: Number, required: true })
-  total_words = 0;
+  total_syllables: number;
 
   @Prop({ type: Number, required: true })
-  total_sentences = 0;
+  total_paragraph: number;
+
+  @Prop({ type: Number, required: true, default: 0 })
+  total_headings: number;
+
+  @Prop({ type: Number, required: true, default: 0 })
+  total_words: number;
 
   @Prop({ type: Number, required: true })
-  total_syllables = 0;
+  total_score: number;
 }
 
 export const ReadabilitySchema = SchemaFactory.createForClass(Readability);
