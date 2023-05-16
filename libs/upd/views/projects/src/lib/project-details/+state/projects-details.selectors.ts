@@ -13,6 +13,11 @@ export const selectProjectsDetailsLoaded = createSelector(
   (state: ProjectsDetailsState) => state.loaded
 );
 
+export const selectProjectsDetailsLoading = createSelector(
+  selectProjectsDetailsState,
+  (state: ProjectsDetailsState) => state.loading
+);
+
 export const selectProjectsDetailsError = createSelector(
   selectProjectsDetailsState,
   (state: ProjectsDetailsState) => state.error
