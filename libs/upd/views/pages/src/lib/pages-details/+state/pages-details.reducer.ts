@@ -26,6 +26,7 @@ export const pagesDetailsInitialState: PagesDetailsState = {
     comparisonDateRange: '',
     feedbackComments: [],
     searchTerms: [],
+    readability: [],
   },
   loading: false,
   loaded: false,

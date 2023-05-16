@@ -30,6 +30,8 @@ import {
   SearchAssessmentSchema,
   Url,
   UrlSchema,
+  Readability,
+  ReadabilitySchema,
 } from './db.schemas';
 import { PageVisitsViewSchema, PageVisitsView } from './db.views';
 
@@ -50,6 +52,7 @@ export const models = {
   searchAssessment: { model: SearchAssessment, schema: SearchAssessmentSchema },
   aaItemIds: { model: AAItemId, schema: AAItemIdSchema },
   urls: { model: Url, schema: UrlSchema },
+  readability: { model: Readability, schema: ReadabilitySchema },
 } as const;
 
 export const views = {

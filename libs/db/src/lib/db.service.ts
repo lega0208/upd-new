@@ -14,6 +14,7 @@ import {
   Project,
   AAItemId,
   SearchAssessment,
+  Readability,
   PageMetricsTS,
   type PageMetricsModel,
   Url,
@@ -50,6 +51,7 @@ export class DbService {
     aaItemIds: this.aaItemIds,
     searchAssessment: this.searchAssessment,
     urls: this.urls,
+    readability: this.readability,
   } as const;
 
   readonly views = {
@@ -84,6 +86,8 @@ export class DbService {
     private aaItemIds: Model<AAItemId>,
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessment: Model<SearchAssessment>,
+    @InjectModel(Readability.name, 'defaultConnection')
+    private readability: Model<Readability>,
     @InjectModel(PageVisitsView.name, 'defaultConnection')
     private pageVisits: Model<PageVisits>,
     @InjectModel(Url.name, 'defaultConnection')

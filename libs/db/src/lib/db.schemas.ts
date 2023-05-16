@@ -11,3 +11,4 @@ export * from './schemas/search-assessment.schema';
 export * from './schemas/aa_item_ids.schema';
 export * from './schemas/page-metrics-ts.schema';
 export * from './schemas/url.schema';
+export * from './schemas/readability.schema';

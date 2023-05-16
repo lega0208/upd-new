@@ -88,7 +88,10 @@
     "reflect-metadata": "^0.1.13",
     "regenerator-runtime": "0.13.7",
     "rxjs": "~7.8.0",
+    "stopwords-en": "^0.3.0",
+    "stopwords-fr": "^0.3.0",
     "tar": "^6.1.12",
+    "text-readability": "^1.0.5",
     "tslib": "^2.5.0",
     "xlsx": "^0.18.5",
     "zone.js": "0.12.0"

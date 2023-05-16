@@ -100,6 +100,26 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   }[];
   feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
+  readability: ReadabilityData[];
+}
+
+export interface ReadabilityData {
+  url: string;
+  date: Date;
+  original_score: number;
+  final_fk_score: number;
+  fk_points: number;
+  avg_words_per_paragraph: number;
+  avg_words_per_header: number;
+  paragraph_points: number;
+  header_points: number;
+  word_counts: { word: string; count: number }[];
+  total_sentences: number;
+  total_syllables: number;
+  total_paragraph: number;
+  total_headings: number;
+  total_words: number;
+  total_score: number;
 }
 
 export interface OverviewAggregatedData {
