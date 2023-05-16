@@ -8,7 +8,13 @@ import type {
   PageDocument,
   PageMetricsModel,
 } from '@dua-upd/db';
-import { DbService, Feedback, Page, PageMetrics } from '@dua-upd/db';
+import {
+  DbService,
+  Feedback,
+  Page,
+  PageMetrics,
+  Readability,
+} from '@dua-upd/db';
 import type {
   ApiParams,
   GscSearchTermMetrics,
@@ -30,6 +36,8 @@ export class PagesService {
     private feedbackModel: FeedbackModel,
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
+    @InjectModel(Readability.name, 'defaultConnection')
+    private readabilityModel: Model<Readability>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -211,6 +219,11 @@ export class PagesService {
       searchTermsWithPercentChange
     );
 
+    const readability = await this.readabilityModel
+      .find({ url: [page.url] })
+      .sort({ date: -1 })
+      .exec();
+
     const results = {
       ...page,
       projects,
@@ -245,6 +258,7 @@ export class PagesService {
         page.url,
       ]),
       searchTerms: await this.getTopSearchTerms(params),
+      readability,
     } as PageDetailsData;
 
     await this.cacheManager.set(cacheKey, results);
