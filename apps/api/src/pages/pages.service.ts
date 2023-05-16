@@ -220,7 +220,7 @@ export class PagesService {
     );
 
     const readability = await this.readabilityModel
-      .find({ url: [page.url] })
+      .find({ page: params.id  })
       .sort({ date: -1 })
       .exec();
 
