@@ -25,6 +25,7 @@ import { ColumnConfig } from '../data-table-styles/types';
             [modal]="modal"
           ></upd-card-secondary-title>
         </div>
+        <div [innerHTML]="cardMessage | translate"></div>
         <ng-content></ng-content>
       </div>
     </div>
@@ -35,6 +36,7 @@ export class CardComponent {
   @Input() title = '';
   @Input() titleTooltip = '';
   @Input() titleSize: CardTitleSize = 'h6';
+  @Input() cardMessage = '';
   @Input() h = 0;
   @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() data: Record<string, number | string>[] = [];

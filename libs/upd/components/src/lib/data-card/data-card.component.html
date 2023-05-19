@@ -42,10 +42,25 @@
           >
           <span
             class="d-inline-flex px-0 pe-1 flex-sm-shrink-1 align-items-center"
-            >{{ kpiConfig[kpiObjectiveStatus].message | translate }}</span
+            >{{ kpiConfig[kpiObjectiveStatus].message | translate }} {{kpiValue}}</span
           >
         </p>
       </div>
+    </div>
+    <div *ngIf="message" class="row row-no-gutters d-block">
+      <div class="col">
+        <p class="mb-0 mt-2 row flex-nowrap">
+          <span
+            class="me-0 col-auto pe-2"
+            >{{ message | translate }} {{ kpiValue }}</span
+          >
+        </p>
+      </div>
+    </div>
+    <br>
+    <div class="position-absolute bottom-0 end-0 p-3" *ngIf="modal">
+      <upd-modal [modalTitle]="titleModal" [modalContent]="modal | translate">
+      </upd-modal>
     </div>
   </div>
 </upd-card>

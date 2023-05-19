@@ -103,6 +103,10 @@ export class DataCardComponent {
   @Input() comparison?: number | null;
   @Input() title = '';
   @Input() tooltip = '';
+  @Input() titleModal = '';
+  @Input() modal = '';
+  @Input() message = '';
+  @Input() kpiValue = '';
   @Input() pipe: 'percent' | 'number' = 'number';
   @Input() pipeParams?: string;
   @Input() emptyMessage = 'nodata-available';

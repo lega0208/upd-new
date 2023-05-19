@@ -1,0 +1,120 @@
+<div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <upd-data-card
+          [current]="totalScore$"
+          [title]="'total-score'"
+          [tooltip]="'tooltip-total-score'"
+          [displayKpis]="true"
+          [kpiObjectiveCriteria]="totalScoreKpiCriteria"
+          [kpiStylesConfig]="totalScoreKpiConfig"
+          [titleModal]="'meaning-of-score'"
+          [modal]="'meaning-of-score-description'"
+        ></upd-data-card>
+      </div>
+
+      <div class="col">
+        <upd-data-card
+          [current]="readability$"
+          [title]="'tab-readability'"
+          [tooltip]="'tooltip-readability'"
+          [displayKpis]="true"
+          [kpiObjectiveCriteria]="readabilityKpiCriteria"
+          [kpiStylesConfig]="readabilityKpiConfig"
+          kpiValue="{{ fleshKincaid$ }}"
+          [titleModal]="'calculation-of-readability-points'"
+          [modal]="'calculation-of-readability-points-description'"
+        ></upd-data-card>
+      </div>
+
+      <div class="col">
+        <upd-data-card
+          [current]="heading$"
+          [title]="'heading'"
+          [tooltip]="'tooltip-heading'"
+          [message]="'words-per-heading'"
+          kpiValue="{{ wordsPerHeading$ }}"
+          [titleModal]="'calculation-of-heading-points'"
+          [modal]="'calculation-of-heading-points-description'"
+        ></upd-data-card>
+      </div>
+
+      <div class="col">
+        <upd-data-card
+          [current]="paragraph$"
+          [title]="'paragraph'"
+          [tooltip]="'tooltip-paragraph'"
+          [message]="'words-per-paragraph'"
+          kpiValue="{{ wordsPerParagraph$ }}"
+          [titleModal]="'calculation-of-paragraph-points'"
+          [modal]="'calculation-of-paragraph-points-description'"
+        ></upd-data-card>
+      </div>
+    </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [cols]="mostFrequentWordsOnPageCols"
+        [data]="mostFrequentWordsOnPage$"
+        [title]="'most-frequent-words-on-page'"
+        [tooltip]="'tooltip-most-frequent-words-on-page'"
+      >
+      </upd-data-table-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-card
+        [current]="wordCount$"
+        [title]="'words'"
+        [tooltip]="'tooltip-words'"
+      ></upd-data-card>
+    </div>
+
+    <div class="col">
+      <upd-data-card
+        [current]="paragraphCount$"
+        [title]="'paragraphs'"
+        [tooltip]="'tooltip-paragraphs'"
+      ></upd-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-card
+        [current]="headingCount$"
+        [title]="'headings'"
+        [tooltip]="'tooltip-headings'"
+      ></upd-data-card>
+    </div>
+
+    <div class="col">
+      <upd-data-card
+        [current]="originalFleschKincaidScore$"
+        [title]="'original-flesch-kincaid-score'"
+        [tooltip]="'tooltip-original-flesch-kincaid-score'"
+      ></upd-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-card
+        [cardMessage]="'improving-web-readability-description'"
+        [title]="'improving-web-readability'"
+        [titleTooltip]="'tooltip-improving-web-readability'"
+      ></upd-card>
+    </div>
+  </div>
+</div>
