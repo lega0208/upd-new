@@ -21,7 +21,7 @@
           [displayKpis]="true"
           [kpiObjectiveCriteria]="readabilityKpiCriteria"
           [kpiStylesConfig]="readabilityKpiConfig"
-          kpiValue="{{ fleshKincaid$ }}"
+          [kpiValue]="fleshKincaid$"
           [titleModal]="'calculation-of-readability-points'"
           [modal]="'calculation-of-readability-points-description'"
         ></upd-data-card>
@@ -33,7 +33,7 @@
           [title]="'heading'"
           [tooltip]="'tooltip-heading'"
           [message]="'words-per-heading'"
-          kpiValue="{{ wordsPerHeading$ }}"
+          [kpiValue]="wordsPerHeading$"
           [titleModal]="'calculation-of-heading-points'"
           [modal]="'calculation-of-heading-points-description'"
         ></upd-data-card>
@@ -45,7 +45,7 @@
           [title]="'paragraph'"
           [tooltip]="'tooltip-paragraph'"
           [message]="'words-per-paragraph'"
-          kpiValue="{{ wordsPerParagraph$ }}"
+          [kpiValue]="wordsPerParagraph$"
           [titleModal]="'calculation-of-paragraph-points'"
           [modal]="'calculation-of-paragraph-points-description'"
         ></upd-data-card>

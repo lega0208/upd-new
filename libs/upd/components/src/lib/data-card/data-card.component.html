@@ -42,7 +42,7 @@
           >
           <span
             class="d-inline-flex px-0 pe-1 flex-sm-shrink-1 align-items-center"
-            >{{ kpiConfig[kpiObjectiveStatus].message | translate }} {{kpiValue}}</span
+            >{{ kpiConfig[kpiObjectiveStatus].message | translate }} {{ localePipe.transform(kpiValue, pipeParams) }}</span
           >
         </p>
       </div>
@@ -52,7 +52,7 @@
         <p class="mb-0 mt-2 row flex-nowrap">
           <span
             class="me-0 col-auto pe-2"
-            >{{ message | translate }} {{ kpiValue }}</span
+            >{{ message | translate }} {{ localePipe.transform(kpiValue, pipeParams) }}</span
           >
         </p>
       </div>
