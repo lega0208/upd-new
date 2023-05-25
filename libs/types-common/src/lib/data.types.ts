@@ -100,7 +100,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   }[];
   feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
-  readability: ReadabilityData[];
+  // readability: ReadabilityData[];
 }
 
 export interface ReadabilityData {
