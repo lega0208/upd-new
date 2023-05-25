@@ -483,9 +483,7 @@ export class ProjectsDetailsFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
-      const uxTests = data?.taskSuccessByUxTest.filter(
-        (uxTest) => uxTest.success_rate ?? false
-      );
+      const uxTests = data?.taskSuccessByUxTest;
 
       const tasksWithSuccessRate = uxTests
         ?.map((uxTest) => uxTest.tasks.split('; ') || [])
