@@ -12,11 +12,17 @@ export class Url implements IUrl {
   @Prop({ type: String, required: true, unique: true })
   url: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: true })
   title?: string;
 
   @Prop({ type: Types.ObjectId, sparse: true })
   page?: Types.ObjectId;
+
+  @Prop({ type: Object })
+  metadata?: { [prop: string]: string };
+
+  @Prop({ type: { href: String, text: String }})
+  links?: { href: string, text: string }[];
 
   @Prop({ type: String, index: true })
   redirect?: string;
@@ -38,3 +44,8 @@ export class Url implements IUrl {
 }
 
 export const UrlSchema = SchemaFactory.createForClass(Url);
+
+UrlSchema.index({ 'links.text': 1 }, { background: true });
+UrlSchema.index({ 'links.href': 1 }, { background: true });
+UrlSchema.index({ last_checked: -1 }, { background: true });
+UrlSchema.index({ last_modified: -1 }, { background: true });
