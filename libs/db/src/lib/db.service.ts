@@ -17,7 +17,8 @@ import {
   Readability,
   PageMetricsTS,
   type PageMetricsModel,
-  Url, ReadabilityModel,
+  type ReadabilityModel,
+  Url,
 } from '../';
 import { AsyncLogTiming, logJson, prettyJson } from '@dua-upd/utils-common';
 import { AnyBulkWriteOperation } from 'mongodb';

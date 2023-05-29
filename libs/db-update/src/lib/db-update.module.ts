@@ -48,7 +48,6 @@ export class DbUpdateModule {
             log: `${month}/db-update-${date}`,
           },
         }),
-        ReadabilityService,
       ],
       providers: [
         AirtableService,
