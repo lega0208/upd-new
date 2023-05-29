@@ -438,9 +438,9 @@ export class BlobClient {
         console.error(chalk.red('Error uploading string to storage:'));
         console.error(err.stack);
       }
+    } else {
+      console.log('Files are the same. No changes made.');
     }
-
-    console.log('Files are the same. No changes made.');
   }
 
   async downloadToString(
