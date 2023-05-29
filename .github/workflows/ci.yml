@@ -1,7 +1,6 @@
 name: ci
 
-on:
-  pull_request:
+on: [pull_request, push]
 
 env:
   NX_CLOUD_DISTRIBUTED_EXECUTION: true
