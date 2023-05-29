@@ -17,7 +17,7 @@ import {
   Readability,
   PageMetricsTS,
   type PageMetricsModel,
-  Url,
+  Url, ReadabilityModel,
 } from '../';
 import { AsyncLogTiming, logJson, prettyJson } from '@dua-upd/utils-common';
 import { AnyBulkWriteOperation } from 'mongodb';
@@ -87,7 +87,7 @@ export class DbService {
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessment: Model<SearchAssessment>,
     @InjectModel(Readability.name, 'defaultConnection')
-    private readability: Model<Readability>,
+    private readability: ReadabilityModel,
     @InjectModel(PageVisitsView.name, 'defaultConnection')
     private pageVisits: Model<PageVisits>,
     @InjectModel(Url.name, 'defaultConnection')

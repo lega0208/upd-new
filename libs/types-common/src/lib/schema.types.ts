@@ -394,6 +394,8 @@ export interface IUrl {
   url: string;
   title?: string;
   page?: Types.ObjectId;
+  metadata?: { [prop: string]: string };
+  links?: { href: string, text: string }[]
   redirect?: string;
   last_checked?: Date;
   last_modified?: Date;
@@ -417,6 +419,32 @@ export interface SearchAssessmentData {
   expected_position: number;
   pass: boolean;
   visits: number;
+}
+
+export interface ReadabilityScore {
+  original_score: number;
+  final_fk_score: number;
+  fk_points: number;
+  avg_words_per_paragraph: number;
+  avg_words_per_header: number;
+  paragraph_points: number;
+  header_points: number;
+  word_counts: { word: string; count: number }[];
+  total_sentences: number;
+  total_syllables: number;
+  total_paragraph: number;
+  total_headings: number;
+  total_words: number;
+  total_score: number;
+}
+
+export interface IReadability extends ReadabilityScore {
+  _id: Types.ObjectId;
+  url: string;
+  lang: 'en' | 'fr'
+  date: Date;
+  page?: Types.ObjectId;
+  hash: string;
 }
 
 export type AccumulatorOperator =

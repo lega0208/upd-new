@@ -11,3 +11,5 @@ export * from './lib/internal-search/search-terms.service';
 export * from './lib/activity-map/activity-map.service';
 export * from './lib/pipelines';
 export * from './lib/urls/urls.service';
+export * from './lib/readability/readability.module';
+export * from './lib/readability/readability.service';

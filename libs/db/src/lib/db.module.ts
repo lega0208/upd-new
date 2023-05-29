@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import zstd from '@mongodb-js/zstd'; // need to import this for it to be included in the build output
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';

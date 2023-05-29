@@ -14,7 +14,6 @@ import {
   GscSearchTermMetrics,
   PageAggregatedData,
   PageDetailsData,
-  ReadabilityData,
 } from '@dua-upd/types-common';
 
 import * as PagesDetailsActions from './pages-details.actions';
