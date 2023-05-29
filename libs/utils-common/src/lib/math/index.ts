@@ -7,3 +7,9 @@ export const percentChange = (currentValue: number, previousValue: number) =>
 
 export const sum = (array: number[]) =>
   array.reduce((total, term) => term + total, 0);
+
+export const round = (num: number, digits: number) => {
+  const pow = Math.pow(10, digits);
+
+  return Math.round(num * pow) / pow;
+}

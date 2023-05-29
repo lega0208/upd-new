@@ -3,7 +3,6 @@ import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio/lib/slim';
 import { batchAwait, Retry, squishTrim, TimingUtility } from '../utils-common';
 import { RateLimitUtils } from './utils';
-import { Observable } from 'rxjs';
 
 export type HttpClientOptions = {
   rateLimitDelay?: number;
