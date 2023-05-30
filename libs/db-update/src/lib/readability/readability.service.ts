@@ -43,14 +43,7 @@ export class ReadabilityService {
 
     const word = readability.lexiconCount(postText);
     const sentence = this.sentenceCount(postText);
-    let syllables: number;
-
-    if (lang === 'fr') {
-      syllables =  this.syllableCountFr(postText);
-    } else {
-      syllables = readability.syllableCount(postText);
-    }
-
+    const syllables = (lang === 'fr') ? this.syllableCountFr(postText) : readability.syllableCount(postText);
     const original_fk = this.calculateGradeLevel(preText, syllables, lang);
     const final_fk = this.calculateGradeLevel(postText, syllables, lang);
 
@@ -160,16 +153,16 @@ export class ReadabilityService {
   calculateGradeLevel(text: string, syllables: number, lang: string): number {
     const word = readability.lexiconCount(text);
     const sentence = this.sentenceCount(text);
-    const sentenceLength = word / sentence;
+    const wordsPerSentence = word / sentence;
     const syllablesPerWord = syllables / word;
   
     if (lang === 'fr') {
       // Kandel-Moles reading ease formula
-      return readability.fleschReadingEaseToGrade(207 - 1.015 * sentenceLength - 73.6 * syllablesPerWord);
+      return readability.fleschReadingEaseToGrade(207 - 1.015 * wordsPerSentence - 73.6 * syllablesPerWord);
     }
   
     // Flesch-Kincaid grade level formula
-    return round(0.39 * sentenceLength + 11.8 * syllablesPerWord - 15.59, 1);
+    return round(0.39 * wordsPerSentence + 11.8 * syllablesPerWord - 15.59, 1);
   }
 
   sentenceCount(text: string): number {
