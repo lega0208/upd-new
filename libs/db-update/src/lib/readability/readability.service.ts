@@ -44,18 +44,15 @@ export class ReadabilityService {
     const word = readability.lexiconCount(postText);
     const sentence = this.sentenceCount(postText);
     let syllables: number;
-    let original_fk: number;
-    let final_fk: number;
 
     if (lang === 'fr') {
-      syllables = this.syllableCountFr(postText);
-      original_fk = this.fleschKincaidGradeFr(preText);
-      final_fk = this.fleschKincaidGradeFr(postText);
+      syllables =  this.syllableCountFr(postText);
     } else {
       syllables = readability.syllableCount(postText);
-      original_fk = readability.fleschKincaidGrade(preText);
-      final_fk = readability.fleschKincaidGrade(postText);
     }
+
+    const original_fk = this.calculateGradeLevel(preText, syllables, lang);
+    const final_fk = this.calculateGradeLevel(postText, syllables, lang);
 
     // HTML string to be parsed
     const mainHtml = load(main.html());
@@ -160,17 +157,19 @@ export class ReadabilityService {
     }, 0);
   }
 
-  fleschKincaidGradeFr(text: string): number {
+  calculateGradeLevel(text: string, syllables: number, lang: string): number {
     const word = readability.lexiconCount(text);
     const sentence = this.sentenceCount(text);
-    const syllables = this.syllableCountFr(text);
-    const wordsPerSentence = word / sentence;
+    const sentenceLength = word / sentence;
     const syllablesPerWord = syllables / word;
-
-    // Kandel-Moles formula
-    return readability.fleschReadingEaseToGrade(
-      207 - 1.015 * wordsPerSentence - 73.6 * syllablesPerWord
-    );
+  
+    if (lang === 'fr') {
+      // Kandel-Moles reading ease formula
+      return readability.fleschReadingEaseToGrade(207 - 1.015 * sentenceLength - 73.6 * syllablesPerWord);
+    }
+  
+    // Flesch-Kincaid grade level formula
+    return round(0.39 * sentenceLength + 11.8 * syllablesPerWord - 15.59, 1);
   }
 
   sentenceCount(text: string): number {
