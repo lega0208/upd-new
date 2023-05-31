@@ -374,9 +374,6 @@ export interface ProjectDetailsAggregatedData {
   callsByTopic: CallsByTopic[];
   callsByTasks: CallsByTasks[];
   totalCalldrivers: number;
-  pageMetricsByTasks: (Partial<ProjectDetailsAggregatedData> & {
-    title: string;
-  })[];
 }
 
 export interface ProjectsDetailsData
