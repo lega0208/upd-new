@@ -32,7 +32,7 @@ export class PagesHomeComponent implements OnInit {
           field: 'title',
           header: this.i18n.service.translate('Title', lang),
           type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
+          typeParam: '_id',
         },
         {
           field: 'url',
