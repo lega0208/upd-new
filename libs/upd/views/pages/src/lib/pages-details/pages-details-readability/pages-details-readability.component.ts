@@ -15,18 +15,19 @@ export class PagesDetailsReadabilityComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
-  totalScore$ = 74.8;
-  readability$ = 37.52;
-  fleshKincaid$ = 6;
-  heading$ = 17.27;
-  wordsPerHeading$ = 61.80;
-  paragraph$ = 20.00;
-  wordsPerParagraph$ = 19.31;
-  mostFrequentWordsOnPage$ = [{word: 'rent', count: '6'}, {word: 'wage', count: '7'}, {word: 'cers', count: '5'}];
-  wordCount$ = 309;
-  paragraphCount$ = 16;
-  headingCount$ = 5;
-  originalFleschKincaidScore$ = 19.92;
+  pageLastUpdated$ = this.pageDetailsService.pageLastUpdated$;
+  totalScore$ = this.pageDetailsService.totalScore$;
+  readabilityPoints$ = this.pageDetailsService.readabilityPoints$;
+  fleshKincaid$ = this.pageDetailsService.fleshKincaid$;
+  headingPoints$ = this.pageDetailsService.headingPoints$;
+  wordsPerHeading$ = this.pageDetailsService.wordsPerHeading$;
+  paragraphPoints$ = this.pageDetailsService.paragraphPoints$;
+  wordsPerParagraph$ = this.pageDetailsService.wordsPerParagraph$;
+  mostFrequentWordsOnPage$ = this.pageDetailsService.mostFrequentWordsOnPage$;
+  wordCount$ = this.pageDetailsService.wordCount$;
+  paragraphCount$ = this.pageDetailsService.paragraphCount$;
+  headingCount$ = this.pageDetailsService.headingCount$;
+  originalFleschKincaidScore$ = this.pageDetailsService.originalFleschKincaidScore$;
 
   mostFrequentWordsOnPageCols: ColumnConfig[] = [];
 
@@ -69,17 +70,17 @@ export class PagesDetailsReadabilityComponent implements OnInit {
     }
   };
 
-  readabilityKpiCriteria = () => {
+  readabilityKpiCriteria = (fleshKincaid: number) => {
     switch (true) {
-      case this.fleshKincaid$ === 0:
+      case fleshKincaid === 0:
         return 'none';
-      case this.fleshKincaid$ <= 9:
+      case fleshKincaid <= 9:
         this.readabilityKpiConfig.pass.message = 'flesch-kincaid-readability-score';
         return 'pass';
-      case this.fleshKincaid$ > 9 && this.fleshKincaid$ <= 11:
+      case fleshKincaid > 9 && fleshKincaid <= 11:
         this.readabilityKpiConfig.partial.message = 'flesch-kincaid-readability-score';
         return 'partial';
-      case this.fleshKincaid$ > 11:
+      case fleshKincaid > 11:
         this.readabilityKpiConfig.fail.message = 'flesch-kincaid-readability-score';
         return 'fail';
       default:

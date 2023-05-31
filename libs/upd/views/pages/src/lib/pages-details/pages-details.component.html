@@ -54,7 +54,7 @@
   ></upd-project-header>
 
   <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
-  <upd-date-selector></upd-date-selector>
+  <upd-date-selector *ngIf = "currentUrl != 'readability'"></upd-date-selector>
 
   <router-outlet></router-outlet>
 </ng-template>

@@ -1,8 +1,10 @@
+<div><strong>Page last updated: {{ pageLastUpdated$ | async | date:'longDate' }}</strong></div>
+
 <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
         <upd-data-card
-          [current]="totalScore$"
+          [current]="totalScore$ | async"
           [title]="'total-score'"
           [tooltip]="'tooltip-total-score'"
           [displayKpis]="true"
@@ -15,13 +17,13 @@
 
       <div class="col">
         <upd-data-card
-          [current]="readability$"
+          [current]="readabilityPoints$ | async"
           [title]="'tab-readability'"
           [tooltip]="'tooltip-readability'"
           [displayKpis]="true"
           [kpiObjectiveCriteria]="readabilityKpiCriteria"
           [kpiStylesConfig]="readabilityKpiConfig"
-          [kpiValue]="fleshKincaid$"
+          [kpiValue]="fleshKincaid$ | async"
           [titleModal]="'calculation-of-readability-points'"
           [modal]="'calculation-of-readability-points-description'"
         ></upd-data-card>
@@ -29,11 +31,11 @@
 
       <div class="col">
         <upd-data-card
-          [current]="heading$"
+          [current]="headingPoints$ | async"
           [title]="'heading'"
           [tooltip]="'tooltip-heading'"
           [message]="'words-per-heading'"
-          [kpiValue]="wordsPerHeading$"
+          [kpiValue]="wordsPerHeading$ | async"
           [titleModal]="'calculation-of-heading-points'"
           [modal]="'calculation-of-heading-points-description'"
         ></upd-data-card>
@@ -41,11 +43,11 @@
 
       <div class="col">
         <upd-data-card
-          [current]="paragraph$"
+          [current]="paragraphPoints$ | async"
           [title]="'paragraph'"
           [tooltip]="'tooltip-paragraph'"
           [message]="'words-per-paragraph'"
-          [kpiValue]="wordsPerParagraph$"
+          [kpiValue]="wordsPerParagraph$ | async"
           [titleModal]="'calculation-of-paragraph-points'"
           [modal]="'calculation-of-paragraph-points-description'"
         ></upd-data-card>
@@ -58,7 +60,7 @@
     <div class="col">
       <upd-data-table-card
         [cols]="mostFrequentWordsOnPageCols"
-        [data]="mostFrequentWordsOnPage$"
+        [data]="(mostFrequentWordsOnPage$ | async) || []"
         [title]="'most-frequent-words-on-page'"
         [tooltip]="'tooltip-most-frequent-words-on-page'"
       >
@@ -71,7 +73,7 @@
   <div class="row">
     <div class="col">
       <upd-data-card
-        [current]="wordCount$"
+        [current]="wordCount$ | async"
         [title]="'words'"
         [tooltip]="'tooltip-words'"
       ></upd-data-card>
@@ -79,7 +81,7 @@
 
     <div class="col">
       <upd-data-card
-        [current]="paragraphCount$"
+        [current]="paragraphCount$ | async"
         [title]="'paragraphs'"
         [tooltip]="'tooltip-paragraphs'"
       ></upd-data-card>
@@ -91,7 +93,7 @@
   <div class="row">
     <div class="col">
       <upd-data-card
-        [current]="headingCount$"
+        [current]="headingCount$ | async"
         [title]="'headings'"
         [tooltip]="'tooltip-headings'"
       ></upd-data-card>
@@ -99,7 +101,7 @@
 
     <div class="col">
       <upd-data-card
-        [current]="originalFleschKincaidScore$"
+        [current]="originalFleschKincaidScore$ | async"
         [title]="'original-flesch-kincaid-score'"
         [tooltip]="'tooltip-original-flesch-kincaid-score'"
       ></upd-data-card>
