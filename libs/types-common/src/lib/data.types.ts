@@ -100,7 +100,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   }[];
   feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
-  readability: ReadabilityData[];
+  // readability: ReadabilityData[];
 }
 
 export interface ReadabilityData {
@@ -374,9 +374,6 @@ export interface ProjectDetailsAggregatedData {
   callsByTopic: CallsByTopic[];
   callsByTasks: CallsByTasks[];
   totalCalldrivers: number;
-  pageMetricsByTasks: (Partial<ProjectDetailsAggregatedData> & {
-    title: string;
-  })[];
 }
 
 export interface ProjectsDetailsData
