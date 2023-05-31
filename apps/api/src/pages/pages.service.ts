@@ -220,7 +220,7 @@ export class PagesService {
     );
 
     const readability = await this.readabilityModel
-      .find({ page: params.id  })
+      .find({ page: new Types.ObjectId(params.id) })
       .sort({ date: -1 })
       .exec();
 
