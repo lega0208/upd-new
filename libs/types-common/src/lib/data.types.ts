@@ -10,6 +10,7 @@ import type {
   IPageMetrics,
   ITask,
   IUxTest,
+  IReadability,
 } from './schema.types';
 
 export type ApiParams = {
@@ -100,7 +101,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   }[];
   feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
-  // readability: IReadability[];
+  readability: IReadability[];
 }
 
 export interface OverviewAggregatedData {

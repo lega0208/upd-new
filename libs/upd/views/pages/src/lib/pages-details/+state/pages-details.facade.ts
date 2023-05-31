@@ -719,14 +719,14 @@ export class PagesDetailsFacade {
     },
   ]);
 
-  // readability$ = this.pagesDetailsData$.pipe(
-  //   map((data) => {
-  //     return {
-  //       latest: data?.readability[0],
-  //       archive: data?.readability,
-  //     };
-  //   })
-  // );
+  readability$ = this.pagesDetailsData$.pipe(
+    map((data) => {
+      return {
+        latest: data?.readability[0],
+        archive: data?.readability,
+      };
+    })
+  );
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
 

@@ -258,7 +258,7 @@ export class PagesService {
         page.url,
       ]),
       searchTerms: await this.getTopSearchTerms(params),
-      // readability,
+      readability,
     } as PageDetailsData;
 
     await this.cacheManager.set(cacheKey, results);
