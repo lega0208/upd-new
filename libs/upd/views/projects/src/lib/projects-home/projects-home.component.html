@@ -39,7 +39,7 @@
   </div>
 </div>
 
-<upd-card title="List of all projects" titleSize="h5">
+<upd-card [title]="'List of all projects'" titleSize="h5">
   <upd-data-table
     id="projects-home-"
     [data]="(tableData$ | async) || []"
