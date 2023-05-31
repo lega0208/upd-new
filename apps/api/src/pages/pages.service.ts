@@ -258,7 +258,7 @@ export class PagesService {
         page.url,
       ]),
       searchTerms: await this.getTopSearchTerms(params),
-      readability,
+      // readability,
     } as PageDetailsData;
 
     await this.cacheManager.set(cacheKey, results);
@@ -470,18 +470,22 @@ function getSearchTermsWithPercentChange(
   > = {};
 
   for (const searchTerm of uniqueSearchTerms) {
-    if (
-      searchTermMetrics[searchTerm] &&
-      comparisonSearchTermMetrics[searchTerm]
-    ) {
+    const searchTermMetric = searchTermMetrics[searchTerm];
+    const comparisonSearchTermMetric = comparisonSearchTermMetrics[searchTerm];
+
+    if (searchTermMetric && comparisonSearchTermMetric) {
       const percentChange =
-        (searchTermMetrics[searchTerm].clicks -
-          comparisonSearchTermMetrics[searchTerm].clicks) /
-        comparisonSearchTermMetrics[searchTerm].clicks;
+        (searchTermMetric.clicks - comparisonSearchTermMetric.clicks) /
+        comparisonSearchTermMetric.clicks;
 
       searchTermsWithPercentChange[searchTerm] = {
-        ...searchTermMetrics[searchTerm],
+        ...searchTermMetric,
         change: Math.round(percentChange * 100) / 100,
+      };
+    } else if (searchTermMetric) {
+      searchTermsWithPercentChange[searchTerm] = {
+        ...searchTermMetric,
+        change: null,
       };
     }
   }

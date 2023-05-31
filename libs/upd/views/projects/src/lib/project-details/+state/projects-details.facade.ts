@@ -484,7 +484,7 @@ export class ProjectsDetailsFacade {
   ]).pipe(
     map(([data, lang]) => {
       const uxTests = data?.taskSuccessByUxTest.filter(
-        (uxTest) => uxTest.success_rate ?? false
+        (uxTest) => uxTest.success_rate || uxTest.success_rate === 0
       );
 
       const tasksWithSuccessRate = uxTests

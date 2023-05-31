@@ -671,73 +671,6 @@ async function getAggregatedProjectMetrics(
     tpcIds
   );
 
-  type TaskMetrics = {
-    _id: Types.ObjectId;
-    page: number;
-    visits: number;
-    dyfYes: number;
-    dyfNo: number;
-    fwylfCantFindInfo: number;
-    fwylfHardToUnderstand: number;
-    fwylfOther: number;
-    fwylfError: number;
-    gscTotalClicks: number;
-    gscTotalImpressions: number;
-    gscTotalCtr: number;
-    gscTotalPosition: number;
-  }
-
-  const pageMetricsByTasks = await pageMetricsModel
-    .aggregate<TaskMetrics>()
-    .project({
-      projects: 1,
-      tasks: 1,
-      date: 1,
-      visits: 1,
-      dyf_yes: 1,
-      dyf_no: 1,
-      fwylf_cant_find_info: 1,
-      fwylf_hard_to_understand: 1,
-      fwylf_other: 1,
-      fwylf_error: 1,
-      gsc_total_clicks: 1,
-      gsc_total_impressions: 1,
-      gsc_total_ctr: 1,
-      gsc_total_position: 1,
-    })
-    .match({
-      date: { $gte: startDate, $lte: endDate },
-      projects: id,
-    })
-    .unwind('$tasks')
-    .group({
-      _id: '$tasks',
-      visits: { $sum: '$visits' },
-      dyfYes: { $sum: '$dyf_yes' },
-      dyfNo: { $sum: '$dyf_no' },
-      fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
-      fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
-      fwylfOther: { $sum: '$fwylf_other' },
-      fwylfError: { $sum: '$fwylf_error' },
-      gscTotalClicks: { $sum: '$gsc_total_clicks' },
-      gscTotalImpressions: { $sum: '$gsc_total_impressions' },
-      gscTotalCtr: { $avg: '$gsc_total_ctr' },
-      gscTotalPosition: { $avg: '$gsc_total_position' },
-    })
-    .exec();
-
-  const tasksDict = arrayToDictionary(tasks as Task[], '_id');
-
-  const metricsByTask = pageMetricsByTasks.map((metrics) => {
-    const task = tasksDict[metrics._id.toString()];
-    const title = task?.title;
-
-    return {
-      ...metrics,
-      title,
-    };
-  });
-
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
   return {
@@ -747,7 +680,6 @@ async function getAggregatedProjectMetrics(
     totalCalldrivers,
     feedbackByTags,
     callsByTasks,
-    pageMetricsByTasks: metricsByTask,
   };
 }
 

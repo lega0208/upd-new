@@ -237,7 +237,7 @@
   "Latest success rate": "Dernier taux de réussite",
   "Total participants from all tests": "Nombre total de participants à tous les tests",
   "Tasks success by Test": "Succès des tâches par test",
-  "Tasks success by test": "Succès des tâches par test",
+  "Average tasks success by test": "Succès moyenne des tâches par test",
   "Success rate and scenarios": "Taux de réussite et scénarios",
   "Documents": "Documents",
   "Task success rate (%)": "Taux de réussite des tâches (%)",
