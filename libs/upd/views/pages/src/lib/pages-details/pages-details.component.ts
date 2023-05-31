@@ -52,6 +52,10 @@ export class PagesDetailsComponent implements OnInit {
           href: 'pagefeedback',
           title: this.i18n.service.translate('tab-pagefeedback', lang),
         },
+        {
+          href: 'readability',
+          title: this.i18n.service.translate('tab-readability', lang),
+        },
         // { href: 'details', title: this.i18n.service.translate('tab-details', lang) },
       ];
 
