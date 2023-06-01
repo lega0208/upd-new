@@ -218,21 +218,3 @@ export const dateRangeConfigs: readonly DateRangeConfig[] = Object.freeze([
       dayjs.utc(fromDate).subtract(52, 'weeks'),
   },
 ]);
-
-/**
- * From seconds to milliseconds
- * @param num
- */
-export const seconds = (num: number) => num * 1000;
-
-/**
- * From minutes to milliseconds
- * @param num
- */
-export const minutes = (num: number) => seconds(num * 60);
-
-/**
- * From hours to milliseconds
- * @param num
- */
-export const hours = (num: number) => minutes(num * 60);
