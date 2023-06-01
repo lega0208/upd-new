@@ -10,8 +10,7 @@
       >
         <div class="col">
           <p class="h3 w-100">
-            {{ localePipe.transform(current, pipeParams) }}
-            <span *ngIf="denominator">{{ '/' + denominator }}</span>
+            {{ localePipe.transform(current, pipeParams) }}<span *ngIf="denominator">{{ '/' + denominator }}</span>
           </p>
           <ng-content></ng-content>
         </div>
