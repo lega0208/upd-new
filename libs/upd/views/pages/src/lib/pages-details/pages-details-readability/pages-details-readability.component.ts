@@ -31,6 +31,8 @@ export class PagesDetailsReadabilityComponent implements OnInit {
 
   mostFrequentWordsOnPageCols: ColumnConfig[] = [];
 
+  fleshKincaid = 0;
+
   totalScoreKpiConfig = {
     pass: { message: '' },
     partial: { message: '' },
@@ -38,9 +40,9 @@ export class PagesDetailsReadabilityComponent implements OnInit {
   };
 
   readabilityKpiConfig = {
-    pass: { message: '' },
-    partial: { message: '' },
-    fail: { message: '' },
+    pass: { message: 'flesch-kincaid-readability-score' },
+    partial: { message: 'flesch-kincaid-readability-score' },
+    fail: { message: 'flesch-kincaid-readability-score' },
   };
 
   totalScoreKpiCriteria = (totalScore: number) => {
@@ -70,18 +72,18 @@ export class PagesDetailsReadabilityComponent implements OnInit {
     }
   };
 
-  readabilityKpiCriteria = (fleshKincaid: number) => {
+  readabilityKpiCriteria = () => {
+    this.fleshKincaid$.subscribe(
+      fleshKincaid => this.fleshKincaid = fleshKincaid);
+      
     switch (true) {
-      case fleshKincaid === 0:
+      case this.fleshKincaid === 0:
         return 'none';
-      case fleshKincaid <= 9:
-        this.readabilityKpiConfig.pass.message = 'flesch-kincaid-readability-score';
+      case this.fleshKincaid <= 9:
         return 'pass';
-      case fleshKincaid > 9 && fleshKincaid <= 11:
-        this.readabilityKpiConfig.partial.message = 'flesch-kincaid-readability-score';
+      case this.fleshKincaid > 9 && this.fleshKincaid <= 11:
         return 'partial';
-      case fleshKincaid > 11:
-        this.readabilityKpiConfig.fail.message = 'flesch-kincaid-readability-score';
+      case this.fleshKincaid > 11:
         return 'fail';
       default:
         return 'none';

@@ -1,10 +1,11 @@
-<div><strong>{{ 'readability-score-last-calculated' | translate }} {{ pageLastUpdated$ | async | date:'longDate' }}</strong></div>
+<div><strong>{{ 'readability-score-last-calculated' | translate }} {{ pageLastUpdated$ | async | localeDate }}</strong></div>
 
 <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
         <upd-data-card
           [current]="totalScore$ | async"
+          [denominator]="'100'"
           [title]="'total-score'"
           [tooltip]="'tooltip-total-score'"
           [displayKpis]="true"
@@ -18,12 +19,13 @@
       <div class="col">
         <upd-data-card
           [current]="readabilityPoints$ | async"
+          [denominator]="'60'"
           [title]="'tab-readability'"
           [tooltip]="'tooltip-readability'"
           [displayKpis]="true"
           [kpiObjectiveCriteria]="readabilityKpiCriteria"
           [kpiStylesConfig]="readabilityKpiConfig"
-          [kpiValue]="fleshKincaid$ | async"
+          [messageValue]="fleshKincaid$ | async"
           [titleModal]="'calculation-of-readability-points'"
           [modal]="'calculation-of-readability-points-description'"
         ></upd-data-card>
@@ -32,10 +34,11 @@
       <div class="col">
         <upd-data-card
           [current]="headingPoints$ | async"
+          [denominator]="'20'"
           [title]="'heading'"
           [tooltip]="'tooltip-heading'"
           [message]="'words-per-heading'"
-          [kpiValue]="wordsPerHeading$ | async"
+          [messageValue]="wordsPerHeading$ | async"
           [titleModal]="'calculation-of-heading-points'"
           [modal]="'calculation-of-heading-points-description'"
         ></upd-data-card>
@@ -44,10 +47,11 @@
       <div class="col">
         <upd-data-card
           [current]="paragraphPoints$ | async"
+          [denominator]="'20'"
           [title]="'paragraph'"
           [tooltip]="'tooltip-paragraph'"
           [message]="'words-per-paragraph'"
-          [kpiValue]="wordsPerParagraph$ | async"
+          [messageValue]="wordsPerParagraph$ | async"
           [titleModal]="'calculation-of-paragraph-points'"
           [modal]="'calculation-of-paragraph-points-description'"
         ></upd-data-card>

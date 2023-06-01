@@ -100,13 +100,14 @@ const defaultKpiObjectiveCriteria: KpiObjectiveCriteria = (
 })
 export class DataCardComponent {
   @Input() current: number | null = null;
+  @Input() denominator = '';
   @Input() comparison?: number | null;
   @Input() title = '';
   @Input() tooltip = '';
   @Input() titleModal = '';
   @Input() modal = '';
   @Input() message = '';
-  @Input() kpiValue: number | null = null;
+  @Input() messageValue: number | null = null;
   @Input() pipe: 'percent' | 'number' = 'number';
   @Input() pipeParams?: string;
   @Input() emptyMessage = 'nodata-available';

@@ -11,6 +11,7 @@
         <div class="col">
           <p class="h3 w-100">
             {{ localePipe.transform(current, pipeParams) }}
+            <span *ngIf="denominator">{{ '/' + denominator }}</span>
           </p>
           <ng-content></ng-content>
         </div>
@@ -42,7 +43,7 @@
           >
           <span
             class="d-inline-flex px-0 pe-1 flex-sm-shrink-1 align-items-center"
-            >{{ kpiConfig[kpiObjectiveStatus].message | translate }} {{ localePipe.transform(kpiValue, pipeParams) }}</span
+            >{{ kpiConfig[kpiObjectiveStatus].message | translate }} {{ localePipe.transform(messageValue, pipeParams) }}</span
           >
         </p>
       </div>
@@ -52,7 +53,7 @@
         <p class="mb-0 mt-2 row flex-nowrap">
           <span
             class="me-0 col-auto pe-2"
-            >{{ message | translate }} {{ localePipe.transform(kpiValue, pipeParams) }}</span
+            >{{ message | translate }} {{ localePipe.transform(messageValue, pipeParams) }}</span
           >
         </p>
       </div>
