@@ -2,7 +2,7 @@
 
 <upd-date-selector></upd-date-selector>
 
-<upd-card [title]="'List of all pages'" titleSize="h5" [ngClass]="'pages-home'">
+<upd-card title="List of all pages" titleSize="h5" [ngClass]="'pages-home'">
   <upd-data-table
     id="pages-home-"
     [data]="(pagesHomeData$ | async) || []"
