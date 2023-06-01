@@ -3,7 +3,6 @@ import { combineLatest } from 'rxjs';
 
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { EN_CA } from '@dua-upd/upd/i18n';
 import { PagesHomeAggregatedData } from '@dua-upd/types-common';
 import { PagesHomeFacade } from './+state/pages-home.facade';
 
@@ -17,7 +16,6 @@ export class PagesHomeComponent implements OnInit {
   loading$ = this.pagesHomeService.loading$;
 
   currentLang$ = this.i18n.currentLang$;
-  langLink = 'en';
 
   columns: ColumnConfig<PagesHomeAggregatedData>[] = [];
 
@@ -25,14 +23,10 @@ export class PagesHomeComponent implements OnInit {
 
   ngOnInit() {
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
-      this.langLink = lang === EN_CA ? 'en' : 'fr';
-
       this.columns = [
         {
           field: 'title',
           header: this.i18n.service.translate('Title', lang),
-          type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
         },
         {
           field: 'url',
