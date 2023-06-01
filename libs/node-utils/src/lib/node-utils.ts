@@ -73,9 +73,7 @@ export const decompressString = async (
   }
 };
 
-const md5Hasher = createHash('md5');
-
 export const md5Hash = (target: string | object) =>
-  md5Hasher
+  createHash('md5')
     .update(typeof target === 'string' ? target : JSON.stringify(target))
     .digest('hex');
