@@ -16,7 +16,8 @@ import {
   today,
 } from '@dua-upd/utils-common';
 import { ReadabilityService } from '../readability/readability.service';
-import { omit } from 'rambdax';
+import { omit, pick } from 'rambdax';
+import { createUpdateQueue } from '../utils';
 
 export type UpdateUrlsOptions = {
   urls?: {
@@ -26,6 +27,10 @@ export type UpdateUrlsOptions = {
   };
   forceReadability?: boolean;
 };
+
+// TODO: Move Readability stuff to readability service
+//  "forceReadability" won't work as it is now-- will need to make it read from
+//  blob storage, completely separate from what's happening in this file
 
 @Injectable()
 export class UrlsService {
@@ -91,6 +96,7 @@ export class UrlsService {
   }
 
   async updateCollectionFromBlobStorage() {
+    this.logger.setContext(UrlsService.name);
     try {
       const blobClient = await this.getBlobClient();
 
@@ -175,6 +181,8 @@ export class UrlsService {
       this.logger.error('Error updating urls collection from blob storage:');
       this.logger.error(err.stack);
     }
+
+    this.logger.resetContext();
   }
 
   async updateReadabilityFromBlobStorage() {
@@ -274,6 +282,7 @@ export class UrlsService {
 
     if (!this.production) {
       await this.updateCollectionFromBlobStorage();
+      await this.updateReadabilityFromBlobStorage();
 
       return;
     }
@@ -395,87 +404,60 @@ export class UrlsService {
     const urlsPageDict = arrayToDictionary(pageUrls, 'url');
 
     // using an update queue to batch updates rather than flooding the db with requests
-    const updateQueue: AnyBulkWriteOperation<Url>[] = [];
-    const readabilityQueue: Readability[] = [];
+    const urlsQueue = createUpdateQueue<AnyBulkWriteOperation<Url>>(
+      10,
+      async (ops) => {
+        await this.db.collections.urls.bulkWrite(ops);
+      }
+    );
+
+    const readabilityQueue = createUpdateQueue<Readability>(10, async (ops) => {
+      await this.db.collections.readability.insertMany(ops, { lean: true });
+    });
 
     const flushQueues = async () => {
-      const tempUpdateQueue: AnyBulkWriteOperation<Url>[] = [];
-      const tempReadabilityQueue: Readability[] = [];
-
-      while (updateQueue.length) {
-        tempUpdateQueue.push(updateQueue.pop());
-        tempReadabilityQueue.push(readabilityQueue.pop());
-      }
-
-      await this.db.collections.urls.bulkWrite(tempUpdateQueue);
-
-      if (tempReadabilityQueue.length) {
-        await this.db.collections.readability.insertMany(tempReadabilityQueue, {
-          lean: true,
-        });
-      }
-
-      return;
+      await Promise.all([urlsQueue.flush(), readabilityQueue.flush()]);
     };
 
     const addToQueues = async (
       urlData: Url & { hash?: UrlHash },
       readabilityScore?: Readability
     ) => {
-      if (updateQueue.length >= 10 || readabilityQueue.length >= 10) {
-        await flushQueues();
-      }
-
       if (readabilityScore) {
-        readabilityQueue.push(readabilityScore);
+        await readabilityQueue.add(readabilityScore);
       }
-
-      const idUrl = { _id: urlData._id, url: urlData.url };
-
-      delete urlData._id;
-      delete urlData.url;
 
       if (!urlData.hash) {
         const updateOp: AnyBulkWriteOperation<Url> = {
           updateOne: {
             filter: {
-              _id: idUrl._id,
+              _id: urlData._id,
             },
             update: {
-              $setOnInsert: {
-                ...idUrl,
-              },
-              $set: {
-                ...urlData,
-              },
+              $setOnInsert: pick(['_id', 'url'], urlData),
+              $set: omit(['_id', 'url'], urlData),
               upsert: true,
             },
           },
         };
 
-        updateQueue.push(updateOp);
+        await urlsQueue.add(updateOp);
 
         return;
       }
 
-      const hash = urlData.hash;
-      const links = urlData.links;
-
-      delete urlData.hash;
-      delete urlData.links;
-
       const updateOp: AnyBulkWriteOperation<Url> = {
         updateOne: {
           filter: {
-            _id: idUrl._id,
+            _id: urlData._id,
           },
           update: {
-            $setOnInsert: idUrl,
-            $set: urlData,
+            $setOnInsert: pick(['_id', 'url'], urlData),
+            $set: omit(['_id', 'url', 'hash', 'links'], urlData),
             $addToSet: {
-              hashes: hash,
+              hashes: urlData.hash,
               links: {
-                $each: links,
+                $each: urlData.links,
               },
             },
           },
@@ -483,7 +465,7 @@ export class UrlsService {
         },
       };
 
-      updateQueue.push(updateOp);
+      await urlsQueue.add(updateOp);
     };
 
     try {

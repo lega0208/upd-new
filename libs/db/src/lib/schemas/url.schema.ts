@@ -21,7 +21,7 @@ export class Url implements IUrl {
   @Prop({ type: Object })
   metadata?: { [prop: string]: string };
 
-  @Prop({ type: { href: String, text: String }})
+  @Prop({ type: [{ href: String, text: String }]})
   links?: { href: string, text: string }[];
 
   @Prop({ type: String, index: true })
