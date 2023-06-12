@@ -435,7 +435,7 @@ export class AirtableClient {
 
     const query = this.createQuery(
       bases.TASKS_INVENTORY,
-      'Unique Call Drivers',
+      'Unique Call Drivers FINAL',
       {
         filterByFormula,
       }
@@ -444,8 +444,8 @@ export class AirtableClient {
     const results = (await this.selectAll(query)).map(
       ({ fields }) =>
         ({
-          tpc_id: fields['TPC ID'],
-          tasks: fields['Task'],
+          tpc_id: fields['TPC_ID'],
+          tasks: fields['Task link'],
         } as { tpc_id: number; tasks: string[] })
     );
 
