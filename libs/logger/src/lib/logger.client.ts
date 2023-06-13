@@ -26,6 +26,11 @@ export class BlobLogger extends CustomLogger {
     this.blobModel = config.blobModel;
   }
 
+  disableBlobLogging() {
+    this.logLevelTargets = {};
+    this.targetBlobs = {};
+  }
+
   setLogLevelTargets(logLevelTargets: LogLevelTargets) {
     this.logLevelTargets = logLevelTargets;
 
