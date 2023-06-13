@@ -1,7 +1,13 @@
 import { LoggerService } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio/lib/slim';
-import { batchAwait, Retry, squishTrim, TimingUtility } from '../utils-common';
+import {
+  batchAwait,
+  Retry,
+  squishTrim,
+  Timeout,
+  TimingUtility,
+} from '../utils-common';
 import { RateLimitUtils } from './utils';
 
 export type HttpClientOptions = {
@@ -30,8 +36,8 @@ export class HttpClient {
   private delayContainer = { delay: this.rateLimitDelay };
   private readonly batchSize: number;
   private readonly logger: LoggerService | Console = console;
-  private readonly rateLimitStats: boolean;
   private readonly rejectOn404: boolean;
+  private rateLimitStats: boolean;
   private rateLimitUtils = new RateLimitUtils();
 
   constructor(options: HttpClientOptions = {}) {
@@ -47,7 +53,12 @@ export class HttpClient {
     this.delayContainer.delay = delay;
   }
 
-  @Retry(4, 250)
+  setRateLimitStats(value: boolean) {
+    this.rateLimitStats = value;
+  }
+
+  @Retry(5, 250)
+  @Timeout(5000)
   async get(url: string): Promise<HttpClientResponse> {
     if (this.rateLimitStats) {
       this.rateLimitUtils.incrementRequests();
@@ -114,7 +125,10 @@ export class HttpClient {
         if (rateLimitExceededRegex.test(e.message)) {
           this.logger.warn('Rate limit exceeded. Request stats:');
 
-          const utilsStats = this.rateLimitUtils.getStats();
+          const utilsStats = this.rateLimitStats
+            ? this.rateLimitUtils.getStats()
+            : {};
+
           const otherStats = {
             delay: this.delayContainer.delay,
             batchSize: this.batchSize,
@@ -130,7 +144,7 @@ export class HttpClient {
             }ms...`
           );
 
-          this.rateLimitUtils.reset();
+          this.rateLimitStats && this.rateLimitUtils.reset();
 
           this.delay = this.rateLimitDelay + 10;
         }

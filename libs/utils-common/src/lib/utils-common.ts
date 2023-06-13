@@ -142,6 +142,45 @@ export function arrayToDictionary<T extends object>(
   return dictionary;
 }
 
+export function arrayToDictionaryFlat<T extends object>(
+  array: T[],
+  keyProp: keyof T,
+  allowDuplicateKeys = false
+) {
+  if (!array.length) return {};
+
+  if (!Array.isArray(array[0][keyProp])) {
+    throw Error('Key property should be an array of strings to be flattened');
+  }
+
+  const dictionary: Record<string, T> = {};
+
+  for (const obj of array) {
+    const keys = obj[keyProp] as string[];
+
+    if (!keys) {
+      throw Error(
+        'Could not convert array to dictionary: the value of the key property is invalid or undefined.\r\n' +
+          'Object where error occurred:\r\n\r\n' +
+          JSON.stringify(obj, null, 2)
+      );
+    }
+
+    for (const key of keys) {
+      if (!allowDuplicateKeys && dictionary[key]) {
+        throw Error(
+          'Could not convert array to dictionary: received duplicate key: ' +
+            key
+        );
+      }
+
+      dictionary[key] = obj;
+    }
+  }
+
+  return dictionary;
+}
+
 // For cloning class instances, objects, etc., including current state
 export const clone = <T extends object>(obj: T): T =>
   Object.assign(Object.create(Object.getPrototypeOf(obj)), obj);
@@ -339,7 +378,7 @@ export function Retry(retries: number, delay: number) {
           console.error(
             chalk.red(
               `Error occurred in ${originalMethod.name}, retrying (${retries} attempts left)` +
-              `\n${err}`
+                `\n${err}`
             )
           );
 
@@ -361,6 +400,37 @@ export function Retry(retries: number, delay: number) {
       };
 
       return attempt(retries, delay);
+    };
+
+    return descriptor;
+  };
+}
+
+/*
+ * Decorator for setting a timeout and throwing an error if it is exceeded
+ */
+export function Timeout(milliseconds: number) {
+  return function (
+    target: object,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (
+      ...args: Parameters<typeof originalMethod>[]
+    ): Promise<ReturnType<typeof originalMethod>> {
+      const timeout = setTimeout(() => {
+        throw new Error(
+          `Timeout of ${milliseconds}ms exceeded in ${originalMethod.name}`
+        );
+      }, milliseconds);
+
+      try {
+        return originalMethod.apply(this, args);
+      } finally {
+        clearTimeout(timeout);
+      }
     };
 
     return descriptor;
