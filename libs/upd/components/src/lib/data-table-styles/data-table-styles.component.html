@@ -57,6 +57,7 @@
     <a
       *ngIf="config.type === 'link'"
       [href]="'https://' + data[config.typeParams.link]"
+      target="_blank"
     >
       {{
         config.translate
