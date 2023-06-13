@@ -24,10 +24,10 @@ export class Readability implements IReadability {
   @Prop({ type: Date, required: true, index: true })
   date: Date;
 
-  @Prop({ type: Number, required: true })
+  @Prop({ type: Number, required: true, index: true })
   original_score: number;
 
-  @Prop({ type: Number, required: true })
+  @Prop({ type: Number, required: true, index: true })
   final_fk_score: number;
 
   @Prop({ type: Number, required: true })
@@ -47,6 +47,7 @@ export class Readability implements IReadability {
 
   @Prop({
     type: [{ word: String, count: Number }],
+    _id: false,
   })
   word_counts: { word: string; count: number }[];
 
@@ -72,6 +73,10 @@ export class Readability implements IReadability {
 export const ReadabilitySchema = SchemaFactory.createForClass(Readability);
 
 ReadabilitySchema.index({ url: 1, date: 1 }, { unique: true });
+ReadabilitySchema.index({ page: 1, date: 1 });
+ReadabilitySchema.index({ url: 1, page: 1 });
+ReadabilitySchema.index({ url: 1, hash: 1 });
+ReadabilitySchema.index({ date: -1 });
 
 export function getReadabilityModel() {
   return model(Readability.name, ReadabilitySchema);

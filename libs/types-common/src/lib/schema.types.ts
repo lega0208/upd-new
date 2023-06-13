@@ -394,7 +394,12 @@ export interface IUrl {
   url: string;
   title?: string;
   page?: Types.ObjectId;
-  metadata?: { [prop: string]: string };
+  metadata?: { [prop: string]: string | Date };
+  langHrefs?: {
+    en?: string;
+    fr?: string;
+    [prop: string]: string | undefined;
+  };
   links?: { href: string, text: string }[]
   redirect?: string;
   last_checked?: Date;
