@@ -42,6 +42,7 @@ export class DbUpdateService {
     private db: DbService,
     @Inject('DB_UPDATE_LOGGER')
     private logger: BlobLogger,
+    @Inject('ENV') private production: boolean,
     @Inject(SearchAnalyticsClient.name)
     private gscClient: SearchAnalyticsClient,
     private airtableService: AirtableService,
@@ -63,6 +64,10 @@ export class DbUpdateService {
     private pagesListModel: Model<PagesListDocument>
   ) {
     this.logger.setContext('DbUpdater');
+
+    if (!this.production) {
+      this.logger.disableBlobLogging();
+    }
   }
 
   private setBlobLogTargets() {

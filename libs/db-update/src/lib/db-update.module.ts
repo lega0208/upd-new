@@ -45,7 +45,7 @@ export class DbUpdateModule {
           logLevelTargets: {
             error: `${month}/db-update_errors_${date}`,
             warn: `${month}/db-update_${date}`,
-            log: `${month}/db-update-${date}`,
+            log: `${month}/db-update_${date}`,
           },
         }),
       ],
