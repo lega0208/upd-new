@@ -39,7 +39,7 @@ export class UrlsService {
     logger: this.logger,
     rateLimitStats: this.rateLimitStats,
     rateLimitDelay: 78,
-    batchSize: 20,
+    batchSize: 15,
   });
 
   constructor(
@@ -890,6 +890,7 @@ export const processHtml = (html: string): ProcessedHtml => {
   const langHrefs = Object.fromEntries(
     $('link[rel="alternate"][hreflang]')
       .toArray()
+      .filter((link) => link.attribs.hreflang && link.attribs.href)
       .map((link) => {
         const href = link.attribs.href.replace('https://', '');
 
