@@ -52,7 +52,7 @@ export class UpdateCommand extends CommandRunner {
       return;
     }
 
-    await this.dbUpdateService.updateAll();
+    await this.dbUpdateService.updateAll(false);
     await this.dataIntegrityService.fillMissingData();
     await this.dataIntegrityService.cleanPageUrls();
   }

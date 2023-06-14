@@ -66,7 +66,7 @@ export class UrlsService {
     return this.blobService.blobModels.urls.blob(this.READABILITY_BLOB_NAME);
   }
 
-  async preparePagesCollection() {
+  private async preparePagesCollection() {
     // We mostly just want to make sure that Pages don't have "duplicated" urls
     // specifically, cases where two versions of a url exist,
     // one with "https://" and one without.
@@ -285,7 +285,7 @@ export class UrlsService {
     );
   }
 
-  async assessReadability(
+  private async assessReadability(
     content: string,
     metadata: { url: string; page: Types.ObjectId; hash: string; date: Date }
   ): Promise<Readability> {
@@ -683,7 +683,7 @@ export class UrlsService {
     }
   }
 
-  async updateCollectionFromPageUrls() {
+  private async updateCollectionFromPageUrls() {
     this.logger.info('Checking Pages collection for any new urls...');
 
     const currentUrls =
