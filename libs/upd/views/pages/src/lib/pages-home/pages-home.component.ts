@@ -19,7 +19,7 @@ export class PagesHomeComponent implements OnInit {
 
   columns: ColumnConfig<PagesHomeAggregatedData>[] = [];
 
-  searchFields = this.columns.map((col) => col.field).concat(['all_urls'])
+  searchFields = this.columns.map((col) => col.field).concat(['all_urls']);
 
   ngOnInit() {
     combineLatest([this.currentLang$]).subscribe(([lang]) => {
@@ -27,12 +27,14 @@ export class PagesHomeComponent implements OnInit {
         {
           field: 'title',
           header: this.i18n.service.translate('Title', lang),
+          type: 'link',
+          typeParam: '_id',
         },
         {
           field: 'url',
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
-          typeParam: '_id',
+          typeParams: { link: 'url', external: true },
         },
         {
           field: 'visits',
@@ -43,7 +45,9 @@ export class PagesHomeComponent implements OnInit {
     });
 
     this.pagesHomeService.fetchData();
-    this.searchFields = this.columns.map((col) => col.field).concat(['all_urls'])
+    this.searchFields = this.columns
+      .map((col) => col.field)
+      .concat(['all_urls']);
   }
 
   constructor(

@@ -7,12 +7,12 @@ import {
   Page,
   PageMetrics,
   PagesList,
-  PagesListDocument,
 } from '@dua-upd/db';
 import type {
   OverallDocument,
   PageDocument,
   PageMetricsModel,
+  PagesListDocument,
 } from '@dua-upd/db';
 import {
   DateType,
@@ -34,6 +34,7 @@ import { PageUpdateService } from './pages/pages.service';
 import { PageMetricsService } from './pages-metrics/page-metrics.service';
 import { InternalSearchTermsService } from './internal-search/search-terms.service';
 import { ActivityMapService } from './activity-map/activity-map.service';
+import { UrlsService } from './urls/urls.service';
 import dayjs from 'dayjs';
 
 @Injectable()
@@ -42,6 +43,7 @@ export class DbUpdateService {
     private db: DbService,
     @Inject('DB_UPDATE_LOGGER')
     private logger: BlobLogger,
+    @Inject('ENV') private production: boolean,
     @Inject(SearchAnalyticsClient.name)
     private gscClient: SearchAnalyticsClient,
     private airtableService: AirtableService,
@@ -60,9 +62,14 @@ export class DbUpdateService {
     @InjectModel(PageMetrics.name, 'defaultConnection')
     private pageMetricsModel: PageMetricsModel,
     @InjectModel(PagesList.name, 'defaultConnection')
-    private pagesListModel: Model<PagesListDocument>
+    private pagesListModel: Model<PagesListDocument>,
+    private urlsService: UrlsService
   ) {
     this.logger.setContext('DbUpdater');
+
+    if (!this.production) {
+      this.logger.disableBlobLogging();
+    }
   }
 
   private setBlobLogTargets() {
@@ -132,9 +139,6 @@ export class DbUpdateService {
         )().catch((err) =>
           this.logger.error(`Error updating Calldrivers data\n${err.stack}`)
         ),
-        // withRetry(this.pagesService.updatePages.bind(this.pagesService), 4, 1000)().catch((err) =>
-        //   this.logger.error('Error updating Page data', err)
-        // ),
       ]);
 
       await this.pagesService.consolidateDuplicatePages();
@@ -160,6 +164,8 @@ export class DbUpdateService {
 
       // run this again in case we've created duplicates from the published pages list
       await this.pagesService.consolidateDuplicatePages();
+
+      await this.urlsService.updateUrls();
 
       this.logger.log('Database updates completed.');
     } catch (error) {

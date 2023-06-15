@@ -12,4 +12,12 @@ export const round = (num: number, digits: number) => {
   const pow = Math.pow(10, digits);
 
   return Math.round(num * pow) / pow;
-}
+};
+
+export const avg = (array: number[], roundToDecimals?: number) => {
+  if (!array.length) return null;
+
+  const average = sum(array) / array.length;
+
+  return roundToDecimals ? round(average, roundToDecimals) : average;
+};

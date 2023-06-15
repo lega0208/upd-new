@@ -4,6 +4,7 @@ import { readFile, writeFile } from 'fs/promises';
 import { Types } from 'mongoose';
 import { IFeedback } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
+import { RunScriptCommand } from '../run-script.command';
 import { startTimer } from './utils/misc';
 
 export const recalculateViews = async (
@@ -76,13 +77,8 @@ export async function repopulateFeedbackFromSnapshot(
   await db.collections.feedback.insertMany(feedback);
 }
 
+export async function syncUrlsCollection() {
+  const urlsService = (<RunScriptCommand>this).inject<UrlsService>(UrlsService);
 
-export async function syncUrlsCollection(
-  _,
-  __,
-  ___,
-  blob: BlobStorageService,
-  urlsService: UrlsService
-) {
   await urlsService.updateUrls();
 }

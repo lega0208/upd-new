@@ -231,6 +231,8 @@ export class TasksService {
       .populate(['pages', 'ux_tests', 'projects'])
       .exec();
 
+    if (!task) console.error(params.id);
+
     const projects = (task.projects || []).map((project) => ({
       _id: project._id,
       id: project._id,
