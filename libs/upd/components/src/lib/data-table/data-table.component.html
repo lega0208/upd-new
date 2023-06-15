@@ -119,9 +119,10 @@
       <div *ngIf="sort; then thenBlock; else elseBlock"></div>
       <ng-template #thenBlock>
         <th
-          *ngFor="let col of columns"
+          *ngFor="let col of columns; let firstColumn = first"
           [pSortableColumn]="col.field"
           [hidden]="col.hideTable"
+          [ngClass]="{'fixed-first-column': firstColumn && showFixedFirstColumn}"
         >
           <div class="text-nowrap d-flex align-items-center">
             <ng-container *ngIf="col.tooltip">

@@ -285,7 +285,7 @@
   "kpi-50-and-60": "Needs a lot of work",
   "kpi-50-or-under": "Very bad",
   "flesch-kincaid-readability-score": "Adjusted Flesch-Kincaid readability score of: ",
-  "words-per-heading": "Words per heading: ",
+  "words-between-each-heading": "Average number of words between each heading: ",
   "words-per-paragraph": "Words per paragraph: ",
   "improving-web-readability-description": "<p>To improve web readability, follow web writing best practices, like: </p> <ul> <li>use simple words</li> <li>write short sentences and paragraphs</li> <li>use subheadings and lists to help people scan the page</li> </ul> <p><a href='https://www.canada.ca/en/treasury-board-secretariat/services/government-communications/canada-content-style-guide.html'>Follow the Canada.ca Content Style Guide</a></p>",
   "task-not-tested": "This task hasn't been tested yet.",

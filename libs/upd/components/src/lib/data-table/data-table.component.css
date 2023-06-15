@@ -16,3 +16,7 @@ td.validation-kpi-not-met + td.bg-green {
 .grouped{
   display:flex;
   }
+
+.fixed-first-column {
+  width: 25%;
+}

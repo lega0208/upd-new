@@ -37,7 +37,7 @@
           [denominator]="'20'"
           [title]="'heading'"
           [tooltip]="'tooltip-heading'"
-          [message]="'words-per-heading'"
+          [message]="'words-between-each-heading'"
           [messageValue]="wordsPerHeading$ | async"
           [titleModal]="'calculation-of-heading-points'"
           [modal]="'calculation-of-heading-points-description'"
@@ -67,6 +67,7 @@
         [data]="(mostFrequentWordsOnPage$ | async) || []"
         [title]="'most-frequent-words-on-page'"
         [tooltip]="'tooltip-most-frequent-words-on-page'"
+        [showFixedFirstColumn]="true"
       >
       </upd-data-table-card>
     </div>
@@ -90,11 +91,7 @@
         [tooltip]="'tooltip-paragraphs'"
       ></upd-data-card>
     </div>
-  </div>
-</div>
 
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
     <div class="col">
       <upd-data-card
         [current]="headingCount$ | async"
@@ -102,7 +99,11 @@
         [tooltip]="'tooltip-headings'"
       ></upd-data-card>
     </div>
+  </div>
+</div>
 
+<!-- <div class="container-fluid my-4 gx-0">
+  <div class="row">
     <div class="col">
       <upd-data-card
         [current]="originalFleschKincaidScore$ | async"
@@ -111,7 +112,7 @@
       ></upd-data-card>
     </div>
   </div>
-</div>
+</div> -->
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">

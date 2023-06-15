@@ -285,7 +285,7 @@
   "kpi-50-and-60": "Besoin de beaucoup de travail",
   "kpi-50-or-under": "Très mauvais",
   "flesch-kincaid-readability-score": "Score de lisibilité Flesch-Kincaid ajusté :",
-  "words-per-heading": "Mots par en-tête : ",
+  "words-between-each-heading": "Nombre de mots moyen entre chaque en-tête : ",
   "words-per-paragraph": "Mots par paragraphe : ",
   "improving-web-readability-description": "<p>Pour améliorer la lisibilité Web, suivez les meilleures pratiques en matière d'écriture pour le web, telles que: </p> <ul> <li>utilisez des mots simples</li> <li>écrivez des phrases courtes et des paragraphes courts</li> <li>utilisez des sous-titres et des listes pour aider les gens à survoler la page</li> </ul> <p><a href='https://www.canada.ca/fr/secretariat-conseil-tresor/services/communications-gouvernementales/guide-redaction-contenu-canada.html'>Suivez le Guide de rédaction du contenu du site Canada.ca</a></p>",
   "task-not-tested": "Cette tâche n'a pas encore été testée.",
