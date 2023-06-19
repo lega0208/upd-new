@@ -1,0 +1,183 @@
+<div>
+  <strong
+    >{{ 'readability-score-last-calculated' | translate }}
+    {{ pageLastUpdated$ | async | localeDate }}</strong
+  >
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-card
+        [current]="totalScore$ | async"
+        [title]="'total-score'"
+        [tooltip]="'tooltip-total-score'"
+        [displayKpis]="true"
+        [kpiObjectiveCriteria]="totalScoreKpiCriteria"
+        [kpiStylesConfig]="(totalScoreKpiConfig$ | async) || {}"
+        [modalTitle]="'meaning-of-score'"
+        [modal]="'meaning-of-score-description'"
+        [pipe]="'template'"
+        [pipeParams]="totalScoreTemplateParams"
+      ></upd-data-card>
+    </div>
+
+    <div class="col">
+      <upd-data-card
+        [current]="readabilityPoints$ | async"
+        [title]="'tab-readability'"
+        [tooltip]="'tooltip-readability'"
+        [modalTitle]="'calculation-of-readability-points'"
+        [modal]="(readabilityDescriptionKey$ | async) || ''"
+        [pipe]="'template'"
+        [pipeParams]="readabilityScoreTemplateParams"
+      >
+      <div
+      *ngIf="fleshKincaidFormatted$ | async as fleshKincaid"
+      class="row row-no-gutters d-block"
+    >
+      <div class="col">
+        <p class="mb-0 mt-2 row flex-nowrap">
+          <span class="me-0 col-auto pe-2">{{ fleshKincaid }}</span>
+        </p>
+      </div>
+    </div></upd-data-card>
+    </div>
+
+    <div class="col">
+      <upd-data-card
+        [current]="headingPoints$ | async"
+        [title]="'heading'"
+        [tooltip]="'tooltip-heading'"
+        [modalTitle]="'calculation-of-heading-points'"
+        [modal]="'calculation-of-heading-points-description'"
+        [pipe]="'template'"
+        [pipeParams]="otherScoresTemplateParams"
+      >
+        <div
+          *ngIf="wordsPerHeadingFormatted$ | async as wordsPerHeading"
+          class="row row-no-gutters d-block"
+        >
+          <div class="col">
+            <p class="mb-0 mt-2 row flex-nowrap">
+              <span class="me-0 col-auto pe-2">{{ wordsPerHeading }}</span>
+            </p>
+          </div>
+        </div>
+      </upd-data-card>
+    </div>
+
+    <div class="col">
+      <upd-data-card
+        [current]="paragraphPoints$ | async"
+        [title]="'paragraph'"
+        [tooltip]="'tooltip-paragraph'"
+        [modalTitle]="'calculation-of-paragraph-points'"
+        [modal]="'calculation-of-paragraph-points-description'"
+        [pipe]="'template'"
+        [pipeParams]="otherScoresTemplateParams"
+      >
+        <div
+          *ngIf="wordsPerParagraphFormatted$ | async as wordsPerParagraph"
+          class="row row-no-gutters d-block"
+        >
+          <div class="col">
+            <p class="mb-0 mt-2 row flex-nowrap">
+              <span class="me-0 col-auto pe-2">{{ wordsPerParagraph }}</span>
+            </p>
+          </div>
+        </div>
+      </upd-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [cols]="(mostFrequentWordsOnPageCols$ | async) || []"
+        [data]="(mostFrequentWordsOnPage$ | async) || []"
+        [title]="'most-frequent-words-on-page'"
+        [tooltip]="'tooltip-most-frequent-words-on-page'"
+      >
+      </upd-data-table-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-card
+        [current]="wordCount$ | async"
+        [title]="'words'"
+        [tooltip]="'tooltip-words'"
+      ></upd-data-card>
+    </div>
+
+    <div class="col">
+      <upd-data-card
+        [current]="paragraphCount$ | async"
+        [title]="'paragraphs'"
+        [tooltip]="'tooltip-paragraphs'"
+      ></upd-data-card>
+    </div>
+
+    <div class="col">
+      <upd-data-card
+        [current]="headingCount$ | async"
+        [title]="'headings'"
+        [tooltip]="'tooltip-headings'"
+      ></upd-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-card
+        [title]="'improving-web-readability'"
+        [titleTooltip]="'tooltip-improving-web-readability'"
+      >
+        <ng-container *ngIf="(currentLang$ | async) === 'en-CA'">
+          <p>
+            To improve web readability, follow web writing best practices, like:
+          </p>
+          <ul>
+            <li>use simple words</li>
+            <li>write short sentences and paragraphs</li>
+            <li>use subheadings and lists to help people scan the page</li>
+          </ul>
+          <p>
+            <a
+              href="https://www.canada.ca/en/treasury-board-secretariat/services/government-communications/canada-content-style-guide.html"
+              >Follow the Canada.ca Content Style Guide</a
+            >
+          </p>
+        </ng-container>
+        <ng-container *ngIf="(currentLang$ | async) === 'fr-CA'">
+          <p>
+            Pour améliorer la lisibilité Web, suivez les meilleures pratiques en
+            matière d'écriture pour le web, telles que:
+          </p>
+          <ul>
+            <li>utilisez des mots simples</li>
+            <li>écrivez des phrases courtes et des paragraphes courts</li>
+            <li>
+              utilisez des sous-titres et des listes pour aider les gens à
+              survoler la page
+            </li>
+          </ul>
+          <p>
+            <a
+              href="https://www.canada.ca/fr/secretariat-conseil-tresor/services/communications-gouvernementales/guide-redaction-contenu-canada.html"
+              >Suivez le Guide de rédaction du contenu du site Canada.ca</a
+            >
+          </p>
+        </ng-container>
+      </upd-card>
+    </div>
+  </div>
+</div>

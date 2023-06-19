@@ -4,7 +4,7 @@
 </div>
 
 <upd-loading-spinner
-  *ngIf="(loading$ | async); else elseBlock2"
+  *ngIf="loading$ | async; else elseBlock2"
 ></upd-loading-spinner>
 
 <!--<ng-template #elseBlock>-->
@@ -38,8 +38,10 @@
         (click)="toggleAlert()"
         translate
         tabindex="0"
-        ><span class="material-icons align-top" aria-hidden="true">content_copy</span> Copy
-        URL</span
+        ><span class="material-icons align-top" aria-hidden="true"
+          >content_copy</span
+        >
+        Copy URL</span
       >
       <ng-container *ngIf="showAlert">
         <upd-alert position="top">Copied successfully!</upd-alert>
@@ -54,7 +56,9 @@
   ></upd-project-header>
 
   <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
-  <upd-date-selector></upd-date-selector>
+  <upd-date-selector
+    *ngIf="!currentUrl.startsWith('readability')"
+  ></upd-date-selector>
 
   <router-outlet></router-outlet>
 </ng-template>
