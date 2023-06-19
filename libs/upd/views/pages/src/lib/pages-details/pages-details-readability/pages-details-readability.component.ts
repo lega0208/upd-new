@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
 import {
   ColumnConfig,
@@ -39,6 +39,21 @@ export class PagesDetailsReadabilityComponent {
   wordCount$ = this.pageDetailsService.wordCount$;
   paragraphCount$ = this.pageDetailsService.paragraphCount$;
   headingCount$ = this.pageDetailsService.headingCount$;
+
+  fleshKincaidFormatted$ = combineLatest([
+    this.fleshKincaid$,
+    this.currentLang$,
+  ]).pipe(
+    map(([fleshKincaid, lang]) => {
+      const message = this.i18n.service.translate(
+        'flesch-kincaid-readability-score',
+        lang
+      );
+      const value = formatNumber(fleshKincaid, lang, '1.0-2');
+
+      return `${message} ${value}`;
+    })
+  );
 
   wordsPerHeadingFormatted$ = combineLatest([
     this.wordsPerHeading$,
@@ -124,33 +139,6 @@ export class PagesDetailsReadabilityComponent {
     })
   );
 
-  readabilityKpiConfig$: Observable<KpiOptionalConfig> = combineLatest([
-    this.fleshKincaid$,
-    this.pageLang$,
-    this.currentLang$,
-  ]).pipe(
-    map(([fleshKincaid, pageLang, lang]) => {
-      const messageKey =
-        pageLang === 'en'
-          ? 'flesch-kincaid-readability-score'
-          : 'flesch-kincaid-readability-score-fr';
-
-      const messageFormatter = () => {
-        const message = this.i18n.service.instant(messageKey);
-
-        const fkScore = formatNumber(fleshKincaid, lang, '1.0-2');
-
-        return `${message} ${fkScore}`;
-      };
-
-      return {
-        pass: { messageFormatter },
-        partial: { messageFormatter },
-        fail: { messageFormatter },
-      };
-    })
-  );
-
   totalScoreKpiCriteria: KpiObjectiveCriteria = (totalScore: number) => {
     switch (true) {
       case totalScore >= 70:
@@ -158,19 +146,6 @@ export class PagesDetailsReadabilityComponent {
       case totalScore >= 60 && totalScore < 70:
         return 'partial';
       case totalScore < 60:
-        return 'fail';
-      default:
-        return 'none';
-    }
-  };
-
-  readabilityCriteria: KpiObjectiveCriteria = (score) => {
-    switch (true) {
-      case score >= 50:
-        return 'pass';
-      case score < 50 && score >= 30:
-        return 'partial';
-      case score < 30:
         return 'fail';
       default:
         return 'none';

@@ -27,14 +27,21 @@
         [current]="readabilityPoints$ | async"
         [title]="'tab-readability'"
         [tooltip]="'tooltip-readability'"
-        [displayKpis]="true"
-        [kpiObjectiveCriteria]="readabilityCriteria"
-        [kpiStylesConfig]="(readabilityKpiConfig$ | async) || {}"
         [modalTitle]="'calculation-of-readability-points'"
         [modal]="(readabilityDescriptionKey$ | async) || ''"
         [pipe]="'template'"
         [pipeParams]="readabilityScoreTemplateParams"
-      ></upd-data-card>
+      >
+      <div
+      *ngIf="fleshKincaidFormatted$ | async as fleshKincaid"
+      class="row row-no-gutters d-block"
+    >
+      <div class="col">
+        <p class="mb-0 mt-2 row flex-nowrap">
+          <span class="me-0 col-auto pe-2">{{ fleshKincaid }}</span>
+        </p>
+      </div>
+    </div></upd-data-card>
     </div>
 
     <div class="col">
