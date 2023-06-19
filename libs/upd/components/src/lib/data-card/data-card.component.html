@@ -10,7 +10,7 @@
       >
         <div class="col">
           <p class="h3 w-100">
-            {{ localePipe.transform(current, pipeParams) }}<span *ngIf="denominator">{{ '/' + denominator }}</span>
+            {{ localeTransform(current, pipeParams) }}
           </p>
           <ng-content></ng-content>
         </div>
@@ -42,24 +42,14 @@
           >
           <span
             class="d-inline-flex px-0 pe-1 flex-sm-shrink-1 align-items-center"
-            >{{ kpiConfig[kpiObjectiveStatus].message | translate }} {{ localePipe.transform(messageValue, pipeParams) }}</span
+            >{{ kpiConfig[kpiObjectiveStatus].message || '' | translate }}</span
           >
         </p>
       </div>
     </div>
-    <div *ngIf="message" class="row row-no-gutters d-block">
-      <div class="col">
-        <p class="mb-0 mt-2 row flex-nowrap">
-          <span
-            class="me-0 col-auto pe-2"
-            >{{ message | translate }} {{ localePipe.transform(messageValue, pipeParams) }}</span
-          >
-        </p>
-      </div>
-    </div>
-    <br>
+    <br />
     <div class="position-absolute bottom-0 end-0 p-3" *ngIf="modal">
-      <upd-modal [modalTitle]="titleModal" [modalContent]="modal | translate">
+      <upd-modal [modalTitle]="modalTitle" [modalContent]="modal | translate">
       </upd-modal>
     </div>
   </div>

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ColumnConfig } from '../data-table-styles/types';
 
 @Component({
@@ -21,7 +21,6 @@ export class DataTableCardComponent<T> {
   @Input() title = '';
   @Input() tooltip = '';
   @Input() loading = false;
-  @Input() showFixedFirstColumn = false;
 
   get defaultSearchFields() {
     return this.cols.map((obj) => obj.field);

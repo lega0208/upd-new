@@ -32,18 +32,17 @@ export class PagesDetailsComponent implements OnInit {
     private i18n: I18nFacade,
     private router: Router
   ) {
+    this.currentUrl = this.router.url.substring(
+      this.router.url.lastIndexOf('/') + 1
+    );
 
-    this.currentUrl = this.router.url.substring(this.router.url.lastIndexOf('/') + 1);
-    
-    router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-  )
-      .subscribe(event => {
-        this.currentUrl = this.router.url.substring(this.router.url.lastIndexOf('/') + 1);
+    router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.currentUrl = this.router.url.substring(
+          this.router.url.lastIndexOf('/') + 1
+        );
       });
-      
-    
-  
   }
 
   ngOnInit(): void {

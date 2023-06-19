@@ -36,7 +36,6 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
   @Input() placeholderText = 'dt_search_keyword';
   @Input() selectedNodes: SelectedNode[] = [];
   @Input() node: SelectedNode | null = null;
-  @Input() showFixedFirstColumn = false;
   exportCols: ColumnConfig[] = [];
 
   ngOnInit() {

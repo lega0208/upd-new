@@ -20,6 +20,8 @@ import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
 import {
+  selectPageLang,
+  selectReadabilityData,
   selectVisitsByDayChartData,
   selectVisitsByDayChartTable,
 } from './pages-details.selectors';
@@ -104,56 +106,60 @@ export class PagesDetailsFacade {
 
   tasks$ = this.pagesDetailsData$.pipe(map((data) => data?.tasks || 0));
 
-  pageLastUpdated$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.date || 0)
+  readability$ = this.store.select(selectReadabilityData);
+
+  pageLang$ = this.store.select(selectPageLang);
+
+  latestReadability$ = this.readability$.pipe(
+    map((readability) => readability[0])
   );
 
-  totalScore$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.total_score || 0)
+  pageLastUpdated$ = this.latestReadability$.pipe(
+    map((readability) => readability?.date)
   );
 
-  readabilityPoints$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.fk_points || 0)
+  totalScore$ = this.latestReadability$.pipe(
+    map((readability) => readability?.total_score)
   );
 
-  fleshKincaid$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.final_fk_score || 0)
+  readabilityPoints$ = this.latestReadability$.pipe(
+    map((readability) => readability?.fk_points)
   );
 
-  headingPoints$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.header_points || 0)
+  fleshKincaid$ = this.latestReadability$.pipe(
+    map((readability) => readability?.final_fk_score)
   );
 
-  wordsPerHeading$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.avg_words_per_header || 0)
+  headingPoints$ = this.latestReadability$.pipe(
+    map((readability) => readability?.header_points)
   );
 
-  paragraphPoints$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.paragraph_points || 0)
+  wordsPerHeading$ = this.latestReadability$.pipe(
+    map((readability) => readability?.avg_words_per_header)
   );
 
-  wordsPerParagraph$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.avg_words_per_paragraph || 0)
+  paragraphPoints$ = this.latestReadability$.pipe(
+    map((readability) => readability?.paragraph_points)
   );
 
-  mostFrequentWordsOnPage$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.word_counts)
+  wordsPerParagraph$ = this.latestReadability$.pipe(
+    map((readability) => readability?.avg_words_per_paragraph)
   );
 
-  wordCount$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.total_words || 0)
+  mostFrequentWordsOnPage$ = this.latestReadability$.pipe(
+    map((readability) => readability?.word_counts)
   );
 
-  paragraphCount$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.total_paragraph || 0)
+  wordCount$ = this.latestReadability$.pipe(
+    map((readability) => readability?.total_words)
   );
 
-  headingCount$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.total_headings || 0)
+  paragraphCount$ = this.latestReadability$.pipe(
+    map((readability) => readability?.total_paragraph)
   );
 
-  originalFleschKincaidScore$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.readability[0]?.original_score || 0)
+  headingCount$ = this.latestReadability$.pipe(
+    map((readability) => readability?.total_headings)
   );
 
   projects$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
@@ -770,15 +776,6 @@ export class PagesDetailsFacade {
       pipeParam: '1.0-2',
     },
   ]);
-
-  readability$ = this.pagesDetailsData$.pipe(
-    map((data) => {
-      return {
-        latest: data?.readability[0],
-        archive: data?.readability,
-      };
-    })
-  );
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
 

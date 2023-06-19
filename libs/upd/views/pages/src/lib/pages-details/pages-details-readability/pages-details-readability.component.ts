@@ -1,19 +1,31 @@
-import { Component, OnInit } from '@angular/core';
-import { PagesDetailsFacade } from '../+state/pages-details.facade';
-import { ColumnConfig } from '@dua-upd/upd-components';
-
-import { LocaleId } from '@dua-upd/upd/i18n';
+import { Component } from '@angular/core';
+import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { GetTableProps } from '@dua-upd/utils-common';
+import {
+  ColumnConfig,
+  KpiObjectiveCriteria,
+  KpiOptionalConfig,
+} from '@dua-upd/upd-components';
+import { PagesDetailsFacade } from '../+state/pages-details.facade';
+import { formatNumber } from '@angular/common';
 
 @Component({
   selector: 'upd-pages-details-readability',
   templateUrl: './pages-details-readability.component.html',
   styleUrls: ['./pages-details-readability.component.css'],
 })
-export class PagesDetailsReadabilityComponent implements OnInit {
-  currentLang!: LocaleId;
+export class PagesDetailsReadabilityComponent {
   currentLang$ = this.i18n.currentLang$;
+
+  pageLang$ = this.pageDetailsService.pageLang$;
+  // Flesch-Kincaid vs. Kandel-Moles
+  readabilityDescriptionKey$ = this.pageLang$.pipe(
+    map((lang) =>
+      lang === 'fr'
+        ? 'calculation-of-readability-points-description-fr'
+        : 'calculation-of-readability-points-description'
+    )
+  );
 
   pageLastUpdated$ = this.pageDetailsService.pageLastUpdated$;
   totalScore$ = this.pageDetailsService.totalScore$;
@@ -27,63 +39,138 @@ export class PagesDetailsReadabilityComponent implements OnInit {
   wordCount$ = this.pageDetailsService.wordCount$;
   paragraphCount$ = this.pageDetailsService.paragraphCount$;
   headingCount$ = this.pageDetailsService.headingCount$;
-  originalFleschKincaidScore$ = this.pageDetailsService.originalFleschKincaidScore$;
 
-  mostFrequentWordsOnPageCols: ColumnConfig[] = [];
+  wordsPerHeadingFormatted$ = combineLatest([
+    this.wordsPerHeading$,
+    this.currentLang$,
+  ]).pipe(
+    map(([wordsPerHeading, lang]) => {
+      const message = this.i18n.service.translate(
+        'words-between-each-heading',
+        lang
+      );
+      const value = formatNumber(wordsPerHeading, lang, '1.0-2');
 
-  fleshKincaid = 0;
+      return `${message} ${value}`;
+    })
+  );
 
-  totalScoreKpiConfig = {
-    pass: { message: '' },
-    partial: { message: '' },
-    fail: { message: '' },
-  };
+  wordsPerParagraphFormatted$ = combineLatest([
+    this.wordsPerParagraph$,
+    this.currentLang$,
+  ]).pipe(
+    map(([wordsPerParagraph, lang]) => {
+      const message = this.i18n.service.translate('words-per-paragraph', lang);
+      const value = formatNumber(wordsPerParagraph, lang, '1.0-2');
 
-  readabilityKpiConfig = {
-    pass: { message: 'flesch-kincaid-readability-score' },
-    partial: { message: 'flesch-kincaid-readability-score' },
-    fail: { message: 'flesch-kincaid-readability-score' },
-  };
+      return `${message} ${value}`;
+    })
+  );
 
-  totalScoreKpiCriteria = (totalScore: number) => {
+  mostFrequentWordsOnPageCols$ = this.currentLang$.pipe(
+    map(
+      (lang) =>
+        [
+          {
+            field: 'word',
+            header: this.i18n.service.translate('word', lang),
+            headerClass: 'col-3',
+          },
+          {
+            field: 'count',
+            header: this.i18n.service.translate('count', lang),
+            headerClass: 'col-auto',
+          },
+        ] as ColumnConfig<{ word: string; count: number }>[]
+    )
+  );
+
+  totalScoreTemplateParams = ['{{}}/100', '1.0-2'];
+  readabilityScoreTemplateParams = ['{{}}/60', '1.0-2'];
+  otherScoresTemplateParams = ['{{}}/20', '1.0-2'];
+
+  totalScoreKpiConfig$: Observable<KpiOptionalConfig> = combineLatest([
+    this.totalScore$,
+    this.currentLang$,
+  ]).pipe(
+    map(([totalScore]) => {
+      const messageFromScore = (score: number) => {
+        switch (true) {
+          case score >= 90:
+            return 'kpi-90-or-more';
+          case score >= 80 && score < 90:
+            return 'kpi-80-and-90';
+          case score >= 70 && score < 80:
+            return 'kpi-70-and-80';
+          case score >= 60 && score < 70:
+            return 'kpi-60-and-70';
+          case score >= 50 && score < 60:
+            return 'kpi-50-and-60';
+          case score < 50:
+            return 'kpi-50-or-under';
+          default:
+            return '';
+        }
+      };
+
+      const messageFormatter = () =>
+        this.i18n.service.instant(messageFromScore(totalScore));
+
+      return {
+        pass: { messageFormatter },
+        partial: { messageFormatter },
+        fail: { messageFormatter },
+      };
+    })
+  );
+
+  readabilityKpiConfig$: Observable<KpiOptionalConfig> = combineLatest([
+    this.fleshKincaid$,
+    this.pageLang$,
+    this.currentLang$,
+  ]).pipe(
+    map(([fleshKincaid, pageLang, lang]) => {
+      const messageKey =
+        pageLang === 'en'
+          ? 'flesch-kincaid-readability-score'
+          : 'flesch-kincaid-readability-score-fr';
+
+      const messageFormatter = () => {
+        const message = this.i18n.service.instant(messageKey);
+
+        const fkScore = formatNumber(fleshKincaid, lang, '1.0-2');
+
+        return `${message} ${fkScore}`;
+      };
+
+      return {
+        pass: { messageFormatter },
+        partial: { messageFormatter },
+        fail: { messageFormatter },
+      };
+    })
+  );
+
+  totalScoreKpiCriteria: KpiObjectiveCriteria = (totalScore: number) => {
     switch (true) {
-      case totalScore === 0:
-        return 'none';
-      case totalScore >= 90:
-        this.totalScoreKpiConfig.pass.message = 'kpi-90-or-more';
-        return 'pass';
-      case totalScore >= 80 && totalScore < 90:
-        this.totalScoreKpiConfig.pass.message = 'kpi-80-and-90';
-        return 'pass';
-      case totalScore >= 70 && totalScore < 80:
-        this.totalScoreKpiConfig.pass.message = 'kpi-70-and-80';
+      case totalScore >= 70:
         return 'pass';
       case totalScore >= 60 && totalScore < 70:
-        this.totalScoreKpiConfig.partial.message = 'kpi-60-and-70';
         return 'partial';
-      case totalScore >= 50 && totalScore < 60:
-        this.totalScoreKpiConfig.fail.message = 'kpi-50-and-60';
-        return 'fail';
-      case totalScore < 50:
-        this.totalScoreKpiConfig.fail.message = 'kpi-50-or-under';
+      case totalScore < 60:
         return 'fail';
       default:
         return 'none';
     }
   };
 
-  readabilityKpiCriteria = () => {
-    this.fleshKincaid$.subscribe(
-      fleshKincaid => this.fleshKincaid = fleshKincaid);
-      
+  readabilityCriteria: KpiObjectiveCriteria = (score) => {
     switch (true) {
-      case this.fleshKincaid === 0:
-        return 'none';
-      case this.fleshKincaid <= 9:
+      case score >= 50:
         return 'pass';
-      case this.fleshKincaid > 9 && this.fleshKincaid <= 11:
+      case score < 50 && score >= 30:
         return 'partial';
-      case this.fleshKincaid > 11:
+      case score < 30:
         return 'fail';
       default:
         return 'none';
@@ -94,25 +181,4 @@ export class PagesDetailsReadabilityComponent implements OnInit {
     private pageDetailsService: PagesDetailsFacade,
     private i18n: I18nFacade
   ) {}
-
-  ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
-    this.currentLang$.subscribe((lang) => {
-
-      this.mostFrequentWordsOnPageCols = [
-        {
-          field: 'word',
-          header: this.i18n.service.translate('word', lang),
-        },
-        {
-          field: 'count',
-          header: this.i18n.service.translate('count', lang),
-        },
-      ];
-
-    });
-  }
 }

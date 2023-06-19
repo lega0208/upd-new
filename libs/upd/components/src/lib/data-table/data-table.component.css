@@ -11,12 +11,5 @@ td.validation-kpi-not-met + td.bg-green {
   background-color: #f8e6d2 !important;
 }
 .exportButtons {
-  margin: 0px 5px 5px 0px;
-}
-.grouped{
-  display:flex;
-  }
-
-.fixed-first-column {
-  width: 25%;
+  margin: 0 5px 5px 0;
 }

@@ -14,6 +14,7 @@ export interface ColumnConfig<T = any> {
   translate?: boolean;
   filterConfig?: FilterConfig<T>;
   hideTable?: boolean;
+  headerClass?: string;
 }
 
 export interface typeParams {
