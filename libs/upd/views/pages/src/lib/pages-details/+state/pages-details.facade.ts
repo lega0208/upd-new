@@ -147,7 +147,7 @@ export class PagesDetailsFacade {
   );
 
   mostFrequentWordsOnPage$ = this.latestReadability$.pipe(
-    map((readability) => readability?.word_counts)
+    map((readability) => readability?.word_counts || [])
   );
 
   wordCount$ = this.latestReadability$.pipe(
