@@ -35,7 +35,9 @@ export class PagesDetailsReadabilityComponent {
   wordsPerHeading$ = this.pageDetailsService.wordsPerHeading$;
   paragraphPoints$ = this.pageDetailsService.paragraphPoints$;
   wordsPerParagraph$ = this.pageDetailsService.wordsPerParagraph$;
-  mostFrequentWordsOnPage$ = this.pageDetailsService.mostFrequentWordsOnPage$;
+  mostFrequentWordsOnPage$ = this.pageDetailsService.mostFrequentWordsOnPage$.pipe(
+    map((words) => [...words])
+  );
   wordCount$ = this.pageDetailsService.wordCount$;
   paragraphCount$ = this.pageDetailsService.paragraphCount$;
   headingCount$ = this.pageDetailsService.headingCount$;
