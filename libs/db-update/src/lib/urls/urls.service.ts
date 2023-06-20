@@ -1,28 +1,44 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { createHash } from 'node:crypto';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import * as cheerio from 'cheerio';
 import dayjs from 'dayjs';
-import { Types } from 'mongoose';
-import { AnyBulkWriteOperation } from 'mongodb';
 import { minify } from 'html-minifier-terser';
+import { FilterQuery, Types } from 'mongoose';
+import { AnyBulkWriteOperation } from 'mongodb';
+import { omit, pick } from 'rambdax';
 import { BlobStorageService } from '@dua-upd/blob-storage';
-import { DbService, Url } from '@dua-upd/db';
+import { DbService, Page, Readability, Url } from '@dua-upd/db';
 import { BlobLogger } from '@dua-upd/logger';
-import type { UrlHash } from '@dua-upd/types-common';
+import { md5Hash } from '@dua-upd/node-utils';
+import type { IPage, IUrl, UrlHash } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
   HttpClient,
   HttpClientResponse,
-  logJson,
+  prettyJson,
+  squishTrim,
   today,
 } from '@dua-upd/utils-common';
+import { ReadabilityService } from '../readability/readability.service';
+import { createUpdateQueue } from '../utils';
+
+export type UpdateUrlsOptions = {
+  urls?: {
+    check404s?: boolean;
+    checkAll?: boolean;
+    filter?: FilterQuery<Page>;
+  };
+};
 
 @Injectable()
 export class UrlsService {
   private readonly DATA_BLOB_NAME = 'urls-collection-data.json';
+  private readonly READABILITY_BLOB_NAME = 'readability-collection-data.json';
+
+  private rateLimitStats = true;
   private readonly http = new HttpClient({
     logger: this.logger,
-    rateLimitStats: true,
-    rateLimitDelay: 80,
+    rateLimitStats: this.rateLimitStats,
+    rateLimitDelay: 78,
     batchSize: 15,
   });
 
@@ -30,19 +46,76 @@ export class UrlsService {
     private db: DbService,
     @Inject('DB_UPDATE_LOGGER') private logger: BlobLogger,
     @Inject(BlobStorageService.name) private blobService: BlobStorageService,
-    @Inject('ENV') private production: boolean
+    @Inject('ENV') private production: boolean,
+    @Optional() private readability: ReadabilityService
   ) {}
 
   private async getBlobClient() {
     return this.blobService.blobModels.urls.blob(this.DATA_BLOB_NAME);
   }
 
+  private async getArchiveBlobClient() {
+    const dateString = new Date().toISOString().slice(0, 10);
+
+    return this.blobService.blobModels.urls.blob(
+      `archive/${dateString}/${this.DATA_BLOB_NAME}`
+    );
+  }
+
+  private async getReadabilityBlobClient() {
+    return this.blobService.blobModels.urls.blob(this.READABILITY_BLOB_NAME);
+  }
+
+  private async preparePagesCollection() {
+    // We mostly just want to make sure that Pages don't have "duplicated" urls
+    // specifically, cases where two versions of a url exist,
+    // one with "https://" and one without.
+
+    // also remove the url "x"
+    await this.db.collections.pages.updateMany(
+      {},
+      { $pull: { all_urls: 'x' } }
+    );
+
+    const pagesToUpdate = await this.db.collections.pages
+      .find({ all_urls: /^\s*https:|\s+$/i }, { all_urls: 1 })
+      .lean()
+      .exec();
+
+    const updateOps: AnyBulkWriteOperation<Page>[] = [];
+
+    const httpsRegex = new RegExp('https?://', 'ig');
+
+    for (const page of pagesToUpdate) {
+      const allUrls = page.all_urls;
+
+      const dedupedUrls = [
+        ...new Set(
+          allUrls.map((url) => squishTrim(url).replace(httpsRegex, ''))
+        ),
+      ];
+
+      updateOps.push({
+        updateOne: {
+          filter: { _id: page._id },
+          update: { $set: { all_urls: dedupedUrls } },
+        },
+      });
+    }
+
+    await this.db.collections.pages.bulkWrite(updateOps);
+  }
+
   async updateCollectionFromBlobStorage() {
+    this.logger.setContext(UrlsService.name);
+
     try {
       const blobClient = await this.getBlobClient();
 
       if (!(await blobClient.exists())) {
-        this.logger.log(`Collection data blob does not exist.`);
+        this.logger.warn(
+          `Tried to sync local Urls collection, but data blob does not exist.`
+        );
         return;
       }
 
@@ -52,23 +125,24 @@ export class UrlsService {
         ? new Date(blobProperties.metadata.date)
         : blobProperties.lastModified;
 
-      const collectionDate = (await this.db.collections.urls
-        .findOne(
-          {},
-          { _id: 0, last_checked: 1 },
-          { sort: { last_checked: -1 } }
-        )
-        .lean()
-        .exec())?.last_checked;
+      const collectionDate = (
+        await this.db.collections.urls
+          .findOne({}, { last_checked: 1 }, { sort: { last_checked: -1 } })
+          .lean()
+          .exec()
+      )?.last_checked;
 
-      if (collectionDate && dayjs(collectionDate).add(1, 'day').isAfter(blobDate)) {
+      if (
+        collectionDate &&
+        dayjs(collectionDate).add(1, 'day').isAfter(blobDate)
+      ) {
         this.logger.log(`Collection data is up to date.`);
         return;
       }
 
       this.logger.log(`Downloading collection data from blob storage...`);
 
-      const collectionData = await blobClient.downloadToString();
+      const blobData = await blobClient.downloadToString();
 
       this.logger.log(`Inserting data into collection...`);
 
@@ -92,7 +166,7 @@ export class UrlsService {
       };
 
       const bulkWriteOps: AnyBulkWriteOperation<Url>[] = JSON.parse(
-        collectionData,
+        blobData,
         jsonReviver
       ).map(
         (url) =>
@@ -107,7 +181,7 @@ export class UrlsService {
 
       const bulkWriteResults = await this.db.collections.urls.bulkWrite(
         bulkWriteOps,
-        { ordered: false }
+        { ordered: true }
       );
 
       this.logger.accent(
@@ -119,11 +193,27 @@ export class UrlsService {
       this.logger.error('Error updating urls collection from blob storage:');
       this.logger.error(err.stack);
     }
+
+    await this.ensurePageRefs();
+
+    this.logger.resetContext();
   }
 
-  async updateUrls() {
+  async updateUrls(options?: UpdateUrlsOptions) {
+    if (
+      options?.urls?.filter &&
+      (options?.urls?.check404s || options?.urls?.checkAll)
+    ) {
+      throw new Error(
+        'Cannot use filter option with check404s or checkAll options.'
+      );
+    }
+
+    await this.preparePagesCollection();
+
     if (!this.production) {
       await this.updateCollectionFromBlobStorage();
+      await this.readability.updateCollectionFromBlobStorage();
 
       return;
     }
@@ -132,34 +222,42 @@ export class UrlsService {
 
     this.logger.info('Checking Urls collection to see what URLs to update.');
 
-    const oneWeekAgo = today().subtract(7, 'days').add(1, 'minute').toDate();
+    const threeDaysAgo = today().subtract(3, 'days').add(2, 'hours').toDate();
+    const twoWeeksAgo = today().subtract(2, 'weeks').add(2, 'hours').toDate();
 
     const ignoredUrls = [
       'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/completing-filing-information-returns/t4a-information-payers/t4a-slip/distribute-your-t4a-slips.html',
       'www.canada.ca/fr/agence-revenu/services/impot/entreprises/sujets/retenues-paie/remplir-produire-declarations-renseignements/t4a-information-payeurs/feuillet-t4a/comment-distribuer-vos-feuillets-t4a.html',
-      'canada-preview.adobecqms.net/en/revenue-agency/services/tax/individuals/segments/tax-credits-deductions-persons-disabilities/information-medical-practitioners/life-sustaining-therapy-video-alternative-formats-transcript.html',
-      'canada-preview.adobecqms.net/en/revenue-agency/services/tax/individuals/segments/tax-credits-deductions-persons-disabilities/information-medical-practitioners/cumulative-effect-video-alternative-formats-transcript.html',
-      'canada-preview.adobecqms.net/en/revenue-agency/services/tax/individuals/segments/tax-credits-deductions-persons-disabilities/information-medical-practitioners/vision-video-alternative-formats-transcript.html',
-      'canada-preview.adobecqms.net/fr/agence-revenu/services/impot/particuliers/segments/deductions-credits-impot-personnes-handicapees/renseignements-professionnels-sante/soins-therapeutiques-essentiels-video-formats-remplacement-transcription.html',
-      'canada-preview.adobecqms.net/fr/agence-revenu/services/impot/particuliers/segments/deductions-credits-impot-personnes-handicapees/renseignements-professionnels-sante/effet-cumulatif-video-formats-remplacement-transcription.html',
-      'canada-preview.adobecqms.net/fr/agence-revenu/services/impot/particuliers/segments/deductions-credits-impot-personnes-handicapees/renseignements-professionnels-sante/voir-transcription-medias-substituts.html',
     ];
 
-    const urlsFromCollection = (
-      await this.db.collections.urls
-        .find({
-          $or: [
-            { last_checked: null },
-            {
-              is_404: {
-                $in: [null, false],
+    const filter404s = options?.urls?.check404s
+      ? {}
+      : {
+          is_404: {
+            $in: [null, false],
+          },
+        };
+
+    const urlsQuery =
+      options?.urls?.filter || options?.urls?.checkAll
+        ? {}
+        : {
+            url: /^www\.canada\.ca/,
+            $or: [
+              { last_checked: null },
+              {
+                ...filter404s,
+                last_checked: { $lt: threeDaysAgo },
               },
-              last_checked: { $lt: oneWeekAgo },
-            },
-          ],
-        })
-        .lean()
-        .exec()
+              {
+                is_404: true,
+                last_checked: { $lt: twoWeeksAgo },
+              },
+            ],
+          };
+
+    const urlsFromCollection = (
+      await this.db.collections.urls.find(urlsQuery).lean().exec()
     ).filter(
       // filter out pages that have an endless redirect loop
       (urlDoc) => !ignoredUrls.includes(urlDoc.url)
@@ -187,6 +285,30 @@ export class UrlsService {
     );
   }
 
+  private async assessReadability(
+    content: string,
+    metadata: { url: string; page: Types.ObjectId; hash: string; date: Date }
+  ): Promise<Readability> {
+    const langRegex = /canada\.ca\/(en|fr)/i;
+    const lang = langRegex.exec(metadata.url)?.[1];
+
+    if (!lang || (lang !== 'en' && lang !== 'fr')) {
+      throw new Error(`Could not determine language for ${metadata.url}`);
+    }
+
+    const readabilityScore = await this.readability.calculateReadability(
+      content,
+      lang
+    );
+
+    return {
+      _id: new Types.ObjectId(),
+      lang,
+      ...metadata,
+      ...readabilityScore,
+    };
+  }
+
   private async checkAndUpdateUrlData(urls: Url[]) {
     const urlsDataDict = arrayToDictionary(urls, 'url');
 
@@ -201,79 +323,76 @@ export class UrlsService {
 
     const urlsPageDict = arrayToDictionary(pageUrls, 'url');
 
+    const existingReadabilityHashes = await this.db.collections.readability
+      .distinct<string>('hash')
+      .exec();
+
     // using an update queue to batch updates rather than flooding the db with requests
-    const updateQueue: AnyBulkWriteOperation<Url>[] = [];
-
-    const flushQueue = async () => {
-      const tempQueue: AnyBulkWriteOperation<Url>[] = [];
-
-      while (updateQueue.length) {
-        tempQueue.push(updateQueue.pop());
+    const urlsQueue = createUpdateQueue<AnyBulkWriteOperation<Url>>(
+      100,
+      async (ops) => {
+        await this.db.collections.urls.bulkWrite(ops);
       }
+    );
 
-      await this.db.collections.urls.bulkWrite(tempQueue);
+    const readabilityQueue = createUpdateQueue<Readability>(
+      100,
+      async (ops) => {
+        await this.db.collections.readability.insertMany(ops, { lean: true });
+      }
+    );
 
-      return;
+    const flushQueues = async () => {
+      await Promise.all([urlsQueue.flush(), readabilityQueue.flush()]);
     };
 
-    const addToQueue = async (urlData: Url & { hash?: UrlHash }) => {
-      if (updateQueue.length >= 10) {
-        await flushQueue();
+    const addToQueues = async (
+      urlData: Url & { hash?: UrlHash },
+      readabilityScore?: Readability
+    ) => {
+      if (readabilityScore) {
+        await readabilityQueue.add(readabilityScore);
       }
-
-      const idUrl = { _id: urlData._id, url: urlData.url };
-
-      delete urlData._id;
-      delete urlData.url;
 
       if (!urlData.hash) {
         const updateOp: AnyBulkWriteOperation<Url> = {
           updateOne: {
             filter: {
-              _id: idUrl._id,
+              _id: urlData._id,
             },
             update: {
-              $setOnInsert: {
-                ...idUrl,
-              },
-              $set: {
-                ...urlData,
-              },
+              $setOnInsert: pick(['_id', 'url'], urlData),
+              $set: omit(['_id', 'url'], urlData),
               upsert: true,
             },
           },
         };
 
-        updateQueue.push(updateOp);
+        await urlsQueue.add(updateOp);
 
         return;
       }
 
-      const hash = urlData.hash;
-
-      delete urlData.hash;
-
       const updateOp: AnyBulkWriteOperation<Url> = {
         updateOne: {
           filter: {
-            _id: idUrl._id,
+            _id: urlData._id,
           },
           update: {
-            $setOnInsert: {
-              ...idUrl,
-            },
-            $set: {
-              ...urlData,
-            },
+            $setOnInsert: pick(['_id', 'url'], urlData),
+            $set: omit(['_id', 'url', 'hash', 'links'], urlData),
             $addToSet: {
-              hashes: hash,
+              hashes: urlData.hash,
+              links: {
+                $each: urlData.links,
+              },
             },
           },
           upsert: true,
         },
       };
 
-      updateQueue.push(updateOp);
+      await urlsQueue.add(updateOp);
     };
 
     try {
@@ -282,18 +401,9 @@ export class UrlsService {
         async (response: HttpClientResponse) => {
           const date = new Date();
 
-          const collectionData =
-            urlsDataDict[response.url] ||
-            urlsDataDict[`https://${response.url}`];
+          const collectionData = urlsDataDict[response.url];
 
           if (!collectionData) {
-            console.error(response.url);
-            logJson(
-              Object.keys(urlsDataDict).filter(
-                (url) => url.search(response.url) !== -1
-              )
-            );
-
             throw new Error(
               `No collection data found for url ${response.url}.`
             );
@@ -304,7 +414,7 @@ export class UrlsService {
             : {};
 
           if (response.is404) {
-            return await addToQueue({
+            return await addToQueues({
               _id: collectionData._id,
               url: collectionData.url,
               last_checked: date,
@@ -319,7 +429,33 @@ export class UrlsService {
             return;
           }
 
-          const hash = createHash('md5').update(response.body).digest('hex');
+          const processedHtml = processHtml(response.body);
+
+          const langHrefs = processedHtml.langHrefs
+            ? { langHrefs: processedHtml.langHrefs }
+            : {};
+
+          if (!processedHtml) {
+            return await addToQueues({
+              _id: collectionData._id,
+              url: collectionData.url,
+              last_checked: date,
+              last_modified: date,
+              // if the body is empty, it's technically not a 404, but may as well be.
+              is_404: true,
+              ...redirect,
+            });
+          }
+
+          // need to hash the processed html because of dynamically injected content
+          const hash = md5Hash(processedHtml.body);
+
+          const readabilityMetadata = {
+            url: collectionData.url,
+            page: collectionData.page,
+            hash,
+            date,
+          };
 
           if (
             collectionData?.hashes &&
@@ -328,34 +464,57 @@ export class UrlsService {
             // current hash has already been saved previously -- can skip
             // (just update last_checked in db)
             try {
-              await addToQueue({
+              // assess readability if data does not exist for this hash
+              if (!existingReadabilityHashes.includes(hash)) {
+                const readabilityScore = await this.assessReadability(
+                  processedHtml.body,
+                  readabilityMetadata
+                );
+
+                return await addToQueues(
+                  {
+                    _id: collectionData._id,
+                    url: collectionData.url,
+                    last_checked: date,
+                    metadata: processedHtml.metadata,
+                    ...langHrefs,
+                    links: processedHtml.links,
+                    ...redirect,
+                  },
+                  readabilityScore
+                );
+              }
+
+              return await addToQueues({
                 _id: collectionData._id,
                 url: collectionData.url,
                 last_checked: date,
+                metadata: processedHtml.metadata,
+                ...langHrefs,
+                links: processedHtml.links,
                 ...redirect,
               });
             } catch (err) {
-              this.logger.error('Error updating Url collection data:');
+              this.logger.error(
+                'Error updating Url collection data or assessing readability:'
+              );
               this.logger.error(err.stack);
+              return;
             }
-
-            return;
           }
 
           const urlBlob = this.blobService.blobModels.urls.blob(hash);
 
-
-
-          // if blob already exists, add the url to it's metadata if it's not already there
+          // if blob already exists, add the url to its blob metadata if it's not already there
           if (await urlBlob.exists()) {
-            const metadata = (await urlBlob.getProperties()).metadata;
-            const urls: string[] = JSON.parse(metadata.urls);
+            const blobMetadata = (await urlBlob.getProperties()).metadata;
+            const urls: string[] = JSON.parse(blobMetadata.urls);
 
             if (!urls.includes(response.url)) {
               urls.push(response.url);
 
               await urlBlob.setMetadata({
-                ...metadata,
+                ...blobMetadata,
                 urls: JSON.stringify(urls),
               });
             }
@@ -363,7 +522,7 @@ export class UrlsService {
             try {
               // if html is malformed, minifying will fail.
               // we'll wrap it in a try/catch and upload it as-is if that happens
-              const minifiedBody: string = await minify(response.body, {
+              const minifiedBody: string = await minify(processedHtml.body, {
                 collapseWhitespace: true,
                 conservativeCollapse: true,
                 continueOnParseError: true,
@@ -380,13 +539,33 @@ export class UrlsService {
                   date: date.toISOString(),
                 },
               });
-            } catch {
-              await urlBlob.uploadFromString(response.body, {
-                metadata: {
-                  urls: JSON.stringify([response.url]),
-                  date: date.toISOString(),
-                },
-              });
+            } catch (err) {
+              // If an error is caught here, it could either be because minifying failed,
+              // or because the blob was uploaded from a "redirect" url after we
+              // checked if it exists.
+
+              if (/already exists/.test(err.message)) {
+                // if already exists, set blob metadata like above
+                const blobMetadata = (await urlBlob.getProperties()).metadata;
+
+                const urls: string[] = JSON.parse(blobMetadata.urls);
+
+                if (!urls.includes(response.url)) {
+                  urls.push(response.url);
+
+                  await urlBlob.setMetadata({
+                    ...blobMetadata,
+                    urls: JSON.stringify(urls),
+                  });
+                }
+              } else {
+                await urlBlob.uploadFromString(processedHtml.body, {
+                  metadata: {
+                    urls: JSON.stringify([response.url]),
+                    date: date.toISOString(),
+                  },
+                });
+              }
             }
           }
 
@@ -395,46 +574,120 @@ export class UrlsService {
               ? { page: urlsPageDict[response.url].page }
               : {};
 
-            return await addToQueue({
-              _id: collectionData._id,
-              url: response.url,
-              title: response.title,
-              ...page,
-              ...redirect,
-              last_checked: date,
-              last_modified: date,
-              is_404: false,
-              hash: { hash, date },
-              latest_snapshot: urlBlob.url,
-            });
+            const readabilityScore = await this.assessReadability(
+              processedHtml.body,
+              readabilityMetadata
+            );
+
+            return await addToQueues(
+              {
+                _id: collectionData._id,
+                url: response.url,
+                title: response.title,
+                ...page,
+                metadata: processedHtml.metadata,
+                ...langHrefs,
+                links: processedHtml.links,
+                ...redirect,
+                last_checked: date,
+                last_modified: date,
+                is_404: false,
+                hash: { hash, date },
+                latest_snapshot: hash,
+              },
+              readabilityScore
+            );
           } catch (err) {
             this.logger.error(
-              'An error occurred when inserting Url data to db:'
+              `An error occurred when inserting Url data to db for url:\n${response.url}\n`
             );
-            this.logger.error(err.stack);
-          }
-        }
-      );
 
-      await this.saveCollectionToBlobStorage();
+            if (/cheerio/.test(err.message) && !response.body) {
+              this.logger.error(
+                `Cheerio loading error. Response body is empty!`
+              );
+            } else if (/cheerio/.test(err.message)) {
+              this.logger.error(
+                `Cheerio loading error but response body is not empty.`
+              );
+              this.logger.error(err);
+            } else {
+              this.logger.error(err.stack);
+            }
+          }
+        },
+        true
+      );
     } catch (err) {
       this.logger.error('An error occurred during http.getAll():');
       this.logger.error(err.stack);
     } finally {
       // commit any remaining updates
-      await flushQueue();
+      await flushQueues();
     }
 
-    this.logger.info('Urls updates completed.');
+    try {
+      await this.saveCollectionToBlobStorage();
+    } catch (err) {
+      this.logger.error(
+        'An error occurred during saveCollectionToBlobStorage():'
+      );
+      this.logger.error(err);
+    }
+
+    try {
+      await this.readability.saveCollectionToBlobStorage();
+    } catch (err) {
+      this.logger.error(
+        'An error occurred during readability.saveCollectionToBlobStorage():'
+      );
+      this.logger.error(err);
+    }
+
+    this.logger.info('Urls and Readability updates completed.');
+  }
+
+  async getPageData(url: string) {
+    const rateLimitStatsSetting = this.rateLimitStats;
+
+    this.http.setRateLimitStats(false);
+
+    try {
+      const response = await this.http.get(url);
+
+      const lang = /^www\.canada\.ca\/(en|fr)/.exec(url)?.[1];
+
+      const redirect = response.redirect ? { redirect: response.redirect } : {};
+
+      if (response.title === 'Access Denied') {
+        throw Error('Tried to get page data but received "Access Denied"');
+      }
+
+      const processedHtml = processHtml(response.body);
+
+      // need to hash the processed html because of dynamically injected content
+      const hash = md5Hash(processedHtml.body);
+
+      return {
+        ...response,
+        processedHtml,
+        redirect,
+        hash,
+        lang,
+      };
+    } catch (err) {
+      this.logger.error(`Error getting page data for url: ${url}`);
+      this.logger.error(err);
+    } finally {
+      this.http.setRateLimitStats(rateLimitStatsSetting);
+    }
   }
 
   private async updateCollectionFromPageUrls() {
-    this.logger.log('Checking Pages collection for any new urls...');
+    this.logger.info('Checking Pages collection for any new urls...');
 
     const currentUrls =
-      (await this.db.collections.urls
-        .find({}, { _id: 0, url: 1 })
-        .distinct('url')) || [];
+      (await this.db.collections.urls.distinct<string>('url').exec()) || [];
 
     const pageUrls = (
       await this.db.collections.pages.find({}, { all_urls: 1 }).lean().exec()
@@ -468,10 +721,12 @@ export class UrlsService {
     await this.db.collections.urls.insertMany(urlDocs);
 
     this.logger.log(`${urlDocs.length} new urls added.`);
+
+    await this.ensurePageRefs();
   }
 
-  async saveCollectionToBlobStorage() {
-    this.logger.log('Saving urls data to blob storage...');
+  async saveCollectionToBlobStorage(force = false) {
+    this.logger.info('Saving urls data to blob storage...');
 
     try {
       const blobClient = await this.getBlobClient();
@@ -484,7 +739,7 @@ export class UrlsService {
           .lean()
           .exec();
 
-        if (!newData) {
+        if (!newData && !force) {
           this.logger.log('No new data added. Skipping upload to storage.');
 
           return;
@@ -501,7 +756,14 @@ export class UrlsService {
 
       await blobClient.uploadFromString(JSON.stringify(data), {
         metadata: { date: newDate.toISOString() },
+        overwrite: true,
       });
+
+      const archiveClient = await this.getArchiveBlobClient();
+
+      if (!(await archiveClient.exists())) {
+        await archiveClient.uploadFromString(JSON.stringify(data));
+      }
     } catch (err) {
       this.logger.error(
         `An error occurred uploading collection to blob storage:`
@@ -509,4 +771,138 @@ export class UrlsService {
       this.logger.error(err.stack);
     }
   }
+
+  async ensurePageRefs() {
+    this.logger.info('Ensuring page refs for urls collection...');
+
+    const urlsWithPages = await this.db.collections.urls
+      .aggregate<{ _id: Types.ObjectId; url: string; page?: [IPage] }>()
+      .project({ url: 1, page: 1 })
+      .match({ page: { $exists: true } })
+      .lookup({
+        from: 'pages',
+        localField: 'page',
+        foreignField: '_id',
+        as: 'page',
+      })
+      .exec();
+
+    const urlsToUpdate = urlsWithPages
+      .filter(
+        (urlDoc) =>
+          !urlDoc.page.length || !urlDoc.page[0]?.all_urls.includes(urlDoc.url)
+      )
+      .map(({ url }) => url);
+
+    if (!urlsToUpdate.length) {
+      this.logger.info('Pages references are up to date.');
+
+      return;
+    }
+
+    const pagesForUpdates = await this.db.collections.pages
+      .find({ all_urls: { $in: urlsToUpdate } })
+      .lean()
+      .exec();
+
+    if (!pagesForUpdates.length) {
+      this.logger.error(
+        `Invalid references found, but no corresponding pages were found for urls: ${prettyJson(
+          urlsToUpdate
+        )}`
+      );
+
+      return;
+    }
+
+    const bulkWriteOps: AnyBulkWriteOperation<IUrl>[] = pagesForUpdates.map(
+      (page) => ({
+        updateMany: {
+          filter: { url: { $in: page.all_urls }, page: { $ne: page._id } },
+          update: {
+            $set: { page: page._id },
+          },
+        },
+      })
+    );
+
+    this.logger.log(
+      `Updating references to ${pagesForUpdates.length} pages...`
+    );
+
+    await this.db.collections.urls.bulkWrite(bulkWriteOps);
+
+    this.logger.info('Page references successfully updated.');
+
+    return;
+  }
 }
+
+type ProcessedHtml = {
+  title: string;
+  body: string;
+  metadata: Record<string, string>;
+  links: { href: string; text: string }[];
+  langHrefs: { [lang: string]: string };
+};
+
+export const processHtml = (html: string): ProcessedHtml => {
+  const $ = cheerio.load(html, {}, false);
+  $('script, meta[property="fb:pages"]').remove();
+
+  const body = $('main').html() || '';
+
+  if (!body.trim()) {
+    return;
+  }
+
+  const metadata = Object.fromEntries(
+    $('meta[name], meta[property]')
+      .toArray()
+      .filter(
+        (meta) =>
+          meta.attribs.name &&
+          meta.attribs.content &&
+          meta.attribs.content !== 'IE=edge' &&
+          meta.attribs.content !== 'width=device-width,initial-scale=1'
+      )
+      .map((meta) => {
+        if (
+          ['dcterms.issued', 'dcterms.modified'].includes(meta.attribs.name) &&
+          /\d{4}-\d{2}-\d{2}/.test(meta.attribs.content)
+        ) {
+          return [meta.attribs.name, new Date(meta.attribs.content)];
+        }
+
+        return [meta.attribs.name, meta.attribs.content];
+      })
+  );
+
+  const links = $('main a[href]')
+    .toArray()
+    .map((a) => ({
+      href: a.attribs.href
+        .replace('https://', '')
+        .replace(/^\/(en|fr)\//i, 'www.canada.ca/$1/'),
+      text: $(a).text(),
+    }));
+
+  const langHrefs = Object.fromEntries(
+    $('link[rel="alternate"][hreflang]')
+      .toArray()
+      .filter((link) => link.attribs.hreflang && link.attribs.href)
+      .map((link) => {
+        const href = link.attribs.href.replace('https://', '');
+
+        return [link.attribs.hreflang, href];
+      })
+  );
+
+  return {
+    title: $('title').text(),
+    body: $.html(),
+    metadata,
+    links,
+    langHrefs,
+  };
+};

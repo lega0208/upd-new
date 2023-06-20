@@ -14,13 +14,14 @@ import {
   GscSearchTermMetrics,
   PageAggregatedData,
   PageDetailsData,
-  ReadabilityData,
 } from '@dua-upd/types-common';
 
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
 import {
+  selectPageLang,
+  selectReadabilityData,
   selectVisitsByDayChartData,
   selectVisitsByDayChartTable,
 } from './pages-details.selectors';
@@ -104,6 +105,62 @@ export class PagesDetailsFacade {
   );
 
   tasks$ = this.pagesDetailsData$.pipe(map((data) => data?.tasks || 0));
+
+  readability$ = this.store.select(selectReadabilityData);
+
+  pageLang$ = this.store.select(selectPageLang);
+
+  latestReadability$ = this.readability$.pipe(
+    map((readability) => readability[0])
+  );
+
+  pageLastUpdated$ = this.latestReadability$.pipe(
+    map((readability) => readability?.date)
+  );
+
+  totalScore$ = this.latestReadability$.pipe(
+    map((readability) => readability?.total_score)
+  );
+
+  readabilityPoints$ = this.latestReadability$.pipe(
+    map((readability) => readability?.fk_points)
+  );
+
+  fleshKincaid$ = this.latestReadability$.pipe(
+    map((readability) => readability?.final_fk_score)
+  );
+
+  headingPoints$ = this.latestReadability$.pipe(
+    map((readability) => readability?.header_points)
+  );
+
+  wordsPerHeading$ = this.latestReadability$.pipe(
+    map((readability) => readability?.avg_words_per_header)
+  );
+
+  paragraphPoints$ = this.latestReadability$.pipe(
+    map((readability) => readability?.paragraph_points)
+  );
+
+  wordsPerParagraph$ = this.latestReadability$.pipe(
+    map((readability) => readability?.avg_words_per_paragraph)
+  );
+
+  mostFrequentWordsOnPage$ = this.latestReadability$.pipe(
+    map((readability) => readability?.word_counts)
+  );
+
+  wordCount$ = this.latestReadability$.pipe(
+    map((readability) => readability?.total_words)
+  );
+
+  paragraphCount$ = this.latestReadability$.pipe(
+    map((readability) => readability?.total_paragraph)
+  );
+
+  headingCount$ = this.latestReadability$.pipe(
+    map((readability) => readability?.total_headings)
+  );
 
   projects$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
@@ -719,15 +776,6 @@ export class PagesDetailsFacade {
       pipeParam: '1.0-2',
     },
   ]);
-
-  // readability$ = this.pagesDetailsData$.pipe(
-  //   map((data) => {
-  //     return {
-  //       latest: data?.readability[0],
-  //       archive: data?.readability,
-  //     };
-  //   })
-  // );
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
 

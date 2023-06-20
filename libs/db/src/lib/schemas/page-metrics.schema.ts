@@ -230,6 +230,22 @@ PageMetricsSchema.index(
   { date: 1, page: 1 },
   { background: true, partialFilterExpression: { page: { $exists: true } } }
 );
+PageMetricsSchema.index(
+  { url: 1, page: 1 },
+  { background: true, partialFilterExpression: { page: { $exists: true } } }
+);
+PageMetricsSchema.index(
+  { url: 1, projects: 1 },
+  { background: true, partialFilterExpression: { projects: { $exists: true } } }
+);
+PageMetricsSchema.index(
+  { url: 1, tasks: 1 },
+  { background: true, partialFilterExpression: { tasks: { $exists: true } } }
+);
+PageMetricsSchema.index(
+  { url: 1, ux_tests: 1 },
+  { background: true, partialFilterExpression: { ux_tests: { $exists: true } } }
+);
 
 export function getPageMetricsModel() {
   return model(PageMetrics.name, PageMetricsSchema);

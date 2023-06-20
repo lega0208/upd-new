@@ -70,7 +70,8 @@
         "development": {
           "browserTarget": "upd:build:development",
           "hmr": true,
-          "liveReload": false
+          "liveReload": false,
+          "proxyConfig": "apps/upd/proxy.conf.mjs"
         }
       },
       "defaultConfiguration": "development",

@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { LocaleNumberPipe, LocalePercentPipe } from '@dua-upd/upd/pipes';
+import {
+  LocaleNumberPipe,
+  LocalePercentPipe,
+  LocaleTemplatePipe,
+} from '@dua-upd/upd/pipes';
 
 export type ComparisonStatus = 'good' | 'bad' | 'neutral' | 'none';
 
@@ -39,7 +43,7 @@ export type KpiObjectiveStatus = 'pass' | 'fail' | 'partial' | 'none';
 
 export type KpiObjectiveStatusConfig = Record<
   KpiObjectiveStatus,
-  ComparisonStyles & { message: string }
+  ComparisonStyles & KpiMessage
 >;
 
 export type KpiObjectiveCriteria = (
@@ -47,9 +51,18 @@ export type KpiObjectiveCriteria = (
   comparison: number
 ) => KpiObjectiveStatus;
 
+export type KpiMessage =
+  | {
+      message: string;
+    }
+  | {
+      messageFormatter: (current: number, previous?: number | null) => string;
+      message?: string;
+    };
+
 export type KpiOptionalConfig = {
   [key in KpiObjectiveStatus]?: {
-    [styles in keyof ComparisonStyles & { message: string }]: string;
+    [styles in keyof ComparisonStyles & KpiMessage]: string;
   };
 };
 
@@ -103,8 +116,10 @@ export class DataCardComponent {
   @Input() comparison?: number | null;
   @Input() title = '';
   @Input() tooltip = '';
-  @Input() pipe: 'percent' | 'number' = 'number';
-  @Input() pipeParams?: string;
+  @Input() modalTitle = '';
+  @Input() modal = '';
+  @Input() pipe: 'percent' | 'number' | 'template' = 'number';
+  @Input() pipeParams?: string | string[];
   @Input() emptyMessage = 'nodata-available';
 
   @Input() comparisonMode: 'upGoodDownBad' | 'upBadDownGood' = 'upGoodDownBad';
@@ -121,6 +136,18 @@ export class DataCardComponent {
     for (const key of Object.keys(
       this.kpiStylesConfig
     ) as KpiObjectiveStatus[]) {
+      const config = this.kpiStylesConfig[
+        key
+      ] as KpiObjectiveStatusConfig[keyof KpiObjectiveStatusConfig];
+
+      if (config && 'messageFormatter' in config) {
+        config.message = (
+          this.current || this.current === 0
+            ? config.messageFormatter(this.current, this.comparison)
+            : ''
+        ) as string;
+      }
+
       mergedConfig[key] = {
         ...mergedConfig[key],
         ...this.kpiStylesConfig[key],
@@ -170,7 +197,8 @@ export class DataCardComponent {
   constructor(
     private i18n: I18nFacade,
     private numberPipe: LocaleNumberPipe,
-    private percentPipe: LocalePercentPipe
+    private percentPipe: LocalePercentPipe,
+    private templatePipe: LocaleTemplatePipe
   ) {}
 
   get localePipe() {
@@ -179,9 +207,19 @@ export class DataCardComponent {
         return this.numberPipe;
       case 'percent':
         return this.percentPipe;
+      case 'template':
+        return this.templatePipe;
       default:
         return this.numberPipe;
     }
+  }
+
+  localeTransform(value: number | null, params?: string | string[]) {
+    if (Array.isArray(params)) {
+      return this.localePipe.transform(value, ...params);
+    }
+
+    return this.localePipe.transform(value, params);
   }
 }
 

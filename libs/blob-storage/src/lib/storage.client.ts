@@ -396,6 +396,7 @@ export class BlobClient {
     options?: BlockBlobParallelUploadOptions & {
       compression?: CompressionAlgorithm;
       logProgress?: boolean;
+      overwrite?: boolean;
     }
   ) {
     if (!(this.client instanceof BlockBlobClient)) {
@@ -404,7 +405,7 @@ export class BlobClient {
 
     const blobExists = await this.client.exists();
 
-    if (blobExists && !this.overwrite) {
+    if (blobExists && !this.overwrite && !options?.overwrite) {
       throw Error(
         `Error uploading blob: "${this.name}" already exists and overwrite = false`
       );
@@ -438,9 +439,9 @@ export class BlobClient {
         console.error(chalk.red('Error uploading string to storage:'));
         console.error(err.stack);
       }
+    } else {
+      console.log('Files are the same. No changes made.');
     }
-
-    console.log('Files are the same. No changes made.');
   }
 
   async downloadToString(

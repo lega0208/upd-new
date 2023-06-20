@@ -12,11 +12,24 @@ export class Url implements IUrl {
   @Prop({ type: String, required: true, unique: true })
   url: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: true })
   title?: string;
 
   @Prop({ type: Types.ObjectId, sparse: true })
   page?: Types.ObjectId;
+
+  @Prop({ type: Object })
+  metadata?: { [prop: string]: string | Date };
+
+  @Prop({ type: Object})
+  langHrefs?: {
+    en?: string;
+    fr?: string;
+    [prop: string]: string | undefined;
+  };
+
+  @Prop({ type: [{ href: String, text: String }], _id: false })
+  links?: { href: string; text: string }[];
 
   @Prop({ type: String, index: true })
   redirect?: string;
@@ -30,11 +43,18 @@ export class Url implements IUrl {
   @Prop({ type: Boolean, index: true })
   is_404?: boolean;
 
-  @Prop({ type: [{ hash: String, date: Date }] })
+  @Prop({ type: [{ hash: String, date: Date }], _id: false })
   hashes?: UrlHash[];
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: true })
   latest_snapshot?: string;
 }
 
 export const UrlSchema = SchemaFactory.createForClass(Url);
+
+UrlSchema.index({ 'links.text': 1 }, { background: true });
+UrlSchema.index({ 'links.href': 1 }, { background: true });
+UrlSchema.index({ last_checked: -1 }, { background: true });
+UrlSchema.index({ last_modified: -1 }, { background: true });
+UrlSchema.index({ 'hashes.hash': 1 }, { background: true });
+UrlSchema.index({ 'hashes.date': 1 }, { background: true });

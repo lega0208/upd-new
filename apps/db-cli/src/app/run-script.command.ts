@@ -9,9 +9,11 @@ import {
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { DataIntegrityService } from '@dua-upd/data-integrity';
 import { DbService } from '@dua-upd/db';
-import { DbUpdateService, UrlsService } from '@dua-upd/db-update';
+import { DbUpdateService, ReadabilityService, UrlsService } from '@dua-upd/db-update';
 import { LoggerService } from '@dua-upd/logger';
 import * as scripts from './scripts';
+import { ModuleRef } from '@nestjs/core';
+import { TypeOrToken } from './scripts/utils/misc';
 
 // Use this interface to add any other dependencies to be passed as args
 export type DbScript<Args extends unknown[] = unknown[]> = (
@@ -25,6 +27,7 @@ export type DbScript<Args extends unknown[] = unknown[]> = (
 })
 export class RunScriptCommand extends CommandRunner {
   constructor(
+    private readonly moduleRef: ModuleRef,
     private readonly inquirerService: InquirerService,
     private readonly dataIntegrityService: DataIntegrityService,
     private readonly dbUpdateService: DbUpdateService,
@@ -32,8 +35,15 @@ export class RunScriptCommand extends CommandRunner {
     private readonly logger: LoggerService,
     @Inject(BlobStorageService.name) private readonly blob: BlobStorageService,
     private readonly urlService: UrlsService,
+    private readonly readability: ReadabilityService,
   ) {
     super();
+  }
+
+  inject<ReturnType>(
+    typeOrToken: TypeOrToken
+  ): ReturnType {
+    return this.moduleRef.get(typeOrToken, { strict: false });
   }
 
   // Note the script you want to run should be the default export of the file
@@ -44,6 +54,7 @@ export class RunScriptCommand extends CommandRunner {
       this.logger,
       this.blob,
       this.urlService,
+      this.readability
     ];
 
     try {

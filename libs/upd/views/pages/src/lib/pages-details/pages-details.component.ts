@@ -3,8 +3,9 @@ import { PagesDetailsFacade } from './+state/pages-details.facade';
 
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { combineLatest } from 'rxjs';
+import { combineLatest, filter } from 'rxjs';
 import { EN_CA } from '@dua-upd/upd/i18n';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'upd-page-details',
@@ -24,10 +25,25 @@ export class PagesDetailsComponent implements OnInit {
   projects$ = this.pageDetailsService.projects$;
   projectsCol: ColumnConfig = { field: '', header: '' };
 
+  currentUrl = '';
+
   constructor(
     private pageDetailsService: PagesDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
+    private i18n: I18nFacade,
+    private router: Router
+  ) {
+    this.currentUrl = this.router.url.substring(
+      this.router.url.lastIndexOf('/') + 1
+    );
+
+    router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.currentUrl = this.router.url.substring(
+          this.router.url.lastIndexOf('/') + 1
+        );
+      });
+  }
 
   ngOnInit(): void {
     this.pageDetailsService.init();
@@ -51,6 +67,10 @@ export class PagesDetailsComponent implements OnInit {
         {
           href: 'pagefeedback',
           title: this.i18n.service.translate('tab-pagefeedback', lang),
+        },
+        {
+          href: 'readability',
+          title: this.i18n.service.translate('tab-readability', lang),
         },
         // { href: 'details', title: this.i18n.service.translate('tab-details', lang) },
       ];

@@ -1,10 +1,14 @@
 import { Buffer } from 'buffer';
-import { compress as compressZstd, decompress as decompressZstd } from '@mongodb-js/zstd';
+import {
+  compress as compressZstd,
+  decompress as decompressZstd,
+} from '@mongodb-js/zstd';
 import { compress as compressLz4, decompress as decompressLz4 } from 'lz4js';
 import {
   compress as compressBrotli,
   decompress as decompressBrotli,
 } from 'brotli-wasm';
+import { createHash } from 'node:crypto';
 
 export const bytesToMbs = (bytes: number) => Math.round(bytes / 10) / 100000;
 
@@ -68,3 +72,8 @@ export const decompressString = async (
       return Buffer.from(decompressLz4(stringBuffer)).toString('utf-8');
   }
 };
+
+export const md5Hash = (target: string | object) =>
+  createHash('md5')
+    .update(typeof target === 'string' ? target : JSON.stringify(target))
+    .digest('hex');

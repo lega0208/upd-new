@@ -19,12 +19,19 @@
  *
  */
 
+import { UrlsService } from '@dua-upd/db-update';
 import { Types } from 'mongoose';
 import { DbService } from '@dua-upd/db';
 import { logJson } from '@dua-upd/utils-common';
+import { RunScriptCommand } from '../../run-script.command';
 import { outputChart, outputTable } from '../utils/output';
 import { readFile } from 'fs/promises';
-import { bytesToMbs, CompressionAlgorithm, compressString, decompressString } from '@dua-upd/node-utils';
+import {
+  bytesToMbs,
+  CompressionAlgorithm,
+  compressString,
+  decompressString,
+} from '@dua-upd/node-utils';
 import { startTimer } from '../utils/misc';
 
 /*
@@ -359,7 +366,6 @@ export const getTopSearchTermPages = async (db: DbService) => {
   );
 };
 
-
 export const benchCompression = async () => {
   const file = 'feedback_cleanest_2021-04-01_2023-04-16.json';
 
@@ -373,7 +379,7 @@ export const benchCompression = async () => {
     if (algo === 'brotli' && originalSize > 16_777_216) {
       console.log(
         `File too big: ${originalSizeMB}MB\n` +
-        `Brotli compression only supports files up to 16MB\n`
+          `Brotli compression only supports files up to 16MB\n`
       );
 
       continue;
@@ -404,3 +410,21 @@ export const benchCompression = async () => {
     console.log(`Compression ratio: ${compressionRatio}%\n`);
   }
 };
+
+/*
+ * This is an example of how to inject a service into a script
+ * Doing it this way can be a lot easier than through params...
+ *
+ * Still a little verbose with all the type annotations, but
+ * much better than the alternative 🤷‍♂️
+ */
+export async function injectServiceExample() {
+  const urlsService = (<RunScriptCommand>this).inject<UrlsService>(UrlsService);
+
+  const url =
+    'www.canada.ca/en/revenue-agency/campaigns/support-members-parliament-constituency/how-contact.html';
+
+  const pageData = await urlsService.getPageData(url);
+
+  logJson(pageData);
+}

@@ -8,6 +8,7 @@ import { PagesDetailsSummaryComponent } from './pages-details/pages-details-summ
 import { PagesDetailsWebtrafficComponent } from './pages-details/pages-details-webtraffic/pages-details-webtraffic.component';
 import { PagesDetailsSearchAnalyticsComponent } from './pages-details/pages-details-search-analytics/pages-details-search-analytics.component';
 import { PagesDetailsFeedbackComponent } from './pages-details/pages-details-feedback/pages-details-feedback.component';
+import { PagesDetailsReadabilityComponent } from './pages-details/pages-details-readability/pages-details-readability.component';
 
 const routes: Routes = [
   {
@@ -24,6 +25,7 @@ const routes: Routes = [
           { path: 'webtraffic', component: PagesDetailsWebtrafficComponent, data: {title: 'Pages | Web traffic'} },
           { path: 'searchanalytics', component: PagesDetailsSearchAnalyticsComponent, data: {title: 'Pages | Search analytics'} },
           { path: 'pagefeedback', component: PagesDetailsFeedbackComponent, data: {title: 'Pages | Page feedback'} },
+          { path: 'readability', component: PagesDetailsReadabilityComponent, data: {title: 'Pages | Readability'} },
         ],
       },
     ],

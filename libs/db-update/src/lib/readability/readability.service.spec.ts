@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ReadabilityService } from './readability.service';
 import { DbModule, DbService } from '@dua-upd/db';
 
-jest.setTimeout(900000000);
+jest.setTimeout(5000);
 
 describe('ReadabilityService', () => {
   let service: ReadabilityService;
@@ -29,15 +29,22 @@ describe('ReadabilityService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should get pages', async () => {
-    const results = await service.getPages();
-    console.log(results);
-    return expect(results).toBeDefined();
-  });
+  it('should assess readability', async () => {
+    const fakeContent = `
+      <html>
+      <body>
+        <main>
+        <h1>a title</h1>
+        <p>a paragraph</p>
+        </main>
+      </body>
+      </html>
+      `;
 
-  it('should get main', async () => {
-    const results = await service.main();
+    const results = await service.calculateReadability(fakeContent, 'fr');
+
     console.log(results);
+
     return expect(results).toBeDefined();
   });
 });

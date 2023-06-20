@@ -27,6 +27,8 @@ import { PagesDetailsFacade } from './pages-details/+state/pages-details.facade'
 import { ServicesModule, ApiService } from '@dua-upd/upd/services';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { I18nModule } from '@dua-upd/upd/i18n';
+import { PagesDetailsReadabilityComponent } from './pages-details/pages-details-readability/pages-details-readability.component';
+import { PipesModule } from '@dua-upd/upd/pipes';
 
 @NgModule({
   imports: [
@@ -40,6 +42,7 @@ import { I18nModule } from '@dua-upd/upd/i18n';
     StoreModule.forFeature(PAGES_DETAILS_FEATURE_KEY, pagesDetailsReducer),
     EffectsModule.forFeature([PagesDetailsEffects]),
     ServicesModule,
+    PipesModule,
   ],
   declarations: [
     PagesComponent,
@@ -49,6 +52,7 @@ import { I18nModule } from '@dua-upd/upd/i18n';
     PagesDetailsWebtrafficComponent,
     PagesDetailsSearchAnalyticsComponent,
     PagesDetailsFeedbackComponent,
+    PagesDetailsReadabilityComponent,
   ],
   providers: [PagesHomeFacade, PagesDetailsFacade, ApiService],
 })

@@ -58,6 +58,16 @@ export const selectComparisonDateRangeLabel = selectDateRangeLabel(
   selectComparisonDateRange
 );
 
+export const selectReadabilityData = createSelector(
+  selectPagesDetailsData,
+  ({ readability }) => readability
+);
+
+export const selectPageLang = createSelector(
+  selectPagesDetailsData,
+  ({ url }) => /canada\.ca\/(en|fr)/i.exec(url)?.[1] || 'en'
+);
+
 /*
  * chart/table/component-level
  */

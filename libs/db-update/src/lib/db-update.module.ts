@@ -20,6 +20,7 @@ import { PagesListService } from './pages-list/pages-list.service';
 import { InternalSearchTermsService } from './internal-search/search-terms.service';
 import { ActivityMapService } from './activity-map/activity-map.service';
 import { UrlsService } from './urls/urls.service';
+import { ReadabilityService } from './readability/readability.service';
 
 const date = dayjs().format('YYYY-MM-DD');
 const month = dayjs().format('YYYY-MM');
@@ -44,7 +45,7 @@ export class DbUpdateModule {
           logLevelTargets: {
             error: `${month}/db-update_errors_${date}`,
             warn: `${month}/db-update_${date}`,
-            log: `${month}/db-update-${date}`,
+            log: `${month}/db-update_${date}`,
           },
         }),
       ],
@@ -71,6 +72,7 @@ export class DbUpdateModule {
           provide: 'ENV',
           useValue: production,
         },
+        ReadabilityService,
       ],
       exports: [
         AirtableClient.name,
@@ -87,6 +89,7 @@ export class DbUpdateModule {
         PageMetricsService,
         PageUpdateService,
         PagesListService,
+        ReadabilityService,
         SearchAssessmentService,
         UrlsService,
       ],

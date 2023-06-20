@@ -17,6 +17,7 @@ import {
   Readability,
   PageMetricsTS,
   type PageMetricsModel,
+  type ReadabilityModel,
   Url,
 } from '../';
 import { AsyncLogTiming, logJson, prettyJson } from '@dua-upd/utils-common';
@@ -87,7 +88,7 @@ export class DbService {
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessment: Model<SearchAssessment>,
     @InjectModel(Readability.name, 'defaultConnection')
-    private readability: Model<Readability>,
+    private readability: ReadabilityModel,
     @InjectModel(PageVisitsView.name, 'defaultConnection')
     private pageVisits: Model<PageVisits>,
     @InjectModel(Url.name, 'defaultConnection')
