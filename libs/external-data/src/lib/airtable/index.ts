@@ -430,11 +430,11 @@ export class AirtableClient {
       })) as FeedbackData[];
   }
 
-  async getCraFeedback(
+  async getMainFeedback(
     dateRange: { start: DateType; end: DateType } = {} as typeof dateRange
   ) {
     const filterByFormula = createDateRangeFilterFormula(dateRange, 'Date');
-    const query = this.createQuery(bases.CRA_FEEDBACK, 'Page feedback', {
+    const query = this.createQuery(bases.MAIN_FEEDBACK, 'Page feedback', {
       filterByFormula,
     });
     
