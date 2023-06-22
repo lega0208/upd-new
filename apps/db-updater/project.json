@@ -28,6 +28,10 @@
             {
               "replace": "apps/db-updater/src/environments/environment.ts",
               "with": "apps/db-updater/src/environments/environment.prod.ts"
+            },
+            {
+              "replace": "libs/data-integrity/src/environments/environment.ts",
+              "with": "libs/data-integrity/src/environments/environment.prod.ts"
             }
           ]
         }
