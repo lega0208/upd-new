@@ -413,7 +413,31 @@ export class AirtableClient {
     const query = this.createQuery(bases.FEEDBACK, 'Page feedback', {
       filterByFormula,
     });
+    
+    return (await this.selectAll(query))
+      .filter(({ fields }) => fields['URL'] && fields['Date'])
+      .map(({ id, fields }) => ({
+        airtable_id: id,
+        url: fields['URL'].replace(/^https:\/\//i, ''),
+        date: dayjs.utc(fields['Date']).toDate(),
+        lang: fields['Lang'],
+        comment: fields['Comment'],
+        tags: fields['Lookup_tags'],
+        status: fields['Status'],
+        whats_wrong: fields["What's wrong"],
+        main_section: fields['Main section'],
+        theme: fields['Theme'],
+      })) as FeedbackData[];
+  }
 
+  async getCraFeedback(
+    dateRange: { start: DateType; end: DateType } = {} as typeof dateRange
+  ) {
+    const filterByFormula = createDateRangeFilterFormula(dateRange, 'Date');
+    const query = this.createQuery(bases.CRA_FEEDBACK, 'Page feedback', {
+      filterByFormula,
+    });
+    
     return (await this.selectAll(query))
       .filter(({ fields }) => fields['URL'] && fields['Date'])
       .map(({ id, fields }) => ({
