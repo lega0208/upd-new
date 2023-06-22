@@ -5,6 +5,7 @@ import { ColumnConfig } from '@dua-upd/upd-components';
 import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { GetTableProps } from '@dua-upd/utils-common';
+import { map } from 'rxjs';
 
 type GscSearchTermsColTypes = GetTableProps<PagesDetailsSearchAnalyticsComponent, 'topGSCSearchTerms$'>
 type ReferrerTypeColTypes = GetTableProps<PagesDetailsSearchAnalyticsComponent, 'referrerType$'>
@@ -30,7 +31,9 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
 
   topGSCSearchTerms$ = this.pageDetailsService.top25GSCSearchTerms$;
 
-  topSearchTerms$ = this.pageDetailsService.topSearchTerms$;
+  topSearchTerms$ = this.pageDetailsService.topSearchTerms$.pipe(
+    map((searchTerms) => [...searchTerms])
+  );
 
   searchTermsColConfig$ = this.pageDetailsService.searchTermsColConfig$;
 
