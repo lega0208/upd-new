@@ -87,7 +87,7 @@ export class DbModule {
       connectionName: 'defaultConnection',
       dbName,
       compressors: ['zstd', 'snappy'],
-      retryWrites: false,
+      retryWrites: true,
     });
   }
 }
