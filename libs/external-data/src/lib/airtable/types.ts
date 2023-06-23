@@ -84,8 +84,11 @@ export interface PageData {
 
 export interface FeedbackData {
   airtable_id: string;
+  unique_id: string;
   url: string;
   date: Date;
+  created_time: Date;
+  time_received: string;
   tags?: string[];
   status?: string;
   whats_wrong?: string;

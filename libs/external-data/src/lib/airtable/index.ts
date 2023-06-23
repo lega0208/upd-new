@@ -416,10 +416,13 @@ export class AirtableClient {
     
     return (await this.selectAll(query))
       .filter(({ fields }) => fields['URL'] && fields['Date'])
-      .map(({ id, fields }) => ({
+      .map(({ id, fields, createdTime }) => ({
         airtable_id: id,
+        unique_id: fields['Unique ID'],
         url: fields['URL'].replace(/^https:\/\//i, ''),
         date: dayjs.utc(fields['Date']).toDate(),
+        time_received: fields['Time received'],
+        created_time: dayjs.utc(String(createdTime)).toDate(),
         lang: fields['Lang'],
         comment: fields['Comment'],
         tags: fields['Lookup_tags'],
@@ -439,11 +442,14 @@ export class AirtableClient {
     });
     
     return (await this.selectAll(query))
-      .filter(({ fields }) => fields['URL'] && fields['Date'])
-      .map(({ id, fields }) => ({
+      .filter(({ fields }) => fields['Institution'].toUpperCase() === 'CRA' && fields['URL'] && fields['Date'])
+      .map(({ id, fields, createdTime  }) => ({
         airtable_id: id,
+        unique_id: fields['Unique ID'],
         url: fields['URL'].replace(/^https:\/\//i, ''),
         date: dayjs.utc(fields['Date']).toDate(),
+        time_received: fields['Time received'],
+        created_time: dayjs.utc(String(createdTime)).toDate(),
         lang: fields['Lang'],
         comment: fields['Comment'],
         tags: fields['Lookup_tags'],
