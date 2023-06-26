@@ -413,13 +413,43 @@ export class AirtableClient {
     const query = this.createQuery(bases.FEEDBACK, 'Page feedback', {
       filterByFormula,
     });
-
+    
     return (await this.selectAll(query))
       .filter(({ fields }) => fields['URL'] && fields['Date'])
-      .map(({ id, fields }) => ({
+      .map(({ id, fields, createdTime }) => ({
         airtable_id: id,
+        unique_id: fields['Unique ID'],
         url: fields['URL'].replace(/^https:\/\//i, ''),
         date: dayjs.utc(fields['Date']).toDate(),
+        time_received: fields['Time received'],
+        created_time: dayjs.utc(String(createdTime)).toDate(),
+        lang: fields['Lang'],
+        comment: fields['Comment'],
+        tags: fields['Lookup_tags'],
+        status: fields['Status'],
+        whats_wrong: fields["What's wrong"],
+        main_section: fields['Main section'],
+        theme: fields['Theme'],
+      })) as FeedbackData[];
+  }
+
+  async getLiveFeedback(
+    dateRange: { start: DateType; end: DateType } = {} as typeof dateRange
+  ) {
+    const filterByFormula = createDateRangeFilterFormula(dateRange, 'Date');
+    const query = this.createQuery(bases.LIVE_FEEDBACK, 'Page feedback', {
+      filterByFormula,
+    });
+    
+    return (await this.selectAll(query))
+      .filter(({ fields }) => fields['Institution'].toUpperCase() === 'CRA' && fields['URL'] && fields['Date'])
+      .map(({ id, fields, createdTime  }) => ({
+        airtable_id: id,
+        unique_id: fields['Unique ID'],
+        url: fields['URL'].replace(/^https:\/\//i, ''),
+        date: dayjs.utc(fields['Date']).toDate(),
+        time_received: fields['Time received'],
+        created_time: dayjs.utc(String(createdTime)).toDate(),
         lang: fields['Lang'],
         comment: fields['Comment'],
         tags: fields['Lookup_tags'],
