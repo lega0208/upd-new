@@ -26,32 +26,54 @@ export class FeedbackService {
     const latestDataDate: Date | null = (await this.feedbackModel
       .findOne({}, { date: 1 })
       .sort({ date: -1 }))?.date;
-
+    
+    const createdDateThreshold = dayjs(latestDataDate || '2020-01-01')
+      .utc(false)
+      .add(1, 'day') as DateType;
+    
+    const startDate = dayjs(endDate).subtract(14, 'days').startOf('day') as DateType;
+    
     const dateRange = {
-      start: dayjs(latestDataDate || '2020-01-01')
-        .utc(false)
-        .add(1, 'day') as DateType,
-      end: (endDate || dayjs().utc(true).subtract(1, 'day')) as DateType,
+      start: createdDateThreshold < startDate ? startDate : createdDateThreshold,
+      end: endDate,
     } as DateRange;
 
-    const feedbackData = (await this.airtableClient.getFeedback(dateRange))
-      .map(
-        (feedbackData) =>
-          ({
-            _id: new Types.ObjectId(),
-            ...feedbackData,
-          } as Feedback)
-      )
-      .sort((current, next) => current.date.getTime() - next.date.getTime());
+    const [craFeedbackData, liveFeedbackData] = await Promise.all([
+      this.airtableClient.getFeedback(dateRange),
+      this.airtableClient.getLiveFeedback(dateRange)
+    ]);
 
+    const feedbackData = [...craFeedbackData, ...liveFeedbackData].map((data) => ({
+      _id: new Types.ObjectId(),
+      ...data,
+    }) as Feedback);
+  
     if (feedbackData.length === 0) {
+      this.logger.log('Feedback data already up-to-date.');
+      return;
+    }
+  
+    const existingUniqueIds = new Set<string>();
+    const existingFeedbackData = await this.feedbackModel
+      .find({ unique_id: { $in: feedbackData.map((data) => data.unique_id) } })
+      .lean();
+  
+    existingFeedbackData.forEach((feedback) => {
+      existingUniqueIds.add(feedback.unique_id);
+    });
+  
+    const filteredFeedbackData = feedbackData
+    .filter((data) => !existingUniqueIds.has(data.unique_id))
+    .sort((current, next) => current.date.getTime() - next.date.getTime());
+
+    if (filteredFeedbackData.length === 0) {
       this.logger.log('Feedback data already up-to-date.');
       return;
     }
 
     return await this.feedbackModel
-      .insertMany(feedbackData)
-      .then(() => this.logger.log('Successfully updated Feedback data'));
+      .insertMany(filteredFeedbackData)
+      .then(() => this.logger.log(`Successfully updated ${filteredFeedbackData.length} Feedback data`));
   }
 
   async repopulateFeedback() {

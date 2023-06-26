@@ -10,8 +10,11 @@ export declare type FeedbackDocument = Feedback & Document;
 export declare class Feedback {
     _id: Types.ObjectId;
     airtable_id: string;
+    unique_id: string;
     url: string;
     date: Date;
+    created_time: Date;
+    time_received: string;
     tags?: string[];
     status?: string;
     whats_wrong?: string;

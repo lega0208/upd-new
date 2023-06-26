@@ -75,9 +75,15 @@ export interface IFeedback {
 
   airtable_id?: string;
 
+  unique_id?: string;
+
   url: string;
 
   date: Date;
+
+  created_time: Date;
+
+  time_received?: string;
 
   lang: string;
 
