@@ -72,25 +72,16 @@ export interface FeedbackComment {
 
 export interface IFeedback {
   _id: Types.ObjectId;
-
   airtable_id?: string;
-
+  unique_id?: Types.ObjectId;
   url: string;
-
   date: Date;
-
   lang: string;
-
   comment: string;
-
   tags?: string[];
-
   status?: string;
-
   whats_wrong?: string;
-
   main_section?: string;
-
   theme?: string;
 }
 

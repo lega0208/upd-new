@@ -12,6 +12,9 @@ export class Feedback implements IFeedback {
   @Prop({ type: String })
   airtable_id? = '';
 
+  @Prop({ type: Types.ObjectId, index: true })
+  unique_id?: Types.ObjectId;
+
   @Prop({ type: String, required: true, index: true })
   url = '';
 

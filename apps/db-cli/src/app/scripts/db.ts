@@ -82,3 +82,42 @@ export async function syncUrlsCollection() {
 
   await urlsService.updateUrls();
 }
+
+export async function uploadFeedback2(_, __, ___, blob: BlobStorageService) {
+  const time = startTimer('uploadFeedback');
+  const feedback = await readFile(
+    'feedback_2023-04-17_2023-06-25.json',
+    'utf-8'
+  );
+
+  await blob.blobModels.feedback
+    .blob('feedback_2023-04-17_2023-06-25.json')
+    .uploadFromString(feedback);
+
+  time();
+}
+
+export async function repopulateFeedbackFromSnapshot2(
+  db: DbService,
+  __,
+  ___,
+  blob: BlobStorageService
+) {
+  const filename = 'feedback_2023-04-17_2023-06-25.json';
+
+  const feedback = <Omit<IFeedback, '_id'>[]>JSON.parse(
+    await blob.blobModels.feedback.blob(filename).downloadToString()
+  ).map(
+    (feedback) =>
+      ({
+        _id: new Types.ObjectId(),
+        ...feedback,
+      } as IFeedback)
+  );
+
+  await db.collections.feedback.deleteMany({
+    date: { $gte: new Date('2023-04-17'), $lte: new Date('2023-06-25') },
+  });
+
+  await db.collections.feedback.insertMany(feedback);
+}
