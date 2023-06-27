@@ -3,7 +3,7 @@ import { AsyncLogTiming } from '@dua-upd/utils-common';
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { dayjs, type Dayjs, today } from '@dua-upd/utils-common/date';
+import { dayjs, type Dayjs, today } from '@dua-upd/utils-common';
 
 import { AirtableClient } from '@dua-upd/external-data';
 import type { DateRange, DateType } from '@dua-upd/external-data';
