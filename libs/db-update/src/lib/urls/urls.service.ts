@@ -259,8 +259,9 @@ export class UrlsService {
     const urlsFromCollection = (
       await this.db.collections.urls.find(urlsQuery).lean().exec()
     ).filter(
-      // filter out pages that have an endless redirect loop
-      (urlDoc) => !ignoredUrls.includes(urlDoc.url)
+      // filter out pages that have an endless redirect loop (and pdfs)
+      (urlDoc) =>
+        !ignoredUrls.includes(urlDoc.url) && !urlDoc.url.endsWith('.pdf')
     );
 
     if (urlsFromCollection?.length) {
