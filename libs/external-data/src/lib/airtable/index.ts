@@ -1,15 +1,15 @@
+import { FieldSet, Query, RecordData } from 'airtable';
+import { QueryParams, SortParameter } from 'airtable/lib/query_params';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-
-import { FieldSet, Query, RecordData, Table } from 'airtable';
-import { QueryParams, SortParameter } from 'airtable/lib/query_params';
-
-import { logJson, squishTrim, wait } from '@dua-upd/utils-common';
+import { Types } from 'mongoose';
+import { squishTrim } from '@dua-upd/utils-common';
 import { getATClient, AirTableAPI } from './client';
 import { bases } from './base';
+import { FieldRecordQuery, Lang } from './query';
 import {
   CalldriverData,
   PageData,
@@ -18,12 +18,6 @@ import {
   FeedbackData,
   PageListData,
 } from './types';
-import {
-  CreatedFieldRecord,
-  FieldRecord,
-  FieldRecordQuery,
-  Lang,
-} from './query';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -33,6 +27,18 @@ export * from './client';
 export * from './types';
 
 export type DateType = string | Date | Dayjs;
+
+export const combineFormulas = (formulas: string[]) => {
+  if (formulas.length === 0) {
+    return '';
+  }
+
+  if (formulas.length === 1) {
+    return formulas[0];
+  }
+
+  return `AND(${formulas.join(', ')})`;
+};
 
 export const createLastUpdatedFilterFormula = (date: DateType) =>
   `IS_AFTER(LAST_MODIFIED_TIME(), "${dayjs.utc(date).format('YYYY-MM-DD')}")`;
@@ -413,16 +419,14 @@ export class AirtableClient {
     const query = this.createQuery(bases.FEEDBACK, 'Page feedback', {
       filterByFormula,
     });
-    
+
     return (await this.selectAll(query))
       .filter(({ fields }) => fields['URL'] && fields['Date'])
-      .map(({ id, fields, createdTime }) => ({
+      .map(({ id, fields }) => ({
         airtable_id: id,
-        unique_id: fields['Unique ID'],
-        url: fields['URL'].replace(/^https:\/\//i, ''),
+        unique_id: new Types.ObjectId(fields['Unique ID']),
+        url: squishTrim(fields['URL']).replace(/^https:\/\//i, ''),
         date: dayjs.utc(fields['Date']).toDate(),
-        time_received: fields['Time received'],
-        created_time: dayjs.utc(String(createdTime)).toDate(),
         lang: fields['Lang'],
         comment: fields['Comment'],
         tags: fields['Lookup_tags'],
@@ -436,20 +440,25 @@ export class AirtableClient {
   async getLiveFeedback(
     dateRange: { start: DateType; end: DateType } = {} as typeof dateRange
   ) {
-    const filterByFormula = createDateRangeFilterFormula(dateRange, 'Date');
+    const dateRangeFormula = createDateRangeFilterFormula(dateRange, 'Date');
+    const craFilterFormula = '{Institution} = "CRA"';
+
+    const filterByFormula = combineFormulas([
+      dateRangeFormula,
+      craFilterFormula,
+    ]);
+
     const query = this.createQuery(bases.LIVE_FEEDBACK, 'Page feedback', {
       filterByFormula,
     });
-    
+
     return (await this.selectAll(query))
-      .filter(({ fields }) => fields['Institution'].toUpperCase() === 'CRA' && fields['URL'] && fields['Date'])
-      .map(({ id, fields, createdTime  }) => ({
+      .filter(({ fields }) => fields['URL'] && fields['Date'])
+      .map(({ id, fields }) => ({
         airtable_id: id,
-        unique_id: fields['Unique ID'],
-        url: fields['URL'].replace(/^https:\/\//i, ''),
+        unique_id: new Types.ObjectId(fields['Unique ID']),
+        url: squishTrim(fields['URL']).replace(/^https:\/\//i, ''),
         date: dayjs.utc(fields['Date']).toDate(),
-        time_received: fields['Time received'],
-        created_time: dayjs.utc(String(createdTime)).toDate(),
         lang: fields['Lang'],
         comment: fields['Comment'],
         tags: fields['Lookup_tags'],

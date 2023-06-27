@@ -1,5 +1,7 @@
 // types for parsed airtable API query results
 
+import { Types } from 'mongoose';
+
 export interface TaskData {
   airtable_id: string;
   title: string;
@@ -84,11 +86,11 @@ export interface PageData {
 
 export interface FeedbackData {
   airtable_id: string;
-  unique_id: string;
+  unique_id?: Types.ObjectId;
   url: string;
   date: Date;
-  created_time: Date;
-  time_received: string;
+  comment: string;
+  lang: string;
   tags?: string[];
   status?: string;
   whats_wrong?: string;

@@ -1,15 +1,14 @@
+import { IFeedback } from '@dua-upd/types-common';
+import { AsyncLogTiming } from '@dua-upd/utils-common';
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
+import { dayjs, type Dayjs, today } from '@dua-upd/utils-common/date';
 
 import { AirtableClient } from '@dua-upd/external-data';
 import type { DateRange, DateType } from '@dua-upd/external-data';
 import { Feedback } from '@dua-upd/db';
 import type { FeedbackDocument } from '@dua-upd/db';
-
-dayjs.extend(utc);
 
 @Injectable()
 export class FeedbackService {
@@ -20,60 +19,113 @@ export class FeedbackService {
     private feedbackModel: Model<FeedbackDocument>
   ) {}
 
+  @AsyncLogTiming
   async updateFeedbackData(endDate?: DateType) {
     this.logger.log('Updating Feedback data');
 
-    const latestDataDate: Date | null = (await this.feedbackModel
-      .findOne({}, { date: 1 })
-      .sort({ date: -1 }))?.date;
-    
-    const createdDateThreshold = dayjs(latestDataDate || '2020-01-01')
-      .utc(false)
+    const newFeedback: IFeedback[] = [];
+
+    const latestDataDate: Date | null = (
+      await this.feedbackModel.findOne({}, { date: 1 }).sort({ date: -1 })
+    )?.date;
+
+    const start = dayjs
+      .utc(latestDataDate || '2020-01-01')
       .add(1, 'day') as DateType;
-    
-    const startDate = dayjs(endDate).subtract(14, 'days').startOf('day') as DateType;
-    
+
+    const end = endDate || (today().subtract(1, 'day') as DateType);
+
+    // if the db is empty, we can skip this part
+    if (latestDataDate) {
+      // check for late additions separately, that way we have fewer records to check
+      const lateAdditionsStart = dayjs
+        .utc(latestDataDate || '2020-01-01')
+        .subtract(14, 'days')
+        .startOf('day') as DateType;
+
+      const lateAdditionsEnd = (start as Dayjs).subtract(1, 'day') as DateType;
+
+      const existingFeedback =
+        (await this.feedbackModel
+          .find({
+            date: {
+              $gte: lateAdditionsStart,
+              $lte: lateAdditionsEnd,
+            },
+            unique_id: { $exists: true },
+          })
+          .lean()
+          .exec()) || [];
+
+      const existingIds = new Set<string>(
+        existingFeedback.map(({ unique_id }) => unique_id.toString())
+      );
+
+      const lateAdditionsCra = await this.airtableClient.getFeedback({
+        start: lateAdditionsStart,
+        end: lateAdditionsEnd,
+      });
+
+      const lateAdditionsLive = await this.airtableClient.getLiveFeedback({
+        start: lateAdditionsStart,
+        end: lateAdditionsEnd,
+      });
+
+      const lateAdditions = [...lateAdditionsCra, ...lateAdditionsLive]
+        .filter(({ unique_id }) => !existingIds.has(unique_id.toString()))
+        .map((feedback) => ({
+          _id: new Types.ObjectId(),
+          ...feedback,
+        }));
+
+      if (lateAdditions.length > 0) {
+        this.logger.log(
+          `Found ${lateAdditions.length} "late additions" for Feedback`
+        );
+      }
+
+      newFeedback.push(...lateAdditions);
+    }
+
     const dateRange = {
-      start: createdDateThreshold < startDate ? startDate : createdDateThreshold,
-      end: endDate,
+      start,
+      end,
     } as DateRange;
 
-    const [craFeedbackData, liveFeedbackData] = await Promise.all([
-      this.airtableClient.getFeedback(dateRange),
-      this.airtableClient.getLiveFeedback(dateRange)
-    ]);
+    // Promise.all() would be slower here because of rate-limiting
+    const craFeedbackData = await this.airtableClient.getFeedback(dateRange);
+    const liveFeedbackData = await this.airtableClient.getLiveFeedback(
+      dateRange
+    );
 
-    const feedbackData = [...craFeedbackData, ...liveFeedbackData].map((data) => ({
-      _id: new Types.ObjectId(),
-      ...data,
-    }) as Feedback);
-  
-    if (feedbackData.length === 0) {
+    const feedbackData = [...craFeedbackData, ...liveFeedbackData].map(
+      (data) =>
+        ({
+          _id: new Types.ObjectId(),
+          ...data,
+        } as IFeedback)
+    );
+
+    newFeedback.push(...feedbackData);
+
+    if (newFeedback.length === 0) {
       this.logger.log('Feedback data already up-to-date.');
       return;
     }
-  
-    const existingUniqueIds = new Set<string>();
-    const existingFeedbackData = await this.feedbackModel
-      .find({ unique_id: { $in: feedbackData.map((data) => data.unique_id) } })
-      .lean();
-  
-    existingFeedbackData.forEach((feedback) => {
-      existingUniqueIds.add(feedback.unique_id);
-    });
-  
-    const filteredFeedbackData = feedbackData
-    .filter((data) => !existingUniqueIds.has(data.unique_id))
-    .sort((current, next) => current.date.getTime() - next.date.getTime());
 
-    if (filteredFeedbackData.length === 0) {
-      this.logger.log('Feedback data already up-to-date.');
-      return;
-    }
+    this.logger.log(`${newFeedback.length} total new Feedback records`);
 
     return await this.feedbackModel
-      .insertMany(filteredFeedbackData)
-      .then(() => this.logger.log(`Successfully updated ${filteredFeedbackData.length} Feedback data`));
+      .insertMany(newFeedback)
+      .then(() =>
+        this.logger.log(
+          `Successfully added ${newFeedback.length} Feedback data`
+        )
+      )
+      .catch((err) => {
+        this.logger.error('Error updating feedback data');
+        this.logger.error(err);
+      });
   }
 
   async repopulateFeedback() {
