@@ -15,6 +15,9 @@ export class Url implements IUrl {
   @Prop({ type: String, index: true })
   title?: string;
 
+  @Prop({ type: [String], index: true })
+  all_titles?: string[];
+
   @Prop({ type: Types.ObjectId, sparse: true })
   page?: Types.ObjectId;
 
