@@ -432,10 +432,6 @@ export class UrlsService {
 
           const processedHtml = processHtml(response.body);
 
-          const langHrefs = processedHtml.langHrefs
-            ? { langHrefs: processedHtml.langHrefs }
-            : {};
-
           if (!processedHtml) {
             return await addToQueues({
               _id: collectionData._id,
@@ -447,6 +443,10 @@ export class UrlsService {
               ...redirect,
             });
           }
+
+          const langHrefs = processedHtml.langHrefs
+            ? { langHrefs: processedHtml.langHrefs }
+            : {};
 
           // need to hash the processed html because of dynamically injected content
           const hash = md5Hash(processedHtml.body);
