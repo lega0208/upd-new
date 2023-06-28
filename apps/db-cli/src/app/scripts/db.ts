@@ -1,8 +1,9 @@
 import { DbService } from '@dua-upd/db';
 import { DbUpdateService, UrlsService } from '@dua-upd/db-update';
 import { readFile, writeFile } from 'fs/promises';
+import { AnyBulkWriteOperation } from 'mongodb';
 import { Types } from 'mongoose';
-import { IFeedback } from '@dua-upd/types-common';
+import { IFeedback, IUrl } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { RunScriptCommand } from '../run-script.command';
 import { startTimer } from './utils/misc';
@@ -120,4 +121,26 @@ export async function repopulateFeedbackFromSnapshot2(
   });
 
   await db.collections.feedback.insertMany(feedback);
+}
+
+export async function addUrlTitlesToAllTitles(db: DbService) {
+  const urls = await db.collections.urls
+    .find({ title: { $exists: true } })
+    .lean()
+    .exec();
+
+  const writeOps: AnyBulkWriteOperation<IUrl>[] = urls.map((url) => ({
+    updateOne: {
+      filter: { _id: url._id },
+      update: {
+        $addToSet: {
+          all_titles: url.title,
+        },
+      },
+    },
+  }));
+
+  await db.collections.urls.bulkWrite(writeOps);
+
+  console.log('Current titles successfully added to all_titles.');
 }

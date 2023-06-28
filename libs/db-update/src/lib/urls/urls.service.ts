@@ -387,6 +387,7 @@ export class UrlsService {
               links: {
                 $each: urlData.links,
               },
+              all_titles: urlData.title,
             },
           },
           upsert: true,
@@ -476,6 +477,7 @@ export class UrlsService {
                   {
                     _id: collectionData._id,
                     url: collectionData.url,
+                    title: processedHtml.title,
                     last_checked: date,
                     metadata: processedHtml.metadata,
                     ...langHrefs,
@@ -489,6 +491,7 @@ export class UrlsService {
               return await addToQueues({
                 _id: collectionData._id,
                 url: collectionData.url,
+                title: processedHtml.title,
                 last_checked: date,
                 metadata: processedHtml.metadata,
                 ...langHrefs,
@@ -584,7 +587,7 @@ export class UrlsService {
               {
                 _id: collectionData._id,
                 url: response.url,
-                title: response.title,
+                title: processedHtml.title,
                 ...page,
                 metadata: processedHtml.metadata,
                 ...langHrefs,
