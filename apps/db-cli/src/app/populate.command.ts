@@ -185,6 +185,9 @@ export class PopulateCommand extends CommandRunner {
     // Make sure Page all_urls are deduplicated first, to ensure proper refs
     // are added later and don't get corrupted
     await this.pagesService.consolidateDuplicatePages();
+
+    // Updating UX data doesn't include project attachments
+    await this.airtableService.uploadProjectAttachmentsAndUpdateUrls();
   }
 
   async run(inputs: string[], options?: Record<string, any>) {
