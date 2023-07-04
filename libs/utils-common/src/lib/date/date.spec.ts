@@ -122,6 +122,20 @@ describe.each(dateRangeTypes)('Methods and date values - %s', (type) => {
     }
   );
 
+  test.concurrent(
+    'Date ranges should have the same number of days',
+    async () => {
+      const { start, end } = dateRange;
+      const comparisonStart = periodConfig.getComparisonDate(start);
+      const comparisonEnd = periodConfig.getComparisonDate(end);
+
+      const daysInDateRange = end.diff(start, 'day');
+      const daysInComparisonDateRange = comparisonEnd.diff(comparisonStart, 'day');
+
+      expect(daysInComparisonDateRange).toEqual(daysInDateRange);
+    }
+  )
+
   test.concurrent('Comparison date should be weekday-aligned', async () => {
     const { start } = _dateRangeConfigs[type].getDateRange();
     const comparisonStart = _dateRangeConfigs[type].getComparisonDate(start);
