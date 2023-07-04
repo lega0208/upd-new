@@ -1,3 +1,4 @@
+import { Dayjs } from 'dayjs';
 import type { UnitType } from 'dayjs';
 import { arrayToDictionary } from '../utils-common';
 import {
@@ -61,6 +62,34 @@ describe.each(dateRangeTypes)('Methods and date values - %s', (type) => {
   const dateRange = periodConfig.getDateRange();
   const comparisonDate = periodConfig.getComparisonDate();
 
+  const initialDate = today();
+
+  const datesToTest = [
+    initialDate,
+    initialDate.add(1, 'day'),
+    initialDate.add(3, 'days'),
+    initialDate.add(1, 'week'),
+    initialDate.add(2, 'weeks'),
+    initialDate.add(3, 'weeks'),
+    initialDate.add(4, 'weeks'),
+    initialDate.add(1, 'month'),
+    initialDate.add(2, 'months'),
+    initialDate.add(2, 'months').add(3, 'days'),
+    initialDate.add(3, 'months'),
+    initialDate.add(3, 'months').add(3, 'days'),
+    initialDate.add(4, 'months'),
+    initialDate.add(4, 'months').add(3, 'weeks'),
+    initialDate.add(1, 'quarter'),
+    initialDate.add(1, 'quarter').add(3, 'weeks'),
+    initialDate.add(2, 'quarters'),
+    initialDate.add(7, 'months'),
+    initialDate.add(7, 'months').add(3, 'days'),
+    initialDate.add(8, 'months'),
+    initialDate.add(8, 'months').add(3, 'days'),
+    initialDate.add(3, 'quarters'),
+    dayjs.utc('2024-02-29'), // leap year
+  ].map((date) => [date.toDate()]);
+
   test.concurrent('Period type should exist in dateRangeConfigs', async () =>
     expect(periodConfig).toBeDefined()
   );
@@ -122,19 +151,23 @@ describe.each(dateRangeTypes)('Methods and date values - %s', (type) => {
     }
   );
 
-  test.concurrent(
-    'Date ranges should have the same number of days',
-    async () => {
+  test.concurrent.each(datesToTest)(
+    'Date ranges should have the same number of days - %s',
+    async (date) => {
+      const dateRange = periodConfig.getDateRange(date);
       const { start, end } = dateRange;
       const comparisonStart = periodConfig.getComparisonDate(start);
       const comparisonEnd = periodConfig.getComparisonDate(end);
 
       const daysInDateRange = end.diff(start, 'day');
-      const daysInComparisonDateRange = comparisonEnd.diff(comparisonStart, 'day');
+      const daysInComparisonDateRange = comparisonEnd.diff(
+        comparisonStart,
+        'day'
+      );
 
       expect(daysInComparisonDateRange).toEqual(daysInDateRange);
     }
-  )
+  );
 
   test.concurrent('Comparison date should be weekday-aligned', async () => {
     const { start } = _dateRangeConfigs[type].getDateRange();
