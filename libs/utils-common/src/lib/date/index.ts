@@ -6,6 +6,7 @@ import _dayjs, {
 import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import duration, { DurationUnitType } from 'dayjs/plugin/duration';
+import isBetween from 'dayjs/plugin/isBetween';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
 import { partial } from 'rambdax';
@@ -13,6 +14,7 @@ import { partial } from 'rambdax';
 _dayjs.extend(utc);
 _dayjs.extend(quarterOfYear);
 _dayjs.extend(duration);
+_dayjs.extend(isBetween);
 
 // Re-export dayjs object and types to be able to import from here
 export const dayjs = _dayjs;
@@ -137,34 +139,53 @@ export const getComparisonDate = (
   return dayjs.utc(fromDate).subtract(numWeeks, 'weeks');
 };
 
-const genericPeriods = Object.fromEntries<DateRangeConfig>((
-  ['week', 'month', 'year'] as const
-).map((type) => [type, {
-  type,
-  label: `Last ${type}`,
-  getDateRange: partial(getPeriodDateRange, [type]),
-  getComparisonDate: partial(getComparisonDate, [type]),
-}]));
+const genericPeriods = Object.fromEntries<DateRangeConfig>(
+  (['week', 'month', 'year'] as const).map((type) => [
+    type,
+    {
+      type,
+      label: `Last ${type}`,
+      getDateRange: partial(getPeriodDateRange, [type]),
+      getComparisonDate: partial(getComparisonDate, [type]),
+    },
+  ])
+);
 
-const quarterlyConfig: DateRangeConfig =
-  {
-    type: 'quarter',
-    label: 'Last quarter',
-    getDateRange: partial(getPeriodDateRange, ['quarter']),
-    getComparisonDate: function(fromDate = today()) {
-      const numWeeks = Math.floor(dayjs.duration(3, 'months').asWeeks());
+const quarterlyConfig: DateRangeConfig = {
+  type: 'quarter',
+  label: 'Last quarter',
+  getDateRange: partial(getPeriodDateRange, ['quarter']),
+  getComparisonDate: function (fromDate = today()) {
+    const numWeeks = Math.floor(dayjs.duration(3, 'months').asWeeks());
 
-      const sevenDaysAfterCurrentStart = this.getDateRange(fromDate).start.add(7, 'days');
+    const fromDateStart = this.getDateRange(fromDate).start;
 
-      const comparisonDate = dayjs.utc(fromDate).subtract(numWeeks, 'weeks');
+    const sevenDaysAfterCurrentStart = fromDateStart.add(7, 'days');
+    const sevenDaysBeforeCurrentStart = fromDateStart.subtract(7, 'days');
 
-      if (!comparisonDate.isBefore(sevenDaysAfterCurrentStart)) {
-        return comparisonDate.subtract(1, 'weeks');
-      }
+    // if the comparison date isn't within 7 days of the start date,
+    //   we can assume it's the start date
 
-      return comparisonDate;
+    const comparisonDate = dayjs.utc(fromDate).subtract(numWeeks, 'weeks');
+
+    const isStart = comparisonDate.isBetween(
+      sevenDaysBeforeCurrentStart,
+      sevenDaysAfterCurrentStart,
+      null,
+      '[]'
+    );
+
+    if (
+      !comparisonDate.isBefore(sevenDaysAfterCurrentStart) ||
+      (isStart &&
+        comparisonDate.diff(comparisonDate.endOf('quarter'), 'days') < 90)
+    ) {
+      return comparisonDate.subtract(1, 'weeks');
     }
-  }
+
+    return comparisonDate;
+  },
+};
 
 export const dateRangeConfigs: readonly DateRangeConfig[] = Object.freeze([
   genericPeriods['week'],
