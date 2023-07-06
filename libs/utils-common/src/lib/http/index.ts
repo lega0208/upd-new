@@ -177,20 +177,27 @@ export class HttpClient {
     }
 
     const batchFunc = async (url: string) =>
-      this.get(url).then(async (result) => {
-        try {
-          return await callback(result);
-        } catch (err) {
-          this.logger.error(`Error in callback for ${url}:`);
+      this.get(url)
+        .then(async (result) => {
+          try {
+            return await callback(result);
+          } catch (err) {
+            this.logger.error(`Error in callback for ${url}:`);
+            this.logger.error((err as Error).stack);
+
+            return;
+          } finally {
+            if (logProgress) {
+              progressTimer.logIteration();
+            }
+          }
+        })
+        .catch((err) => {
+          this.logger.error(`Error fetching ${url}:`);
           this.logger.error((err as Error).stack);
 
           return;
-        } finally {
-          if (logProgress) {
-            progressTimer.logIteration();
-          }
-        }
-      });
+        });
 
     return await batchAwait(
       urls,

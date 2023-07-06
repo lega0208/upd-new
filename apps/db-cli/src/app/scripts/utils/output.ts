@@ -100,7 +100,8 @@ export async function outputTable(
           .map((col) => `<td>${col}</td>`)
           .join('')}
       </tr>`
-  ).join('');
+    )
+    .join('');
 
   const tableOutput = `
     <table>
@@ -124,4 +125,41 @@ ${tableOutput}
   await writeFile(`./${filename}.html`, output, 'utf8');
 
   openHtmlFile(`./${filename}.html`);
+}
+
+export function toCsv(data: Record<string, unknown>[]) {
+  const headers = Object.keys(data[0]).join(',') + '\n';
+
+  return (
+    headers +
+    data
+      .map((row) =>
+        Object.values(row)
+          .map((value) => {
+            if (typeof value === 'string') {
+              return `"${value}"`.replaceAll(/\n|\s{2,}/g, ' ');
+            }
+
+            if (value instanceof Date) {
+              return value.toISOString();
+            }
+
+            if (value === null || value === undefined) {
+              return '';
+            }
+
+            return value;
+          })
+          .join(',')
+      )
+      .join('\n')
+  );
+}
+
+export function outputCsv(filename: string, data: Record<string, unknown>[]) {
+  return writeFile(
+    filename.endsWith('.csv') ? filename : `${filename}.csv`,
+    toCsv(data),
+    'utf8'
+  );
 }

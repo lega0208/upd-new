@@ -144,3 +144,32 @@ export async function addUrlTitlesToAllTitles(db: DbService) {
 
   console.log('Current titles successfully added to all_titles.');
 }
+
+export async function cleanUrlsTitles(db: DbService) {
+  const urls = await db.collections.urls
+    .find({ title: { $exists: true } })
+    .lean()
+    .exec();
+
+  const cleanTitle = (title: string) =>
+    title
+      .replace(/ - Canada\.ca\s*$/i, '')
+      .trim()
+      .replaceAll(/\s+/g, ' ');
+
+  const writeOps: AnyBulkWriteOperation<IUrl>[] = urls.map((url) => ({
+    updateOne: {
+      filter: { _id: url._id },
+      update: {
+        $set: {
+          title: cleanTitle(url.title),
+          all_titles: url.all_titles.map(cleanTitle),
+        },
+      },
+    },
+  }));
+
+  await db.collections.urls.bulkWrite(writeOps);
+
+  console.log('Titles successfully cleaned 🧹🧹');
+}

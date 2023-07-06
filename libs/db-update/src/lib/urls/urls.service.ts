@@ -38,8 +38,8 @@ export class UrlsService {
   private readonly http = new HttpClient({
     logger: this.logger,
     rateLimitStats: this.rateLimitStats,
-    rateLimitDelay: 78,
-    batchSize: 15,
+    rateLimitDelay: 84,
+    batchSize: 12,
   });
 
   constructor(
@@ -903,7 +903,11 @@ export const processHtml = (html: string): ProcessedHtml => {
   );
 
   return {
-    title: $('title').text(),
+    title: $('title')
+      .text()
+      .replace(/ - Canada\.ca\s*$/, '')
+      .replaceAll(/s{2,}/g, ' ')
+      .trim(),
     body: $.html(),
     metadata,
     links,

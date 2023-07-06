@@ -1,13 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { AnyBulkWriteOperation } from 'mongodb';
 import { Model, Types } from 'mongoose';
-import {
-  DbService,
-  Overall,
-  Page,
-  PageMetrics,
-  PagesList,
-} from '@dua-upd/db';
+import { DbService, Overall, Page, PageMetrics, PagesList } from '@dua-upd/db';
 import type {
   OverallDocument,
   PageDocument,
@@ -181,7 +176,8 @@ export class DbUpdateService {
   @AsyncLogTiming
   async createPagesFromPageList() {
     this.logger.log(`Checking for new pages in Published Pages list...`);
-    const pagesList = (await this.pagesListModel.find().exec()) ?? [];
+
+    const pagesList = (await this.pagesListModel.find().lean().exec()) ?? [];
     const pagesListUrls = pagesList.map((page) => page.url);
 
     if (pagesList.length === 0) {
@@ -211,10 +207,49 @@ export class DbUpdateService {
       }));
 
     this.logger.log(
-      `Creating ${pagesToCreate.length} new pages from Published Pages list`
+      `Creating ${pagesToCreate.length} new pages from Published Pages list...`
     );
 
-    return this.pageModel.insertMany(pagesToCreate, { ordered: false });
+    await this.pageModel.insertMany(pagesToCreate, { ordered: false });
+
+    this.logger.log('New pages successfully created');
+
+    this.logger.log('Adding references to page metrics...');
+
+    const bulkWriteOps: AnyBulkWriteOperation<PageMetrics>[] =
+      pagesToCreate.map((page) => ({
+        updateMany: {
+          filter: {
+            url: page.url,
+            page: null,
+          },
+          update: {
+            $set: {
+              page: page._id,
+            },
+          },
+        },
+      }));
+
+    const bulkWriteResults = await this.pageMetricsModel.bulkWrite(
+      bulkWriteOps
+    );
+
+    if (bulkWriteResults.modifiedCount) {
+      this.logger.log(
+        `Successfully added references to ${bulkWriteResults.modifiedCount} page metrics`
+      );
+
+      return;
+    }
+
+    this.logger.warn(
+      `No page metrics found for the following urls: ${JSON.stringify(
+        pagesToCreate.map((page) => page.url),
+        null,
+        2
+      )}`
+    );
   }
 
   async updateUxData() {
