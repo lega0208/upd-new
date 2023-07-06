@@ -511,7 +511,6 @@ export class AirtableService {
             );
 
             project.attachments[attachmentIndex].storage_url = blobUrl;
-            project.attachments[attachmentIndex].storage_url = blobUrl;
           }
 
           return project.save();
