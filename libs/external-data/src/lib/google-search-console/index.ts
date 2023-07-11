@@ -72,7 +72,7 @@ export class SearchAnalyticsClient {
     for (const date of dates) {
       const mergedDateResults = Promise.all([
         this.getOverallTotals(date, { dataState }),
-        this.getOverallSearchTerms(date, { rowLimit: 250, dataState }),
+        this.getOverallSearchTerms(date, { rowLimit: 15000, dataState }),
       ]).then(([totals, searchTerms]) => ({
         ...totals,
         ...searchTerms,

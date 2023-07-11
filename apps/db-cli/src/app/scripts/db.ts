@@ -1,5 +1,7 @@
 import { DbService } from '@dua-upd/db';
 import { DbUpdateService, UrlsService } from '@dua-upd/db-update';
+import { singleDatesFromDateRange } from '@dua-upd/external-data';
+import { dayjs } from '@dua-upd/utils-common';
 import { readFile, writeFile } from 'fs/promises';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { Types } from 'mongoose';
@@ -172,4 +174,29 @@ export async function cleanUrlsTitles(db: DbService) {
   await db.collections.urls.bulkWrite(writeOps);
 
   console.log('Titles successfully cleaned 🧹🧹');
+}
+
+export async function repopulateGscSearchTerms() {
+  const dbUpdateService = (<RunScriptCommand>this).inject<DbUpdateService>(
+    DbUpdateService
+  );
+
+  console.time('repopulateGscSearchTerms');
+
+  const sixteenMonthsAgo = dayjs().subtract(16, 'months').format('YYYY-MM-DD');
+
+  console.log('16 months ago: ', sixteenMonthsAgo);
+
+  await dbUpdateService.upsertOverallGscMetrics(
+    singleDatesFromDateRange(
+      {
+        start: sixteenMonthsAgo,
+        end: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
+      },
+      false,
+      true
+    ) as Date[]
+  );
+
+  console.timeEnd('repopulateGscSearchTerms');
 }
