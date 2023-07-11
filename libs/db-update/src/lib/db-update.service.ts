@@ -1,3 +1,4 @@
+import { IOverall } from '@dua-upd/types-common';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AnyBulkWriteOperation } from 'mongodb';
@@ -20,6 +21,7 @@ import {
   AsyncLogTiming,
   dateRangeConfigs,
   prettyJson,
+  wait,
 } from '@dua-upd/utils-common';
 import { CalldriversService } from './airtable/calldrivers.service';
 import { FeedbackService } from './airtable/feedback.service';
@@ -293,29 +295,53 @@ export class DbUpdateService {
   }
 
   async upsertOverallGscMetrics(dates: Date[]) {
-    const bulkInsertOps = [];
+    const promises: Promise<IOverall[]>[] = [];
 
-    const results = (
-      await Promise.all(
-        dates.map((date) => this.gscClient.getOverallMetrics(date))
-      )
-    ).flat();
+    for (const date of dates) {
+      promises.push(this.gscClient.getOverallMetrics(date));
 
-    for (const result of results) {
-      bulkInsertOps.push({
-        updateOne: {
-          filter: {
-            date: result.date,
-          },
-          update: {
-            $set: result,
-          },
-          upsert: true,
-        },
-      });
+      await wait(600);
+
+      if (promises.length % 10 === 0) {
+        const bulkWriteOps = (
+          await Promise.all(promises.splice(0, promises.length))
+        )
+          .flat()
+          .map((result) => ({
+            updateOne: {
+              filter: {
+                date: result.date,
+              },
+              update: {
+                $set: result,
+              },
+              upsert: true,
+            },
+          }));
+
+        console.log(
+          `Writing GSC search terms up to ${bulkWriteOps[
+            bulkWriteOps.length - 1
+          ].updateOne.filter.date.toISOString()}`
+        );
+
+        await this.overallMetricsModel.bulkWrite(bulkWriteOps);
+      }
     }
 
-    return this.overallMetricsModel.bulkWrite(bulkInsertOps);
+    const bulkWriteOps = (await Promise.all(promises)).flat().map((result) => ({
+      updateOne: {
+        filter: {
+          date: result.date,
+        },
+        update: {
+          $set: result,
+        },
+        upsert: true,
+      },
+    }));
+
+    await this.overallMetricsModel.bulkWrite(bulkWriteOps);
   }
 
   async upsertGscPageMetrics(dates: Date[]) {
