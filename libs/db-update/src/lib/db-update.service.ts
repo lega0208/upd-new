@@ -19,7 +19,7 @@ import {
 import { BlobLogger } from '@dua-upd/logger';
 import {
   AsyncLogTiming,
-  dateRangeConfigs,
+  dateRangeConfigs, logJson,
   prettyJson,
   wait,
 } from '@dua-upd/utils-common';
@@ -307,15 +307,16 @@ export class DbUpdateService {
           await Promise.all(promises.splice(0, promises.length))
         )
           .flat()
+          .filter((result) => Object.keys(result).length > 0)
           .map((result) => ({
             updateOne: {
               filter: {
-                date: result.date,
+                date,
               },
               update: {
                 $set: result,
               },
-              upsert: true,
+              // upsert: true,
             },
           }));
 
@@ -345,7 +346,7 @@ export class DbUpdateService {
   }
 
   async upsertGscPageMetrics(dates: Date[]) {
-    const bulkInsertOps = [];
+    const bulkWriteOps = [];
 
     const results = (
       await Promise.all(
@@ -354,7 +355,7 @@ export class DbUpdateService {
     ).flat(2);
 
     for (const result of results) {
-      bulkInsertOps.push({
+      bulkWriteOps.push({
         updateOne: {
           filter: {
             url: result.url,
@@ -367,7 +368,7 @@ export class DbUpdateService {
       });
     }
 
-    return this.pageMetricsModel.bulkWrite(bulkInsertOps, { ordered: false });
+    return this.pageMetricsModel.bulkWrite(bulkWriteOps, { ordered: false });
   }
 
   async repopulateFeedback() {
