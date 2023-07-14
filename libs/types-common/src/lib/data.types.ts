@@ -102,6 +102,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
   readability: IReadability[];
+  alternatePageId: string;
 }
 
 export interface OverviewAggregatedData {

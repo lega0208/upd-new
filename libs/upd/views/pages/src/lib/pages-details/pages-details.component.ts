@@ -5,7 +5,7 @@ import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest, filter } from 'rxjs';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import { NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'upd-page-details',
@@ -23,11 +23,14 @@ export class PagesDetailsComponent implements OnInit {
   langLink = 'en';
   navTabs: { href: string; title: string }[] = [];
   projects$ = this.pageDetailsService.projects$;
+  altPageId$ = this.pageDetailsService.altPageId$;
   projectsCol: ColumnConfig = { field: '', header: '' };
 
   currentUrl = '';
+  altPageId = '';
 
   constructor(
+    private route: ActivatedRoute,
     private pageDetailsService: PagesDetailsFacade,
     private i18n: I18nFacade,
     private router: Router
@@ -38,7 +41,7 @@ export class PagesDetailsComponent implements OnInit {
 
     router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe((event) => {
+      .subscribe(() => {
         this.currentUrl = this.router.url.substring(
           this.router.url.lastIndexOf('/') + 1
         );
@@ -48,8 +51,13 @@ export class PagesDetailsComponent implements OnInit {
   ngOnInit(): void {
     this.pageDetailsService.init();
 
-    this.currentLang$.subscribe((lang) => {
+    combineLatest([
+      this.currentLang$,
+      this.altPageId$
+    ]).subscribe(([lang, altPageId]) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+
+      this.altPageId = `/${this.langLink}/pages/${altPageId}/summary`
 
       this.navTabs = [
         {
