@@ -178,6 +178,49 @@ export class ApexStore extends ComponentStore<ChartOptions> {
             dataLabels: {
               enabled: false,
             },
+            plotOptions: {
+              pie: {
+                donut: {
+                  labels: {
+                    show: false,
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          breakpoint: 992,
+          options: {
+            dataLabels: {
+              enabled: true,
+            },
+            plotOptions: {
+              pie: {
+                donut: {
+                  labels: {
+                    show: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          breakpoint: 593,
+          options: {
+            dataLabels: {
+              enabled: false,
+            },
+            plotOptions: {
+              pie: {
+                donut: {
+                  labels: {
+                    show: false,
+                  },
+                },
+              },
+            },
           },
         },
       ],
