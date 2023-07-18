@@ -639,28 +639,21 @@ async function getOverviewMetrics(
 
   const calldriversEnquiry = await calldriversModel
     .aggregate()
+    .project({
+      date: 1,
+      enquiry_line: 1,
+      calls: 1,
+    })
     .match({ date: dateQuery })
     .group({
       _id: '$enquiry_line',
       sum: { $sum: '$calls' },
-      doc: { $push: '$$ROOT' },
     })
-    .replaceRoot({
-      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
-    })
-    .sort({ enquiry_line: 'asc' })
+    .sort({ sum: -1 })
     .project({
       _id: 0,
-      doc: 0,
-      airtable_id: 0,
-      date: 0,
-      calls: 0,
-      tpc_id: 0,
-      topic: 0,
-      subtopic: 0,
-      sub_subtopic: 0,
-      impact: 0,
-      __v: 0,
+      enquiry_line: '$_id',
+      sum: 1,
     })
     .exec();
 
@@ -689,10 +682,20 @@ async function getOverviewMetrics(
 
   const totalFeedback = await feedbackModel
     .aggregate()
+    .project({
+      date: 1,
+      url: 1,
+      main_section: 1,
+    })
     .sort({ date: 1 })
     .match({
       $and: [
-        { date: dateQuery },
+        {
+          date: {
+            $gte: new Date('2021-01-23'),
+            $lte: new Date('2023-01-23'),
+          },
+        },
         {
           url: {
             $regex:
@@ -704,28 +707,21 @@ async function getOverviewMetrics(
     .group({
       _id: '$main_section',
       sum: { $sum: 1 },
-      doc: { $push: '$$ROOT' },
     })
-    .replaceRoot({
-      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
-    })
-    .sort({ main_section: 'asc' })
+    .sort({ sum: -1 })
     .project({
       _id: 0,
-      doc: 0,
-      airtable_id: 0,
-      date: 0,
-      whats_wrong: 0,
-      tags: 0,
-      status: 0,
-      theme: 0,
-      url: 0,
-      __v: 0,
+      main_section: '$_id',
+      sum: 1,
     })
     .exec();
 
   const feedbackPages = await feedbackModel
     .aggregate<{ _id: string; title: string; url: string; sum: number }>()
+    .project({
+      date: 1,
+      url: 1,
+    })
     .match({
       $and: [
         { date: dateQuery },
