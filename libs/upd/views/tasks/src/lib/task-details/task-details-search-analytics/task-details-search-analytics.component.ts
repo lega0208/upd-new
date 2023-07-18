@@ -43,6 +43,12 @@ export class TaskDetailsSearchAnalyticsComponent implements OnInit {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.visitsByPageCols = [
         {
+          field: 'title',
+          header: this.i18n.service.translate('Title', lang),
+          type: 'link',
+          typeParam: '_id',
+        },
+        {
           field: 'url',
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
