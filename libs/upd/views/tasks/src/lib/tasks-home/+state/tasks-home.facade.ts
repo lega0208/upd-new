@@ -7,6 +7,7 @@ import * as TasksHomeActions from './tasks-home.actions';
 import * as TasksHomeSelectors from './tasks-home.selectors';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ColumnConfig } from '@dua-upd/upd-components';
+import { round } from '@dua-upd/utils-common';
 
 @Injectable()
 export class TasksHomeFacade {
@@ -33,6 +34,8 @@ export class TasksHomeFacade {
           row.user_type.length > 0
             ? row.user_type.map((userType) => userType || '')
             : '',
+        calls_per_100_visits: 
+          row.visits > 0 ? round( ( row.calls / row.visits ) * 100, 3) || 0 : 0,
       }));
     })
   );
@@ -101,6 +104,7 @@ export class TasksHomeFacade {
           field: 'tasks_subtopic',
           header: this.i18n.service.translate('tasks_subtopic', lang),
           translate: true,
+          hideTable: true,
         },
         {
           field: 'visits',
@@ -112,6 +116,11 @@ export class TasksHomeFacade {
           header: this.i18n.service.translate('calls', lang),
           pipe: 'number',
         },
+        {
+          field: 'calls_per_100_visits',
+          header: this.i18n.service.translate('calls_per_100_visits', lang),
+          pipe: 'number',
+        }
       ] as ColumnConfig[];
     })
   );
