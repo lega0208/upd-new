@@ -470,7 +470,11 @@ export class AirtableClient {
   }
 
   async getTasksTopicsMap() {
-    const filterByFormula = 'NOT({Task} = "")';
+    const filterByFormula = combineFormulas([
+      'NOT({Task} = "")',
+      'NOT({Task link} = "")',
+      'NOT({Task link} = BLANK())',
+    ]);
 
     const query = this.createQuery(
       bases.TASKS_INVENTORY,

@@ -19,7 +19,7 @@ import {
 import { BlobLogger } from '@dua-upd/logger';
 import {
   AsyncLogTiming,
-  dateRangeConfigs, logJson,
+  dateRangeConfigs,
   prettyJson,
   wait,
 } from '@dua-upd/utils-common';
@@ -302,23 +302,25 @@ export class DbUpdateService {
 
       await wait(600);
 
-      if (promises.length % 10 === 0) {
-        const bulkWriteOps = (
-          await Promise.all(promises.splice(0, promises.length))
-        )
+      if (promises.length && promises.length % 10 === 0) {
+        const bulkWriteOps = (await Promise.all(promises.splice(0)))
           .flat()
           .filter((result) => Object.keys(result).length > 0)
           .map((result) => ({
             updateOne: {
               filter: {
-                date,
+                date: result.date,
               },
               update: {
                 $set: result,
               },
-              // upsert: true,
+              upsert: true,
             },
           }));
+
+        if (bulkWriteOps.length === 0) {
+          continue;
+        }
 
         console.log(
           `Writing GSC search terms up to ${bulkWriteOps[
