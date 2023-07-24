@@ -1,7 +1,7 @@
-import { DbService } from '@dua-upd/db';
-import { DbUpdateService, UrlsService } from '@dua-upd/db-update';
+import { DbService, Page } from '@dua-upd/db';
+import { DbUpdateService, processHtml, UrlsService } from '@dua-upd/db-update';
 import { singleDatesFromDateRange } from '@dua-upd/external-data';
-import { dayjs } from '@dua-upd/utils-common';
+import { arrayToDictionary, dayjs } from '@dua-upd/utils-common';
 import { readFile, writeFile } from 'fs/promises';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { Types } from 'mongoose';
@@ -84,6 +84,13 @@ export async function syncUrlsCollection() {
   const urlsService = (<RunScriptCommand>this).inject<UrlsService>(UrlsService);
 
   await urlsService.updateUrls();
+}
+
+// Don't run this unless you know what you're doing
+export async function uploadUrlsCollection() {
+  const urlsService = (<RunScriptCommand>this).inject<UrlsService>(UrlsService);
+
+  await urlsService.saveCollectionToBlobStorage(true);
 }
 
 export async function uploadFeedback2(_, __, ___, blob: BlobStorageService) {
@@ -199,4 +206,154 @@ export async function repopulateGscSearchTerms() {
   );
 
   console.timeEnd('repopulateGscSearchTerms');
+}
+
+// repopulate titles from blobs because of bug causing mangled titles
+export async function repairUrlTitles(db: DbService) {
+  console.time('repairUrlTitles');
+  const blobService = (<RunScriptCommand>this).inject<BlobStorageService>(
+    BlobStorageService.name
+  );
+
+  // mangles `a`, compares `b`, and returns true if there's a match
+  const isMangled = (a: string, b: string) => {
+    const aMangled = a.replace(/s{2,}/g, ' ').replace(/\s{2,}/g, ' ');
+
+    return aMangled === b;
+  };
+
+  const testUrlWithBlob = (
+    await db.collections.urls.mapBlobs(
+      blobService.blobModels.urls,
+      {
+        $and: [{ title: { $ne: null } }, { title: { $ne: '' } }],
+        latest_snapshot: { $exists: true },
+        hashes: { $not: { $size: 0 } },
+      },
+      (urlWithBlob): AnyBulkWriteOperation<IUrl> => {
+        const htmlData = processHtml(urlWithBlob.blobContent);
+
+        if (!htmlData) {
+          return;
+        }
+
+        const blobTitle = htmlData.title;
+
+        const newAllTitles = [
+          ...new Set(
+            [blobTitle, urlWithBlob.title, ...urlWithBlob.all_titles].map(
+              (title) => title.trim().replace(/\s+/g, ' ')
+            )
+          ),
+        ];
+
+        const couldBeMangled = newAllTitles.filter((title) =>
+          title.includes('ss')
+        );
+
+        const cleanAllTitles = newAllTitles.filter(
+          (title) =>
+            !couldBeMangled.some((comparison) => isMangled(comparison, title))
+        );
+
+        return {
+          updateOne: {
+            filter: { _id: urlWithBlob._id },
+            update: {
+              $set: {
+                title: blobTitle,
+                all_titles: cleanAllTitles,
+              },
+            },
+          },
+        };
+      }
+    )
+  ).filter(Boolean) as AnyBulkWriteOperation<IUrl>[];
+
+  const results = await db.collections.urls.bulkWrite(testUrlWithBlob);
+
+  console.log(`modified: ${results.nModified}`);
+
+  console.timeEnd('repairUrlTitles');
+}
+
+export async function updatePageTitlesFromUrls(db: DbService) {
+  // group by page -> find multiple titles
+  // if multiple titles, can't know which title is correct
+  const titles = await db.collections.urls.aggregate<{
+    _id: Types.ObjectId;
+    titles: string[];
+    titlesCount: number;
+  }>([
+    {
+      $match: {
+        title: { $ne: null },
+        $or: [{ is_404: false }, { is_404: null }],
+      },
+    },
+    {
+      $group: {
+        _id: '$page',
+        titles: { $addToSet: '$title' },
+      },
+    },
+    {
+      $addFields: {
+        titlesCount: {
+          $size: '$titles',
+        },
+      },
+    },
+    {
+      $match: {
+        titlesCount: { $gt: 1 },
+      },
+    },
+  ]);
+
+  const multiPageTitles = titles.map(({ _id }) => _id);
+
+  const pagesTitles = await db.collections.urls
+    .aggregate<{
+      _id: Types.ObjectId;
+      title: string;
+    }>()
+    .match({
+      $and: [{ page: { $exists: true } }, { page: { $nin: multiPageTitles } }],
+      title: { $exists: true, $ne: 'Forbidden' },
+      is_404: { $not: { $eq: true } },
+    })
+    .group({
+      _id: '$page',
+      title: { $first: '$title' },
+    })
+    .exec();
+
+  const currentPageTitles = await db.collections.pages
+    .find({}, { title: 1 })
+    .exec();
+
+  const currentPageTitlesDict = arrayToDictionary(currentPageTitles, '_id');
+
+  const pageTitleChanges: AnyBulkWriteOperation<Page>[] = pagesTitles
+    .filter(
+      ({ _id, title }) => currentPageTitlesDict[_id.toString()].title !== title
+    )
+    .map(({ _id, title }) => ({
+      updateOne: {
+        filter: { _id },
+        update: {
+          $set: {
+            title,
+          },
+        },
+      },
+    }));
+
+  const results = await db.collections.pages.bulkWrite(pageTitleChanges, {
+    ordered: false,
+  });
+
+  console.log(`modified: ${results.nModified}`);
 }
