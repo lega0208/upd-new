@@ -384,6 +384,7 @@ export interface IUrl {
   _id: Types.ObjectId;
   url: string;
   title?: string;
+  all_titles?: string[];
   page?: Types.ObjectId;
   metadata?: { [prop: string]: string | Date };
   langHrefs?: {
