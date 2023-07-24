@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import {
   Command,
   CommandRunner,
@@ -52,9 +53,13 @@ export class UpdateCommand extends CommandRunner {
       return;
     }
 
-    await this.dbUpdateService.updateAll(false);
-    await this.dataIntegrityService.fillMissingData();
-    await this.dataIntegrityService.cleanPageUrls();
+    try {
+      await this.dbUpdateService.updateAll(false);
+      await this.dataIntegrityService.fillMissingData();
+      await this.dataIntegrityService.cleanPageUrls();
+    } catch (error) {
+      console.error(chalk.red(error.stack));
+    }
   }
 
   @Option({
