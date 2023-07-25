@@ -1,5 +1,10 @@
 // types for parsed airtable API query results
 
+import {
+  AnnotationsAudienceType,
+  AnnotationsDataAffectedType,
+  AnnotationsEventType,
+} from '@dua-upd/types-common';
 import { Types } from 'mongoose';
 
 export interface TaskData {
@@ -57,6 +62,24 @@ export interface UxTestData {
   cops?: boolean;
   attachments?: AttachmentData[];
   description?: string;
+}
+
+export interface AnnotationsData {
+  airtable_id: string;
+  title: string;
+  title_fr: string;
+  event_type: AnnotationsEventType[];
+  description?: string;
+  description_fr?: string;
+  event_date: Date;
+  data_affected?: AnnotationsDataAffectedType[];
+  tasks_affected?: string[];
+  audience?: AnnotationsAudienceType[];
+  date_entered?: Date;
+  notes?: string;
+  notes_fr?: string;
+  predictive_insight?: string;
+  predictive_insight_fr?: string;
 }
 
 export interface AttachmentData {

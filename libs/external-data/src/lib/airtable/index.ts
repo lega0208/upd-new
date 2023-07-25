@@ -17,6 +17,7 @@ import {
   UxTestData,
   FeedbackData,
   PageListData,
+  AnnotationsData,
 } from './types';
 
 dayjs.extend(utc);
@@ -355,6 +356,36 @@ export class AirtableClient {
         url: squishTrim(fields['Url']).replace('https://', ''),
         tasks: fields['Tasks'],
       })) as PageData[];
+  }
+
+  async getAnnotations(lastUpdatedDate?: DateType): Promise<AnnotationsData[]> {
+    const params = lastUpdatedDate
+      ? {
+          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
+        }
+      : {};
+    const query = this.createQuery(bases.ANNOTATIONS, 'Events', params);
+
+    return (await this.selectAll(query))
+      .filter(({ fields }) => Object.values(fields).some((value) => value))
+      .map(({ id, fields }) => ({
+        airtable_id: id,
+        title: squishTrim(fields['Title']),
+        title_fr: squishTrim(fields['Title FR']),
+        event_type: fields['Event Type']?.map(squishTrim),
+        description: squishTrim(fields['Description']),
+        description_fr: squishTrim(fields['Description FR']),
+        event_date: dayjs.utc(fields['Event Date']).toDate(),
+        data_affected: fields['Data affected']?.map(squishTrim),
+        tasks_affected: fields['Tasks affected']?.map(squishTrim),
+        audience: fields['Audience']?.map(squishTrim),
+        date_entered:
+          fields['Date entered'] && dayjs.utc(fields['Date entered']).toDate(),
+        notes: squishTrim(fields['Notes']),
+        notes_fr: squishTrim(fields['Notes FR']),
+        predictive_insight: squishTrim(fields['Predictive insight']),
+        predictive_insight_fr: squishTrim(fields['Predictive insight FR']),
+      })) as AnnotationsData[];
   }
 
   createCalldriverQueries(dateRange: { start: DateType; end: DateType }) {
