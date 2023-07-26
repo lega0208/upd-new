@@ -372,7 +372,7 @@ export class AirtableClient {
         airtable_id: id,
         title: squishTrim(fields['Title']),
         title_fr: squishTrim(fields['Title FR']),
-        event_type: fields['Event Type']?.map(squishTrim),
+        event_type: squishTrim(fields['Event Type']),
         description: squishTrim(fields['Description']),
         description_fr: squishTrim(fields['Description FR']),
         event_date: dayjs.utc(fields['Event Date']).toDate(),
