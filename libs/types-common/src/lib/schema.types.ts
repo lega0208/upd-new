@@ -452,7 +452,7 @@ export interface IAnnotations {
   airtable_id: string;
   title: string;
   title_fr: string;
-  event_type: AnnotationsEventType[];
+  event_type: AnnotationsEventType;
   description?: string;
   description_fr?: string;
   event_date: Date;
