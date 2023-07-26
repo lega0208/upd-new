@@ -25,7 +25,7 @@ export class Annotations implements IAnnotations {
   title_fr: string;
 
   @Prop({ type: String, required: true, index: true })
-  event_type: AnnotationsEventType[];
+  event_type: AnnotationsEventType;
 
   @Prop({ type: String })
   description? = '';
