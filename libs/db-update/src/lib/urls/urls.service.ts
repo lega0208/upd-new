@@ -1,5 +1,5 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/lib/slim';
 import dayjs from 'dayjs';
 import { minify } from 'html-minifier-terser';
 import { FilterQuery, Types } from 'mongoose';
@@ -459,54 +459,6 @@ export class UrlsService {
             date,
           };
 
-          if (
-            collectionData?.hashes &&
-            collectionData.hashes.map(({ hash }) => hash).includes(hash)
-          ) {
-            // current hash has already been saved previously -- can skip
-            // (just update last_checked in db)
-            try {
-              // assess readability if data does not exist for this hash
-              if (!existingReadabilityHashes.includes(hash)) {
-                const readabilityScore = await this.assessReadability(
-                  processedHtml.body,
-                  readabilityMetadata
-                );
-
-                return await addToQueues(
-                  {
-                    _id: collectionData._id,
-                    url: collectionData.url,
-                    title: processedHtml.title,
-                    last_checked: date,
-                    metadata: processedHtml.metadata,
-                    ...langHrefs,
-                    links: processedHtml.links,
-                    ...redirect,
-                  },
-                  readabilityScore
-                );
-              }
-
-              return await addToQueues({
-                _id: collectionData._id,
-                url: collectionData.url,
-                title: processedHtml.title,
-                last_checked: date,
-                metadata: processedHtml.metadata,
-                ...langHrefs,
-                links: processedHtml.links,
-                ...redirect,
-              });
-            } catch (err) {
-              this.logger.error(
-                'Error updating Url collection data or assessing readability:'
-              );
-              this.logger.error(err.stack);
-              return;
-            }
-          }
-
           const urlBlob = this.blobService.blobModels.urls.blob(hash);
 
           // if blob already exists, add the url to its blob metadata if it's not already there
@@ -570,6 +522,54 @@ export class UrlsService {
                   },
                 });
               }
+            }
+          }
+
+          if (
+            collectionData?.hashes &&
+            collectionData.hashes.map(({ hash }) => hash).includes(hash)
+          ) {
+            // current hash has already been saved previously -- can skip
+            // (just update last_checked in db)
+            try {
+              // assess readability if data does not exist for this hash
+              if (!existingReadabilityHashes.includes(hash)) {
+                const readabilityScore = await this.assessReadability(
+                  processedHtml.body,
+                  readabilityMetadata
+                );
+
+                return await addToQueues(
+                  {
+                    _id: collectionData._id,
+                    url: collectionData.url,
+                    title: processedHtml.title,
+                    last_checked: date,
+                    metadata: processedHtml.metadata,
+                    ...langHrefs,
+                    links: processedHtml.links,
+                    ...redirect,
+                  },
+                  readabilityScore
+                );
+              }
+
+              return await addToQueues({
+                _id: collectionData._id,
+                url: collectionData.url,
+                title: processedHtml.title,
+                last_checked: date,
+                metadata: processedHtml.metadata,
+                ...langHrefs,
+                links: processedHtml.links,
+                ...redirect,
+              });
+            } catch (err) {
+              this.logger.error(
+                'Error updating Url collection data or assessing readability:'
+              );
+              this.logger.error(err.stack);
+              return;
             }
           }
 
@@ -906,7 +906,7 @@ export const processHtml = (html: string): ProcessedHtml => {
     title: $('title')
       .text()
       .replace(/ - Canada\.ca\s*$/, '')
-      .replaceAll(/s{2,}/g, ' ')
+      .replace(/[\t\n\s]+/g, ' ')
       .trim(),
     body: $.html(),
     metadata,

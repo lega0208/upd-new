@@ -691,10 +691,7 @@ async function getOverviewMetrics(
     .match({
       $and: [
         {
-          date: {
-            $gte: new Date('2021-01-23'),
-            $lte: new Date('2023-01-23'),
-          },
+          date: dateQuery,
         },
         {
           url: {
