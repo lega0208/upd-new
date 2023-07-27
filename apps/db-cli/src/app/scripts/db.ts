@@ -7,6 +7,7 @@ import { AnyBulkWriteOperation } from 'mongodb';
 import { Types } from 'mongoose';
 import { IFeedback, IUrl } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
+import { difference, uniq } from 'rambdax';
 import { RunScriptCommand } from '../run-script.command';
 import { startTimer } from './utils/misc';
 
@@ -356,4 +357,57 @@ export async function updatePageTitlesFromUrls(db: DbService) {
   });
 
   console.log(`modified: ${results.nModified}`);
+}
+
+export async function populateAllTitles(db: DbService) {
+  const blobService = (<RunScriptCommand>this).inject<BlobStorageService>(
+    BlobStorageService.name
+  );
+
+  const allTitles = JSON.parse(
+    await blobService.blobModels.urls.blob('all-titles.json').downloadToString()
+  );
+
+  // clean/dedupe allTitles
+  for (const url in allTitles) {
+    allTitles[url] = uniq(
+      allTitles[url].map((title) =>
+        title
+          .replace(/\s+/g, ' ')
+          .replace(/ [-–] Canada\.ca/, '')
+          .trim()
+      )
+    );
+  }
+
+  const urls = await db.collections.urls.find({}, {}).lean().exec();
+
+  const bulkWriteOps: AnyBulkWriteOperation<IUrl>[] = urls
+    .filter(
+      (url) =>
+        allTitles[url.url] &&
+        url.all_titles &&
+        url.all_titles.length !== allTitles[url.url].length &&
+        difference(allTitles[url.url], url.all_titles || []).length > 0
+    )
+    .map((url) => {
+      const titles = allTitles[url.url];
+
+      return {
+        updateOne: {
+          filter: { _id: url._id },
+          update: {
+            $addToSet: {
+              all_titles: {
+                $each: titles,
+              },
+            },
+          },
+        },
+      };
+    });
+
+  const bulkWriteResults = await db.collections.urls.bulkWrite(bulkWriteOps);
+
+  console.log(`Bulk write results: ${bulkWriteResults.modifiedCount}`);
 }
