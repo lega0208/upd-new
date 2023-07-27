@@ -16,9 +16,10 @@ import {
   SearchAssessment,
   Readability,
   PageMetricsTS,
+  Url,
   type PageMetricsModel,
   type ReadabilityModel,
-  Url,
+  type UrlModel,
 } from '../';
 import { AsyncLogTiming, logJson, prettyJson } from '@dua-upd/utils-common';
 import { AnyBulkWriteOperation } from 'mongodb';
@@ -92,7 +93,7 @@ export class DbService {
     @InjectModel(PageVisitsView.name, 'defaultConnection')
     private pageVisits: Model<PageVisits>,
     @InjectModel(Url.name, 'defaultConnection')
-    private urls: Model<Url>
+    private urls: UrlModel
   ) {}
 
   @AsyncLogTiming

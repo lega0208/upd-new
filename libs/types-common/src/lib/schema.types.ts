@@ -384,6 +384,7 @@ export interface IUrl {
   _id: Types.ObjectId;
   url: string;
   title?: string;
+  all_titles?: string[];
   page?: Types.ObjectId;
   metadata?: { [prop: string]: string | Date };
   langHrefs?: {
@@ -391,7 +392,7 @@ export interface IUrl {
     fr?: string;
     [prop: string]: string | undefined;
   };
-  links?: { href: string, text: string }[]
+  links?: { href: string; text: string }[];
   redirect?: string;
   last_checked?: Date;
   last_modified?: Date;
@@ -437,11 +438,61 @@ export interface ReadabilityScore {
 export interface IReadability extends ReadabilityScore {
   _id: Types.ObjectId;
   url: string;
-  lang: 'en' | 'fr'
+  lang: 'en' | 'fr';
   date: Date;
   page?: Types.ObjectId;
   hash: string;
 }
+
+/*
+ * Annotations interface
+ */
+export interface IAnnotations {
+  _id: Types.ObjectId;
+  airtable_id: string;
+  title: string;
+  title_fr: string;
+  event_type: AnnotationsEventType;
+  description?: string;
+  description_fr?: string;
+  event_date: Date;
+  data_affected?: AnnotationsDataAffectedType[];
+  tasks_affected?: Types.ObjectId[] | ITask[];
+  audience?: AnnotationsAudienceType[];
+  date_entered?: Date;
+  notes?: string;
+  notes_fr?: string;
+  predictive_insight?: string;
+  predictive_insight_fr?: string;
+}
+
+export type AnnotationsEventType =
+  | 'Comms'
+  | 'Migration'
+  | 'Data outages'
+  | 'Page removal'
+  | 'CRA event'
+  | 'COPS Project'
+  | 'Data outage'
+  | 'Public holiday';
+
+export type AnnotationsDataAffectedType =
+  | 'Web traffic'
+  | 'Overview'
+  | 'Tasks'
+  | 'Calls'
+  | 'Projects'
+  | 'Pages'
+  | 'UX Test'
+  | 'Survey'
+  | 'Search'
+  | 'Page feedback';
+
+export type AnnotationsAudienceType =
+  | 'Individual'
+  | 'Business'
+  | 'Tax professional'
+  | 'Charities';
 
 export type AccumulatorOperator =
   | '$accumulator'
