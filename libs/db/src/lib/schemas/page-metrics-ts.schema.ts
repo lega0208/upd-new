@@ -3,6 +3,7 @@ import { Document, Types } from 'mongoose';
 import {
   GscSearchTermMetrics,
   AASearchTermMetrics,
+  ActivityMapMetrics,
 } from '@dua-upd/types-common';
 
 export type PageMetricsTSDocument = PageMetricsTS & Document;
@@ -224,25 +225,49 @@ export class PageMetricsTS {
 
   @Prop({ type: [{ term: String, clicks: Number, position: Number }] })
   aa_searchterms?: AASearchTermMetrics[];
+
+  @Prop({
+    type: [
+      {
+        link: String,
+        clicks: Number,
+      },
+    ],
+  })
+  activity_map?: ActivityMapMetrics[] = [];
 }
 
 export const PageMetricsTSSchema = SchemaFactory.createForClass(PageMetricsTS);
 
-PageMetricsTSSchema.index({ date: -1, 'meta.url': 1 }, { background: true, unique: true });
+PageMetricsTSSchema.index(
+  { date: -1, 'meta.url': 1 },
+  { background: true, unique: true }
+);
 PageMetricsTSSchema.index(
   { date: -1, 'meta.page': 1 },
-  { background: true, partialFilterExpression: { 'meta.page': { $exists: true } } }
+  {
+    background: true,
+    partialFilterExpression: { 'meta.page': { $exists: true } },
+  }
 );
 PageMetricsTSSchema.index(
   { date: -1, 'meta.projects': 1 },
-  { background: true, partialFilterExpression: { 'meta.projects': { $exists: true } } }
+  {
+    background: true,
+    partialFilterExpression: { 'meta.projects': { $exists: true } },
+  }
 );
 PageMetricsTSSchema.index(
   { date: -1, 'meta.tasks': 1 },
-  { background: true, partialFilterExpression: { 'meta.tasks': { $exists: true } } }
+  {
+    background: true,
+    partialFilterExpression: { 'meta.tasks': { $exists: true } },
+  }
 );
 PageMetricsTSSchema.index(
   { date: -1, 'meta.ux_tests': 1 },
-  { background: true, partialFilterExpression: { 'meta.ux_tests': { $exists: true } } }
+  {
+    background: true,
+    partialFilterExpression: { 'meta.ux_tests': { $exists: true } },
+  }
 );
-

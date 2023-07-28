@@ -5,7 +5,7 @@ import { Types } from 'mongoose';
  */
 export type AAItemIdTypes =
   | 'internalSearch'
-  | 'activityMap'
+  | 'activityMapTitle'
   | 'urlLast255'
   | 'pageUrl';
 
@@ -15,6 +15,11 @@ export interface IAAItemId {
   page?: Types.ObjectId;
   itemId: string;
   value: string;
+}
+
+export interface ActivityMapMetrics {
+  link: string;
+  clicks: number;
 }
 
 /*

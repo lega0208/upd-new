@@ -5,6 +5,7 @@ import {
   AccumulatorOperator,
   AASearchTermMetrics,
   IPageMetrics,
+  ActivityMapMetrics,
 } from '@dua-upd/types-common';
 import { Page } from './page.schema';
 import { Task } from './task.schema';
@@ -221,6 +222,16 @@ export class PageMetrics implements IPageMetrics {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }], index: true })
   ux_tests?: Types.ObjectId[] | UxTest[];
+
+  @Prop({
+    type: [
+      {
+        link: String,
+        clicks: Number,
+      },
+    ],
+  })
+  activity_map?: ActivityMapMetrics[] = [];
 }
 
 export const PageMetricsSchema = SchemaFactory.createForClass(PageMetrics);
