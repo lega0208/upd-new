@@ -61,182 +61,197 @@ export class SearchAssessmentService {
 
   async upsertPreviousSearchAssessment() {
     for (const lang of ['en', 'fr'] as ('en' | 'fr')[]) {
-      const records = await this.getCurrentSearchAssessment(lang);
-      const dbStartQuery = await this.db.collections.searchAssessment
-        .find({ lang: lang }, { date: 1 })
-        .sort({ date: -1 })
-        .limit(1)
-        .exec();
-      let startDate = dayjs
-        .utc(records[0]?.fields.Date || '2022-11-13')
-        .startOf('day');
-      const dbStartDate = dayjs
-        .utc(dbStartQuery[0]?.date || '2022-11-12')
-        .startOf('day');
+      try {
+        const records = await this.getCurrentSearchAssessment(lang);
+        const dbStartQuery = await this.db.collections.searchAssessment
+          .find({ lang: lang }, { date: 1 })
+          .sort({ date: -1 })
+          .limit(1)
+          .exec();
+        let startDate = dayjs
+          .utc(records[0]?.fields.Date || '2022-11-13')
+          .startOf('day');
+        const dbStartDate = dayjs
+          .utc(dbStartQuery[0]?.date || '2022-11-12')
+          .startOf('day');
 
-      const cutoffDate = dayjs
-        .utc()
-        .subtract(2, 'week')
-        .endOf('week')
-        .startOf('day');
+        const cutoffDate = dayjs
+          .utc()
+          .subtract(2, 'week')
+          .endOf('week')
+          .startOf('day');
 
-      let endDate = dayjs
-        .utc(startDate)
-        .add(1, 'week')
-        .subtract(1, 'day')
-        .startOf('day');
+        let endDate = dayjs
+          .utc(startDate)
+          .add(1, 'week')
+          .subtract(1, 'day')
+          .startOf('day');
 
-      let flag = 0;
+        let flag = 0;
 
-      this.logger.log(
-        `Updating previous week's search assessment for ${lang} from ${startDate} to ${endDate}`
-      );
-
-      while (startDate.isBefore(cutoffDate) && startDate.isAfter(dbStartDate)) {
-        flag = 1;
-        const dateRangeFilter = {
-          date: {
-            $gte: new Date(startDate.format('YYYY-MM-DD')),
-            $lte: new Date(endDate.format('YYYY-MM-DD')),
-          },
-        };
-
-        let expectedResultsMaster = await this.getExpectedResultsMaster(lang);
-        const dbOverallResults = await this.getTopSearchFromOverall(
-          lang,
-          dateRangeFilter
-        );
-        const topSearchPages = await this.getTopSearchTermPages(
-          lang,
-          dateRangeFilter,
-          dbOverallResults
+        this.logger.log(
+          `Updating previous week's search assessment for ${lang} from ${startDate} to ${endDate}`
         );
 
-        const blankExpectedUrlCount = records.filter(
-          (d) => d.fields['Expected Result'] === undefined
-        ).length;
-
-        const termsNotInExpectedDB = records
-          .map((d, idx) => {
-            const result = expectedResultsMaster.find(
-              (r) =>
-                squishTrim(r.fields.Query.toLowerCase()) ===
-                squishTrim(d.fields.Query.toLowerCase())
-            );
-            const sorted = topSearchPages
-              .find((r) => r.term === d.fields.Query)
-              ?.url_positions.sort((a, b) => a.position - b.position);
-            const expectedUrl = records[idx]?.fields['Expected Result'];
-            const expectedUrlStartsWithWWW = expectedUrl?.startsWith('www.');
-            const sortedUrl = sorted?.[0]?.url.startsWith('www.')
-              ? `https://${sorted?.[0].url}`
-              : '';
-
-            if (!result) {
-              return {
-                fields: {
-                  Query: d.fields.Query,
-                  URL: expectedUrlStartsWithWWW
-                    ? `https://${expectedUrl}`
-                    : expectedUrl || sortedUrl,
-                },
-              };
-            }
-
-            return undefined;
-          })
-          .flatMap((f) => (f ? [f] : []))
-          .flat();
-
-        if (
-          termsNotInExpectedDB.length > 0 ||
-          blankExpectedUrlCount > 0 ||
-          records.length === 0
+        while (
+          startDate.isBefore(cutoffDate) &&
+          startDate.isAfter(dbStartDate)
         ) {
-          this.logger.log(
-            `Found ${termsNotInExpectedDB.length} term(s) not in the Expected DB Master List, or ${blankExpectedUrlCount} blank Expected Result(s)`
+          flag = 1;
+          const dateRangeFilter = {
+            date: {
+              $gte: new Date(startDate.format('YYYY-MM-DD')),
+              $lte: new Date(endDate.format('YYYY-MM-DD')),
+            },
+          };
+
+          let expectedResultsMaster = await this.getExpectedResultsMaster(lang);
+          const dbOverallResults = await this.getTopSearchFromOverall(
+            lang,
+            dateRangeFilter
           );
-          this.logger.log(`Updating the list...`);
-          await this.insertExpectedDB(termsNotInExpectedDB, lang);
-
-          expectedResultsMaster = await this.getExpectedResultsMaster(lang);
-
-          const expectedResultsMerged = await this.getExpectedResultsMerged(
-            topSearchPages,
-            expectedResultsMaster
+          const topSearchPages = await this.getTopSearchTermPages(
+            lang,
+            dateRangeFilter,
+            dbOverallResults
           );
 
-          const notInList: NotInList[] = [];
+          const blankExpectedUrlCount = records.filter(
+            (d) => d.fields['Expected Result'] === undefined
+          ).length;
 
-          const airtableInput = topSearchPages.map(
-            ({ term, url_positions }) => {
-              const sorted = url_positions.sort(
-                (a, b) => a.position - b.position
+          const termsNotInExpectedDB = records
+            .map((d, idx) => {
+              const result = expectedResultsMaster.find(
+                (r) =>
+                  squishTrim(r.fields.Query.toLowerCase()) ===
+                  squishTrim(d.fields.Query.toLowerCase())
               );
-              const expected = expectedResultsMerged.find(
-                (r) => r?.term === term
-              );
-              const foundClicks = dbOverallResults.find((t) => t._id === term);
-              const expectedUrlClicks = topSearchPages.find(
-                (result) => result.term === term
-              );
-              const expectedUrlClicksSum = expectedUrlClicks?.url_positions
-                .filter(
-                  (url) =>
-                    `https://${url.url}` ===
-                    expectedResultsMerged.find(
-                      (item) => item?.term === expectedUrlClicks?.term
-                    )?.url
-                )
-                .map((url) => url.clicks)
-                .reduce((a, b) => a + b, 0);
+              const sorted = topSearchPages
+                .find((r) => r.term === d.fields.Query)
+                ?.url_positions.sort((a, b) => a.position - b.position);
+              const expectedUrl = records[idx]?.fields['Expected Result'];
+              const expectedUrlStartsWithWWW = expectedUrl?.startsWith('www.');
+              const sortedUrl = sorted?.[0]?.url.startsWith('www.')
+                ? `https://${sorted?.[0].url}`
+                : '';
 
-              if (!expected?.url) {
-                notInList.push({
-                  term,
-                  url: sorted[0]?.url || '',
-                });
+              if (!result) {
+                return {
+                  fields: {
+                    Query: d.fields.Query,
+                    URL: expectedUrlStartsWithWWW
+                      ? `https://${expectedUrl}`
+                      : expectedUrl || sortedUrl,
+                  },
+                };
               }
 
-              return {
-                fields: {
-                  Query: term,
-                  'Expected Result': expected?.url || '',
-                  'Expected Position':
-                    Math.round(expected?.position as number) || 0,
-                  Pass: expected?.position && +expected?.position <= 3 ? true : false,
-                  '1st Result': sorted[0]?.url || '',
-                  '1st Position': sorted[0]?.position || 0,
-                  '2nd Result': sorted[1]?.url || '',
-                  '2nd Position': sorted[1]?.position || 0,
-                  '3rd Result': sorted[2]?.url || '',
-                  '3rd Position': sorted[2]?.position || 0,
-                  '4th Result': sorted[3]?.url || '',
-                  '4th Position': sorted[3]?.position || 0,
-                  '5th Result': sorted[4]?.url || '',
-                  '5th Position': sorted[4]?.position || 0,
-                  Date: startDate.format('YYYY-MM-DD'),
-                  'Total searches': foundClicks?.num_searches || 0,
-                  'Total clicks': foundClicks?.clicks || 0,
-                  'Target clicks': expectedUrlClicksSum || 0,
-                },
-              };
-            }
-          );
+              return undefined;
+            })
+            .flatMap((f) => (f ? [f] : []))
+            .flat();
 
-          await this.deleteSearchAssessment(lang);
-          await this.insertCurrentSearchAssessment(airtableInput, lang);
+          if (
+            termsNotInExpectedDB.length > 0 ||
+            blankExpectedUrlCount > 0 ||
+            records.length === 0
+          ) {
+            this.logger.log(
+              `Found ${termsNotInExpectedDB.length} term(s) not in the Expected DB Master List, or ${blankExpectedUrlCount} blank Expected Result(s)`
+            );
+            this.logger.log(`Updating the list...`);
+            await this.insertExpectedDB(termsNotInExpectedDB, lang);
+
+            expectedResultsMaster = await this.getExpectedResultsMaster(lang);
+
+            const expectedResultsMerged = await this.getExpectedResultsMerged(
+              topSearchPages,
+              expectedResultsMaster
+            );
+
+            const notInList: NotInList[] = [];
+
+            const airtableInput = topSearchPages.map(
+              ({ term, url_positions }) => {
+                const sorted = url_positions.sort(
+                  (a, b) => a.position - b.position
+                );
+                const expected = expectedResultsMerged.find(
+                  (r) => r?.term === term
+                );
+                const foundClicks = dbOverallResults.find(
+                  (t) => t._id === term
+                );
+                const expectedUrlClicks = topSearchPages.find(
+                  (result) => result.term === term
+                );
+                const expectedUrlClicksSum = expectedUrlClicks?.url_positions
+                  .filter(
+                    (url) =>
+                      `https://${url.url}` ===
+                      expectedResultsMerged.find(
+                        (item) => item?.term === expectedUrlClicks?.term
+                      )?.url
+                  )
+                  .map((url) => url.clicks)
+                  .reduce((a, b) => a + b, 0);
+
+                if (!expected?.url) {
+                  notInList.push({
+                    term,
+                    url: sorted[0]?.url || '',
+                  });
+                }
+
+                return {
+                  fields: {
+                    Query: term,
+                    'Expected Result': expected?.url || '',
+                    'Expected Position':
+                      Math.round(expected?.position as number) || 0,
+                    Pass:
+                      expected?.position && +expected?.position <= 3
+                        ? true
+                        : false,
+                    '1st Result': sorted[0]?.url || '',
+                    '1st Position': sorted[0]?.position || 0,
+                    '2nd Result': sorted[1]?.url || '',
+                    '2nd Position': sorted[1]?.position || 0,
+                    '3rd Result': sorted[2]?.url || '',
+                    '3rd Position': sorted[2]?.position || 0,
+                    '4th Result': sorted[3]?.url || '',
+                    '4th Position': sorted[3]?.position || 0,
+                    '5th Result': sorted[4]?.url || '',
+                    '5th Position': sorted[4]?.position || 0,
+                    Date: startDate.format('YYYY-MM-DD'),
+                    'Total searches': foundClicks?.num_searches || 0,
+                    'Total clicks': foundClicks?.clicks || 0,
+                    'Target clicks': expectedUrlClicksSum || 0,
+                  },
+                };
+              }
+            );
+
+            await this.deleteSearchAssessment(lang);
+            await this.insertCurrentSearchAssessment(airtableInput, lang);
+          }
+
+          this.logger.log(`Upserting previous weeks data...`);
+          await this.archiveSearchAssessmentData(lang);
+
+          startDate = startDate.add(1, 'week');
+          endDate = endDate.add(1, 'week');
         }
 
-        this.logger.log(`Upserting previous weeks data...`);
-        await this.archiveSearchAssessmentData(lang);
-
-        startDate = startDate.add(1, 'week');
-        endDate = endDate.add(1, 'week');
-      }
-
-      if (!flag) {
-        this.logger.log(`No new records to update for ${lang}`);
+        if (!flag) {
+          this.logger.log(`No new records to update for ${lang}`);
+        }
+      } catch (error) {
+        this.logger.error(
+          `Error occurred in upsertPreviousSearchAssessment for ${lang}.`
+        );
+        this.logger.error(error);
       }
     }
   }
@@ -334,7 +349,8 @@ export class SearchAssessmentService {
               'Expected Result': expected?.url || '',
               'Expected Position':
                 Math.round(expected?.position as number) || 0,
-              Pass: expected?.position && +expected.position <= 3 ? true : false,
+              Pass:
+                expected?.position && +expected.position <= 3 ? true : false,
               '1st Result': sorted[0]?.url || '',
               '1st Position': sorted[0]?.position || 0,
               '2nd Result': sorted[1]?.url || '',
@@ -365,132 +381,148 @@ export class SearchAssessmentService {
 
   async getLatestSearchAssessment() {
     for (const lang of ['en', 'fr'] as ('en' | 'fr')[]) {
-      const records = (await this.getCurrentSearchAssessment(lang))
-        .sort((a, b) => b.fields.Date?.localeCompare(a.fields.Date || '') || 0);
-
-      const atStartDate = dayjs.utc(records[0]?.fields.Date);
-
-      const dbStartQuery = await this.db.collections.searchAssessment
-        .find({ lang: lang }, { date: 1 })
-        .sort({ date: -1 })
-        .limit(1)
-        .exec();
-
-      const dbStartDate = dayjs.utc(dbStartQuery[0]?.date).startOf('day');
-
-      const cutoffDate = dayjs
-        .utc()
-        .subtract(3, 'week')
-        .endOf('week')
-        .add(1, 'day')
-        .startOf('day');
-
-      const startDate = dbStartDate.add(1, 'week').startOf('week');
-      const endDate = dbStartDate.add(1, 'week').endOf('week').startOf('day');
-
-      const dateRangeFilter = {
-        date: {
-          $gte: new Date(startDate.format('YYYY-MM-DD')),
-          $lte: new Date(endDate.format('YYYY-MM-DD')),
-        },
-      };
-
-      this.logger.log(
-        `Getting latest search assessment for ${lang} from ${startDate} to ${endDate}`
-      );
-
-      let flag = 0;
-
-      if (atStartDate.isSameOrBefore(cutoffDate)) {
-        flag = 1;
-
-        const notInList: NotInList[] = [];
-
-        const dbOverallResults = await this.getTopSearchFromOverall(
-          lang,
-          dateRangeFilter
-        );
-        const dbRecords = await this.getTopSearchTermPages(
-          lang,
-          dateRangeFilter,
-          dbOverallResults
-        );
-        const expectedResultsMaster = await this.getExpectedResultsMaster(lang);
-        const expectedResultsMerged = await this.getExpectedResultsMerged(
-          dbRecords,
-          expectedResultsMaster
+      try {
+        const records = (await this.getCurrentSearchAssessment(lang)).sort(
+          (a, b) => b.fields.Date?.localeCompare(a.fields.Date || '') || 0
         );
 
-        const airtableInput = dbRecords.map(({ term, url_positions }) => {
-          const sorted = url_positions.sort((a, b) => a.position - b.position);
-          const expected = expectedResultsMerged.find((r) => r?.term === term);
-          const foundClicks = dbOverallResults.find((t) => t._id === term);
-          const expectedUrlClicks = dbRecords.find(
-            (result) => result.term === term
-          );
-          const expectedUrlClicksSum = expectedUrlClicks?.url_positions
-            .filter(
-              (url) =>
-                `https://${url.url}` ===
-                expectedResultsMerged.find(
-                  (item) => item?.term === expectedUrlClicks?.term
-                )?.url
-            )
-            .map((url) => url.clicks)
-            .reduce((a, b) => a + b, 0);
+        const atStartDate = dayjs.utc(records[0]?.fields.Date);
 
-          if (expected?.position === 0 && !expected?.url) {
-            notInList.push({
-              term,
-              url: sorted[0]?.url || '',
-            });
-          }
+        const dbStartQuery = await this.db.collections.searchAssessment
+          .find({ lang: lang }, { date: 1 })
+          .sort({ date: -1 })
+          .limit(1)
+          .exec();
 
-          return {
-            fields: {
-              Query: term,
-              'Expected Result': expected?.url || '',
-              'Expected Position':
-                Math.round(expected?.position as number) || 0,
-              Pass:
-                expected?.position &&
-                +expected.position <= 3 &&
-                expected?.position !== 0  ? true : false,
-              '1st Result': sorted[0]?.url || '',
-              '1st Position': sorted[0]?.position || 0,
-              '2nd Result': sorted[1]?.url || '',
-              '2nd Position': sorted[1]?.position || 0,
-              '3rd Result': sorted[2]?.url || '',
-              '3rd Position': sorted[2]?.position || 0,
-              '4th Result': sorted[3]?.url || '',
-              '4th Position': sorted[3]?.position || 0,
-              '5th Result': sorted[4]?.url || '',
-              '5th Position': sorted[4]?.position || 0,
-              Date: startDate.format('YYYY-MM-DD'),
-              'Total searches': foundClicks?.num_searches || 0,
-              'Total clicks': foundClicks?.clicks || 0,
-              'Target clicks': expectedUrlClicksSum || 0,
-            },
-          };
-        });
+        const dbStartDate = dayjs.utc(dbStartQuery[0]?.date).startOf('day');
 
-        await this.deleteSearchAssessment(lang);
-        await this.airtableClient.insertSearchAssessment(airtableInput, lang);
+        const cutoffDate = dayjs
+          .utc()
+          .subtract(3, 'week')
+          .endOf('week')
+          .add(1, 'day')
+          .startOf('day');
 
-        if (notInList.length !== 0) {
-          this.logger.log(
-            `Found ${notInList.length} terms not in the list for ${lang}; sending email to recipients...`
-          );
-          await this.email(
+        const startDate = dbStartDate.add(1, 'week').startOf('week');
+        const endDate = dbStartDate.add(1, 'week').endOf('week').startOf('day');
+
+        const dateRangeFilter = {
+          date: {
+            $gte: new Date(startDate.format('YYYY-MM-DD')),
+            $lte: new Date(endDate.format('YYYY-MM-DD')),
+          },
+        };
+
+        this.logger.log(
+          `Getting latest search assessment for ${lang} from ${startDate} to ${endDate}`
+        );
+
+        let flag = 0;
+
+        if (atStartDate.isSameOrBefore(cutoffDate)) {
+          flag = 1;
+
+          const notInList: NotInList[] = [];
+
+          const dbOverallResults = await this.getTopSearchFromOverall(
             lang,
-            notInList,
-            endDate.add(1, 'week').format('YYYY-MM-DD')
+            dateRangeFilter
           );
-        }
-      }
+          const dbRecords = await this.getTopSearchTermPages(
+            lang,
+            dateRangeFilter,
+            dbOverallResults
+          );
+          const expectedResultsMaster = await this.getExpectedResultsMaster(
+            lang
+          );
+          const expectedResultsMerged = await this.getExpectedResultsMerged(
+            dbRecords,
+            expectedResultsMaster
+          );
 
-      if (!flag) {
-        this.logger.log(`No new records to update for ${lang}`);
+          const airtableInput = dbRecords.map(({ term, url_positions }) => {
+            const sorted = url_positions.sort(
+              (a, b) => a.position - b.position
+            );
+            const expected = expectedResultsMerged.find(
+              (r) => r?.term === term
+            );
+            const foundClicks = dbOverallResults.find((t) => t._id === term);
+            const expectedUrlClicks = dbRecords.find(
+              (result) => result.term === term
+            );
+            const expectedUrlClicksSum = expectedUrlClicks?.url_positions
+              .filter(
+                (url) =>
+                  `https://${url.url}` ===
+                  expectedResultsMerged.find(
+                    (item) => item?.term === expectedUrlClicks?.term
+                  )?.url
+              )
+              .map((url) => url.clicks)
+              .reduce((a, b) => a + b, 0);
+
+            if (expected?.position === 0 && !expected?.url) {
+              notInList.push({
+                term,
+                url: sorted[0]?.url || '',
+              });
+            }
+
+            return {
+              fields: {
+                Query: term,
+                'Expected Result': expected?.url || '',
+                'Expected Position':
+                  Math.round(expected?.position as number) || 0,
+                Pass:
+                  expected?.position &&
+                  +expected.position <= 3 &&
+                  expected?.position !== 0
+                    ? true
+                    : false,
+                '1st Result': sorted[0]?.url || '',
+                '1st Position': sorted[0]?.position || 0,
+                '2nd Result': sorted[1]?.url || '',
+                '2nd Position': sorted[1]?.position || 0,
+                '3rd Result': sorted[2]?.url || '',
+                '3rd Position': sorted[2]?.position || 0,
+                '4th Result': sorted[3]?.url || '',
+                '4th Position': sorted[3]?.position || 0,
+                '5th Result': sorted[4]?.url || '',
+                '5th Position': sorted[4]?.position || 0,
+                Date: startDate.format('YYYY-MM-DD'),
+                'Total searches': foundClicks?.num_searches || 0,
+                'Total clicks': foundClicks?.clicks || 0,
+                'Target clicks': expectedUrlClicksSum || 0,
+              },
+            };
+          });
+
+          await this.deleteSearchAssessment(lang);
+          await this.airtableClient.insertSearchAssessment(airtableInput, lang);
+
+          if (notInList.length !== 0) {
+            this.logger.log(
+              `Found ${notInList.length} terms not in the list for ${lang}; sending email to recipients...`
+            );
+            await this.email(
+              lang,
+              notInList,
+              endDate.add(1, 'week').format('YYYY-MM-DD')
+            );
+          }
+        }
+
+        if (!flag) {
+          this.logger.log(`No new records to update for ${lang}`);
+        }
+      } catch (error) {
+        this.logger.error(
+          `Error occurred in getLatestSearchAssessment for ${lang}.`
+        );
+        this.logger.error(error);
       }
     }
   }
@@ -704,7 +736,7 @@ export class SearchAssessmentService {
           };
         });
       })
-      .flat() as { fields: { Id: string; Query: string; URL: string; }; }[];
+      .flat() as { fields: { Id: string; Query: string; URL: string } }[];
   }
 
   async archiveSearchAssessmentData(lang: Lang = 'en') {

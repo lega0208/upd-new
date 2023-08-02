@@ -82,9 +82,32 @@ export class DbUpdateService {
 
   async updateSAT() {
     this.logger.log('Starting search assessment...');
-    await this.searchAssessmentService.upsertPreviousSearchAssessment();
-    await this.searchAssessmentService.getLatestSearchAssessment();
-    this.logger.log('Search assessment successfully updated.');
+
+    await withRetry(
+      this.searchAssessmentService.upsertPreviousSearchAssessment.bind(
+        this.searchAssessmentService
+      ),
+      4,
+      1000
+    )().catch((err) =>
+      this.logger.error(
+        `Error storing the previous Search Assessment Tool\n${err.stack}`
+      )
+    );
+
+    await withRetry(
+      this.searchAssessmentService.getLatestSearchAssessment.bind(
+        this.searchAssessmentService
+      ),
+      4,
+      1000
+    )().catch((err) =>
+      this.logger.error(
+        `Error getting the latest Search Assessment Tool\n${err.stack}`
+      )
+    );
+
+    this.logger.log('Search assessment completed');
   }
 
   async updateActivityMap() {
