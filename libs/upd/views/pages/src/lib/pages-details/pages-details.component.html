@@ -17,7 +17,6 @@
 <!--</ng-template>-->
 <ng-template #elseBlock2>
   <h2 class="h3 pt-2 pb-2">Page: {{ title$ | async }}</h2>
-  <button [routerLink]="[altPageId]">Change</button>
   <ng-container *ngIf="showUrl"
     ><p class="page_url">{{ url$ | async }}</p></ng-container
   >

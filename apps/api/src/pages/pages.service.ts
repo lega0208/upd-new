@@ -229,35 +229,6 @@ export class PagesService {
       .sort({ date: -1 })
       .exec();
 
-    const language = page?.url.includes('/en/') ? 'fr' : 'en';
-
-    const alternateUrl = await this.urlModel
-      .aggregate()
-      .match({ page: new Types.ObjectId(params.id) })
-      .sort({ date: -1 })
-      .limit(1)
-      .project({
-        en: { $ifNull: ['$langHrefs.en', ''] },
-        fr: { $ifNull: ['$langHrefs.fr', ''] },
-      })
-      .exec();
-
-    let alternatePageId = '';
-
-    if (alternateUrl.length > 0) {
-      const { en, fr } = alternateUrl[0];
-      const urlToMatch = language === 'en' ? en : fr;
-
-      const alternatePage = await this.pageModel
-        .aggregate([
-          { $match: { url: urlToMatch } },
-          { $project: { id: '$_id' } },
-        ])
-        .exec();
-
-      alternatePageId = alternatePage[0]?.id || '';
-    }
-
     const results = {
       ...page,
       projects,
@@ -294,7 +265,6 @@ export class PagesService {
       searchTerms: await this.getTopSearchTerms(params),
       activityMap: await this.getActivityMapData(params),
       readability,
-      alternatePageId,
     } as PageDetailsData;
 
     await this.cacheManager.set(cacheKey, results);
