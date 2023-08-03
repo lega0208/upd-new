@@ -109,8 +109,16 @@ export class TasksDetailsFacade {
     map((data) => data?.dateRangeData?.visitsByPage)
   );
 
-  visitsByPageWithPercentChange$ = this.tasksDetailsData$.pipe(
-    mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits')
+  visitsByPageWithPercentChange$ = combineLatest([
+    this.tasksDetailsData$.pipe(mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits')),
+    this.currentLang$
+  ]).pipe(
+    map(([data, lang]) => data?.map((page) => {
+      const language = page.url.includes('/en/')
+        ? this.i18n.service.translate('English', lang)
+        : this.i18n.service.translate('French', lang);
+      return { ...page, language };
+    }))
   );
 
   visitsByPageGSCWithPercentChange$ = this.tasksDetailsData$.pipe(
