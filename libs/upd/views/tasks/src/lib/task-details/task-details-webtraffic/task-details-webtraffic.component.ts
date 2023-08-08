@@ -37,6 +37,10 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
           typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
         },
         {
+          field: 'language',
+          header: this.i18n.service.translate('Search term language', lang),
+        },
+        {
           field: 'url',
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
