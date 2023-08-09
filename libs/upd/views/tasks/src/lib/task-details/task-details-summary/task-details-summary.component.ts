@@ -6,6 +6,8 @@ import {
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
+import { createCategoryConfig } from '@dua-upd/upd/utils';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'upd-task-details-summary',
@@ -55,93 +57,109 @@ export class TaskDetailsSummaryComponent implements OnInit {
     successRate >= 0.8 ? 'pass' : 'fail';
 
   ngOnInit(): void {
-    this.currentLang$.subscribe((lang) => {
-      this.langLink = lang === EN_CA ? 'en' : 'fr';
+    combineLatest([this.visitsByPage$, this.currentLang$]).subscribe(
+      ([data, lang]) => {
+        this.langLink = lang === EN_CA ? 'en' : 'fr';
 
-      this.dyfChartLegend = [
-        this.i18n.service.translate('yes', lang),
-        this.i18n.service.translate('no', lang),
-      ];
+        this.dyfChartLegend = [
+          this.i18n.service.translate('yes', lang),
+          this.i18n.service.translate('no', lang),
+        ];
 
-      this.whatWasWrongChartLegend = [
-        this.i18n.service.translate('d3-cant-find-info', lang),
-        this.i18n.service.translate('d3-other', lang),
-        this.i18n.service.translate('d3-hard-to-understand', lang),
-        this.i18n.service.translate('d3-error', lang),
-      ];
+        this.whatWasWrongChartLegend = [
+          this.i18n.service.translate('d3-cant-find-info', lang),
+          this.i18n.service.translate('d3-other', lang),
+          this.i18n.service.translate('d3-hard-to-understand', lang),
+          this.i18n.service.translate('d3-error', lang),
+        ];
 
-      this.visitsByPageCols = [
-        {
-          field: 'title',
-          header: this.i18n.service.translate('page-title', lang),
-          type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
-        },
-        {
-          field: 'language',
-          header: this.i18n.service.translate('Search term language', lang),
-        },
-        {
-          field: 'url',
-          header: this.i18n.service.translate('URL', lang),
-          type: 'link',
-          typeParams: { link: 'url', external: true },
-        },
-        {
-          field: 'visits',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-        {
-          field: 'percentChange',
-          header: this.i18n.service.translate('%-change', lang),
-          pipe: 'percent',
-          type: 'comparison',
-        },
-      ];
+        this.visitsByPageCols = [
+          {
+            field: 'title',
+            header: this.i18n.service.translate('page-title', lang),
+            type: 'link',
+            typeParams: {
+              preLink: '/' + this.langLink + '/pages',
+              link: '_id',
+            },
+          },
+          {
+            field: 'language',
+            header: this.i18n.service.translate('Search term language', lang),
+            filterConfig: {
+              type: 'category',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'language',
+              }),
+            },
+          },
+          {
+            field: 'url',
+            header: this.i18n.service.translate('URL', lang),
+            type: 'link',
+            typeParams: { link: 'url', external: true },
+          },
+          {
+            field: 'visits',
+            header: this.i18n.service.translate('visits', lang),
+            pipe: 'number',
+          },
+          {
+            field: 'percentChange',
+            header: this.i18n.service.translate('%-change', lang),
+            pipe: 'percent',
+            type: 'comparison',
+          },
+        ];
 
-      this.taskSuccessByUxTestCols = [
-        {
-          field: 'title',
-          header: this.i18n.service.translate('ux-test', lang),
-        },
-        {
-          field: 'date',
-          header: this.i18n.service.translate('date', lang),
-          pipe: 'date',
-        },
-        {
-          field: 'test_type',
-          header: this.i18n.service.translate('test-type', lang),
-        },
-        {
-          field: 'success_rate',
-          header: this.i18n.service.translate('success-rate', lang),
-          pipe: 'percent',
-        },
-      ];
+        this.taskSuccessByUxTestCols = [
+          {
+            field: 'title',
+            header: this.i18n.service.translate('ux-test', lang),
+          },
+          {
+            field: 'date',
+            header: this.i18n.service.translate('date', lang),
+            pipe: 'date',
+          },
+          {
+            field: 'test_type',
+            header: this.i18n.service.translate('test-type', lang),
+          },
+          {
+            field: 'success_rate',
+            header: this.i18n.service.translate('success-rate', lang),
+            pipe: 'percent',
+          },
+        ];
 
-      this.dyfTableCols = [
-        {
-          field: 'name',
-          header: this.i18n.service.translate('Selection', lang),
-        },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-      ];
+        this.dyfTableCols = [
+          {
+            field: 'name',
+            header: this.i18n.service.translate('Selection', lang),
+          },
+          {
+            field: 'value',
+            header: this.i18n.service.translate('visits', lang),
+            pipe: 'number',
+          },
+        ];
 
-      this.whatWasWrongTableCols = [
-        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-      ];
-    });
+        this.whatWasWrongTableCols = [
+          {
+            field: 'name',
+            header: this.i18n.service.translate('d3-www', lang),
+          },
+          {
+            field: 'value',
+            header: this.i18n.service.translate('visits', lang),
+            pipe: 'number',
+          },
+        ];
+      }
+    );
   }
 
   constructor(
