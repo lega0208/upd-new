@@ -12,6 +12,7 @@ export class DataTableCardComponent<T> {
   @Input() sort = true;
   @Input() pagination = true;
   @Input() filter = true;
+  @Input() filterTree = false;
   @Input() cols: ColumnConfig[] = [];
   @Input() searchFields: string[] = [];
   @Input() captionTitle = '';
