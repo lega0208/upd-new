@@ -5,6 +5,7 @@ import { CallDriver, CallDriverDocument } from '@dua-upd/db';
 import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import chalk from 'chalk';
+import { Retry } from '@dua-upd/utils-common';
 
 @Injectable()
 export class CalldriversService {
@@ -15,6 +16,7 @@ export class CalldriversService {
     private calldriverModel: Model<CallDriverDocument>
   ) {}
 
+  @Retry(4, 1000)
   async updateCalldrivers(endDate?: DateType) {
     this.logger.log('Updating calldrivers...');
 

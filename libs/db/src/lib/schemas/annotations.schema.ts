@@ -36,13 +36,13 @@ export class Annotations implements IAnnotations {
   @Prop({ type: Date, required: true, index: true })
   event_date: Date;
 
-  @Prop({ type: String })
+  @Prop({ type: [String] })
   data_affected?: AnnotationsDataAffectedType[] = [];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }] })
   tasks_affected?: Types.ObjectId[] | Task[];
 
-  @Prop({ type: String })
+  @Prop({ type: [String] })
   audience?: AnnotationsAudienceType[] = [];
 
   @Prop({ type: Date })
