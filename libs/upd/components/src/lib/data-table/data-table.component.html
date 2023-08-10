@@ -52,8 +52,7 @@
             id="data-table-{{ id }}"
             *ngIf="exports"
             [cols]="exportCols"
-            [data]="data || []"
-            [filters]="dt.filters"
+            [data]="dt.filteredValue || []"
           ></upd-data-table-exports>
         </div>
       </div>
