@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Types } from 'mongoose';
 import { IAnnotations } from '@dua-upd/types-common';
-import {
+import type {
   AnnotationsAudienceType,
   AnnotationsDataAffectedType,
   AnnotationsEventType,

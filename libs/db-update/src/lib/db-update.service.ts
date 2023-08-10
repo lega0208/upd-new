@@ -11,7 +11,6 @@ import type {
   PagesListDocument,
 } from '@dua-upd/db';
 import {
-  DateType,
   SearchAnalyticsClient,
   SearchAssessmentService,
 } from '@dua-upd/external-data';
@@ -34,6 +33,7 @@ import { ActivityMapService } from './activity-map/activity-map.service';
 import { UrlsService } from './urls/urls.service';
 import dayjs from 'dayjs';
 import { AnnotationsService } from './airtable/annotations.service';
+import type { DateType } from '@dua-upd/external-data';
 
 @Injectable()
 export class DbUpdateService {
