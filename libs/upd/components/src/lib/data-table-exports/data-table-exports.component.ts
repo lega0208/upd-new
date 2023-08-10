@@ -8,6 +8,7 @@ import { ColumnConfig } from '../data-table-styles/types';
 import { DropdownOption } from '../dropdown/dropdown.component';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ProjectStatus } from '@dua-upd/types-common';
+import { FilterMetadata } from 'primeng/api';
 
 @Component({
   selector: 'upd-data-table-exports',
@@ -47,6 +48,9 @@ export class DataTableExportsComponent<T> {
   @Input() id!: string;
   @Input() data: T[] = [];
   @Input() cols: ColumnConfig<T>[] = [];
+  @Input() filters: {
+    [s: string]: FilterMetadata | FilterMetadata[] | undefined;
+  } = {};
 
   constructor(config: NgbPopoverConfig, private i18n: I18nFacade) {
     config.placement = 'right';
@@ -56,6 +60,89 @@ export class DataTableExportsComponent<T> {
   async getFormattedExportData(replaceKeysWithHeaders = false) {
     const currentLang = this.i18n.service.currentLang;
     const cops = this.i18n.service.translate('COPS', currentLang);
+
+    let globalFilterValue = '';
+
+    const globalFilterString = this.filters['global'];
+    if (globalFilterString) {
+      globalFilterValue = Array.isArray(globalFilterString)
+        ? globalFilterString[0].value
+        : globalFilterString.value;
+    }
+
+    let filteredData = this.data;
+
+    if (globalFilterValue) {
+      filteredData = this.data.filter((row: T) => {
+        return Object.entries(row as keyof T).some(
+          ([key, value]: [string, unknown]) => {
+            if (
+              key === '_id' ||
+              key === 'id' ||
+              value === null ||
+              value === undefined
+            )
+              return false;
+
+            const valueIncludesGlobalSearchTerm = (val: unknown): boolean => {
+              if (typeof val === 'string') {
+                return val.toLowerCase().includes(globalFilterValue);
+              } else if (typeof val === 'number' || typeof val === 'boolean') {
+                return val.toString().includes(globalFilterValue);
+              } else if (val instanceof Date) {
+                return val.toISOString().includes(globalFilterValue);
+              } else if (Array.isArray(val)) {
+                return val.some((element) =>
+                  valueIncludesGlobalSearchTerm(element)
+                );
+              } else {
+                return false;
+              }
+            };
+
+            return valueIncludesGlobalSearchTerm(value);
+          }
+        );
+      });
+    }
+
+    const specificFilteredData = filteredData.filter((row: T) => {
+      return Object.entries(row as keyof T).every(
+        ([key, value]: [string, unknown]) => {
+          const filterData = this.filters[key];
+          if (!filterData) return true;
+
+          const specificFilters: FilterMetadata[] = Array.isArray(filterData)
+            ? filterData
+            : [filterData];
+          if (!specificFilters.length) return true;
+
+          return specificFilters.some((filter) => {
+            if (filter.value === null) return true;
+            if (filter.matchMode === 'in' && Array.isArray(filter.value)) {
+              return new Set(filter.value).has(value as string);
+            } else if (
+              filter.matchMode === 'arrayFilter' &&
+              Array.isArray(filter.value) &&
+              Array.isArray(value)
+            ) {
+              const valueSet = new Set(value);
+              return filter.value.some((element) => valueSet.has(element));
+            } else if (
+              filter.matchMode === 'contains' &&
+              typeof value === 'boolean'
+            ) {
+              return filter.value === value;
+            }
+            return false;
+          });
+        }
+      );
+    });
+
+    if (specificFilteredData.length === 0) {
+      specificFilteredData.push({} as T);
+    }
 
     const projectStatusKeys: ProjectStatus[] = [
       'Unknown',
@@ -73,7 +160,7 @@ export class DataTableExportsComponent<T> {
       projectStatusKeys
     )) as Record<string, string>;
 
-    return this.data.map((row) =>
+    return specificFilteredData.map((row) =>
       this.cols.reduce((formattedRow, col) => {
         const colKey = replaceKeysWithHeaders ? col.header : col.field;
 
@@ -126,7 +213,7 @@ export class DataTableExportsComponent<T> {
 
       // UTF-8 Byte-order mark (so that Excel knows to use UTF-8)
       // https://en.wikipedia.org/wiki/Byte_order_mark#Byte_order_marks_by_encoding
-      const BOM = Uint8Array.from([0xEF, 0xBB, 0xBF]);
+      const BOM = Uint8Array.from([0xef, 0xbb, 0xbf]);
 
       const encodedCsv = this.utf8Encoder.encode(csvOutput);
 
