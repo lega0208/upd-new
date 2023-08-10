@@ -11,7 +11,7 @@ import { Overall, OverallDocument } from '@dua-upd/db';
 import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { today } from '@dua-upd/utils-common';
+import { Retry, today } from '@dua-upd/utils-common';
 import { assemblePipeline, PipelineConfig } from '../pipelines';
 
 dayjs.extend(utc);
@@ -30,6 +30,7 @@ export class OverallMetricsService {
     private overallMetricsModel: Model<OverallDocument>
   ) {}
 
+  @Retry(4, 1000)
   async updateOverallMetrics() {
     // get dates required for query
     const latestDateResults = await this.overallMetricsModel

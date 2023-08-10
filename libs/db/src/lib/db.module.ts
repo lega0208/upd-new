@@ -33,6 +33,8 @@ import {
   UrlSchema,
   Readability,
   ReadabilitySchema,
+  Annotations,
+  AnnotationsSchema,
 } from './db.schemas';
 import { PageVisitsViewSchema, PageVisitsView } from './db.views';
 
@@ -54,6 +56,7 @@ export const models = {
   aaItemIds: { model: AAItemId, schema: AAItemIdSchema },
   urls: { model: Url, schema: UrlSchema },
   readability: { model: Readability, schema: ReadabilitySchema },
+  annotations: { model: Annotations, schema: AnnotationsSchema },
 } as const;
 
 export const views = {

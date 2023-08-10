@@ -377,7 +377,7 @@ export class AirtableClient {
         description_fr: squishTrim(fields['Description FR']),
         event_date: dayjs.utc(fields['Event Date']).toDate(),
         data_affected: fields['Data affected']?.map(squishTrim),
-        tasks_affected: fields['Tasks affected']?.map(squishTrim),
+        tasks_affected: fields['Task Ids']?.map(squishTrim),
         audience: fields['Audience']?.map(squishTrim),
         date_entered:
           fields['Date entered'] && dayjs.utc(fields['Date entered']).toDate(),

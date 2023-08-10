@@ -21,6 +21,7 @@ import { InternalSearchTermsService } from './internal-search/search-terms.servi
 import { ActivityMapService } from './activity-map/activity-map.service';
 import { UrlsService } from './urls/urls.service';
 import { ReadabilityService } from './readability/readability.service';
+import { AnnotationsService } from './airtable/annotations.service';
 
 const date = dayjs().format('YYYY-MM-DD');
 const month = dayjs().format('YYYY-MM');
@@ -64,6 +65,7 @@ export class DbUpdateModule {
         PagesListService,
         SearchAssessmentService,
         UrlsService,
+        AnnotationsService,
         {
           provide: AirtableClient.name,
           useValue: new AirtableClient(),
@@ -92,6 +94,7 @@ export class DbUpdateModule {
         ReadabilityService,
         SearchAssessmentService,
         UrlsService,
+        AnnotationsService,
       ],
     };
   }
