@@ -4,6 +4,8 @@ import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 import { EN_CA } from '@dua-upd/upd/i18n';
+import { createCategoryConfig } from '@dua-upd/upd/utils';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'upd-project-details-webtraffic',
@@ -26,14 +28,30 @@ export class ProjectDetailsWebtrafficComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
-    this.currentLang$.subscribe((lang) => {
-      this.langLink = lang === EN_CA ? 'en' : 'fr';
+    combineLatest([this.visitsByPage$, this.currentLang$]).subscribe(
+      ([data, lang]) => {
+        this.langLink = lang === EN_CA ? 'en' : 'fr';
         this.visitsByPageCols = [
           {
             field: 'title',
             header: this.i18n.service.translate('page-title', lang),
             type: 'link',
-            typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
+            typeParams: {
+              preLink: '/' + this.langLink + '/pages',
+              link: '_id',
+            },
+          },
+          {
+            field: 'language',
+            header: this.i18n.service.translate('Search term language', lang),
+            filterConfig: {
+              type: 'category',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'language',
+              }),
+            },
           },
           {
             field: 'url',
@@ -41,15 +59,20 @@ export class ProjectDetailsWebtrafficComponent implements OnInit {
             type: 'link',
             typeParams: { link: 'url', external: true },
           },
-          { field: 'visits', header: this.i18n.service.translate('visits', lang), pipe: 'number' },
+          {
+            field: 'visits',
+            header: this.i18n.service.translate('visits', lang),
+            pipe: 'number',
+          },
           {
             field: 'percentChange',
             header: this.i18n.service.translate('comparison', lang),
             type: 'comparison',
             pipe: 'percent',
-          }
+          },
         ];
-    });
+      }
+    );
   }
 
   constructor(

@@ -44,7 +44,9 @@ export class ProjectsDetailsFacade {
     ProjectsDetailsSelectors.selectProjectsDetailsLoaded
   );
 
-  loading$ = this.store.select(ProjectsDetailsSelectors.selectProjectsDetailsLoading);
+  loading$ = this.store.select(
+    ProjectsDetailsSelectors.selectProjectsDetailsLoading
+  );
 
   projectsDetailsData$ = this.store.select(
     ProjectsDetailsSelectors.selectProjectsDetailsData
@@ -111,8 +113,22 @@ export class ProjectsDetailsFacade {
     map((data) => data?.dateRangeData?.visitsByPage)
   );
 
-  visitsByPageWithPercentChange$ = this.projectsDetailsData$.pipe(
-    mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits')
+  visitsByPageWithPercentChange$ = combineLatest([
+    this.projectsDetailsData$.pipe(
+      mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits')
+    ),
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const visitsByPage = data?.map((page) => {
+        const language = page.url.includes('/en/')
+          ? this.i18n.service.translate('English', lang)
+          : this.i18n.service.translate('French', lang);
+        return { ...page, language };
+      });
+
+      return [...(visitsByPage || [])];
+    })
   );
 
   visitsByPageGSCWithPercentChange$ = this.projectsDetailsData$.pipe(
@@ -892,7 +908,9 @@ export class ProjectsDetailsFacade {
     )
   );
 
-  error$ = this.store.select(ProjectsDetailsSelectors.selectProjectsDetailsError);
+  error$ = this.store.select(
+    ProjectsDetailsSelectors.selectProjectsDetailsError
+  );
 
   constructor(private readonly store: Store, private i18n: I18nFacade) {}
 

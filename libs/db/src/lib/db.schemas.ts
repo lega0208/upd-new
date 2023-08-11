@@ -12,3 +12,4 @@ export * from './schemas/aa_item_ids.schema';
 export * from './schemas/page-metrics-ts.schema';
 export * from './schemas/url.schema';
 export * from './schemas/readability.schema';
+export * from './schemas/annotations.schema';

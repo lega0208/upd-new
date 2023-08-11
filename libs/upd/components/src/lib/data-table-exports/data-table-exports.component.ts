@@ -126,7 +126,7 @@ export class DataTableExportsComponent<T> {
 
       // UTF-8 Byte-order mark (so that Excel knows to use UTF-8)
       // https://en.wikipedia.org/wiki/Byte_order_mark#Byte_order_marks_by_encoding
-      const BOM = Uint8Array.from([0xEF, 0xBB, 0xBF]);
+      const BOM = Uint8Array.from([0xef, 0xbb, 0xbf]);
 
       const encodedCsv = this.utf8Encoder.encode(csvOutput);
 

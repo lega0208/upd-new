@@ -110,15 +110,21 @@ export class TasksDetailsFacade {
   );
 
   visitsByPageWithPercentChange$ = combineLatest([
-    this.tasksDetailsData$.pipe(mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits')),
-    this.currentLang$
+    this.tasksDetailsData$.pipe(
+      mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits')
+    ),
+    this.currentLang$,
   ]).pipe(
-    map(([data, lang]) => data?.map((page) => {
-      const language = page.url.includes('/en/')
-        ? this.i18n.service.translate('English', lang)
-        : this.i18n.service.translate('French', lang);
-      return { ...page, language };
-    }))
+    map(([data, lang]) => {
+      const visitsByPage = data?.map((page) => {
+        const language = page.url.includes('/en/')
+          ? this.i18n.service.translate('English', lang)
+          : this.i18n.service.translate('French', lang);
+        return { ...page, language };
+      });
+
+      return [...(visitsByPage || [])];
+    })
   );
 
   visitsByPageGSCWithPercentChange$ = this.tasksDetailsData$.pipe(
