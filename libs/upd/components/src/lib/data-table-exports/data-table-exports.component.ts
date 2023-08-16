@@ -46,7 +46,6 @@ export class DataTableExportsComponent<T> {
 
   @Input() id!: string;
   @Input() data: T[] = [];
-  @Input() filteredData: T[] = [];
   @Input() cols: ColumnConfig<T>[] = [];
 
   constructor(config: NgbPopoverConfig, private i18n: I18nFacade) {
@@ -55,8 +54,6 @@ export class DataTableExportsComponent<T> {
   }
 
   async getFormattedExportData(replaceKeysWithHeaders = false) {
-    const data = this.filteredData.length ? this.filteredData : this.data;
-
     const currentLang = this.i18n.service.currentLang;
     const cops = this.i18n.service.translate('COPS', currentLang);
 
@@ -76,7 +73,7 @@ export class DataTableExportsComponent<T> {
       projectStatusKeys
     )) as Record<string, string>;
 
-    return data.map((row) =>
+    return this.data.map((row) =>
       this.cols.reduce((formattedRow, col) => {
         const colKey = replaceKeysWithHeaders ? col.header : col.field;
 
@@ -113,8 +110,7 @@ export class DataTableExportsComponent<T> {
   }
 
   async exportCsv() {
-    const data = this.filteredData.length ? this.filteredData : this.data;
-    if (data.length) {
+    if (this.data.length) {
       const data = await this.getFormattedExportData(true);
 
       const headerRow = Object.keys(data[0]).map(
@@ -178,10 +174,9 @@ export class DataTableExportsComponent<T> {
 
   async exportExcel() {
     const xlsx = await import('xlsx');
-    const data = this.filteredData.length ? this.filteredData : this.data;
 
     try {
-      if (data && data.length > 0) {
+      if (this.data && this.data.length > 0) {
         // Create a new object using only data used in the table and
         // replacing the keys with the appropriate headers
 
