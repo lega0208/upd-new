@@ -45,18 +45,18 @@ export class SearchAssessmentService {
       `Sending email to ${emails.length} recipients for ${lang}...`
     );
 
-    // for (const email of emails) {
-    //   await client.sendEmail(templateId, email, {
-    //     personalisation: {
-    //       first_name: 'DUA',
-    //       number: `**${notInList.length}**`,
-    //       bulleted_list: notInList.map(
-    //         (d) => `**${d.term}** : https://${d.url}`
-    //       ),
-    //       date: date,
-    //     },
-    //   });
-    // }
+    for (const email of emails) {
+      await client.sendEmail(templateId, email, {
+        personalisation: {
+          first_name: 'DUA',
+          number: `**${notInList.length}**`,
+          bulleted_list: notInList.map(
+            (d) => `**${d.term}** : https://${d.url}`
+          ),
+          date: date,
+        },
+      });
+    }
   }
 
   async upsertPreviousSearchAssessment() {
