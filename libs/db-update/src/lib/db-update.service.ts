@@ -11,14 +11,13 @@ import type {
   PagesListDocument,
 } from '@dua-upd/db';
 import {
-  DateType,
   SearchAnalyticsClient,
   SearchAssessmentService,
-  withRetry,
 } from '@dua-upd/external-data';
 import { BlobLogger } from '@dua-upd/logger';
 import {
   AsyncLogTiming,
+  Retry,
   dateRangeConfigs,
   prettyJson,
   wait,
@@ -33,6 +32,8 @@ import { InternalSearchTermsService } from './internal-search/search-terms.servi
 import { ActivityMapService } from './activity-map/activity-map.service';
 import { UrlsService } from './urls/urls.service';
 import dayjs from 'dayjs';
+import { AnnotationsService } from './airtable/annotations.service';
+import type { DateType } from '@dua-upd/external-data';
 
 @Injectable()
 export class DbUpdateService {
@@ -46,6 +47,7 @@ export class DbUpdateService {
     private airtableService: AirtableService,
     private calldriversService: CalldriversService,
     private feedbackService: FeedbackService,
+    private annotationsService: AnnotationsService,
     private overallMetricsService: OverallMetricsService,
     private pagesService: PageUpdateService,
     private pageMetricsService: PageMetricsService,
@@ -131,49 +133,48 @@ export class DbUpdateService {
       this.logger.log('Published Pages list successfully updated');
 
       await Promise.allSettled([
-        withRetry(
-          this.overallMetricsService.updateOverallMetrics.bind(
-            this.overallMetricsService
+        this.overallMetricsService
+          .updateOverallMetrics()
+          .catch((err) =>
+            this.logger.error(`Error updating overall metrics\n${err.stack}`)
           ),
-          4,
-          1000
-        )().catch((err) =>
-          this.logger.error(`Error updating overall metrics\n${err.stack}`)
-        ),
-        withRetry(this.updateUxData.bind(this), 4, 1000)().catch((err) =>
+        this.updateUxData().catch((err) =>
           this.logger.error(`Error updating UX data\n${err.stack}`)
         ),
       ]);
 
-      await withRetry(this.updateFeedback.bind(this), 4, 1000)().catch((err) =>
+      await this.updateFeedback().catch((err) =>
         this.logger.error(`Error updating Feedback data\n${err.stack}`)
       );
 
       await Promise.allSettled([
-        withRetry(
-          this.calldriversService.updateCalldrivers.bind(
-            this.calldriversService
+        this.calldriversService
+          .updateCalldrivers()
+          .catch((err) =>
+            this.logger.error(`Error updating Calldrivers data\n${err.stack}`)
           ),
-          4,
-          1000
-        )().catch((err) =>
-          this.logger.error(`Error updating Calldrivers data\n${err.stack}`)
-        ),
       ]);
 
       await this.pagesService.consolidateDuplicatePages();
 
-      await this.internalSearchService
-        .upsertOverallSearchTerms()
-        .catch((err) => this.logger.error(err.stack));
+      await Promise.allSettled([
+        this.internalSearchService
+          .upsertOverallSearchTerms()
+          .catch((err) => this.logger.error(err.stack)),
+        this.annotationsService
+          .updateAnnotations()
+          .catch((err) =>
+            this.logger.error(`Error updating Annotations data\n${err.stack}`)
+          ),
+      ]);
 
       await Promise.allSettled([
-        await this.pageMetricsService
+        this.pageMetricsService
           .updatePageMetrics()
           .catch((err) =>
             this.logger.error(`Error updating Page metrics data\n${err.stack}`)
           ),
-        await this.airtableService.uploadProjectAttachmentsAndUpdateUrls(),
+        this.airtableService.uploadProjectAttachmentsAndUpdateUrls(),
       ]);
 
       await this.internalSearchService
@@ -277,6 +278,7 @@ export class DbUpdateService {
     );
   }
 
+  @Retry(4, 1000)
   async updateUxData() {
     return this.airtableService.updateUxData();
   }
@@ -285,6 +287,7 @@ export class DbUpdateService {
     return this.calldriversService.updateCalldrivers(endDate);
   }
 
+  @Retry(4, 1000)
   async updateFeedback(endDate?: DateType) {
     return this.feedbackService.updateFeedbackData(endDate);
   }

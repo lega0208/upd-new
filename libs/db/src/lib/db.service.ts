@@ -17,6 +17,7 @@ import {
   Readability,
   PageMetricsTS,
   Url,
+  Annotations,
   type PageMetricsModel,
   type ReadabilityModel,
   type UrlModel,
@@ -54,6 +55,7 @@ export class DbService {
     searchAssessment: this.searchAssessment,
     urls: this.urls,
     readability: this.readability,
+    annotations: this.annotations,
   } as const;
 
   readonly views = {
@@ -90,6 +92,8 @@ export class DbService {
     private searchAssessment: Model<SearchAssessment>,
     @InjectModel(Readability.name, 'defaultConnection')
     private readability: ReadabilityModel,
+    @InjectModel(Annotations.name, 'defaultConnection')
+    private annotations: Model<Annotations>,
     @InjectModel(PageVisitsView.name, 'defaultConnection')
     private pageVisits: Model<PageVisits>,
     @InjectModel(Url.name, 'defaultConnection')

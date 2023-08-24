@@ -7,13 +7,16 @@
   <ng-template #elseBlock>
     <upd-data-table
       [filter]="filter"
+      [filterTree]="filterTree"
       [sort]="sort"
       [pagination]="pagination"
       [data]="data"
       [cols]="cols"
       [captionTitle]="captionTitle"
       [kpi]="kpi"
-      [searchFields]="searchFields.length > 0 ? searchFields : defaultSearchFields"
+      [searchFields]="
+        searchFields.length > 0 ? searchFields : defaultSearchFields
+      "
       [sortField]="sortField"
       [sortOrder]="sortOrder"
       [loading]="loading"

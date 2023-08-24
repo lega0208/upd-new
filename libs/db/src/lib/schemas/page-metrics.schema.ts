@@ -257,6 +257,23 @@ PageMetricsSchema.index(
   { url: 1, ux_tests: 1 },
   { background: true, partialFilterExpression: { ux_tests: { $exists: true } } }
 );
+// This index is specifically for maintaining references when updating airtable data.
+// It's a partial index that includes only documents with tasks/projects/ux_tests arrays that aren't empty,
+//  which makes it much faster when querying for them (and might even help for regular data fetching)
+PageMetricsSchema.index(
+  { date: 1 },
+  {
+    name: 'date_airtable',
+    background: true,
+    partialFilterExpression: {
+      $or: [
+        { 'tasks.0': { $exists: true } },
+        { 'projects.0': { $exists: true } },
+        { 'ux_tests.0': { $exists: true } },
+      ],
+    },
+  }
+);
 
 export function getPageMetricsModel() {
   return model(PageMetrics.name, PageMetricsSchema);

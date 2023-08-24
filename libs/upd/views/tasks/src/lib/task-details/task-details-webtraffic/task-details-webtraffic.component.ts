@@ -4,6 +4,8 @@ import { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 import { EN_CA } from '@dua-upd/upd/i18n';
+import { combineLatest } from 'rxjs';
+import { createCategoryConfig } from '@dua-upd/upd/utils';
 
 @Component({
   selector: 'upd-task-details-webtraffic',
@@ -27,25 +29,51 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
       this.currentLang = lang as LocaleId;
     });
 
-    this.currentLang$.subscribe((lang) => {
-      this.langLink = lang === EN_CA ? 'en' : 'fr';
-      this.visitsByPageCols = [
-        {
-          field: 'title',
-          header: this.i18n.service.translate('page-title', lang),
-          type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
-        },
-        {
-          field: 'url',
-          header: this.i18n.service.translate('URL', lang),
-          type: 'link',
-          typeParams: { link: 'url', external: true },
-        },
-        { field: 'visits', header: this.i18n.service.translate('visits', lang), pipe: 'number' },
-        { field: 'percentChange', header: this.i18n.service.translate('%-change', lang), pipe: 'percent', type: 'comparison' },
-      ];
-    });
+    combineLatest([this.visitsByPage$, this.currentLang$]).subscribe(
+      ([data, lang]) => {
+        this.langLink = lang === EN_CA ? 'en' : 'fr';
+        this.visitsByPageCols = [
+          {
+            field: 'title',
+            header: this.i18n.service.translate('page-title', lang),
+            type: 'link',
+            typeParams: {
+              preLink: '/' + this.langLink + '/pages',
+              link: '_id',
+            },
+          },
+          {
+            field: 'language',
+            header: this.i18n.service.translate('Search term language', lang),
+            filterConfig: {
+              type: 'category',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'language',
+              }),
+            },
+          },
+          {
+            field: 'url',
+            header: this.i18n.service.translate('URL', lang),
+            type: 'link',
+            typeParams: { link: 'url', external: true },
+          },
+          {
+            field: 'visits',
+            header: this.i18n.service.translate('visits', lang),
+            pipe: 'number',
+          },
+          {
+            field: 'percentChange',
+            header: this.i18n.service.translate('%-change', lang),
+            pipe: 'percent',
+            type: 'comparison',
+          },
+        ];
+      }
+    );
   }
 
   constructor(

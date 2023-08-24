@@ -333,16 +333,27 @@ export class ProjectsService {
 
     const projectId = new Types.ObjectId(params.id);
 
+    console.time('findById');
     const projectDoc = await this.projectsModel.findById(projectId);
+    console.timeEnd('findById');
 
     if (projectDoc === null) {
       return;
     }
 
+    console.time('getUniqueProjectUrls');
     const projectUrls = await getUniqueProjectUrls(projectDoc);
+    console.timeEnd('getUniqueProjectUrls');
 
+    console.time('populate');
     const populatedProjectDoc = (await this.projectsModel
-      .findById(projectId, { title: 1, tasks: 1, ux_tests: 1, attachments: 1 })
+      .findById(projectId, {
+        title: 1,
+        description: 1,
+        tasks: 1,
+        ux_tests: 1,
+        attachments: 1,
+      })
       .populate([
         {
           path: 'tasks',
@@ -358,17 +369,22 @@ export class ProjectsService {
         },
       ])
       .exec()) as Project;
+    console.timeEnd('populate');
 
     const title = populatedProjectDoc.title;
 
+    console.time('getProjectStatus');
     const status = getProjectStatus(
       (populatedProjectDoc.ux_tests as UxTest[])
         .filter((test) => !(test instanceof Types.ObjectId))
         .map((test) => test.status as ProjectStatus)
     );
+    console.timeEnd('getProjectStatus');
 
     const description = populatedProjectDoc.description;
+    console.log(description);
 
+    console.time('uxTests');
     const uxTests = populatedProjectDoc.ux_tests.map((uxTest) => {
       uxTest = uxTest._doc;
 
@@ -390,11 +406,17 @@ export class ProjectsService {
       };
     }) as (Partial<UxTest> & { tasks: string })[];
 
+    console.timeEnd('uxTests');
+
+    console.time('getLatestTest');
     const lastTest = getLatestTest(uxTests);
+    console.timeEnd('getLatestTest');
 
     const dateFromLastTest: Date | null = lastTest?.date || null;
 
+    console.time('getLatestTestData');
     const { percentChange, avgTestSuccess } = getLatestTestData(uxTests);
+    console.timeEnd('getLatestTestData');
 
     const tasks = populatedProjectDoc.tasks as Task[];
 
@@ -404,28 +426,48 @@ export class ProjectsService {
       ?.launch_date.toISOString();
     const members = uxTests.find((uxTest) => uxTest.project_lead)?.project_lead;
 
+    console.time('dateRangeData');
+    const dateRangeData = await getAggregatedProjectMetrics(
+      this.pageMetricsModel,
+      this.feedbackModel,
+      this.calldriversModel,
+      this.projectsModel,
+      new Types.ObjectId(params.id),
+      params.dateRange,
+      projectUrls
+    );
+    console.timeEnd('dateRangeData');
+
+    console.time('comparisonDateRangeData');
+    const comparisonDateRangeData = await getAggregatedProjectMetrics(
+      this.pageMetricsModel,
+      this.feedbackModel,
+      this.calldriversModel,
+      this.projectsModel,
+      new Types.ObjectId(params.id),
+      params.comparisonDateRange,
+      projectUrls
+    );
+    console.timeEnd('comparisonDateRangeData');
+
+    console.time('getProjectFeedbackComments');
+    const feedbackComments = await getProjectFeedbackComments(
+      params.dateRange,
+      projectUrls,
+      this.feedbackModel
+    );
+    console.timeEnd('getProjectFeedbackComments');
+
+    console.time('getTopSearchTerms');
+    const searchTerms = await this.getTopSearchTerms(params);
+    console.timeEnd('getTopSearchTerms');
+
     const results = {
       _id: populatedProjectDoc._id.toString(),
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
-      dateRangeData: await getAggregatedProjectMetrics(
-        this.pageMetricsModel,
-        this.feedbackModel,
-        this.calldriversModel,
-        this.projectsModel,
-        new Types.ObjectId(params.id),
-        params.dateRange,
-        projectUrls
-      ),
-      comparisonDateRangeData: await getAggregatedProjectMetrics(
-        this.pageMetricsModel,
-        this.feedbackModel,
-        this.calldriversModel,
-        this.projectsModel,
-        new Types.ObjectId(params.id),
-        params.comparisonDateRange,
-        projectUrls
-      ),
+      dateRangeData,
+      comparisonDateRangeData,
       title,
       status,
       description,
@@ -437,14 +479,10 @@ export class ProjectsService {
       dateFromLastTest,
       taskSuccessByUxTest: uxTests,
       tasks,
-      feedbackComments: await getProjectFeedbackComments(
-        params.dateRange,
-        projectUrls,
-        this.feedbackModel
-      ),
-      searchTerms: await this.getTopSearchTerms(params),
+      feedbackComments,
+      searchTerms,
       attachments: populatedProjectDoc.attachments.map((attachment) => {
-        attachment.storage_url = attachment.storage_url.replace(
+        attachment.storage_url = attachment.storage_url?.replace(
           /^https:\/\//,
           ''
         );
@@ -560,11 +598,14 @@ async function getAggregatedProjectMetrics(
 ): Promise<ProjectDetailsAggregatedData> {
   const [startDate, endDate] = dateRangeSplit(dateRange);
 
+  console.time('feedbackByTags');
   const feedbackByTags = await feedbackModel.getCommentsByTag(
     dateRange,
     projectUrls
   );
+  console.timeEnd('feedbackByTags');
 
+  console.time('projectMetrics');
   const projectMetrics = (
     await pageMetricsModel
       .aggregate<ProjectDetailsAggregatedData>()
@@ -637,15 +678,19 @@ async function getAggregatedProjectMetrics(
       .project({ _id: 0 })
       .exec()
   )[0];
+  console.timeEnd('projectMetrics');
 
-  const project = await projectModel.findById(id).populate<{ tasks: Task[] }>('tasks');
-  const tasks = (project?.tasks || []);
+  const project = await projectModel
+    .findById(id)
+    .populate<{ tasks: Task[] }>('tasks');
+  const tasks = project?.tasks || [];
 
   const tpcIds = tasks
     .filter((task: Types.ObjectId | Task) => 'tpc_ids' in task)
     .map((task: Task) => task.tpc_ids)
     .flat();
 
+  console.time('calldriverDocs');
   const calldriverDocs = await calldriversModel
     .find(
       {
@@ -656,20 +701,25 @@ async function getAggregatedProjectMetrics(
     )
     .lean()
     .exec();
+  console.timeEnd('calldriverDocs');
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 
+  console.time('calldriversEnquiry');
   const calldriversEnquiry =
     await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
 
   const callsByTopic = await calldriversModel.getCallsByTopicFromIds(
     documentIds
   );
+  console.timeEnd('calldriversEnquiry');
 
+  console.time('callsByTasks');
   const callsByTasks = await calldriversModel.getCallsByTpcId(
     dateRange,
     tpcIds
   );
+  console.timeEnd('callsByTasks');
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
