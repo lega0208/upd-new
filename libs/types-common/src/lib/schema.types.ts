@@ -13,8 +13,10 @@ export interface IAAItemId {
   _id: Types.ObjectId;
   type: AAItemIdTypes;
   page?: Types.ObjectId;
+  pages?: Types.ObjectId[];
   itemId: string;
   value: string;
+  title?: string;
 }
 
 /*

@@ -45,18 +45,18 @@ export class SearchAssessmentService {
       `Sending email to ${emails.length} recipients for ${lang}...`
     );
 
-    for (const email of emails) {
-      await client.sendEmail(templateId, email, {
-        personalisation: {
-          first_name: 'DUA',
-          number: `**${notInList.length}**`,
-          bulleted_list: notInList.map(
-            (d) => `**${d.term}** : https://${d.url}`
-          ),
-          date: date,
-        },
-      });
-    }
+    // for (const email of emails) {
+    //   await client.sendEmail(templateId, email, {
+    //     personalisation: {
+    //       first_name: 'DUA',
+    //       number: `**${notInList.length}**`,
+    //       bulleted_list: notInList.map(
+    //         (d) => `**${d.term}** : https://${d.url}`
+    //       ),
+    //       date: date,
+    //     },
+    //   });
+    // }
   }
 
   async upsertPreviousSearchAssessment() {
@@ -132,16 +132,17 @@ export class SearchAssessmentService {
               ? `https://${sorted?.[0].url}`
               : '';
 
-            if (!result) {
-              return {
-                fields: {
-                  Query: d.fields.Query,
-                  URL: expectedUrlStartsWithWWW
-                    ? `https://${expectedUrl}`
-                    : expectedUrl || sortedUrl,
-                },
-              };
-            }
+              if (!result) {
+                return {
+                  fields: {
+                    Query: d.fields.Query,
+                    URL: expectedUrlStartsWithWWW
+                      ? `https://${expectedUrl}`
+                      : expectedUrl || sortedUrl,
+                    Auto: expectedUrlStartsWithWWW ? false : true,
+                  },
+                };
+              }
 
             return undefined;
           })
@@ -771,7 +772,7 @@ export class SearchAssessmentService {
   }
 
   async insertExpectedDB(
-    data: { fields: { Query: string; URL: string } }[],
+    data: { fields: { Query: string; URL: string; Auto: boolean } }[],
     lang: 'en' | 'fr'
   ) {
     return await this.airtableClient.insertExpectedDB(
@@ -791,6 +792,7 @@ export class SearchAssessmentService {
           Id: d.airtable_id,
           Query: d.query,
           URL: d.url,
+          Auto: d.auto,
         },
       };
     });
