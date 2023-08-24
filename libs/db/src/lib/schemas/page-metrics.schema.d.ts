@@ -78,6 +78,7 @@ export declare class PageMetrics {
     tasks?: Types.ObjectId[] | Task[];
     projects?: Types.ObjectId[] | Project[];
     ux_tests?: Types.ObjectId[] | UxTest[];
+    activity_map?: ActivityMapMetrics[] = [];
 }
 export declare const PageMetricsSchema: import("mongoose").Schema<Document<PageMetrics, any, any>, Model<Document<PageMetrics, any, any>, any, any, any>, {}, {}>;
 export declare function getPageMetricsModel(): Model<Document<PageMetrics>>;

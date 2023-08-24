@@ -139,7 +139,6 @@ export class SearchAssessmentService {
                     URL: expectedUrlStartsWithWWW
                       ? `https://${expectedUrl}`
                       : expectedUrl || sortedUrl,
-                    Auto: expectedUrlStartsWithWWW ? false : true,
                   },
                 };
               }
@@ -772,7 +771,7 @@ export class SearchAssessmentService {
   }
 
   async insertExpectedDB(
-    data: { fields: { Query: string; URL: string; Auto: boolean } }[],
+    data: { fields: { Query: string; URL: string; } }[],
     lang: 'en' | 'fr'
   ) {
     return await this.airtableClient.insertExpectedDB(
@@ -792,7 +791,6 @@ export class SearchAssessmentService {
           Id: d.airtable_id,
           Query: d.query,
           URL: d.url,
-          Auto: d.auto,
         },
       };
     });
