@@ -25,6 +25,8 @@ import {
   PageDocument,
   SearchAssessment,
   SearchAssessmentDocument,
+  Annotations,
+  AnnotationsDocument,
 } from '@dua-upd/db';
 import type {
   ApiParams,
@@ -108,7 +110,9 @@ export class OverallService {
     private feedbackModel: Model<FeedbackDocument>,
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessmentModel: Model<SearchAssessmentDocument>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectModel(Annotations.name, 'defaultConnection')
+    private annotationsModel: Model<AnnotationsDocument>
   ) {}
 
   @AsyncLogTiming
@@ -176,6 +180,7 @@ export class OverallService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.annotationsModel,
         this.db,
         this.searchAssessmentModel,
         this.cacheManager,
@@ -188,6 +193,7 @@ export class OverallService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.annotationsModel,
         this.db,
         this.searchAssessmentModel,
         this.cacheManager,
@@ -579,6 +585,7 @@ async function getOverviewMetrics(
   calldriversModel: CallDriverModel,
   feedbackModel: Model<FeedbackDocument>,
   pageModel: Model<PageDocument>,
+  annotationsModel: Model<AnnotationsDocument>,
   db: DbService,
   searchAssessmentModel: Model<SearchAssessmentDocument>,
   cacheManager: Cache,
@@ -600,6 +607,13 @@ async function getOverviewMetrics(
 
   satDateQuery.$gte = new Date(satStartDate);
   satDateQuery.$lte = new Date(satEndDate);
+
+  const annotations = (
+    await annotationsModel.find({ event_date: dateQuery }).lean().exec()
+  ).map((item) => ({
+    ...item,
+    event_date: item.event_date.toISOString(),
+  }));
 
   const visitsByDay = (
     await overallModel
@@ -758,12 +772,21 @@ async function getOverviewMetrics(
     .exec();
 
   const aggregatedMetrics = await overallModel
-    .aggregate<
-      Omit<
-        OverviewAggregatedData,
-        'visitsByDay' | 'calldriversByDay' | 'dyfByDay'
-      >
-    >()
+    .aggregate<{
+      visitors: number;
+      visits: number;
+      pageViews: number;
+      impressions: number;
+      ctr: number;
+      position: number;
+      dyf_yes: number;
+      dyf_no: number;
+      dyf_submit: number;
+      fwylf_error: number;
+      fwylf_hard_to_understand: number;
+      fwylf_other: number;
+      fwylf_cant_find_info: number;
+    }>()
     .match({
       date: dateQuery,
     })
@@ -845,6 +868,7 @@ async function getOverviewMetrics(
     topPagesVisited,
     top10GSC,
     feedbackPages,
+    annotations,
   };
 }
 

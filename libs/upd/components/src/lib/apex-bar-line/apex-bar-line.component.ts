@@ -11,6 +11,7 @@ import { I18nFacade } from '@dua-upd/upd/state';
 import { ApexStore } from './apex.store';
 import { map, tap } from 'rxjs/operators';
 import { sum } from '@dua-upd/utils-common';
+import { values } from 'rambdax';
 
 @Component({
   selector: 'upd-apex-bar-line',
@@ -34,6 +35,10 @@ export class ApexBarLineComponent implements OnInit {
 
   @Input() set series(value: ApexAxisChartSeries) {
     this.apexStore.setYAxis(value);
+  }
+
+  @Input() set annotations(values: { x: Date; text: string }[]) {
+    this.apexStore.setAnnotations(values);
   }
 
   vm$ = this.apexStore.vm$;

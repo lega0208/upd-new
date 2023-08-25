@@ -117,6 +117,25 @@ export class ApexStore extends ComponentStore<ChartOptions> {
       })
   );
 
+  readonly setAnnotations = this.updater(
+    (state, values: { x: Date; text: string }[]): ChartOptions => ({
+      ...state,
+      annotations: {
+        points: values.map(({ x, text }) => ({
+          x: x.getTime(),
+          y: 15,
+          marker: {
+            size: 8,
+          },
+          label: {
+            borderColor: '#FF4560',
+            text,
+          },
+        })),
+      },
+    })
+  );
+
   readonly showPercent = this.updater(
     (
       state,

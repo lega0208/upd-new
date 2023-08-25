@@ -66,6 +66,25 @@ export class ApexStore extends ComponentStore<ApexOptions> {
     })
   );
 
+  readonly setAnnotations = this.updater(
+    (state, values: { x: Date; text: string }[]): ApexOptions => ({
+      ...state,
+      annotations: {
+        points: values.map(({ x, text }) => ({
+          x: x.getTime(),
+          y: 15,
+          marker: {
+            size: 8,
+          },
+          label: {
+            borderColor: '#FF4560', // #26A69A
+            text,
+          },
+        })),
+      },
+    })
+  );
+
   readonly setYAxis = this.updater(
     (state, value: ApexAxisChartSeries): ApexOptions => {
       const firstDataSet: number[] = [0, 1]

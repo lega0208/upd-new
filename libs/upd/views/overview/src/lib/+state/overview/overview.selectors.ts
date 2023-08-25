@@ -75,6 +75,7 @@ export const selectVisitsByDay = createSelector(
   selectCurrentData,
   (data) => data?.visitsByDay || []
 );
+
 export const selectVisitsByDaySeries = createSelector(
   selectVisitsByDay,
   (visitsByDay) =>
@@ -84,10 +85,30 @@ export const selectVisitsByDaySeries = createSelector(
     }))
 );
 
+export const selectAnnotations = createSelector(
+  selectCurrentData,
+  (data) => data?.annotations || []
+);
+
+export const selectAnnotationsSeries = createSelector(
+  selectAnnotations,
+  selectCurrentLang,
+  (annotations, lang) => {
+    return annotations.map(({ event_date, title, title_fr, event_type }) => ({
+      x: new Date(event_date),
+      text:
+        lang == 'en-CA'
+          ? title + ` (${event_type})`
+          : title_fr + ` (${event_type})`,
+    }));
+  }
+);
+
 export const selectComparisonVisitsByDay = createSelector(
   selectComparisonData,
   (data) => data?.visitsByDay || []
 );
+
 export const selectComparisonVisitsByDaySeries = createSelector(
   selectComparisonVisitsByDay,
   selectPeriodDates,
@@ -128,6 +149,11 @@ export const selectComparisonCallsByDaySeries = createSelector(
         x: dates.get(date) as string,
         y: calls,
       }))
+);
+
+export const selectComparisonAnnotations = createSelector(
+  selectComparisonData,
+  (data) => data?.annotations || []
 );
 
 // Calls per 100 visits
@@ -272,13 +298,30 @@ export const selectComboChartTable = createSelector(
   selectCallsByDay,
   selectComparisonVisitsByDay,
   selectComparisonCallsByDay,
+  selectAnnotations,
+  selectComparisonAnnotations,
   selectCurrentLang,
   selectDatePeriodSelection,
-  (dates, visits, calls, prevVisits, prevCalls, lang, dateRangePeriod) => {
+  (
+    dates,
+    visits,
+    calls,
+    prevVisits,
+    prevCalls,
+    annotations,
+    prevAnnotations,
+    lang,
+    dateRangePeriod
+  ) => {
     const visitsDict = arrayToDictionary(visits, 'date');
     const callsDict = arrayToDictionary(calls, 'date');
+    const annotationsDict = arrayToDictionary(annotations, 'event_date');
     const prevVisitsDict = arrayToDictionary(prevVisits, 'date');
     const prevCallsDict = arrayToDictionary(prevCalls, 'date');
+    const prevAnnotationsDict = arrayToDictionary(
+      prevAnnotations,
+      'event_date'
+    );
 
     // *** extract date/label stuff for reuse
     // potentially also colConfigs
@@ -290,9 +333,15 @@ export const selectComboChartTable = createSelector(
       date: dayjs.utc(currentDate).locale(lang).format(dateFormat),
       visits: visitsDict[currentDate]?.visits,
       calls: callsDict[currentDate]?.calls,
+      annotations: `${annotationsDict[currentDate]?.title || ''} ${
+        annotationsDict[currentDate]?.event_type || ''
+      }`,
       prevDate: dayjs.utc(prevDate).locale(lang).format(dateFormat),
       prevVisits: prevVisitsDict[prevDate]?.visits,
       prevCalls: prevCallsDict[prevDate]?.calls,
+      prevAnnotations: `${prevAnnotationsDict[prevDate]?.title || ''} ${
+        prevAnnotationsDict[prevDate]?.event_type || ''
+      }`,
     }));
   }
 );
@@ -301,11 +350,26 @@ export const selectVisitsByDayChartTable = createSelector(
   selectPeriodDates,
   selectVisitsByDay,
   selectComparisonVisitsByDay,
+  selectAnnotations,
+  selectComparisonAnnotations,
   selectCurrentLang,
   selectDatePeriodSelection,
-  (dates, visits, prevVisits, lang, dateRangePeriod) => {
+  (
+    dates,
+    visits,
+    prevVisits,
+    annotations,
+    prevAnnotations,
+    lang,
+    dateRangePeriod
+  ) => {
     const visitsDict = arrayToDictionary(visits, 'date');
+    const annotationsDict = arrayToDictionary(annotations, 'event_date');
     const prevVisitsDict = arrayToDictionary(prevVisits, 'date');
+    const prevAnnotationsDict = arrayToDictionary(
+      prevAnnotations,
+      'event_date'
+    );
 
     const dateFormat =
       dateRangePeriod === 'week' ? 'dddd, MMM D' : 'MMM D YYYY';
@@ -313,8 +377,14 @@ export const selectVisitsByDayChartTable = createSelector(
     return [...dates].map(([prevDate, currentDate]) => ({
       date: dayjs.utc(currentDate).locale(lang).format(dateFormat),
       visits: visitsDict[currentDate]?.visits,
+      annotations: `${annotationsDict[currentDate]?.title || ''} ${
+        annotationsDict[currentDate]?.event_type || ''
+      }`,
       prevDate: dayjs.utc(prevDate).locale(lang).format(dateFormat),
       prevVisits: prevVisitsDict[prevDate]?.visits,
+      prevAnnotations: `${prevAnnotationsDict[prevDate]?.title || ''} ${
+        prevAnnotationsDict[prevDate]?.event_type || ''
+      }`,
     }));
   }
 );

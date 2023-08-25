@@ -116,6 +116,7 @@
         [colours]="['#2E5EA7', '#B5C2CC', '#f37d35', '#fbbc4d']"
         [secondaryTitleData]="chartData"
         [secondaryTitleCols]="chartCols"
+        [annotations]="(annotationsData$ | async) || []"
       ></upd-apex-bar-line>
     </div>
   </div>
