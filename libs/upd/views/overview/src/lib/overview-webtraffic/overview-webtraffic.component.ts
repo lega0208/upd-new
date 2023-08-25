@@ -22,7 +22,8 @@ export class OverviewWebtrafficComponent implements OnInit {
   pageViews$ = this.overviewService.views$;
   pageViewsPercentChange$ = this.overviewService.viewsPercentChange$;
 
-  apexBar$ = this.overviewService.apexBar$.pipe(tap((console.log)));
+  apexBar$ = this.overviewService.apexBar$.pipe(tap(console.log));
+  annotationsData$ = this.overviewService.annotationsData$;
 
   topPagesWithChangeData$ =
     this.overviewService.topPagesVisitedWithPercentChange$;
@@ -47,8 +48,10 @@ export class OverviewWebtrafficComponent implements OnInit {
   barTableCols: ColumnConfig<{
     date: string;
     visits: number;
+    annotations: string;
     prevDate: string;
     prevVisits: number;
+    prevAnnotations: string;
   }>[] = [];
 
   ngOnInit() {
@@ -85,6 +88,12 @@ export class OverviewWebtrafficComponent implements OnInit {
           pipe: 'number',
         },
         {
+          field: 'annotations',
+          header: this.i18n.service.translate('Events for ', lang, {
+            value: dateRange,
+          }),
+        },
+        {
           field: 'prevDate',
           header: this.i18n.service.translate('Dates', lang),
         },
@@ -94,6 +103,12 @@ export class OverviewWebtrafficComponent implements OnInit {
             value: comparisonDateRange,
           }),
           pipe: 'number',
+        },
+        {
+          field: 'prevAnnotations',
+          header: this.i18n.service.translate('Events for ', lang, {
+            value: comparisonDateRange,
+          }),
         },
       ];
     });

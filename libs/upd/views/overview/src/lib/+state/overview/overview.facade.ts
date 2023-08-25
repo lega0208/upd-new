@@ -54,6 +54,10 @@ export class OverviewFacade {
   dateRangeSelected$ = this.store.select(selectDatePeriodSelection);
   overviewData$ = this.store.select(OverviewSelectors.selectOverviewData);
 
+  annotationsData$ = this.store.select(
+    OverviewSelectors.selectAnnotationsSeries
+  );
+
   currentRoute$ = this.store
     .select(selectUrl)
     .pipe(map((url) => url.replace(/\?.+$/, '')));

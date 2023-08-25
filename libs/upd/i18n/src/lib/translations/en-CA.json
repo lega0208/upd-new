@@ -205,6 +205,7 @@
   "Number of calls (in thousands)": "Number of calls (in thousands)",
   "Number of calls for": "Number of calls for{{value}}",
   "Calls for ": "Calls for {{value}}",
+  "Events for ": "Events for {{value}}",
   "tests-completed-since2018": "Tests completed since 2018",
   "tasks-tested-since2018": "Tasks tested since 2018",
   "participants-since2018": "Participants tested since 2018",

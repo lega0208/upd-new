@@ -30,6 +30,7 @@ export class OverviewSummaryComponent implements OnInit {
   error$ = this.overviewService.error$;
 
   comboChartData$ = this.overviewService.comboChartData$;
+  annotationsData$ = this.overviewService.annotationsData$;
 
   currentKpiFeedback$ = this.overviewService.currentKpiFeedback$;
   kpiFeedbackPercentChange$ = this.overviewService.kpiFeedbackPercentChange$;
@@ -104,13 +105,16 @@ export class OverviewSummaryComponent implements OnInit {
     date: string;
     visits: string;
     calls: string;
+    annotations: string;
     prevDate: string;
     prevVisits: string;
     prevCalls: string;
+    prevAnnotations: string;
   }>[] = [];
   taskSurveyCols: ColumnConfig[] = [];
 
   ngOnInit() {
+    this.annotationsData$.subscribe((res) => console.log(res));
     combineLatest([
       this.currentLang$,
       this.dateRangeLabel$,
@@ -181,6 +185,12 @@ export class OverviewSummaryComponent implements OnInit {
           pipe: 'number',
         },
         {
+          field: 'annotations',
+          header: this.i18n.service.translate('Events for ', lang, {
+            value: dateRange,
+          }),
+        },
+        {
           field: 'prevDate',
           header: this.i18n.service.translate('Dates', lang),
         },
@@ -197,6 +207,12 @@ export class OverviewSummaryComponent implements OnInit {
             value: comparisonDateRange,
           }),
           pipe: 'number',
+        },
+        {
+          field: 'prevAnnotations',
+          header: this.i18n.service.translate('Events for ', lang, {
+            value: comparisonDateRange,
+          }),
         },
       ];
       this.taskSurveyCols = [

@@ -11,6 +11,7 @@ import type {
   ITask,
   IUxTest,
   IReadability,
+  IAnnotations,
 } from './schema.types';
 
 export type ApiParams = {
@@ -118,12 +119,6 @@ export interface OverviewAggregatedData {
   fwylf_hard_to_understand: number;
   fwylf_other: number;
   fwylf_cant_find_info: number;
-  enquiryLineBE: number;
-  enquiryLineBenefits: number;
-  enquiryLineC4: number;
-  enquiryLineC9: number;
-  enquiryLineITE: number;
-  enquiryLineEService: number;
   visitsByDay: { date: string; visits: number }[];
   calldriversByDay: { date: string; calls: number }[];
   dyfByDay: {
@@ -150,6 +145,7 @@ export interface OverviewAggregatedData {
     total_clicks: number;
     total_searches: number;
   }[];
+  annotations: (Omit<IAnnotations, 'event_date'> & { event_date: string })[];
 }
 
 export interface OverviewUxData {
