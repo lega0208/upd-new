@@ -22,6 +22,7 @@ import type {
   PageDetailsData,
   PagesHomeData,
   PagesHomeAggregatedData,
+  ActivityMapMetrics,
 } from '@dua-upd/types-common';
 import { arrayToDictionary, dateRangeSplit } from '@dua-upd/utils-common';
 import { InternalSearchTerm } from '@dua-upd/types-common';
@@ -258,6 +259,7 @@ export class PagesService {
         page.url,
       ]),
       searchTerms: await this.getTopSearchTerms(params),
+      activityMap: await this.getActivityMapData(params),
       readability,
     } as PageDetailsData;
 
@@ -307,6 +309,82 @@ export class PagesService {
       ...result,
       gsc_searchterms: result.gsc_searchterms.flat(),
     }));
+  }
+
+  async getActivityMapData({ dateRange, comparisonDateRange, id }: ApiParams) {
+    const [startDate, endDate] = dateRangeSplit(dateRange);
+    const [prevStartDate, prevEndDate] = dateRangeSplit(comparisonDateRange);
+
+    const results =
+      (await this.pageMetricsModel
+        .aggregate<ActivityMapMetrics>()
+        .project({ date: 1, activity_map: 1, page: 1 })
+        .match({
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+          page: new Types.ObjectId(id),
+        })
+        .unwind('$activity_map')
+        .match({
+          'activity_map.link': { $exists: true, $ne: '' },
+        })
+        .group({
+          _id: '$activity_map.link',
+          clicks: {
+            $sum: '$activity_map.clicks',
+          },
+        })
+        .sort({ clicks: -1 })
+        .project({
+          _id: 0,
+          link: '$_id',
+          clicks: 1,
+        })
+        .exec()) || [];
+
+    const prevResults =
+      (await this.pageMetricsModel
+        .aggregate<ActivityMapMetrics>()
+        .project({ date: 1, activity_map: 1, page: 1 })
+        .match({
+          date: { $gte: prevStartDate, $lte: prevEndDate },
+          page: new Types.ObjectId(id),
+        })
+        .unwind('$activity_map')
+        .match({
+          'activity_map.link': {
+            $in: results.map(({ link }) => link),
+          },
+        })
+        .group({
+          _id: '$activity_map.link',
+          clicks: {
+            $sum: '$activity_map.clicks',
+          },
+        })
+        .project({
+          _id: 0,
+          link: '$_id',
+          clicks: 1,
+        })
+        .exec()) || [];
+
+    const prevResultsDict = arrayToDictionary(prevResults, 'link');
+
+    return results.map((result) => {
+      const prevCount = prevResultsDict[result.link]?.clicks;
+      const clicksChange =
+        typeof prevCount === 'number' && prevCount !== 0
+          ? Math.round(((result.clicks - prevCount) / prevCount) * 100) / 100
+          : null;
+
+      return {
+        ...result,
+        clicksChange,
+      };
+    });
   }
 
   async getTopSearchTerms({ dateRange, comparisonDateRange, id }: ApiParams) {

@@ -222,6 +222,8 @@
   "related-tasks": "Related Tasks",
   "nodata-related-tasks": "No Related tasks for this page",
   "visitor-location": "Visitor location",
+  "visitor-activity": "Visitor activity",
+  "link-text": "Link text",
   "province": "Province",
   "text": "Text",
   "previous-page-url": "Previous page URL",
