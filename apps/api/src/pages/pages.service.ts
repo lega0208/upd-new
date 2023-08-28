@@ -327,9 +327,6 @@ export class PagesService {
           page: new Types.ObjectId(id),
         })
         .unwind('$activity_map')
-        .match({
-          'activity_map.link': { $exists: true, $ne: '' },
-        })
         .group({
           _id: '$activity_map.link',
           clicks: {
