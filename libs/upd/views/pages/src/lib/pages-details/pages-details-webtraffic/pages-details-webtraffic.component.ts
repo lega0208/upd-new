@@ -15,6 +15,11 @@ type BarTableColTypes = GetTableProps<
   'barTable$'
 >;
 
+type ActivityMapColTypes = GetTableProps<
+  PagesDetailsWebtrafficComponent,
+  'activityMap$'
+>;
+
 @Component({
   selector: 'upd-page-details-webtraffic',
   templateUrl: './pages-details-webtraffic.component.html',
@@ -31,6 +36,9 @@ export class PagesDetailsWebtrafficComponent implements OnInit {
   visitorLocation$ = this.pageDetailsService.visitorLocation$;
 
   visitorLocationCols: ColumnConfig<VisitorLocationColTypes>[] = [];
+
+  activityMap$ = this.pageDetailsService.activityMap$;
+  activityMapCols: ColumnConfig<ActivityMapColTypes>[] = [];
 
   barTable$ = this.pageDetailsService.barTable$;
   barTableCols: ColumnConfig<BarTableColTypes>[] = [];
@@ -82,6 +90,20 @@ export class PagesDetailsWebtrafficComponent implements OnInit {
           }),
           pipe: 'number',
         },
+      ];
+
+      this.activityMapCols = [
+        { field: 'link', header: this.i18n.service.translate('link-text', lang) },
+        {
+          field: 'clicks',
+          header: this.i18n.service.translate('clicks', lang),
+          pipe: 'number',
+        },
+        {
+          field: 'clicksChange',
+          header: this.i18n.service.translate('comparison', lang),
+          pipe: 'percent'
+        }
       ];
     });
   }

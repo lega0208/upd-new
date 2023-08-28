@@ -102,6 +102,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
   readability: IReadability[];
+  activityMap: ActivityMap[];
 }
 
 export interface OverviewAggregatedData {
@@ -205,6 +206,12 @@ export type InternalSearchTerm = {
   clicksChange?: number | null;
   position: number;
 };
+
+export type ActivityMap = {
+  link: string;
+  clicks: number;
+  clicksChange?: number | null | undefined;
+}
 
 export interface TasksHomeAggregatedData {
   _id: string | Types.ObjectId;

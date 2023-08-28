@@ -222,6 +222,8 @@
   "related-tasks": "Tâches connexes",
   "nodata-related-tasks": "Aucune tâche associée pour cette page",
   "visitor-location": "Emplacement du visiteur",
+  "visitor-activity": "Activité du visiteur",
+  "link-text": "Texte du lien",
   "province": "Province",
   "text": "Texte",
   "previous-page-url": "URL de la page précédente",
