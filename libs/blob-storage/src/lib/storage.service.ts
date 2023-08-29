@@ -41,6 +41,7 @@ export class BlobStorageService {
     aa_raw: {
       path: 'aa_raw',
       containerName: 'raw-data',
+      compression: 'zstd',
     },
     feedback: {
       path: 'feedback',

@@ -86,19 +86,12 @@ export class InternalSearchTermsService {
       const uniqueFirst247UrlPages = await this.db.collections.pages
         .aggregate<{ page: Types.ObjectId; url_first247: string }>()
         .project({
-          all_urls_first247: {
-            $map: {
-              input: '$all_urls',
-              as: 'first247Url',
-              in: {
-                $substrCP: ['$$first247Url', 0, 247],
-              },
-            },
+          url_first247: {
+            $substrCP: ['$url', 0, 247],
           },
         })
-        .unwind('$all_urls_first247')
         .group({
-          _id: '$all_urls_first247',
+          _id: '$url_first247',
           page: {
             $push: '$_id',
           },
@@ -189,17 +182,13 @@ export class InternalSearchTermsService {
 
       const matchingPages = await this.db.collections.pages
         .aggregate<{ url: string; page: Types.ObjectId }>()
-        .project({ all_urls: 1 })
-        .sort({ all_urls: 1 })
-        .match({ all_urls: { $elemMatch: { $in: cleanedItemIdUrls } } })
-        .unwind('$all_urls')
+        .project({ url: 1 })
+        .sort({ url: 1 })
+        .match({ url: { $in: cleanedItemIdUrls } })
         .project({
           _id: 0,
           page: '$_id',
-          url: '$all_urls',
-        })
-        .project({
-          all_urls: 0,
+          url: '$url',
         })
         .exec();
 

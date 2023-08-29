@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { type FilterQuery, Model } from 'mongoose';
 import { type Filter } from 'mongodb';
+import { uniq } from 'rambdax';
 import {
   CallDriver,
   Feedback,
@@ -22,7 +23,12 @@ import {
   type ReadabilityModel,
   type UrlModel,
 } from '../';
-import { AsyncLogTiming, logJson, prettyJson } from '@dua-upd/utils-common';
+import {
+  arrayToDictionary,
+  AsyncLogTiming,
+  logJson,
+  prettyJson,
+} from '@dua-upd/utils-common';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { PageVisits, PageVisitsView } from './db.views';
 
@@ -143,11 +149,7 @@ export class DbService {
 
   @AsyncLogTiming
   async validatePageMetricsRefs(filter: FilterQuery<PageMetrics> = {}) {
-    if (JSON.stringify(filter) === JSON.stringify({})) {
-      return await this.validateAllPageMetricsRefs();
-    }
-
-    return await this.validateFilteredPageMetricsRefs(filter);
+    return await this.simplifiedValidatePageRefs(filter);
   }
 
   private async validateAllPageMetricsRefs() {
@@ -160,15 +162,12 @@ export class DbService {
     const bulkWriteOps: AnyBulkWriteOperation[] = [];
 
     const pages: Page[] = await this.pages
-      .find({}, { all_urls: 1, projects: 1, ux_tests: 1, tasks: 1 })
+      .find({}, { url: 1, projects: 1, ux_tests: 1, tasks: 1 })
       .lean()
       .exec();
 
     if (pages) {
-      // WE'RE ASSUMING THAT PAGE ALL_URLS ARE DE-DUPLICATED (todo: add check and dedupe first if needed)
-      const pagesDict: Record<string, Page> = Object.fromEntries(
-        pages.map((page) => page.all_urls.map((url) => [url, page])).flat()
-      );
+      const pagesDict: Record<string, Page> = arrayToDictionary(pages, 'url');
 
       for (const metricsUrl of pageMetricsUrls) {
         const matchingPage = pagesDict[metricsUrl];
@@ -178,9 +177,6 @@ export class DbService {
             updateMany: {
               filter: {
                 url: metricsUrl,
-                page: {
-                  $ne: matchingPage._id,
-                },
               },
               update: {
                 $set: {
@@ -208,6 +204,47 @@ export class DbService {
     }
   }
 
+  private async simplifiedValidatePageRefs(filter: FilterQuery<PageMetrics>) {
+    const pages: Page[] = await this.pages
+      .find({}, { all_urls: 1, tasks: 1, projects: 1, ux_tests: 1 })
+      .lean()
+      .exec();
+
+    if (!pages) {
+      throw new Error('No pages found?');
+    }
+
+    const dateFilter = filter.date ? { date: filter.date } : {};
+
+    const bulkWriteOps: AnyBulkWriteOperation<PageMetrics>[] = pages.map(
+      (page) => ({
+        updateMany: {
+          filter: {
+            ...dateFilter,
+            url: page.url,
+          },
+          update: {
+            $set: {
+              page: page._id,
+              projects: page.projects,
+              tasks: page.tasks,
+              ux_tests: page.ux_tests,
+            },
+          },
+        },
+      })
+    );
+
+    if (bulkWriteOps.length) {
+      const writeResults = await this.pageMetrics.bulkWrite(bulkWriteOps, {
+        ordered: false,
+      });
+
+      console.log('validatePageRefs writeResults:');
+      logJson(writeResults);
+    }
+  }
+
   private async validateFilteredPageMetricsRefs(
     filter: FilterQuery<PageMetrics>
   ) {
@@ -226,29 +263,22 @@ export class DbService {
     const metricsWithNoRefs = pageMetrics.filter((metrics) => !metrics.page);
 
     if (metricsWithNoRefs.length) {
-      const uniqueUrls = [
-        ...new Set(metricsWithNoRefs.map((metrics) => metrics.url)),
-      ];
+      const uniqueUrls = uniq(metricsWithNoRefs.map((metrics) => metrics.url));
 
       const pages: Page[] = await this.pages
         .find(
           {
-            all_urls: {
-              $elemMatch: {
-                $in: uniqueUrls,
-              },
+            url: {
+              $in: uniqueUrls,
             },
           },
-          { all_urls: 1, projects: 1, ux_tests: 1, tasks: 1 }
+          { url: 1, projects: 1, ux_tests: 1, tasks: 1 }
         )
         .lean()
         .exec();
 
       if (pages) {
-        // WE'RE ASSUMING THAT PAGE ALL_URLS ARE DE-DUPLICATED (todo: add check to dedupe first if needed)
-        const pagesDict: Record<string, Page> = Object.fromEntries(
-          pages.map((page) => page.all_urls.map((url) => [url, page])).flat()
-        );
+        const pagesDict = arrayToDictionary(pages, 'url');
 
         for (const url of uniqueUrls) {
           const matchingPage = pagesDict[url];
@@ -259,9 +289,6 @@ export class DbService {
                 filter: {
                   ...(filter as Filter<PageMetrics>),
                   url,
-                  page: {
-                    $ne: matchingPage._id,
-                  },
                 },
                 update: {
                   $set: {
@@ -282,29 +309,22 @@ export class DbService {
     const metricsWithRefs = pageMetrics.filter((metrics) => metrics.page);
 
     if (metricsWithRefs.length) {
-      const uniqueUrls = [
-        ...new Set(metricsWithRefs.map((metrics) => metrics.url)),
-      ];
+      const uniqueUrls = uniq(metricsWithRefs.map((metrics) => metrics.url));
 
       const pages: Page[] = await this.pages
         .find(
           {
-            all_urls: {
-              $elemMatch: {
-                $in: uniqueUrls,
-              },
+            url: {
+              $in: uniqueUrls,
             },
           },
-          { all_urls: 1, projects: 1, ux_tests: 1, tasks: 1 }
+          { url: 1, projects: 1, ux_tests: 1, tasks: 1 }
         )
         .lean()
         .exec();
 
       if (pages) {
-        // WE'RE ASSUMING THAT PAGE ALL_URLS ARE DE-DUPLICATED (todo: add check to dedupe first if needed)
-        const pagesDict: Record<string, Page> = Object.fromEntries(
-          pages.map((page) => page.all_urls.map((url) => [url, page])).flat()
-        );
+        const pagesDict = arrayToDictionary(pages, 'url');
 
         for (const url of uniqueUrls) {
           const matchingPage = pagesDict[url];
@@ -315,9 +335,6 @@ export class DbService {
                 filter: {
                   ...(filter as Filter<PageMetrics>),
                   url,
-                  page: {
-                    $ne: matchingPage._id,
-                  },
                 },
                 update: {
                   $set: {
@@ -334,12 +351,19 @@ export class DbService {
       }
     }
 
-    console.log(`${bulkWriteOps.length} bulkWriteOps`);
+    if (bulkWriteOps.length) {
+      console.log(`${bulkWriteOps.length} bulkWriteOps`);
 
-    await this.pageMetrics.bulkWrite(
-      bulkWriteOps as AnyBulkWriteOperation<PageMetrics>[],
-      { ordered: false }
-    );
+      const writeResults = await this.pageMetrics.bulkWrite(
+        bulkWriteOps as AnyBulkWriteOperation<PageMetrics>[],
+        {
+          ordered: false,
+        }
+      );
+
+      console.log('validatePageRefs writeResults:');
+      logJson(writeResults);
+    }
   }
 
   @AsyncLogTiming
@@ -451,34 +475,5 @@ export class DbService {
     }
 
     console.log('Finished adding missing refs to pages_metrics.');
-  }
-
-  @AsyncLogTiming
-  async getDuplicatedPages() {
-    const duplicates = await this.pages
-      .aggregate()
-      .sort({ all_urls: 1 })
-      .unwind('$all_urls')
-      .group({
-        _id: '$all_urls',
-        pageIds: {
-          $push: '$_id',
-        },
-        count: {
-          $sum: 1,
-        },
-      })
-      .match({
-        count: {
-          $gt: 1,
-        },
-      })
-      .exec();
-
-    logJson(duplicates);
-
-    console.log(`${duplicates.length} ✌duplicates✌ found`);
-
-    return duplicates;
   }
 }

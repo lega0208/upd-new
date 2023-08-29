@@ -198,7 +198,6 @@ export class PageVisitsView
 
     const pagesProjection = {
       url: 1,
-      all_urls: 1,
       title: 1,
       tasks: 1,
       projects: 1,

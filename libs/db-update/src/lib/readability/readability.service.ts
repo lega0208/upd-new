@@ -482,15 +482,22 @@ export class ReadabilityService {
           } as AnyBulkWriteOperation<Readability>)
       );
 
-      const bulkWriteResults = await this.db.collections.readability.bulkWrite(
-        bulkWriteOps
-      );
+      this.logger.log(`${bulkWriteOps.length} bulkWriteOps`);
 
-      this.logger.log(
-        `Bulk write results: ${JSON.stringify(bulkWriteResults, null, 2)}`
-      );
+      while (bulkWriteOps.length) {
+        const batch = bulkWriteOps.splice(0, 1000);
 
-      this.logger.log(`Readability collection successfully updated.`);
+        const bulkWriteResults =
+          await this.db.collections.readability.bulkWrite(batch, {
+            ordered: false,
+          });
+
+        if (bulkWriteResults.modifiedCount) {
+          this.logger.log(
+            `${bulkWriteResults.modifiedCount} readability docs updated.`
+          );
+        }
+      }
     } catch (err) {
       this.logger.error(
         `Error updating readability collection from blob storage:\n${err}`
@@ -519,7 +526,7 @@ export class ReadabilityService {
       .filter(
         (readabilityDoc) =>
           !readabilityDoc.page.length ||
-          !readabilityDoc.page[0]?.all_urls.includes(readabilityDoc.url)
+          readabilityDoc.page[0].url !== readabilityDoc.url
       )
       .map(({ url }) => url);
 
@@ -530,7 +537,7 @@ export class ReadabilityService {
     }
 
     const pagesForUpdates = await this.db.collections.pages
-      .find({ all_urls: { $in: urlsToUpdate } })
+      .find({ url: { $in: urlsToUpdate } })
       .lean()
       .exec();
 
@@ -547,7 +554,7 @@ export class ReadabilityService {
     const bulkWriteOps: AnyBulkWriteOperation<IReadability>[] =
       pagesForUpdates.map((page) => ({
         updateMany: {
-          filter: { url: { $in: page.all_urls }, page: { $ne: page._id } },
+          filter: { url: page.url },
           update: {
             $set: { page: page._id },
           },

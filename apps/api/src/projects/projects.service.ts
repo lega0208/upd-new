@@ -758,8 +758,8 @@ async function getUniqueProjectUrls(
   project: ProjectDocument
 ): Promise<string[]> {
   const projectPageUrls = ((await project.populate('pages')).pages || []).map(
-    (page) => 'url' in page && [...(page.all_urls || [])]
+    (page) => 'url' in page && page.url
   );
 
-  return [...new Set(projectPageUrls.flat())];
+  return [...new Set(projectPageUrls)];
 }

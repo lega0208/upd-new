@@ -158,19 +158,6 @@ export class DataIntegrityService {
               replacement: '',
             },
           },
-          all_urls: {
-            $map: {
-              input: { $ifNull: ['$all_urls', []] },
-              as: 'url',
-              in: {
-                $replaceOne: {
-                  input: '$$url',
-                  find: 'https://',
-                  replacement: '',
-                },
-              },
-            },
-          },
         },
       },
     ]);
