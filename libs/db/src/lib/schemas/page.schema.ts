@@ -1,9 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import {
-  Document,
-  model,
-  Types,
-} from 'mongoose';
+import { Document, model, Types } from 'mongoose';
 import { Task } from './task.schema';
 import { Project } from './project.schema';
 import { UxTest } from './ux-test.schema';
@@ -15,11 +11,8 @@ export class Page {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
-  @Prop({ required: true, type: String, index: true })
-  url = '';
-
-  @Prop({ type: [String], index: true })
-  all_urls: string[] = [];
+  @Prop({ required: true, type: String, index: true, unique: true })
+  url: string;
 
   @Prop({ required: true, type: String })
   title = '';
@@ -28,13 +21,19 @@ export class Page {
   airtable_id?: string;
 
   @Prop({ type: String })
-  itemid_url?: string;
+  lang?: 'en' | 'fr';
 
   @Prop({ type: String })
-  itemid_activitymap?: string;
+  altLangHref?: string;
 
   @Prop({ type: String })
-  itemid_internalsearch?: string;
+  redirect?: string;
+
+  @Prop({ type: Boolean })
+  is_404?: boolean;
+
+  @Prop({ type: Object })
+  metadata?: { [prop: string]: string | Date };
 
   @Prop({ type: Date })
   lastChecked?: Date;
@@ -50,9 +49,6 @@ export class Page {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }] })
   ux_tests?: Types.ObjectId[] | UxTest[];
-
-  @Prop({ type: Number })
-  url_status?: number;
 }
 
 export const PageSchema = SchemaFactory.createForClass(Page);

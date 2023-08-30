@@ -132,8 +132,6 @@ export class DbUpdateService {
           ),
       ]);
 
-      await this.pagesService.consolidateDuplicatePages();
-
       await Promise.allSettled([
         this.internalSearchService
           .upsertOverallSearchTerms()
@@ -158,22 +156,23 @@ export class DbUpdateService {
         .upsertPageSearchTerms()
         .catch((err) => this.logger.error(err.stack));
 
-      await this.createPagesFromPageList();
+      await this.createPagesFromPageList().catch((err) =>
+        this.logger.error(err.stack)
+      );
 
-      // run this again in case we've created duplicates from the published pages list
-      await this.pagesService.consolidateDuplicatePages();
+      await this.pagesService
+        .updatePagesLang()
+        .catch((err) => this.logger.error(err.stack));
 
-      await this.urlsService.updateUrls();
+      await this.urlsService
+        .updateUrls()
+        .catch((err) => this.logger.error(err.stack));
 
       this.logger.log('Database updates completed.');
     } catch (error) {
       this.logger.error(error);
       this.logger.error(error.stack);
     }
-  }
-
-  async consolidateDuplicatePages() {
-    return await this.pagesService.consolidateDuplicatePages();
   }
 
   @AsyncLogTiming
@@ -190,14 +189,13 @@ export class DbUpdateService {
     const pagesWithListMatches =
       (await this.pageModel
         .find({
-          all_urls: {
-            $elemMatch: { $in: pagesListUrls },
-          },
+          url: { $in: pagesListUrls },
         })
+        .lean()
         .exec()) ?? [];
 
-    const urlsAlreadyInCollection = pagesWithListMatches.flatMap(
-      (page) => page.all_urls
+    const urlsAlreadyInCollection = pagesWithListMatches.map(
+      (page) => page.url
     );
 
     const pagesToCreate = pagesList
@@ -206,7 +204,6 @@ export class DbUpdateService {
         _id: new Types.ObjectId(),
         url: page.url,
         title: page.title,
-        all_urls: [page.url],
       }));
 
     this.logger.log(

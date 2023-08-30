@@ -10,7 +10,7 @@ import type {
   IPageMetrics,
   ITask,
   IUxTest,
-  IReadability,
+  IReadability, IAnnotations,
 } from './schema.types';
 
 export type ApiParams = {
@@ -35,7 +35,7 @@ export interface EntityDetailsData<T> extends ViewData<T> {
 
 export type PagesHomeAggregatedData = Pick<
   IPage,
-  '_id' | 'url' | 'title' | 'all_urls'
+  '_id' | 'url' | 'title'
 > & {
   visits: number;
 };
@@ -118,12 +118,6 @@ export interface OverviewAggregatedData {
   fwylf_hard_to_understand: number;
   fwylf_other: number;
   fwylf_cant_find_info: number;
-  enquiryLineBE: number;
-  enquiryLineBenefits: number;
-  enquiryLineC4: number;
-  enquiryLineC9: number;
-  enquiryLineITE: number;
-  enquiryLineEService: number;
   visitsByDay: { date: string; visits: number }[];
   calldriversByDay: { date: string; calls: number }[];
   dyfByDay: {

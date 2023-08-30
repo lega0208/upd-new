@@ -18,7 +18,6 @@ import {
   DbUpdateService,
   PageMetricsService,
   PagesListService,
-  PageUpdateService,
   InternalSearchTermsService,
 } from '@dua-upd/db-update';
 import {
@@ -164,7 +163,6 @@ export class PopulateCommand extends CommandRunner {
     private readonly dbService: DbService,
     private readonly pagesListService: PagesListService,
     private readonly pageMetricsService: PageMetricsService,
-    private readonly pagesService: PageUpdateService,
     private readonly internalSearchService: InternalSearchTermsService,
     private logger: ConsoleLogger,
     @InjectModel(Overall.name, 'defaultConnection')
@@ -181,10 +179,6 @@ export class PopulateCommand extends CommandRunner {
     this.logger.log('Published Pages list updated');
 
     await this.airtableService.updateUxData();
-
-    // Make sure Page all_urls are deduplicated first, to ensure proper refs
-    // are added later and don't get corrupted
-    await this.pagesService.consolidateDuplicatePages();
 
     // Updating UX data doesn't include project attachments
     await this.airtableService.uploadProjectAttachmentsAndUpdateUrls();
