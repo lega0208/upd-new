@@ -475,8 +475,7 @@ export const createActivityMapQuery = (
       },
     })
     .setGlobalFilters([
-      { type: 'segment', segmentId: SEGMENTS.cra },
-      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
+      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` }
     ])
     .setSettings(querySettings)
     .build(false);
