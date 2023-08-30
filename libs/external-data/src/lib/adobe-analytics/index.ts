@@ -117,9 +117,11 @@ export class AdobeAnalyticsClient {
       await this.initClient();
     }
 
+    const filterWithDateRange = query.globalFilters?.find(filter => filter.dateRange !== undefined);
+
     // This is only used to log the dateRange for now
     if (options.hooks?.pre) {
-      options.hooks.pre(query.globalFilters[1].dateRange);
+      options.hooks.pre(filterWithDateRange?.dateRange);
     }
 
     const results: AAMaybeResponse = await this.client.getReport(query);
@@ -703,8 +705,8 @@ export function createRowsParser<T>(
   const dimension = query.dimension;
 
   // globalFilters should be [segment, dateRange]
-  const dateRangeFilter = query.globalFilters?.[1]?.dateRange;
-
+  const filterWithDateRange = query.globalFilters?.find(filter => filter.dateRange !== undefined);
+  const dateRangeFilter = filterWithDateRange?.dateRange;
   if (!dateRangeFilter) {
     throw new Error(
       'Expected global daterange filter at index 1 in AA query, but none was found'
@@ -732,7 +734,7 @@ export function createRowsParser<T>(
           ({
             itemId: row.itemId,
             value: row.value,
-            type: 'activityMap',
+            type: 'activityMapTitle',
           } as T)
       );
   }
