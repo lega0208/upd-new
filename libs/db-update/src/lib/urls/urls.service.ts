@@ -300,10 +300,9 @@ export class UrlsService {
   private async checkAndUpdateUrlData(urls: Url[]) {
     const urlsDataDict = arrayToDictionary(urls, 'url');
 
-    const pageUrls: { page: Types.ObjectId; url: string }[] | null =
+    const pageUrls =
       await this.db.collections.pages
-        .find({})
-        .projection({ _id: 0, page: '$_id', url: 1 })
+        .find({}, { url: 1 })
         .lean()
         .exec();
 
@@ -560,7 +559,7 @@ export class UrlsService {
 
           try {
             const page = urlsPageDict[response.url]
-              ? { page: urlsPageDict[response.url].page }
+              ? { page: urlsPageDict[response.url]._id }
               : {};
 
             const readabilityScore = await this.assessReadability(
