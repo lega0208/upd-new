@@ -248,16 +248,7 @@ export class TasksService {
     }));
 
     const taskUrls = task.pages
-      .map((page) => {
-        if ('all_urls' in page && page.all_urls.length) {
-          return page.all_urls;
-        }
-
-        if ('url' in page && page.url) {
-          return page.url;
-        }
-      })
-      .flat()
+      .map((page) => 'url' in page && page.url)
       .filter((url) => !!url);
 
     const taskTpcId = task.tpc_ids;

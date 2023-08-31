@@ -15,10 +15,6 @@ import { PipelineStage } from 'mongoose';
  *  const scriptDependencies: Parameters<DbScript> = [this.db, this.dbUpdateService]; (DbService and DbUpdateService)
  */
 
-export const findDuplicatePageUrls = async (db: DbService) => {
-  await db.getDuplicatedPages();
-};
-
 export const reformatI18n = async (db: DbService) => {
   const en = JSON.parse(
     await readFile(

@@ -337,9 +337,6 @@ export async function getAggregatedPageMetrics<T>(
       title: {
         $first: '$page.title',
       },
-      all_urls: {
-        $first: '$page.all_urls',
-      },
     })
     .sort(metricsSort)
     .exec();

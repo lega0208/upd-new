@@ -64,31 +64,6 @@ export class PagesService {
       this.pageModel
     );
 
-    // const metrics: PagesHomeAggregatedData[] =
-    //   await this.pageMetricsModel.getAggregatedPageMetrics(
-    //     dateRange,
-    //     ['visits'],
-    //     {},
-    //     { visits: -1 }
-    //   );
-    //
-    // const pages =
-    //   (await this.pageModel
-    //     .find(
-    //       { _id: { $nin: metrics.map((metric) => metric._id) } },
-    //       { url: 1, title: 1, all_urls: 1 }
-    //     )
-    //     .lean()
-    //     .exec()) ?? [];
-    //
-    // const results = [
-    //   ...metrics,
-    //   ...pages.map((page) => ({
-    //     ...page,
-    //     visits: 0,
-    //   })),
-    // ];
-
     await this.cacheManager.set(cacheKey, results);
 
     return {

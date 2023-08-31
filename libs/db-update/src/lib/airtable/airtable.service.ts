@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AnyBulkWriteOperation } from 'mongodb';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import {
   CallDriver,
@@ -20,8 +20,18 @@ import {
   UxTestData,
 } from '@dua-upd/external-data';
 import { BlobLogger } from '@dua-upd/logger';
-import { AttachmentData, IPage, ITask } from '@dua-upd/types-common';
-import { arrayToDictionary, WithObjectId } from '@dua-upd/utils-common';
+import {
+  AttachmentData,
+  IPage,
+  IProject,
+  ITask,
+  IUxTest,
+} from '@dua-upd/types-common';
+import {
+  arrayToDictionary,
+  logJson,
+  WithObjectId,
+} from '@dua-upd/utils-common';
 import type { UxApiData, UxApiDataType, UxData } from './types';
 import { assertHasUrl, assertObjectId } from './utils';
 import { difference, uniq } from 'rambdax';
@@ -71,21 +81,19 @@ export class AirtableService {
     const airtableIds = data.map((doc) => doc.airtable_id);
 
     const airtableFilter = { airtable_id: { $in: airtableIds } };
-    const urlFilter = {};
 
-    // for Pages, we might already have an entry that wasn't from airtable, so we'll check urls as well
+    const urlFilter: FilterQuery<Page> = {};
+
     if (model.modelName === 'Page') {
       assertHasUrl(data);
 
       const urls = data.map((doc) => doc.url.replace(/^https:\/\//i, ''));
 
-      urlFilter['$or'] = [{ url: { $in: urls } }, { all_urls: { $in: urls } }];
+      urlFilter['url'] = { $in: urls };
     }
 
     const existingDataFilter =
-      model.modelName === 'Page'
-        ? { $or: [airtableFilter, ...urlFilter['$or']] }
-        : airtableFilter;
+      model.modelName === 'Page' ? urlFilter : airtableFilter;
 
     const existingData =
       (await model.find(existingDataFilter).lean().exec()) || ([] as T[]);
@@ -94,21 +102,15 @@ export class AirtableService {
       idsMap.set(doc.airtable_id, doc._id);
     }
 
-    const allUrlsDict = Object.fromEntries(
-      existingData
-        .map((page: T) =>
-          'all_urls' in page
-            ? (<Page>(<unknown>page)).all_urls.map((url) => [url, page])
-            : []
-        )
-        .flat()
+    const urlsDict = Object.fromEntries(
+      existingData.map((page: T) => ('url' in page ? [page.url, page] : []))
     );
 
     return data.map((doc) => {
       if (!idsMap.get(doc.airtable_id)) {
         idsMap.set(
           doc.airtable_id,
-          allUrlsDict[doc['url']]?._id || new Types.ObjectId()
+          urlsDict[doc['url']]?._id || new Types.ObjectId()
         );
       }
       return {
@@ -125,7 +127,7 @@ export class AirtableService {
       uxTests: Map<string, Types.ObjectId>;
       pages: Map<string, Types.ObjectId>;
     }
-  ): Promise<Project[]> {
+  ): Promise<IProject[]> {
     const projectTitles = [
       ...new Set(uxTestsWithIds.map((uxTest) => uxTest.title)),
     ];
@@ -195,7 +197,7 @@ export class AirtableService {
         description: uxTests.find((uxTest) => uxTest.description)?.description,
         attachments: Object.values(attachments),
       };
-    }) as Project[];
+    }) as IProject[];
   }
 
   async getAndPrepareUxData(): Promise<UxData> {
@@ -252,15 +254,15 @@ export class AirtableService {
         tasks: (uxTest.tasks || []).map((taskAirtableId) =>
           airtableIdToObjectIdMaps.tasks.get(taskAirtableId)
         ),
-      } as UxTest;
+      } as IUxTest;
     });
 
     const tasksWithRefs = tasksWithIds.map((task) => {
       const ux_tests = uxTestsWithRefs.filter((uxTest) => {
         if (uxTest.tasks) {
-          assertObjectId(uxTest.tasks);
+          assertObjectId(uxTest.tasks as Types.ObjectId[]);
 
-          return uxTest.tasks?.includes(task._id);
+          return (uxTest.tasks as Types.ObjectId[])?.includes(task._id);
         }
       });
 
@@ -290,9 +292,9 @@ export class AirtableService {
     const pagesWithRefs = pagesWithIds.map((page) => {
       const ux_tests = uxTestsWithRefs.filter((uxTest) => {
         if (uxTest.pages) {
-          assertObjectId(uxTest.pages);
+          assertObjectId(uxTest.pages as Types.ObjectId[]);
 
-          return uxTest.pages?.includes(page._id);
+          return (uxTest.pages as Types.ObjectId[])?.includes(page._id);
         }
       });
 
@@ -383,11 +385,11 @@ export class AirtableService {
             title: page.title,
             url: page.url,
           },
-          $addToSet: {
-            all_urls: page.url,
-          },
           $set: {
             airtable_id: page.airtable_id,
+            lang: page.url
+              .match(/(?<=www\.canada\.ca\/)(?:en|fr)/i)?.[0]
+              ?.toLowerCase(),
             tasks: page.tasks || [],
             projects: page.projects || [],
             ux_tests: page.ux_tests || [],
@@ -404,9 +406,13 @@ export class AirtableService {
     await this.pageModel.bulkWrite(pageUpdateOps);
 
     if (pageRemoveOps.length) {
-      this.logger.log(
-        `${removedPages.length} Pages removed from airtable- removing references`
-      );
+      this.logger.log(`${removedPages.length} Pages removed from airtable:`);
+      const removedPagesData = await this.pageModel
+        .find({ _id: { $in: removedPages } }, { url: 1 })
+        .lean()
+        .exec();
+      logJson(removedPagesData);
+      this.logger.log(`removing references`);
 
       await this.pageModel.bulkWrite(pageRemoveOps);
 
@@ -496,9 +502,7 @@ export class AirtableService {
       updateMany: {
         filter: {
           page: null,
-          url: {
-            $in: page.all_urls,
-          },
+          url: page.url,
         },
         update: {
           $set: {

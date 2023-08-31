@@ -758,12 +758,21 @@ async function getOverviewMetrics(
     .exec();
 
   const aggregatedMetrics = await overallModel
-    .aggregate<
-      Omit<
-        OverviewAggregatedData,
-        'visitsByDay' | 'calldriversByDay' | 'dyfByDay'
-      >
-    >()
+    .aggregate<{
+      visitors: number;
+      visits: number;
+      pageViews: number;
+      impressions: number;
+      ctr: number;
+      position: number;
+      dyf_yes: number;
+      dyf_no: number;
+      dyf_submit: number;
+      fwylf_error: number;
+      fwylf_hard_to_understand: number;
+      fwylf_other: number;
+      fwylf_cant_find_info: number;
+    }>()
     .match({
       date: dateQuery,
     })
