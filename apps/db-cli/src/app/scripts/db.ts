@@ -11,7 +11,6 @@ import {
   arrayToDictionary,
   arrayToDictionaryFlat,
   dayjs,
-  logJson,
   prettyJson,
 } from '@dua-upd/utils-common';
 import { readFile, writeFile, mkdir } from 'fs/promises';
@@ -947,9 +946,6 @@ export async function migratePagesToSingleUrl(db: DbService) {
   await db.collections.urls.bulkWrite(urlsUpdateOps);
 
   console.log(`bulk writing: pages update ops`);
-  logJson(
-    pagesUpdateOps.slice(pagesUpdateOps.length - 10, pagesUpdateOps.length)
-  );
   await db.collections.pages.collection.bulkWrite(
     pagesUpdateOps as AnyBulkWriteOperation[]
   );
