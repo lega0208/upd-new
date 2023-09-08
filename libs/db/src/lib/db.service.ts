@@ -206,7 +206,7 @@ export class DbService {
 
   private async simplifiedValidatePageRefs(filter: FilterQuery<PageMetrics>) {
     const pages: Page[] = await this.pages
-      .find({}, { all_urls: 1, tasks: 1, projects: 1, ux_tests: 1 })
+      .find({}, { url: 1, tasks: 1, projects: 1, ux_tests: 1 })
       .lean()
       .exec();
 

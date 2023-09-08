@@ -16,7 +16,7 @@ import {
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { AnyBulkWriteOperation } from 'mongodb';
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { IFeedback, IUrl } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { difference, filterObject, omit, uniq } from 'rambdax';
@@ -946,7 +946,9 @@ export async function migratePagesToSingleUrl(db: DbService) {
   await db.collections.urls.bulkWrite(urlsUpdateOps);
 
   console.log(`bulk writing: pages update ops`);
-  await db.collections.pages.bulkWrite(pagesUpdateOps);
+  await db.collections.pages.collection.bulkWrite(
+    pagesUpdateOps as AnyBulkWriteOperation[]
+  );
 
   console.log(`bulk writing: readability update ops`);
   await db.collections.readability.bulkWrite(readabilityUpdateOps);
@@ -975,7 +977,7 @@ export async function migratePagesToSingleUrl(db: DbService) {
   // run airtable updates
   console.log('running airtable updates');
   console.time('airtable updates');
-  await dbUpdateService.updateUxData();
+  await dbUpdateService.updateUxData(true);
   console.timeEnd('airtable updates');
 
   await dbUpdateService.recalculateViews();

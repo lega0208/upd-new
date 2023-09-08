@@ -60,6 +60,61 @@ export class AirtableService {
     private blobService: BlobStorageService
   ) {}
 
+  async pagesHaveChanged(
+    currentPages: IPage[],
+    pagesDict: Record<string, IPage>,
+    newPages: IPage[]
+  ): Promise<boolean> {
+    // compare pages and relationships to current data -> skip updating refs if nothing has changed
+    const refArraysAreTheSame = (a: Types.ObjectId[], b: Types.ObjectId[]) => {
+      if (a.length !== b.length) {
+        return false;
+      }
+
+      const normalizedA = JSON.stringify(a.map((id) => id.toString()));
+      const normalizedB = JSON.stringify(b.map((id) => id.toString()));
+
+      return normalizedA === normalizedB;
+    };
+
+    if (currentPages.length !== newPages.length) {
+      console.log('current pages and new pages are different lengths');
+      console.log(
+        `currentPages: ${currentPages.length} - newPages: ${newPages.length}`
+      );
+
+      return true;
+    }
+
+    for (const page of currentPages) {
+      const newPage = pagesDict[page._id.toString()];
+
+      if (!newPage) {
+        console.log('no newPage?');
+        return true;
+      }
+
+      const tasksChanged = !refArraysAreTheSame(
+        page.tasks as Types.ObjectId[],
+        newPage.tasks as Types.ObjectId[]
+      );
+
+      const projectsChanged = !refArraysAreTheSame(
+        page.projects as Types.ObjectId[],
+        newPage.projects as Types.ObjectId[]
+      );
+
+      const uxTestsChanged = !refArraysAreTheSame(
+        page.ux_tests as Types.ObjectId[],
+        newPage.ux_tests as Types.ObjectId[]
+      );
+
+      if (tasksChanged || projectsChanged || uxTestsChanged) {
+        return true;
+      }
+    }
+  }
+
   async getUxData(): Promise<UxApiData> {
     this.logger.log('Getting data from Airtable...');
     const tasksData = await this.airtableClient.getTasks();
@@ -322,23 +377,25 @@ export class AirtableService {
     };
   }
 
-  async updateUxData() {
+  async updateUxData(forceVerifyMetricsRefs = false) {
     // don't await it yet so that we can do db queries while we're waiting
     const uxDataPromise = this.getAndPrepareUxData();
 
     // get current page ids to compare to airtable pages
     const currentPages =
-      (await this.pageModel.distinct<Types.ObjectId>('_id', {
-        $or: [
-          { airtable_id: { $exists: true } },
-          { 'tasks.0': { $exists: true } },
-          { 'projects.0': { $exists: true } },
-        ],
-      })) || [];
+      (await this.pageModel
+        .find({
+          $or: [
+            { airtable_id: { $exists: true } },
+            { 'tasks.0': { $exists: true } },
+            { 'projects.0': { $exists: true } },
+          ],
+        })
+        .lean()
+        .exec()) || [];
 
     const { tasks, uxTests, pages, projects } = await uxDataPromise;
 
-    // allowDuplicateKeys should probably become false after urls migration
     const pagesDict = arrayToDictionary(pages, '_id', true);
 
     // see if any pages are in the db but are no longer in airtable
@@ -465,194 +522,204 @@ export class AirtableService {
       projectUpdateOps as AnyBulkWriteOperation<Project>[]
     );
 
-    // update metrics refs
-    this.logger.log('Syncing pages_metrics references');
+    const pagesChanged = await this.pagesHaveChanged(
+      currentPages,
+      pagesDict,
+      pages
+    );
 
-    // set refs on metrics using page ids
-    const metricsSetRefsOps = pages.map((page) => ({
-      updateMany: {
-        filter: { page: page._id },
-        update: {
-          $set: {
-            tasks: page.tasks,
-            projects: page.projects,
-            ux_tests: page.ux_tests,
+    console.log('pages have changed: ', pagesChanged);
+
+    if (forceVerifyMetricsRefs || !pagesChanged) {
+      // update metrics refs
+      this.logger.log('Syncing pages_metrics references');
+
+      // set refs on metrics using page ids
+      const metricsSetRefsOps = pages.map((page) => ({
+        updateMany: {
+          filter: { page: page._id },
+          update: {
+            $set: {
+              tasks: page.tasks,
+              projects: page.projects,
+              ux_tests: page.ux_tests,
+            },
           },
         },
-      },
-    })) as AnyBulkWriteOperation<PageMetrics>[];
+      })) as AnyBulkWriteOperation<PageMetrics>[];
 
-    if (metricsSetRefsOps.length) {
-      this.logger.log(
-        `Setting metrics references for ${metricsSetRefsOps.length} pages`
-      );
+      if (metricsSetRefsOps.length) {
+        this.logger.log(
+          `Setting metrics references for ${metricsSetRefsOps.length} pages`
+        );
 
-      const metricsSetRefsResults = await this.pageMetricsModel.bulkWrite(
-        metricsSetRefsOps,
-        { ordered: false }
-      );
+        const metricsSetRefsResults = await this.pageMetricsModel.bulkWrite(
+          metricsSetRefsOps,
+          { ordered: false }
+        );
 
-      this.logger.log(
-        `Added references to ${metricsSetRefsResults.modifiedCount} metrics documents`
-      );
-    }
+        this.logger.log(
+          `Added references to ${metricsSetRefsResults.modifiedCount} metrics documents`
+        );
+      }
 
-    // set refs on metrics using url if page ref is missing
-    const metricsAddMissingRefsOps = pages.map((page) => ({
-      updateMany: {
-        filter: {
-          page: null,
-          url: page.url,
-        },
-        update: {
-          $set: {
-            page: page._id,
-            tasks: page.tasks,
-            projects: page.projects,
-            ux_tests: page.ux_tests,
+      // set refs on metrics using url if page ref is missing
+      const metricsAddMissingRefsOps = pages.map((page) => ({
+        updateMany: {
+          filter: {
+            page: null,
+            url: page.url,
+          },
+          update: {
+            $set: {
+              page: page._id,
+              tasks: page.tasks,
+              projects: page.projects,
+              ux_tests: page.ux_tests,
+            },
           },
         },
-      },
-    })) as AnyBulkWriteOperation<PageMetrics>[];
+      })) as AnyBulkWriteOperation<PageMetrics>[];
 
-    if (metricsAddMissingRefsOps.length) {
-      this.logger.log(
-        `Adding missing references to metrics documents for ${metricsAddMissingRefsOps.length} pages`
+      if (metricsAddMissingRefsOps.length) {
+        this.logger.log(
+          `Adding missing references to metrics documents for ${metricsAddMissingRefsOps.length} pages`
+        );
+
+        const metricsAddMissingRefsResults =
+          await this.pageMetricsModel.bulkWrite(metricsAddMissingRefsOps, {
+            ordered: false,
+          });
+
+        this.logger.log(
+          `Added references to ${metricsAddMissingRefsResults.modifiedCount} metrics documents`
+        );
+      }
+
+      // remove dangling refs
+      // todo: collect urls and try to associate with existing pages
+      //        -> if no match, create new page? (will need some sane validation and can use that to remove garbage)
+
+      // get ids of non-airtable pages
+      const dbPageIds = (
+        await this.pageModel.distinct<Types.ObjectId>('_id', {
+          airtable_id: { $exists: false },
+        })
+      ).map((id) => id.toString());
+
+      const metricsPageIds = (
+        await this.pageMetricsModel.distinct<Types.ObjectId>('page')
+      )
+        ?.filter((id) => id)
+        .map((id) => id.toString());
+
+      // find any page refs for pages that don't exist anymore
+      const danglingPageIds = difference(
+        metricsPageIds,
+        pages.map((page) => page._id.toString()).concat(dbPageIds)
       );
 
-      const metricsAddMissingRefsResults =
-        await this.pageMetricsModel.bulkWrite(metricsAddMissingRefsOps, {
-          ordered: false,
+      if (danglingPageIds.length) {
+        this.logger.log(
+          `Removing references from metrics documents for ${danglingPageIds.length} dangling page references:`
+        );
+
+        const metricsRemoveRefsOps = danglingPageIds.map((pageId) => ({
+          updateMany: {
+            filter: { page: new Types.ObjectId(pageId) },
+            update: {
+              $unset: {
+                page: '',
+                tasks: '',
+                projects: '',
+                ux_tests: '',
+              },
+            },
+          },
+        })) as AnyBulkWriteOperation<PageMetrics>[];
+
+        const metricsRemoveRefsResults = await this.pageMetricsModel.bulkWrite(
+          metricsRemoveRefsOps,
+          { ordered: false }
+        );
+
+        this.logger.log(
+          `Removed page references from ${metricsRemoveRefsResults.modifiedCount} metrics documents`
+        );
+      }
+
+      // find airtable refs that should be removed:
+      // get page ids of metrics with airtable refs and compare to current airtable pages
+      const metricsTaskPageIds =
+        await this.pageMetricsModel.distinct<Types.ObjectId>('page', {
+          // the date property is only for triggering the use of a specific index
+          // for more details see the definition of the index called "date_airtable" (as of writing this comment)
+          //  in libs/db/src/lib/schemas/page_metrics.schema.ts
+          date: {
+            $exists: true,
+          },
+          // have to do tasks/projects/tests separately or the index doesn't get used, for whatever reason
+          'tasks.0': { $exists: true },
         });
 
-      this.logger.log(
-        `Added references to ${metricsAddMissingRefsResults.modifiedCount} metrics documents`
-      );
-    }
+      const metricsProjectPageIds =
+        await this.pageMetricsModel.distinct<Types.ObjectId>('page', {
+          date: {
+            $exists: true,
+          },
+          'projects.0': { $exists: true },
+        });
 
-    // remove dangling refs
-    // todo: collect urls and try to associate with existing pages
-    //        -> if no match, create new page? (will need some sane validation and can use that to remove garbage)
+      const metricsUxTestPageIds =
+        await this.pageMetricsModel.distinct<Types.ObjectId>('page', {
+          date: {
+            $exists: true,
+          },
+          'ux_tests.0': { $exists: true },
+        });
 
-    // get ids of non-airtable pages
-    const dbPageIds = (
-      await this.pageModel.distinct<Types.ObjectId>('_id', {
-        airtable_id: { $exists: false },
-      })
-    ).map((id) => id.toString());
-
-    const metricsPageIds = (
-      await this.pageMetricsModel.distinct<Types.ObjectId>('page')
-    )
-      ?.filter((id) => id)
-      .map((id) => id.toString());
-
-    // find any page refs for pages that don't exist anymore
-    const danglingPageIds = difference(
-      metricsPageIds,
-      pages.map((page) => page._id.toString()).concat(dbPageIds)
-    );
-
-    if (danglingPageIds.length) {
-      this.logger.log(
-        `Removing references from metrics documents for ${danglingPageIds.length} dangling page references:`
+      const metricsAirtablePageIds = uniq(
+        [
+          ...metricsTaskPageIds,
+          ...metricsProjectPageIds,
+          ...metricsUxTestPageIds,
+        ].map((id) => id.toString())
       );
 
-      const metricsRemoveRefsOps = danglingPageIds.map((pageId) => ({
-        updateMany: {
-          filter: { page: new Types.ObjectId(pageId) },
-          update: {
-            $unset: {
-              page: '',
-              tasks: '',
-              projects: '',
-              ux_tests: '',
+      const danglingAirtableRefIds = difference(
+        metricsAirtablePageIds,
+        pages.map((page) => page._id.toString())
+      );
+
+      if (danglingAirtableRefIds.length) {
+        this.logger.log(
+          `Removing references from metrics documents for ${danglingAirtableRefIds.length} dangling airtable references:`
+        );
+
+        const metricsRemoveRefsOps = danglingAirtableRefIds.map((pageId) => ({
+          updateMany: {
+            filter: { page: new Types.ObjectId(pageId) },
+            update: {
+              // unset airtable refs *but not page ref*, because we checked above for dangling *page* refs
+              // (as opposed to airtable refs)
+              $unset: {
+                tasks: '',
+                projects: '',
+                ux_tests: '',
+              },
             },
           },
-        },
-      })) as AnyBulkWriteOperation<PageMetrics>[];
+        })) as AnyBulkWriteOperation<PageMetrics>[];
 
-      const metricsRemoveRefsResults = await this.pageMetricsModel.bulkWrite(
-        metricsRemoveRefsOps,
-        { ordered: false }
-      );
+        const metricsRemoveRefsResults = await this.pageMetricsModel.bulkWrite(
+          metricsRemoveRefsOps,
+          { ordered: false }
+        );
 
-      this.logger.log(
-        `Removed page references from ${metricsRemoveRefsResults.modifiedCount} metrics documents`
-      );
-    }
-
-    // find airtable refs that should be removed:
-    // get page ids of metrics with airtable refs and compare to current airtable pages
-    const metricsTaskPageIds =
-      await this.pageMetricsModel.distinct<Types.ObjectId>('page', {
-        // the date property is only for triggering the use of a specific index
-        // for more details see the definition of the index called "date_airtable" (as of writing this comment)
-        //  in libs/db/src/lib/schemas/page_metrics.schema.ts
-        date: {
-          $exists: true,
-        },
-        // have to do tasks/projects/tests separately or the index doesn't get used, for whatever reason
-        'tasks.0': { $exists: true },
-      });
-
-    const metricsProjectPageIds =
-      await this.pageMetricsModel.distinct<Types.ObjectId>('page', {
-        date: {
-          $exists: true,
-        },
-        'projects.0': { $exists: true },
-      });
-
-    const metricsUxTestPageIds =
-      await this.pageMetricsModel.distinct<Types.ObjectId>('page', {
-        date: {
-          $exists: true,
-        },
-        'ux_tests.0': { $exists: true },
-      });
-
-    const metricsAirtablePageIds = uniq(
-      [
-        ...metricsTaskPageIds,
-        ...metricsProjectPageIds,
-        ...metricsUxTestPageIds,
-      ].map((id) => id.toString())
-    );
-
-    const danglingAirtableRefIds = difference(
-      metricsAirtablePageIds,
-      pages.map((page) => page._id.toString())
-    );
-
-    if (danglingAirtableRefIds.length) {
-      this.logger.log(
-        `Removing references from metrics documents for ${danglingAirtableRefIds.length} dangling airtable references:`
-      );
-
-      const metricsRemoveRefsOps = danglingAirtableRefIds.map((pageId) => ({
-        updateMany: {
-          filter: { page: new Types.ObjectId(pageId) },
-          update: {
-            // unset airtable refs *but not page ref*, because we checked above for dangling *page* refs
-            // (as opposed to airtable refs)
-            $unset: {
-              tasks: '',
-              projects: '',
-              ux_tests: '',
-            },
-          },
-        },
-      })) as AnyBulkWriteOperation<PageMetrics>[];
-
-      const metricsRemoveRefsResults = await this.pageMetricsModel.bulkWrite(
-        metricsRemoveRefsOps,
-        { ordered: false }
-      );
-
-      this.logger.log(
-        `Removed airtable references from ${metricsRemoveRefsResults.modifiedCount} metrics documents`
-      );
+        this.logger.log(
+          `Removed airtable references from ${metricsRemoveRefsResults.modifiedCount} metrics documents`
+        );
+      }
     }
 
     // Prune removed data
