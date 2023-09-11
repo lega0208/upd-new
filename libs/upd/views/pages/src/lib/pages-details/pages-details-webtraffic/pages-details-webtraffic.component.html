@@ -46,6 +46,20 @@
   <div class="row">
     <div class="col">
       <upd-data-table-card
+        [data]="(activityMap$ | async) || []"
+        [cols]="activityMapCols"
+        [pagination]="true"
+        [title]="'visitor-activity'"
+      >
+      </upd-data-table-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
         [data]="(visitorLocation$ | async) || []"
         [cols]="visitorLocationCols"
         [pagination]="false"
