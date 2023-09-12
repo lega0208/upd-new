@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   AAItemId,
   DbService,
@@ -16,7 +17,7 @@ import {
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { AnyBulkWriteOperation } from 'mongodb';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { IFeedback, IUrl } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { difference, filterObject, omit, uniq } from 'rambdax';
@@ -31,6 +32,13 @@ export const recalculateViews = async (
 ) => {
   return await updateService.recalculateViews();
 };
+
+export const updateAirtable = async (
+  db: DbService,
+  updateService: DbUpdateService
+) => {
+  return await updateService.updateUxData(true);
+}
 
 export const addMissingPageMetricsRefs = async (db: DbService) => {
   await db.addMissingAirtableRefsToPageMetrics();

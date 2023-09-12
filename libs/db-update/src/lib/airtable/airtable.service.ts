@@ -530,7 +530,7 @@ export class AirtableService {
 
     console.log('pages have changed: ', pagesChanged);
 
-    if (forceVerifyMetricsRefs || !pagesChanged) {
+    if (forceVerifyMetricsRefs || pagesChanged) {
       // update metrics refs
       this.logger.log('Syncing pages_metrics references');
 
