@@ -41,13 +41,18 @@ const projectStatusSwitchExpression = {
     branches: [
       {
         case: {
-          $allElementsTrue: {
-            $map: {
-              input: '$statuses',
-              as: 'status',
-              in: { $eq: ['$$status', 'Complete'] },
-            },
-          },
+          $and: [
+            { $gt: [{ $size: "$statuses" }, 0] },
+            {
+              $allElementsTrue: {
+                $map: {
+                  input: '$statuses',
+                  as: 'status',
+                  in: { $eq: ['$$status', 'Complete'] }
+                }
+              }
+            }
+          ]
         },
         then: 'Complete',
       },

@@ -62,10 +62,14 @@ export const createDateRangeFilterFormula = (
 };
 
 export class AirtableClient {
-  client: AirTableAPI = getATClient();
+  client: AirTableAPI;
   feedbackClient: AirTableAPI = getATClient(
     process.env.AIRTABLE_FEEDBACK_API_KEY
   );
+
+  constructor(apiKey?: string) {
+    this.client = getATClient(apiKey);
+  }
 
   createQuery(
     baseId: string,
@@ -300,7 +304,7 @@ export class AirtableClient {
             : undefined,
           scenario: fields['Scenario/Questions'],
           tasks: fields['Task'],
-          subtasks: fields['Sub-Task'],
+          subtask: fields['Sub-Task'],
           pages: fields['Pages_RecordIds'],
           vendor: fields['Vendor'],
           version_tested: fields['Version Tested'],

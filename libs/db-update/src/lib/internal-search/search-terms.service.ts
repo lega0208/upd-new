@@ -16,6 +16,7 @@ import type {
 } from '@dua-upd/types-common';
 import {
   AdobeAnalyticsService,
+  BlobProxyService,
   DateRange,
   InternalSearchResult,
   queryDateFormat,
@@ -32,6 +33,7 @@ dayjs.extend(utc);
 export class InternalSearchTermsService {
   constructor(
     private adobeAnalyticsService: AdobeAnalyticsService,
+    private blobProxyService: BlobProxyService,
     private db: DbService,
     private logger: ConsoleLogger
   ) {}
@@ -307,13 +309,23 @@ export class InternalSearchTermsService {
         )
       );
 
-      const itemIds = await this.adobeAnalyticsService.getInternalSearchItemIds(
-        dateRange
+      const blobProxy = this.blobProxyService.createProxy({
+        blobModel: 'aa_raw',
+        filenameGenerator: (date: string) => `searchterms/itemIds_${date}.json`,
+        queryExecutor: async (dateRange: DateRange) =>
+          await this.adobeAnalyticsService.getInternalSearchItemIds(dateRange),
+      });
+
+      const itemIds = await blobProxy.exec(
+        dateRange,
+        `${dateRange.start.slice(0, 10)}_${dateRange.end.slice(0, 10)}`
       );
 
       await this.insertItemIdsIfNew(itemIds);
 
       this.logger.log(chalk.green('Successfully updated itemIds.'));
+
+      return itemIds;
     } catch (err) {
       this.logger.error(chalk.red('Error updating itemIds:'));
       this.logger.error(chalk.red(err.stack));
@@ -466,15 +478,6 @@ export class InternalSearchTermsService {
       return;
     }
 
-    await this.updateItemIds(queriesDateRange);
-
-    const itemIdDocs = await this.db.collections.aaItemIds
-      .find({
-        page: { $exists: true },
-      })
-      .lean()
-      .exec();
-
     type SearchTermIntermediateResult = InternalSearchResult & {
       itemIdUrl: string;
       page: Types.ObjectId;
@@ -498,20 +501,42 @@ export class InternalSearchTermsService {
           dayjs.utc().startOf('day')
       );
 
+    const blobProxy = this.blobProxyService.createProxy({
+      blobModel: 'aa_raw',
+      filenameGenerator: (dates: string) =>
+        `searchterms/searchterms-by-itemId_${dates}.json`,
+      queryExecutor: async ([dateRange, itemIdDocs]: [
+        DateRange,
+        IAAItemId[]
+      ]) =>
+        await this.adobeAnalyticsService.getPageSearchTerms(
+          dateRange,
+          itemIdDocs
+        ),
+    });
+
     for (const dateRange of dateRanges) {
       const noMetricsMatchSet = new Set<{
         page: Types.ObjectId;
         url: string;
       }>();
 
-      const results = await this.adobeAnalyticsService.getPageSearchTerms(
-        dateRange,
-        itemIdDocs
+      const itemIdDocs = await this.updateItemIds(dateRange);
+
+      const searchTermResults = await blobProxy.exec(
+        [dateRange, itemIdDocs],
+        `${dateRange.start.slice(0, 10)}_${dateRange.end.slice(0, 10)}` // the date string to include in the filename
       );
 
-      const itemIdDict = arrayToDictionary(itemIdDocs, 'itemId');
+      const dbItemIds =
+        (await this.db.collections.aaItemIds
+          .find({ type: 'internalSearch' })
+          .lean()
+          .exec()) || [];
 
-      const resultsWithRefs = results
+      const itemIdDict = arrayToDictionary(dbItemIds, 'itemId');
+
+      const resultsWithRefs = searchTermResults
         .map((searchTermResults) => {
           const itemIdData = itemIdDict[searchTermResults.itemId];
           const page = itemIdData?.page;

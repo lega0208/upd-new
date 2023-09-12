@@ -205,6 +205,7 @@ export interface ITask {
   date?: string;
   tpc_ids: number[];
   program?: string;
+  service?: string;
   user_journey?: string[];
   status?: string;
   channel?: string[];

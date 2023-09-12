@@ -152,13 +152,13 @@ export class DbUpdateService {
         this.airtableService.uploadProjectAttachmentsAndUpdateUrls(),
       ]);
 
-      await this.internalSearchService
-        .upsertPageSearchTerms()
-        .catch((err) => this.logger.error(err.stack));
-
       await this.createPagesFromPageList().catch((err) =>
         this.logger.error(err.stack)
       );
+
+      await this.internalSearchService
+        .upsertPageSearchTerms()
+        .catch((err) => this.logger.error(err.stack));
 
       await this.pagesService
         .updatePagesLang()
@@ -253,8 +253,8 @@ export class DbUpdateService {
   }
 
   @Retry(4, 1000)
-  async updateUxData() {
-    return this.airtableService.updateUxData();
+  async updateUxData(forceVerifyMetricsRefs = false) {
+    return this.airtableService.updateUxData(forceVerifyMetricsRefs);
   }
 
   async updateCalldrivers(endDate?: DateType) {

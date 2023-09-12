@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   AAItemId,
   DbService,
@@ -31,6 +32,13 @@ export const recalculateViews = async (
 ) => {
   return await updateService.recalculateViews();
 };
+
+export const updateAirtable = async (
+  db: DbService,
+  updateService: DbUpdateService
+) => {
+  return await updateService.updateUxData(true);
+}
 
 export const addMissingPageMetricsRefs = async (db: DbService) => {
   await db.addMissingAirtableRefsToPageMetrics();
@@ -946,7 +954,9 @@ export async function migratePagesToSingleUrl(db: DbService) {
   await db.collections.urls.bulkWrite(urlsUpdateOps);
 
   console.log(`bulk writing: pages update ops`);
-  await db.collections.pages.bulkWrite(pagesUpdateOps);
+  await db.collections.pages.collection.bulkWrite(
+    pagesUpdateOps as AnyBulkWriteOperation[]
+  );
 
   console.log(`bulk writing: readability update ops`);
   await db.collections.readability.bulkWrite(readabilityUpdateOps);
@@ -975,7 +985,7 @@ export async function migratePagesToSingleUrl(db: DbService) {
   // run airtable updates
   console.log('running airtable updates');
   console.time('airtable updates');
-  await dbUpdateService.updateUxData();
+  await dbUpdateService.updateUxData(true);
   console.timeEnd('airtable updates');
 
   await dbUpdateService.recalculateViews();

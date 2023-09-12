@@ -10,4 +10,5 @@ export default {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   coverageDirectory: '../../coverage/libs/db-update',
   preset: '../../jest.preset.js',
+  setupFiles: ['<rootDir>/src/lib/test-setup.ts']
 };
