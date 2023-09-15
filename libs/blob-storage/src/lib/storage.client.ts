@@ -256,7 +256,20 @@ export class BlobClient {
     this.compression = algorithm;
 
     if (algorithm && !this.name.endsWith(`.${algorithm}`)) {
-      this.filename += `.${algorithm}`;
+      const compressionExtensions: CompressionAlgorithm[] = [
+        'brotli',
+        'lz4',
+        'zstd',
+      ];
+
+      const extensionsRegex = new RegExp(
+        `.(${compressionExtensions.join('|')})$`
+      );
+
+      this.filename = `${this.filename.replace(
+        extensionsRegex,
+        ''
+      )}.${algorithm}`;
 
       if (this.blobType === 'append') {
         this.client = this.container
@@ -489,6 +502,17 @@ export class BlobClient {
       await this.client.appendBlock(text, Buffer.from(text).byteLength);
     } catch (err) {
       console.error(chalk.red('Error appending to blob: ', this.client.name));
+      console.error(err.stack);
+    }
+  }
+
+  async delete() {
+    try {
+      if (await this.client.exists()) {
+        await this.client.delete();
+      }
+    } catch (err) {
+      console.error(chalk.red('Error deleting blob: ', this.client.name));
       console.error(err.stack);
     }
   }

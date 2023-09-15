@@ -205,6 +205,7 @@ export interface ITask {
   date?: string;
   tpc_ids: number[];
   program?: string;
+  service?: string;
   user_journey?: string[];
   status?: string;
   channel?: string[];
@@ -287,6 +288,14 @@ export interface AttachmentData {
   size: number;
   storage_url?: string;
 }
+
+export interface IReports {
+  en_title: string;
+  fr_title: string;
+  en_attachment: AttachmentData[];
+  fr_attachment: AttachmentData[];
+}
+[];
 
 export interface SearchAssessmentData {
   lang: string;

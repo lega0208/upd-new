@@ -18,6 +18,7 @@ import {
   FeedbackData,
   PageListData,
   AnnotationsData,
+  ReportsData,
 } from './types';
 
 dayjs.extend(utc);
@@ -62,10 +63,14 @@ export const createDateRangeFilterFormula = (
 };
 
 export class AirtableClient {
-  client: AirTableAPI = getATClient();
+  client: AirTableAPI;
   feedbackClient: AirTableAPI = getATClient(
     process.env.AIRTABLE_FEEDBACK_API_KEY
   );
+
+  constructor(apiKey?: string) {
+    this.client = getATClient(apiKey);
+  }
 
   createQuery(
     baseId: string,
@@ -272,6 +277,33 @@ export class AirtableClient {
       })) as TaskData[];
   }
 
+  async getReports(lastUpdatedDate?: DateType): Promise<ReportsData[]> {
+    const params = lastUpdatedDate
+      ? {
+          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
+        }
+      : {};
+    const query = this.createQuery(
+      bases.TASKS_INVENTORY,
+      'TMF reports',
+      params
+    );
+
+    return (await this.selectAll(query))
+      .filter(({ fields }) => Object.values(fields).some((value) => value))
+      .map(({ id, fields }) => ({
+        airtable_id: id,
+        en_title: squishTrim(fields['TMF Report title - En']),
+        fr_title: squishTrim(fields['TMF Report title - Fr']),
+        type: 'tasks',
+        en_attachment: fields['Report attachment - En'],
+        fr_attachment: fields['Report attachment - Fr'],
+        date: fields['Date added']
+          ? dayjs.utc(fields['Date added']).toDate()
+          : fields['Date added'],
+      })) as ReportsData[];
+  }
+
   async getUxTests(lastUpdatedDate?: DateType): Promise<UxTestData[]> {
     const params = lastUpdatedDate
       ? {
@@ -300,7 +332,7 @@ export class AirtableClient {
             : undefined,
           scenario: fields['Scenario/Questions'],
           tasks: fields['Task'],
-          subtasks: fields['Sub-Task'],
+          subtask: fields['Sub-Task'],
           pages: fields['Pages_RecordIds'],
           vendor: fields['Vendor'],
           version_tested: fields['Version Tested'],

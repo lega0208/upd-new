@@ -16,6 +16,7 @@ import {
   Feedback,
   PageMetrics,
   Project,
+  Reports,
   Task,
   UxTest,
 } from '@dua-upd/db';
@@ -23,6 +24,8 @@ import type {
   TaskDetailsData,
   TasksHomeData,
   TaskDetailsAggregatedData,
+  AttachmentData,
+  IReports,
 } from '@dua-upd/types-common';
 import type { ApiParams } from '@dua-upd/types-common';
 import {
@@ -51,6 +54,8 @@ export class TasksService {
     private feedbackModel: FeedbackModel,
     @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriversModel: CallDriverModel,
+    @InjectModel(Reports.name, 'defaultConnection')
+    private reportsModel: Model<Reports>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -94,8 +99,14 @@ export class TasksService {
         })
     )?.[0]?.totalVisits;
 
-    const tpcIds = await this.db.collections.tasks.find({tpc_ids: {$not: {$size: 0}}},{tpc_ids: 1}).lean().exec();
-    const allIds = tpcIds.reduce((idsArray, tpcIds) => idsArray.concat(tpcIds.tpc_ids), []);
+    const tpcIds = await this.db.collections.tasks
+      .find({ tpc_ids: { $not: { $size: 0 } } }, { tpc_ids: 1 })
+      .lean()
+      .exec();
+    const allIds = tpcIds.reduce(
+      (idsArray, tpcIds) => idsArray.concat(tpcIds.tpc_ids),
+      []
+    );
     const uniqueIds = [...new Set(allIds)];
 
     const totalCalls = (
@@ -152,7 +163,10 @@ export class TasksService {
         .aggregate<{ totalCalls: number }>()
         .match({
           tpc_id: { $in: uniqueIds },
-          date: { $gte: new Date(comparisonStart), $lte: new Date(comparisonEnd) },
+          date: {
+            $gte: new Date(comparisonStart),
+            $lte: new Date(comparisonEnd),
+          },
         })
         .project({
           date: 1,
@@ -194,6 +208,19 @@ export class TasksService {
       calls: callsByTasks[task._id.toString()] ?? 0,
     }));
 
+    const reports = (await this.reportsModel
+      .find(
+        { type: 'tasks' },
+        {
+          _id: 0,
+          en_title: 1,
+          fr_title: 1,
+          en_attachment: 1,
+          fr_attachment: 1,
+        }
+      )
+      .exec()) as IReports[];
+
     const results = {
       dateRange,
       dateRangeData: task,
@@ -201,6 +228,7 @@ export class TasksService {
       percentChange: change,
       totalCalls,
       percentChangeCalls: changeCallDrivers,
+      reports,
     };
 
     await this.cacheManager.set(cacheKey, results);

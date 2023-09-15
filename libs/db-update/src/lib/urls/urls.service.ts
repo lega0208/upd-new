@@ -172,7 +172,7 @@ export class UrlsService {
       );
 
       this.logger.accent(
-        `Bulk write results: ${JSON.stringify(bulkWriteResults, null, 2)}`
+        `${bulkWriteResults.nModified + bulkWriteResults.nUpserted} urls updated.`
       );
 
       this.logger.log(`Urls collection successfully updated.`);

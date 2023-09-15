@@ -306,6 +306,9 @@
   "Target": "Target:",
   "SAT-title": "Top search term assessment (English and French) from Canada.ca - {{start}} to {{end}}",
   "SAT-tooltip": "Assessment of the Top English and French search terms on canada.ca and their corresponding target URL.",
+  "english-report": "English report",
+  "french-report": "French report",
+  "reports": "Reports",
   "English": "English",
   "French": "French",
 
