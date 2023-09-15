@@ -41,10 +41,10 @@ export function getAvgTestSuccess<T extends { success_rate?: number }>(
 
   if (testsWithSuccessRate.length > 0) {
     return (
-      testsWithSuccessRate.reduce(
+      Math.round((testsWithSuccessRate.reduce(
         (total, success_rate) => total + success_rate,
         0
-      ) / testsWithSuccessRate.length
+      ) / testsWithSuccessRate.length) * 100 ) / 100
     );
   }
 
