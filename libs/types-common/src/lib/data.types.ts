@@ -10,7 +10,9 @@ import type {
   IPageMetrics,
   ITask,
   IUxTest,
-  IReadability, IAnnotations,
+  IReadability,
+  IAnnotations,
+  IReports,
 } from './schema.types';
 
 export type ApiParams = {
@@ -33,10 +35,7 @@ export interface EntityDetailsData<T> extends ViewData<T> {
   title: string;
 }
 
-export type PagesHomeAggregatedData = Pick<
-  IPage,
-  '_id' | 'url' | 'title'
-> & {
+export type PagesHomeAggregatedData = Pick<IPage, '_id' | 'url' | 'title'> & {
   visits: number;
 };
 export type PagesHomeData = ViewData<PagesHomeAggregatedData[]>;
@@ -224,6 +223,7 @@ export type TasksHomeData = ViewData<TasksHomeAggregatedData[]> & {
   percentChange: number;
   totalCalls: number;
   percentChangeCalls: number;
+  reports: IReports[];
 };
 
 export interface TaskDetailsMetrics {

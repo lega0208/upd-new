@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { combineLatest, map } from 'rxjs';
+import { map } from 'rxjs';
 
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { TasksHomeAggregatedData } from '@dua-upd/types-common';
 import { TasksHomeFacade } from './+state/tasks-home.facade';
-import { createCategoryConfig } from '@dua-upd/upd/utils';
 
 @Component({
   selector: 'upd-tasks-home',
@@ -22,7 +21,9 @@ export class TasksHomeComponent implements OnInit {
   totalVisits$ = this.tasksHomeService.totalVisits$;
   totalVisitsChange$ = this.tasksHomeService.totalVisitsChange$;
   totalCalls$ = this.tasksHomeService.totalCalls$;
-  totalCallsChange$ = this.tasksHomeService.totalCallsChange$
+  totalCallsChange$ = this.tasksHomeService.totalCallsChange$;
+  tasksReports$ = this.tasksHomeService.tasksReports$;
+  tasksReportsColumns$ = this.tasksHomeService.tasksReportsColumns$;
 
   columns: ColumnConfig<TasksHomeAggregatedData>[] = [];
   searchFields = this.columns.map((col) => col.field);

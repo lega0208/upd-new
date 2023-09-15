@@ -19,6 +19,7 @@ import {
   PageMetricsTS,
   Url,
   Annotations,
+  Reports,
   type PageMetricsModel,
   type ReadabilityModel,
   type UrlModel,
@@ -62,6 +63,7 @@ export class DbService {
     urls: this.urls,
     readability: this.readability,
     annotations: this.annotations,
+    reports: this.reports,
   } as const;
 
   readonly views = {
@@ -103,7 +105,9 @@ export class DbService {
     @InjectModel(PageVisitsView.name, 'defaultConnection')
     private pageVisits: Model<PageVisits>,
     @InjectModel(Url.name, 'defaultConnection')
-    private urls: UrlModel
+    private urls: UrlModel,
+    @InjectModel(Reports.name, 'defaultConnection')
+    private reports: Model<Reports>
   ) {}
 
   @AsyncLogTiming

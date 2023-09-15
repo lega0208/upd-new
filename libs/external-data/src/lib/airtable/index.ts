@@ -18,6 +18,7 @@ import {
   FeedbackData,
   PageListData,
   AnnotationsData,
+  ReportsData,
 } from './types';
 
 dayjs.extend(utc);
@@ -274,6 +275,33 @@ export class AirtableClient {
         channel: fields['Channel']?.map(squishTrim),
         core: fields['Core']?.map(squishTrim),
       })) as TaskData[];
+  }
+
+  async getReports(lastUpdatedDate?: DateType): Promise<ReportsData[]> {
+    const params = lastUpdatedDate
+      ? {
+          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
+        }
+      : {};
+    const query = this.createQuery(
+      bases.TASKS_INVENTORY,
+      'TMF reports',
+      params
+    );
+
+    return (await this.selectAll(query))
+      .filter(({ fields }) => Object.values(fields).some((value) => value))
+      .map(({ id, fields }) => ({
+        airtable_id: id,
+        en_title: squishTrim(fields['TMF Report title - En']),
+        fr_title: squishTrim(fields['TMF Report title - Fr']),
+        type: 'tasks',
+        en_attachment: fields['Report attachment - En'],
+        fr_attachment: fields['Report attachment - Fr'],
+        date: fields['Date added']
+          ? dayjs.utc(fields['Date added']).toDate()
+          : fields['Date added'],
+      })) as ReportsData[];
   }
 
   async getUxTests(lastUpdatedDate?: DateType): Promise<UxTestData[]> {
