@@ -1,13 +1,12 @@
-import { AnyBulkWriteOperation } from 'mongodb';
-import { writeFile, mkdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
+import chalk from 'chalk';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-
-import { AAItemId, DbService, PageMetrics, Url } from '@dua-upd/db';
-import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
-import { ActivityMapMetrics, IAAItemId } from '@dua-upd/types-common';
+import { AnyBulkWriteOperation } from 'mongodb';
+import { Types } from 'mongoose';
 import { BlobStorageService } from '@dua-upd/blob-storage';
+import { DbService, PageMetrics } from '@dua-upd/db';
+import type { ActivityMapMetrics, IAAItemId } from '@dua-upd/types-common';
 import {
   ActivityMapResult,
   AdobeAnalyticsService,
@@ -15,17 +14,24 @@ import {
   queryDateFormat,
   singleDatesFromDateRange,
 } from '@dua-upd/external-data';
-import { arrayToDictionary, prettyJson, today } from '@dua-upd/utils-common';
-import chalk from 'chalk';
-import { Types } from 'mongoose';
+import {
+  arrayToDictionary,
+  arrayToDictionaryMultiref,
+  prettyJson,
+  today,
+} from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
 
 interface ActivityMapEntry {
   title: string;
-  data: ActivityMapMetrics[];
+  activity_map: ActivityMapMetrics[];
   itemId: string;
 }
+
+export type ActivityMap = ActivityMapEntry & {
+  pages: Types.ObjectId[];
+};
 
 @Injectable()
 export class ActivityMapService {
@@ -42,7 +48,7 @@ export class ActivityMapService {
         this.db.collections.pageMetrics
           .findOne(
             { activity_map: { $exists: true, $not: { $size: 0 } } },
-            { date: 1 }
+            { activity_map: 1, date: 1 }
           )
           .sort({ date: -1 })
           .exec();
@@ -80,314 +86,183 @@ export class ActivityMapService {
             dayjs.utc().startOf('day')
         );
 
-      type ActivityMapIntermediateResult = ActivityMapEntry & {
-        itemIdTitle: string;
-        pages: Types.ObjectId[];
-        cleanUrl: string;
-      };
-
       for (const dateRange of dateRanges) {
-        let activityMapRecords: ActivityMapEntry[] = [];
-        activityMapRecords = (await this.getPageActivityMap(dateRange)).flat();
-
-        const activityMapDict = arrayToDictionary(activityMapRecords, 'itemId');
-
-        const existingItems = await this.db.collections.aaItemIds.find({
-          type: 'activityMapTitle',
-          itemId: { $in: Object.keys(activityMapDict) },
-        });
-
-        const existingItemsDict = arrayToDictionary(existingItems, 'itemId');
-
-        const noMatchActivityMapRecords = activityMapRecords.filter(
-          (rec) => !existingItemsDict[rec.itemId]
+        const requestItemIdDocs = await this.updateActivityMapItemIds(
+          dateRange
         );
 
-        await this.upsertValidItemIds(noMatchActivityMapRecords, dateRange);
+        const activityMapResults =
+          await this.adobeAnalyticsService.getPageActivityMap(
+            dateRange,
+            requestItemIdDocs
+          );
 
-        const itemIdDocs = await this.db.collections.aaItemIds.find({
-          type: 'activityMapTitle',
-          itemId: { $in: Object.keys(activityMapDict) },
-        });
-
-        const newExistingItemsDict = arrayToDictionary(itemIdDocs, 'itemId');
-
-        const resultsWithRefs = activityMapRecords
-          .map((activityMapResults) => {
-            const itemIdData = newExistingItemsDict[activityMapResults.itemId];
-            if (!itemIdData) return activityMapResults;
-
-            const uniquePageStrings = [
-              ...new Set(itemIdData.pages.map((page) => page.toString())),
-            ];
-            const pages = uniquePageStrings.map(
-              (page) => new Types.ObjectId(page)
-            );
-
-            const itemIdTitle = itemIdData?.value;
-            delete activityMapResults.itemId;
-
-            return {
-              ...activityMapResults,
-              itemIdTitle,
-              pages,
-            };
-          })
-          .filter(
-            (results) => 'pages' in results && results.pages.length > 0
-          ) as ActivityMapIntermediateResult[];
-
-        const pageObjectIds = resultsWithRefs
-          .flatMap(({ pages }) => pages)
-          .map((page) => new Types.ObjectId(page));
-
-        const pageMetricsToMatch = await this.db.collections.pageMetrics
-          .find(
-            {
-              date: dayjs.utc(dateRange.start).toDate(),
-              page: {
-                $in: pageObjectIds,
-              },
-            },
-            { url: 1, page: 1, title: 1 }
-          )
-          .lean()
-          .exec();
-
-        const pageMetricsUrlDict = arrayToDictionary(
-          pageMetricsToMatch,
-          'page',
-          true
+        // add page refs via itemIds
+        const activityMapResultsWithRefs = await this.addPageRefsToActivityMap(
+          activityMapResults
         );
 
-        this.logger.log(
-          `Found ${pageMetricsToMatch.length} matching page metrics records`
+        // fix outbound links (remove incorrect values and "rename" correct ones)
+        const cleanActivityMap = fixOutboundLinks(
+          activityMapResultsWithRefs as ActivityMap[]
         );
 
-        const bulkOperations: AnyBulkWriteOperation<PageMetrics>[] = [];
+        const bulkWriteOps: AnyBulkWriteOperation<PageMetrics>[] = [];
 
-        for (const activityMap of resultsWithRefs) {
-          const { data, pages } = activityMap;
-
+        for (const { activity_map, pages } of cleanActivityMap) {
           for (const page of pages) {
-            const pageMetricsMatch = pageMetricsUrlDict[page.toString()];
-
-            const dataObject = data.reduce((records, item) => {
-              let linkKey = item?.link;
-
-              if (
-                // Check if the link is a pdf, txt, or brf file
-                RegExp(
-                  /^(http:\/\/|https:\/\/)www.canada.ca\/.*\.(pdf|txt|brf)$/
-                ).test(linkKey)
-              ) {
-                const linkParts = item?.link.split('/');
-                linkKey = linkParts[linkParts.length - 1];
-
-                records[linkKey] = {
-                  ...item,
-                  link: linkKey,
-                };
-              } else if (!records[linkKey]) {
-                records[linkKey] = item;
-              }
-
-              return records;
-            }, {}) as Record<string, ActivityMapMetrics>;
-
-            const updatedData = Object.values(dataObject);
-
-            if (pageMetricsMatch) {
-              bulkOperations.push({
-                updateOne: {
-                  filter: { _id: pageMetricsMatch._id },
-                  update: {
-                    $addToSet: {
-                      activity_map: { $each: updatedData },
-                    },
-                  },
-                  upsert: true,
+            bulkWriteOps.push({
+              updateOne: {
+                filter: {
+                  date: dayjs.utc(dateRange.start).toDate(),
+                  page,
                 },
-              });
-            }
+                update: {
+                  $set: {
+                    activity_map,
+                  },
+                },
+              },
+            });
           }
         }
 
-        if (bulkOperations.length) {
-          await this.db.collections.pageMetrics.bulkWrite(bulkOperations, {
+        if (bulkWriteOps.length) {
+          await this.db.collections.pageMetrics.bulkWrite(bulkWriteOps, {
             ordered: false,
           });
-          this.logger.log(
-            `Upserted ${resultsWithRefs.length}/${activityMapRecords.length} records`
-          );
-        }
 
-        if (!existsSync('./logs')) {
-          await mkdir('./logs');
+          this.logger.log(`Updated ${bulkWriteOps.length} records`);
         }
-
-        await writeFile(
-          `./logs/activityMap-${dateRange.start.replace(
-            /^(\d{4}-\d{2}-\d{2}).+/,
-            '$1'
-          )}.json`,
-          prettyJson(resultsWithRefs),
-          'utf8'
-        );
       }
     } catch (e) {
-      console.error(e);
+      this.logger.error(e);
     }
   }
 
-  /* ***************************************************************************
-   * Get Activity Map ItemIds
-   * **************************************************************************/
+  async updateActivityMapItemIds(dateRange: DateRange) {
+    this.logger.log(
+      chalk.blueBright(
+        'Updating itemIds for dateRange: ',
+        prettyJson(dateRange)
+      )
+    );
 
-  async getItemIds(dateRange: DateRange) {
-    try {
+    const itemIds = await this.adobeAnalyticsService.getActivityMapItemIds(
+      dateRange
+    );
+
+    await this.insertItemIdsIfNew(itemIds);
+
+    this.logger.log(chalk.green('Successfully updated itemIds.'));
+
+    return itemIds;
+  }
+
+  async addPageRefsToItemIds(itemIds: IAAItemId[]): Promise<IAAItemId[]> {
+    const urls = await this.db.collections.urls
+      .find({
+        all_titles: {
+          $not: { $size: 0 },
+          $in: itemIds.map(({ value }) => value),
+        },
+      })
+      .lean()
+      .exec();
+
+    const urlsDict = arrayToDictionaryMultiref(urls, 'all_titles', true);
+
+    return itemIds.map((itemId) => {
+      const urls = urlsDict[itemId.value];
+
+      const pages = urls ? { pages: urls.map((url) => url.page) } : {};
+
+      return {
+        ...itemId,
+        ...pages,
+      };
+    });
+  }
+
+  async addPageRefsToActivityMap(
+    activityMap: ActivityMapResult[]
+  ): Promise<(ActivityMapResult & { pages?: Types.ObjectId[] })[]> {
+    const itemIds = await this.db.collections.aaItemIds
+      .find({ type: 'activityMapTitle' })
+      .lean()
+      .exec();
+
+    const itemIdsDict = arrayToDictionary(itemIds, 'itemId');
+
+    return activityMap
+      .map((activityMapEntry) => {
+        const { itemId } = activityMapEntry;
+        const itemIdDoc = itemIdsDict[itemId];
+
+        if (!itemIdDoc?.pages?.length) return activityMapEntry;
+
+        return {
+          ...activityMapEntry,
+          pages: itemIdDoc.pages,
+        };
+      })
+      .filter((activityMapEntry) => 'pages' in activityMapEntry);
+  }
+
+  async insertItemIdsIfNew(itemIds: IAAItemId[]) {
+    const existingItemIds = await this.db.collections.aaItemIds.find({
+      type: 'activityMapTitle',
+    });
+
+    const existingItemIdsDict = arrayToDictionary(existingItemIds, 'itemId');
+
+    const newItems = itemIds
+      .filter((item) => !existingItemIdsDict[item.itemId])
+      .map((itemId) => ({
+        _id: new Types.ObjectId(),
+        type: 'activityMapTitle',
+        ...itemId,
+      }));
+
+    if (newItems.length) {
       this.logger.log(
-        chalk.blueBright(
-          'Getting itemIds for dateRange: ',
-          prettyJson(dateRange)
-        )
+        chalk.blueBright('Finding valid Page references and inserting...')
       );
+      const itemIdsWithPageRefs = await this.addPageRefsToItemIds(newItems);
 
-      const itemIds = await this.adobeAnalyticsService.getActivityMapItemIds(
-        dateRange
-      );
+      await this.db.collections.aaItemIds.insertMany(itemIdsWithPageRefs);
 
-      this.logger.log(
-        chalk.green(`Successfully received ${itemIds.length} itemIds.`)
-      );
-
-      return itemIds;
-    } catch (err) {
-      this.logger.error(chalk.red('Error updating itemIds:'));
-      this.logger.error(chalk.red(err.stack));
+      this.logger.log(`Inserted ${newItems.length} new itemIds`);
+    } else {
+      this.logger.log('No new itemIds to insert');
     }
   }
+}
 
-  async getPageActivityMap(dateRange?: DateRange) {
-    const activityMapItemIds: IAAItemId[] = await this.getItemIds(dateRange);
+export function fixOutboundLinks(activityMapEntries: ActivityMap[]) {
+  const outboundLinkRegex = new RegExp(
+    '^https?://.+?/([^/]+?\\.(?:pdf|txt|brf))$',
+    'i'
+  );
+  const incorrectOutboundRegex = /^([^/]+?\.(?:pdf|txt|brf))$/i;
 
-    const activityMapData: ActivityMapResult[] =
-      await this.adobeAnalyticsService.getPageActivityMap(
-        dateRange,
-        activityMapItemIds
-      );
+  return activityMapEntries.map((item) => ({
+    ...item,
+    activity_map: item.activity_map
+      .filter(
+        (activityMapItem) => !incorrectOutboundRegex.test(activityMapItem.link)
+      )
+      .map((activityMapItem) => {
+        const match = outboundLinkRegex.exec(activityMapItem.link);
 
-    return await this.parseActivityMap(activityMapData, activityMapItemIds);
-  }
-
-  /* ***************************************************************************
-   * Parse Activity Map
-   * **************************************************************************/
-
-  async parseActivityMap(
-    activityMapData: ActivityMapResult[],
-    activityMapItemIds: IAAItemId[]
-  ): Promise<ActivityMapEntry[]> {
-    const records: ActivityMapEntry[] = [];
-
-    for (const obj of activityMapData) {
-      const { url, ...data } = obj;
-      const filteredData = Object.entries(data).filter(
-        ([key, value]) =>
-          key !== 'date' && typeof value === 'number' && value !== 0
-      );
-
-      for (const [key, clicks] of filteredData) {
-        const matchingId = activityMapItemIds.find((id) => id.itemId === key);
-
-        if (matchingId) {
-          const existingRecord = records.find((rec) => rec.itemId === key);
-          const dataObj = { link: url, clicks: Number(clicks) };
-
-          if (existingRecord) {
-            existingRecord.data.push(dataObj);
-            existingRecord.data.sort((a, b) => b.clicks - a.clicks);
-          } else {
-            records.push({
-              title: matchingId.value,
-              data: [dataObj],
-              itemId: key,
-            });
-          }
-        }
-      }
-    }
-
-    return records;
-  }
-
-  async upsertValidItemIds(
-    records: ActivityMapEntry[],
-    dateRange
-  ): Promise<void> {
-    try {
-      if (records.length) {
-        const bulkOperations: AnyBulkWriteOperation<AAItemId>[] = [];
-        const noMetricsMatchSet = new Set();
-        for (const record of records) {
-          const { title, itemId } = record;
-          const matchingRecords =
-            (await this.db.collections.urls.find({
-              all_titles: title,
-            })) || [];
-
-          if (matchingRecords.length === 0) {
-            noMetricsMatchSet.add({
-              title,
-              itemId,
-            });
-
-            continue;
-          }
-
-          bulkOperations.push({
-            updateOne: {
-              filter: {
-                type: 'activityMapTitle',
-                itemId: itemId,
-              },
-              update: {
-                value: title,
-                pages: matchingRecords.map((rec) => rec.page),
-              },
-              upsert: true,
-            },
-          });
+        if (match) {
+          return {
+            ...activityMapItem,
+            link: match[1],
+          };
         }
 
-        if (bulkOperations.length > 0) {
-          await this.db.collections.aaItemIds.bulkWrite(bulkOperations);
-          this.logger.log(`Upserted ${bulkOperations.length} itemids`);
-        } else {
-          this.logger.log('No itemids to upsert');
-        }
-
-        if (noMetricsMatchSet.size > 0) {
-          try {
-            if (!existsSync('./logs')) {
-              await mkdir('./logs');
-            }
-
-            await writeFile(
-              `./logs/activityMap-itemId-noMatch-${dateRange.start.replace(
-                /^(\d{4}-\d{2}-\d{2}).+/,
-                '$1'
-              )}.json`,
-              prettyJson([...noMetricsMatchSet]),
-              'utf8'
-            );
-          } catch (e) {
-            console.error(e);
-          }
-        }
-      }
-    } catch (error) {
-      console.error(`Error in upsertActivityMap: ${error}`);
-    }
-  }
+        return activityMapItem;
+      }),
+  }));
 }

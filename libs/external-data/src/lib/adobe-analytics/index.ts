@@ -1,3 +1,4 @@
+import { ActivityMapMetrics } from '@dua-upd/types-common';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { Overall, PageMetrics } from '@dua-upd/db';
@@ -117,7 +118,9 @@ export class AdobeAnalyticsClient {
       await this.initClient();
     }
 
-    const filterWithDateRange = query.globalFilters?.find(filter => filter.dateRange !== undefined);
+    const filterWithDateRange = query.globalFilters?.find(
+      (filter) => filter.dateRange !== undefined
+    );
 
     // This is only used to log the dateRange for now
     if (options.hooks?.pre) {
@@ -448,8 +451,6 @@ export class AdobeAnalyticsClient {
 
     const { columnIds } = results.body.columns;
 
-    //return results;
-
     return results.body.rows.reduce((parsedResults, row) => {
       // build up results object using columnIds as keys
       const newPageMetricsData = row.data.reduce(
@@ -533,8 +534,6 @@ export class AdobeAnalyticsClient {
     // the 'Z' means the date is UTC, so no conversion required
     const date = new Date(dateRange.start + 'Z');
 
-    //return results;
-
     return sortArrayDesc(seperateArray(results.body.rows))
       .map((row) => {
         return row.map((v) => {
@@ -550,7 +549,7 @@ export class AdobeAnalyticsClient {
           rowValues[columnId] = value;
           return rowValues;
         },
-        { date } as any
+        { date }
       );
   }
 
@@ -597,7 +596,7 @@ export class AdobeAnalyticsClient {
           rowValues[columnId] = value;
           return rowValues;
         },
-        { date } as any
+        { date }
       );
   }
 
@@ -646,7 +645,7 @@ export class AdobeAnalyticsClient {
           rowValues[columnId] = value;
           return rowValues;
         },
-        { date } as any
+        { date }
       );
   }
 
@@ -694,7 +693,7 @@ export class AdobeAnalyticsClient {
           rowValues[columnId] = value;
           return rowValues;
         },
-        { date } as any
+        { date }
       );
   }
 }
@@ -705,7 +704,9 @@ export function createRowsParser<T>(
   const dimension = query.dimension;
 
   // globalFilters should be [segment, dateRange]
-  const filterWithDateRange = query.globalFilters?.find(filter => filter.dateRange !== undefined);
+  const filterWithDateRange = query.globalFilters?.find(
+    (filter) => filter.dateRange !== undefined
+  );
   const dateRangeFilter = filterWithDateRange?.dateRange;
   if (!dateRangeFilter) {
     throw new Error(
@@ -715,7 +716,7 @@ export function createRowsParser<T>(
 
   const { startDate } = parseQueryDateRange(dateRangeFilter);
 
-  // for itemId queries // (just internal search for now)
+  // itemId queries
   if (dimension === 'variables/evar52') {
     return (columnIds: string[], rows: AAResultsRow[]) =>
       rows.map(
@@ -727,7 +728,9 @@ export function createRowsParser<T>(
             type: 'internalSearch',
           } as T)
       );
-  } else if (dimension === 'variables/clickmappage') {
+  }
+
+  if (dimension === 'variables/clickmappage') {
     return (columnIds: string[], rows: AAResultsRow[]) =>
       rows.map(
         (row) =>
@@ -741,6 +744,34 @@ export function createRowsParser<T>(
 
   const metricFilter = query.metricContainer.metricFilters?.[0];
   const queryHasItemIds = metricFilter?.itemIds?.length || metricFilter?.itemId;
+
+  if (dimension === 'variables/clickmaplink' && queryHasItemIds) {
+    return (columnIds: string[], rows: AAResultsRow[]) => {
+      const activityMapEntries = columnIds.map((columnId) => ({
+        itemId: columnId,
+        activity_map: [] as ActivityMapMetrics[],
+      }));
+
+      for (const row of rows) {
+        const { value, data } = row;
+
+        for (const [index, clicks] of data.entries()) {
+          if (clicks !== 0 && typeof clicks === 'number') {
+            activityMapEntries[index].activity_map.push({
+              link: value,
+              clicks,
+            });
+          }
+        }
+      }
+
+      for (const activityMapEntry of activityMapEntries) {
+        activityMapEntry.activity_map.sort((a, b) => b.clicks - a.clicks);
+      }
+
+      return activityMapEntries as T[];
+    };
+  }
 
   // for overall search phrases
   if (dimension === 'variables/evar50' && !queryHasItemIds) {
@@ -789,10 +820,10 @@ export function createRowsParser<T>(
       const resultsByItemId: Record<string, AASearchTermMetrics[]> = {};
 
       for (const searchTermResult of searchTermResults) {
-        const { date, term } = searchTermResult;
+        const { term } = searchTermResult;
 
         const reformatted = Object.entries(searchTermResult)
-          .filter(([key, val]) => key !== 'date' && key !== 'term')
+          .filter(([key]) => key !== 'date' && key !== 'term')
           .reduce((resultsById, [key, val]) => {
             const [metricName, itemId] = key.split('-');
 
