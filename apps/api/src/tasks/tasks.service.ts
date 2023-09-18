@@ -5,6 +5,7 @@ import { Cache } from 'cache-manager';
 import type {
   CallDriverModel,
   FeedbackModel,
+  PageDocument,
   PageMetricsModel,
   ProjectDocument,
   TaskDocument,
@@ -14,6 +15,7 @@ import {
   CallDriver,
   DbService,
   Feedback,
+  Page,
   PageMetrics,
   Project,
   Reports,
@@ -54,6 +56,8 @@ export class TasksService {
     private feedbackModel: FeedbackModel,
     @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriversModel: CallDriverModel,
+    @InjectModel(Page.name, 'defaultConnection')
+    private pageModel: Model<PageDocument>,
     @InjectModel(Reports.name, 'defaultConnection')
     private reportsModel: Model<Reports>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
@@ -303,6 +307,7 @@ export class TasksService {
         this.pageMetricsModel,
         this.calldriversModel,
         this.feedbackModel,
+        this.pageModel,
         params.dateRange,
         taskUrls,
         taskTpcId
@@ -313,6 +318,7 @@ export class TasksService {
         this.pageMetricsModel,
         this.calldriversModel,
         this.feedbackModel,
+        this.pageModel,
         params.comparisonDateRange,
         taskUrls,
         taskTpcId
@@ -461,6 +467,7 @@ async function getTaskAggregatedData(
   pageMetricsModel: PageMetricsModel,
   calldriversModel: CallDriverModel,
   feedbackModel: FeedbackModel,
+  pageModel: Model<Page>,
   dateRange: string,
   pageUrls: string[],
   calldriversTpcId: number[]
@@ -513,21 +520,6 @@ async function getTaskAggregatedData(
       gscTotalCtr: { $avg: '$gsc_total_ctr' },
       gscTotalPosition: { $avg: '$gsc_total_position' },
     })
-    .lookup({
-      from: 'pages',
-      localField: '_id',
-      foreignField: '_id',
-      as: 'page',
-    })
-    .unwind('$page')
-    .replaceRoot({
-      $mergeObjects: [
-        '$$ROOT',
-        { _id: '$page._id', title: '$page.title', url: '$page.url' },
-      ],
-    })
-    .project({ page: 0 })
-    .sort({ title: 1 })
     .group({
       _id: 'null',
       visits: { $sum: '$visits' },
@@ -543,7 +535,6 @@ async function getTaskAggregatedData(
       gscTotalPosition: { $avg: '$gscTotalPosition' },
       visitsByPage: { $push: '$$ROOT' },
     })
-    .project({ _id: 0 })
     .exec();
 
   const calldriverDocs = await calldriversModel
@@ -555,8 +546,50 @@ async function getTaskAggregatedData(
       { _id: 1 }
     )
     .lean()
-
     .exec();
+
+  const pageWithTask = await pageModel
+    .find({ tasks: new Types.ObjectId(taskId) })
+    .lean()
+    .exec();
+
+  const pageLookup = arrayToDictionary(pageWithTask, '_id');
+
+  if (results[0]?.visitsByPage) {
+    const metricsMapped = results[0].visitsByPage.map((metric) => {
+      const page = pageLookup[metric._id.toString()];
+      delete pageLookup[metric._id.toString()];
+
+      return {
+        ...metric,
+        _id: metric._id.toString(),
+        title: page.title,
+        url: page.url,
+      };
+    });
+
+    const missingPages = Object.values(pageLookup).map((page) => ({
+      _id: page._id.toString(),
+      title: page.title,
+      url: page.url,
+      visits: 0,
+      dyfYes: 0,
+      dyfNo: 0,
+      fwylfCantFindInfo: 0,
+      fwylfError: 0,
+      fwylfHardToUnderstand: 0,
+      fwylfOther: 0,
+      gscTotalClicks: 0,
+      gscTotalImpressions: 0,
+      gscTotalCtr: 0,
+      gscTotalPosition: 0,
+    }));
+
+    results[0].visitsByPage = [
+      ...(metricsMapped || []),
+      ...(missingPages || []),
+    ].sort((a, b) => a.title.localeCompare(b.title));
+  }
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 
