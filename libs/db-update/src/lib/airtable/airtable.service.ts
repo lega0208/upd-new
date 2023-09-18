@@ -67,12 +67,12 @@ export class AirtableService {
   ): Promise<boolean> {
     // compare pages and relationships to current data -> skip updating refs if nothing has changed
     const refArraysAreTheSame = (a: Types.ObjectId[], b: Types.ObjectId[]) => {
-      if (a.length !== b.length) {
+      if (a?.length !== b?.length) {
         return false;
       }
 
-      const normalizedA = JSON.stringify(a.map((id) => id.toString()));
-      const normalizedB = JSON.stringify(b.map((id) => id.toString()));
+      const normalizedA = JSON.stringify(a?.map((id) => id.toString()));
+      const normalizedB = JSON.stringify(b?.map((id) => id.toString()));
 
       return normalizedA === normalizedB;
     };
