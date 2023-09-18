@@ -96,17 +96,17 @@ export class AirtableService {
 
       const tasksChanged = !refArraysAreTheSame(
         page.tasks as Types.ObjectId[],
-        newPage.tasks as Types.ObjectId[]
+        (newPage.tasks || []) as Types.ObjectId[]
       );
 
       const projectsChanged = !refArraysAreTheSame(
         page.projects as Types.ObjectId[],
-        newPage.projects as Types.ObjectId[]
+        (newPage.projects || []) as Types.ObjectId[]
       );
 
       const uxTestsChanged = !refArraysAreTheSame(
         page.ux_tests as Types.ObjectId[],
-        newPage.ux_tests as Types.ObjectId[]
+        (newPage.ux_tests || []) as Types.ObjectId[]
       );
 
       if (tasksChanged || projectsChanged || uxTestsChanged) {
