@@ -10,6 +10,7 @@ import type { ActivityMapMetrics, IAAItemId } from '@dua-upd/types-common';
 import {
   ActivityMapResult,
   AdobeAnalyticsService,
+  BlobProxyService,
   DateRange,
   queryDateFormat,
   singleDatesFromDateRange,
@@ -37,6 +38,7 @@ export type ActivityMap = ActivityMapEntry & {
 export class ActivityMapService {
   constructor(
     private adobeAnalyticsService: AdobeAnalyticsService,
+    private blobProxyService: BlobProxyService,
     private logger: ConsoleLogger,
     private db: DbService,
     @Inject(BlobStorageService.name) private blob: BlobStorageService
@@ -80,22 +82,43 @@ export class ActivityMapService {
           start: date,
           end: dayjs.utc(date).add(1, 'day').format(queryDateFormat),
         }))
-        .filter(
-          (dateRange) =>
+        .filter((dateRange) => {
+          const gapDateStart = dayjs.utc('2022-07-01');
+          const gapDateEnd = dayjs.utc('2022-12-31');
+
+          const dateIsDuringGap = dayjs
+            .utc(dateRange.start)
+            .isBetween(gapDateStart, gapDateEnd, 'day', '[]');
+
+          return (
+            !dateIsDuringGap &&
             dayjs.utc(dateRange.start).startOf('day') !==
-            dayjs.utc().startOf('day')
-        );
+              dayjs.utc().startOf('day')
+          );
+        });
+
+      const blobProxy = this.blobProxyService.createProxy({
+        blobModel: 'aa_raw',
+        filenameGenerator: (dates: string) => `activityMap_data_${dates}.json`,
+        queryExecutor: async ([dateRange, itemIdDocs]: [
+          DateRange,
+          IAAItemId[]
+        ]) =>
+          await this.adobeAnalyticsService.getPageActivityMap(
+            dateRange,
+            itemIdDocs
+          ),
+      });
 
       for (const dateRange of dateRanges) {
         const requestItemIdDocs = await this.updateActivityMapItemIds(
           dateRange
         );
 
-        const activityMapResults =
-          await this.adobeAnalyticsService.getPageActivityMap(
-            dateRange,
-            requestItemIdDocs
-          );
+        const activityMapResults = await blobProxy.exec(
+          [dateRange, requestItemIdDocs],
+          `${dateRange.start.slice(0, 10)}`
+        );
 
         // add page refs via itemIds
         const activityMapResultsWithRefs = await this.addPageRefsToActivityMap(
@@ -148,8 +171,16 @@ export class ActivityMapService {
       )
     );
 
-    const itemIds = await this.adobeAnalyticsService.getActivityMapItemIds(
-      dateRange
+    const blobProxy = this.blobProxyService.createProxy({
+      blobModel: 'aa_raw',
+      filenameGenerator: (date: string) => `activityMap_itemIds_${date}.json`,
+      queryExecutor: async (dateRange: DateRange) =>
+        await this.adobeAnalyticsService.getActivityMapItemIds(dateRange),
+    });
+
+    const itemIds = await blobProxy.exec(
+      dateRange,
+      `${dateRange.start.slice(0, 10)}`
     );
 
     await this.insertItemIdsIfNew(itemIds);
