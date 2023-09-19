@@ -162,6 +162,10 @@ export class DbUpdateService {
         .upsertPageSearchTerms()
         .catch((err) => this.logger.error(err.stack));
 
+      await this.updateActivityMap().catch((err) =>
+        this.logger.error(err.stack)
+      );
+
       await this.pagesService
         .updatePagesLang()
         .catch((err) => this.logger.error(err.stack));
