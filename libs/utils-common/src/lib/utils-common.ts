@@ -7,7 +7,7 @@ export function wait(ms: number): Promise<void> {
 
 // Removes double-spaces and trims the string
 export function squishTrim<T extends string>(str?: T) {
-  return (str?.replaceAll(/\s{2,}/g, ' ').trim() as T) || '';
+  return (str?.replaceAll(/\s+/g, ' ').trim() as T) || '';
 }
 
 export const hasDuplicates = <T>(array: T[]) =>
@@ -130,11 +130,17 @@ export function arrayToDictionary<T extends object>(
       );
     }
 
-    if (!allowDuplicateKeys && dictionary[key]) {
-      throw Error(
-        'Could not convert array to dictionary: received duplicate key: ' + key
-      );
+    if (dictionary[key]) {
+      if (!allowDuplicateKeys) {
+        throw Error(
+          'Could not convert array to dictionary: received duplicate key: ' + key
+        );
+      }
+
+      console.warn('Duplicate key found when converting array to dictionary: ' + key);
+      console.warn(JSON.stringify(obj, null, 2));
     }
+
 
     dictionary[key] = obj;
   }
@@ -436,3 +442,10 @@ export function Timeout(milliseconds: number) {
     return descriptor;
   };
 }
+
+/*
+ * Takes an array of strings, normalizes whitespace, and returns a deduplicated array
+ */
+export const collapseStrings = (strings: string[]) => [
+  ...new Set(strings.map((s) => s.replace(/\s+/g, ' ').trim())),
+];

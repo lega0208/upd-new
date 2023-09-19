@@ -41,13 +41,18 @@ const projectStatusSwitchExpression = {
     branches: [
       {
         case: {
-          $allElementsTrue: {
-            $map: {
-              input: '$statuses',
-              as: 'status',
-              in: { $eq: ['$$status', 'Complete'] },
-            },
-          },
+          $and: [
+            { $gt: [{ $size: "$statuses" }, 0] },
+            {
+              $allElementsTrue: {
+                $map: {
+                  input: '$statuses',
+                  as: 'status',
+                  in: { $eq: ['$$status', 'Complete'] }
+                }
+              }
+            }
+          ]
         },
         then: 'Complete',
       },
@@ -758,8 +763,8 @@ async function getUniqueProjectUrls(
   project: ProjectDocument
 ): Promise<string[]> {
   const projectPageUrls = ((await project.populate('pages')).pages || []).map(
-    (page) => 'url' in page && [...(page.all_urls || [])]
+    (page) => 'url' in page && page.url
   );
 
-  return [...new Set(projectPageUrls.flat())];
+  return [...new Set(projectPageUrls)];
 }

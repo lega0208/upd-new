@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { minify } from 'html-minifier-terser';
 import { FilterQuery, Types } from 'mongoose';
 import { AnyBulkWriteOperation } from 'mongodb';
-import { omit, pick } from 'rambdax';
+import { filter, mapObject, omit, pick, pipe } from 'rambdax';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { DbService, Page, Readability, Url } from '@dua-upd/db';
 import { BlobLogger } from '@dua-upd/logger';
@@ -12,6 +12,7 @@ import { md5Hash } from '@dua-upd/node-utils';
 import type { IPage, IUrl, UrlHash } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
+  collapseStrings,
   HttpClient,
   HttpClientResponse,
   prettyJson,
@@ -71,37 +72,23 @@ export class UrlsService {
     // specifically, cases where two versions of a url exist,
     // one with "https://" and one without.
 
-    // also remove the url "x"
-    await this.db.collections.pages.updateMany(
-      {},
-      { $pull: { all_urls: 'x' } }
-    );
-
     const pagesToUpdate = await this.db.collections.pages
-      .find({ all_urls: /^\s*https:|\s+$/i }, { all_urls: 1 })
+      .find({ url: /^\s*https:|\s+$/i }, { url: 1 })
       .lean()
       .exec();
 
-    const updateOps: AnyBulkWriteOperation<Page>[] = [];
-
     const httpsRegex = new RegExp('https?://', 'ig');
 
-    for (const page of pagesToUpdate) {
-      const allUrls = page.all_urls;
-
-      const dedupedUrls = [
-        ...new Set(
-          allUrls.map((url) => squishTrim(url).replace(httpsRegex, ''))
-        ),
-      ];
-
-      updateOps.push({
+    const updateOps: AnyBulkWriteOperation<Page>[] = pagesToUpdate.map(
+      (page) => ({
         updateOne: {
           filter: { _id: page._id },
-          update: { $set: { all_urls: dedupedUrls } },
+          update: {
+            $set: { url: squishTrim(page.url).replace(httpsRegex, '') },
+          },
         },
-      });
-    }
+      })
+    );
 
     await this.db.collections.pages.bulkWrite(updateOps);
   }
@@ -185,7 +172,7 @@ export class UrlsService {
       );
 
       this.logger.accent(
-        `Bulk write results: ${JSON.stringify(bulkWriteResults, null, 2)}`
+        `${bulkWriteResults.nModified + bulkWriteResults.nUpserted} urls updated.`
       );
 
       this.logger.log(`Urls collection successfully updated.`);
@@ -313,14 +300,11 @@ export class UrlsService {
   private async checkAndUpdateUrlData(urls: Url[]) {
     const urlsDataDict = arrayToDictionary(urls, 'url');
 
-    const pageUrls = (
-      await this.db.collections.pages.find({}, { all_urls: 1 }).lean().exec()
-    )?.flatMap(({ _id, all_urls }) =>
-      all_urls.map((url): { page: Types.ObjectId; url: string } => ({
-        page: _id,
-        url,
-      }))
-    );
+    const pageUrls =
+      await this.db.collections.pages
+        .find({}, { url: 1 })
+        .lean()
+        .exec();
 
     const urlsPageDict = arrayToDictionary(pageUrls, 'url');
 
@@ -575,7 +559,7 @@ export class UrlsService {
 
           try {
             const page = urlsPageDict[response.url]
-              ? { page: urlsPageDict[response.url].page }
+              ? { page: urlsPageDict[response.url]._id }
               : {};
 
             const readabilityScore = await this.assessReadability(
@@ -628,6 +612,15 @@ export class UrlsService {
     } finally {
       // commit any remaining updates
       await flushQueues();
+    }
+
+    try {
+      await this.syncDataWithPages();
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while syncing urls data with pages:'
+      );
+      this.logger.error(err);
     }
 
     try {
@@ -687,18 +680,200 @@ export class UrlsService {
     }
   }
 
+  async populateEmptyTitles() {
+    const urlsNoTitle = await this.db.collections.urls
+      .find(
+        { $or: [{ title: '' }, { title: null }] },
+        { url: 1, title: 1, page: 1 }
+      )
+      .lean()
+      .exec();
+
+    if (urlsNoTitle.length === 0) {
+      this.logger.log('All urls have titles.');
+
+      return;
+    }
+
+    const noTitleUrls = urlsNoTitle.map(({ url }) => url);
+
+    const urlsTitlesMap = await this.blobService.blobModels.urls
+      .blob('all-titles.json')
+      .downloadToString()
+      .then(
+        pipe(
+          JSON.parse,
+          filter((titles, url) => noTitleUrls.includes(url)),
+          mapObject(collapseStrings)
+        )
+      );
+
+    const titlesFromPagesMap = await this.blobService.blobModels.urls
+      .blob('titles-from-pages.json')
+      .downloadToString()
+      .then(JSON.parse);
+
+    this.logger.log(`${urlsNoTitle.length} urls with no title`);
+
+    const urlsNoTitleMatch = urlsNoTitle.filter(
+      (url) => !urlsTitlesMap[url.url]
+    );
+
+    this.logger.log(
+      `${urlsNoTitleMatch.length} urls with no title match - will use titles from Pages`
+    );
+
+    // get titles from pages if no match
+    const noMatchWithPageTitles = urlsNoTitleMatch
+      .filter((url) => titlesFromPagesMap[url.url])
+      .map((url) => ({
+        ...url,
+        title: squishTrim(titlesFromPagesMap[url.url] as string),
+      }));
+
+    this.logger.log(
+      `${noMatchWithPageTitles.length} urls with no title match but with title from Pages`
+    );
+
+    const urlsWithTitleMatch = urlsNoTitle
+      .filter((url) => urlsTitlesMap[url.url]?.length > 0)
+      .map((url) => ({
+        ...url,
+        title: urlsTitlesMap[url.url][0],
+      }));
+
+    this.logger.log(`${urlsWithTitleMatch.length} urls with title matches:`);
+
+    const bulkWriteOps: AnyBulkWriteOperation<Url>[] = [
+      ...urlsWithTitleMatch,
+      ...noMatchWithPageTitles,
+    ].map(({ _id, title }) => ({
+      updateOne: {
+        filter: { _id },
+        update: { $set: { title } },
+      },
+    }));
+
+    const bulkWriteResults = await this.db.collections.urls.bulkWrite(
+      bulkWriteOps
+    );
+
+    this.logger.log(`updated ${bulkWriteResults.modifiedCount} url titles`);
+  }
+
+  async syncDataWithPages() {
+    await this.populateEmptyTitles();
+    await this.ensurePageRefs();
+
+    const urlsWithPages = (
+      await this.db.collections.urls
+        .aggregate<{
+          _id: Types.ObjectId;
+          url: string;
+          title: string;
+          redirect?: string;
+          is_404?: boolean;
+          metadata?: { [prop: string]: string | Date };
+          page: IPage;
+          langHrefs?: {
+            en?: string;
+            fr?: string;
+            [prop: string]: string | undefined;
+          };
+        }>()
+        .project({
+          url: 1,
+          title: 1,
+          redirect: 1,
+          is_404: 1,
+          metadata: 1,
+          page: 1,
+          langHrefs: 1,
+        })
+        .match({
+          page: { $exists: true },
+          // ignoring urls with no titles
+          $and: [{ title: { $ne: null } }, { title: { $ne: '' } }],
+        })
+        .lookup({
+          from: 'pages',
+          localField: 'page',
+          foreignField: '_id',
+          as: 'page',
+        })
+        .unwind('page')
+        .exec()
+    ).map((url) => {
+      const lang = /^www\.canada\.ca\/(en|fr)/.exec(url.url)?.[1];
+      const altLang = lang === 'en' ? 'fr' : 'en';
+
+      const altLangHref =
+        altLang && url.langHrefs?.[altLang]
+          ? { altLangHref: url.langHrefs[altLang] }
+          : {};
+
+      return {
+        ...omit(['langHrefs'], url),
+        ...altLangHref,
+      };
+    });
+
+    const pickUrlsProps = pick([
+      'title',
+      'altLangHref',
+      'redirect',
+      'is_404',
+      'metadata',
+    ]);
+
+    const toComparisonString = pipe(pickUrlsProps, JSON.stringify);
+
+    const pagesToUpdate = urlsWithPages.filter(
+      (urlDoc) => toComparisonString(urlDoc) !== toComparisonString(urlDoc.page)
+    );
+
+    if (!pagesToUpdate.length) {
+      this.logger.info('Pages are up-to-date');
+
+      return;
+    }
+
+    const pageWriteOps: AnyBulkWriteOperation<Page>[] = pagesToUpdate.map(
+      (url) => ({
+        updateOne: {
+          filter: { _id: url.page._id },
+          update: {
+            $set: pickUrlsProps(url),
+          },
+        },
+      })
+    );
+
+    if (!pageWriteOps.length) {
+      this.logger.info('Pages are up-to-date');
+
+      return;
+    }
+
+    this.logger.info(`Updating ${pageWriteOps.length} pages...`);
+
+    const bulkWriteResults = await this.db.collections.pages.bulkWrite(
+      pageWriteOps
+    );
+
+    this.logger.info(`Updated ${bulkWriteResults.modifiedCount} pages`);
+  }
+
   private async updateCollectionFromPageUrls() {
     this.logger.info('Checking Pages collection for any new urls...');
 
     const currentUrls =
       (await this.db.collections.urls.distinct<string>('url').exec()) || [];
 
-    const pageUrls = (
-      await this.db.collections.pages.find({}, { all_urls: 1 }).lean().exec()
-    )?.map((page) => ({
-      page: page._id,
-      all_urls: page.all_urls,
-    }));
+    const pageUrls = await this.db.collections.pages
+      .find({}, { url: 1 })
+      .lean()
+      .exec();
 
     if (!pageUrls?.length) {
       throw new Error(
@@ -706,15 +881,13 @@ export class UrlsService {
       );
     }
 
-    const urlDocs: Url[] = pageUrls.flatMap(({ page, all_urls }) =>
-      all_urls
-        .filter((url) => !currentUrls.includes(url))
-        .map((url) => ({
-          _id: new Types.ObjectId(),
-          url,
-          page,
-        }))
-    );
+    const urlDocs: Url[] = pageUrls
+      .filter((page) => !currentUrls.includes(page.url))
+      .map((page) => ({
+        _id: new Types.ObjectId(),
+        url: page.url,
+        page: page._id,
+      }));
 
     if (!urlDocs.length) {
       this.logger.log(`No new urls found.`);
@@ -793,8 +966,7 @@ export class UrlsService {
 
     const urlsToUpdate = urlsWithPages
       .filter(
-        (urlDoc) =>
-          !urlDoc.page.length || !urlDoc.page[0]?.all_urls.includes(urlDoc.url)
+        (urlDoc) => !urlDoc.page.length || urlDoc.page[0]?.url !== urlDoc.url
       )
       .map(({ url }) => url);
 
@@ -805,7 +977,7 @@ export class UrlsService {
     }
 
     const pagesForUpdates = await this.db.collections.pages
-      .find({ all_urls: { $in: urlsToUpdate } })
+      .find({ url: { $in: urlsToUpdate } }, { url: 1 })
       .lean()
       .exec();
 
@@ -821,8 +993,8 @@ export class UrlsService {
 
     const bulkWriteOps: AnyBulkWriteOperation<IUrl>[] = pagesForUpdates.map(
       (page) => ({
-        updateMany: {
-          filter: { url: { $in: page.all_urls }, page: { $ne: page._id } },
+        updateOne: {
+          filter: { url: page.url },
           update: {
             $set: { page: page._id },
           },

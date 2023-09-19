@@ -1,7 +1,8 @@
 import child_process from 'child_process';
 import { resolve } from 'path';
-import { ApexOptions } from 'apexcharts';
 import { writeFile } from 'fs/promises';
+import { ApexOptions } from 'apexcharts';
+import { writeFile as writeXlsx, utils } from 'xlsx';
 
 function openHtmlFile(path) {
   let command = '';
@@ -161,5 +162,37 @@ export function outputCsv(filename: string, data: Record<string, unknown>[]) {
     filename.endsWith('.csv') ? filename : `${filename}.csv`,
     toCsv(data),
     'utf8'
+  );
+}
+
+export function outputJson(filename: string, data: Record<string, unknown>[]) {
+  return writeFile(
+    filename.endsWith('.json') ? filename : `${filename}.json`,
+    JSON.stringify(data, null, 2),
+    'utf8'
+  );
+}
+
+export type SheetConfig = {
+  sheetName: string;
+  data: Record<string, unknown>[];
+}
+
+export async function outputExcel(
+  filename: string,
+  sheets: SheetConfig[]
+) {
+  const workbook = utils.book_new();
+
+  for (const sheet of sheets) {
+    const { sheetName, data } = sheet;
+    const worksheet = utils.json_to_sheet(data);
+    utils.book_append_sheet(workbook, worksheet, sheetName);
+  }
+
+  return await writeXlsx(
+    workbook,
+    filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`,
+    { compression: true }
   );
 }

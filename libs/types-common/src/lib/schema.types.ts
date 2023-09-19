@@ -39,23 +39,14 @@ export interface TopCalldriverTopics extends CallsByTopic {
 
 export interface ICallDriver {
   _id: Types.ObjectId;
-
   airtable_id: string;
-
   date: Date;
-
   enquiry_line: string;
-
   topic?: string;
-
   subtopic?: string;
-
   sub_subtopic?: string;
-
   tpc_id: number; // Some records don't have a tpc_id, so they will default to this value
-
   impact: number;
-
   calls: number;
 }
 
@@ -105,127 +96,68 @@ export interface AASearchTermMetrics {
 
 export interface IMetrics {
   _id: Types.ObjectId;
-
   date: Date;
-
   dyf_submit: number;
-
   dyf_yes: number;
-
   dyf_no: number;
-
   views: number;
-
   visits: number;
-
   visitors: number;
-
   average_time_spent: number;
-
   bouncerate: number;
-
   rap_initiated: number;
-
   rap_completed: number;
-
   nav_menu_initiated: number;
-
   rap_cant_find: number;
-
   rap_login_error: number;
-
   rap_other: number;
-
   rap_sin: number;
-
   rap_info_missing: number;
-
   rap_securekey: number;
-
   rap_other_login: number;
-
   rap_gc_key: number;
-
   rap_info_wrong: number;
-
   rap_spelling: number;
-
   rap_access_code: number;
-
   rap_link_not_working: number;
-
   rap_404: number;
-
   rap_blank_form: number;
-
   fwylf_cant_find_info: number;
-
   fwylf_other: number;
-
   fwylf_hard_to_understand: number;
-
   fwylf_error: number;
-
   visits_geo_ab: number;
-
   visits_geo_bc: number;
-
   visits_geo_mb: number;
-
   visits_geo_nb: number;
-
   visits_geo_nl: number;
-
   visits_geo_ns: number;
-
   visits_geo_nt: number;
-
   visits_geo_nu: number;
-
   visits_geo_on: number;
-
   visits_geo_outside_canada: number;
-
   visits_geo_pe: number;
-
   visits_geo_qc: number;
-
   visits_geo_sk: number;
-
   visits_geo_us: number;
-
   visits_geo_yt: number;
-
   visits_referrer_other: number;
-
   visits_referrer_searchengine: number;
-
   visits_referrer_social: number;
-
   visits_referrer_typed_bookmarked: number;
-
   visits_device_other: number;
-
   visits_device_desktop: number;
-
   visits_device_mobile: number;
-
   visits_device_tablet: number;
-
   gsc_total_clicks: number;
-
   gsc_total_ctr: number;
-
   gsc_total_impressions: number;
-
   gsc_total_position: number;
-
   gsc_searchterms?: GscSearchTermMetrics[];
 }
 
 export interface IOverall extends IMetrics {
   aa_searchterms_en?: AASearchTermMetrics[];
-
   aa_searchterms_fr?: AASearchTermMetrics[];
 }
 
@@ -240,32 +172,18 @@ export interface IPageMetrics extends IMetrics {
  */
 export interface IPage {
   _id: Types.ObjectId;
-
   url: string;
-
-  all_urls: string[];
-
   title: string;
-
   airtable_id?: string;
-
-  itemid_url?: string;
-
-  itemid_activitymap?: string;
-
-  itemid_internalsearch?: string;
-
+  lang?: 'en' | 'fr';
+  altLangHref?: string;
+  redirect?: string;
+  is_404?: boolean;
   lastChecked?: Date;
-
   lastModified?: Date;
-
   tasks?: Types.ObjectId[] | ITask[];
-
   projects?: Types.ObjectId[] | IProject[];
-
   ux_tests?: Types.ObjectId[] | IUxTest[];
-
-  url_status?: number;
 }
 
 /*
@@ -273,33 +191,21 @@ export interface IPage {
  */
 export interface ITask {
   _id: Types.ObjectId;
-
   airtable_id: string;
-
   title: string;
-
   group: string;
-
   subgroup: string;
-
   topic: string;
-
   subtopic: string;
-
   sub_subtopic: string[];
-
   user_type: string[];
-
   ux_tests?: Types.ObjectId[] | IUxTest[];
-
   projects?: Types.ObjectId[] | IProject[];
-
   pages?: Types.ObjectId[] | IPage[];
-
   date?: string;
-
   tpc_ids: number[];
   program?: string;
+  service?: string;
   user_journey?: string[];
   status?: string;
   channel?: string[];
@@ -311,13 +217,9 @@ export interface ITask {
  */
 export interface IProject {
   _id: Types.ObjectId;
-
   title: string;
-
   ux_tests?: Types.ObjectId[] | IUxTest[];
-
   pages?: Types.ObjectId[] | IPage[];
-
   tasks?: Types.ObjectId[] | ITask[];
   description?: string;
   attachments?: AttachmentData[];
@@ -328,51 +230,28 @@ export interface IProject {
  */
 export interface IUxTest {
   _id: Types.ObjectId;
-
   title: string;
-
   airtable_id: string;
-
   project: Types.ObjectId | IProject;
-
   pages?: Types.ObjectId[] | IPage[];
-
   tasks?: Types.ObjectId[] | ITask[];
-
   subtask?: string;
-
   date?: Date;
-
   success_rate?: number;
-
   test_type?: string;
-
   session_type?: string;
-
   scenario?: string;
-
   vendor?: string;
-
   version_tested?: string;
-
   github_repo?: string;
-
   total_users?: number;
-
   successful_users?: number;
-
   program?: string;
-
   branch?: string;
-
   project_lead?: string;
-
   launch_date?: Date;
-
   status?: string;
-
   cops?: boolean;
-
   attachments?: AttachmentData[];
 }
 
@@ -380,6 +259,7 @@ export interface UrlHash {
   hash: string;
   date: Date;
 }
+
 export interface IUrl {
   _id: Types.ObjectId;
   url: string;
