@@ -248,7 +248,10 @@ export class ActivityMapService {
     const existingItemIdsDict = arrayToDictionary(existingItemIds, 'itemId');
 
     const newItems = itemIds
-      .filter((item) => !existingItemIdsDict[item.itemId])
+      .filter(
+        (item) =>
+          !existingItemIdsDict[item.itemId] && !item.value.match('https://')
+      )
       .map((itemId) => ({
         _id: new Types.ObjectId(),
         type: 'activityMapTitle',
