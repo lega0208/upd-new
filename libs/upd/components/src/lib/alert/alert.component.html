@@ -2,6 +2,7 @@
   #staticAlert
   [type]="type"
   [attr.style]="style"
+  [ngClass]="styleClass"
   *ngIf="!staticAlertClosed"
   (closed)="staticAlertClosed = true"
   [dismissible]="dismissible"

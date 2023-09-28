@@ -122,6 +122,9 @@
   "count": "Nombre",
   "most-frequent-words-on-page": "Mots les plus fréquents sur la page",
   "tooltip-most-frequent-words-on-page": "Les mots les plus fréquents sur la page",
+  "what-visitors-clicked-on": "Clics des visiteurs",
+  "notification-what-visitors-clicked-on": "Ce rapport montre les liens sur lesquels les visiteurs ont cliqué pendant la période de temps sélectionnée. Certains liens peuvent différer ou avoir des comptages combinés. Il comprend les liens traduits par le navigateur, les téléchargements et les clics depuis les menus et les barres latérales.",
+  "tooltip-what-visitors-clicked-on": "Ce que les visiteurs ont cliqué sur la page pendant la période sélectionnée.",
 
   "rank": "Classement",
   "page": "Page",
@@ -179,7 +182,6 @@
   "tooltip-headings": "Le nombre d'en-têtes",
   "tooltip-original-flesch-kincaid-score": "Le score sans considérer les en-têtes et les éléments d'une liste comme des phrases séparées",
   "tooltip-improving-web-readability": "Meilleures pratiques pour améliorer la lisibilité Web",
-
   "dt_search_keyword": "Rechercher un motclé",
   "dt_search_keyword_url": "Recherche par mot-clé ou URL",
   "government_of_canada": "Gouvernement du Canada",
