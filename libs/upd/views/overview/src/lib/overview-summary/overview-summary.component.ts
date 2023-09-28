@@ -109,7 +109,6 @@ export class OverviewSummaryComponent implements OnInit {
     prevDate: string;
     prevVisits: string;
     prevCalls: string;
-    prevAnnotations: string;
   }>[] = [];
   taskSurveyCols: ColumnConfig[] = [];
 
@@ -207,12 +206,6 @@ export class OverviewSummaryComponent implements OnInit {
             value: comparisonDateRange,
           }),
           pipe: 'number',
-        },
-        {
-          field: 'prevAnnotations',
-          header: this.i18n.service.translate('Events for ', lang, {
-            value: comparisonDateRange,
-          }),
         },
       ];
       this.taskSurveyCols = [

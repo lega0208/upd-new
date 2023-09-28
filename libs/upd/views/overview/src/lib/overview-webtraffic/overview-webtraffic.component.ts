@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { LocaleId } from '@dua-upd/upd/i18n';
 import { combineLatest, tap } from 'rxjs';
 
 @Component({
@@ -48,10 +47,8 @@ export class OverviewWebtrafficComponent implements OnInit {
   barTableCols: ColumnConfig<{
     date: string;
     visits: number;
-    annotations: string;
     prevDate: string;
     prevVisits: number;
-    prevAnnotations: string;
   }>[] = [];
 
   ngOnInit() {
@@ -78,6 +75,7 @@ export class OverviewWebtrafficComponent implements OnInit {
           pipe: 'percent',
         },
       ];
+
       this.barTableCols = [
         { field: 'date', header: this.i18n.service.translate('Dates', lang) },
         {
@@ -86,12 +84,6 @@ export class OverviewWebtrafficComponent implements OnInit {
             value: dateRange,
           }),
           pipe: 'number',
-        },
-        {
-          field: 'annotations',
-          header: this.i18n.service.translate('Events for ', lang, {
-            value: dateRange,
-          }),
         },
         {
           field: 'prevDate',
@@ -103,12 +95,6 @@ export class OverviewWebtrafficComponent implements OnInit {
             value: comparisonDateRange,
           }),
           pipe: 'number',
-        },
-        {
-          field: 'prevAnnotations',
-          header: this.i18n.service.translate('Events for ', lang, {
-            value: comparisonDateRange,
-          }),
         },
       ];
     });

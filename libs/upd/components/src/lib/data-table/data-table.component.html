@@ -7,7 +7,7 @@
   [showCurrentPageReport]="true"
   [rowsPerPageOptions]="[10, 25, 50, 100]"
   [loading]="loading"
-  styleClass="p-datatable-striped p-datatable-sm"
+  styleClass="p-datatable-striped p-datatable-sm border"
   [paginator]="pagination"
   currentPageReportTemplate="{{
     'dt-paginator'
@@ -27,7 +27,7 @@
         <ng-container *ngIf="captionTitle">
           {{ captionTitle | translate }}
         </ng-container>
-        <div ngClass="searh-url-field">
+        <div class="searh-url-field">
           <span *ngIf="filter" class="p-input-icon-left p-ml-auto">
             <i class="pi pi-search"></i>
             <input
@@ -207,7 +207,7 @@
   </ng-template>
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td attr.colspan="{{ cols.length }}" translate>No data found.</td>
+      <td colspan="{{ cols.length }}" translate>No data found.</td>
     </tr>
   </ng-template>
   <ng-template *ngIf="kpi" pTemplate="footer">

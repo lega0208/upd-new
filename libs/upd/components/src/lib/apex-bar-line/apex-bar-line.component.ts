@@ -9,9 +9,6 @@ import { ApexAxisChartSeries, ChartComponent } from 'ng-apexcharts';
 import { ColumnConfig } from '../data-table-styles/types';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ApexStore } from './apex.store';
-import { map, tap } from 'rxjs/operators';
-import { sum } from '@dua-upd/utils-common';
-import { values } from 'rambdax';
 
 @Component({
   selector: 'upd-apex-bar-line',
@@ -20,13 +17,13 @@ import { values } from 'rambdax';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ApexStore],
 })
-export class ApexBarLineComponent implements OnInit {
+export class ApexBarLineComponent<T> implements OnInit {
   @ViewChild('chart', { static: true }) chart!: ChartComponent;
   @Input() secondaryTitleCols: ColumnConfig = { field: '', header: '' };
   @Input() secondaryTitleData: Record<string, number | string>[] = [];
   @Input() title = '';
   @Input() titleTooltip = '';
-  @Input() table: any;
+  @Input() table: T[] = [];
   @Input() tableCols: ColumnConfig[] = [];
 
   @Input() set colours(value: string[]) {
@@ -37,12 +34,14 @@ export class ApexBarLineComponent implements OnInit {
     this.apexStore.setYAxis(value);
   }
 
-  @Input() set annotations(values: { x: Date; text: string }[]) {
+  @Input() set annotations(values: { x: Date; y: number; text: string }[]) {
     this.apexStore.setAnnotations(values);
   }
 
   vm$ = this.apexStore.vm$;
+
   hasData$ = this.apexStore.hasData$;
+
   constructor(
     private i18n: I18nFacade,
     private readonly apexStore: ApexStore
