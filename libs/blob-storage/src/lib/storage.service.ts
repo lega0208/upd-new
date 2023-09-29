@@ -15,10 +15,11 @@ export interface BlobDefinition {
  */
 export const blobModels = [
   'project_attachments',
+  'reports',
   'db_updates',
   'aa_raw',
   'feedback',
-  'urls'
+  'urls',
 ] as const;
 
 export type BlobModels = typeof blobModels;
@@ -28,11 +29,18 @@ export type RegisteredBlobModel = BlobModels[number];
 export class BlobStorageService {
   private storageClient = new StorageClient();
 
-  private readonly blobDefinitions: Record<RegisteredBlobModel, BlobDefinition> = {
+  private readonly blobDefinitions: Record<
+    RegisteredBlobModel,
+    BlobDefinition
+  > = {
     project_attachments: {
       path: 'project_attachments',
       containerName: 'documents',
       overwrite: true,
+    },
+    reports: {
+      path: 'reports',
+      containerName: 'documents',
     },
     db_updates: {
       path: 'db_updates',
@@ -52,15 +60,16 @@ export class BlobStorageService {
       path: 'urls',
       containerName: 'raw-data',
       compression: 'zstd',
-    }
+    },
   } as const;
 
   readonly blobModels: Record<RegisteredBlobModel, BlobModel> = {
     db_updates: null,
     project_attachments: null,
+    reports: null,
     aa_raw: null,
     feedback: null,
-    urls: null
+    urls: null,
   };
 
   private async configureBlobs(): Promise<BlobStorageService> {

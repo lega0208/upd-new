@@ -35,6 +35,8 @@ import {
   ReadabilitySchema,
   Annotations,
   AnnotationsSchema,
+  Reports,
+  ReportsSchema,
 } from './db.schemas';
 import { PageVisitsViewSchema, PageVisitsView } from './db.views';
 
@@ -57,6 +59,7 @@ export const models = {
   urls: { model: Url, schema: UrlSchema },
   readability: { model: Readability, schema: ReadabilitySchema },
   annotations: { model: Annotations, schema: AnnotationsSchema },
+  reports: { model: Reports, schema: ReportsSchema },
 } as const;
 
 export const views = {

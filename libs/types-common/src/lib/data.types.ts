@@ -12,6 +12,7 @@ import type {
   IUxTest,
   IReadability,
   IAnnotations,
+  IReports,
 } from './schema.types';
 
 export type ApiParams = {
@@ -228,6 +229,7 @@ export type TasksHomeData = ViewData<TasksHomeAggregatedData[]> & {
   percentChange: number;
   totalCalls: number;
   percentChangeCalls: number;
+  reports: IReports[];
 };
 
 export interface TaskDetailsMetrics {

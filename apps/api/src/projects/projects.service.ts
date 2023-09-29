@@ -440,6 +440,7 @@ export class ProjectsService {
       this.feedbackModel,
       this.calldriversModel,
       this.projectsModel,
+      this.pageModel,
       new Types.ObjectId(params.id),
       params.dateRange,
       projectUrls
@@ -452,6 +453,7 @@ export class ProjectsService {
       this.feedbackModel,
       this.calldriversModel,
       this.projectsModel,
+      this.pageModel,
       new Types.ObjectId(params.id),
       params.comparisonDateRange,
       projectUrls
@@ -601,6 +603,7 @@ async function getAggregatedProjectMetrics(
   feedbackModel: FeedbackModel,
   calldriversModel: CallDriverModel,
   projectModel: Model<ProjectDocument>,
+  pageModel: Model<PageDocument>,
   id: Types.ObjectId,
   dateRange: string,
   projectUrls: string[]
@@ -637,7 +640,7 @@ async function getAggregatedProjectMetrics(
         gsc_total_position: 1,
       })
       .group({
-        _id: '$url',
+        _id: '$page',
         page: { $first: '$page' },
         visits: { $sum: '$visits' },
         dyfYes: { $sum: '$dyf_yes' },
@@ -683,10 +686,52 @@ async function getAggregatedProjectMetrics(
         gscTotalCtr: { $avg: '$gscTotalCtr' },
         gscTotalPosition: { $avg: '$gscTotalPosition' },
       })
-      .project({ _id: 0 })
       .exec()
   )[0];
   console.timeEnd('projectMetrics');
+
+  const pageWithProject = await pageModel
+    .find({ projects: new Types.ObjectId(id) })
+    .lean()
+    .exec();
+
+  const pageLookup = arrayToDictionary(pageWithProject, '_id');
+
+  if (projectMetrics?.visitsByPage) {
+    const metricsMapped = projectMetrics.visitsByPage.map((metric) => {
+      const page = pageLookup[metric._id.toString()];
+      delete pageLookup[metric._id.toString()];
+
+      return {
+        ...metric,
+        _id: metric._id.toString(),
+        title: page.title,
+        url: page.url,
+      };
+    });
+
+    const missingPages = Object.values(pageLookup).map((page) => ({
+      _id: page._id.toString(),
+      title: page.title,
+      url: page.url,
+      visits: 0,
+      dyfYes: 0,
+      dyfNo: 0,
+      fwylfCantFindInfo: 0,
+      fwylfError: 0,
+      fwylfHardToUnderstand: 0,
+      fwylfOther: 0,
+      gscTotalClicks: 0,
+      gscTotalImpressions: 0,
+      gscTotalCtr: 0,
+      gscTotalPosition: 0,
+    }));
+
+    projectMetrics.visitsByPage = [
+      ...(metricsMapped || []),
+      ...(missingPages || []),
+    ].sort((a, b) => a.title.localeCompare(b.title));
+  }
 
   const project = await projectModel
     .findById(id)
