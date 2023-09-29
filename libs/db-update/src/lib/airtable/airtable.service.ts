@@ -70,12 +70,12 @@ export class AirtableService {
   ): Promise<boolean> {
     // compare pages and relationships to current data -> skip updating refs if nothing has changed
     const refArraysAreTheSame = (a: Types.ObjectId[], b: Types.ObjectId[]) => {
-      if (a.length !== b.length) {
+      if (a?.length !== b?.length) {
         return false;
       }
 
-      const normalizedA = JSON.stringify(a.map((id) => id.toString()));
-      const normalizedB = JSON.stringify(b.map((id) => id.toString()));
+      const normalizedA = JSON.stringify(a?.map((id) => id.toString()));
+      const normalizedB = JSON.stringify(b?.map((id) => id.toString()));
 
       return normalizedA === normalizedB;
     };
@@ -99,17 +99,17 @@ export class AirtableService {
 
       const tasksChanged = !refArraysAreTheSame(
         page.tasks as Types.ObjectId[],
-        newPage.tasks as Types.ObjectId[]
+        (newPage.tasks || []) as Types.ObjectId[]
       );
 
       const projectsChanged = !refArraysAreTheSame(
         page.projects as Types.ObjectId[],
-        newPage.projects as Types.ObjectId[]
+        (newPage.projects || []) as Types.ObjectId[]
       );
 
       const uxTestsChanged = !refArraysAreTheSame(
         page.ux_tests as Types.ObjectId[],
-        newPage.ux_tests as Types.ObjectId[]
+        (newPage.ux_tests || []) as Types.ObjectId[]
       );
 
       if (tasksChanged || projectsChanged || uxTestsChanged) {

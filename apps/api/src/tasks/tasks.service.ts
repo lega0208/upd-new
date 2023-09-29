@@ -31,12 +31,11 @@ import type {
 } from '@dua-upd/types-common';
 import type { ApiParams } from '@dua-upd/types-common';
 import {
-  getAvgSuccessFromLastTests,
-  getLatestTest,
   dateRangeSplit,
   arrayToDictionary,
   logJson,
   percentChange,
+  getAvgSuccessFromLatestTests,
 } from '@dua-upd/utils-common';
 import { InternalSearchTerm } from '@dua-upd/types-common';
 
@@ -325,6 +324,7 @@ export class TasksService {
       ),
       taskSuccessByUxTest: [],
       avgTaskSuccessFromLastTest: null, // todo: better handle N/A
+      avgSuccessPercentChange: null,
       dateFromLastTest: null,
       feedbackComments: [],
       searchTerms: await this.getTopSearchTerms(params),
@@ -354,11 +354,11 @@ export class TasksService {
           return 0;
         });
 
-      // *** @@@
-      // move functions to uxTests statics
-      returnData.dateFromLastTest = getLatestTest(uxTests)?.date || null;
-      returnData.avgTaskSuccessFromLastTest =
-        getAvgSuccessFromLastTests(uxTests);
+      ({
+        avgTestSuccess: returnData.avgTaskSuccessFromLastTest,
+        latestDate: returnData.dateFromLastTest,
+        percentChange: returnData.avgSuccessPercentChange,
+      } = getAvgSuccessFromLatestTests(uxTests));
 
       returnData.feedbackComments = await this.feedbackModel.getComments(
         params.dateRange,
@@ -602,11 +602,68 @@ async function getTaskAggregatedData(
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
+  const visitsByDay = await pageMetricsModel
+    .aggregate()
+    .match({ date: dateQuery, tasks: taskId })
+    .group({
+      _id: '$date',
+      visits: { $sum: '$visits' },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      visits: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
+
+  const dyfByDay = await pageMetricsModel
+    .aggregate()
+    .match({ date: dateQuery, tasks: taskId })
+    .group({
+      _id: '$date',
+      dyf_yes: { $sum: '$dyf_yes' },
+      dyf_no: { $sum: '$dyf_no' },
+      dyf_submit: { $sum: '$dyf_submit' },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      dyf_yes: 1,
+      dyf_no: 1,
+      dyf_submit: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
+
+  const calldriversByDay = await calldriversModel
+    .aggregate()
+    .match({
+      date: { $gte: startDate, $lte: endDate },
+      tpc_id: { $in: calldriversTpcId },
+    })
+    .group({
+      _id: '$date',
+      calls: {
+        $sum: '$calls',
+      },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      calls: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
+
   return {
     ...results[0],
     calldriversEnquiry,
     callsByTopic,
     totalCalldrivers,
     feedbackByTags,
+    visitsByDay,
+    dyfByDay,
+    calldriversByDay,
   };
 }

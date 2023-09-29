@@ -86,6 +86,12 @@ export type PageDetailsMetrics = Pick<
 export interface PageAggregatedData extends PageDetailsMetrics {
   visitsByDay: { date: string; visits: number }[];
   feedbackByTags: { tag: string; numComments: number }[];
+  dyfByDay: {
+    date: Date;
+    dyf_yes: number;
+    dyf_no: number;
+    dyf_submit: number;
+  }[];
 }
 
 export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
@@ -240,6 +246,9 @@ export interface TaskDetailsMetrics {
   gscTotalPosition: number;
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
+  calldriversByDay: { date: string; calls: number }[];
+  visitsByDay: { date: string; visits: number }[];
+  dyfByDay: { date: string; dyf_yes: number; dyf_no: number }[];
   totalCalldrivers: number;
 }
 
@@ -263,6 +272,7 @@ export interface TaskDetailsData
   channel: string[];
   core: string[];
   avgTaskSuccessFromLastTest: number;
+  avgSuccessPercentChange: number;
   dateFromLastTest: Date;
   taskSuccessByUxTest: {
     title: string;
@@ -307,7 +317,13 @@ export interface ProjectsHomeProject {
   avgSuccessRate?: number;
   lastAvgSuccessRate?: number;
   status: ProjectStatus;
-  uxTests?: { date?: Date; success_rate?: number; test_type?: string }[];
+  uxTests?: {
+    title: any;
+    date?: Date;
+    success_rate?: number;
+    test_type?: string;
+    task?: string;
+  }[];
 }
 
 export interface ProjectsHomeData {
@@ -345,16 +361,23 @@ export interface ProjectDetailsAggregatedData {
   gscTotalPosition: number;
   gscSearchTerms: GscSearchTermMetrics;
   visitsByPage: VisitsByPage[];
+  visitsByDay: { date: string; visits: number }[];
+  dyfByDay: { date: string; dyf_yes: number; dyf_no: number }[];
+  calldriversByDay: { date: string; calls: number }[];
   feedbackByTags: { tag: string; numComments: number }[];
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
   callsByTasks: CallsByTasks[];
   totalCalldrivers: number;
+  pageMetricsByTasks: (Partial<ProjectDetailsAggregatedData> & {
+    title: string;
+  })[];
 }
 
 export interface ProjectsDetailsData
   extends EntityDetailsData<ProjectDetailsAggregatedData> {
   status: ProjectStatus;
+  cops?: boolean;
   description?: string;
   startDate: string | undefined;
   launchDate: string | undefined;

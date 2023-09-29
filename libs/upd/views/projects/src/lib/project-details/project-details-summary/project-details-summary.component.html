@@ -1,6 +1,6 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-12 col-md-12 col-sm-12">
       <upd-card [title]="'Project description'">{{
         (description$ | async) ||
           ('Project description not available' | translate)
@@ -27,19 +27,51 @@
         </p>
       </upd-data-card>
     </div>
-    <div class="col-lg-4 col-sm-12">
+    <div class="col-lg-4 col-md-12 col-sm-12">
+      <upd-apex-spark-line
+        [title]="'kpi-calls-per-100-title'"
+        [titleTooltip]="'kpi-calls-per-100-tooltip'"
+        [series]="(apexCallDrivers$ | async) || []"
+        [current]="(callPerVisits$ | async) || 0"
+        [comparison]="(apexCallPercentChange$ | async) || 0"
+        [keyword]="'calls'"
+        [scale]="100"
+        [difference]="(apexCallDifference$ | async) || 0"
+        modal=" {{ 'kpi-calls-per-100-guidance' | translate }}"
+      ></upd-apex-spark-line>
+    </div>
+    <div class="col-lg-4 col-md-12 col-sm-12">
+      <upd-apex-spark-line
+        [title]="'kpi-feedback-per-1000-title'"
+        [titleTooltip]="'kpi-feedback-per-1000-tooltip'"
+        [series]="(apexKpiFeedback$ | async) || []"
+        [current]="(currentKpiFeedback$ | async) || 0"
+        [comparison]="(kpiFeedbackPercentChange$ | async) || 0"
+        [scale]="1000"
+        [kpiObjectiveCriteria]="feedbackKpiObjectiveCriteria"
+        [difference]="(kpiFeedbackDifference$ | async) || 0"
+        modal=" {{ 'kpi-feedback-per-1000-guidance' | translate }} "
+        [keyword]="'feedback'"
+      ></upd-apex-spark-line>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-6 col-sm-12">
       <upd-data-card
         [current]="visits$ | async"
         [comparison]="visitsPercentChange$ | async"
         [title]="'Total visits from all pages'"
       ></upd-data-card>
     </div>
-    <div class="col-lg-4 col-sm-12">
+    <div class="col-lg-6 col-sm-12">
       <upd-data-card
         [current]="totalCalldriver$ | async"
         [comparison]="totalCalldriverPercentChange$ | async"
         [title]="'Call volume'"
-        [displayKpis]="true"
+        [displayKpis]="false"
         [kpiObjectiveCriteria]="callVolumeObjectiveCriteria"
         [kpiStylesConfig]="callVolumeKpiConfig"
         [comparisonMode]="'upBadDownGood'"
@@ -128,6 +160,21 @@
           <p>{{ 'Timeline not available' | translate }}.</p>
         </ng-template>
       </upd-card>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="documents$ | async as documents" class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [data]="documents || []"
+        [cols]="documentsCols"
+        [sort]="false"
+        [pagination]="false"
+        [filter]="false"
+        [title]="'Documents'"
+      ></upd-data-table-card>
     </div>
   </div>
 </div>

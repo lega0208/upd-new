@@ -26,6 +26,8 @@ export class ProjectDetailsComponent implements OnInit {
   );
 
   status$ = this.projectsDetailsService.status$;
+  cops$ = this.projectsDetailsService.cops$;
+
   error$ = this.projectsDetailsService.error$;
   loading$ = this.projectsDetailsService.loading$;
   currentRoute$ = this.projectsDetailsService.currentRoute$;
