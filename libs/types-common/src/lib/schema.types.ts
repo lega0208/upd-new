@@ -5,16 +5,23 @@ import { Types } from 'mongoose';
  */
 export type AAItemIdTypes =
   | 'internalSearch'
-  | 'activityMap'
+  | 'activityMapTitle'
   | 'urlLast255'
   | 'pageUrl';
+
+export interface ActivityMapMetrics {
+  link: string;
+  clicks: number;
+}
 
 export interface IAAItemId {
   _id: Types.ObjectId;
   type: AAItemIdTypes;
   page?: Types.ObjectId;
+  pages?: Types.ObjectId[];
   itemId: string;
   value: string;
+  title?: string;
 }
 
 /*

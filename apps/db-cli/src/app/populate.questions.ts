@@ -19,7 +19,7 @@ export class PopulateOverallPrompt {
     message: 'Populate metrics or search terms?',
     name: 'metricsOrSearchTerms',
     type: 'list',
-    choices: ['metrics', 'search terms', 'both']
+    choices: ['metrics', 'search terms', 'both'],
   })
   parseMetricsOrSearchTerms(choice: 'metrics' | 'search terms' | 'both') {
     return choice;
@@ -33,29 +33,12 @@ export class PopulatePagesPrompt {
     message: 'Populate metrics or search terms?',
     name: 'metricsOrSearchTerms',
     type: 'list',
-    choices: ['metrics', 'search terms', 'both']
+    choices: ['metrics', 'search terms', 'activity map', 'all'],
   })
   parseMetricsOrSearchTerms(choice: string) {
     return choice;
   }
 }
-
-// @QuestionSet({ name: 'populate_itemIds' })
-// export class PopulateItemIdsPrompt {
-//   @Question({
-//     message: 'Which type of itemId would you like to populate?',
-//     name: 'itemIdType',
-//     type: 'list',
-//     choices: [
-//       'internal search',
-//       'page url',
-//       'activity map',
-//     ]
-//   })
-//   parseMetricsOrSearchTerms(choice: string) {
-//     return choice;
-//   }
-// }
 
 @QuestionSet({ name: 'populate_collection_options' })
 export class PopulateCollectionOptionsPrompt {

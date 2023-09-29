@@ -132,16 +132,16 @@ export class SearchAssessmentService {
               ? `https://${sorted?.[0].url}`
               : '';
 
-            if (!result) {
-              return {
-                fields: {
-                  Query: d.fields.Query,
-                  URL: expectedUrlStartsWithWWW
-                    ? `https://${expectedUrl}`
-                    : expectedUrl || sortedUrl,
-                },
-              };
-            }
+              if (!result) {
+                return {
+                  fields: {
+                    Query: d.fields.Query,
+                    URL: expectedUrlStartsWithWWW
+                      ? `https://${expectedUrl}`
+                      : expectedUrl || sortedUrl,
+                  },
+                };
+              }
 
             return undefined;
           })
@@ -771,7 +771,7 @@ export class SearchAssessmentService {
   }
 
   async insertExpectedDB(
-    data: { fields: { Query: string; URL: string } }[],
+    data: { fields: { Query: string; URL: string; } }[],
     lang: 'en' | 'fr'
   ) {
     return await this.airtableClient.insertExpectedDB(

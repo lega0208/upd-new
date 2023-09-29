@@ -173,6 +173,14 @@ export class PagesDetailsFacade {
     })
   );
 
+  activityMap$ = combineLatest([
+    this.pagesDetailsData$,
+  ]).pipe(
+    map(([data]) => {
+      return data?.activityMap || [];
+    })
+  );
+
   visitsByDay$ = combineLatest([
     this.pagesDetailsData$,
     this.currentLang$,

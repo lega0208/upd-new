@@ -122,6 +122,9 @@
   "count": "Count",
   "most-frequent-words-on-page": "Most frequent words on the page",
   "tooltip-most-frequent-words-on-page": "The most frequent words on the page",
+  "what-visitors-clicked-on": "What visitors clicked on",
+  "notification-what-visitors-clicked-on": "This report shows the links clicked by visitors during the selected period. Some links may differ or have combined counts. It includes links translated by the browser, downloads, and clicks from menus and sidebars.",
+  "tooltip-what-visitors-clicked-on": "What visitors clicked on the page during the selected period.",
 
   "rank": "Rank",
   "page": "Page",
@@ -223,6 +226,8 @@
   "related-tasks": "Related Tasks",
   "nodata-related-tasks": "No Related tasks for this page",
   "visitor-location": "Visitor location",
+  "visitor-activity": "Visitor activity",
+  "link-text": "Link text",
   "province": "Province",
   "text": "Text",
   "previous-page-url": "Previous page URL",

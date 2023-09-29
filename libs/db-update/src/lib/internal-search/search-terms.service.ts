@@ -1,5 +1,7 @@
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import chalk from 'chalk';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { Types } from 'mongoose';
 import {
@@ -22,10 +24,7 @@ import {
   queryDateFormat,
   singleDatesFromDateRange,
 } from '@dua-upd/external-data';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import { writeFile, mkdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { writeLogFile } from '@dua-upd/node-utils';
 
 dayjs.extend(utc);
 
@@ -300,7 +299,7 @@ export class InternalSearchTermsService {
     }
   }
 
-  async updateItemIds(dateRange: DateRange) {
+  async updateInternalSearchItemIds(dateRange: DateRange) {
     try {
       this.logger.log(
         chalk.blueBright(
@@ -368,7 +367,7 @@ export class InternalSearchTermsService {
       return;
     }
 
-    await this.updateItemIds(queryDateRange);
+    await this.updateInternalSearchItemIds(queryDateRange);
 
     for (const lang of ['en', 'fr'] as ('en' | 'fr')[]) {
       this.logger.log(
@@ -521,7 +520,7 @@ export class InternalSearchTermsService {
         url: string;
       }>();
 
-      const itemIdDocs = await this.updateItemIds(dateRange);
+      const itemIdDocs = await this.updateInternalSearchItemIds(dateRange);
 
       const searchTermResults = await blobProxy.exec(
         [dateRange, itemIdDocs],
@@ -754,22 +753,10 @@ export class InternalSearchTermsService {
       logJson(bulkWriteResults);
 
       if (noMetricsMatchSet.size > 0) {
-        try {
-          if (!existsSync('./logs')) {
-            await mkdir('./logs');
-          }
+        const dateString = dateRange.start.slice(0, 10);
+        const logFilename = `searchterms-noMatch-${dateString}.json`;
 
-          await writeFile(
-            `./logs/searchterms-noMatch-${dateRange.start.replace(
-              /^(\d{4}-\d{2}-\d{2}).+/,
-              '$1'
-            )}.json`,
-            prettyJson([...noMetricsMatchSet]),
-            'utf8'
-          );
-        } catch (e) {
-          console.error(e);
-        }
+        await writeLogFile(logFilename, [...noMetricsMatchSet]);
       }
     }
   }

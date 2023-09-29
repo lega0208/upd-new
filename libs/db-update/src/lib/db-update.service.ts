@@ -82,6 +82,7 @@ export class DbUpdateService {
     });
   }
 
+  @Retry(4, 1000)
   async updateSAT() {
     this.logger.log('Starting search assessment...');
     await this.searchAssessmentService.upsertPreviousSearchAssessment();
@@ -89,9 +90,10 @@ export class DbUpdateService {
     this.logger.log('Search assessment successfully updated.');
   }
 
+  @Retry(4, 1000)
   async updateActivityMap() {
     this.logger.log('Starting activity map...');
-    await this.activityMapService.upsertPageActivityMap();
+    await this.activityMapService.updateActivityMap();
     this.logger.log('Activity map successfully updated.');
   }
 
@@ -159,6 +161,10 @@ export class DbUpdateService {
       await this.internalSearchService
         .upsertPageSearchTerms()
         .catch((err) => this.logger.error(err.stack));
+
+      await this.updateActivityMap().catch((err) =>
+        this.logger.error(err.stack)
+      );
 
       await this.pagesService
         .updatePagesLang()
