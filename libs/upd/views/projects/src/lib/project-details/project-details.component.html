@@ -1,6 +1,9 @@
 <div class="back_link">
   <span class="material-icons align-top">west</span>
-  <a [routerLink]="['/', langLink, 'projects']" [translate]="'menu-projects'"></a>
+  <a
+    [routerLink]="['/', langLink, 'projects']"
+    [translate]="'menu-projects'"
+  ></a>
 </div>
 
 <upd-loading-spinner
@@ -14,19 +17,29 @@
 </ng-template>
 
 <ng-template #elseBlock2>
-  <h2 class="h3 pt-2 pb-2">
-    <span [translate]="'project'"></span>: {{ title$ | async }}
-    <span class="h5 d-inline-block mb-0 align-top ms-1">
-    <upd-project-status-label
-      [statusText]="(status$ | async) || 'Unknown'"
-    ></upd-project-status-label>
-  </span>
-  </h2>
+<h2 class="h3 pt-2 pb-2">
+  <span [translate]="'project'"></span>: 
+  <ng-container *ngIf="title$ | async as title">
+    {{ title }}
+  </ng-container>
+  
+  <span class="h5 d-inline-block mb-0 align-top ms-1">
+    <ng-container *ngIf="status$ | async as status">
+      <upd-project-status-label [statusText]="status || 'Unknown'">
+      </upd-project-status-label>
+    </ng-container>
 
-<upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
-<upd-date-selector
-  *ngIf="!((currentRoute$ | async) || '').endsWith('uxtests')"
+    <ng-container *ngIf="cops$ | async as cops">
+      <span class="badge ms-2" [class.bg-primary]="cops" translate>
+        COPS
+      </span>
+    </ng-container>
+  </span>
+</h2>
+
+  <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
+  <upd-date-selector
+    *ngIf="!((currentRoute$ | async) || '').endsWith('uxtests')"
   ></upd-date-selector>
   <router-outlet></router-outlet>
 </ng-template>
-

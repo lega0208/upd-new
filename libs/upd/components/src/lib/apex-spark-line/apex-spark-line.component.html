@@ -5,71 +5,69 @@
   [config]="secondaryTitleCols"
   [data]="secondaryTitleData"
 >
-<div>
-</div>
-  <div class="radialBar">
-    <apx-chart
-      #chart
-      *ngIf="hasData"
-      [series]="series || []"
-      [labels]="chartOptions.labels || []"
-      [legend]="chartOptions.legend || {}"
-      [chart]="chartConfig"
-      [yaxis]="chartOptions.yaxis || []"
-      [xaxis]="chartOptions.xaxis || {}"
-      [stroke]="chartOptions.stroke || {}"
-      [plotOptions]="chartOptions.plotOptions || {}"
-      [markers]="chartOptions.markers || {}"
-      [fill]="chartOptions.fill || {}"
-      [colors]="colors"
-      [dataLabels]="chartOptions.dataLabels || {}"
-      [tooltip]="chartOptions.tooltip || {}"
-    ></apx-chart>
-  </div>
-  <!-- <div class="button">
-    <upd-modal>
+  <ng-container *ngIf="!hasData; else elseBlock">
+    <p>
+      <span [translate]="'nodata-available'"></span>
+    </p>
+  </ng-container>
+  <ng-template #elseBlock>
+    <div class="radialBar">
+      <apx-chart
+        #chart
+        [series]="series || []"
+        [labels]="chartOptions.labels || []"
+        [legend]="chartOptions.legend || {}"
+        [chart]="chartConfig"
+        [yaxis]="chartOptions.yaxis || []"
+        [xaxis]="chartOptions.xaxis || {}"
+        [stroke]="chartOptions.stroke || {}"
+        [plotOptions]="chartOptions.plotOptions || {}"
+        [markers]="chartOptions.markers || {}"
+        [fill]="chartOptions.fill || {}"
+        [colors]="colors"
+        [dataLabels]="chartOptions.dataLabels || {}"
+        [tooltip]="chartOptions.tooltip || {}"
+      ></apx-chart>
+    </div>
+
+    <div class="d-flex align-items-center box">
+      <span class="fw-bold large-text">
+        {{ curr }}
+      </span>
+      <div class="d-flex justify-content-end">
+        <span *ngIf="keyword === 'calls'">{{
+          'kpi-calls-per-100-text' | translate
+        }}</span>
+        <span *ngIf="keyword === 'feedback'">{{
+          'kpi-feedback-per-1000-text' | translate
+        }}</span>
+      </div>
+    </div>
+
+    <div class="d-flex second-box">
+      <div class="d-flex"></div>
+      <span
+        [ngStyle]="{ color: kpiConfig[kpiObjectiveStatus].colour }"
+        class="text-nowrap pe-2"
+        ><span class="material-icons">{{
+          kpiConfig[kpiObjectiveStatus].iconName
+        }}</span>
+        {{ comparison | localePercent }}</span
+      >
+      <span *ngIf="keyword === 'calls'"
+        >({{ diff }} {{ 'kpi-calls-per-100-label' | translate }})
+      </span>
+      <span *ngIf="keyword === 'feedback'"
+        >({{ diff }} {{ 'kpi-feedback-per-1000-label' | translate }})</span
+      >
       <ng-content></ng-content>
-    </upd-modal>
-  </div> -->
-
-  <div class="d-flex align-items-center box">
-    <span class="fw-bold large-text">
-      {{ curr }}
-    </span>
-    <div class="d-flex justify-content-end">
-      <span *ngIf="keyword === 'calls'">{{
-        'kpi-calls-per-100-text' | translate
-      }}</span>
-      <span *ngIf="keyword === 'feedback'">{{
-        'kpi-feedback-per-1000-text' | translate
-      }}</span>
+      <div class="d-flex push" *ngIf="modal">
+        <upd-modal [modalTitle]="title" [modalContent]="modal"> </upd-modal>
+      </div>
     </div>
-  </div>
+  </ng-template>
 
-  <div class="d-flex second-box">
-    <div class="d-flex"></div>
-    <span
-      [ngStyle]="{ color: kpiConfig[kpiObjectiveStatus].colour }"
-      class="text-nowrap pe-2"
-      ><span class="material-icons">{{
-        kpiConfig[kpiObjectiveStatus].iconName
-      }}</span>
-      {{ comparison | localePercent }}</span
-    >
-    <span *ngIf="keyword === 'calls'"
-      >({{ diff }} {{ 'kpi-calls-per-100-label' | translate }})
-    </span>
-    <span *ngIf="keyword === 'feedback'"
-      >({{ diff }} {{ 'kpi-feedback-per-1000-label' | translate }})</span
-    >
-    <ng-content></ng-content>
-    <div class="d-flex push" *ngIf="modal">
-      <upd-modal [modalTitle]="title" [modalContent]="modal">
-      </upd-modal>
-    </div>
-  </div>
-
-  <!--
+<!--   
 
   <div class="pt-3">
     <upd-accordion

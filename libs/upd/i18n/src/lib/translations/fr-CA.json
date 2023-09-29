@@ -326,7 +326,7 @@
   "kpi-ux-test-title": "Taux de réussite moyen des tests d'expérience utilisateur",
   "kpi-ux-test-tooltip": "Taux de réussite moyen des derniers tests sur tous les tests d'expérience utilisateur complets avec le type de test de validation",
   "kpi-ux-test-guidance": "<strong>Qu'est-ce que c'est?</strong>  <br />Le pourcentage du taux de réussite moyen des derniers tests sur tous les tests d'expérience utilisateur complets avec le type de test de validation.<br />L'objectif pour cet indicateur de performance clé est de 80%.<br /><br /><strong>Comment cet ICR est-il calculé?</strong>  <br />A: La somme des derniers taux de réussite des tests UX (en pourcentage) de tous les tests UX complets avec le type de test Validation<br />B: Le nombre total de tests complets effectués avec le type de test de validation<br /> <br />A/B<br /><br /><div class=\"text-end\"><a href=\"/fr/overview/uxtests\">Visionner plus de données de résultats de tests de l’expérience utilisateurs</a></div>",
-  "kpi-ux-test-text": "{{total}} tests terminés",
+  "kpi-ux-test-text": "{{total}} tâches terminés",
   "Total searches": "Recherches totales",
 
   "Projects in progress": "Projets en cours",

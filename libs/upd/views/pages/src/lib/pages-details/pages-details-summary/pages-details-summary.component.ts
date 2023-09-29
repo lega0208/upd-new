@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import {
+  ColumnConfig,
+  feedbackKpiObjectiveCriteria,
+} from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
@@ -28,6 +31,13 @@ export class PagesDetailsSummaryComponent implements OnInit {
 
   data$ = this.pageDetailsService.pagesDetailsData$;
   error$ = this.pageDetailsService.error$;
+
+  apexKpiFeedback$ = this.pageDetailsService.apexKpiFeedback$;
+
+  currentKpiFeedback$ = this.pageDetailsService.currentKpiFeedback$;
+  kpiFeedbackPercentChange$ = this.pageDetailsService.kpiFeedbackPercentChange$;
+  feedbackKpiObjectiveCriteria = feedbackKpiObjectiveCriteria;
+  kpiFeedbackDifference$ = this.pageDetailsService.kpiFeedbackDifference$;
 
   url$ = this.pageDetailsService.pageUrl$;
 
@@ -122,7 +132,10 @@ export class PagesDetailsSummaryComponent implements OnInit {
           }),
           pipe: 'number',
         },
-        { field: 'prevDate', header: this.i18n.service.translate('Dates', lang) },
+        {
+          field: 'prevDate',
+          header: this.i18n.service.translate('Dates', lang),
+        },
         {
           field: 'prevVisits',
           header: this.i18n.service.translate('Visits for ', lang, {
