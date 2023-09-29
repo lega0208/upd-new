@@ -29,6 +29,7 @@ export class TaskDetailsUxTestsComponent implements OnInit {
 
   avgTaskSuccessFromLastTest$ =
     this.taskDetailsService.avgTaskSuccessFromLastTest$;
+  avgSuccessPercentChange$ = this.taskDetailsService.avgSuccessPercentChange$;
 
   documents$ = this.taskDetailsService.documents$;
   documentsCols: ColumnConfig<DocumentsColTypes>[] = [];

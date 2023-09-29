@@ -186,6 +186,47 @@ CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
     .sort((a, b) => (b.calls ?? 0) - (a.calls ?? 0));
 };
 
+CallDriverSchema.statics['getCallsByTaskFromIds'] = async function (
+  dateRange: string,
+  documentIds: number[]
+): Promise<CallsByTasks[]> {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  return this.aggregate([
+    {
+      $match: {
+        tpc_id: { $in: documentIds },
+        date: { $gte: startDate, $lte: endDate },
+      },
+    },
+    {
+      $lookup: {
+        from: 'tasks',
+        localField: 'tpc_id',
+        foreignField: 'tpc_ids',
+        as: 'task',
+      },
+    },
+    {
+      $unwind: '$task',
+    },
+    {
+      $group: {
+        _id: '$task._id',
+        title: { $first: '$task.title' },
+        calls: { $sum: '$calls' },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        title: 1,
+        calls: 1,
+      },
+    },
+  ]).exec();
+};
+
 export interface CallDriverModel extends Model<CallDriver> {
   getCallsByTopicFromIds(
     documentIds: Types.ObjectId[]
@@ -199,4 +240,8 @@ export interface CallDriverModel extends Model<CallDriver> {
     tpcIds?: number[]
   ): Promise<TopCalldriverTopics[]>;
   getCallsByTpcId(dateRange: string, tpcIds: number[]): Promise<CallsByTasks[]>;
+  getCallsByTaskFromIds(
+    dateRange: string,
+    documentIds: number[]
+  ): Promise<CallsByTasks[]>;
 }

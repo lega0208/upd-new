@@ -312,6 +312,9 @@
   "Target": "Target:",
   "SAT-title": "Top search term assessment (English and French) from Canada.ca - {{start}} to {{end}}",
   "SAT-tooltip": "Assessment of the Top English and French search terms on canada.ca and their corresponding target URL.",
+  "english-report": "English report",
+  "french-report": "French report",
+  "reports": "Reports",
   "English": "English",
   "French": "French",
 
@@ -332,7 +335,7 @@
   "kpi-ux-test-title": "UX tests average success rate",
   "kpi-ux-test-tooltip": "Average success rate of the latest testing on all complete UX tests with Validation test type",
   "kpi-ux-test-guidance": "<strong>What is this?</strong>  <br />The percentage of average success rate for the latest testing on all complete UX tests with Validation test type.<br />The target for this Key performance indicator is 80%.<br /><br /><strong>How is this KPI calculated?</strong>  <br />A: The sum of latest user test success rates (in percentages) of all complete UX tests with the Validation test type<br />B: The total number of complete tests performed with the Validation test type<br /> <br />A/B<br /><br /><div class='d-flex justify-content-end'><a href=\"/en/overview/uxtests/\">View more UX tests data</a></div>",
-  "kpi-ux-test-text": "{{total}} tests completed",
+  "kpi-ux-test-text": "{{total}} tasks completed",
   "Total searches": "Total searches",
 
   "Projects in progress": "Projects in progress",

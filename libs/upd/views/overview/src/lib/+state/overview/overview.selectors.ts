@@ -1,4 +1,4 @@
-import { createFeatureSelector, createSelector, Selector } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { I18nModule, I18nService } from '@dua-upd/upd/i18n';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -12,9 +12,7 @@ import {
   selectPeriodDates,
 } from '@dua-upd/upd/state';
 import { OVERVIEW_FEATURE_KEY, OverviewState } from './overview.reducer';
-import { arrayToDictionary, DateRangeType } from '@dua-upd/utils-common';
-import { OverviewAggregatedData } from '@dua-upd/types-common';
-import { ApexAxisChartSeries } from 'ng-apexcharts';
+import { arrayToDictionary } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
 

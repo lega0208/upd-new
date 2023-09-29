@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {
   ColumnConfig,
   callVolumeObjectiveCriteria,
+  feedbackKpiObjectiveCriteria,
 } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
@@ -18,10 +19,24 @@ import { combineLatest } from 'rxjs';
 export class TaskDetailsSummaryComponent implements OnInit {
   avgTaskSuccessFromLastTest$ =
     this.taskDetailsService.avgTaskSuccessFromLastTest$;
+  avgSuccessPercentChange$ = this.taskDetailsService.avgSuccessPercentChange$;
   dateFromLastTest$ = this.taskDetailsService.dateFromLastTest$;
 
   visits$ = this.taskDetailsService.visits$;
   visitsPercentChange$ = this.taskDetailsService.visitsPercentChange$;
+
+  feedbackKpiObjectiveCriteria = feedbackKpiObjectiveCriteria;
+
+  apexCallDrivers$ = this.taskDetailsService.apexCallDrivers$;
+  apexKpiFeedback$ = this.taskDetailsService.apexKpiFeedback$;
+
+  callPerVisits$ = this.taskDetailsService.callPerVisits$;
+  apexCallPercentChange$ = this.taskDetailsService.apexCallPercentChange$;
+  apexCallDifference$ = this.taskDetailsService.apexCallDifference$;
+
+  currentKpiFeedback$ = this.taskDetailsService.currentKpiFeedback$;
+  kpiFeedbackPercentChange$ = this.taskDetailsService.kpiFeedbackPercentChange$;
+  kpiFeedbackDifference$ = this.taskDetailsService.kpiFeedbackDifference$;
 
   currentCallVolume$ = this.taskDetailsService.currentCallVolume$;
   callPercentChange$ = this.taskDetailsService.callPercentChange$;

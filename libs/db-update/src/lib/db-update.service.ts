@@ -143,6 +143,11 @@ export class DbUpdateService {
           .catch((err) =>
             this.logger.error(`Error updating Annotations data\n${err.stack}`)
           ),
+        this.airtableService
+          .updateReports()
+          .catch((err) =>
+            this.logger.error(`Error updating Reports data\n${err.stack}`)
+          ),
       ]);
 
       await Promise.allSettled([
@@ -152,6 +157,7 @@ export class DbUpdateService {
             this.logger.error(`Error updating Page metrics data\n${err.stack}`)
           ),
         this.airtableService.uploadProjectAttachmentsAndUpdateUrls(),
+        this.airtableService.uploadReportAttachmentsAndUpdateUrls(),
       ]);
 
       await this.createPagesFromPageList().catch((err) =>
@@ -256,6 +262,11 @@ export class DbUpdateService {
         2
       )}`
     );
+  }
+
+  @Retry(4, 1000)
+  async updateReports() {
+    return this.airtableService.updateReports();
   }
 
   @Retry(4, 1000)

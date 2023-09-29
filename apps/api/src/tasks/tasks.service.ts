@@ -5,6 +5,7 @@ import { Cache } from 'cache-manager';
 import type {
   CallDriverModel,
   FeedbackModel,
+  PageDocument,
   PageMetricsModel,
   ProjectDocument,
   TaskDocument,
@@ -14,8 +15,10 @@ import {
   CallDriver,
   DbService,
   Feedback,
+  Page,
   PageMetrics,
   Project,
+  Reports,
   Task,
   UxTest,
 } from '@dua-upd/db';
@@ -23,15 +26,16 @@ import type {
   TaskDetailsData,
   TasksHomeData,
   TaskDetailsAggregatedData,
+  AttachmentData,
+  IReports,
 } from '@dua-upd/types-common';
 import type { ApiParams } from '@dua-upd/types-common';
 import {
-  getAvgSuccessFromLastTests,
-  getLatestTest,
   dateRangeSplit,
   arrayToDictionary,
   logJson,
   percentChange,
+  getAvgSuccessFromLatestTests,
 } from '@dua-upd/utils-common';
 import { InternalSearchTerm } from '@dua-upd/types-common';
 
@@ -51,6 +55,10 @@ export class TasksService {
     private feedbackModel: FeedbackModel,
     @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriversModel: CallDriverModel,
+    @InjectModel(Page.name, 'defaultConnection')
+    private pageModel: Model<PageDocument>,
+    @InjectModel(Reports.name, 'defaultConnection')
+    private reportsModel: Model<Reports>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -94,8 +102,14 @@ export class TasksService {
         })
     )?.[0]?.totalVisits;
 
-    const tpcIds = await this.db.collections.tasks.find({tpc_ids: {$not: {$size: 0}}},{tpc_ids: 1}).lean().exec();
-    const allIds = tpcIds.reduce((idsArray, tpcIds) => idsArray.concat(tpcIds.tpc_ids), []);
+    const tpcIds = await this.db.collections.tasks
+      .find({ tpc_ids: { $not: { $size: 0 } } }, { tpc_ids: 1 })
+      .lean()
+      .exec();
+    const allIds = tpcIds.reduce(
+      (idsArray, tpcIds) => idsArray.concat(tpcIds.tpc_ids),
+      []
+    );
     const uniqueIds = [...new Set(allIds)];
 
     const totalCalls = (
@@ -152,7 +166,10 @@ export class TasksService {
         .aggregate<{ totalCalls: number }>()
         .match({
           tpc_id: { $in: uniqueIds },
-          date: { $gte: new Date(comparisonStart), $lte: new Date(comparisonEnd) },
+          date: {
+            $gte: new Date(comparisonStart),
+            $lte: new Date(comparisonEnd),
+          },
         })
         .project({
           date: 1,
@@ -194,6 +211,19 @@ export class TasksService {
       calls: callsByTasks[task._id.toString()] ?? 0,
     }));
 
+    const reports = (await this.reportsModel
+      .find(
+        { type: 'tasks' },
+        {
+          _id: 0,
+          en_title: 1,
+          fr_title: 1,
+          en_attachment: 1,
+          fr_attachment: 1,
+        }
+      )
+      .exec()) as IReports[];
+
     const results = {
       dateRange,
       dateRangeData: task,
@@ -201,6 +231,7 @@ export class TasksService {
       percentChange: change,
       totalCalls,
       percentChangeCalls: changeCallDrivers,
+      reports,
     };
 
     await this.cacheManager.set(cacheKey, results);
@@ -275,6 +306,7 @@ export class TasksService {
         this.pageMetricsModel,
         this.calldriversModel,
         this.feedbackModel,
+        this.pageModel,
         params.dateRange,
         taskUrls,
         taskTpcId
@@ -285,12 +317,14 @@ export class TasksService {
         this.pageMetricsModel,
         this.calldriversModel,
         this.feedbackModel,
+        this.pageModel,
         params.comparisonDateRange,
         taskUrls,
         taskTpcId
       ),
       taskSuccessByUxTest: [],
       avgTaskSuccessFromLastTest: null, // todo: better handle N/A
+      avgSuccessPercentChange: null,
       dateFromLastTest: null,
       feedbackComments: [],
       searchTerms: await this.getTopSearchTerms(params),
@@ -320,11 +354,11 @@ export class TasksService {
           return 0;
         });
 
-      // *** @@@
-      // move functions to uxTests statics
-      returnData.dateFromLastTest = getLatestTest(uxTests)?.date || null;
-      returnData.avgTaskSuccessFromLastTest =
-        getAvgSuccessFromLastTests(uxTests);
+      ({
+        avgTestSuccess: returnData.avgTaskSuccessFromLastTest,
+        latestDate: returnData.dateFromLastTest,
+        percentChange: returnData.avgSuccessPercentChange,
+      } = getAvgSuccessFromLatestTests(uxTests));
 
       returnData.feedbackComments = await this.feedbackModel.getComments(
         params.dateRange,
@@ -433,6 +467,7 @@ async function getTaskAggregatedData(
   pageMetricsModel: PageMetricsModel,
   calldriversModel: CallDriverModel,
   feedbackModel: FeedbackModel,
+  pageModel: Model<Page>,
   dateRange: string,
   pageUrls: string[],
   calldriversTpcId: number[]
@@ -485,21 +520,6 @@ async function getTaskAggregatedData(
       gscTotalCtr: { $avg: '$gsc_total_ctr' },
       gscTotalPosition: { $avg: '$gsc_total_position' },
     })
-    .lookup({
-      from: 'pages',
-      localField: '_id',
-      foreignField: '_id',
-      as: 'page',
-    })
-    .unwind('$page')
-    .replaceRoot({
-      $mergeObjects: [
-        '$$ROOT',
-        { _id: '$page._id', title: '$page.title', url: '$page.url' },
-      ],
-    })
-    .project({ page: 0 })
-    .sort({ title: 1 })
     .group({
       _id: 'null',
       visits: { $sum: '$visits' },
@@ -515,7 +535,6 @@ async function getTaskAggregatedData(
       gscTotalPosition: { $avg: '$gscTotalPosition' },
       visitsByPage: { $push: '$$ROOT' },
     })
-    .project({ _id: 0 })
     .exec();
 
   const calldriverDocs = await calldriversModel
@@ -527,8 +546,50 @@ async function getTaskAggregatedData(
       { _id: 1 }
     )
     .lean()
-
     .exec();
+
+  const pageWithTask = await pageModel
+    .find({ tasks: new Types.ObjectId(taskId) })
+    .lean()
+    .exec();
+
+  const pageLookup = arrayToDictionary(pageWithTask, '_id');
+
+  if (results[0]?.visitsByPage) {
+    const metricsMapped = results[0].visitsByPage.map((metric) => {
+      const page = pageLookup[metric._id.toString()];
+      delete pageLookup[metric._id.toString()];
+
+      return {
+        ...metric,
+        _id: metric._id.toString(),
+        title: page.title,
+        url: page.url,
+      };
+    });
+
+    const missingPages = Object.values(pageLookup).map((page) => ({
+      _id: page._id.toString(),
+      title: page.title,
+      url: page.url,
+      visits: 0,
+      dyfYes: 0,
+      dyfNo: 0,
+      fwylfCantFindInfo: 0,
+      fwylfError: 0,
+      fwylfHardToUnderstand: 0,
+      fwylfOther: 0,
+      gscTotalClicks: 0,
+      gscTotalImpressions: 0,
+      gscTotalCtr: 0,
+      gscTotalPosition: 0,
+    }));
+
+    results[0].visitsByPage = [
+      ...(metricsMapped || []),
+      ...(missingPages || []),
+    ].sort((a, b) => a.title.localeCompare(b.title));
+  }
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 
@@ -541,11 +602,68 @@ async function getTaskAggregatedData(
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
+  const visitsByDay = await pageMetricsModel
+    .aggregate()
+    .match({ date: dateQuery, tasks: taskId })
+    .group({
+      _id: '$date',
+      visits: { $sum: '$visits' },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      visits: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
+
+  const dyfByDay = await pageMetricsModel
+    .aggregate()
+    .match({ date: dateQuery, tasks: taskId })
+    .group({
+      _id: '$date',
+      dyf_yes: { $sum: '$dyf_yes' },
+      dyf_no: { $sum: '$dyf_no' },
+      dyf_submit: { $sum: '$dyf_submit' },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      dyf_yes: 1,
+      dyf_no: 1,
+      dyf_submit: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
+
+  const calldriversByDay = await calldriversModel
+    .aggregate()
+    .match({
+      date: { $gte: startDate, $lte: endDate },
+      tpc_id: { $in: calldriversTpcId },
+    })
+    .group({
+      _id: '$date',
+      calls: {
+        $sum: '$calls',
+      },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      calls: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
+
   return {
     ...results[0],
     calldriversEnquiry,
     callsByTopic,
     totalCalldrivers,
     feedbackByTags,
+    visitsByDay,
+    dyfByDay,
+    calldriversByDay,
   };
 }

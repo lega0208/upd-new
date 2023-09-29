@@ -296,6 +296,14 @@ export interface AttachmentData {
   storage_url?: string;
 }
 
+export interface IReports {
+  en_title: string;
+  fr_title: string;
+  en_attachment: AttachmentData[];
+  fr_attachment: AttachmentData[];
+}
+[];
+
 export interface SearchAssessmentData {
   lang: string;
   query: string;

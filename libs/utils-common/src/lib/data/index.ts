@@ -8,7 +8,9 @@ export type DbEntity = {
  * Gets the most recent test, or any with a success rate if no dates are present
  * @param uxTests
  */
-export const getLatestTest = <T extends { date?: Date, success_rate?: number }>(uxTests: T[]) =>
+export const getLatestTest = <T extends { date?: Date; success_rate?: number }>(
+  uxTests: T[]
+) =>
   uxTests.reduce((latestTest, test) => {
     if (!latestTest || typeof latestTest?.date !== 'object') {
       return test;
@@ -41,10 +43,14 @@ export function getAvgTestSuccess<T extends { success_rate?: number }>(
 
   if (testsWithSuccessRate.length > 0) {
     return (
-      Math.round((testsWithSuccessRate.reduce(
-        (total, success_rate) => total + success_rate,
-        0
-      ) / testsWithSuccessRate.length) * 100 ) / 100
+      Math.round(
+        (testsWithSuccessRate.reduce(
+          (total, success_rate) => total + success_rate,
+          0
+        ) /
+          testsWithSuccessRate.length) *
+          100
+      ) / 100
     );
   }
 
@@ -122,6 +128,62 @@ export function getAvgSuccessFromLastTests<
   }
 
   return getAvgTestSuccess(allTests);
+}
+
+export function getAvgSuccessFromLatestTests<
+  T extends { date?: Date; success_rate?: number }
+>(uxTests: T[]): TestSuccessWithPercentChange & { latestDate: Date | null } {
+  const sortedTests = [...uxTests]
+    .filter(
+      (test) => test.date && test.success_rate != null && test.success_rate >= 0
+    )
+    .sort((a, b) => (b.date as Date).getTime() - (a.date as Date).getTime());
+
+  if (sortedTests.length < 1)
+    return {
+      avgTestSuccess: null,
+      latestDate: null,
+      percentChange: null,
+      total: 0,
+    };
+
+  const latestDate = sortedTests[0]?.date || null;
+  const secondLatestDate = sortedTests.find(
+    (test) => (test.date as Date).getTime() !== (latestDate as Date).getTime()
+  )?.date;
+
+  const avgTestSuccess =
+    getAvgTestSuccess(
+      sortedTests.filter(
+        (test) =>
+          (test.date as Date).getTime() === (latestDate as Date).getTime()
+      )
+    ) ?? null;
+
+  let avgSecondLatest = null;
+  let percentChange = null;
+
+  if (secondLatestDate) {
+    avgSecondLatest =
+      getAvgTestSuccess(
+        sortedTests.filter(
+          (test) =>
+            (test.date as Date).getTime() ===
+            (secondLatestDate as Date).getTime()
+        )
+      ) ?? null;
+    percentChange =
+      avgSecondLatest !== null
+        ? (avgTestSuccess as number) - avgSecondLatest
+        : null;
+  }
+
+  return {
+    avgTestSuccess,
+    latestDate,
+    percentChange,
+    total: sortedTests.length,
+  };
 }
 
 export function groupTestsByType<
@@ -235,7 +297,7 @@ export function getLatestTestData<
           return {
             avgTestSuccess,
             percentChange,
-            total: testsByType[testType]?.length
+            total: testsByType[testType]?.length,
           };
         }
       }
@@ -243,7 +305,7 @@ export function getLatestTestData<
       return {
         avgTestSuccess,
         percentChange: null,
-        total: testsByType[testType]?.length
+        total: testsByType[testType]?.length,
       };
     }
   }
@@ -251,6 +313,6 @@ export function getLatestTestData<
   return {
     avgTestSuccess: null,
     percentChange: null,
-    total: null
+    total: null,
   };
 }

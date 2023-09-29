@@ -214,6 +214,7 @@ export class PagesService {
           params.dateRange,
           [page.url]
         ),
+        dyfByDay: await this.getDyfByDay(params.dateRange, params.id),
       },
       comparisonDateRange: params.comparisonDateRange,
       comparisonDateRangeData: {
@@ -226,6 +227,7 @@ export class PagesService {
           params.comparisonDateRange,
           [page.url]
         ),
+        dyfByDay: await this.getDyfByDay(params.comparisonDateRange, params.id),
       },
       topSearchTermsIncrease: topIncreasedSearchTerms,
       topSearchTermsDecrease: topDecreasedSearchTerms,
@@ -241,6 +243,30 @@ export class PagesService {
     await this.cacheManager.set(cacheKey, results);
 
     return results;
+  }
+  async getDyfByDay(dateRange: string, id: string) {
+    const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+    return await this.pageMetricsModel
+      .aggregate()
+      .match({
+        date: { $gte: startDate, $lte: endDate },
+        page: new Types.ObjectId(id),
+      })
+      .group({
+        _id: '$date',
+        dyf_yes: { $sum: '$dyf_yes' },
+        dyf_no: { $sum: '$dyf_no' },
+        dyf_submit: { $sum: '$dyf_submit' },
+      })
+      .project({
+        _id: 0,
+        date: '$_id',
+        dyf_yes: 1,
+        dyf_no: 1,
+        dyf_submit: 1,
+      })
+      .sort({ date: 1 })
+      .exec();
   }
 
   async getPageDetailsDataByDay(page: Page, dateRange: string) {
