@@ -1,7 +1,11 @@
 <div class="l-navbar show-n" id="nav-bar">
   <nav class="nav">
     <div>
-      <a class="nav_logo" [routerLink]="[langPath | async]" [queryParamsHandling]="'merge'">
+      <a
+        class="nav_logo"
+        [routerLink]="[langPath | async]"
+        [queryParamsHandling]="'merge'"
+      >
         <img
           src="../../../assets/img/upd-logo{{
             (isFr$ | async) ? '-fr' : ''
@@ -40,7 +44,9 @@
           [queryParamsHandling]="'merge'"
           class="nav_link"
         >
-          <span class="material-icons nav_icon" aria-hidden="true">assignment</span>
+          <span class="material-icons nav_icon" aria-hidden="true"
+            >assignment</span
+          >
           <span class="nav_name" data-i18n="menu-tasks">{{
             'menu-tasks' | translate
           }}</span>
@@ -56,20 +62,35 @@
             'menu-projects' | translate
           }}</span>
         </a>
-      </div>
-    </div>
-    <div class="mb-4">
         <a
-          [routerLink]="[langPath | async, 'about-us']"
+          [routerLink]="[langPath | async, 'reports']"
           [routerLinkActive]="['active']"
           [queryParamsHandling]="'merge'"
           class="nav_link"
         >
-          <span class="material-icons nav_icon" aria-hidden="true">web_asset</span>
-          <span class="nav_name" data-i18n="about-us">{{
-            'about-us' | translate
+          <span class="material-icons nav_icon" aria-hidden="true"
+            >summarize</span
+          >
+          <span class="nav_name" data-i18n="menu-reports">{{
+            'menu-reports' | translate
           }}</span>
         </a>
+      </div>
+    </div>
+    <div class="mb-4">
+      <a
+        [routerLink]="[langPath | async, 'about-us']"
+        [routerLinkActive]="['active']"
+        [queryParamsHandling]="'merge'"
+        class="nav_link"
+      >
+        <span class="material-icons nav_icon" aria-hidden="true"
+          >web_asset</span
+        >
+        <span class="nav_name" data-i18n="about-us">{{
+          'about-us' | translate
+        }}</span>
+      </a>
       <a [href]="'feedback-mailto' | translate" class="nav_link">
         <span class="material-icons nav_icon" aria-hidden="true">feedback</span>
         <span class="nav_name" data-i18n="menu-feedback">{{
