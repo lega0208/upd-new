@@ -5,7 +5,7 @@ import { ReportsComponent } from './reports.component';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
-import { ServicesModule } from '@dua-upd/upd/services';
+import { ApiService, ServicesModule } from '@dua-upd/upd/services';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { ReportsEffects } from './+state/reports.effects';
@@ -15,9 +15,9 @@ import { UpdComponentsModule } from '@dua-upd/upd-components';
 
 @NgModule({
   imports: [
-    I18nModule,
     CommonModule,
     UpdComponentsModule,
+    I18nModule,
     ServicesModule,
     StoreModule.forFeature(REPORTS_FEATURE_KEY, reportsReducer),
     EffectsModule.forFeature([ReportsEffects]),
@@ -27,6 +27,6 @@ import { UpdComponentsModule } from '@dua-upd/upd-components';
     NgbModule,
   ],
   declarations: [ReportsComponent],
-  providers: [ReportsFacade],
+  providers: [ApiService, ReportsFacade],
 })
 export class ReportsModule {}

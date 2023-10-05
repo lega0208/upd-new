@@ -6,7 +6,7 @@ import { ReportsData } from '@dua-upd/types-common';
 import { ColumnConfig } from '@dua-upd/upd-components';
 
 @Component({
-  selector: 'dua-upd-reports',
+  selector: 'upd-reports',
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.scss'],
 })
