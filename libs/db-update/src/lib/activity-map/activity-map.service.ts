@@ -2,6 +2,7 @@ import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import chalk from 'chalk';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import isBetween from 'dayjs/plugin/isBetween';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { Types } from 'mongoose';
 import { BlobStorageService } from '@dua-upd/blob-storage';
@@ -23,6 +24,7 @@ import {
 } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
+dayjs.extend(isBetween);
 
 interface ActivityMapEntry {
   title: string;
@@ -253,9 +255,9 @@ export class ActivityMapService {
           !existingItemIdsDict[item.itemId] && !item.value.match('https://')
       )
       .map((itemId) => ({
-        _id: new Types.ObjectId(),
-        type: 'activityMapTitle',
         ...itemId,
+        _id: new Types.ObjectId(),
+        type: 'activityMapTitle' as const,
       }));
 
     if (newItems.length) {
