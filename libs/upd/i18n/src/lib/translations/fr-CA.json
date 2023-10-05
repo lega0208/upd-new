@@ -8,6 +8,8 @@
   "menu-tasks": "Tâches",
   "menu-projects": "Projets",
   "menu-feedback": "Rétroaction",
+  "menu-reports": "Rapports",
+
   "feedback-mailto": "mailto:DUAADCG@cra-arc.gc.ca?subject=Commentaires pour Tableau de bord des performances de convivialité&body=",
   "menu-collapsemenu": "Réduire le menu",
   "menu-expandmenu": "Agrandir le menu",
@@ -814,6 +816,7 @@
   "Projects | Call drivers": "TBPC | Projets | Facteurs générateurs d'appels",
   "Projects | UX tests": "TBPC | Projets | Essais sur l'expérience utilisateur",
   "Projects | Details": "TBPC | Projets | Détails",
+  "Reports": "TBPC | Rapports",
   "-------VIEW MORE...-------": "================================VIEW MORE============================================",
   "View more traffic data": "Afficher plus de données sur le trafic",
   "View more call drivers data": "Afficher plus de données sur les facteurs générateurs d'appels",

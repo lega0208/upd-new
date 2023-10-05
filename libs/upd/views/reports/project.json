@@ -1,0 +1,44 @@
+{
+  "name": "upd-views-reports",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/upd/views/reports/src",
+  "prefix": "upd",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:ng-packagr-lite",
+      "outputs": ["{workspaceRoot}/dist/libs/upd/views/reports"],
+      "options": {
+        "project": "libs/upd/views/reports/ng-package.json",
+        "tsConfig": "libs/upd/views/reports/tsconfig.lib.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/upd/views/reports/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/upd/views/reports/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/upd/views/reports"],
+      "options": {
+        "jestConfig": "libs/upd/views/reports/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/upd/views/reports/src/**/*.ts",
+          "libs/upd/views/reports/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

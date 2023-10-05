@@ -211,7 +211,7 @@ export type ActivityMap = {
   link: string;
   clicks: number;
   clicksChange?: number | null | undefined;
-}
+};
 
 export interface TasksHomeAggregatedData {
   _id: string | Types.ObjectId;
@@ -344,6 +344,15 @@ export interface ProjectsHomeData {
   projects: ProjectsHomeProject[];
   avgTestSuccessAvg?: number;
   testsCompleted?: number;
+}
+
+export interface ReportsHomeProject extends ProjectsHomeProject {
+  attachments: AttachmentData[];
+}
+
+export interface ReportsData {
+  projects: ReportsHomeProject[];
+  tasks: IReports[];
 }
 
 export interface VisitsByPage {
