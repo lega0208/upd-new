@@ -260,27 +260,30 @@ PageMetricsSchema.index(
 PageMetricsSchema.index(
   { date: -1 },
   {
+    name: 'activitymap_date_desc',
     background: true,
     partialFilterExpression: {
-      activity_map: { $exists: true, $not: { $size: 0 } },
+      'activity_map.0': { $exists: true },
     },
   }
 );
 PageMetricsSchema.index(
   { date: 1, url: 1 },
   {
+    name: 'activitymap_date_url',
     background: true,
     partialFilterExpression: {
-      activity_map: { $exists: true, $not: { $size: 0 } },
+      'activity_map.0': { $exists: true },
     },
   }
 );
 PageMetricsSchema.index(
   { date: 1, page: 1 },
   {
+    name: 'activitymap_date_page',
     background: true,
     partialFilterExpression: {
-      activity_map: { $exists: true, $not: { $size: 0 } },
+      'activity_map.0': { $exists: true },
     },
   }
 );

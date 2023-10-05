@@ -12,6 +12,7 @@ import {
   arrayToDictionary,
   arrayToDictionaryFlat,
   dayjs,
+  logJson,
   prettyJson,
 } from '@dua-upd/utils-common';
 import { readFile, writeFile, mkdir } from 'fs/promises';
@@ -38,7 +39,7 @@ export const updateAirtable = async (
   updateService: DbUpdateService
 ) => {
   return await updateService.updateUxData(true);
-}
+};
 
 export const addMissingPageMetricsRefs = async (db: DbService) => {
   await db.addMissingAirtableRefsToPageMetrics();
@@ -1066,4 +1067,115 @@ export async function exportRedirectsList(db: DbService) {
   ];
 
   await outputExcel('airtable_redirects_404s.xlsx', sheets);
+}
+
+export async function reformatAllTitlesJson() {
+  const originalJson = JSON.parse(
+    await readFile('all_titles_v2.json', 'utf-8')
+  ) as { url: string; title: string }[];
+
+  const newJson = {} as Record<string, string[]>;
+
+  for (const { url, title } of originalJson) {
+    if (!newJson[url]) {
+      newJson[url] = [];
+    }
+
+    newJson[url].push(title);
+  }
+
+  await writeFile(
+    'all_titles_v2_reformatted.json',
+    JSON.stringify(newJson),
+    'utf-8'
+  );
+}
+
+export async function uploadAllTitlesJson() {
+  const blobService = (<RunScriptCommand>this).inject<BlobStorageService>(
+    BlobStorageService.name
+  );
+  const allTitles = await readFile('all_titles_v2_reformatted.json', 'utf-8');
+  const allTitlesDeletion = await readFile(
+    'all_titles_deletion_reformatted.json',
+    'utf-8'
+  );
+
+  await blobService.blobModels.urls
+    .blob('all-titles.json')
+    .uploadFromString(allTitles, { overwrite: true });
+  await blobService.blobModels.urls
+    .blob('all-titles_deletion.json')
+    .uploadFromString(allTitlesDeletion);
+}
+
+export async function fixActivityMapTitles(db: DbService) {
+  const blobService = (<RunScriptCommand>this).inject<BlobStorageService>(
+    BlobStorageService.name
+  );
+
+  const titlesToRemove: Record<string, string[]> =
+    await blobService.blobModels.urls
+      .blob('all-titles_deletion.json')
+      .downloadToString()
+      .then(JSON.parse);
+
+  console.log('Removing bad titles')
+  for (const [url, titles] of Object.entries(titlesToRemove)) {
+    await db.collections.urls.updateOne(
+      { url },
+      {
+        $pullAll: {
+          all_titles: titles,
+        },
+      }
+    );
+  }
+
+  // make sure current title is in all_titles
+  console.log('Ensuring (url) titles are in all_titles');
+
+  const urls = await db.collections.urls
+    .find({ title: { $exists: true } })
+    .lean()
+    .exec();
+
+  // cool variable name right?
+  const ensureTitlesInAllTitlesBulkWriteOps: AnyBulkWriteOperation<IUrl>[] =
+    urls.map(({ _id, title }) => ({
+      updateOne: {
+        filter: { _id },
+        update: {
+          $addToSet: {
+            all_titles: title,
+          },
+        },
+      },
+    }));
+
+  await db.collections.urls.bulkWrite(ensureTitlesInAllTitlesBulkWriteOps, {
+    ordered: false,
+  });
+
+  console.log('Deleting activityMap itemIds');
+  await db.collections.aaItemIds
+    .deleteMany({ type: 'activityMapTitle' })
+    .lean()
+    .exec();
+
+  console.log('unsetting activity_map from metrics');
+  console.time('unsetting metrics');
+  await db.collections.pageMetrics.updateMany(
+    {
+      activity_map: { $exists: true },
+    },
+    {
+      $unset: {
+        activity_map: '',
+      },
+    }
+  );
+  console.timeEnd('unsetting metrics');
+
+  console.log('Done fixing bad titles. Activity map needs to be repopulated.');
 }

@@ -210,6 +210,8 @@
   "Number of calls for": "Number of calls for{{value}}",
   "Calls for ": "Calls for {{value}}",
   "Events for ": "Events for {{value}}",
+  "Events": "Events",
+  "Event": "Event",
   "tests-completed-since2018": "Tests completed since 2018",
   "tasks-tested-since2018": "Unique tasks tested since 2018",
   "participants-since2018": "Participants tested since 2018",

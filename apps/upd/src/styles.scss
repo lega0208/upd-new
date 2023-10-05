@@ -102,3 +102,23 @@ div.apexcharts-tooltip.apexcharts-theme-light {
   transform: scale(0.89);
 }
 
+.event-annotation-legend > .apexcharts-legend-marker {
+  background: rgb(255, 255, 255) !important;
+  color: rgb(255, 255, 255);
+  height: 8px;
+  width: 8px;
+  left: 0;
+  top: -1px;
+  margin-right: 8px;
+  margin-left: 6px;
+  border-width: 1px;
+  border-color: rgb(0, 0, 0);
+  border-radius: 100%;
+}
+
+.event-annotation-legend > .apexcharts-legend-text {
+  color: rgb(55, 61, 63);
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Noto Sans', sans-serif;
+}
