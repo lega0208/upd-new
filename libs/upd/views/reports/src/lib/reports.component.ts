@@ -17,8 +17,9 @@ export class ReportsComponent {
   projectsReports$ = this.reportsService.projectsReports$;
   projectsReportsColumns$ = this.reportsService.projectsReportsColumns$;
 
-  columns: ColumnConfig<ReportsData>[] = [];
+  error$ = this.reportsService.error$;
 
+  columns: ColumnConfig<ReportsData>[] = [];
   searchFields = this.columns.map((col) => col.field);
 
   constructor(
