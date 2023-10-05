@@ -48,6 +48,7 @@ const routes: Routes = [
       import('@dua-upd/upd/views/reports').then(
         (module) => module.ReportsModule
       ),
+    data: { animation: 'reports', title: 'Reports' },
   },
   { path: '**', redirectTo: 'overview' },
 ];
