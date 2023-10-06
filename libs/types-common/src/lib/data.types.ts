@@ -96,6 +96,9 @@ export interface PageAggregatedData extends PageDetailsMetrics {
 
 export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   url: string;
+  is404?: boolean;
+  isRedirect?: boolean;
+  redirect?: string;
   topSearchTermsIncrease?: GscSearchTermMetrics[];
   topSearchTermsDecrease?: GscSearchTermMetrics[];
   top25GSCSearchTerms?: GscSearchTermMetrics[];
@@ -309,6 +312,13 @@ export type ProjectStatus =
   | 'Paused'
   | 'Delayed'
   | 'Unknown';
+
+  export type pageStatus =
+  | '404'
+  | 'Redirect';
+
+  export type projectType =
+  | 'COPS';
 
 export interface searchAssessmentColTypes {
   query: string;
