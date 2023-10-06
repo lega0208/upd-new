@@ -117,7 +117,8 @@ export class ApexStore extends ComponentStore<ApexOptions> {
                   })),
                   annotation,
                 },
-                this.i18n.service.currentLang
+                this.i18n.service.currentLang,
+                this.i18n.service.instant('Event')
               );
             } catch (err) {
               console.error(err);
@@ -172,7 +173,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
             fontSize: '14px',
           },
           formatter: (val: number) => {
-            return val.toLocaleString(this.i18n.service.currentLang, {
+            return val?.toLocaleString(this.i18n.service.currentLang, {
               maximumFractionDigits: 0,
             });
           },
@@ -327,7 +328,8 @@ export function seriesTooltipHtml(
 
 export function getTooltipHtml(
   { title, series, annotation }: TooltipConfig,
-  locale: 'en-CA' | 'fr-CA'
+  locale: 'en-CA' | 'fr-CA',
+  eventText = 'Event'
 ) {
   const annotationHtml = annotation
     ? `
@@ -345,7 +347,7 @@ export function getTooltipHtml(
     >
       <div class="apexcharts-tooltip-y-group">
         <span class="apexcharts-tooltip-text-y-label"
-          ><strong>Event:</strong> ${annotation.text}: </span
+          ><strong>${eventText}:</strong> ${annotation.text}: </span
         ><span class="apexcharts-tooltip-text-y-value">${title}</span>
       </div>
     </div>
