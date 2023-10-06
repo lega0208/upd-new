@@ -472,6 +472,9 @@ export class AirtableClient {
       tpc_id: fields['TPC_ID'],
       impact: fields['Impact'],
       calls: fields['Calls'],
+      selfserve_yes: fields['SST_SS_Yes_Pct'],
+      selfserve_no: fields['SST_SS_No_Pct'],
+      selfserve_na: fields['SST_SS_NA_Pct'],
     })) as CalldriverData[];
   }
 

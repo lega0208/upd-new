@@ -45,6 +45,9 @@ export interface CalldriverData {
   tpc_id: number;
   impact: number;
   calls: number;
+  selfserve_yes?: number;
+  selfserve_no?: number;
+  selfserve_na?: number;
 }
 
 export interface UxTestData {

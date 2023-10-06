@@ -9,7 +9,6 @@
   "menu-projects": "Projets UX",
   "menu-feedback": "Rétroaction",
   "menu-reports": "Rapports",
-
   "feedback-mailto": "mailto:DUAADCG@cra-arc.gc.ca?subject=Commentaires pour Tableau de bord des performances de convivialité&body=",
   "menu-collapsemenu": "Réduire le menu",
   "menu-expandmenu": "Agrandir le menu",
@@ -115,6 +114,7 @@
   "d3-C9 - My Account Lockout": "C9 - Verrouillage de mon compte",
   "d3-Canada Housing Benefit": "Allocation canadienne pour le logement",
   "d3-C9 - Dental": "C9 - Dentaire",
+  "d3-COE / IEIT": "CE / DRIIPF",
   "call-drivers-disclaimer": "Ce rapport présente les résultats des sujets d'appel pour les principales files d'attente d'agents sur la base d'un échantillon aléatoire d'appels.",
   "top10-pages-visited": "Dix pages les plus visitées",
   "comment": "Commenter",

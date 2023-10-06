@@ -41,6 +41,15 @@ export class CallDriver implements ICallDriver {
 
   @Prop({ type: Number })
   calls = 0;
+
+  @Prop({ type: Number })
+  selfserve_yes?: number;
+
+  @Prop({ type: Number })
+  selfserve_no?: number;
+
+  @Prop({ type: Number })
+  selfserve_na?: number;
 }
 
 export const CallDriverSchema = SchemaFactory.createForClass(CallDriver);
