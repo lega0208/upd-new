@@ -122,6 +122,7 @@ export class TasksHomeFacade {
           field: 'calls_per_100_visits',
           header: this.i18n.service.translate('kpi-calls-per-100-title', lang),
           pipe: 'number',
+          pipeParam: '1.3-3',
         },
       ] as ColumnConfig[];
     })
