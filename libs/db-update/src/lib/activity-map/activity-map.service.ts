@@ -51,15 +51,16 @@ export class ActivityMapService {
       const latestDateResult = () =>
         this.db.collections.pageMetrics
           .findOne(
-            { activity_map: { $exists: true, $not: { $size: 0 } } },
+            { 'activity_map.0': { $exists: true } },
             { activity_map: 1, date: 1 }
           )
           .sort({ date: -1 })
+          .lean()
           .exec();
 
       const queriesDateRange = dateRange || {
         start: dayjs
-          .utc((await latestDateResult())?.['date'])
+          .utc((await latestDateResult())?.['date'] || new Date('2022-01-31'))
           .add(1, 'day')
           .format(queryDateFormat),
         end: today().subtract(1, 'day').endOf('day').format(queryDateFormat),
@@ -143,8 +144,10 @@ export class ActivityMapService {
                   page,
                 },
                 update: {
-                  $set: {
-                    activity_map,
+                  $addToSet: {
+                    activity_map: {
+                      $each: activity_map,
+                    },
                   },
                 },
               },
