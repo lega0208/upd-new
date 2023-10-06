@@ -115,7 +115,7 @@ export class ProjectDetailsSummaryComponent implements OnInit {
       this.documentsCols = [
         {
           field: 'filename',
-          header: this.i18n.service.translate('Documents', lang),
+          header: this.i18n.service.translate('File link', lang),
           type: 'link',
           typeParams: { link: 'url', external: true },
         },

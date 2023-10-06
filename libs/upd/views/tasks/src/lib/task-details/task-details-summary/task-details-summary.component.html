@@ -19,27 +19,27 @@
     <div class="col-lg-4 col-md-12 col-sm-12">
       <upd-apex-spark-line
         [title]="'kpi-calls-per-100-title'"
-        [titleTooltip]="'kpi-calls-per-100-tooltip'"
+        [titleTooltip]="'kpi-calls-per-100-tooltip-task'"
         [series]="(apexCallDrivers$ | async) || []"
         [current]="(callPerVisits$ | async) || 0"
         [comparison]="(apexCallPercentChange$ | async) || 0"
         [keyword]="'calls'"
         [scale]="100"
         [difference]="(apexCallDifference$ | async) || 0"
-        modal=" {{ 'kpi-calls-per-100-guidance' | translate }}"
+        modal=" {{ 'kpi-calls-per-100-guidance-task' | translate }}"
       ></upd-apex-spark-line>
     </div>
     <div class="col-lg-4 col-md-12 col-sm-12">
       <upd-apex-spark-line
         [title]="'kpi-feedback-per-1000-title'"
-        [titleTooltip]="'kpi-feedback-per-1000-tooltip'"
+        [titleTooltip]="'kpi-feedback-per-1000-tooltip-task'"
         [series]="(apexKpiFeedback$ | async) || []"
         [current]="(currentKpiFeedback$ | async) || 0"
         [comparison]="(kpiFeedbackPercentChange$ | async) || 0"
         [scale]="1000"
         [kpiObjectiveCriteria]="feedbackKpiObjectiveCriteria"
         [difference]="(kpiFeedbackDifference$ | async) || 0"
-        modal=" {{ 'kpi-feedback-per-1000-guidance' | translate }} "
+        modal=" {{ 'kpi-feedback-per-1000-guidance-task' | translate }} "
         [keyword]="'feedback'"
       ></upd-apex-spark-line>
     </div>
