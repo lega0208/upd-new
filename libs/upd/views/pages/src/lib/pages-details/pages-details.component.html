@@ -16,7 +16,25 @@
 <!--  ></upd-page-404>-->
 <!--</ng-template>-->
 <ng-template #elseBlock2>
-  <h2 class="h3 pt-2 pb-2">Page: {{ title$ | async }}</h2>
+  <h2 class="h3 pt-2 pb-2">
+  <ng-container *ngIf="title$ | async as title">
+    {{ title }}
+  </ng-container>
+
+  <span class="h5 d-inline-block mb-0 align-top ms-1">
+
+    <ng-container *ngIf="is404$ | async">
+      <upd-project-status-label [pageStatus]="'404'">
+      </upd-project-status-label>
+    </ng-container>
+
+    <ng-container *ngIf="isRedirect$ | async">
+      <upd-project-status-label [pageStatus]="'Redirect'">
+      </upd-project-status-label>
+    </ng-container>
+  </span>
+</h2>
+
   <ng-container *ngIf="showUrl"
     ><p class="page_url">{{ url$ | async }}</p></ng-container
   >
