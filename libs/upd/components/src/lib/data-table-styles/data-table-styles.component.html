@@ -12,23 +12,16 @@
   </a>
   <ng-container *ngIf="isProjectLabel">
     <upd-project-status-label
-      [statusText]="projectLabel"
+      [projectStatus]="projectLabel"
     ></upd-project-status-label>
   </ng-container>
-  <span
-    *ngIf="
-      config.type === 'label' &&
-      config.typeParam === 'cops' &&
-      !!data[config.field]
-    "
-    class="badge"
-    [ngClass]="{
-      'bg-primary': config.typeParam === 'cops'
-    }"
-    translate
-  >
-    COPS
-  </span>
+  
+  <ng-container *ngIf="config.type === 'label' &&
+  config.typeParam === 'cops' &&
+  !!data[config.field]">
+    <upd-project-status-label [projectType]="'COPS'">
+    </upd-project-status-label>
+  </ng-container>
   <span
     *ngIf="
       config.type === 'text' &&

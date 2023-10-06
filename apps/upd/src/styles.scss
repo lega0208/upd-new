@@ -77,6 +77,16 @@
   color: #262928;
 }
 
+.bg-404 {
+  background-color: grey;
+  color: #ffffff;
+}
+
+.bg-redirect {
+  background-color: #faeb1d;
+  color: #262928;
+}
+
 .p-datatable {
   border-width: 1px 1px 1px 1px;
   border-collapse: collapse;
@@ -87,7 +97,7 @@ div.apexcharts-tooltip.apexcharts-theme-light {
 }
 
 .apexcharts-tooltip-marker.annotation {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border: #000000 1.5px solid;
 }
 
@@ -98,7 +108,17 @@ div.apexcharts-tooltip.apexcharts-theme-light {
   height: 100%;
   top: 0;
   left: 0;
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
   transform: scale(0.89);
 }
-
