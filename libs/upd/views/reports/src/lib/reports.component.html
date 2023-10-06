@@ -28,7 +28,6 @@
             [data]="(projectsReports$ | async) || []"
             [cols]="(projectsReportsColumns$ | async) || []"
             [filter]="true"
-            [searchFields]="searchFields"
             [displayRows]="25"
             sortField="startDate"
             [sortOrder]="'desc'"

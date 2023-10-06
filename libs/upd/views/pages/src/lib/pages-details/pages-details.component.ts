@@ -15,6 +15,8 @@ import { NavigationEnd, Router } from '@angular/router';
 export class PagesDetailsComponent implements OnInit {
   title$ = this.pageDetailsService.pageTitle$;
   url$ = this.pageDetailsService.pageUrl$;
+  is404$ = this.pageDetailsService.is404$;
+  isRedirect$ = this.pageDetailsService.isRedirect$;
   loading$ = this.pageDetailsService.loading$;
   currentLang$ = this.i18n.currentLang$;
   showUrl = true;

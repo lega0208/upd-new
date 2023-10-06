@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map, debounceTime, combineLatest } from 'rxjs';
+import { map, debounceTime, combineLatest, filter } from 'rxjs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
@@ -62,6 +62,9 @@ export class PagesDetailsFacade {
 
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
+
+  is404$ = this.pagesDetailsData$.pipe(map((data) => data?.is404));
+  isRedirect$ = this.pagesDetailsData$.pipe(map((data) => data?.isRedirect));
 
   visitors$ = this.pagesDetailsData$.pipe(
     map((data) => data?.dateRangeData?.visitors || 0)
@@ -208,9 +211,7 @@ export class PagesDetailsFacade {
     })
   );
 
-  activityMap$ = combineLatest([
-    this.pagesDetailsData$,
-  ]).pipe(
+  activityMap$ = combineLatest([this.pagesDetailsData$]).pipe(
     map(([data]) => {
       return data?.activityMap || [];
     })

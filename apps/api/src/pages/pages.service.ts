@@ -7,6 +7,7 @@ import type {
   MetricsConfig,
   PageDocument,
   PageMetricsModel,
+  UrlModel,
 } from '@dua-upd/db';
 import {
   DbService,
@@ -14,6 +15,7 @@ import {
   Page,
   PageMetrics,
   Readability,
+  Url,
 } from '@dua-upd/db';
 import type {
   ApiParams,
@@ -39,6 +41,8 @@ export class PagesService {
     private pageModel: Model<PageDocument>,
     @InjectModel(Readability.name, 'defaultConnection')
     private readabilityModel: Model<Readability>,
+    @InjectModel(Url.name, 'defaultConnection')
+    private urls: UrlModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -98,6 +102,12 @@ export class PagesService {
       .populate('tasks')
       .populate('projects')
       .lean();
+
+    const urls = (await this.urls
+    .aggregate()
+    .match({page: new Types.ObjectId(params.id)})
+    .project({_id: 0, is_404: 1, redirect: 1})
+    .exec())[0];
 
     const projects = (page.projects || [])
       .map((project) => {
@@ -202,6 +212,9 @@ export class PagesService {
 
     const results = {
       ...page,
+      is404: urls.is_404,
+    isRedirect: !!urls.redirect,
+    redirectUrl: urls.redirect || null,
       projects,
       dateRange: params.dateRange,
       dateRangeData: {
