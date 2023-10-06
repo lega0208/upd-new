@@ -30,14 +30,14 @@
     <div class="col-lg-4 col-md-12 col-sm-12">
       <upd-apex-spark-line
         [title]="'kpi-feedback-per-1000-title'"
-        [titleTooltip]="'kpi-feedback-per-1000-tooltip'"
+        [titleTooltip]="'kpi-feedback-per-1000-tooltip-page'"
         [series]="(apexKpiFeedback$ | async) || []"
         [current]="(currentKpiFeedback$ | async) || 0"
         [comparison]="(kpiFeedbackPercentChange$ | async) || 0"
         [scale]="1000"
         [kpiObjectiveCriteria]="feedbackKpiObjectiveCriteria"
         [difference]="(kpiFeedbackDifference$ | async) || 0"
-        modal=" {{ 'kpi-feedback-per-1000-guidance' | translate }} "
+        modal=" {{ 'kpi-feedback-per-1000-guidance-page' | translate }} "
         [keyword]="'feedback'"
       ></upd-apex-spark-line>
     </div>
