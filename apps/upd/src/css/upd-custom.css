@@ -387,8 +387,9 @@ table .text-success {
 }
 
 .legend {
-  float: left;
-  margin-right: 1em;
+  display: inline-flex;
+  flex-direction: column;
+  margin: 0.5em;
 }
 
 .legend_field {
@@ -399,6 +400,7 @@ table .text-success {
   height: 15px;
   margin-right: 0.5em;
   width: 15px;
+  vertical-align: middle;
 }
 
 .legend_color_line {

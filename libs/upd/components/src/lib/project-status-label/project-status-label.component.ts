@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ProjectStatus, pageStatus, projectType } from '@dua-upd/types-common';
+import { ProjectStatus, PageStatus, ProjectType } from '@dua-upd/types-common';
 
 @Component({
   selector: 'upd-project-status-label',
@@ -12,8 +12,8 @@ import { ProjectStatus, pageStatus, projectType } from '@dua-upd/types-common';
 })
 export class ProjectStatusLabelComponent {
   @Input() projectStatus: ProjectStatus | null = null;
-  @Input() pageStatus: pageStatus | null = null;
-  @Input() projectType: projectType | null = null;
+  @Input() pageStatus: PageStatus | null = null;
+  @Input() projectType: ProjectType | null = null;
   @Input() styleClass: string | null = null;
 
   projectStatusClassMap: Record<ProjectStatus, string> = {
@@ -28,12 +28,12 @@ export class ProjectStatusLabelComponent {
     Paused: 'bg-paused',
   };
 
-  pageStatusClassMap: Record<pageStatus, string> = {
+  pageStatusClassMap: Record<PageStatus, string> = {
     '404': 'bg-404',
-    'Redirect': 'bg-redirect',
+    'Redirected': 'bg-redirect',
   };
 
-  projectTypeClassMap: Record<projectType, string> = {
+  projectTypeClassMap: Record<ProjectType, string> = {
     'COPS': 'bg-primary',
   };
 }

@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { avg } from '../math';
 
 export type DbEntity = {
   _id: Types.ObjectId;
@@ -41,20 +42,7 @@ export function getAvgTestSuccess<T extends { success_rate?: number }>(
       (successRate) => successRate !== undefined && successRate !== null
     ) as number[];
 
-  if (testsWithSuccessRate.length > 0) {
-    return (
-      Math.round(
-        (testsWithSuccessRate.reduce(
-          (total, success_rate) => total + success_rate,
-          0
-        ) /
-          testsWithSuccessRate.length) *
-          100
-      ) / 100
-    );
-  }
-
-  return null;
+  return avg(testsWithSuccessRate, 2);
 }
 
 /**

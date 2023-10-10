@@ -7,7 +7,7 @@ import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 
 import {
-  arrayToDictionary,
+  avg,
   GetTableProps,
   percentChange,
   PickByType,
@@ -238,6 +238,7 @@ export class ProjectsDetailsFacade {
     this.comparisonKpiFeedback$,
   ]).pipe(map(([currentKpi, comparisonKpi]) => currentKpi - comparisonKpi));
 
+  // this isn't used apparently?
   kpiTaskSuccessByUxTest$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,
@@ -265,24 +266,17 @@ export class ProjectsDetailsFacade {
           return dayjs(latest.date).isAfter(dayjs(test.date)) ? latest : test;
         }).date;
 
-        const tasksWithLatestDate = relevantTests.filter(
-          (uxTest) => uxTest.date === latestDate
-        );
-
-        const totalSuccessRate = tasksWithLatestDate.reduce((acc, test) => {
-          if (test.success_rate !== undefined) {
-            return acc + test.success_rate;
-          }
-          return acc;
-        }, 0);
-
-        const averageSuccessRate = tasksWithLatestDate.length
-          ? totalSuccessRate / tasksWithLatestDate.length
-          : null;
+        const latestDateSuccessRates = relevantTests
+          .filter(
+            (uxTest) =>
+              uxTest.date === latestDate &&
+              (uxTest.success_rate || uxTest.success_rate === 0)
+          )
+          .map((uxTest) => uxTest.success_rate) as number[];
 
         return {
           title: this.i18n.service.translate(task.title, lang),
-          success: averageSuccessRate,
+          success: avg(latestDateSuccessRates, 2),
           latestDate,
         };
       });

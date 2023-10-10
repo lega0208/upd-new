@@ -621,6 +621,9 @@ async function getAggregatedProjectMetrics(
   const projectMetrics = (
     await pageMetricsModel
       .aggregate<ProjectDetailsAggregatedData>()
+      // look for how to have the index be used "naturally" instead of hinting
+      // seems to significantly improve performance though (~300%?)
+      .hint('date_1_projects_exists')
       .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
       .project({
         date: 1,
@@ -654,21 +657,6 @@ async function getAggregatedProjectMetrics(
         gscTotalCtr: { $avg: '$gsc_total_ctr' },
         gscTotalPosition: { $avg: '$gsc_total_position' },
       })
-      .lookup({
-        from: 'pages',
-        localField: 'page',
-        foreignField: '_id',
-        as: 'page',
-      })
-      .unwind('$page')
-      .replaceRoot({
-        $mergeObjects: [
-          '$$ROOT',
-          { _id: '$page._id', title: '$page.title', url: '$page.url' },
-        ],
-      })
-      .project({ page: 0 }) 
-      .sort({ title: 1 })
       .group({
         _id: null,
         visitsByPage: {
@@ -687,15 +675,15 @@ async function getAggregatedProjectMetrics(
         gscTotalPosition: { $avg: '$gscTotalPosition' },
       })
       .exec()
-  )[0];
+  )?.[0];
   console.timeEnd('projectMetrics');
 
-  const pageWithProject = await pageModel
+  const projectPages = await pageModel
     .find({ projects: new Types.ObjectId(id) })
     .lean()
     .exec();
 
-  const pageLookup = arrayToDictionary(pageWithProject, '_id');
+  const pageLookup = arrayToDictionary(projectPages, '_id');
 
   if (projectMetrics?.visitsByPage) {
     const metricsMapped = projectMetrics.visitsByPage.map((metric) => {
@@ -747,8 +735,8 @@ async function getAggregatedProjectMetrics(
   const calldriverDocs = await calldriversModel
     .find(
       {
-        tpc_id: { $in: tpcIds },
         date: { $gte: startDate, $lte: endDate },
+        tpc_id: { $in: tpcIds },
       },
       { _id: 1 }
     )

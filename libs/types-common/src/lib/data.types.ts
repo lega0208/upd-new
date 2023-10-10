@@ -313,11 +313,11 @@ export type ProjectStatus =
   | 'Delayed'
   | 'Unknown';
 
-  export type pageStatus =
+  export type PageStatus =
   | '404'
-  | 'Redirect';
+  | 'Redirected';
 
-  export type projectType =
+  export type ProjectType =
   | 'COPS';
 
 export interface searchAssessmentColTypes {
@@ -336,7 +336,7 @@ export interface ProjectsHomeProject {
   lastAvgSuccessRate?: number;
   status: ProjectStatus;
   uxTests?: {
-    title: any;
+    title: string;
     date?: Date;
     success_rate?: number;
     test_type?: string;

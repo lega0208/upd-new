@@ -101,7 +101,6 @@ CallDriverSchema.statics['getCallsByEnquiryLineFromIds'] = async function (
       _id: { $in: documentIds },
     })
     .project({
-      _id: 0,
       enquiry_line: 1,
       calls: 1,
     })

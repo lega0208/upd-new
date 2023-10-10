@@ -250,6 +250,14 @@ PageMetricsSchema.index(
   { background: true, partialFilterExpression: { projects: { $exists: true } } }
 );
 PageMetricsSchema.index(
+  { date: 1, projects: 1 },
+  {
+    name: 'date_1_projects_exists',
+    background: true,
+    partialFilterExpression: { 'projects.0': { $exists: true } },
+  }
+);
+PageMetricsSchema.index(
   { url: 1, tasks: 1 },
   { background: true, partialFilterExpression: { tasks: { $exists: true } } }
 );

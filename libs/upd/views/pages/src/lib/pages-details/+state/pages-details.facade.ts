@@ -63,8 +63,17 @@ export class PagesDetailsFacade {
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
 
-  is404$ = this.pagesDetailsData$.pipe(map((data) => data?.is404));
-  isRedirect$ = this.pagesDetailsData$.pipe(map((data) => data?.isRedirect));
+  pageStatus$ = this.pagesDetailsData$.pipe(map((data) => {
+    if (data?.isRedirect) {
+      return 'Redirected';
+    }
+
+    if (data?.is404) {
+      return '404';
+    }
+
+    return null;
+  }));
 
   visitors$ = this.pagesDetailsData$.pipe(
     map((data) => data?.dateRangeData?.visitors || 0)

@@ -3,7 +3,7 @@ import { PagesDetailsFacade } from './+state/pages-details.facade';
 
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { combineLatest, filter } from 'rxjs';
+import { filter } from 'rxjs';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { NavigationEnd, Router } from '@angular/router';
 
@@ -15,8 +15,7 @@ import { NavigationEnd, Router } from '@angular/router';
 export class PagesDetailsComponent implements OnInit {
   title$ = this.pageDetailsService.pageTitle$;
   url$ = this.pageDetailsService.pageUrl$;
-  is404$ = this.pageDetailsService.is404$;
-  isRedirect$ = this.pageDetailsService.isRedirect$;
+  pageStatus$ = this.pageDetailsService.pageStatus$;
   loading$ = this.pageDetailsService.loading$;
   currentLang$ = this.i18n.currentLang$;
   showUrl = true;

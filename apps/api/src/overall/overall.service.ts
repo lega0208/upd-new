@@ -41,9 +41,9 @@ import type {
 import {
   arrayToDictionary,
   AsyncLogTiming,
+  avg,
   dateRangeSplit,
   getLatestTestData,
-  logJson,
 } from '@dua-upd/utils-common';
 import { OverallSearchTerm } from '@dua-upd/types-common';
 
@@ -544,7 +544,8 @@ async function getProjects(
       totalUsers: 1,
       testType: 1,
       uxTests: 1,
-    });
+    })
+    .exec();
 
   const avgUxTest: {
     percentChange: number;
@@ -564,27 +565,38 @@ async function getProjects(
     }
   }
 
-const calculateAverage = (numbers) => numbers.reduce((acc, num) => acc + num, 0) / numbers.length;
-
-const kpiUxTestsSuccessRates = projectsData
+  const kpiUxTestsSuccessRates = projectsData
     .flatMap((project) => project.uxTests)
-    .filter((test) => test.test_type === 'Validation' && test.success_rate)
+    .filter(
+      (test) =>
+        test.test_type === 'Validation' &&
+        (test.success_rate || test.success_rate === 0)
+    )
     .map((test) => test.success_rate);
 
-const avgTestSuccessAvg = calculateAverage(kpiUxTestsSuccessRates);
+  const avgTestSuccessAvg = avg(kpiUxTestsSuccessRates, 2);
 
-const taskSuccessRatesRecord: Record<string, number[]> = projectsData
-  .flatMap((project) => project.uxTests)
-  .reduce((acc, test) => {
-    if (test.test_type === 'Validation' && test.success_rate && test.task && test.title) {
-      const taskStr = test.task.toString();
-      acc[taskStr] = acc[taskStr] || [];
-      acc[taskStr].push(test.success_rate);
-    }
-    return acc;
-  }, {} as Record<string, number[]>);
+  const taskSuccessRatesRecord: Record<string, number[]> = projectsData
+    .flatMap((project) => project.uxTests)
+    .filter(
+      (test) =>
+        test.test_type === 'Validation' &&
+        (test.success_rate || test.success_rate === 0) &&
+        test.task &&
+        test.title
+    )
+    .reduce((acc, test) => {
+      if (!acc[test.task]) {
+        acc[test.task] = [];
+      }
 
-const testsCompleted = (Object.values(taskSuccessRatesRecord)).length;
+      acc[test.task].push(test.success_rate);
+
+      return acc;
+    }, {} as Record<string, number[]>);
+
+  // except this is actually "unique tasks tested?"
+  const testsCompleted = Object.values(taskSuccessRatesRecord).length;
 
   return {
     ...aggregatedData,
@@ -592,7 +604,7 @@ const testsCompleted = (Object.values(taskSuccessRatesRecord)).length;
     projects: projectsData,
     avgUxTest,
     avgTestSuccessAvg,
-    testsCompleted
+    testsCompleted,
   };
 }
 
@@ -898,18 +910,19 @@ interface ProjectData {
 }
 
 async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
-
   const projectData: { [key: string]: ProjectData } = {};
   const datejs = dayjs.utc();
   const lastQuarterStart = datejs.subtract(1, 'quarter').startOf('quarter');
   const lastQuarterEnd = lastQuarterStart.endOf('quarter');
   const currentYearEnd = datejs.month(2).endOf('month').startOf('day');
-  const lastFiscalEnd = currentYearEnd.isAfter(datejs) ? currentYearEnd.subtract(1, 'year') : currentYearEnd;
+  const lastFiscalEnd = currentYearEnd.isAfter(datejs)
+    ? currentYearEnd.subtract(1, 'year')
+    : currentYearEnd;
   const lastFiscalStart = lastFiscalEnd.subtract(1, 'year').add(1, 'day');
 
   uxTests
-    .filter(test => test.status === 'Complete')
-    .map(test => {
+    .filter((test) => test.status === 'Complete')
+    .map((test) => {
       const project = test.project ? test.project.toString() : 'unknown';
       projectData[project] = projectData[project] || {
         testTypes: new Set(),
@@ -923,14 +936,27 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
 
       if (test.tasks) projectData[project].tasks.add(test.tasks.toString());
       if (test.cops) projectData[project].cops.add(test.test_type.toString());
-      if (test.date >= lastQuarterStart.toDate() && test.date <= lastQuarterEnd.toDate()) projectData[project].lastQuarterTests.add(test.test_type);
-      if (test.date >= lastFiscalStart.toDate() && test.date <= lastFiscalEnd.toDate()) projectData[project].lastFiscalTests.add(test.test_type);
+      if (
+        test.date >= lastQuarterStart.toDate() &&
+        test.date <= lastQuarterEnd.toDate()
+      )
+        projectData[project].lastQuarterTests.add(test.test_type);
+      if (
+        test.date >= lastFiscalStart.toDate() &&
+        test.date <= lastFiscalEnd.toDate()
+      )
+        projectData[project].lastFiscalTests.add(test.test_type);
     });
 
-  let testsCompletedSince2018 = 0, tasksTestedSince2018 = 0, copsTestsCompletedSince2018 = 0, testsConductedLastQuarter = 0, testsConductedLastFiscal = 0;
+  let testsCompletedSince2018 = 0,
+    tasksTestedSince2018 = 0,
+    copsTestsCompletedSince2018 = 0,
+    testsConductedLastQuarter = 0,
+    testsConductedLastFiscal = 0;
 
   for (const project in projectData) {
-    const { testTypes, tasks, cops, lastQuarterTests, lastFiscalTests } = projectData[project];
+    const { testTypes, tasks, cops, lastQuarterTests, lastFiscalTests } =
+      projectData[project];
     testsCompletedSince2018 += testTypes.size;
     tasksTestedSince2018 += tasks.size;
     copsTestsCompletedSince2018 += cops.size;
@@ -939,7 +965,7 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
   }
 
   tasksTestedSince2018 = Object.values(projectData).reduce((acc, { tasks }) => {
-    tasks.forEach(task => acc.add(task));
+    tasks.forEach((task) => acc.add(task));
     return acc;
   }, new Set<string>()).size;
 
@@ -951,9 +977,9 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
   const uniqueGroups = Array.from(uniqueGroupMap.values());
   const uxTestsMaxUsers = uniqueGroups.map(({ title, test_type }) => {
     const filteredTests = uxTests
-      .filter(test => test.title === title && test.test_type === test_type)
-      .map(test => test.total_users)
-      .filter(val => typeof val === 'number' && !isNaN(val));
+      .filter((test) => test.title === title && test.test_type === test_type)
+      .map((test) => test.total_users)
+      .filter((val) => typeof val === 'number' && !isNaN(val));
 
     return {
       title,
@@ -962,7 +988,10 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
     };
   });
 
-  const participantsTestedSince2018 = uxTestsMaxUsers.reduce((total, test) => total + test.total_users, 0);
+  const participantsTestedSince2018 = uxTestsMaxUsers.reduce(
+    (total, test) => total + test.total_users,
+    0
+  );
 
   return {
     testsCompletedSince2018,
