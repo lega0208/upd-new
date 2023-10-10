@@ -82,6 +82,7 @@ export class DbUpdateService {
     });
   }
 
+  @Retry(4, 1000)
   async updateSAT() {
     this.logger.log('Starting search assessment...');
     await this.searchAssessmentService.upsertPreviousSearchAssessment();
@@ -89,9 +90,10 @@ export class DbUpdateService {
     this.logger.log('Search assessment successfully updated.');
   }
 
+  @Retry(4, 1000)
   async updateActivityMap() {
     this.logger.log('Starting activity map...');
-    await this.activityMapService.upsertPageActivityMap();
+    await this.activityMapService.updateActivityMap();
     this.logger.log('Activity map successfully updated.');
   }
 
@@ -141,6 +143,11 @@ export class DbUpdateService {
           .catch((err) =>
             this.logger.error(`Error updating Annotations data\n${err.stack}`)
           ),
+        this.airtableService
+          .updateReports()
+          .catch((err) =>
+            this.logger.error(`Error updating Reports data\n${err.stack}`)
+          ),
       ]);
 
       await Promise.allSettled([
@@ -150,6 +157,7 @@ export class DbUpdateService {
             this.logger.error(`Error updating Page metrics data\n${err.stack}`)
           ),
         this.airtableService.uploadProjectAttachmentsAndUpdateUrls(),
+        this.airtableService.uploadReportAttachmentsAndUpdateUrls(),
       ]);
 
       await this.createPagesFromPageList().catch((err) =>
@@ -159,6 +167,10 @@ export class DbUpdateService {
       await this.internalSearchService
         .upsertPageSearchTerms()
         .catch((err) => this.logger.error(err.stack));
+
+      await this.updateActivityMap().catch((err) =>
+        this.logger.error(err.stack)
+      );
 
       await this.pagesService
         .updatePagesLang()
@@ -250,6 +262,11 @@ export class DbUpdateService {
         2
       )}`
     );
+  }
+
+  @Retry(4, 1000)
+  async updateReports() {
+    return this.airtableService.updateReports();
   }
 
   @Retry(4, 1000)

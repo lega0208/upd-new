@@ -5,6 +5,7 @@ import {
   AccumulatorOperator,
   AASearchTermMetrics,
   IPageMetrics,
+  ActivityMapMetrics,
 } from '@dua-upd/types-common';
 import { Page } from './page.schema';
 import { Task } from './task.schema';
@@ -221,6 +222,16 @@ export class PageMetrics implements IPageMetrics {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }], index: true })
   ux_tests?: Types.ObjectId[] | UxTest[];
+
+  @Prop({
+    type: [
+      {
+        link: String,
+        clicks: Number,
+      },
+    ],
+  })
+  activity_map?: ActivityMapMetrics[] = [];
 }
 
 export const PageMetricsSchema = SchemaFactory.createForClass(PageMetrics);
@@ -239,6 +250,14 @@ PageMetricsSchema.index(
   { background: true, partialFilterExpression: { projects: { $exists: true } } }
 );
 PageMetricsSchema.index(
+  { date: 1, projects: 1 },
+  {
+    name: 'date_1_projects_exists',
+    background: true,
+    partialFilterExpression: { 'projects.0': { $exists: true } },
+  }
+);
+PageMetricsSchema.index(
   { url: 1, tasks: 1 },
   { background: true, partialFilterExpression: { tasks: { $exists: true } } }
 );
@@ -246,6 +265,37 @@ PageMetricsSchema.index(
   { url: 1, ux_tests: 1 },
   { background: true, partialFilterExpression: { ux_tests: { $exists: true } } }
 );
+PageMetricsSchema.index(
+  { date: -1 },
+  {
+    name: 'activitymap_date_desc',
+    background: true,
+    partialFilterExpression: {
+      'activity_map.0': { $exists: true },
+    },
+  }
+);
+PageMetricsSchema.index(
+  { date: 1, url: 1 },
+  {
+    name: 'activitymap_date_url',
+    background: true,
+    partialFilterExpression: {
+      'activity_map.0': { $exists: true },
+    },
+  }
+);
+PageMetricsSchema.index(
+  { date: 1, page: 1 },
+  {
+    name: 'activitymap_date_page',
+    background: true,
+    partialFilterExpression: {
+      'activity_map.0': { $exists: true },
+    },
+  }
+);
+
 // This index is specifically for maintaining references when updating airtable data.
 // It's a partial index that includes only documents with tasks/projects/ux_tests arrays that aren't empty,
 //  which makes it much faster when querying for them (and might even help for regular data fetching)

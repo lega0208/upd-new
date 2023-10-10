@@ -199,7 +199,8 @@ export class UrlsService {
     await this.preparePagesCollection();
 
     if (!this.production) {
-      await this.updateCollectionFromBlobStorage();
+      // UNCOMMENT AFTER PUSHING TO PROD
+      // await this.updateCollectionFromBlobStorage();
       await this.readability.updateCollectionFromBlobStorage();
 
       return;

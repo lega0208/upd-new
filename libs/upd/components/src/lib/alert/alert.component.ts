@@ -16,6 +16,7 @@ export class AlertComponent implements OnInit {
   @Input() selfClosing = true;
   @Input() position: Position = 'static';
   @Input() dismissible = true;
+  @Input() styleClass = '';
   style = '';
 
   constructor(public translateService: TranslateService) {}

@@ -1,17 +1,32 @@
 import { Injectable } from '@angular/core';
-import { ComponentStore } from '@ngrx/component-store';
+import { EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
-import {
+import { arrayToDictionary, sum } from '@dua-upd/utils-common';
+import { ComponentStore } from '@ngrx/component-store';
+import type {
   ApexAxisChartSeries,
   ApexChart,
-  ApexYAxis,
   ApexOptions,
+  ApexYAxis,
 } from 'ng-apexcharts';
-
-import { EN_CA } from '@dua-upd/upd/i18n';
-import { mergeDeepRight } from 'rambdax';
+import { mergeDeepRight, pluck } from 'rambdax';
 import { createBaseConfig } from '../apex-base/apex.config.base';
-import { sum } from '@dua-upd/utils-common';
+
+export type TooltipParams = {
+  series: number[][];
+  dataPointIndex: number;
+  seriesIndex: number;
+  // apex can't be bothered to type this, so we'll just use `any`
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  w: { config: ApexOptions; globals: any };
+};
+
+export type SeriesDates = { x: string }[];
+export type SeriesWithXYData = {
+  data: { x: string; y: number }[];
+  name: string;
+  type: string;
+};
 
 @Injectable()
 export class ApexStore extends ComponentStore<ApexOptions> {
@@ -45,17 +60,6 @@ export class ApexStore extends ComponentStore<ApexOptions> {
     })
   );
 
-  readonly setSeries = this.updater(
-    (state, value: ApexAxisChartSeries): ApexOptions => {
-      this.setYAxis(value);
-
-      return {
-        ...state,
-        series: value ? value : [],
-      };
-    }
-  );
-
   readonly setLocale = this.updater(
     (state, value: string): ApexOptions => ({
       ...state,
@@ -66,126 +70,191 @@ export class ApexStore extends ComponentStore<ApexOptions> {
     })
   );
 
-  readonly setYAxis = this.updater(
-    (state, value: ApexAxisChartSeries): ApexOptions => {
-      const firstDataSet: number[] = [0, 1]
-        .map((p: number) => {
-          return value[p].data;
-        })
-        .reduce((a: any, b: any) => {
-          return a.concat(b);
-        }, [])
-        .map((d: any) => {
-          return d?.y;
-        });
+  readonly setAnnotations = this.updater(
+    (state, values: { x: Date; y: number; text: string }[]): ApexOptions => {
+      const annotationsByDate = arrayToDictionary(
+        values.map(({ x, y, text }) => ({
+          x: x.toISOString(),
+          y,
+          text,
+        })),
+        'x'
+      );
 
-      const secondDataSet: number[] = [2, 3]
-        .map((p: number) => {
-          return value[p].data;
-        })
-        .reduce((a: any, b: any) => {
-          return a.concat(b);
-        }, [])
-        .map((d: any) => {
-          return d?.y;
-        });
+      const seriesDicts = (state.series as SeriesWithXYData[])?.map((series) =>
+        arrayToDictionary(series.data, 'x')
+      );
 
-      let secondMax = secondDataSet;
-      if (value[0]?.data?.length > 7) {
-        secondMax = firstDataSet.map((val) => Math.round(val / 5));
-      }
       return {
         ...state,
-        series: value,
-        yaxis: value.map((s, i) => {
-          let yAxisOpt: ApexYAxis = {};
-          if (i === 0) {
-            yAxisOpt = {
-              seriesName: value[0].name,
-              title: {
-                text: this.i18n.service.translate(
-                  'visits',
-                  this.i18n.service.currentLang
-                ),
-                style: {
-                  fontSize: '16px',
+        tooltip: {
+          enabled: true,
+          shared: true,
+          intersect: false,
+
+          custom: ({
+            series,
+            dataPointIndex,
+            seriesIndex,
+            w,
+          }: TooltipParams) => {
+            const { data } = <{ data: SeriesDates }>(
+              w.config.series?.[seriesIndex]
+            );
+
+            const date = data[dataPointIndex].x;
+
+            const annotation = annotationsByDate[date.toString()];
+
+            try {
+              return getTooltipHtml(
+                {
+                  title: formatDate(date, this.i18n.service.currentLang),
+                  series: series.map((s: number[], i: number) => ({
+                    label: w.globals.seriesNames[i],
+                    value: seriesDicts[i]?.[date]?.y,
+                    colour: w.config.colors?.[i],
+                  })),
+                  annotation,
                 },
-                offsetX: -10,
-              },
-              max: getMax(firstDataSet),
-              tickAmount: 5,
-            };
-          } else if (i === 1) {
-            yAxisOpt = {
-              show: false,
-              seriesName: value[0].name,
-            };
-          } else if (i === 2) {
-            yAxisOpt = {
-              title: {
-                text: this.i18n.service.translate(
-                  'Call volume',
-                  this.i18n.service.currentLang
-                ),
-                style: {
-                  fontSize: '16px',
-                  color: '#f37d35',
-                },
-                offsetX: 10,
-              },
-              labels: {
-                style: {
-                  colors: ['#f37d35'],
-                },
-              },
-              opposite: true,
-              max: getMax(secondMax),
-              seriesName: value[2].name,
-              tickAmount: 5,
-            };
-          } else if (i === 3) {
-            yAxisOpt = {
-              opposite: true,
-              show: false,
-              seriesName: value[2].name,
-            };
-          }
-          return mergeDeepRight<ApexYAxis>(yAxisOpt, {
-            min: 0,
-            axisTicks: {
-              show: true,
-            },
-            axisBorder: {
-              show: true,
-            },
-            labels: {
-              style: {
-                fontSize: '14px',
-              },
-              formatter: (val: number) => {
-                return val.toLocaleString(this.i18n.service.currentLang, {
-                  maximumFractionDigits: 0,
-                });
-              },
-            },
-          });
-        }),
-        chart: {
-          ...state.chart,
-          type: state.chart?.type || 'line',
-          toolbar: {
-            ...state.chart?.toolbar,
-            offsetX: value[0]?.data?.length > 31 ? -124 : -103,
+                this.i18n.service.currentLang,
+                this.i18n.service.instant('Event')
+              );
+            } catch (err) {
+              console.error(err);
+              return '';
+            }
           },
         },
-        fill: {
-          opacity: value[0]?.data?.length > 31 ? [1, 0.75, 1, 0.75] : 1,
+        annotations: {
+          points: values.map(({ x, y, text }) => ({
+            x: x.getTime(),
+            y,
+            marker: {
+              size: 4,
+              radius: 5,
+              strokeWidth: 1,
+            },
+            label: {
+              text,
+              style: {
+                cssClass: 'hidden',
+              },
+            },
+          })),
         },
       };
     }
   );
 
+  readonly setYAxis = this.updater(
+    (state, series: ApexAxisChartSeries): ApexOptions => {
+      const firstDataSet: number[] = [0, 1].flatMap((i: number) =>
+        (series[i].data as { y: number }[]).map((data) => data.y)
+      );
+
+      const secondDataSet: number[] =
+        series[0]?.data?.length <= 7
+          ? [2, 3].flatMap((p: number) =>
+              (series[p].data as { y: number }[]).map((d) => d.y)
+            )
+          : firstDataSet.map((val) => Math.round(val / 5));
+
+      const defaultYAxisOpts: ApexYAxis = {
+        min: 0,
+        axisTicks: {
+          show: true,
+        },
+        axisBorder: {
+          show: true,
+        },
+        labels: {
+          style: {
+            fontSize: '14px',
+          },
+          formatter: (val: number) => {
+            return val?.toLocaleString(this.i18n.service.currentLang, {
+              maximumFractionDigits: 0,
+            });
+          },
+        },
+      };
+
+      const seriesNames = pluck('name', series);
+
+      const yaxis: ApexYAxis[] = [
+        // visits - current
+        {
+          seriesName: seriesNames[0],
+          title: {
+            text: this.i18n.service.translate(
+              'visits',
+              this.i18n.service.currentLang
+            ),
+            style: {
+              fontSize: '16px',
+            },
+            offsetX: -10,
+          },
+          max: getMax(firstDataSet),
+          tickAmount: 5,
+        },
+        // visits - comparison
+        {
+          show: false,
+          seriesName: seriesNames[0],
+        },
+        // calls - current
+        {
+          title: {
+            text: this.i18n.service.translate(
+              'Call volume',
+              this.i18n.service.currentLang
+            ),
+            style: {
+              fontSize: '16px',
+              color: '#f37d35',
+            },
+            offsetX: 10,
+          },
+          labels: {
+            style: {
+              colors: ['#f37d35'],
+            },
+          },
+          opposite: true,
+          max: getMax(secondDataSet),
+          seriesName: seriesNames[2],
+          tickAmount: 5,
+        },
+        // calls - comparison
+        {
+          opposite: true,
+          show: false,
+          seriesName: seriesNames[2],
+        },
+      ].map(mergeDeepRight(defaultYAxisOpts));
+
+      const chartOpts: ApexOptions = {
+        series,
+        yaxis,
+        chart: {
+          type: state.chart?.type || 'line',
+          toolbar: {
+            offsetX: series[0]?.data?.length > 31 ? -124 : -103,
+          },
+        },
+        fill: {
+          opacity: series[0]?.data?.length > 31 ? [1, 0.75, 1, 0.75] : 1,
+        },
+      };
+
+      return mergeDeepRight(state, chartOpts);
+    }
+  );
+
   readonly vm$ = this.select(this.state$, (state) => state);
+
   readonly hasData$ = this.select(
     this.vm$,
     (state) =>
@@ -210,4 +279,115 @@ export function getMax(values: number[]): number {
 
   const digits = Math.floor(Math.log10(max)) + 1;
   return Math.ceil(max / Math.pow(10, digits - 1)) * Math.pow(10, digits - 1);
+}
+
+export type TooltipSeriesConfig = {
+  label: string;
+  value?: number;
+  colour: string;
+};
+
+export type TooltipConfig = {
+  title: string;
+  series: TooltipSeriesConfig[];
+  annotation?: {
+    text: string;
+  };
+};
+
+export function seriesTooltipHtml(
+  { label, value, colour }: TooltipSeriesConfig,
+  index: number,
+  locale: 'en-CA' | 'fr-CA'
+) {
+  return `
+
+  <div
+    class="apexcharts-tooltip-series-group apexcharts-active d-flex"
+    style="order: ${index + 1};"
+  >
+    <span
+      class="apexcharts-tooltip-marker"
+      style="background-color: ${colour}"
+    ></span>
+    <div
+      class="apexcharts-tooltip-text"
+      style="font-family: 'Noto Sans',sans-serif; font-size: 0.7rem"
+    >
+      <div class="apexcharts-tooltip-y-group">
+        <span class="apexcharts-tooltip-text-y-label"
+          >${label}: </span
+        ><span class="apexcharts-tooltip-text-y-value">${(
+          value || 0
+        ).toLocaleString(locale)}</span>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+export function getTooltipHtml(
+  { title, series, annotation }: TooltipConfig,
+  locale: 'en-CA' | 'fr-CA',
+  eventText = 'Event'
+) {
+  const annotationHtml = annotation
+    ? `
+  <hr style="order: 98;" class="my-1" />
+  <div
+    class="apexcharts-tooltip-series-group apexcharts-active d-flex"
+    style="order: 99;"
+  >
+    <span
+      class="apexcharts-tooltip-marker annotation"
+    ></span>
+    <div
+      class="apexcharts-tooltip-text"
+      style="font-family: 'Noto Sans',sans-serif; font-size: 0.7rem"
+    >
+      <div class="apexcharts-tooltip-y-group">
+        <span class="apexcharts-tooltip-text-y-label"
+          ><strong>${eventText}:</strong> ${annotation.text}: </span
+        ><span class="apexcharts-tooltip-text-y-value">${title}</span>
+      </div>
+    </div>
+  </div>
+  `
+    : '';
+
+  const seriesHtml = series
+    .filter(
+      ({ value }) => value !== null && value !== undefined && !isNaN(value)
+    )
+    .map((series, i) => seriesTooltipHtml(series, i, locale))
+    .join('');
+
+  return `
+    <div
+      class="apexcharts-tooltip-title apexcharts-active d-flex"
+      style="font-family: 'Noto Sans',sans-serif; font-size: 0.8rem"
+    >
+      ${title}
+    </div>
+
+    ${seriesHtml}
+
+    ${annotationHtml}
+  `;
+}
+
+// date formatting utils
+const enFormatter = new Intl.DateTimeFormat('en-CA', {
+  day: '2-digit',
+  month: 'short',
+});
+const frFormatter = new Intl.DateTimeFormat('fr-CA', {
+  day: '2-digit',
+  month: 'short',
+});
+
+export function formatDate(date: Date | string | number, locale: string) {
+  date = date instanceof Date ? date : new Date(date);
+
+  return locale === EN_CA ? enFormatter.format(date) : frFormatter.format(date);
 }

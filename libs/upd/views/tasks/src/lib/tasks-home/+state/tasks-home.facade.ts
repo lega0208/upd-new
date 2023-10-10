@@ -8,6 +8,8 @@ import * as TasksHomeSelectors from './tasks-home.selectors';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { round } from '@dua-upd/utils-common';
+import { EN_CA } from '@dua-upd/upd/i18n';
+import { AttachmentData, IReports } from '@dua-upd/types-common';
 
 @Injectable()
 export class TasksHomeFacade {
@@ -34,8 +36,8 @@ export class TasksHomeFacade {
           row.user_type.length > 0
             ? row.user_type.map((userType) => userType || '')
             : '',
-        calls_per_100_visits: 
-          row.visits > 0 ? round( ( row.calls / row.visits ) * 100, 3) || 0 : 0,
+        calls_per_100_visits:
+          row.visits > 0 ? round((row.calls / row.visits) * 100, 3) || 0 : 0,
       }));
     })
   );
@@ -120,7 +122,41 @@ export class TasksHomeFacade {
           field: 'calls_per_100_visits',
           header: this.i18n.service.translate('kpi-calls-per-100-title', lang),
           pipe: 'number',
-        }
+          pipeParam: '1.3-3',
+        },
+      ] as ColumnConfig[];
+    })
+  );
+
+  tasksReports$ = this.tasksHomeData$.pipe(
+    map((tasksHomeData) => {
+      return (tasksHomeData?.reports || []).map((report) => {
+        const extractUrl = (attachment: AttachmentData[]) =>
+          attachment[0]?.storage_url?.replace('https://', '');
+        return {
+          ...report,
+          en_attachment: extractUrl(report.en_attachment),
+          fr_attachment: extractUrl(report.fr_attachment),
+        };
+      });
+    })
+  );
+
+  tasksReportsColumns$ = this.i18n.currentLang$.pipe(
+    map((lang) => {
+      return [
+        {
+          field: 'en_title',
+          header: this.i18n.service.translate('english-report', lang),
+          type: 'link',
+          typeParams: { link: 'en_attachment', external: true },
+        },
+        {
+          field: 'fr_title',
+          header: this.i18n.service.translate('french-report', lang),
+          type: 'link',
+          typeParams: { link: 'fr_attachment', external: true },
+        },
       ] as ColumnConfig[];
     })
   );
@@ -130,20 +166,20 @@ export class TasksHomeFacade {
   );
 
   totalVisits$ = this.tasksHomeData$.pipe(
-    map((tasksData) => tasksData.totalVisits || 0
-  ));
+    map((tasksData) => tasksData.totalVisits || 0)
+  );
 
   totalCalls$ = this.tasksHomeData$.pipe(
-    map((tasksData) => tasksData.totalCalls || 0
-  ));
+    map((tasksData) => tasksData.totalCalls || 0)
+  );
 
   totalVisitsChange$ = this.tasksHomeData$.pipe(
-    map((tasksData) => tasksData.percentChange || 0
-  ));
+    map((tasksData) => tasksData.percentChange || 0)
+  );
 
   totalCallsChange$ = this.tasksHomeData$.pipe(
-    map((tasksData) => tasksData.percentChangeCalls || 0
-  ));
+    map((tasksData) => tasksData.percentChangeCalls || 0)
+  );
 
   error$ = this.store.pipe(select(TasksHomeSelectors.getTasksHomeError));
 

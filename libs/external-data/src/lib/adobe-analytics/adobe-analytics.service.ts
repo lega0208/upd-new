@@ -2,9 +2,10 @@ import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import chalk from 'chalk';
-import { logJson, wait } from '@dua-upd/utils-common';
+import { wait } from '@dua-upd/utils-common';
 import {
   AASearchTermMetrics,
+  ActivityMapMetrics,
   IAAItemId,
   IOverall,
   IPageMetrics,
@@ -39,18 +40,16 @@ export type InternalSearchResult = {
 };
 
 export type ActivityMapResult = {
-  url: string;
-  date?: Date;
-  aa_activitymap: AASearchTermMetrics[];
-  itemId?: string;
+  activity_map: ActivityMapMetrics[];
+  itemId: string;
 };
 
 @Injectable()
 export class AdobeAnalyticsService {
   constructor(
-    private logger: ConsoleLogger,
     @Inject(AdobeAnalyticsClient.name)
-    private readonly client: AdobeAnalyticsClient
+    private readonly client: AdobeAnalyticsClient,
+    private readonly logger: ConsoleLogger
   ) {}
 
   async getOverallMetrics(

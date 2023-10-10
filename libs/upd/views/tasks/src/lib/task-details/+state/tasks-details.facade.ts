@@ -26,7 +26,11 @@ import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
-import { selectTasksDetailsDataWithI18n } from './tasks-details.selectors';
+import {
+  selectCallsPerVisitsChartData,
+  selectDyfNoPerVisitsSeries,
+  selectTasksDetailsDataWithI18n,
+} from './tasks-details.selectors';
 
 dayjs.extend(utc);
 
@@ -88,6 +92,10 @@ export class TasksDetailsFacade {
 
   avgTaskSuccessFromLastTest$ = this.tasksDetailsData$.pipe(
     map((data) => data.avgTaskSuccessFromLastTest)
+  );
+
+  avgSuccessPercentChange$ = this.tasksDetailsData$.pipe(
+    map((data) => data.avgSuccessPercentChange)
   );
 
   dateFromLastTest$ = this.tasksDetailsData$.pipe(
@@ -163,6 +171,88 @@ export class TasksDetailsFacade {
     }),
     mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo', '_id')
   );
+
+  apexCallDrivers$ = this.store.select(selectCallsPerVisitsChartData);
+  apexKpiFeedback$ = this.store.select(selectDyfNoPerVisitsSeries);
+
+  comparisonVisits$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.comparisonDateRangeData?.visits || 0)
+  );
+
+  totalCalldriver$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.dateRangeData?.totalCalldrivers || 0)
+  );
+
+  comparisonTotalCalldriver$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.comparisonDateRangeData?.totalCalldrivers || 0)
+  );
+
+  totalCalldriverPercentChange$ = this.tasksDetailsData$.pipe(
+    mapToPercentChange('totalCalldrivers')
+  );
+
+  callPerVisits$ = combineLatest([this.totalCalldriver$, this.visits$]).pipe(
+    map(([currentCalls, visits]) => {
+      return currentCalls / visits;
+    })
+  );
+
+  callComparisonPerVisits$ = combineLatest([
+    this.comparisonTotalCalldriver$,
+    this.comparisonVisits$,
+  ]).pipe(
+    map(([comparisonCalls, comparisonVisits]) => {
+      return comparisonCalls / comparisonVisits;
+    })
+  );
+
+  apexCallPercentChange$ = combineLatest([
+    this.callPerVisits$,
+    this.callComparisonPerVisits$,
+  ]).pipe(
+    map(([currentCalls, comparisonVisits]) =>
+      percentChange(currentCalls, comparisonVisits)
+    )
+  );
+
+  apexCallDifference$ = combineLatest([
+    this.callPerVisits$,
+    this.callComparisonPerVisits$,
+  ]).pipe(
+    map(([currentCalls, comparisonVisits]) => currentCalls - comparisonVisits)
+  );
+
+  currentKpiFeedback$ = this.tasksDetailsData$.pipe(
+    map((data) => {
+      const dyfNoCurrent = data?.dateRangeData?.dyfNo || 0;
+      const visits = data?.dateRangeData?.visits || 0;
+
+      return dyfNoCurrent / visits;
+    })
+  );
+
+  comparisonKpiFeedback$ = combineLatest([this.tasksDetailsData$]).pipe(
+    map(([data]) => {
+      const dyfNoComparison = data?.comparisonDateRangeData?.dyfNo || 0;
+      const visits = data?.comparisonDateRangeData?.visits || 0;
+
+      return dyfNoComparison / visits;
+    })
+  );
+
+  kpiFeedbackPercentChange$ = combineLatest([
+    this.currentKpiFeedback$,
+    this.comparisonKpiFeedback$,
+  ]).pipe(
+    map(([currentKpi, comparisonKpi]) =>
+      percentChange(currentKpi, comparisonKpi)
+    )
+  );
+
+  kpiFeedbackDifference$ = combineLatest([
+    this.currentKpiFeedback$,
+    this.comparisonKpiFeedback$,
+  ]).pipe(map(([currentKpi, comparisonKpi]) => currentKpi - comparisonKpi));
 
   projects$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
@@ -594,24 +684,58 @@ export class TasksDetailsFacade {
   ]).pipe(
     map(([data, lang]) => {
       const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM DD, YYYY';
-      const taskSuccessByUxTest = data?.taskSuccessByUxTest?.map((d) => ({
+
+      const uxTests = data?.taskSuccessByUxTest;
+
+      const maxTotalUsersByTitle = uxTests.reduce<Record<string, number>>(
+        (acc, test) => {
+          acc[test.title] = Math.max(
+            acc[test.title] || 0,
+            test.total_users || 0
+          );
+          return acc;
+        },
+        {}
+      );
+
+      const totalSum = Object.values(maxTotalUsersByTitle).reduce(
+        (sum, val) => sum + val,
+        0
+      );
+
+      const taskSuccessByUxTest = uxTests?.map((d) => ({
         ...d,
         title: d.title ? this.i18n.service.translate(d.title, lang) : d.title,
         test_type: d.test_type
           ? this.i18n.service.translate(d.test_type, lang)
           : d.test_type,
         date: d.date,
+        total_users: totalSum,
       }));
       return [...(taskSuccessByUxTest || [])];
     })
   );
 
   totalParticipants$ = this.tasksDetailsData$.pipe(
-    map((data) =>
-      data?.taskSuccessByUxTest
-        ?.map((data) => data?.total_users)
-        .reduce((a, b) => (a || 0) + (b || 0), 0)
-    )
+    map((data) => {
+      const uxTests = data?.taskSuccessByUxTest;
+
+      const maxTotalUsersByTitle = uxTests.reduce<Record<string, number>>(
+        (acc, test) => {
+          acc[test.title] = Math.max(
+            acc[test.title] || 0,
+            test.total_users || 0
+          );
+          return acc;
+        },
+        {}
+      );
+
+      return Object.values(maxTotalUsersByTitle).reduce(
+        (sum, val) => sum + val,
+        0
+      );
+    })
   );
 
   feedbackComments$ = combineLatest([

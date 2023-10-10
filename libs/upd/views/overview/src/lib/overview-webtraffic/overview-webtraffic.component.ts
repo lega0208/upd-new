@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ColumnConfig } from '@dua-upd/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { LocaleId } from '@dua-upd/upd/i18n';
 import { combineLatest, tap } from 'rxjs';
 
 @Component({
@@ -22,7 +21,8 @@ export class OverviewWebtrafficComponent implements OnInit {
   pageViews$ = this.overviewService.views$;
   pageViewsPercentChange$ = this.overviewService.viewsPercentChange$;
 
-  apexBar$ = this.overviewService.apexBar$.pipe(tap((console.log)));
+  apexBar$ = this.overviewService.apexBar$.pipe(tap(console.log));
+  annotationsData$ = this.overviewService.annotationsData$;
 
   topPagesWithChangeData$ =
     this.overviewService.topPagesVisitedWithPercentChange$;
@@ -75,6 +75,7 @@ export class OverviewWebtrafficComponent implements OnInit {
           pipe: 'percent',
         },
       ];
+
       this.barTableCols = [
         { field: 'date', header: this.i18n.service.translate('Dates', lang) },
         {

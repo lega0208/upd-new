@@ -9,7 +9,8 @@ import {
   ProjectsHomeData,
   TasksHomeData,
   TaskDetailsData,
-  ProjectsDetailsData
+  ProjectsDetailsData,
+  ReportsData,
 } from '@dua-upd/types-common';
 
 @Injectable()
@@ -17,7 +18,10 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   // @StorageCache
-  private get<T extends ReturnedData<unknown>>(url: string, params?: ApiParams) {
+  private get<T extends ReturnedData<unknown>>(
+    url: string,
+    params?: ApiParams
+  ) {
     return this.http.get<T>(url, { params });
   }
 
@@ -47,6 +51,10 @@ export class ApiService {
 
   getProjectsDetailsData(params: ApiParams) {
     return this.get<ProjectsDetailsData>('/api/projects/details', params);
+  }
+
+  getReportsData() {
+    return this.http.get<ReportsData>('/api/reports');
   }
 
   getInternalSearchData(params: ApiParams) {

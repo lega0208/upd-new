@@ -10,7 +10,9 @@ import type {
   IPageMetrics,
   ITask,
   IUxTest,
-  IReadability, IAnnotations,
+  IReadability,
+  IAnnotations,
+  IReports,
 } from './schema.types';
 
 export type ApiParams = {
@@ -33,10 +35,7 @@ export interface EntityDetailsData<T> extends ViewData<T> {
   title: string;
 }
 
-export type PagesHomeAggregatedData = Pick<
-  IPage,
-  '_id' | 'url' | 'title'
-> & {
+export type PagesHomeAggregatedData = Pick<IPage, '_id' | 'url' | 'title'> & {
   visits: number;
 };
 export type PagesHomeData = ViewData<PagesHomeAggregatedData[]>;
@@ -87,10 +86,19 @@ export type PageDetailsMetrics = Pick<
 export interface PageAggregatedData extends PageDetailsMetrics {
   visitsByDay: { date: string; visits: number }[];
   feedbackByTags: { tag: string; numComments: number }[];
+  dyfByDay: {
+    date: Date;
+    dyf_yes: number;
+    dyf_no: number;
+    dyf_submit: number;
+  }[];
 }
 
 export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   url: string;
+  is404?: boolean;
+  isRedirect?: boolean;
+  redirect?: string;
   topSearchTermsIncrease?: GscSearchTermMetrics[];
   topSearchTermsDecrease?: GscSearchTermMetrics[];
   top25GSCSearchTerms?: GscSearchTermMetrics[];
@@ -102,6 +110,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
   readability: IReadability[];
+  activityMap: ActivityMap[];
 }
 
 export interface OverviewAggregatedData {
@@ -144,6 +153,7 @@ export interface OverviewAggregatedData {
     total_clicks: number;
     total_searches: number;
   }[];
+  annotations: (Omit<IAnnotations, 'event_date'> & { event_date: string })[];
 }
 
 export interface OverviewUxData {
@@ -200,6 +210,12 @@ export type InternalSearchTerm = {
   position: number;
 };
 
+export type ActivityMap = {
+  link: string;
+  clicks: number;
+  clicksChange?: number | null | undefined;
+};
+
 export interface TasksHomeAggregatedData {
   _id: string | Types.ObjectId;
   title: string;
@@ -224,6 +240,7 @@ export type TasksHomeData = ViewData<TasksHomeAggregatedData[]> & {
   percentChange: number;
   totalCalls: number;
   percentChangeCalls: number;
+  reports: IReports[];
 };
 
 export interface TaskDetailsMetrics {
@@ -240,6 +257,9 @@ export interface TaskDetailsMetrics {
   gscTotalPosition: number;
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
+  calldriversByDay: { date: string; calls: number }[];
+  visitsByDay: { date: string; visits: number }[];
+  dyfByDay: { date: string; dyf_yes: number; dyf_no: number }[];
   totalCalldrivers: number;
 }
 
@@ -263,6 +283,7 @@ export interface TaskDetailsData
   channel: string[];
   core: string[];
   avgTaskSuccessFromLastTest: number;
+  avgSuccessPercentChange: number;
   dateFromLastTest: Date;
   taskSuccessByUxTest: {
     title: string;
@@ -292,6 +313,13 @@ export type ProjectStatus =
   | 'Delayed'
   | 'Unknown';
 
+  export type PageStatus =
+  | '404'
+  | 'Redirected';
+
+  export type ProjectType =
+  | 'COPS';
+
 export interface searchAssessmentColTypes {
   query: string;
   url: string;
@@ -307,7 +335,13 @@ export interface ProjectsHomeProject {
   avgSuccessRate?: number;
   lastAvgSuccessRate?: number;
   status: ProjectStatus;
-  uxTests?: { date?: Date; success_rate?: number; test_type?: string }[];
+  uxTests?: {
+    title: string;
+    date?: Date;
+    success_rate?: number;
+    test_type?: string;
+    task?: string;
+  }[];
 }
 
 export interface ProjectsHomeData {
@@ -320,6 +354,15 @@ export interface ProjectsHomeData {
   projects: ProjectsHomeProject[];
   avgTestSuccessAvg?: number;
   testsCompleted?: number;
+}
+
+export interface ReportsHomeProject extends ProjectsHomeProject {
+  attachments: AttachmentData[];
+}
+
+export interface ReportsData {
+  projects: ReportsHomeProject[];
+  tasks: IReports[];
 }
 
 export interface VisitsByPage {
@@ -345,16 +388,23 @@ export interface ProjectDetailsAggregatedData {
   gscTotalPosition: number;
   gscSearchTerms: GscSearchTermMetrics;
   visitsByPage: VisitsByPage[];
+  visitsByDay: { date: string; visits: number }[];
+  dyfByDay: { date: string; dyf_yes: number; dyf_no: number }[];
+  calldriversByDay: { date: string; calls: number }[];
   feedbackByTags: { tag: string; numComments: number }[];
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
   callsByTasks: CallsByTasks[];
   totalCalldrivers: number;
+  pageMetricsByTasks: (Partial<ProjectDetailsAggregatedData> & {
+    title: string;
+  })[];
 }
 
 export interface ProjectsDetailsData
   extends EntityDetailsData<ProjectDetailsAggregatedData> {
   status: ProjectStatus;
+  cops?: boolean;
   description?: string;
   startDate: string | undefined;
   launchDate: string | undefined;

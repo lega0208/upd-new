@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map, debounceTime, combineLatest } from 'rxjs';
+import { map, debounceTime, combineLatest, filter } from 'rxjs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
@@ -24,6 +24,7 @@ import {
   selectReadabilityData,
   selectVisitsByDayChartData,
   selectVisitsByDayChartTable,
+  selectDyfNoPerVisitsSeries,
 } from './pages-details.selectors';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 
@@ -61,6 +62,18 @@ export class PagesDetailsFacade {
 
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
+
+  pageStatus$ = this.pagesDetailsData$.pipe(map((data) => {
+    if (data?.isRedirect) {
+      return 'Redirected';
+    }
+
+    if (data?.is404) {
+      return '404';
+    }
+
+    return null;
+  }));
 
   visitors$ = this.pagesDetailsData$.pipe(
     map((data) => data?.dateRangeData?.visitors || 0)
@@ -107,6 +120,8 @@ export class PagesDetailsFacade {
   tasks$ = this.pagesDetailsData$.pipe(map((data) => data?.tasks || 0));
 
   readability$ = this.store.select(selectReadabilityData);
+
+  apexKpiFeedback$ = this.store.select(selectDyfNoPerVisitsSeries);
 
   pageLang$ = this.store.select(selectPageLang);
 
@@ -162,6 +177,38 @@ export class PagesDetailsFacade {
     map((readability) => readability?.total_headings)
   );
 
+  currentKpiFeedback$ = this.pagesDetailsData$.pipe(
+    map((data) => {
+      const dyfNoCurrent = data?.dateRangeData?.dyf_no || 0;
+      const visits = data?.dateRangeData?.visits || 0;
+
+      return dyfNoCurrent / visits;
+    })
+  );
+
+  comparisonKpiFeedback$ = combineLatest([this.pagesDetailsData$]).pipe(
+    map(([data]) => {
+      const dyfNoComparison = data?.comparisonDateRangeData?.dyf_no || 0;
+      const visits = data?.comparisonDateRangeData?.visits || 0;
+
+      return dyfNoComparison / visits;
+    })
+  );
+
+  kpiFeedbackPercentChange$ = combineLatest([
+    this.currentKpiFeedback$,
+    this.comparisonKpiFeedback$,
+  ]).pipe(
+    map(([currentKpi, comparisonKpi]) =>
+      percentChange(currentKpi, comparisonKpi)
+    )
+  );
+
+  kpiFeedbackDifference$ = combineLatest([
+    this.currentKpiFeedback$,
+    this.comparisonKpiFeedback$,
+  ]).pipe(map(([currentKpi, comparisonKpi]) => currentKpi - comparisonKpi));
+
   projects$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       return (
@@ -170,6 +217,12 @@ export class PagesDetailsFacade {
           title: this.i18n.service.translate(d.title, lang),
         })) || []
       );
+    })
+  );
+
+  activityMap$ = combineLatest([this.pagesDetailsData$]).pipe(
+    map(([data]) => {
+      return data?.activityMap || [];
     })
   );
 
