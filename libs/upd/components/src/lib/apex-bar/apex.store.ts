@@ -224,21 +224,27 @@ export class ApexStore extends ComponentStore<ChartOptions> {
   );
 
   readonly vm$ = this.select(this.state$, (state) => state);
+
   readonly hasData$ = this.select(
     this.vm$,
     (state) =>
       sum(
-        state?.series
-          ?.flat()
-          .map(
-            (series) =>
-              (
-                (typeof series === 'object' &&
-                  'data' in series &&
-                  series.data) ||
-                []
-              ).length
-          ) || []
+        (
+          state?.series
+            ?.flat()
+            .filter(
+              (series) =>
+                typeof series === 'object' &&
+                'data' in series &&
+                series.data.length
+            ) as { data: number[] }[] | { data: { y: number }[] }[]
+        ).flatMap((series) => {
+          if (typeof series.data[0] === 'number') {
+            return series.data as number[];
+          }
+
+          return (series.data as { y: number }[]).map((data) => data.y);
+        })
       ) > 0
   );
 }
