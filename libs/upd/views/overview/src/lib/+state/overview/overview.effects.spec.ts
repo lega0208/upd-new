@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action, createAction, props } from '@ngrx/store';
 import { provideMockStore } from '@ngrx/store/testing';
-import { NxModule } from '@nrwl/angular';
+import { NxModule } from '@nx/angular';
 import { hot } from 'jasmine-marbles';
 import { Observable } from 'rxjs';
 
@@ -24,7 +24,7 @@ describe('OverviewEffects', () => {
       ],
     });
 
-//    effects = TestBed.inject(OverviewEffects);
+    //    effects = TestBed.inject(OverviewEffects);
   });
 
   describe('init$', () => {
@@ -35,12 +35,12 @@ describe('OverviewEffects', () => {
         props<{ data: OverviewData }>()
       );
 
-//      const expected = hot('-a-|', {
-//        a: OverviewActions.loadOverviewSuccess({ data }),
-//      });
+      //      const expected = hot('-a-|', {
+      //        a: OverviewActions.loadOverviewSuccess({ data }),
+      //      });
 
-//      expect(effects.init$).toBeObservable(expected);
-      expect (loadOverviewSuccess).toBeTruthy;
+      //      expect(effects.init$).toBeObservable(expected);
+      expect(loadOverviewSuccess).toBeTruthy;
     });
   });
 });

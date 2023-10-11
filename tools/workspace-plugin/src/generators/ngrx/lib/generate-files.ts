@@ -1,5 +1,5 @@
-import type { Tree } from '@nrwl/devkit';
-import { generateFiles, joinPathFragments, names } from '@nrwl/devkit';
+import type { Tree } from '@nx/devkit';
+import { generateFiles, joinPathFragments, names } from '@nx/devkit';
 import { dirname } from 'path';
 import type { NgRxGeneratorOptions } from '../schema';
 

@@ -1,13 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { NxModule } from '@nrwl/angular';
+import { NxModule } from '@nx/angular';
 
 import { createReducer, on, Action } from '@ngrx/store';
 
 import * as OverviewActions from './overview.actions';
 import { OverviewData } from '@dua-upd/types-common';
-import { OverviewState, initialState, overviewReducer } from './overview.reducer';
+import {
+  OverviewState,
+  initialState,
+  overviewReducer,
+} from './overview.reducer';
 
 import { Observable } from 'rxjs';
 
@@ -23,12 +27,12 @@ describe('Overview Reducer', () => {
         provideMockStore(),
       ],
     });
-//    effects = TestBed.inject(OverviewEffects);
+    //    effects = TestBed.inject(OverviewEffects);
   });
 
   it('should return the default state', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const action = {type: 'NOOP'} as any;
+    const action = { type: 'NOOP' } as any;
 
     const result = overviewReducer(undefined, action);
     expect(result).toBe(initialState);
@@ -36,7 +40,7 @@ describe('Overview Reducer', () => {
 
   it('init should return the loading state', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const action = {type: '[Overview Page] Init'} as any;
+    const action = { type: '[Overview Page] Init' } as any;
 
     const result = overviewReducer(undefined, action);
     expect(result.loading).toBe(true);
@@ -76,5 +80,4 @@ describe('Overview Reducer', () => {
   });
 
 */
-
 });

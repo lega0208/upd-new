@@ -1,12 +1,9 @@
-import type { Tree } from '@nrwl/devkit';
-import { names } from '@nrwl/devkit';
-import { insertImport,  } from '@nrwl/workspace/src/utilities/ast-utils';
+import type { Tree } from '@nx/devkit';
+import { names } from '@nx/devkit';
+import { insertImport } from '@nx/workspace/src/utilities/ast-utils';
 import type { SourceFile } from 'typescript';
 import { createSourceFile, ScriptTarget } from 'typescript';
-import {
-  addImportToModule,
-  addProviderToModule,
-} from './ast-utils';
+import { addImportToModule, addProviderToModule } from './ast-utils';
 import type { NgRxGeneratorOptions } from '../schema';
 
 export function addImportsToModule(
@@ -47,7 +44,7 @@ export function addImportsToModule(
   const effectsName = `${names(options.name).className}Effects`;
   const facadeName = `${names(options.name).className}Facade`;
   const className = `${names(options.name).className}`;
-  const propertyName = names(options.name).propertyName
+  const propertyName = names(options.name).propertyName;
 
   const reducerImports = `${propertyName}Reducer, ${constantName}_FEATURE_KEY`;
 
@@ -131,7 +128,7 @@ export function addImportsToModule(
       sourceFile = addCommonImports();
 
       if (!hasNxModule) {
-        sourceFile = addImport(sourceFile, 'NxModule', '@nrwl/angular');
+        sourceFile = addImport(sourceFile, 'NxModule', '@nx/angular');
         sourceFile = addImportToModule(tree, sourceFile, modulePath, nxModule);
       }
 

@@ -1,14 +1,14 @@
 import * as ts from 'typescript';
-import { findNodes } from '@nrwl/workspace/src/utilities/typescript/find-nodes';
-import { getSourceNodes } from '@nrwl/workspace/src/utilities/typescript/get-source-nodes';
+import { findNodes } from '@nx/workspace/src/utilities/typescript/find-nodes';
+import { getSourceNodes } from '@nx/workspace/src/utilities/typescript/get-source-nodes';
 import * as path from 'path';
-import { Tree, names, readProjectConfiguration } from '@nrwl/devkit';
+import { Tree, names, readProjectConfiguration } from '@nx/devkit';
 import {
   insertChange,
   removeChange,
   getImport,
   replaceChange,
-} from '@nrwl/workspace/src/utilities/ast-utils';
+} from '@nx/workspace/src/utilities/ast-utils';
 
 function _angularImportsFromNode(
   node: ts.ImportDeclaration,
