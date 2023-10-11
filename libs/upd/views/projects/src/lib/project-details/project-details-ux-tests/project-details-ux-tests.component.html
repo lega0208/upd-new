@@ -30,9 +30,9 @@
   <div class="row">
     <div class="col-lg-12">
       <upd-apex-bar
-        [title]="'Tasks success by test'"
+        [title]="'Tasks success by Test'"
         [series]="(apexTaskSuccessByUxTest$ | async)?.series || []"
-        [yAxis]="'ux-tests' | translate"
+        [yAxis]="'tasks' | translate"
         [xAxis]="(apexTaskSuccessByUxTest$ | async)?.xaxis || []"
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"
         [showPercent]="{
