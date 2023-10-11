@@ -188,6 +188,7 @@ export class OverviewSummaryComponent implements OnInit {
           header: this.i18n.service.translate('Events for ', lang, {
             value: dateRange,
           }),
+          columnClass: 'border-end',
         },
         {
           field: 'prevDate',

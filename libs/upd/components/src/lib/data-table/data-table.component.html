@@ -88,6 +88,7 @@
           [pSortableColumn]="col.field"
           [hidden]="col.hideTable"
           [ngClass]="col.headerClass || ''"
+          class="{{ col.columnClass || '' }}"
         >
           <div class="text-nowrap d-flex align-items-center">
             <ng-container *ngIf="col.tooltip">
@@ -160,7 +161,11 @@
         </th>
       </ng-template>
       <ng-template #elseBlock>
-        <th *ngFor="let col of columns" [hidden]="col.hideTable">
+        <th
+          *ngFor="let col of columns"
+          [hidden]="col.hideTable"
+          class="{{ col.columnClass || '' }}"
+        >
           <ng-container *ngIf="col.tooltip">
             <span
               class="p-column-title datatable-headers"
@@ -191,6 +196,7 @@
             (rowData[col.field] >= 0.8 ||
               (col.field === 'change' && rowData[col.field] >= 0.2))
         }"
+        class="{{ col.columnClass || '' }}"
         [hidden]="col.hideTable"
       >
         <span
