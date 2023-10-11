@@ -277,7 +277,7 @@
   "Result": "Résultat",
   "Latest success rate": "Dernier taux de réussite",
   "Total participants from all tests": "Nombre total de participants à tous les tests",
-  "Tasks success by Test": "Succès des tâches par test",
+  "Tasks success by Test": "Succès des tâches par test UX",
   "Average tasks success by test": "Succès moyenne des tâches par test",
   "Success rate and scenarios": "Taux de réussite et scénarios",
   "Documents": "Documents",
@@ -788,7 +788,7 @@
   "Multigenerational Home Renovation Tax Credit (MHRTC)": "Crédit d’impôt pour la rénovation d’habitations multigénérationnelles (CIRHM)",
   "Service Feedback 2023": "Rétroaction liée au service 2023",
   "Scams and Fraud 2023": "Arnaques et fraudes 2023",
-  "My Account / My BA": "Mon dossier / Mon dossier d’entreprise",
+  "My Account / My BA COP": "Mon dossier / Mon dossier d’entreprise POC",
 
   "------PAGE FEEDBACK TAGS----": "---------------------------TAGS TRANSLATION--------------------------------------",
   "Accounts": "Comptes",
