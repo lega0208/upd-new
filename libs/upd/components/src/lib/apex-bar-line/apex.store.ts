@@ -380,10 +380,12 @@ export function getTooltipHtml(
 const enFormatter = new Intl.DateTimeFormat('en-CA', {
   day: '2-digit',
   month: 'short',
+  timeZone: 'UTC',
 });
 const frFormatter = new Intl.DateTimeFormat('fr-CA', {
   day: '2-digit',
   month: 'short',
+  timeZone: 'UTC',
 });
 
 export function formatDate(date: Date | string | number, locale: string) {
