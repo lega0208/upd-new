@@ -4,7 +4,6 @@ import {
   PagesDetailsState,
 } from './pages-details.reducer';
 import {
-  DateRangePeriod,
   selectComparisonDateRange,
   selectCurrentLang,
   selectDatePeriodSelection,
@@ -156,5 +155,69 @@ export const selectVisitsByDayChartTable = createSelector(
       prevDate: dayjs.utc(prevDate).locale(lang).format(dateFormat),
       prevVisits: prevVisitsDict[prevDate]?.visits,
     }));
+  }
+);
+
+// Feedback to visits ratio
+export const selectDyfNoPerVisitsSeries = createSelector(
+  selectPagesDetailsData,
+  selectCurrentDateRangeLabel,
+  selectComparisonDateRangeLabel,
+  selectPeriodDates,
+  (
+    { dateRangeData, comparisonDateRangeData },
+    dateRangeLabel,
+    comparisonDateRangeLabel,
+    dates
+  ) => {
+    const dyfByDay = dateRangeData?.dyfByDay || [];
+    const visitsByDay = dateRangeData?.visitsByDay || [];
+    const dyfDict = arrayToDictionary(dyfByDay, 'date');
+
+    const dyfNoPerVisitsSeries = visitsByDay.map(({ date, visits }) => ({
+      x: date,
+      y: visits ? ((dyfDict[date]?.dyf_no || 0) / visits) * 1000 : NaN,
+    }));
+
+    const comparisonDyfByDay = comparisonDateRangeData?.dyfByDay || [];
+    const comparisonVisitsByDay = comparisonDateRangeData?.visitsByDay || [];
+    const comparisonDyfDict = arrayToDictionary(comparisonDyfByDay, 'date');
+
+    const comparisonDyfNoPerVisitsSeries = comparisonVisitsByDay
+      .filter(({ date }) => dates.has(date))
+      .map(({ date, visits }) => {
+        const currentDate = dates.get(date);
+
+        return {
+          x: currentDate,
+          y:
+            visits && currentDate
+              ? ((comparisonDyfDict[date]?.dyf_no || 0) / visits) * 1000
+              : NaN,
+        };
+      });
+
+    const isDyfNoPerVisitsEmpty = dyfNoPerVisitsSeries.every(
+      ({ y }) => y === 0 || isNaN(y)
+    );
+    const isComparisonDyfNoPerVisitsEmpty =
+      comparisonDyfNoPerVisitsSeries.every(({ y }) => y === 0 || isNaN(y));
+
+    if (isDyfNoPerVisitsEmpty && isComparisonDyfNoPerVisitsEmpty) {
+      return [];
+    }
+
+    return [
+      {
+        name: comparisonDateRangeLabel,
+        type: 'line',
+        data: comparisonDyfNoPerVisitsSeries,
+      },
+      {
+        name: dateRangeLabel,
+        type: 'line',
+        data: dyfNoPerVisitsSeries,
+      },
+    ];
   }
 );

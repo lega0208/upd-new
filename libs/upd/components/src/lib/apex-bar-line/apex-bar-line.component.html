@@ -5,7 +5,7 @@
   [config]="secondaryTitleCols"
   [data]="secondaryTitleData"
 >
-  <ng-container *ngIf="(vm$ | async)?.series?.length === 0; else elseBlock">
+  <ng-container *ngIf="(hasData$ | async) === false; else elseBlock">
     <p>
       <span [translate]="'nodata-available'"></span>
     </p>
@@ -28,7 +28,19 @@
         [colors]="vm.colors || []"
         [dataLabels]="vm.dataLabels || {}"
         [tooltip]="vm.tooltip || {}"
+        [annotations]="vm.annotations || {}"
       ></apx-chart>
+
+      <!--   Events legend item   -->
+      <div class="m-0 p-0 position-absolute">
+        <div class="p-0 m-0 position-relative" style="top: -10px; left: 15px">
+          <div class="apexcharts-legend-series event-annotation-legend">
+            <span class="apexcharts-legend-marker"></span>
+            <span class="apexcharts-legend-text">{{ 'Events' | translate }}</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <div class="pt-3" *ngIf="table">

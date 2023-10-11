@@ -37,10 +37,18 @@ const routes: Routes = [
   },
   {
     path: 'about-us',
-    loadChildren: (() =>
+    loadChildren: () =>
       import('@dua-upd/upd/views/about-us').then(
         (module) => module.AboutUsModule
-      )),
+      ),
+  },
+  {
+    path: 'reports',
+    loadChildren: () =>
+      import('@dua-upd/upd/views/reports').then(
+        (module) => module.ReportsModule
+      ),
+    data: { animation: 'reports', title: 'Reports' },
   },
   { path: '**', redirectTo: 'overview' },
 ];

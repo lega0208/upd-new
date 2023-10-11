@@ -5,16 +5,23 @@ import { Types } from 'mongoose';
  */
 export type AAItemIdTypes =
   | 'internalSearch'
-  | 'activityMap'
+  | 'activityMapTitle'
   | 'urlLast255'
   | 'pageUrl';
+
+export interface ActivityMapMetrics {
+  link: string;
+  clicks: number;
+}
 
 export interface IAAItemId {
   _id: Types.ObjectId;
   type: AAItemIdTypes;
   page?: Types.ObjectId;
+  pages?: Types.ObjectId[];
   itemId: string;
   value: string;
+  title?: string;
 }
 
 /*
@@ -288,6 +295,14 @@ export interface AttachmentData {
   size: number;
   storage_url?: string;
 }
+
+export interface IReports {
+  en_title: string;
+  fr_title: string;
+  en_attachment: AttachmentData[];
+  fr_attachment: AttachmentData[];
+}
+[];
 
 export interface SearchAssessmentData {
   lang: string;

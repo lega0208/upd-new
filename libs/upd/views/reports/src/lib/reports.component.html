@@ -1,0 +1,39 @@
+<upd-page-404 *ngIf="error$ | async; else elseBlock"></upd-page-404>
+
+<ng-template #elseBlock>
+  <h2 [translate]="'menu-reports'"></h2>
+
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <upd-card [title]="'menu-tasks'" titleSize="h3">
+          <upd-data-table
+            [title]="'tasks'"
+            [data]="(tasksReports$ | async) || []"
+            [cols]="(tasksReportsColumns$ | async) || []"
+            [filter]="false"
+            [pagination]="false"
+          ></upd-data-table>
+        </upd-card>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <upd-card [title]="'menu-projects'" titleSize="h3">
+          <upd-data-table
+            id="projects-home-"
+            [data]="(projectsReports$ | async) || []"
+            [cols]="(projectsReportsColumns$ | async) || []"
+            [filter]="true"
+            [displayRows]="25"
+            sortField="startDate"
+            [sortOrder]="'desc'"
+          ></upd-data-table>
+        </upd-card>
+      </div>
+    </div>
+  </div>
+</ng-template>

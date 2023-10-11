@@ -42,17 +42,17 @@ const projectStatusSwitchExpression = {
       {
         case: {
           $and: [
-            { $gt: [{ $size: "$statuses" }, 0] },
+            { $gt: [{ $size: '$statuses' }, 0] },
             {
               $allElementsTrue: {
                 $map: {
                   input: '$statuses',
                   as: 'status',
-                  in: { $eq: ['$$status', 'Complete'] }
-                }
-              }
-            }
-          ]
+                  in: { $eq: ['$$status', 'Complete'] },
+                },
+              },
+            },
+          ],
         },
         then: 'Complete',
       },
@@ -386,8 +386,11 @@ export class ProjectsService {
     );
     console.timeEnd('getProjectStatus');
 
+    const cops = (populatedProjectDoc.ux_tests as UxTest[])
+      .filter((test) => !(test instanceof Types.ObjectId))
+      .some((test) => test.cops);
+
     const description = populatedProjectDoc.description;
-    console.log(description);
 
     console.time('uxTests');
     const uxTests = populatedProjectDoc.ux_tests.map((uxTest) => {
@@ -437,6 +440,7 @@ export class ProjectsService {
       this.feedbackModel,
       this.calldriversModel,
       this.projectsModel,
+      this.pageModel,
       new Types.ObjectId(params.id),
       params.dateRange,
       projectUrls
@@ -449,6 +453,7 @@ export class ProjectsService {
       this.feedbackModel,
       this.calldriversModel,
       this.projectsModel,
+      this.pageModel,
       new Types.ObjectId(params.id),
       params.comparisonDateRange,
       projectUrls
@@ -475,6 +480,7 @@ export class ProjectsService {
       comparisonDateRangeData,
       title,
       status,
+      cops,
       description,
       startDate,
       launchDate,
@@ -597,6 +603,7 @@ async function getAggregatedProjectMetrics(
   feedbackModel: FeedbackModel,
   calldriversModel: CallDriverModel,
   projectModel: Model<ProjectDocument>,
+  pageModel: Model<PageDocument>,
   id: Types.ObjectId,
   dateRange: string,
   projectUrls: string[]
@@ -614,6 +621,10 @@ async function getAggregatedProjectMetrics(
   const projectMetrics = (
     await pageMetricsModel
       .aggregate<ProjectDetailsAggregatedData>()
+      // look for how to have the index be used "naturally" instead of hinting
+      // seems to significantly improve performance though (~300%?)
+      .hint('date_1_projects_exists')
+      .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
       .project({
         date: 1,
         url: 1,
@@ -631,9 +642,8 @@ async function getAggregatedProjectMetrics(
         gsc_total_ctr: 1,
         gsc_total_position: 1,
       })
-      .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
       .group({
-        _id: '$url',
+        _id: '$page',
         page: { $first: '$page' },
         visits: { $sum: '$visits' },
         dyfYes: { $sum: '$dyf_yes' },
@@ -647,22 +657,6 @@ async function getAggregatedProjectMetrics(
         gscTotalCtr: { $avg: '$gsc_total_ctr' },
         gscTotalPosition: { $avg: '$gsc_total_position' },
       })
-      .lookup({
-        from: 'pages',
-        localField: 'page',
-        foreignField: '_id',
-        as: 'page',
-      })
-      .unwind('$page')
-      .replaceRoot({
-        $mergeObjects: [
-          '$$ROOT',
-          { _id: '$page._id', title: '$page.title', url: '$page.url' },
-        ],
-      })
-      // .addFields({ _id: '$page' })
-      .project({ page: 0 })
-      .sort({ title: 1 })
       .group({
         _id: null,
         visitsByPage: {
@@ -680,10 +674,52 @@ async function getAggregatedProjectMetrics(
         gscTotalCtr: { $avg: '$gscTotalCtr' },
         gscTotalPosition: { $avg: '$gscTotalPosition' },
       })
-      .project({ _id: 0 })
       .exec()
-  )[0];
+  )?.[0];
   console.timeEnd('projectMetrics');
+
+  const projectPages = await pageModel
+    .find({ projects: new Types.ObjectId(id) })
+    .lean()
+    .exec();
+
+  const pageLookup = arrayToDictionary(projectPages, '_id');
+
+  if (projectMetrics?.visitsByPage) {
+    const metricsMapped = projectMetrics.visitsByPage.map((metric) => {
+      const page = pageLookup[metric._id.toString()];
+      delete pageLookup[metric._id.toString()];
+
+      return {
+        ...metric,
+        _id: metric._id.toString(),
+        title: page.title,
+        url: page.url,
+      };
+    });
+
+    const missingPages = Object.values(pageLookup).map((page) => ({
+      _id: page._id.toString(),
+      title: page.title,
+      url: page.url,
+      visits: 0,
+      dyfYes: 0,
+      dyfNo: 0,
+      fwylfCantFindInfo: 0,
+      fwylfError: 0,
+      fwylfHardToUnderstand: 0,
+      fwylfOther: 0,
+      gscTotalClicks: 0,
+      gscTotalImpressions: 0,
+      gscTotalCtr: 0,
+      gscTotalPosition: 0,
+    }));
+
+    projectMetrics.visitsByPage = [
+      ...(metricsMapped || []),
+      ...(missingPages || []),
+    ].sort((a, b) => a.title.localeCompare(b.title));
+  }
 
   const project = await projectModel
     .findById(id)
@@ -699,14 +735,68 @@ async function getAggregatedProjectMetrics(
   const calldriverDocs = await calldriversModel
     .find(
       {
-        tpc_id: { $in: tpcIds },
         date: { $gte: startDate, $lte: endDate },
+        tpc_id: { $in: tpcIds },
       },
       { _id: 1 }
     )
     .lean()
     .exec();
   console.timeEnd('calldriverDocs');
+
+  const visitsByDay = await pageMetricsModel
+    .aggregate()
+    .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
+    .group({
+      _id: '$date',
+      visits: { $sum: '$visits' },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      visits: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
+
+  const dyfByDay = await pageMetricsModel
+    .aggregate()
+    .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
+    .group({
+      _id: '$date',
+      dyf_yes: { $sum: '$dyf_yes' },
+      dyf_no: { $sum: '$dyf_no' },
+      dyf_submit: { $sum: '$dyf_submit' },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      dyf_yes: 1,
+      dyf_no: 1,
+      dyf_submit: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
+
+  const calldriversByDay = await calldriversModel
+    .aggregate()
+    .match({
+      date: { $gte: startDate, $lte: endDate },
+      tpc_id: { $in: tpcIds },
+    })
+    .group({
+      _id: '$date',
+      calls: {
+        $sum: '$calls',
+      },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      calls: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 
@@ -720,13 +810,67 @@ async function getAggregatedProjectMetrics(
   console.timeEnd('calldriversEnquiry');
 
   console.time('callsByTasks');
-  const callsByTasks = await calldriversModel.getCallsByTpcId(
+  const callsByTasks = await calldriversModel.getCallsByTaskFromIds(
     dateRange,
     tpcIds
   );
   console.timeEnd('callsByTasks');
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
+
+  const taskIds = tasks.map((task: Types.ObjectId | Task) => task._id);
+
+  console.time('pageMetricsByTasks');
+
+  const pageMetricsByTasks = await pageMetricsModel
+    .aggregate<Partial<ProjectDetailsAggregatedData> & { title: string }>()
+    .match({
+      date: { $gte: startDate, $lte: endDate },
+      tasks: { $elemMatch: { $in: taskIds } },
+      projects: id,
+    })
+    .lookup({
+      from: 'tasks',
+      localField: 'tasks',
+      foreignField: '_id',
+      as: 'task',
+    })
+    .unwind('$task')
+    .match({ 'task._id': { $in: taskIds } })
+    .group({
+      _id: { taskId: '$task._id', taskTitle: '$task.title' },
+      page: { $first: '$page' },
+      visits: { $sum: '$visits' },
+      dyfYes: { $sum: '$dyf_yes' },
+      dyfNo: { $sum: '$dyf_no' },
+      fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
+      fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
+      fwylfOther: { $sum: '$fwylf_other' },
+      fwylfError: { $sum: '$fwylf_error' },
+      gscTotalClicks: { $sum: '$gsc_total_clicks' },
+      gscTotalImpressions: { $sum: '$gsc_total_impressions' },
+      gscTotalCtr: { $avg: '$gsc_total_ctr' },
+      gscTotalPosition: { $avg: '$gsc_total_position' },
+    })
+    .project({
+      _id: 0,
+      title: '$_id.taskTitle',
+      pages: 1, // add this line to include the page array in the output
+      visits: 1,
+      dyfYes: 1,
+      dyfNo: 1,
+      fwylfCantFindInfo: 1,
+      fwylfHardToUnderstand: 1,
+      fwylfOther: 1,
+      fwylfError: 1,
+      gscTotalClicks: 1,
+      gscTotalImpressions: 1,
+      gscTotalCtr: 1,
+      gscTotalPosition: 1,
+    })
+    .exec();
+
+    console.timeEnd('pageMetricsByTasks');
 
   return {
     ...projectMetrics,
@@ -735,6 +879,10 @@ async function getAggregatedProjectMetrics(
     totalCalldrivers,
     feedbackByTags,
     callsByTasks,
+    visitsByDay,
+    dyfByDay,
+    calldriversByDay,
+    pageMetricsByTasks,
   };
 }
 

@@ -25,6 +25,8 @@ import {
   PageDocument,
   SearchAssessment,
   SearchAssessmentDocument,
+  Annotations,
+  AnnotationsDocument,
 } from '@dua-upd/db';
 import type {
   ApiParams,
@@ -39,9 +41,9 @@ import type {
 import {
   arrayToDictionary,
   AsyncLogTiming,
+  avg,
   dateRangeSplit,
   getLatestTestData,
-  logJson,
 } from '@dua-upd/utils-common';
 import { OverallSearchTerm } from '@dua-upd/types-common';
 
@@ -54,17 +56,17 @@ const projectStatusSwitchExpression = {
       {
         case: {
           $and: [
-            { $gt: [{ $size: "$statuses" }, 0] },
+            { $gt: [{ $size: '$statuses' }, 0] },
             {
               $allElementsTrue: {
                 $map: {
                   input: '$statuses',
                   as: 'status',
-                  in: { $eq: ['$$status', 'Complete'] }
-                }
-              }
-            }
-          ]
+                  in: { $eq: ['$$status', 'Complete'] },
+                },
+              },
+            },
+          ],
         },
         then: 'Complete',
       },
@@ -113,7 +115,9 @@ export class OverallService {
     private feedbackModel: Model<FeedbackDocument>,
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessmentModel: Model<SearchAssessmentDocument>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectModel(Annotations.name, 'defaultConnection')
+    private annotationsModel: Model<AnnotationsDocument>
   ) {}
 
   @AsyncLogTiming
@@ -181,6 +185,7 @@ export class OverallService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.annotationsModel,
         this.db,
         this.searchAssessmentModel,
         this.cacheManager,
@@ -193,6 +198,7 @@ export class OverallService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.annotationsModel,
         this.db,
         this.searchAssessmentModel,
         this.cacheManager,
@@ -501,6 +507,8 @@ async function getProjects(
                 success_rate: '$success_rate',
                 date: '$date',
                 test_type: '$test_type',
+                task: '$tasks',
+                title: '$title',
               },
             },
             statuses: {
@@ -536,7 +544,8 @@ async function getProjects(
       totalUsers: 1,
       testType: 1,
       uxTests: 1,
-    });
+    })
+    .exec();
 
   const avgUxTest: {
     percentChange: number;
@@ -556,17 +565,38 @@ async function getProjects(
     }
   }
 
-  // UX Tests KPI updates - Latest average success rate for UX tests with Validation only
   const kpiUxTestsSuccessRates = projectsData
     .flatMap((project) => project.uxTests)
-    .filter((test) => test.test_type === 'Validation' && test.success_rate)
+    .filter(
+      (test) =>
+        test.test_type === 'Validation' &&
+        (test.success_rate || test.success_rate === 0)
+    )
     .map((test) => test.success_rate);
 
-  const testsCompleted = kpiUxTestsSuccessRates.length;
+  const avgTestSuccessAvg = avg(kpiUxTestsSuccessRates, 2);
 
-  const avgTestSuccessAvg =
-    kpiUxTestsSuccessRates.reduce((acc, success) => acc + success, 0) /
-    testsCompleted;
+  const taskSuccessRatesRecord: Record<string, number[]> = projectsData
+    .flatMap((project) => project.uxTests)
+    .filter(
+      (test) =>
+        test.test_type === 'Validation' &&
+        (test.success_rate || test.success_rate === 0) &&
+        test.task &&
+        test.title
+    )
+    .reduce((acc, test) => {
+      if (!acc[test.task]) {
+        acc[test.task] = [];
+      }
+
+      acc[test.task].push(test.success_rate);
+
+      return acc;
+    }, {} as Record<string, number[]>);
+
+  // except this is actually "unique tasks tested?"
+  const testsCompleted = Object.values(taskSuccessRatesRecord).length;
 
   return {
     ...aggregatedData,
@@ -584,6 +614,7 @@ async function getOverviewMetrics(
   calldriversModel: CallDriverModel,
   feedbackModel: Model<FeedbackDocument>,
   pageModel: Model<PageDocument>,
+  annotationsModel: Model<AnnotationsDocument>,
   db: DbService,
   searchAssessmentModel: Model<SearchAssessmentDocument>,
   cacheManager: Cache,
@@ -605,6 +636,13 @@ async function getOverviewMetrics(
 
   satDateQuery.$gte = new Date(satStartDate);
   satDateQuery.$lte = new Date(satEndDate);
+
+  const annotations = (
+    await annotationsModel.find({ event_date: dateQuery }).lean().exec()
+  ).map((item) => ({
+    ...item,
+    event_date: item.event_date.toISOString(),
+  }));
 
   const visitsByDay = (
     await overallModel
@@ -859,53 +897,105 @@ async function getOverviewMetrics(
     topPagesVisited,
     top10GSC,
     feedbackPages,
+    annotations,
   };
 }
 
+interface ProjectData {
+  testTypes: Set<string>;
+  tasks: Set<string>;
+  cops: Set<string>;
+  lastQuarterTests: Set<string>;
+  lastFiscalTests: Set<string>;
+}
+
 async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
-  const testsCompleted = uxTests.filter((test) => test.status === 'Complete');
+  const projectData: { [key: string]: ProjectData } = {};
+  const datejs = dayjs.utc();
+  const lastQuarterStart = datejs.subtract(1, 'quarter').startOf('quarter');
+  const lastQuarterEnd = lastQuarterStart.endOf('quarter');
+  const currentYearEnd = datejs.month(2).endOf('month').startOf('day');
+  const lastFiscalEnd = currentYearEnd.isAfter(datejs)
+    ? currentYearEnd.subtract(1, 'year')
+    : currentYearEnd;
+  const lastFiscalStart = lastFiscalEnd.subtract(1, 'year').add(1, 'day');
 
-  const testsCompletedSince2018 = testsCompleted.length;
+  uxTests
+    .filter((test) => test.status === 'Complete')
+    .map((test) => {
+      const project = test.project ? test.project.toString() : 'unknown';
+      projectData[project] = projectData[project] || {
+        testTypes: new Set(),
+        tasks: new Set(),
+        cops: new Set(),
+        lastQuarterTests: new Set(),
+        lastFiscalTests: new Set(),
+      };
 
-  const copsTestsCompletedSince2018 = testsCompleted.filter(
-    (test) => test.cops
-  ).length;
+      projectData[project].testTypes.add(test.test_type);
 
-  const tasksTestedSince2018 = testsCompleted
-    .filter((test) => test.tasks?.length > 0)
-    .map((test) => test.tasks)
-    .flat();
-  const numUniqueTasksTestedSince2018 = new Set(tasksTestedSince2018).size;
+      if (test.tasks) projectData[project].tasks.add(test.tasks.toString());
+      if (test.cops) projectData[project].cops.add(test.test_type.toString());
+      if (
+        test.date >= lastQuarterStart.toDate() &&
+        test.date <= lastQuarterEnd.toDate()
+      )
+        projectData[project].lastQuarterTests.add(test.test_type);
+      if (
+        test.date >= lastFiscalStart.toDate() &&
+        test.date <= lastFiscalEnd.toDate()
+      )
+        projectData[project].lastFiscalTests.add(test.test_type);
+    });
 
-  const participantsTestedSince2018 = testsCompleted.reduce(
-    (total, test) => total + (test.total_users || 0),
+  let testsCompletedSince2018 = 0,
+    tasksTestedSince2018 = 0,
+    copsTestsCompletedSince2018 = 0,
+    testsConductedLastQuarter = 0,
+    testsConductedLastFiscal = 0;
+
+  for (const project in projectData) {
+    const { testTypes, tasks, cops, lastQuarterTests, lastFiscalTests } =
+      projectData[project];
+    testsCompletedSince2018 += testTypes.size;
+    tasksTestedSince2018 += tasks.size;
+    copsTestsCompletedSince2018 += cops.size;
+    testsConductedLastQuarter += lastQuarterTests.size;
+    testsConductedLastFiscal += lastFiscalTests.size;
+  }
+
+  tasksTestedSince2018 = Object.values(projectData).reduce((acc, { tasks }) => {
+    tasks.forEach((task) => acc.add(task));
+    return acc;
+  }, new Set<string>()).size;
+
+  const uniqueGroupMap = uxTests.reduce((map, test) => {
+    const key = `${test.title}||${test.test_type}`;
+    return map.set(key, { title: test.title, test_type: test.test_type });
+  }, new Map());
+
+  const uniqueGroups = Array.from(uniqueGroupMap.values());
+  const uxTestsMaxUsers = uniqueGroups.map(({ title, test_type }) => {
+    const filteredTests = uxTests
+      .filter((test) => test.title === title && test.test_type === test_type)
+      .map((test) => test.total_users)
+      .filter((val) => typeof val === 'number' && !isNaN(val));
+
+    return {
+      title,
+      test_type,
+      total_users: filteredTests.length > 0 ? Math.max(...filteredTests) : 0,
+    };
+  });
+
+  const participantsTestedSince2018 = uxTestsMaxUsers.reduce(
+    (total, test) => total + test.total_users,
     0
   );
 
-  // todo: make dynamic
-  const lastFiscal = {
-    start: new Date('2021-04-01'),
-    end: new Date('2022-03-31'),
-  };
-  const testsConductedLastFiscal = testsCompleted.filter(
-    (test) => test.date >= lastFiscal.start && test.date <= lastFiscal.end
-  ).length;
-
-  const lastQuarterStart = dayjs
-    .utc()
-    .subtract(1, 'quarter')
-    .startOf('quarter');
-  const lastQuarterEnd = lastQuarterStart.endOf('quarter');
-
-  const testsConductedLastQuarter = testsCompleted.filter(
-    (test) =>
-      test.date >= lastQuarterStart.toDate() &&
-      test.date <= lastQuarterEnd.toDate()
-  ).length;
-
   return {
     testsCompletedSince2018,
-    tasksTestedSince2018: numUniqueTasksTestedSince2018,
+    tasksTestedSince2018,
     participantsTestedSince2018,
     testsConductedLastFiscal,
     testsConductedLastQuarter,

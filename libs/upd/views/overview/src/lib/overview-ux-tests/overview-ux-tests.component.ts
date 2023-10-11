@@ -52,13 +52,13 @@ export class OverviewUxTestsComponent implements OnInit {
         },
         {
           field: 'startDate',
-          header: this.i18n.service.translate('date', lang),
+          header: this.i18n.service.translate('Start date', lang),
           pipe: 'date',
           pipeParam: lang === FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY',
         },
         {
           field: 'lastAvgSuccessRate',
-          header: this.i18n.service.translate('score', lang),
+          header: this.i18n.service.translate('Average success rate', lang),
           pipe: 'percent',
         },
         {

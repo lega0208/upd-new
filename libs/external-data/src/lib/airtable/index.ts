@@ -18,6 +18,7 @@ import {
   FeedbackData,
   PageListData,
   AnnotationsData,
+  ReportsData,
 } from './types';
 
 dayjs.extend(utc);
@@ -276,6 +277,33 @@ export class AirtableClient {
       })) as TaskData[];
   }
 
+  async getReports(lastUpdatedDate?: DateType): Promise<ReportsData[]> {
+    const params = lastUpdatedDate
+      ? {
+          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
+        }
+      : {};
+    const query = this.createQuery(
+      bases.TASKS_INVENTORY,
+      'TMF reports',
+      params
+    );
+
+    return (await this.selectAll(query))
+      .filter(({ fields }) => Object.values(fields).some((value) => value))
+      .map(({ id, fields }) => ({
+        airtable_id: id,
+        en_title: squishTrim(fields['TMF Report title - En']),
+        fr_title: squishTrim(fields['TMF Report title - Fr']),
+        type: 'tasks',
+        en_attachment: fields['Report attachment - En'],
+        fr_attachment: fields['Report attachment - Fr'],
+        date: fields['Date added']
+          ? dayjs.utc(fields['Date added']).toDate()
+          : fields['Date added'],
+      })) as ReportsData[];
+  }
+
   async getUxTests(lastUpdatedDate?: DateType): Promise<UxTestData[]> {
     const params = lastUpdatedDate
       ? {
@@ -444,6 +472,9 @@ export class AirtableClient {
       tpc_id: fields['TPC_ID'],
       impact: fields['Impact'],
       calls: fields['Calls'],
+      selfserve_yes: fields['SST_SS_Yes_Pct'],
+      selfserve_no: fields['SST_SS_No_Pct'],
+      selfserve_na: fields['SST_SS_NA_Pct'],
     })) as CalldriverData[];
   }
 

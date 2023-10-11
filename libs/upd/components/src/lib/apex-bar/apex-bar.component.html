@@ -5,7 +5,7 @@
   [config]="secondaryTitleCols"
   [data]="secondaryTitleData"
 >
-  <ng-container *ngIf="(vm$ | async)?.series?.length === 0; else elseBlock">
+  <ng-container *ngIf="(hasData$ | async) === false; else elseBlock">
     <p>
       <span [translate]="'nodata-available'"></span>
     </p>
@@ -28,6 +28,7 @@
         [colors]="vm.colors || []"
         [dataLabels]="vm.dataLabels || {}"
         [tooltip]="vm.tooltip || {}"
+        [annotations]="vm.annotations || {}"
       ></apx-chart>
     </div>
 

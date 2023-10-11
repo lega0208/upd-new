@@ -12,6 +12,7 @@ import {
   Project,
   Task,
   UxTest,
+  Reports,
 } from '@dua-upd/db';
 import {
   AirtableClient,
@@ -56,6 +57,8 @@ export class AirtableService {
     private uxTestModel: Model<UxTest>,
     @InjectModel(PageMetrics.name, 'defaultConnection')
     private pageMetricsModel: Model<PageMetrics>,
+    @InjectModel(Reports.name, 'defaultConnection')
+    private reportsModel: Model<Reports>,
     @Inject(BlobStorageService.name)
     private blobService: BlobStorageService
   ) {}
@@ -253,6 +256,28 @@ export class AirtableService {
         attachments: Object.values(attachments),
       };
     }) as IProject[];
+  }
+
+  async updateReports() {
+    this.logger.log('Writing Reports to db');
+
+    const reportUpdateOps = (await this.airtableClient.getReports()).map(
+      (report) => ({
+        updateOne: {
+          filter: { airtable_id: report.airtable_id },
+          update: {
+            $set: report,
+          },
+          upsert: true,
+        },
+      })
+    );
+
+    await this.reportsModel.bulkWrite(
+      reportUpdateOps as AnyBulkWriteOperation<Reports>[]
+    );
+
+    this.logger.log('Successfully updated the Reports data');
   }
 
   async getAndPrepareUxData(): Promise<UxData> {
@@ -868,6 +893,82 @@ export class AirtableService {
     if (rejectedResults.length) {
       this.logger.error(
         `${rejectedResults.length} Projects had errors uploading attachments`
+      );
+    }
+
+    this.logger.log('Finished uploading attachments');
+  }
+
+  async uploadReportAttachmentsAndUpdateUrls() {
+    const reportsWithAttachments = await this.reportsModel
+      .find(
+        {
+          en_attachment: { $not: { $size: 0 } },
+          fr_attachment: { $not: { $size: 0 } },
+        },
+        { title: 1, en_attachment: 1, fr_attachment: 1 }
+      )
+      .exec();
+
+    const promises = [];
+
+    for (const report of reportsWithAttachments) {
+      const uploadAndSave = (attachment) => {
+        return Promise.all(
+          report[attachment].map(({ url, filename, size }) => {
+            const blobClient =
+              this.blobService.blobModels.reports.blob(filename);
+
+            const response = blobClient.copyFromUrlIfDifferent(url, size);
+
+            return (response || Promise.resolve()).then((response) => ({
+              response,
+              blobClient,
+            }));
+          })
+        )
+          .then((results) => {
+            for (const result of results) {
+              const fileName = result.blobClient.filename;
+              const blobUrl = result.blobClient.url;
+
+              if (result.response) {
+                if (result.response.copyStatus !== 'success') {
+                  this.logger.warn(
+                    `File ${fileName} has a copy status of ${result.response.copyStatus}`
+                  );
+                }
+              }
+
+              const attachmentIndex = report[attachment].findIndex(
+                ({ filename }) => filename === fileName
+              );
+
+              report[attachment][attachmentIndex].storage_url = blobUrl;
+            }
+
+            return report.save();
+          })
+          .catch((err) =>
+            this.logger.error(
+              `An error occurred uploading attachments for ${report.en_title} or ${report.fr_title}: \n${err.stack}`
+            )
+          );
+      };
+
+      promises.push(uploadAndSave('en_attachment'));
+      promises.push(uploadAndSave('fr_attachment'));
+    }
+
+    const results = await Promise.allSettled(promises);
+
+    const rejectedResults = results.filter(
+      (result) => result.status === 'rejected'
+    );
+
+    if (rejectedResults.length) {
+      this.logger.error(
+        `${rejectedResults.length} Reports had errors uploading attachments`
       );
     }
 

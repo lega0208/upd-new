@@ -29,6 +29,7 @@ export class TaskDetailsUxTestsComponent implements OnInit {
 
   avgTaskSuccessFromLastTest$ =
     this.taskDetailsService.avgTaskSuccessFromLastTest$;
+  avgSuccessPercentChange$ = this.taskDetailsService.avgSuccessPercentChange$;
 
   documents$ = this.taskDetailsService.documents$;
   documentsCols: ColumnConfig<DocumentsColTypes>[] = [];
@@ -49,7 +50,7 @@ export class TaskDetailsUxTestsComponent implements OnInit {
       this.documentsCols = [
         {
           field: 'filename',
-          header: this.i18n.service.translate('Documents', lang),
+          header: this.i18n.service.translate('File link', lang),
           type: 'link',
           typeParams: { link: 'url', external: true },
         },

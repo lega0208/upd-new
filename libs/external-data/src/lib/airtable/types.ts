@@ -7,6 +7,16 @@ import {
 } from '@dua-upd/types-common';
 import { Types } from 'mongoose';
 
+export interface ReportsData {
+  airtable_id: string;
+  en_title?: string;
+  fr_title?: string;
+  type?: string;
+  date?: Date;
+  en_attachment?: AttachmentData[];
+  fr_attachment?: AttachmentData[];
+}
+
 export interface TaskData {
   airtable_id: string;
   title: string;
@@ -35,6 +45,9 @@ export interface CalldriverData {
   tpc_id: number;
   impact: number;
   calls: number;
+  selfserve_yes?: number;
+  selfserve_no?: number;
+  selfserve_na?: number;
 }
 
 export interface UxTestData {

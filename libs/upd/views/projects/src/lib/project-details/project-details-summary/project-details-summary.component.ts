@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {
   ColumnConfig,
   callVolumeObjectiveCriteria,
+  feedbackKpiObjectiveCriteria,
 } from '@dua-upd/upd-components';
 import { LocaleId, EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
@@ -22,6 +23,11 @@ type WhatWasWrongColTypes = GetTableProps<
   'whatWasWrongChart$'
 >;
 
+type DocumentsColTypes = GetTableProps<
+  ProjectDetailsSummaryComponent,
+  'documents$'
+>;
+
 @Component({
   selector: 'upd-project-details-summary',
   templateUrl: './project-details-summary.component.html',
@@ -32,6 +38,23 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
+
+  feedbackKpiObjectiveCriteria = feedbackKpiObjectiveCriteria;
+
+  apexCallDrivers$ = this.projectsDetailsService.apexCallDrivers$;
+  apexKpiFeedback$ = this.projectsDetailsService.apexKpiFeedback$;
+
+  documents$ = this.projectsDetailsService.documents$;
+  documentsCols: ColumnConfig<DocumentsColTypes>[] = [];
+
+  callPerVisits$ = this.projectsDetailsService.callPerVisits$;
+  apexCallPercentChange$ = this.projectsDetailsService.apexCallPercentChange$;
+  apexCallDifference$ = this.projectsDetailsService.apexCallDifference$;
+
+  currentKpiFeedback$ = this.projectsDetailsService.currentKpiFeedback$;
+  kpiFeedbackPercentChange$ =
+    this.projectsDetailsService.kpiFeedbackPercentChange$;
+  kpiFeedbackDifference$ = this.projectsDetailsService.kpiFeedbackDifference$;
 
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
@@ -64,11 +87,6 @@ export class ProjectDetailsSummaryComponent implements OnInit {
     fail: { message: 'kpi-not-met-volume' },
   };
 
-  memberList = [
-    {role: 'Role name 1', projectLead: 'Name 1', vendor: 'Product name 1'},
-    {role: 'Role name 2', projectLead: 'Name 2', vendor: 'Product name 2'},
-    {role: 'Role name 3', projectLead: 'Name 3', vendor: 'Product name 3'}
-  ]
   memberList$ = this.projectsDetailsService.members$;
   memberListCols: ColumnConfig[] = [];
 
@@ -76,8 +94,6 @@ export class ProjectDetailsSummaryComponent implements OnInit {
 
   startDate$ = this.projectsDetailsService.startDate$;
   launchDate$ = this.projectsDetailsService.launchDate$;
-  completedField$ = 'Test string for completed field'
-  yearReview$ = 'Test string for year review field'
 
   constructor(
     private readonly projectsDetailsService: ProjectsDetailsFacade,
@@ -95,6 +111,15 @@ export class ProjectDetailsSummaryComponent implements OnInit {
 
     this.currentLang$.subscribe((lang) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+
+      this.documentsCols = [
+        {
+          field: 'filename',
+          header: this.i18n.service.translate('File link', lang),
+          type: 'link',
+          typeParams: { link: 'url', external: true },
+        },
+      ];
 
       this.dyfChartLegend = [
         this.i18n.service.translate('yes', lang),
@@ -115,6 +140,31 @@ export class ProjectDetailsSummaryComponent implements OnInit {
           type: 'link',
           typeParams: { preLink: '/' + this.langLink + '/tasks', link: '_id' },
         },
+        // {
+        //   field: 'calls',
+        //   header: this.i18n.service.translate('Calls / 100 Visits', lang),
+        //   pipe: 'number',
+        // },
+        // {
+        //   field: 'dyfNo',
+        //   header: this.i18n.service.translate(
+        //     '"No clicks" / 1,000 Visits',
+        //     lang
+        //   ),
+        //   pipe: 'number',
+        // },
+        // {
+        //   field: 'uxTest2Years',
+        //   header: this.i18n.service.translate('UX Test in Past 2 Years?', lang),
+        // },
+        // {
+        //   field: 'successRate',
+        //   header: this.i18n.service.translate(
+        //     'Latest UX Task Success Rate',
+        //     lang
+        //   ),
+        //   pipe: 'percent',
+        // },
       ];
       this.dyfTableCols = [
         {
@@ -141,7 +191,7 @@ export class ProjectDetailsSummaryComponent implements OnInit {
       this.memberListCols = [
         {
           field: 'name',
-          header: this.i18n.service.translate('Name', lang)
+          header: this.i18n.service.translate('Name', lang),
         },
         {
           field: 'role',
