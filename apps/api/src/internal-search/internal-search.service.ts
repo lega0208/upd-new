@@ -1,4 +1,5 @@
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { FilterQuery } from 'mongoose';
 import { Cache } from 'cache-manager';
 import type {
@@ -35,8 +36,8 @@ export class InternalSearchService {
       return cachedData;
     }
 
-    // adobe analytics 
-    
+    // adobe analytics
+
   }
 
   async getInternalSearchTerms(lang, dateRange) {

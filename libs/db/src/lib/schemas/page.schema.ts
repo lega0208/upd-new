@@ -1,8 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, model, Types } from 'mongoose';
-import { Task } from './task.schema';
-import { Project } from './project.schema';
-import { UxTest } from './ux-test.schema';
+import { IProject, ITask, IUxTest } from '@dua-upd/types-common';
 
 export type PageDocument = Page & Document;
 
@@ -42,13 +40,13 @@ export class Page {
   lastModified?: Date;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }] })
-  tasks?: Types.ObjectId[] | Task[];
+  tasks?: Types.ObjectId[] | ITask[];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Project' }] })
-  projects?: Types.ObjectId[] | Project[];
+  projects?: Types.ObjectId[] | IProject[];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }] })
-  ux_tests?: Types.ObjectId[] | UxTest[];
+  ux_tests?: Types.ObjectId[] | IUxTest[];
 }
 
 export const PageSchema = SchemaFactory.createForClass(Page);

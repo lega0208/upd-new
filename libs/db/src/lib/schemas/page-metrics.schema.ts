@@ -6,12 +6,12 @@ import {
   AASearchTermMetrics,
   IPageMetrics,
   ActivityMapMetrics,
+  ITask,
+  IProject,
+  IUxTest,
 } from '@dua-upd/types-common';
-import { Page } from './page.schema';
-import { Task } from './task.schema';
-import { Project } from './project.schema';
-import { UxTest } from './ux-test.schema';
 import { DateRange } from '@dua-upd/utils-common';
+import { Page } from './page.schema';
 import { PageMetricsTS } from './page-metrics-ts.schema';
 
 export type PageMetricsDocument = PageMetrics & Document;
@@ -215,13 +215,13 @@ export class PageMetrics implements IPageMetrics {
   page?: Types.ObjectId | Page;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }], index: true })
-  tasks?: Types.ObjectId[] | Task[];
+  tasks?: Types.ObjectId[] | ITask[];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Project' }], index: true })
-  projects?: Types.ObjectId[] | Project[];
+  projects?: Types.ObjectId[] | IProject[];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }], index: true })
-  ux_tests?: Types.ObjectId[] | UxTest[];
+  ux_tests?: Types.ObjectId[] | IUxTest[];
 
   @Prop({
     type: [
@@ -239,15 +239,18 @@ export const PageMetricsSchema = SchemaFactory.createForClass(PageMetrics);
 PageMetricsSchema.index({ date: 1, url: 1 }, { unique: true });
 PageMetricsSchema.index(
   { date: 1, page: 1 },
-  { background: true, partialFilterExpression: { page: { $exists: true } } }
+  { background: true, partialFilterExpression: { page: { $exists: true } } },
 );
 PageMetricsSchema.index(
   { url: 1, page: 1 },
-  { background: true, partialFilterExpression: { page: { $exists: true } } }
+  { background: true, partialFilterExpression: { page: { $exists: true } } },
 );
 PageMetricsSchema.index(
   { url: 1, projects: 1 },
-  { background: true, partialFilterExpression: { projects: { $exists: true } } }
+  {
+    background: true,
+    partialFilterExpression: { projects: { $exists: true } },
+  },
 );
 PageMetricsSchema.index(
   { date: 1, projects: 1 },
@@ -255,15 +258,18 @@ PageMetricsSchema.index(
     name: 'date_1_projects_exists',
     background: true,
     partialFilterExpression: { 'projects.0': { $exists: true } },
-  }
+  },
 );
 PageMetricsSchema.index(
   { url: 1, tasks: 1 },
-  { background: true, partialFilterExpression: { tasks: { $exists: true } } }
+  { background: true, partialFilterExpression: { tasks: { $exists: true } } },
 );
 PageMetricsSchema.index(
   { url: 1, ux_tests: 1 },
-  { background: true, partialFilterExpression: { ux_tests: { $exists: true } } }
+  {
+    background: true,
+    partialFilterExpression: { ux_tests: { $exists: true } },
+  },
 );
 PageMetricsSchema.index(
   { date: -1 },
@@ -273,7 +279,7 @@ PageMetricsSchema.index(
     partialFilterExpression: {
       'activity_map.0': { $exists: true },
     },
-  }
+  },
 );
 PageMetricsSchema.index(
   { date: 1, url: 1 },
@@ -283,7 +289,7 @@ PageMetricsSchema.index(
     partialFilterExpression: {
       'activity_map.0': { $exists: true },
     },
-  }
+  },
 );
 PageMetricsSchema.index(
   { date: 1, page: 1 },
@@ -293,7 +299,7 @@ PageMetricsSchema.index(
     partialFilterExpression: {
       'activity_map.0': { $exists: true },
     },
-  }
+  },
 );
 
 // This index is specifically for maintaining references when updating airtable data.
@@ -311,7 +317,7 @@ PageMetricsSchema.index(
         { 'ux_tests.0': { $exists: true } },
       ],
     },
-  }
+  },
 );
 
 export function getPageMetricsModel() {
@@ -327,7 +333,7 @@ export async function getAggregatedPageMetrics<T>(
   dateRange: string,
   selectedMetrics: (keyof T | MetricsConfig<T>)[],
   pagesFilter?: FilterQuery<PageMetrics>,
-  sortConfig?: { [key in keyof Partial<T>]: 1 | -1 }
+  sortConfig?: { [key in keyof Partial<T>]: 1 | -1 },
 ): Promise<T[]> {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
@@ -394,7 +400,7 @@ export async function getAggregatedPageMetrics<T>(
 
 export async function toTimeSeries(
   this: PageMetricsModel,
-  dateRange: DateRange<Date>
+  dateRange: DateRange<Date>,
 ) {
   return await this.aggregate<PageMetricsTS>()
     .match({ date: { $gte: dateRange.start, $lte: dateRange.end } })
