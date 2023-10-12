@@ -12,7 +12,6 @@ import {
   AppendBlobClient,
   BlobBeginCopyFromURLResponse,
   BlobClient as AzureBlobClient,
-  BlobDownloadOptions,
   BlobDownloadToBufferOptions,
   BlobItem,
   BlobServiceClient,
@@ -67,17 +66,13 @@ export class StorageClient {
         `Got errorCode ${
           response.errorCode
         } when running createIfNotExists() for container "${containerName}".\r\n${prettyJson(
-          response
+          response,
         )}`,
-        { cause: response }
+        { cause: response },
       );
     }
 
-    return new StorageContainer(
-      containerName,
-      this.baseClient,
-      containerClient
-    );
+    return new StorageContainer(containerClient);
   }
 
   async listContainers() {
@@ -111,11 +106,7 @@ export type BlobsConfig = {
  * @param container The ContainerClient to wrap, from the official Blob Storage SDK.
  */
 export class StorageContainer {
-  constructor(
-    private containerName: string,
-    private baseClient: BlobServiceClient,
-    private container: ContainerClient
-  ) {}
+  constructor(private container: ContainerClient) {}
 
   createBlobsClient(config: Omit<BlobsConfig, 'container'>): BlobModel {
     return new BlobModel({ ...config, container: this });
@@ -127,7 +118,7 @@ export class StorageContainer {
 
   async listBlobs(prefix?: RegisteredBlobModel) {
     for await (const blobInfo of this.container.listBlobsFlat(
-      prefix && { prefix }
+      prefix && { prefix },
     )) {
       logJson(blobInfo);
     }
@@ -135,12 +126,12 @@ export class StorageContainer {
 
   async mapBlobs<T>(
     mapFunc: (item: BlobItem) => T,
-    prefix?: RegisteredBlobModel
+    prefix?: RegisteredBlobModel,
   ) {
     const returnVals: T[] = [];
 
     for await (const blobInfo of this.container.listBlobsFlat(
-      prefix && { prefix }
+      prefix && { prefix },
     )) {
       const mappedVal = await mapFunc(blobInfo);
 
@@ -165,7 +156,7 @@ export class BlobModel {
   constructor(private readonly config: BlobsConfig) {
     if (!this.config.path) {
       throw Error(
-        'Expected a non-empty path in BlobsConfig, but none was provided.'
+        'Expected a non-empty path in BlobsConfig, but none was provided.',
       );
     }
 
@@ -201,11 +192,11 @@ export class BlobClient {
   constructor(
     blobName: string,
     config: BlobsConfig,
-    blobType: BlobType = 'block'
+    blobType: BlobType = 'block',
   ) {
     this.path = config.path;
     this.container = config.container;
-    this.overwrite = config.overwrite;
+    this.overwrite = !!config.overwrite;
     this.blobType = blobType;
 
     if (blobType === 'append') {
@@ -227,7 +218,7 @@ export class BlobClient {
 
     if (!this.path) {
       throw Error(
-        'Expected a non-empty path in BlobsConfig, but none was provided.'
+        'Expected a non-empty path in BlobsConfig, but none was provided.',
       );
     }
   }
@@ -245,7 +236,7 @@ export class BlobClient {
   }
 
   async getSize() {
-    return (await this.client.getProperties()).contentLength;
+    return (await this.client.getProperties()).contentLength || 0;
   }
 
   async setCacheControl(cacheControl: string) {
@@ -258,17 +249,16 @@ export class BlobClient {
     if (algorithm && !this.name.endsWith(`.${algorithm}`)) {
       const compressionExtensions: CompressionAlgorithm[] = [
         'brotli',
-        'lz4',
         'zstd',
       ];
 
       const extensionsRegex = new RegExp(
-        `.(${compressionExtensions.join('|')})$`
+        `.(${compressionExtensions.join('|')})$`,
       );
 
       this.filename = `${this.filename.replace(
         extensionsRegex,
-        ''
+        '',
       )}.${algorithm}`;
 
       if (this.blobType === 'append') {
@@ -306,7 +296,7 @@ export class BlobClient {
 
     if (blobExists && !this.overwrite) {
       throw Error(
-        `Error uploading blob: "${this.name}" already exists and options.overwrite = false`
+        `Error uploading blob: "${this.name}" already exists and options.overwrite = false`,
       );
     }
 
@@ -314,13 +304,14 @@ export class BlobClient {
       return await this.client.syncCopyFromURL(sourceUrl);
     } catch (err) {
       console.error(chalk.red('Error copying from url to storage:'));
-      console.error(err.stack);
+      console.error((<Error>err).stack);
+      return;
     }
   }
 
   async copyFromUrlIfDifferent(
     sourceUrl: string,
-    fileSizeBytes: number
+    fileSizeBytes: number,
   ): Promise<BlobBeginCopyFromURLResponse | void> {
     if (await this.sizesAreDifferent(fileSizeBytes)) {
       console.log(`File is new or updated. Uploading: ${this.filename}`);
@@ -330,7 +321,7 @@ export class BlobClient {
 
   async downloadToFile(
     destinationFilePath: string,
-    options?: BlobDownloadToBufferOptions & { decompressData?: boolean }
+    options?: BlobDownloadToBufferOptions & { decompressData?: boolean },
   ) {
     if (!(await this.client.exists())) {
       throw Error(`The requested blob "${this.client.name}" does not exist`);
@@ -349,13 +340,13 @@ export class BlobClient {
         .downloadToBuffer(0, undefined, opts)
         .then((dataBuffer) => decompressString(dataBuffer, compression))
         .then((decompressed) =>
-          writeFile(destinationFilePath, decompressed, 'utf-8')
+          writeFile(destinationFilePath, decompressed, 'utf-8'),
         )
         .catch((err) => {
           console.error(
-            chalk.red('Error downloading and/or decompressing file:')
+            chalk.red('Error downloading and/or decompressing file:'),
           );
-          console.error(err.stack);
+          console.error((<Error>err).stack);
         });
     }
 
@@ -366,11 +357,11 @@ export class BlobClient {
         undefined,
         {
           onProgress: (event) => console.log(event),
-        }
+        },
       );
     } catch (err) {
       console.error(chalk.red('Error uploading string to storage:'));
-      console.error(err.stack);
+      console.error((<Error>err).stack);
     }
   }
 
@@ -383,7 +374,7 @@ export class BlobClient {
 
     if (blobExists && !this.overwrite) {
       throw Error(
-        `Error uploading blob: "${this.name}" already exists and overwrite = false`
+        `Error uploading blob: "${this.name}" already exists and overwrite = false`,
       );
     }
 
@@ -397,11 +388,13 @@ export class BlobClient {
         });
       } catch (err) {
         console.error(chalk.red('Error uploading file to storage:'));
-        console.error(err.stack);
+        console.error((<Error>err).stack);
       }
     }
 
     console.log('Files are the same. No changes made.');
+
+    return;
   }
 
   async uploadFromString(
@@ -410,7 +403,7 @@ export class BlobClient {
       compression?: CompressionAlgorithm;
       logProgress?: boolean;
       overwrite?: boolean;
-    }
+    },
   ) {
     if (!(this.client instanceof BlockBlobClient)) {
       throw Error('uploadFromString() can only be called on BlockBlobClients');
@@ -420,7 +413,7 @@ export class BlobClient {
 
     if (blobExists && !this.overwrite && !options?.overwrite) {
       throw Error(
-        `Error uploading blob: "${this.name}" already exists and overwrite = false`
+        `Error uploading blob: "${this.name}" already exists and overwrite = false`,
       );
     }
 
@@ -450,15 +443,17 @@ export class BlobClient {
         });
       } catch (err) {
         console.error(chalk.red('Error uploading string to storage:'));
-        console.error(err.stack);
+        console.error((<Error>err).stack);
+        return;
       }
-    } else {
-      console.log('Files are the same. No changes made.');
     }
+
+    console.log('Files are the same. No changes made.');
+    return;
   }
 
   async downloadToString(
-    options?: BlobDownloadToBufferOptions & { decompressData?: boolean }
+    options?: BlobDownloadToBufferOptions & { decompressData?: boolean },
   ) {
     if (!(await this.client.exists())) {
       throw Error(`The requested blob "${this.client.name}" does not exist`);
@@ -482,7 +477,8 @@ export class BlobClient {
         : destinationBuffer.toString('utf-8');
     } catch (err) {
       console.error(chalk.red('Error downloading file to string:'));
-      console.error(err.stack);
+      console.error((<Error>err).stack);
+      return;
     }
   }
 
@@ -502,7 +498,7 @@ export class BlobClient {
       await this.client.appendBlock(text, Buffer.from(text).byteLength);
     } catch (err) {
       console.error(chalk.red('Error appending to blob: ', this.client.name));
-      console.error(err.stack);
+      console.error((<Error>err).stack);
     }
   }
 
@@ -513,7 +509,7 @@ export class BlobClient {
       }
     } catch (err) {
       console.error(chalk.red('Error deleting blob: ', this.client.name));
-      console.error(err.stack);
+      console.error((<Error>err).stack);
     }
   }
 }
