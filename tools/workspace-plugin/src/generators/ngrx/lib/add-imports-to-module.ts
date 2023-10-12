@@ -1,6 +1,6 @@
 import type { Tree } from '@nx/devkit';
 import { names } from '@nx/devkit';
-import { insertImport } from '@nx/workspace/src/utilities/ast-utils';
+import { insertImport } from '@nx/js';
 import type { SourceFile } from 'typescript';
 import { createSourceFile, ScriptTarget } from 'typescript';
 import { addImportToModule, addProviderToModule } from './ast-utils';

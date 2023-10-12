@@ -1,6 +1,6 @@
 import type { Tree } from '@nx/devkit';
 import { joinPathFragments, names } from '@nx/devkit';
-import { addGlobal } from '@nx/workspace/src/utilities/ast-utils';
+import { addGlobal } from '@nx/js';
 import { dirname } from 'path';
 import { createSourceFile, ScriptTarget } from 'typescript';
 import type { NgRxGeneratorOptions } from '../schema';
