@@ -2,9 +2,12 @@
   "name": "@dua-upd/workspace-plugin",
   "version": "0.0.1",
   "dependencies": {
+    "@nx/devkit": "16.10.0",
+    "@nx/js": "16.10.0",
+    "typescript": "5.1.6",
     "tslib": "^2.3.0"
   },
-  "type": "commonjs",
+  "type": "module",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "generators": "./generators.json"
