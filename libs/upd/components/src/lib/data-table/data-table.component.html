@@ -18,7 +18,7 @@
     searchFields.length > 0 ? searchFields : defaultSearchFields
   "
   [sortField]="sortField"
-  [sortOrder]="sortOrder === 'desc' || sortOrder < 0 ? -1 : 1"
+  [sortOrder]="sortOrder === 'desc' ? -1 : 1"
   dataKey="_id"
 >
   <ng-template *ngIf="filter || captionTitle || exports" pTemplate="caption">

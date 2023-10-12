@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AnyBulkWriteOperation } from 'mongodb';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { Types } from 'mongoose';
+import type { FilterQuery, Model, mongo } from 'mongoose';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import {
   CallDriver,
@@ -60,13 +60,13 @@ export class AirtableService {
     @InjectModel(Reports.name, 'defaultConnection')
     private reportsModel: Model<Reports>,
     @Inject(BlobStorageService.name)
-    private blobService: BlobStorageService
+    private blobService: BlobStorageService,
   ) {}
 
   async pagesHaveChanged(
     currentPages: IPage[],
     pagesDict: Record<string, IPage>,
-    newPages: IPage[]
+    newPages: IPage[],
   ): Promise<boolean> {
     // compare pages and relationships to current data -> skip updating refs if nothing has changed
     const refArraysAreTheSame = (a: Types.ObjectId[], b: Types.ObjectId[]) => {
@@ -83,7 +83,7 @@ export class AirtableService {
     if (currentPages.length !== newPages.length) {
       console.log('current pages and new pages are different lengths');
       console.log(
-        `currentPages: ${currentPages.length} - newPages: ${newPages.length}`
+        `currentPages: ${currentPages.length} - newPages: ${newPages.length}`,
       );
 
       return true;
@@ -99,17 +99,17 @@ export class AirtableService {
 
       const tasksChanged = !refArraysAreTheSame(
         page.tasks as Types.ObjectId[],
-        (newPage.tasks || []) as Types.ObjectId[]
+        (newPage.tasks || []) as Types.ObjectId[],
       );
 
       const projectsChanged = !refArraysAreTheSame(
         page.projects as Types.ObjectId[],
-        (newPage.projects || []) as Types.ObjectId[]
+        (newPage.projects || []) as Types.ObjectId[],
       );
 
       const uxTestsChanged = !refArraysAreTheSame(
         page.ux_tests as Types.ObjectId[],
-        (newPage.ux_tests || []) as Types.ObjectId[]
+        (newPage.ux_tests || []) as Types.ObjectId[],
       );
 
       if (tasksChanged || projectsChanged || uxTestsChanged) {
@@ -130,11 +130,11 @@ export class AirtableService {
 
   // function to help with getting or creating objectIds, and populating an airtableId to ObjectId map to add references
   private async addObjectIdsAndPopulateIdsMap<
-    T extends { _id: Types.ObjectId; airtable_id?: string }
+    T extends { _id: Types.ObjectId; airtable_id?: string },
   >(
     data: UxApiDataType[],
     model: Model<T>,
-    idsMap: Map<string, Types.ObjectId>
+    idsMap: Map<string, Types.ObjectId>,
   ): Promise<WithObjectId<UxApiDataType>[]> {
     const airtableIds = data.map((doc) => doc.airtable_id);
 
@@ -153,22 +153,24 @@ export class AirtableService {
     const existingDataFilter =
       model.modelName === 'Page' ? urlFilter : airtableFilter;
 
-    const existingData =
-      (await model.find(existingDataFilter).lean().exec()) || ([] as T[]);
+    const existingData = ((await model
+      .find(existingDataFilter)
+      .lean()
+      .exec()) || []) as T[];
 
     for (const doc of existingData) {
       idsMap.set(doc.airtable_id, doc._id);
     }
 
     const urlsDict = Object.fromEntries(
-      existingData.map((page: T) => ('url' in page ? [page.url, page] : []))
+      existingData.map((page: T) => ('url' in page ? [page.url, page] : [])),
     );
 
     return data.map((doc) => {
       if (!idsMap.get(doc.airtable_id)) {
         idsMap.set(
           doc.airtable_id,
-          urlsDict[doc['url']]?._id || new Types.ObjectId()
+          urlsDict[doc['url']]?._id || new Types.ObjectId(),
         );
       }
       return {
@@ -184,7 +186,7 @@ export class AirtableService {
       tasks: Map<string, Types.ObjectId>;
       uxTests: Map<string, Types.ObjectId>;
       pages: Map<string, Types.ObjectId>;
-    }
+    },
   ): Promise<IProject[]> {
     const projectTitles = [
       ...new Set(uxTestsWithIds.map((uxTest) => uxTest.title)),
@@ -196,7 +198,7 @@ export class AirtableService {
 
     return projectTitles.map((projectTitle) => {
       const uxTests = uxTestsWithIds.filter(
-        (uxTest) => uxTest.title === projectTitle
+        (uxTest) => uxTest.title === projectTitle,
       );
 
       const pageAirtableIds = [
@@ -212,8 +214,8 @@ export class AirtableService {
       const pageObjectIds = [
         ...new Set(
           pageAirtableIds.map((pageAirtableId) =>
-            idMaps.pages.get(pageAirtableId)
-          )
+            idMaps.pages.get(pageAirtableId),
+          ),
         ),
       ] as Types.ObjectId[];
 
@@ -228,23 +230,26 @@ export class AirtableService {
       ] as string[];
 
       const taskObjectIds = taskAirtableIds.map((taskAirtableId) =>
-        idMaps.tasks.get(taskAirtableId)
+        idMaps.tasks.get(taskAirtableId),
       );
 
       const existingProject = existingProjects.find(
-        (project) => project.title === projectTitle
+        (project) => project.title === projectTitle,
       );
 
       // get de-duplicated attachments
-      const attachments = uxTests.reduce((attachments, uxTest) => {
-        for (const attachment of uxTest.attachments || []) {
-          if (!attachments[attachment.filename]) {
-            attachments[attachment.filename] = attachment;
+      const attachments = uxTests.reduce(
+        (attachments, uxTest) => {
+          for (const attachment of uxTest.attachments || []) {
+            if (!attachments[attachment.filename]) {
+              attachments[attachment.filename] = attachment;
+            }
           }
-        }
 
-        return attachments;
-      }, {} as Record<string, AttachmentData>);
+          return attachments;
+        },
+        {} as Record<string, AttachmentData>,
+      );
 
       return {
         _id: existingProject?._id || new Types.ObjectId(),
@@ -270,11 +275,11 @@ export class AirtableService {
           },
           upsert: true,
         },
-      })
+      }),
     );
 
     await this.reportsModel.bulkWrite(
-      reportUpdateOps as AnyBulkWriteOperation<Reports>[]
+      reportUpdateOps as mongo.AnyBulkWriteOperation<Reports>[],
     );
 
     this.logger.log('Successfully updated the Reports data');
@@ -293,37 +298,37 @@ export class AirtableService {
     const tasksWithIds = (await this.addObjectIdsAndPopulateIdsMap<Task>(
       tasksData,
       this.taskModel,
-      airtableIdToObjectIdMaps.tasks
+      airtableIdToObjectIdMaps.tasks,
     )) as WithObjectId<TaskData>[];
 
     const uxTestsWithIds = (await this.addObjectIdsAndPopulateIdsMap<UxTest>(
       uxTestData,
       this.uxTestModel,
-      airtableIdToObjectIdMaps.uxTests
+      airtableIdToObjectIdMaps.uxTests,
     )) as WithObjectId<UxTestData>[];
 
     const pagesWithIds = (await this.addObjectIdsAndPopulateIdsMap<Page>(
       pageData,
       this.pageModel,
-      airtableIdToObjectIdMaps.pages
+      airtableIdToObjectIdMaps.pages,
     )) as WithObjectId<PageData>[];
 
     const projectsWithRefs = await this.getProjectsFromUxTests(
       uxTestsWithIds,
-      airtableIdToObjectIdMaps
+      airtableIdToObjectIdMaps,
     );
 
     // finally, add all missing refs each data type
     const uxTestsWithRefs = uxTestsWithIds.map((uxTest) => {
       const project = projectsWithRefs.find(
-        (project) => project.title === uxTest.title
+        (project) => project.title === uxTest.title,
       );
 
       const pages = [
         ...new Set(
           (uxTest.pages || []).map((pageAirtableId) =>
-            airtableIdToObjectIdMaps.pages.get(pageAirtableId)
-          )
+            airtableIdToObjectIdMaps.pages.get(pageAirtableId),
+          ),
         ),
       ] as Types.ObjectId[];
 
@@ -332,7 +337,7 @@ export class AirtableService {
         project: project?._id,
         pages,
         tasks: (uxTest.tasks || []).map((taskAirtableId) =>
-          airtableIdToObjectIdMaps.tasks.get(taskAirtableId)
+          airtableIdToObjectIdMaps.tasks.get(taskAirtableId),
         ),
       } as IUxTest;
     });
@@ -355,8 +360,8 @@ export class AirtableService {
       const pages = [
         ...new Set(
           (task.pages || []).map((pageAirtableId) =>
-            airtableIdToObjectIdMaps.pages.get(pageAirtableId)
-          )
+            airtableIdToObjectIdMaps.pages.get(pageAirtableId),
+          ),
         ),
       ] as Types.ObjectId[];
 
@@ -383,7 +388,7 @@ export class AirtableService {
       ] as Types.ObjectId[];
 
       const tasks = page.tasks?.map((taskAirtableId) =>
-        airtableIdToObjectIdMaps.tasks.get(taskAirtableId)
+        airtableIdToObjectIdMaps.tasks.get(taskAirtableId),
       );
 
       return {
@@ -426,7 +431,7 @@ export class AirtableService {
     // see if any pages are in the db but are no longer in airtable
     // if so, they've "been removed", so we unset airtable_id and refs
     const removedPages = currentPages.filter(
-      (page) => !pagesDict[page._id.toString()]
+      (page) => !pagesDict[page._id.toString()],
     );
 
     const pageRemoveOps = removedPages.map((page) => ({
@@ -441,7 +446,7 @@ export class AirtableService {
           },
         },
       },
-    })) as AnyBulkWriteOperation<Page>[];
+    })) as mongo.AnyBulkWriteOperation<Page>[];
 
     // unset refs on metrics
     const metricsUnsetRefsOps = removedPages.map((page) => ({
@@ -455,7 +460,7 @@ export class AirtableService {
           },
         },
       },
-    })) as AnyBulkWriteOperation<PageMetrics>[];
+    })) as mongo.AnyBulkWriteOperation<PageMetrics>[];
 
     // update pages
     const pageUpdateOps = pages.map((page) => ({
@@ -479,7 +484,7 @@ export class AirtableService {
         },
         upsert: true,
       },
-    })) as AnyBulkWriteOperation<Page>[];
+    })) as mongo.AnyBulkWriteOperation<Page>[];
 
     // commit the updates prepared so far
 
@@ -502,10 +507,10 @@ export class AirtableService {
 
       const metricsWriteResults = await this.pageMetricsModel.bulkWrite(
         metricsUnsetRefsOps,
-        { ordered: false }
+        { ordered: false },
       );
       this.logger.log(
-        `Removed references from ${metricsWriteResults.modifiedCount} metrics documents`
+        `Removed references from ${metricsWriteResults.modifiedCount} metrics documents`,
       );
     }
 
@@ -544,13 +549,13 @@ export class AirtableService {
 
     this.logger.log('Writing Projects to db');
     await this.projectModel.bulkWrite(
-      projectUpdateOps as AnyBulkWriteOperation<Project>[]
+      projectUpdateOps as mongo.AnyBulkWriteOperation<Project>[],
     );
 
     const pagesChanged = await this.pagesHaveChanged(
       currentPages,
       pagesDict,
-      pages
+      pages,
     );
 
     console.log('pages have changed: ', pagesChanged);
@@ -571,20 +576,20 @@ export class AirtableService {
             },
           },
         },
-      })) as AnyBulkWriteOperation<PageMetrics>[];
+      })) as mongo.AnyBulkWriteOperation<PageMetrics>[];
 
       if (metricsSetRefsOps.length) {
         this.logger.log(
-          `Setting metrics references for ${metricsSetRefsOps.length} pages`
+          `Setting metrics references for ${metricsSetRefsOps.length} pages`,
         );
 
         const metricsSetRefsResults = await this.pageMetricsModel.bulkWrite(
           metricsSetRefsOps,
-          { ordered: false }
+          { ordered: false },
         );
 
         this.logger.log(
-          `Added references to ${metricsSetRefsResults.modifiedCount} metrics documents`
+          `Added references to ${metricsSetRefsResults.modifiedCount} metrics documents`,
         );
       }
 
@@ -604,11 +609,11 @@ export class AirtableService {
             },
           },
         },
-      })) as AnyBulkWriteOperation<PageMetrics>[];
+      })) as mongo.AnyBulkWriteOperation<PageMetrics>[];
 
       if (metricsAddMissingRefsOps.length) {
         this.logger.log(
-          `Adding missing references to metrics documents for ${metricsAddMissingRefsOps.length} pages`
+          `Adding missing references to metrics documents for ${metricsAddMissingRefsOps.length} pages`,
         );
 
         const metricsAddMissingRefsResults =
@@ -617,7 +622,7 @@ export class AirtableService {
           });
 
         this.logger.log(
-          `Added references to ${metricsAddMissingRefsResults.modifiedCount} metrics documents`
+          `Added references to ${metricsAddMissingRefsResults.modifiedCount} metrics documents`,
         );
       }
 
@@ -641,12 +646,12 @@ export class AirtableService {
       // find any page refs for pages that don't exist anymore
       const danglingPageIds = difference(
         metricsPageIds,
-        pages.map((page) => page._id.toString()).concat(dbPageIds)
+        pages.map((page) => page._id.toString()).concat(dbPageIds),
       );
 
       if (danglingPageIds.length) {
         this.logger.log(
-          `Removing references from metrics documents for ${danglingPageIds.length} dangling page references:`
+          `Removing references from metrics documents for ${danglingPageIds.length} dangling page references:`,
         );
 
         const metricsRemoveRefsOps = danglingPageIds.map((pageId) => ({
@@ -661,15 +666,15 @@ export class AirtableService {
               },
             },
           },
-        })) as AnyBulkWriteOperation<PageMetrics>[];
+        })) as mongo.AnyBulkWriteOperation<PageMetrics>[];
 
         const metricsRemoveRefsResults = await this.pageMetricsModel.bulkWrite(
           metricsRemoveRefsOps,
-          { ordered: false }
+          { ordered: false },
         );
 
         this.logger.log(
-          `Removed page references from ${metricsRemoveRefsResults.modifiedCount} metrics documents`
+          `Removed page references from ${metricsRemoveRefsResults.modifiedCount} metrics documents`,
         );
       }
 
@@ -708,17 +713,17 @@ export class AirtableService {
           ...metricsTaskPageIds,
           ...metricsProjectPageIds,
           ...metricsUxTestPageIds,
-        ].map((id) => id.toString())
+        ].map((id) => id.toString()),
       );
 
       const danglingAirtableRefIds = difference(
         metricsAirtablePageIds,
-        pages.map((page) => page._id.toString())
+        pages.map((page) => page._id.toString()),
       );
 
       if (danglingAirtableRefIds.length) {
         this.logger.log(
-          `Removing references from metrics documents for ${danglingAirtableRefIds.length} dangling airtable references:`
+          `Removing references from metrics documents for ${danglingAirtableRefIds.length} dangling airtable references:`,
         );
 
         const metricsRemoveRefsOps = danglingAirtableRefIds.map((pageId) => ({
@@ -734,15 +739,15 @@ export class AirtableService {
               },
             },
           },
-        })) as AnyBulkWriteOperation<PageMetrics>[];
+        })) as mongo.AnyBulkWriteOperation<PageMetrics>[];
 
         const metricsRemoveRefsResults = await this.pageMetricsModel.bulkWrite(
           metricsRemoveRefsOps,
-          { ordered: false }
+          { ordered: false },
         );
 
         this.logger.log(
-          `Removed airtable references from ${metricsRemoveRefsResults.modifiedCount} metrics documents`
+          `Removed airtable references from ${metricsRemoveRefsResults.modifiedCount} metrics documents`,
         );
       }
     }
@@ -758,7 +763,7 @@ export class AirtableService {
 
     this.logger.log('Pruning old UX tests');
     const currentUxTestAirtableIds = uxTests.map(
-      (uxTest) => uxTest.airtable_id
+      (uxTest) => uxTest.airtable_id,
     );
     const uxTestPruningResults = await this.uxTestModel.deleteMany({
       airtable_id: { $nin: currentUxTestAirtableIds },
@@ -794,7 +799,7 @@ export class AirtableService {
     }
 
     const updatedPages = airtableList.filter(
-      (page) => page.url && currentUrlsDict[page.url]
+      (page) => page.url && currentUrlsDict[page.url],
     );
 
     const updateOps = updatedPages.map((page) => ({
@@ -805,7 +810,7 @@ export class AirtableService {
     }));
 
     const newPages = airtableList.filter(
-      (page) => page.url && !currentUrlsDict[page.url]
+      (page) => page.url && !currentUrlsDict[page.url],
     );
 
     const newPagesWithIds = newPages.map((page) => ({
@@ -833,7 +838,7 @@ export class AirtableService {
     const projectsWithAttachments = await this.projectModel
       .find(
         { attachments: { $not: { $size: 0 } } },
-        { title: 1, attachments: 1 }
+        { title: 1, attachments: 1 },
       )
       .exec();
 
@@ -851,7 +856,7 @@ export class AirtableService {
             response,
             blobClient,
           }));
-        })
+        }),
       )
         .then((results) => {
           for (const result of results) {
@@ -861,13 +866,13 @@ export class AirtableService {
             if (result.response) {
               if (result.response.copyStatus !== 'success') {
                 this.logger.warn(
-                  `File ${fileName} has a copy status of ${result.response.copyStatus}`
+                  `File ${fileName} has a copy status of ${result.response.copyStatus}`,
                 );
               }
             }
 
             const attachmentIndex = project.attachments.findIndex(
-              ({ filename }) => filename === fileName
+              ({ filename }) => filename === fileName,
             );
 
             project.attachments[attachmentIndex].storage_url = blobUrl;
@@ -877,8 +882,8 @@ export class AirtableService {
         })
         .catch((err) =>
           this.logger.error(
-            `An error occurred uploading attachments for ${project.title}: \n${err.stack}`
-          )
+            `An error occurred uploading attachments for ${project.title}: \n${err.stack}`,
+          ),
         );
 
       promises.push(promise);
@@ -887,12 +892,12 @@ export class AirtableService {
     const results = await Promise.allSettled(promises);
 
     const rejectedResults = results.filter(
-      (result) => result.status === 'rejected'
+      (result) => result.status === 'rejected',
     );
 
     if (rejectedResults.length) {
       this.logger.error(
-        `${rejectedResults.length} Projects had errors uploading attachments`
+        `${rejectedResults.length} Projects had errors uploading attachments`,
       );
     }
 
@@ -906,7 +911,7 @@ export class AirtableService {
           en_attachment: { $not: { $size: 0 } },
           fr_attachment: { $not: { $size: 0 } },
         },
-        { title: 1, en_attachment: 1, fr_attachment: 1 }
+        { title: 1, en_attachment: 1, fr_attachment: 1 },
       )
       .exec();
 
@@ -925,7 +930,7 @@ export class AirtableService {
               response,
               blobClient,
             }));
-          })
+          }),
         )
           .then((results) => {
             for (const result of results) {
@@ -935,13 +940,13 @@ export class AirtableService {
               if (result.response) {
                 if (result.response.copyStatus !== 'success') {
                   this.logger.warn(
-                    `File ${fileName} has a copy status of ${result.response.copyStatus}`
+                    `File ${fileName} has a copy status of ${result.response.copyStatus}`,
                   );
                 }
               }
 
               const attachmentIndex = report[attachment].findIndex(
-                ({ filename }) => filename === fileName
+                ({ filename }) => filename === fileName,
               );
 
               report[attachment][attachmentIndex].storage_url = blobUrl;
@@ -951,8 +956,8 @@ export class AirtableService {
           })
           .catch((err) =>
             this.logger.error(
-              `An error occurred uploading attachments for ${report.en_title} or ${report.fr_title}: \n${err.stack}`
-            )
+              `An error occurred uploading attachments for ${report.en_title} or ${report.fr_title}: \n${err.stack}`,
+            ),
           );
       };
 
@@ -963,12 +968,12 @@ export class AirtableService {
     const results = await Promise.allSettled(promises);
 
     const rejectedResults = results.filter(
-      (result) => result.status === 'rejected'
+      (result) => result.status === 'rejected',
     );
 
     if (rejectedResults.length) {
       this.logger.error(
-        `${rejectedResults.length} Reports had errors uploading attachments`
+        `${rejectedResults.length} Reports had errors uploading attachments`,
       );
     }
 

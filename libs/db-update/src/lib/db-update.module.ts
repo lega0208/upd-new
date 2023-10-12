@@ -1,4 +1,5 @@
-import { CacheModule, ConsoleLogger, Module } from '@nestjs/common';
+import { ConsoleLogger, Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import dayjs from 'dayjs';
 import { BlobStorageModule } from '@dua-upd/blob-storage';

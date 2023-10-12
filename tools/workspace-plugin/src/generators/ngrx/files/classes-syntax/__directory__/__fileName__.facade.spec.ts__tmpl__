@@ -2,29 +2,28 @@ import { NgModule } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule, Store } from '@ngrx/store';
-import { NxModule } from '@nrwl/angular';
-import { readFirst } from '@nrwl/angular/testing';
+import { NxModule } from '@nx/angular';
+import { readFirst } from '@nx/angular/testing';
 
-import * as <%= className %>Actions from './<%= fileName %>.actions';
+import { Load<%= className %>, <%= className %>Loaded } from './<%= fileName %>.actions';
 import { <%= className %>Effects } from './<%= fileName %>.effects';
 import { <%= className %>Facade } from './<%= fileName %>.facade';
-import { <%= className %>Entity } from './<%= fileName %>.models';
 import {
-  <%= constantName %>_FEATURE_KEY,
-  State,
+  <%= className %>State,
+  Entity,
   initialState,
   reducer
 } from './<%= fileName %>.reducer';
-import * as <%= className %>Selectors from './<%= fileName %>.selectors';
+import { <%= propertyName %>Query } from './<%= fileName %>.selectors';
 
 interface TestSchema {
-  <%= propertyName %>: State;
+  <%= propertyName %>: <%= className %>State;
 }
 
 describe('<%= className %>Facade', () => {
   let facade: <%= className %>Facade;
   let store: Store<TestSchema>;
-  const create<%= className %>Entity = (id: string, name = ''): <%= className %>Entity => ({
+  const create<%= className %> = (id: string, name?: string): Entity => ({
     id,
     name: name || `name-${id}`
   });
@@ -33,7 +32,7 @@ describe('<%= className %>Facade', () => {
     beforeEach(() => {
       @NgModule({
         imports: [
-          StoreModule.forFeature(<%= constantName %>_FEATURE_KEY, reducer),
+          StoreModule.forFeature('<%= propertyName %>', reducer, { initialState }),
           EffectsModule.forFeature([<%= className %>Effects])
         ],
         providers: [<%= className %>Facade]
@@ -65,7 +64,7 @@ describe('<%= className %>Facade', () => {
       expect(list.length).toBe(0);
       expect(isLoaded).toBe(false);
 
-      facade.init();
+      facade.loadAll();
 
       list = await readFirst(facade.all<%= className %>$);
       isLoaded = await readFirst(facade.loaded$);
@@ -75,7 +74,7 @@ describe('<%= className %>Facade', () => {
     });
 
     /**
-     * Use `load<%= className %>Success` to manually update list
+     * Use `<%= className %>Loaded` to manually submit list for state management
      */
     it('all<%= className %>$ should return the loaded list; and loaded flag == true', async () => {
       let list = await readFirst(facade.all<%= className %>$);
@@ -84,12 +83,10 @@ describe('<%= className %>Facade', () => {
       expect(list.length).toBe(0);
       expect(isLoaded).toBe(false);
 
-      store.dispatch(<%= className %>Actions.load<%= className %>Success({
-        <%= propertyName %>: [
-          create<%= className %>Entity('AAA'),
-          create<%= className %>Entity('BBB')
-        ]})
-      );
+      store.dispatch(new <%= className %>Loaded([
+        create<%= className %>('AAA'),
+        create<%= className %>('BBB')
+      ]));
 
       list = await readFirst(facade.all<%= className %>$);
       isLoaded = await readFirst(facade.loaded$);

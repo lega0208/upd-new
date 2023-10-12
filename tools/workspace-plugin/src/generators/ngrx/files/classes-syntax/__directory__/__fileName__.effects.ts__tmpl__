@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Effect, Actions<% if (!useDataPersistence) { %>, ofType<% }%> } from '@ngrx/effects';
-import { <% if (useDataPersistence) { %>DataPersistence<% } else { %>fetch<% } %> } from '@nrwl/angular';
+import { <% if (useDataPersistence) { %>DataPersistence<% } else { %>fetch<% } %> } from '@nx/angular';
 
 import { Load<%= className %>, <%= className %>Loaded, <%= className %>LoadError, <%= className %>ActionTypes } from './<%= fileName %>.actions';
 import { <%= className %>PartialState } from './<%= fileName %>.reducer';

@@ -3,8 +3,7 @@ import chalk from 'chalk';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import isBetween from 'dayjs/plugin/isBetween';
-import { AnyBulkWriteOperation } from 'mongodb';
-import { Types } from 'mongoose';
+import { Types, mongo } from 'mongoose';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { DbService, PageMetrics } from '@dua-upd/db';
 import type { ActivityMapMetrics, IAAItemId } from '@dua-upd/types-common';
@@ -43,7 +42,7 @@ export class ActivityMapService {
     private blobProxyService: BlobProxyService,
     private logger: ConsoleLogger,
     private db: DbService,
-    @Inject(BlobStorageService.name) private blob: BlobStorageService
+    @Inject(BlobStorageService.name) private blob: BlobStorageService,
   ) {}
 
   async updateActivityMap(dateRange?: DateRange) {
@@ -52,7 +51,7 @@ export class ActivityMapService {
         this.db.collections.pageMetrics
           .findOne(
             { 'activity_map.0': { $exists: true } },
-            { activity_map: 1, date: 1 }
+            { activity_map: 1, date: 1 },
           )
           .sort({ date: -1 })
           .lean()
@@ -78,7 +77,7 @@ export class ActivityMapService {
         singleDatesFromDateRange(
           queriesDateRange,
           queryDateFormat,
-          true
+          true,
         ) as string[]
       )
         .map((date: string) => ({
@@ -105,35 +104,33 @@ export class ActivityMapService {
         filenameGenerator: (dates: string) => `activityMap_data_${dates}.json`,
         queryExecutor: async ([dateRange, itemIdDocs]: [
           DateRange,
-          IAAItemId[]
+          IAAItemId[],
         ]) =>
           await this.adobeAnalyticsService.getPageActivityMap(
             dateRange,
-            itemIdDocs
+            itemIdDocs,
           ),
       });
 
       for (const dateRange of dateRanges) {
-        const requestItemIdDocs = await this.updateActivityMapItemIds(
-          dateRange
-        );
+        const requestItemIdDocs =
+          await this.updateActivityMapItemIds(dateRange);
 
         const activityMapResults = await blobProxy.exec(
           [dateRange, requestItemIdDocs],
-          `${dateRange.start.slice(0, 10)}`
+          `${dateRange.start.slice(0, 10)}`,
         );
 
         // add page refs via itemIds
-        const activityMapResultsWithRefs = await this.addPageRefsToActivityMap(
-          activityMapResults
-        );
+        const activityMapResultsWithRefs =
+          await this.addPageRefsToActivityMap(activityMapResults);
 
         // fix outbound links (remove incorrect values and "rename" correct ones)
         const cleanActivityMap = fixOutboundLinks(
-          activityMapResultsWithRefs as ActivityMap[]
+          activityMapResultsWithRefs as ActivityMap[],
         );
 
-        const bulkWriteOps: AnyBulkWriteOperation<PageMetrics>[] = [];
+        const bulkWriteOps: mongo.AnyBulkWriteOperation<PageMetrics>[] = [];
 
         for (const { activity_map, pages } of cleanActivityMap) {
           for (const page of pages) {
@@ -172,8 +169,8 @@ export class ActivityMapService {
     this.logger.log(
       chalk.blueBright(
         'Updating itemIds for dateRange: ',
-        prettyJson(dateRange)
-      )
+        prettyJson(dateRange),
+      ),
     );
 
     const blobProxy = this.blobProxyService.createProxy({
@@ -185,7 +182,7 @@ export class ActivityMapService {
 
     const itemIds = await blobProxy.exec(
       dateRange,
-      `${dateRange.start.slice(0, 10)}`
+      `${dateRange.start.slice(0, 10)}`,
     );
 
     await this.insertItemIdsIfNew(itemIds);
@@ -221,7 +218,7 @@ export class ActivityMapService {
   }
 
   async addPageRefsToActivityMap(
-    activityMap: ActivityMapResult[]
+    activityMap: ActivityMapResult[],
   ): Promise<(ActivityMapResult & { pages?: Types.ObjectId[] })[]> {
     const itemIds = await this.db.collections.aaItemIds
       .find({ type: 'activityMapTitle' })
@@ -255,7 +252,7 @@ export class ActivityMapService {
     const newItems = itemIds
       .filter(
         (item) =>
-          !existingItemIdsDict[item.itemId] && !item.value.match('https://')
+          !existingItemIdsDict[item.itemId] && !item.value.match('https://'),
       )
       .map((itemId) => ({
         ...itemId,
@@ -265,7 +262,7 @@ export class ActivityMapService {
 
     if (newItems.length) {
       this.logger.log(
-        chalk.blueBright('Finding valid Page references and inserting...')
+        chalk.blueBright('Finding valid Page references and inserting...'),
       );
       const itemIdsWithPageRefs = await this.addPageRefsToItemIds(newItems);
 
@@ -281,7 +278,7 @@ export class ActivityMapService {
 export function fixOutboundLinks(activityMapEntries: ActivityMap[]) {
   const outboundLinkRegex = new RegExp(
     '^https?://.+?/([^/]+?\\.(?:pdf|txt|brf))$',
-    'i'
+    'i',
   );
   const incorrectOutboundRegex = /^([^/]+?\.(?:pdf|txt|brf))$/i;
 
@@ -289,7 +286,7 @@ export function fixOutboundLinks(activityMapEntries: ActivityMap[]) {
     ...item,
     activity_map: item.activity_map
       .filter(
-        (activityMapItem) => !incorrectOutboundRegex.test(activityMapItem.link)
+        (activityMapItem) => !incorrectOutboundRegex.test(activityMapItem.link),
       )
       .map((activityMapItem) => {
         const match = outboundLinkRegex.exec(activityMapItem.link);

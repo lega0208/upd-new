@@ -5,25 +5,26 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
+      "executor": "@nx/js:swc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/db-update",
         "tsConfig": "libs/db-update/tsconfig.lib.json",
         "packageJson": "libs/db-update/package.json",
         "main": "libs/db-update/src/index.ts",
-        "extractLicenses": false
+        "extractLicenses": false,
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["libs/db-update/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/db-update"],
       "options": {
         "jestConfig": "libs/db-update/jest.config.ts",

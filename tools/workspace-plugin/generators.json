@@ -1,0 +1,9 @@
+{
+  "generators": {
+    "ngrx": {
+      "implementation": "./src/generators/ngrx",
+      "schema": "./src/generators/ngrx/schema.json",
+      "description": "Generator ngrx"
+    }
+  }
+}
