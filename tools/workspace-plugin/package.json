@@ -4,6 +4,7 @@
   "dependencies": {
     "@nx/devkit": "16.10.0",
     "@nx/js": "16.10.0",
+    "@nx/workspace": "16.10.0",
     "typescript": "5.1.6",
     "tslib": "^2.3.0"
   },
