@@ -133,6 +133,11 @@ export class TaskDetailsSummaryComponent implements OnInit {
           {
             field: 'title',
             header: this.i18n.service.translate('ux-test', lang),
+            type: 'link',
+            typeParams: {
+              preLink: '/' + this.langLink + '/projects',
+              link: '_id',
+            },
           },
           {
             field: 'date',
