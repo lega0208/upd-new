@@ -38,8 +38,8 @@ export class UrlsService {
   private readonly http = new HttpClient({
     logger: this.logger,
     rateLimitStats: this.rateLimitStats,
-    rateLimitDelay: 84,
-    batchSize: 12,
+    rateLimitDelay: 100,
+    batchSize: 10,
   });
 
   constructor(
@@ -198,8 +198,7 @@ export class UrlsService {
     await this.preparePagesCollection();
 
     if (!this.production) {
-      // UNCOMMENT AFTER PUSHING TO PROD
-      // await this.updateCollectionFromBlobStorage();
+      await this.updateCollectionFromBlobStorage();
       await this.readability.updateCollectionFromBlobStorage();
 
       return;
