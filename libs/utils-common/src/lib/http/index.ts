@@ -65,7 +65,7 @@ export class HttpClient {
       this.rateLimitUtils.updateStats();
     }
 
-    const rateLimitExceededRegex = /503|Access Denied/;
+    const rateLimitExceededRegex = /503|Access Denied|read ETIMEDOUT/;
     const notFoundRegex = /404/;
 
     const protocolRegex = /^https?:\/\//;
