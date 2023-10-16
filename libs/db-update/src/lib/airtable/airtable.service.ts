@@ -36,6 +36,7 @@ import {
 import type { UxApiData, UxApiDataType, UxData } from './types';
 import { assertHasUrl, assertObjectId } from './utils';
 import { difference, uniq } from 'rambdax';
+import { BlobBeginCopyFromURLResponse } from '@azure/storage-blob';
 
 @Injectable()
 export class AirtableService {
@@ -903,73 +904,46 @@ export class AirtableService {
     const reportsWithAttachments = await this.reportsModel
       .find(
         {
-          en_attachment: { $not: { $size: 0 } },
-          fr_attachment: { $not: { $size: 0 } },
+          $or: [
+            {
+              'en_attachment.0': { $exists: true },
+            },
+            {
+              'fr_attachment.0': { $exists: true },
+            },
+          ],
         },
         { title: 1, en_attachment: 1, fr_attachment: 1 }
       )
       .exec();
 
-    const promises = [];
-
     for (const report of reportsWithAttachments) {
-      const uploadAndSave = (attachment) => {
-        return Promise.all(
-          report[attachment].map(({ url, filename, size }) => {
+      try {
+        for (const attachments of [
+          report['en_attachment'],
+          report['fr_attachment'],
+        ]) {
+          for (const [i, { url, filename, size }] of attachments.entries()) {
             const blobClient =
               this.blobService.blobModels.reports.blob(filename);
 
-            const response = blobClient.copyFromUrlIfDifferent(url, size);
+            const response = await blobClient.copyFromUrlIfDifferent(url, size);
 
-            return (response || Promise.resolve()).then((response) => ({
-              response,
-              blobClient,
-            }));
-          })
-        )
-          .then((results) => {
-            for (const result of results) {
-              const fileName = result.blobClient.filename;
-              const blobUrl = result.blobClient.url;
-
-              if (result.response) {
-                if (result.response.copyStatus !== 'success') {
-                  this.logger.warn(
-                    `File ${fileName} has a copy status of ${result.response.copyStatus}`
-                  );
-                }
-              }
-
-              const attachmentIndex = report[attachment].findIndex(
-                ({ filename }) => filename === fileName
-              );
-
-              report[attachment][attachmentIndex].storage_url = blobUrl;
+            if (response && response.copyStatus !== 'success') {
+              throw new Error(`Error copying file: ${filename}`);
             }
 
-            return report.save();
-          })
-          .catch((err) =>
-            this.logger.error(
-              `An error occurred uploading attachments for ${report.en_title} or ${report.fr_title}: \n${err.stack}`
-            )
-          );
-      };
+            attachments[i].storage_url = blobClient.url;
+          }
+        }
 
-      promises.push(uploadAndSave('en_attachment'));
-      promises.push(uploadAndSave('fr_attachment'));
-    }
-
-    const results = await Promise.allSettled(promises);
-
-    const rejectedResults = results.filter(
-      (result) => result.status === 'rejected'
-    );
-
-    if (rejectedResults.length) {
-      this.logger.error(
-        `${rejectedResults.length} Reports had errors uploading attachments`
-      );
+        await report.save();
+      } catch (err) {
+        this.logger.error(
+          `An error occurred uploading attachments for ${report.en_title}:`
+        );
+        this.logger.error(err.stack);
+      }
     }
 
     this.logger.log('Finished uploading attachments');
