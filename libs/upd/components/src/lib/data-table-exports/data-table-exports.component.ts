@@ -7,7 +7,7 @@ import * as FileSaver from 'file-saver';
 import { ColumnConfig } from '../data-table-styles/types';
 import { DropdownOption } from '../dropdown/dropdown.component';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { ProjectStatus } from '@dua-upd/types-common';
+import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
 
 @Component({
   selector: 'upd-data-table-exports',
@@ -69,8 +69,17 @@ export class DataTableExportsComponent<T> {
       'Planning',
     ];
 
+    const pageStatusKeys: PageStatus[] = [
+      '404', 
+      'Redirected'
+    ];
+
     const projectStatuses = (await this.i18n.service.get(
       projectStatusKeys
+    )) as Record<string, string>;
+
+    const pageStatuses = (await this.i18n.service.get(
+      pageStatusKeys
     )) as Record<string, string>;
 
     return this.data.map((row) =>
@@ -97,6 +106,9 @@ export class DataTableExportsComponent<T> {
           );
         } else if (col.typeParam === 'cops') {
           formattedRow[colKey] = row[col.field as keyof T] ? cops : '';
+        } else if (col.filterConfig?.type === 'pageStatus') {
+          formattedRow[colKey] =
+            pageStatuses[(<unknown>row[col.field as keyof T]) as string];
         } else if (col.type === 'label') {
           formattedRow[colKey] =
             projectStatuses[(<unknown>row[col.field as keyof T]) as string];

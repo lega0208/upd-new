@@ -5,6 +5,7 @@ import { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { PagesHomeAggregatedData } from '@dua-upd/types-common';
 import { PagesHomeFacade } from './+state/pages-home.facade';
+import { createCategoryConfig } from '@dua-upd/upd/utils';
 
 @Component({
   selector: 'upd-pages-home',
@@ -22,7 +23,8 @@ export class PagesHomeComponent implements OnInit {
   searchFields = this.columns.map((col) => col.field);
 
   ngOnInit() {
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+    combineLatest([this.pagesHomeData$, this.currentLang$]).subscribe(
+      ([data, lang]) => {
       this.columns = [
         {
           field: 'title',
@@ -35,6 +37,20 @@ export class PagesHomeComponent implements OnInit {
           header: this.i18n.service.translate('URL', lang),
           type: 'link',
           typeParams: { link: 'url', external: true },
+        },
+        {
+          field: 'pageStatus',
+          header: this.i18n.service.translate('Status', lang),
+          type: 'label',
+          typeParam: 'pageStatus',
+          filterConfig: {
+            type: 'pageStatus',
+            categories: createCategoryConfig({
+              i18n: this.i18n.service,
+              data,
+              field: 'pageStatus',
+            }),
+          },
         },
         {
           field: 'visits',
