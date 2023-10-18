@@ -37,6 +37,7 @@ export interface EntityDetailsData<T> extends ViewData<T> {
 
 export type PagesHomeAggregatedData = Pick<IPage, '_id' | 'url' | 'title'> & {
   visits: number;
+  pageStatus?: PageStatus;
 };
 export type PagesHomeData = ViewData<PagesHomeAggregatedData[]>;
 
