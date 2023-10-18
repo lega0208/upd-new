@@ -3,7 +3,6 @@ import {
   compress as compressZstd,
   decompress as decompressZstd,
 } from '@mongodb-js/zstd';
-import { compress as compressLz4, decompress as decompressLz4 } from 'lz4js';
 import {
   compress as compressBrotli,
   decompress as decompressBrotli,
@@ -12,13 +11,7 @@ import { createHash } from 'node:crypto';
 
 export const bytesToMbs = (bytes: number) => Math.round(bytes / 10) / 100000;
 
-export type CompressionAlgorithm = 'lz4' | 'brotli' | 'zstd';
-
-export const compressStringLz4 = async (string: string) => {
-  const stringBuffer = Buffer.from(string);
-
-  return Buffer.from(compressLz4(stringBuffer));
-};
+export type CompressionAlgorithm = 'brotli' | 'zstd';
 
 export const compressStringBrotli = async (string: string) => {
   const stringBuffer = Buffer.from(string);
@@ -34,7 +27,7 @@ export const compressStringZstd = async (string: string, level = 9) => {
 
 export const compressString = async (
   string: string | Buffer,
-  algorithm: CompressionAlgorithm = 'lz4'
+  algorithm: CompressionAlgorithm = 'zstd',
 ) => {
   const stringBuffer = string instanceof Buffer ? string : Buffer.from(string);
 
@@ -44,12 +37,9 @@ export const compressString = async (
     case 'zstd':
       return Buffer.from(await compressZstd(stringBuffer));
     default:
-      return Buffer.from(compressLz4(stringBuffer));
+      return Buffer.from(await compressZstd(stringBuffer));
   }
 };
-
-export const decompressStringLz4 = async (compressed: Buffer) =>
-  Buffer.from(decompressLz4(compressed)).toString('utf-8');
 
 export const decompressStringBrotli = async (compressed: Buffer) =>
   Buffer.from(decompressBrotli(compressed)).toString('utf-8');
@@ -59,7 +49,7 @@ export const decompressStringZstd = async (compressed: Buffer) =>
 
 export const decompressString = async (
   string: string | Buffer,
-  algorithm: CompressionAlgorithm = 'lz4'
+  algorithm: CompressionAlgorithm = 'zstd',
 ) => {
   const stringBuffer = string instanceof Buffer ? string : Buffer.from(string);
 
@@ -69,7 +59,7 @@ export const decompressString = async (
     case 'zstd':
       return (await decompressZstd(stringBuffer)).toString('utf-8');
     default:
-      return Buffer.from(decompressLz4(stringBuffer)).toString('utf-8');
+      return (await decompressZstd(stringBuffer)).toString('utf-8');
   }
 };
 

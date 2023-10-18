@@ -17,7 +17,7 @@ export const hasDuplicates = <T>(array: T[]) =>
 //  -credit: https://leefreeman.xyz/2020/05/08/typescript-decorators/
 export function LogTiming(message = '') {
   return function (
-    target: object,
+    _target: object,
     name: string,
     descriptor: PropertyDescriptor
   ) {
@@ -36,7 +36,7 @@ export function LogTiming(message = '') {
 }
 
 export const AsyncLogTiming = <T extends (...args: unknown[]) => ReturnType<T>>(
-  target: object,
+  _target: object,
   propertyKey: string,
   descriptor: PropertyDescriptor
 ) => {
@@ -73,10 +73,6 @@ export function Required(target: object, propertyKey: string) {
     configurable: true,
   });
 }
-
-type KeysMatching<T extends object, V> = {
-  [K in keyof T]-?: T[K] extends V ? K : never;
-}[keyof T];
 
 /**
  * Converts an array of objects into a "dictionary" or lookup table, using the value of the specified property as the key
@@ -425,8 +421,8 @@ export class TimingUtility {
  */
 export function Retry(retries: number, delay: number) {
   return function (
-    target: object,
-    propertyKey: string,
+    _target: object,
+    _propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
@@ -479,8 +475,8 @@ export function Retry(retries: number, delay: number) {
  */
 export function Timeout(milliseconds: number) {
   return function (
-    target: object,
-    propertyKey: string,
+    _target: object,
+    _propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;

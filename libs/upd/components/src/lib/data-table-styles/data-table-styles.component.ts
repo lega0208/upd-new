@@ -30,8 +30,8 @@ export class DataTableStylesComponent implements OnInit, OnChanges {
   hasPipe = false;
 
   comparisonClassMap = {
-    'text-danger': this.data[this.config.field] < 0,
-    'text-success': this.data[this.config.field] > 0,
+    'text-danger': <number>this.data[this.config.field] < 0,
+    'text-success': <number>this.data[this.config.field] > 0,
   };
 
   ngOnInit() {
@@ -60,8 +60,8 @@ export class DataTableStylesComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['data']) {
       this.comparisonClassMap = {
-        'text-danger': this.data[this.config.field] < 0,
-        'text-success': this.data[this.config.field] > 0,
+        'text-danger': <number>this.data[this.config.field] < 0,
+        'text-success': <number>this.data[this.config.field] > 0,
       };
     }
   }

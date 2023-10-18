@@ -1,26 +1,10 @@
-import { logJson } from '@dua-upd/utils-common';
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AnyBulkWriteOperation } from 'mongodb';
-import { Model } from 'mongoose';
+import { Model, mongo } from 'mongoose';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import type {
-  PageDocument,
-  PageMetricsModel,
-  ProjectDocument,
-  TaskDocument,
-  UxTestDocument,
-} from '@dua-upd/db';
-import {
-  AAItemId,
-  DbService,
-  Page,
-  PageMetrics,
-  Project,
-  Task,
-  UxTest,
-} from '@dua-upd/db';
+import type { PageDocument } from '@dua-upd/db';
+import { Page } from '@dua-upd/db';
 
 dayjs.extend(duration);
 
@@ -29,7 +13,7 @@ export class PageUpdateService {
   constructor(
     private logger: ConsoleLogger,
     @InjectModel(Page.name, 'defaultConnection')
-    private pageModel: Model<PageDocument>
+    private pageModel: Model<PageDocument>,
   ) {}
 
   async updatePagesLang() {
@@ -53,7 +37,7 @@ export class PageUpdateService {
 
     this.logger.log(`Setting lang for ${pagesToUpdate.length} pages...`);
 
-    const bulkWriteOps: AnyBulkWriteOperation<Page>[] = pagesToUpdate
+    const bulkWriteOps: mongo.AnyBulkWriteOperation<Page>[] = pagesToUpdate
       .map(({ _id, url }) => ({
         updateOne: {
           filter: { _id },

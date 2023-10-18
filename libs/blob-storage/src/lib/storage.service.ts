@@ -63,7 +63,7 @@ export class BlobStorageService {
     },
   } as const;
 
-  readonly blobModels: Record<RegisteredBlobModel, BlobModel> = {
+  readonly blobModels: Record<RegisteredBlobModel, BlobModel | null> = {
     db_updates: null,
     project_attachments: null,
     reports: null,
@@ -74,10 +74,10 @@ export class BlobStorageService {
 
   private async configureBlobs(): Promise<BlobStorageService> {
     for (const [modelName, blobDefinition] of Object.entries(
-      this.blobDefinitions
-    )) {
+      this.blobDefinitions,
+    ) as [RegisteredBlobModel, BlobDefinition][]) {
       const container = await this.storageClient.container(
-        blobDefinition.containerName
+        blobDefinition.containerName,
       );
 
       this.blobModels[modelName] = container.createBlobsClient({

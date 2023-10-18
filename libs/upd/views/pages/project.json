@@ -6,11 +6,12 @@
   "prefix": "upd",
   "targets": {
     "build": {
-      "executor": "@nrwl/angular:ng-packagr-lite",
+      "executor": "@nx/angular:ng-packagr-lite",
       "outputs": ["{workspaceRoot}/dist/libs/upd/views/pages"],
       "options": {
         "project": "libs/upd/views/pages/ng-package.json",
-        "tsConfig": "libs/upd/views/pages/tsconfig.lib.json"
+        "tsConfig": "libs/upd/views/pages/tsconfig.lib.json",
+        "updateBuildableProjectDepsInPackageJson": true
       },
       "configurations": {
         "production": {
@@ -23,7 +24,7 @@
       "defaultConfiguration": "production"
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/upd/views/pages"],
       "options": {
         "jestConfig": "libs/upd/views/pages/jest.config.ts",
@@ -31,7 +32,7 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "options": {
         "lintFilePatterns": [
           "libs/upd/views/pages/src/**/*.ts",

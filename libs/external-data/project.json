@@ -5,25 +5,26 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
+      "executor": "@nx/js:swc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/external-data",
         "tsConfig": "libs/external-data/tsconfig.lib.json",
         "packageJson": "libs/external-data/package.json",
         "main": "libs/external-data/src/index.ts",
-        "extractLicenses": false
+        "extractLicenses": false,
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["libs/external-data/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/external-data"],
       "options": {
         "jestConfig": "libs/external-data/jest.config.ts",

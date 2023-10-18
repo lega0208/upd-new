@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { type FilterQuery, Model } from 'mongoose';
-import { type Filter } from 'mongodb';
+import { type FilterQuery, Model, mongo } from 'mongoose';
 import { uniq } from 'rambdax';
 import {
   CallDriver,
@@ -30,7 +29,6 @@ import {
   logJson,
   prettyJson,
 } from '@dua-upd/utils-common';
-import { AnyBulkWriteOperation } from 'mongodb';
 import { PageVisits, PageVisitsView } from './db.views';
 
 /**
@@ -163,7 +161,7 @@ export class DbService {
       return;
     }
 
-    const bulkWriteOps: AnyBulkWriteOperation[] = [];
+    const bulkWriteOps: mongo.AnyBulkWriteOperation[] = [];
 
     const pages: Page[] = await this.pages
       .find({}, { url: 1, projects: 1, ux_tests: 1, tasks: 1 })
@@ -197,7 +195,7 @@ export class DbService {
 
       if (bulkWriteOps.length) {
         const writeResults = await this.pageMetrics.bulkWrite(
-          bulkWriteOps as AnyBulkWriteOperation<PageMetrics>[],
+          bulkWriteOps as mongo.AnyBulkWriteOperation<PageMetrics>[],
           {
             ordered: false,
           }
@@ -220,7 +218,7 @@ export class DbService {
 
     const dateFilter = filter.date ? { date: filter.date } : {};
 
-    const bulkWriteOps: AnyBulkWriteOperation<PageMetrics>[] = pages.map(
+    const bulkWriteOps: mongo.AnyBulkWriteOperation<PageMetrics>[] = pages.map(
       (page) => ({
         updateMany: {
           filter: {
@@ -261,7 +259,7 @@ export class DbService {
       return;
     }
 
-    const bulkWriteOps: AnyBulkWriteOperation[] = [];
+    const bulkWriteOps: mongo.AnyBulkWriteOperation[] = [];
 
     // first check metrics without refs to see if we can add any
     const metricsWithNoRefs = pageMetrics.filter((metrics) => !metrics.page);
@@ -291,7 +289,7 @@ export class DbService {
             bulkWriteOps.push({
               updateMany: {
                 filter: {
-                  ...(filter as Filter<PageMetrics>),
+                  ...(filter as mongo.Filter<PageMetrics>),
                   url,
                 },
                 update: {
@@ -337,7 +335,7 @@ export class DbService {
             bulkWriteOps.push({
               updateMany: {
                 filter: {
-                  ...(filter as Filter<PageMetrics>),
+                  ...(filter as mongo.Filter<PageMetrics>),
                   url,
                 },
                 update: {
@@ -359,7 +357,7 @@ export class DbService {
       console.log(`${bulkWriteOps.length} bulkWriteOps`);
 
       const writeResults = await this.pageMetrics.bulkWrite(
-        bulkWriteOps as AnyBulkWriteOperation<PageMetrics>[],
+        bulkWriteOps as mongo.AnyBulkWriteOperation<PageMetrics>[],
         {
           ordered: false,
         }

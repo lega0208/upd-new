@@ -1,4 +1,5 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { TasksService } from './tasks.service';
 import { TasksController } from './tasks.controller';
 import { DbModule, DbService } from '@dua-upd/db';
