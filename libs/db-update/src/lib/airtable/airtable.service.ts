@@ -36,6 +36,7 @@ import {
 import type { UxApiData, UxApiDataType, UxData } from './types';
 import { assertHasUrl, assertObjectId } from './utils';
 import { difference, uniq } from 'rambdax';
+import { BlobBeginCopyFromURLResponse } from '@azure/storage-blob';
 
 @Injectable()
 export class AirtableService {
