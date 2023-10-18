@@ -1,4 +1,5 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { InternalSearchService } from './internal-search.service';
 import { InternalSearchController } from './internal-search.controller';
 import { DbModule, DbService } from '@dua-upd/db';

@@ -500,7 +500,7 @@ export class OverviewFacade {
       const searchAssessment = data?.dateRangeData?.searchAssessmentData
         .map((d) => {
           const isEnglish = d.lang === 'en';
-          const rank = isFinite(d.position) ? Math.round(d.position) : '';
+          const rank = isFinite(d.position) ? Math.round(d.position) : NaN;
           const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
           const url = d.expected_result?.replace(/^https:\/\//i, '');
           return {
@@ -545,7 +545,7 @@ export class OverviewFacade {
       return data?.comparisonDateRangeData?.searchAssessmentData
         .map((d) => {
           const isEnglish = d.lang === 'en';
-          const rank = isFinite(d.position) ? Math.round(d.position) : '';
+          const rank = isFinite(d.position) ? Math.round(d.position) : NaN;
           const pass = rank <= 3 && rank > 0 ? 'Pass' : 'Fail';
           const url = d.expected_result?.replace(/^https:\/\//i, '');
           return {

@@ -1,14 +1,14 @@
 import * as ts from 'typescript';
-import { findNodes } from '@nrwl/workspace/src/utilities/typescript/find-nodes';
-import { getSourceNodes } from '@nrwl/workspace/src/utilities/typescript/get-source-nodes';
+import { findNodes } from '@nx/workspace/src/utilities/ts-config';
 import * as path from 'path';
-import { Tree, names, readProjectConfiguration } from '@nrwl/devkit';
+import { Tree, names, readProjectConfiguration } from '@nx/devkit';
 import {
   insertChange,
   removeChange,
   getImport,
+  getSourceNodes,
   replaceChange,
-} from '@nrwl/workspace/src/utilities/ast-utils';
+} from '@nx/js';
 
 function _angularImportsFromNode(
   node: ts.ImportDeclaration,
@@ -215,7 +215,7 @@ function _addSymbolToNgModuleMetadata(
 
   const isArray = Array.isArray(node);
   if (isArray) {
-    const nodeArray = node as {} as Array<ts.Node>;
+    const nodeArray = node as Array<ts.Node>;
     const symbolsArray = nodeArray.map((node) => node.getText());
     if (symbolsArray.includes(expression)) {
       return source;
@@ -269,7 +269,7 @@ export function removeFromNgModule(
   property: string
 ): ts.SourceFile {
   const nodes = getDecoratorMetadata(source, 'NgModule', '@angular/core');
-  let node: any = nodes[0]; // tslint:disable-line:no-any
+  const node: any = nodes[0]; // tslint:disable-line:no-any
 
   // Find the decorator declaration.
   if (!node) {
@@ -450,7 +450,7 @@ function getMatchingProperty(
   module: string
 ): ts.ObjectLiteralElement {
   const nodes = getDecoratorMetadata(source, identifier, module);
-  let node: any = nodes[0]; // tslint:disable-line:no-any
+  const node: any = nodes[0]; // tslint:disable-line:no-any
 
   if (!node) return null;
 

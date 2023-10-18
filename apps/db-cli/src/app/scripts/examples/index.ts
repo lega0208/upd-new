@@ -371,7 +371,7 @@ export const benchCompression = async () => {
 
   const _data = await readFile(file, 'utf-8');
 
-  for (const algo of ['lz4', 'brotli', 'zstd'] as CompressionAlgorithm[]) {
+  for (const algo of ['brotli', 'zstd'] as CompressionAlgorithm[]) {
     const data = `${_data}`;
     const originalSize = Buffer.from(data).byteLength;
     const originalSizeMB = bytesToMbs(originalSize);

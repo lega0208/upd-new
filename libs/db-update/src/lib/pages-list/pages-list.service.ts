@@ -1,9 +1,5 @@
-import {
-  CACHE_MANAGER,
-  ConsoleLogger,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { PagesList } from '@dua-upd/db';
 import { IPageMetrics } from '@dua-upd/types-common';
@@ -16,7 +12,7 @@ export class PagesListService {
   constructor(
     private airtableService: AirtableService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private logger: ConsoleLogger
+    private logger: ConsoleLogger,
   ) {}
 
   private async getOrSetCache() {
@@ -67,7 +63,7 @@ export class PagesListService {
 
         return dictionary;
       },
-      { en: {}, fr: {} } as Record<'en' | 'fr', Record<string, PagesList>>
+      { en: {}, fr: {} } as Record<'en' | 'fr', Record<string, PagesList>>,
     );
   }
 
@@ -76,7 +72,7 @@ export class PagesListService {
       ({ en, fr }) => ({
         ...en,
         ...fr,
-      })
+      }),
     );
 
     return pageMetrics.map((metrics) => {

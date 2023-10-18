@@ -292,3 +292,10 @@ export const exportTempTimeSeries = async (db: DbService) => {
     timer.logIteration(`Inserted metrics for ${date.toISOString().slice(0, 10)}`);
   }
 };
+
+export async function testHttp() {
+  const test = await fetch('https://www.canada.ca/en/revenue-agency/services/tax/individuals/life-events/what-when-someone-died/final-return/complete-final-return-steps/common-types-income-a-final-return/federal-non-refundable-tax-credits/line-34900-donations-gifts.html')
+    .then((res) => res.text());
+
+  logJson(test)
+}

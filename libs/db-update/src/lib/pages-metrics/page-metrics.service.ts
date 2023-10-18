@@ -4,8 +4,7 @@ import chalk from 'chalk';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { AnyBulkWriteOperation } from 'mongodb';
-import { Model, Types } from 'mongoose';
+import { Model, Types, mongo } from 'mongoose';
 import { today } from '@dua-upd/utils-common';
 import { IPageMetrics } from '@dua-upd/types-common';
 import {
@@ -46,7 +45,7 @@ export class PageMetricsService {
     private pageMetricsModel: PageMetricsModel,
     @InjectModel(PagesList.name, 'defaultConnection')
     private pageListModel: Model<PagesList>,
-    private pagesListService: PagesListService
+    private pagesListService: PagesListService,
   ) {}
 
   async upsertPageMetrics(pageMetrics: PageMetrics[]) {
@@ -111,53 +110,58 @@ export class PageMetricsService {
   }
 
   createPageMetricsPipelineConfig(
-    dateRange: DateRange
+    dateRange: DateRange,
   ): PipelineConfig<Partial<IPageMetrics>> {
     const insertFunc = async (
       data: Partial<IPageMetrics>[],
-      datasourceName?: string
+      datasourceName?: string,
     ) => {
       if (data.length) {
         console.log(
           `[${
             datasourceName || 'datasource'
-          }] (${data[0].date.toISOString()}) number of records passed to insertFunc:`
+          }] (${data[0].date.toISOString()}) number of records passed to insertFunc:`,
         );
         console.log(data.length);
 
-        const bulkInsertOps: AnyBulkWriteOperation[] = data.map((record) => ({
-          updateOne: {
-            filter: {
-              url: record.url,
-              date: record.date,
-            },
-            update: {
-              $setOnInsert: {
-                _id: new Types.ObjectId(),
+        const bulkInsertOps: mongo.AnyBulkWriteOperation[] = data.map(
+          (record) => ({
+            updateOne: {
+              filter: {
+                url: record.url,
+                date: record.date,
               },
-              $set: record,
+              update: {
+                $setOnInsert: {
+                  _id: new Types.ObjectId(),
+                },
+                $set: record,
+              },
+              upsert: true,
             },
-            upsert: true,
-          },
-        }));
+          }),
+        );
 
         return await Promise.resolve(bulkInsertOps).then((bulkInsertOps) =>
           this.pageMetricsModel
-            .bulkWrite(bulkInsertOps as AnyBulkWriteOperation<PageMetrics>[], {
-              ordered: false,
-            })
+            .bulkWrite(
+              bulkInsertOps as mongo.AnyBulkWriteOperation<PageMetrics>[],
+              {
+                ordered: false,
+              },
+            )
             .then((bulkWriteResults) =>
               console.log(
                 `[${
                   datasourceName || 'datasource'
-                }] (${data[0].date.toISOString()}) bulkWrite completed`
-              )
+                }] (${data[0].date.toISOString()}) bulkWrite completed`,
+              ),
             )
             .catch((err) =>
               this.logger.error(
-                chalk.red(`Error during bulkWrite: \r\n${err.stack}`)
-              )
-            )
+                chalk.red(`Error during bulkWrite: \r\n${err.stack}`),
+              ),
+            ),
         );
       }
     };
@@ -167,14 +171,14 @@ export class PageMetricsService {
         onComplete: async (pageMetrics) => {
           // ignore pages w/ 0 visits (can assume everything else is 0)
           const filteredPageMetrics = pageMetrics.filter(
-            (metrics) => !!metrics.visits
+            (metrics) => !!metrics.visits,
           );
 
           const pageMetricsWithRepairedUrls =
             await this.pagesListService.repairUrls(filteredPageMetrics);
 
           return Promise.resolve().then(() =>
-            insertFunc(pageMetricsWithRepairedUrls, 'AA')
+            insertFunc(pageMetricsWithRepairedUrls, 'AA'),
           );
         },
       });
@@ -201,8 +205,8 @@ export class PageMetricsService {
       onComplete: async () => {
         console.log(
           chalk.blueBright(
-            `Finished inserting results -- Adding Page references`
-          )
+            `Finished inserting results -- Adding Page references`,
+          ),
         );
 
         await this.dbService.validatePageMetricsRefs({
@@ -213,7 +217,7 @@ export class PageMetricsService {
         });
 
         console.log(
-          chalk.green('Page Metrics updates completed successfully ✔ ')
+          chalk.green('Page Metrics updates completed successfully ✔ '),
         );
       },
     };

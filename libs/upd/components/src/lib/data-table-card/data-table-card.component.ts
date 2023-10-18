@@ -18,7 +18,7 @@ export class DataTableCardComponent<T> {
   @Input() captionTitle = '';
   @Input() kpi = false;
   @Input() sortField = '';
-  @Input() sortOrder: 'asc' | 'desc' | number = 'asc';
+  @Input() sortOrder: 'asc' | 'desc' = 'asc';
   @Input() title = '';
   @Input() tooltip = '';
   @Input() loading = false;

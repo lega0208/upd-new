@@ -1,4 +1,5 @@
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
@@ -148,7 +149,7 @@ export class OverallService {
       .slice(0, 5);
 
     const top5DecreasedCalldriverTopics = topCalldriverTopics
-      .filter((topic) => topic.change < 0)
+      .filter((topic) => Number(topic.change) < 0)
       .sort((a, b) => Number(a.change) - Number(b.change))
       .slice(0, 5);
 

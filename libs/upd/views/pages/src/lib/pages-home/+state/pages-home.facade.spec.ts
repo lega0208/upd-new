@@ -2,8 +2,8 @@ import { NgModule } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule, Store } from '@ngrx/store';
-import { NxModule } from '@nrwl/angular';
-import { readFirst } from '@nrwl/angular/testing';
+import { NxModule } from '@nx/angular';
+import { readFirst } from '@nx/angular/testing';
 
 import * as PagesHomeActions from './pages-home.actions';
 import { PagesHomeEffects } from './pages-home.effects';

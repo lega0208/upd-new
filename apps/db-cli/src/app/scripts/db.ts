@@ -17,8 +17,7 @@ import {
 } from '@dua-upd/utils-common';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
-import { AnyBulkWriteOperation } from 'mongodb';
-import { Types } from 'mongoose';
+import { Types, type mongo } from 'mongoose';
 import { IFeedback, IUrl } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { difference, filterObject, omit, uniq } from 'rambdax';
@@ -29,14 +28,14 @@ import { outputExcel, outputJson } from './utils/output';
 
 export const recalculateViews = async (
   db: DbService,
-  updateService: DbUpdateService
+  updateService: DbUpdateService,
 ) => {
   return await updateService.recalculateViews();
 };
 
 export const updateAirtable = async (
   db: DbService,
-  updateService: DbUpdateService
+  updateService: DbUpdateService,
 ) => {
   return await updateService.updateUxData(true);
 };
@@ -49,7 +48,7 @@ export async function uploadFeedback(_, __, ___, blob: BlobStorageService) {
   const time = startTimer('uploadFeedback');
   const feedback = await readFile(
     'feedback_cleanest_2021-04-01_2023-04-16.json',
-    'utf-8'
+    'utf-8',
   );
 
   await blob.blobModels.feedback
@@ -63,7 +62,7 @@ export async function downloadFeedbackSnapshot(
   _,
   __,
   ___,
-  blob: BlobStorageService
+  blob: BlobStorageService,
 ) {
   const time = startTimer('downloadFeedback');
   const filename = 'feedback_2021-04-01_2023-04-16.json';
@@ -82,7 +81,7 @@ export async function repopulateFeedbackFromSnapshot(
   db: DbService,
   __,
   ___,
-  blob: BlobStorageService
+  blob: BlobStorageService,
 ) {
   const filename = 'feedback_2021-04-01_2023-04-16.json';
 
@@ -90,13 +89,13 @@ export async function repopulateFeedbackFromSnapshot(
     await blob.blobModels.feedback.blob(filename).downloadToString({
       blockSize: 1_048_576,
       concurrency: 6,
-    })
+    }),
   ).map(
     (feedback) =>
       ({
         _id: new Types.ObjectId(),
         ...feedback,
-      } as IFeedback)
+      }) as IFeedback,
   );
 
   await db.collections.feedback.deleteMany({});
@@ -121,7 +120,7 @@ export async function uploadFeedback2(_, __, ___, blob: BlobStorageService) {
   const time = startTimer('uploadFeedback');
   const feedback = await readFile(
     'feedback_2023-04-17_2023-06-25.json',
-    'utf-8'
+    'utf-8',
   );
 
   await blob.blobModels.feedback
@@ -135,18 +134,18 @@ export async function repopulateFeedbackFromSnapshot2(
   db: DbService,
   __,
   ___,
-  blob: BlobStorageService
+  blob: BlobStorageService,
 ) {
   const filename = 'feedback_2023-04-17_2023-06-25.json';
 
   const feedback = <Omit<IFeedback, '_id'>[]>JSON.parse(
-    await blob.blobModels.feedback.blob(filename).downloadToString()
+    await blob.blobModels.feedback.blob(filename).downloadToString(),
   ).map(
     (feedback) =>
       ({
         _id: new Types.ObjectId(),
         ...feedback,
-      } as IFeedback)
+      }) as IFeedback,
   );
 
   await db.collections.feedback.deleteMany({
@@ -162,7 +161,7 @@ export async function addUrlTitlesToAllTitles(db: DbService) {
     .lean()
     .exec();
 
-  const writeOps: AnyBulkWriteOperation<IUrl>[] = urls.map((url) => ({
+  const writeOps: mongo.AnyBulkWriteOperation<IUrl>[] = urls.map((url) => ({
     updateOne: {
       filter: { _id: url._id },
       update: {
@@ -190,7 +189,7 @@ export async function cleanUrlsTitles(db: DbService) {
       .trim()
       .replaceAll(/\s+/g, ' ');
 
-  const writeOps: AnyBulkWriteOperation<IUrl>[] = urls.map((url) => ({
+  const writeOps: mongo.AnyBulkWriteOperation<IUrl>[] = urls.map((url) => ({
     updateOne: {
       filter: { _id: url._id },
       update: {
@@ -209,7 +208,7 @@ export async function cleanUrlsTitles(db: DbService) {
 
 export async function repopulateGscSearchTerms() {
   const dbUpdateService = (<RunScriptCommand>this).inject<DbUpdateService>(
-    DbUpdateService
+    DbUpdateService,
   );
 
   console.time('repopulateGscSearchTerms');
@@ -225,8 +224,8 @@ export async function repopulateGscSearchTerms() {
         end: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
       },
       false,
-      true
-    ) as Date[]
+      true,
+    ) as Date[],
   );
 
   console.timeEnd('repopulateGscSearchTerms');
@@ -236,7 +235,7 @@ export async function repopulateGscSearchTerms() {
 export async function repairUrlTitles(db: DbService) {
   console.time('repairUrlTitles');
   const blobService = (<RunScriptCommand>this).inject<BlobStorageService>(
-    BlobStorageService.name
+    BlobStorageService.name,
   );
 
   // mangles `a`, compares `b`, and returns true if there's a match
@@ -254,7 +253,7 @@ export async function repairUrlTitles(db: DbService) {
         latest_snapshot: { $exists: true },
         hashes: { $not: { $size: 0 } },
       },
-      (urlWithBlob): AnyBulkWriteOperation<IUrl> => {
+      (urlWithBlob): mongo.AnyBulkWriteOperation<IUrl> => {
         const htmlData = processHtml(urlWithBlob.blobContent);
 
         if (!htmlData) {
@@ -266,18 +265,18 @@ export async function repairUrlTitles(db: DbService) {
         const newAllTitles = [
           ...new Set(
             [blobTitle, urlWithBlob.title, ...urlWithBlob.all_titles].map(
-              (title) => title.trim().replace(/\s+/g, ' ')
-            )
+              (title) => title.trim().replace(/\s+/g, ' '),
+            ),
           ),
         ];
 
         const couldBeMangled = newAllTitles.filter((title) =>
-          title.includes('ss')
+          title.includes('ss'),
         );
 
         const cleanAllTitles = newAllTitles.filter(
           (title) =>
-            !couldBeMangled.some((comparison) => isMangled(comparison, title))
+            !couldBeMangled.some((comparison) => isMangled(comparison, title)),
         );
 
         return {
@@ -291,9 +290,9 @@ export async function repairUrlTitles(db: DbService) {
             },
           },
         };
-      }
+      },
     )
-  ).filter(Boolean) as AnyBulkWriteOperation<IUrl>[];
+  ).filter(Boolean) as mongo.AnyBulkWriteOperation<IUrl>[];
 
   const results = await db.collections.urls.bulkWrite(testUrlWithBlob);
 
@@ -360,9 +359,9 @@ export async function updatePageTitlesFromUrls(db: DbService) {
 
   const currentPageTitlesDict = arrayToDictionary(currentPageTitles, '_id');
 
-  const pageTitleChanges: AnyBulkWriteOperation<Page>[] = pagesTitles
+  const pageTitleChanges: mongo.AnyBulkWriteOperation<Page>[] = pagesTitles
     .filter(
-      ({ _id, title }) => currentPageTitlesDict[_id.toString()].title !== title
+      ({ _id, title }) => currentPageTitlesDict[_id.toString()].title !== title,
     )
     .map(({ _id, title }) => ({
       updateOne: {
@@ -384,11 +383,13 @@ export async function updatePageTitlesFromUrls(db: DbService) {
 
 export async function populateAllTitles(db: DbService) {
   const blobService = (<RunScriptCommand>this).inject<BlobStorageService>(
-    BlobStorageService.name
+    BlobStorageService.name,
   );
 
   const allTitles: Record<string, string[]> = JSON.parse(
-    await blobService.blobModels.urls.blob('all-titles.json').downloadToString()
+    await blobService.blobModels.urls
+      .blob('all-titles.json')
+      .downloadToString(),
   );
 
   // clean/dedupe allTitles
@@ -398,19 +399,20 @@ export async function populateAllTitles(db: DbService) {
         title
           .replace(/\s+/g, ' ')
           .replace(/ [-–] Canada\.ca/, '')
-          .trim()
-      )
+          .trim(),
+      ),
     );
   }
 
   const urls = await db.collections.urls.find({}, {}).lean().exec();
 
-  const bulkWriteOps: AnyBulkWriteOperation<IUrl>[] = urls
+  const bulkWriteOps: mongo.AnyBulkWriteOperation<IUrl>[] = urls
     .filter(
       (url) =>
         (!url.all_titles && url.title) ||
         (url.all_titles?.length !== allTitles[url.url]?.length &&
-          difference(allTitles[url.url] || [], url.all_titles || []).length > 0)
+          difference(allTitles[url.url] || [], url.all_titles || []).length >
+            0),
     )
     .map((url) => {
       const titles = allTitles[url.url]
@@ -573,11 +575,11 @@ export async function exportPreMigrationPageData(db: DbService) {
                   ?.map((taskId) => tasksDict[taskId?.toString()]?.title)
                   .join(', '),
                 projectIds: metrics.projects?.map((projectId) =>
-                  projectId.toString()
+                  projectId.toString(),
                 ),
                 projectTitles: metrics.projects
                   ?.map(
-                    (projectId) => projectsDict[projectId?.toString()]?.title
+                    (projectId) => projectsDict[projectId?.toString()]?.title,
                   )
                   .join(', '),
               }));
@@ -631,13 +633,13 @@ export async function exportPreMigrationPageData(db: DbService) {
       await writeFile(
         `./pre-migration/${aggregation}-${label}.csv`,
         csvOutput,
-        'utf8'
+        'utf8',
       );
 
       utils.book_append_sheet(
         excelWorkbook,
         worksheet,
-        `${aggregation}-${label}`
+        `${aggregation}-${label}`,
       );
 
       console.timeEnd(`${aggregation}-${label}`);
@@ -671,58 +673,58 @@ export async function handleDuplicatePages(db: DbService) {
     .lean()
     .exec();
 
-  const metricsWriteOps = [] as AnyBulkWriteOperation<PageMetrics>[];
+  const metricsWriteOps = [] as mongo.AnyBulkWriteOperation<PageMetrics>[];
 
-  const pagesWriteOps: AnyBulkWriteOperation<Page>[] = badPages.map((page) => {
-    const correctPage = pagesDict[page.url];
+  const pagesWriteOps: mongo.AnyBulkWriteOperation<Page>[] = badPages.map(
+    (page) => {
+      const correctPage = pagesDict[page.url];
 
-    if (!correctPage) {
-      console.log('found a page with no all_urls and no duplicate:');
-      console.log(page.url);
+      if (!correctPage) {
+        console.log('found a page with no all_urls and no duplicate:');
+        console.log(page.url);
 
-      return {
-        updateOne: {
-          filter: { _id: page._id },
+        return {
+          updateOne: {
+            filter: { _id: page._id },
+            update: {
+              $set: {
+                all_urls: [page.url],
+              },
+            },
+          },
+        };
+      }
+
+      metricsWriteOps.push({
+        updateMany: {
+          filter: { page: page._id },
           update: {
             $set: {
-              all_urls: [page.url],
+              page: correctPage._id,
             },
           },
         },
-      };
-    }
+      });
 
-    metricsWriteOps.push({
-      updateMany: {
-        filter: { page: page._id },
-        update: {
-          $set: {
-            page: correctPage._id,
-          },
+      return {
+        deleteOne: {
+          filter: { _id: page._id },
         },
-      },
-    });
-
-    return {
-      deleteOne: {
-        filter: { _id: page._id },
-      },
-    };
-  });
+      };
+    },
+  );
 
   if (pagesWriteOps.length) {
-    const pageWriteResults = await db.collections.pages.bulkWrite(
-      pagesWriteOps
-    );
+    const pageWriteResults =
+      await db.collections.pages.bulkWrite(pagesWriteOps);
 
     console.log(`${pageWriteResults.modifiedCount} pages modified`);
     console.log(`${pageWriteResults.deletedCount} pages deleted`);
   }
 
   if (metricsWriteOps.length) {
-    const metricsWriteResults = await db.collections.pageMetrics.bulkWrite(
-      metricsWriteOps
-    );
+    const metricsWriteResults =
+      await db.collections.pageMetrics.bulkWrite(metricsWriteOps);
 
     console.log(`${metricsWriteResults.modifiedCount} metrics modified`);
   }
@@ -734,7 +736,7 @@ export async function migratePagesToSingleUrl(db: DbService) {
   console.time('total time');
   console.time('migration');
   const dbUpdateService = (<RunScriptCommand>this).inject<DbUpdateService>(
-    DbUpdateService
+    DbUpdateService,
   );
 
   await populateAllTitles.bind(<RunScriptCommand>this)(db);
@@ -775,23 +777,24 @@ export async function migratePagesToSingleUrl(db: DbService) {
   };
 
   // create new pages from all_urls
-  const pagesFromAllUrlsWriteOps: AnyBulkWriteOperation<Page>[] = [];
+  const pagesFromAllUrlsWriteOps: mongo.AnyBulkWriteOperation<Page>[] = [];
 
   // update metrics refs for new pages
-  const metricsFromNewPagesWriteOps: AnyBulkWriteOperation<PageMetrics>[] = [];
+  const metricsFromNewPagesWriteOps: mongo.AnyBulkWriteOperation<PageMetrics>[] =
+    [];
 
   // update urls page refs
-  const urlsUpdateOps: AnyBulkWriteOperation<IUrl>[] = [];
+  const urlsUpdateOps: mongo.AnyBulkWriteOperation<IUrl>[] = [];
 
   // update pages w/ urls props AND
   // unset refs + airtable_id + all_urls from pages
-  const pagesUpdateOps: AnyBulkWriteOperation<Page>[] = [];
+  const pagesUpdateOps: mongo.AnyBulkWriteOperation<Page>[] = [];
 
   // update readability page refs
-  const readabilityUpdateOps: AnyBulkWriteOperation<Readability>[] = [];
+  const readabilityUpdateOps: mongo.AnyBulkWriteOperation<Readability>[] = [];
 
   // update aa_item_id refs (match via url -> https:// + first 247)
-  const aaItemIdUpdateOps: AnyBulkWriteOperation<AAItemId>[] = [];
+  const aaItemIdUpdateOps: mongo.AnyBulkWriteOperation<AAItemId>[] = [];
 
   for (const page of pages) {
     // create new pages from all_urls
@@ -956,7 +959,7 @@ export async function migratePagesToSingleUrl(db: DbService) {
 
   console.log(`bulk writing: pages update ops`);
   await db.collections.pages.collection.bulkWrite(
-    pagesUpdateOps as AnyBulkWriteOperation[]
+    pagesUpdateOps as mongo.AnyBulkWriteOperation[],
   );
 
   console.log(`bulk writing: readability update ops`);
@@ -1028,12 +1031,12 @@ export async function exportRedirectsList(db: DbService) {
   const redirectsNotInAirtable = new Set(
     pages
       .filter((page) => redirectUrls.includes(page.url) && !page.airtable_id)
-      .map(({ url }) => url)
+      .map(({ url }) => url),
   );
 
   const pagesToKeep = pages.filter(
     (page) =>
-      (page.airtable_id && page.redirect) || (page.airtable_id && page.is_404)
+      (page.airtable_id && page.redirect) || (page.airtable_id && page.is_404),
   );
 
   // flag the pages that are the target of a redirect from a page with an airtable_id, that don't have an airtable_id
@@ -1071,7 +1074,7 @@ export async function exportRedirectsList(db: DbService) {
 
 export async function reformatAllTitlesJson() {
   const originalJson = JSON.parse(
-    await readFile('all_titles_v2.json', 'utf-8')
+    await readFile('all_titles_v2.json', 'utf-8'),
   ) as { url: string; title: string }[];
 
   const newJson = {} as Record<string, string[]>;
@@ -1087,18 +1090,18 @@ export async function reformatAllTitlesJson() {
   await writeFile(
     'all_titles_v2_reformatted.json',
     JSON.stringify(newJson),
-    'utf-8'
+    'utf-8',
   );
 }
 
 export async function uploadAllTitlesJson() {
   const blobService = (<RunScriptCommand>this).inject<BlobStorageService>(
-    BlobStorageService.name
+    BlobStorageService.name,
   );
   const allTitles = await readFile('all_titles_v2_reformatted.json', 'utf-8');
   const allTitlesDeletion = await readFile(
     'all_titles_deletion_reformatted.json',
-    'utf-8'
+    'utf-8',
   );
 
   await blobService.blobModels.urls
@@ -1111,7 +1114,7 @@ export async function uploadAllTitlesJson() {
 
 export async function fixActivityMapTitles(db: DbService) {
   const blobService = (<RunScriptCommand>this).inject<BlobStorageService>(
-    BlobStorageService.name
+    BlobStorageService.name,
   );
 
   const titlesToRemove: Record<string, string[]> =
@@ -1120,7 +1123,7 @@ export async function fixActivityMapTitles(db: DbService) {
       .downloadToString()
       .then(JSON.parse);
 
-  console.log('Removing bad titles')
+  console.log('Removing bad titles');
   for (const [url, titles] of Object.entries(titlesToRemove)) {
     await db.collections.urls.updateOne(
       { url },
@@ -1128,7 +1131,7 @@ export async function fixActivityMapTitles(db: DbService) {
         $pullAll: {
           all_titles: titles,
         },
-      }
+      },
     );
   }
 
@@ -1141,7 +1144,7 @@ export async function fixActivityMapTitles(db: DbService) {
     .exec();
 
   // cool variable name right?
-  const ensureTitlesInAllTitlesBulkWriteOps: AnyBulkWriteOperation<IUrl>[] =
+  const ensureTitlesInAllTitlesBulkWriteOps: mongo.AnyBulkWriteOperation<IUrl>[] =
     urls.map(({ _id, title }) => ({
       updateOne: {
         filter: { _id },
@@ -1173,7 +1176,7 @@ export async function fixActivityMapTitles(db: DbService) {
       $unset: {
         activity_map: '',
       },
-    }
+    },
   );
   console.timeEnd('unsetting metrics');
 

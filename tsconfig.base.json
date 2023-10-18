@@ -8,7 +8,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2017",
+    "target": "es2020",
     "module": "esnext",
     "lib": ["ESNext", "dom", "dom.iterable"],
     "skipLibCheck": true,
@@ -42,7 +42,8 @@
       "@dua-upd/utils-common/math": ["libs/utils-common/src/lib/math/index.ts"],
       "@dua-upd/utils-common/types": [
         "libs/utils-common/src/lib/types/index.ts"
-      ]
+      ],
+      "@dua-upd/workspace-plugin": ["tools/workspace-plugin/src/index.ts"]
     },
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

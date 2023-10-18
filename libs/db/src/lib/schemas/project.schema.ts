@@ -1,9 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Types } from 'mongoose';
-import { Page } from './page.schema';
-import { UxTest } from './ux-test.schema';
-import { Task } from './task.schema';
-import { AttachmentData, IProject } from '@dua-upd/types-common';
+import {
+  AttachmentData,
+  IPage,
+  IProject,
+  ITask,
+  IUxTest,
+} from '@dua-upd/types-common';
 
 export type ProjectDocument = Project & Document;
 
@@ -16,13 +19,13 @@ export class Project implements IProject {
   title = '';
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UxTest' }] })
-  ux_tests?: Types.ObjectId[] | UxTest[];
+  ux_tests?: Types.ObjectId[] | IUxTest[];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Page' }] })
-  pages?: Types.ObjectId[] | Page[];
+  pages?: Types.ObjectId[] | IPage[];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }] })
-  tasks?: Types.ObjectId[] | Task[];
+  tasks?: Types.ObjectId[] | ITask[];
 
   @Prop({ type: String })
   description?: string;
