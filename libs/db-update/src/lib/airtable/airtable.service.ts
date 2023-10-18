@@ -945,7 +945,7 @@ export class AirtableService {
         await report.save();
       } catch (err) {
         this.logger.error(
-          `An error occurred uploading attachments for ${report.en_title}:`
+          `An error occurred uploading attachments for ${report.en_title}:`,
         );
         this.logger.error(err.stack);
       }
