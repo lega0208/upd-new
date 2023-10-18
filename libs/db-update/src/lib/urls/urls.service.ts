@@ -39,8 +39,8 @@ export class UrlsService {
   private readonly http = new HttpClient({
     logger: this.logger,
     rateLimitStats: this.rateLimitStats,
-    rateLimitDelay: 100,
-    batchSize: 10,
+    rateLimitDelay: 88,
+    batchSize: 12,
   });
 
   constructor(
