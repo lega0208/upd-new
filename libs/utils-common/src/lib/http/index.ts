@@ -1,5 +1,4 @@
 import { LoggerService } from '@nestjs/common';
-import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio/lib/slim';
 import {
   batchAwait,
@@ -24,7 +23,7 @@ export type HttpClientResponse = {
   body?: string;
   is404: boolean;
   redirect?: string;
-  response?: AxiosResponse;
+  response?: Response;
   error?: Error;
 };
 
