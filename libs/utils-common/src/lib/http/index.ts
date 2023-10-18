@@ -72,30 +72,25 @@ export class HttpClient {
     const requestUrl = protocolRegex.test(url) ? url : `https://${url}`;
 
     try {
-      const response = await axios.get<string, AxiosResponse<string, string>>(
-        requestUrl,
-        {
-          validateStatus: null,
-          maxRedirects: 10,
-        }
-      );
+      const response = await fetch(requestUrl, {
+        keepalive: true,
+      });
 
-      const responseUrl: string = (
-        response.request._redirectable?._currentUrl ||
-        response.headers['location']
-      ).replace('https://', '');
+      const responseUrl: string = response.url.replace('https://', '');
 
       const is404 =
         response.status === 404 ||
         responseUrl === 'www.canada.ca/errors/404.html';
 
-      const isRedirect = response.request._redirectable?._isRedirect && !is404;
+      const isRedirect = response.redirected && !is404;
 
       if (is404 && this.rejectOn404) {
         return Promise.reject(new Error(`404: ${url}`));
       }
 
-      const rawTitle = (titleRegex.exec(response.data) || [''])[0].replace(
+      const body = await response.text();
+
+      const rawTitle = (titleRegex.exec(body) || [''])[0].replace(
         canadaDotCaRegex,
         ''
       );
@@ -112,7 +107,7 @@ export class HttpClient {
 
       return {
         url: url.replace('https://', ''),
-        body: response.data,
+        body,
         title,
         ...redirect,
         is404,
