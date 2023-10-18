@@ -6,6 +6,19 @@
 @import url('../../../node_modules/primeng/resources/themes/saga-blue/theme.css');
 @import url('../../../node_modules/primeng/resources/primeng.min.css');
 
+.p-dropdown-items {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.p-tree-container {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  overflow: auto;
+}
+
 // dependency changes
 .show4nLabels .x.axis {
   .tick {
