@@ -33,14 +33,8 @@ export class PagesHomeComponent implements OnInit {
           typeParam: '_id',
         },
         {
-          field: 'url',
-          header: this.i18n.service.translate('URL', lang),
-          type: 'link',
-          typeParams: { link: 'url', external: true },
-        },
-        {
           field: 'pageStatus',
-          header: this.i18n.service.translate('Status', lang),
+          header: this.i18n.service.translate('Current status', lang),
           type: 'label',
           typeParam: 'pageStatus',
           filterConfig: {
@@ -51,6 +45,12 @@ export class PagesHomeComponent implements OnInit {
               field: 'pageStatus',
             }),
           },
+        },
+        {
+          field: 'url',
+          header: this.i18n.service.translate('URL', lang),
+          type: 'link',
+          typeParams: { link: 'url', external: true },
         },
         {
           field: 'visits',

@@ -26,12 +26,11 @@ import type {
   PagesHomeData,
   PagesHomeAggregatedData,
   ActivityMapMetrics,
-  IUrl,
+  PageStatus,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
   dateRangeSplit,
-  logJson,
 } from '@dua-upd/utils-common';
 import { InternalSearchTerm } from '@dua-upd/types-common';
 
@@ -97,7 +96,7 @@ export class PagesService {
     ).map((page) => {
       const pageInfo = urlsDict[page._id.toString()];
   
-      let pageStatus = null;
+      let pageStatus: PageStatus = 'Live';
       if (pageInfo?.is_404 === true) {
         pageStatus = '404';
       } else if (pageInfo?.is_redirect === true) {

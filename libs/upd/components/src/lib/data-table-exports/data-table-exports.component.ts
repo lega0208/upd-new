@@ -70,6 +70,7 @@ export class DataTableExportsComponent<T> {
     ];
 
     const pageStatusKeys: PageStatus[] = [
+      'Live',
       '404', 
       'Redirected'
     ];
