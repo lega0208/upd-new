@@ -1,8 +1,7 @@
 import { IOverall } from '@dua-upd/types-common';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AnyBulkWriteOperation } from 'mongodb';
-import { Model, Types } from 'mongoose';
+import { Model, Types, mongo } from 'mongoose';
 import { DbService, Overall, Page, PageMetrics, PagesList } from '@dua-upd/db';
 import type {
   OverallDocument,
@@ -62,7 +61,7 @@ export class DbUpdateService {
     private pageMetricsModel: PageMetricsModel,
     @InjectModel(PagesList.name, 'defaultConnection')
     private pagesListModel: Model<PagesListDocument>,
-    private urlsService: UrlsService
+    private urlsService: UrlsService,
   ) {
     this.logger.setContext('DbUpdater');
 
@@ -115,22 +114,22 @@ export class DbUpdateService {
         this.overallMetricsService
           .updateOverallMetrics()
           .catch((err) =>
-            this.logger.error(`Error updating overall metrics\n${err.stack}`)
+            this.logger.error(`Error updating overall metrics\n${err.stack}`),
           ),
         this.updateUxData().catch((err) =>
-          this.logger.error(`Error updating UX data\n${err.stack}`)
+          this.logger.error(`Error updating UX data\n${err.stack}`),
         ),
       ]);
 
       await this.updateFeedback().catch((err) =>
-        this.logger.error(`Error updating Feedback data\n${err.stack}`)
+        this.logger.error(`Error updating Feedback data\n${err.stack}`),
       );
 
       await Promise.allSettled([
         this.calldriversService
           .updateCalldrivers()
           .catch((err) =>
-            this.logger.error(`Error updating Calldrivers data\n${err.stack}`)
+            this.logger.error(`Error updating Calldrivers data\n${err.stack}`),
           ),
       ]);
 
@@ -141,12 +140,12 @@ export class DbUpdateService {
         this.annotationsService
           .updateAnnotations()
           .catch((err) =>
-            this.logger.error(`Error updating Annotations data\n${err.stack}`)
+            this.logger.error(`Error updating Annotations data\n${err.stack}`),
           ),
         this.airtableService
           .updateReports()
           .catch((err) =>
-            this.logger.error(`Error updating Reports data\n${err.stack}`)
+            this.logger.error(`Error updating Reports data\n${err.stack}`),
           ),
       ]);
 
@@ -154,14 +153,14 @@ export class DbUpdateService {
         this.pageMetricsService
           .updatePageMetrics()
           .catch((err) =>
-            this.logger.error(`Error updating Page metrics data\n${err.stack}`)
+            this.logger.error(`Error updating Page metrics data\n${err.stack}`),
           ),
         this.airtableService.uploadProjectAttachmentsAndUpdateUrls(),
         this.airtableService.uploadReportAttachmentsAndUpdateUrls(),
       ]);
 
       await this.createPagesFromPageList().catch((err) =>
-        this.logger.error(err.stack)
+        this.logger.error(err.stack),
       );
 
       await this.internalSearchService
@@ -169,7 +168,7 @@ export class DbUpdateService {
         .catch((err) => this.logger.error(err.stack));
 
       await this.updateActivityMap().catch((err) =>
-        this.logger.error(err.stack)
+        this.logger.error(err.stack),
       );
 
       await this.pagesService
@@ -207,7 +206,7 @@ export class DbUpdateService {
         .exec()) ?? [];
 
     const urlsAlreadyInCollection = pagesWithListMatches.map(
-      (page) => page.url
+      (page) => page.url,
     );
 
     const pagesToCreate = pagesList
@@ -219,7 +218,7 @@ export class DbUpdateService {
       }));
 
     this.logger.log(
-      `Creating ${pagesToCreate.length} new pages from Published Pages list...`
+      `Creating ${pagesToCreate.length} new pages from Published Pages list...`,
     );
 
     await this.pageModel.insertMany(pagesToCreate, { ordered: false });
@@ -228,7 +227,7 @@ export class DbUpdateService {
 
     this.logger.log('Adding references to page metrics...');
 
-    const bulkWriteOps: AnyBulkWriteOperation<PageMetrics>[] =
+    const bulkWriteOps: mongo.AnyBulkWriteOperation<PageMetrics>[] =
       pagesToCreate.map((page) => ({
         updateMany: {
           filter: {
@@ -243,13 +242,12 @@ export class DbUpdateService {
         },
       }));
 
-    const bulkWriteResults = await this.pageMetricsModel.bulkWrite(
-      bulkWriteOps
-    );
+    const bulkWriteResults =
+      await this.pageMetricsModel.bulkWrite(bulkWriteOps);
 
     if (bulkWriteResults.modifiedCount) {
       this.logger.log(
-        `Successfully added references to ${bulkWriteResults.modifiedCount} page metrics`
+        `Successfully added references to ${bulkWriteResults.modifiedCount} page metrics`,
       );
 
       return;
@@ -259,8 +257,8 @@ export class DbUpdateService {
       `No page metrics found for the following urls: ${JSON.stringify(
         pagesToCreate.map((page) => page.url),
         null,
-        2
-      )}`
+        2,
+      )}`,
     );
   }
 
@@ -342,7 +340,7 @@ export class DbUpdateService {
         console.log(
           `Writing GSC search terms up to ${bulkWriteOps[
             bulkWriteOps.length - 1
-          ].updateOne.filter.date.toISOString()}`
+          ].updateOne.filter.date.toISOString()}`,
         );
 
         await this.overallMetricsModel.bulkWrite(bulkWriteOps);
@@ -369,7 +367,7 @@ export class DbUpdateService {
 
     const results = (
       await Promise.all(
-        dates.map((date) => this.gscClient.getPageMetrics(date))
+        dates.map((date) => this.gscClient.getPageMetrics(date)),
       )
     ).flat(2);
 
@@ -426,7 +424,7 @@ export class DbUpdateService {
       for (const dateRange of dateRanges) {
         this.logger.info(
           'Recalculating page visits view for dateRange: ',
-          JSON.stringify(dateRange, null, 2)
+          JSON.stringify(dateRange, null, 2),
         );
 
         const result = await pageVisits.getOrUpdate(dateRange, true);
@@ -434,7 +432,7 @@ export class DbUpdateService {
         if (!result?.pageVisits?.length) {
           this.logger.error(
             'Recalculation failed or contains no results for dateRange: ' +
-              prettyJson(dateRange)
+              prettyJson(dateRange),
           );
 
           continue;

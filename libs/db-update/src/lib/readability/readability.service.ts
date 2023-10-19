@@ -2,8 +2,7 @@ import { ConsoleLogger, Inject, Injectable, Optional } from '@nestjs/common';
 import { load } from 'cheerio/lib/slim';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import type { AnyBulkWriteOperation } from 'mongodb';
-import { Types } from 'mongoose';
+import { Types, mongo } from 'mongoose';
 import { omit } from 'rambdax';
 import stopwordsFr from 'stopwords-fr';
 import stopwordsEn from 'stopwords-en';
@@ -262,11 +261,10 @@ export class ReadabilityService {
       error: string;
     };
 
-    const updateQueue = createUpdateQueue<AnyBulkWriteOperation<IReadability>>(
+    const updateQueue = createUpdateQueue<mongo.AnyBulkWriteOperation<IReadability>>(
       1000,
       async (ops) => {
         await this.db.collections.readability.bulkWrite(ops);
-        // logJson(ops);
       }
     );
 
@@ -461,7 +459,7 @@ export class ReadabilityService {
 
       const omitObjectIdsAndDate = omit(['_id', 'date', 'page']);
 
-      const bulkWriteOps: AnyBulkWriteOperation<Readability>[] = JSON.parse(
+      const bulkWriteOps: mongo.AnyBulkWriteOperation<Readability>[] = JSON.parse(
         blobData,
         jsonReviver
       ).map(
@@ -479,7 +477,7 @@ export class ReadabilityService {
               },
               upsert: true,
             },
-          } as AnyBulkWriteOperation<Readability>)
+          } as mongo.AnyBulkWriteOperation<Readability>)
       );
 
       this.logger.log(`${bulkWriteOps.length} bulkWriteOps`);
@@ -551,7 +549,7 @@ export class ReadabilityService {
       return;
     }
 
-    const bulkWriteOps: AnyBulkWriteOperation<IReadability>[] =
+    const bulkWriteOps: mongo.AnyBulkWriteOperation<IReadability>[] =
       pagesForUpdates.map((page) => ({
         updateMany: {
           filter: { url: page.url },

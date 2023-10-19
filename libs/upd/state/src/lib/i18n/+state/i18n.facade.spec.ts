@@ -2,14 +2,19 @@ import { NgModule } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule, Store } from '@ngrx/store';
-import { NxModule } from '@nrwl/angular';
-import { readFirst } from '@nrwl/angular/testing';
+import { NxModule } from '@nx/angular';
+import { readFirst } from '@nx/angular/testing';
 
 import * as I18nActions from './i18n.actions';
 import { I18nEffects } from './i18n.effects';
 import { I18nFacade } from './i18n.facade';
 import { I18nEntity } from './i18n.models';
-import { I18N_FEATURE_KEY, State, i18nInitialState, reducer } from './i18n.reducer';
+import {
+  I18N_FEATURE_KEY,
+  State,
+  i18nInitialState,
+  reducer,
+} from './i18n.reducer';
 import * as I18nSelectors from './i18n.selectors';
 
 interface TestSchema {

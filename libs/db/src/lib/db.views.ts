@@ -1,4 +1,4 @@
-import { Model, PipelineStage, Schema, Types } from 'mongoose';
+import { Model, mongo, PipelineStage, Schema, Types } from 'mongoose';
 import dayjs, { ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {
@@ -29,7 +29,10 @@ export interface DbViewConfig<T extends DbViewType, Source> {
   maxAge: [number, ManipulateType];
 }
 
-export abstract class DbView<T extends DbViewType & { lastUpdated: Date }, Source> {
+export abstract class DbView<
+  T extends DbViewType & { lastUpdated: Date },
+  Source,
+> {
   collectionName: `view_${string}`;
   sourceModel: Model<Source>;
   model: Model<T>;
@@ -45,7 +48,7 @@ export abstract class DbView<T extends DbViewType & { lastUpdated: Date }, Sourc
   }
 
   private async getLastUpdated(dateRange: DateRange<string | Date>) {
-    const results = await this.model
+    const results = (await this.model
       .findOne(
         {
           _id: {
@@ -53,10 +56,10 @@ export abstract class DbView<T extends DbViewType & { lastUpdated: Date }, Sourc
             end: new Date(dateRange.end),
           },
         },
-        { lastUpdated: 1 }
+        { lastUpdated: 1 },
       )
       .lean()
-      .exec() as T | null;
+      .exec()) as T | null;
 
     return results?.lastUpdated || null;
   }
@@ -88,7 +91,7 @@ export abstract class DbView<T extends DbViewType & { lastUpdated: Date }, Sourc
     return (await this.model.findOne({ _id: queryId }).lean().exec()) as T;
   }
 
-  async clearAll() {
+  async clearAll(): Promise<mongo.DeleteResult> {
     return this.model.deleteMany({});
   }
 }
@@ -116,7 +119,7 @@ export class PageVisitsView
 {
   constructor(
     pageVisitsModel: Model<PageVisits>,
-    pageMetricsModel: Model<PageMetrics>
+    pageMetricsModel: Model<PageMetrics>,
   ) {
     const collectionName = COLLECTION_NAME;
     const maxAge: [number, ManipulateType] = [1, 'week'];
@@ -190,7 +193,7 @@ export class PageVisitsView
 
   async getVisitsWithPageData(
     dateRange: DateRange<string | Date>,
-    pageModel: Model<Page>
+    pageModel: Model<Page>,
   ) {
     const visits = (await this.getOrUpdate(dateRange))?.pageVisits || [];
 
@@ -217,7 +220,7 @@ export class PageVisitsView
 
   async getVisitsWithTaskData(
     dateRange: DateRange<string | Date>,
-    taskModel: Model<Task>
+    taskModel: Model<Task>,
   ) {
     const visits = (await this.getOrUpdate(dateRange))?.pageVisits || [];
 
@@ -230,15 +233,15 @@ export class PageVisitsView
         task.populate('pages').then((task) => {
           const pageVisits =
             task.pages?.map(
-              (page) => visitsDictionary[page._id.toString()]?.visits || 0
+              (page) => visitsDictionary[page._id.toString()]?.visits || 0,
             ) || [];
 
           return {
             ...task.toObject(),
             visits: sum(pageVisits),
           };
-        })
-      )
+        }),
+      ),
     );
 
     return tasksWithVisits.sort((a, b) => b.visits - a.visits);
@@ -250,7 +253,7 @@ export const PageVisitsViewSchema = new Schema<PageVisits>(
     ...viewsBaseSchema,
     pageVisits: [{ _id: Types.ObjectId, visits: Number }],
   },
-  { collection: COLLECTION_NAME }
+  { collection: COLLECTION_NAME },
 );
 
 PageVisitsViewSchema.index({ _id: 'hashed' });

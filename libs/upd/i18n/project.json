@@ -6,11 +6,12 @@
   "prefix": "upd",
   "targets": {
     "build": {
-      "executor": "@nrwl/angular:ng-packagr-lite",
+      "executor": "@nx/angular:ng-packagr-lite",
       "outputs": ["{workspaceRoot}/dist/libs/upd/i18n"],
       "options": {
         "project": "libs/upd/i18n/ng-package.json",
-        "tsConfig": "libs/upd/i18n/tsconfig.lib.json"
+        "tsConfig": "libs/upd/i18n/tsconfig.lib.json",
+        "updateBuildableProjectDepsInPackageJson": true
       },
       "configurations": {
         "production": {
@@ -23,7 +24,7 @@
       "defaultConfiguration": "production"
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "options": {
         "lintFilePatterns": [
           "libs/upd/i18n/src/**/*.ts",

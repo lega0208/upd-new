@@ -29,7 +29,7 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
   @Input() captionTitle = '';
   @Input() loading = false;
   @Input() sortField = '';
-  @Input() sortOrder: 'asc' | 'desc' | number = 'asc';
+  @Input() sortOrder: 'asc' | 'desc' = 'asc';
   @Input() kpi = false;
   @Input() exports = true;
   @Input() id?: string;

@@ -1,8 +1,7 @@
 import { ConsoleLogger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import chalk from 'chalk';
-import { Model, Types } from 'mongoose';
-import { AnyBulkWriteOperation } from 'mongodb';
+import { Model, Types, type mongo } from 'mongoose';
 import { Command, CommandRunner, InquirerService } from 'nest-commander';
 import { DataIntegrityService } from '@dua-upd/data-integrity';
 import {
@@ -335,7 +334,7 @@ export class PopulateCommand extends CommandRunner {
         );
         console.log(data.length);
 
-        const bulkInsertOps: AnyBulkWriteOperation[] = data.map((record) => ({
+        const bulkInsertOps: mongo.AnyBulkWriteOperation[] = data.map((record) => ({
           updateOne: {
             filter: {
               url: record.url,
