@@ -1,0 +1,41 @@
+<h2 class="mb-4">Bulk Report</h2>
+
+<h3>Date picker:</h3>
+
+<upd-calendar></upd-calendar>
+
+<h3>Select pages:</h3>
+
+    <upd-data-table
+      id="pages-home-"
+      [data]="(pagesHomeData$ | async) || []"
+      [cols]="columns"
+      [displayRows]="5"
+      [loading]="(loading$ | async) || false"
+      placeholderText='dt_search_keyword_url'
+      [searchFields]="searchFields"
+      [exports]="false"
+      [checkboxes]="true"
+      (pageSelectionChanged)="handleSelectedPages($event)"
+    >
+    </upd-data-table>
+
+    <label>Or paste in URLs:</label>
+    <div class="clearfix">  </div>
+    <textarea class="w-100" placeholder="Enter URLs separated by comma, semicolon or new lines" #urlTextarea rows="5"></textarea>
+
+    <div class="clearfix">  </div>
+    <button class="btn btn-success" (click)="addPages(urlTextarea.value)">Add pages</button>
+    <ul>
+      <li *ngFor="let url of urls; let i = index">
+        {{ url }}
+        <button (click)="removePage(i)">X</button>
+      </li>
+    </ul>
+
+  <div class="metrics">
+    <label>Select Metrics:</label>
+    <input type="checkbox" value="visits"> Visits
+  </div>
+
+  <button class="btn btn-primary">Generate and download report</button>

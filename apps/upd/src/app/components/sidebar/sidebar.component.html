@@ -27,6 +27,7 @@
             'menu-overview' | translate
           }}</span>
         </a>
+
         <a
           [routerLink]="[langPath | async, 'pages']"
           [routerLinkActive]="['active']"
@@ -75,6 +76,17 @@
             'menu-reports' | translate
           }}</span>
         </a>
+        <a
+        [routerLink]="[langPath | async, 'pages', 'pages-bulk-report']"
+        [routerLinkActive]="['active']"
+        [queryParamsHandling]="'merge'"
+        class="nav_link"
+      >
+        <span class="material-icons nav_icon" aria-hidden="true">snippet_folder</span>
+        <span class="nav_name" data-i18n="menu-pages">{{
+          'Bulk Reports' | translate
+        }}</span>
+      </a>
       </div>
     </div>
     <div class="mb-4">

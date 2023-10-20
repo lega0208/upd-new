@@ -5,6 +5,8 @@ import {
   OnInit,
   SimpleChanges,
   ViewChild,
+  EventEmitter,
+  Output,
 } from '@angular/core';
 import { Table } from 'primeng/table';
 import { equals } from 'rambdax';
@@ -32,11 +34,13 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
   @Input() sortOrder: 'asc' | 'desc' = 'asc';
   @Input() kpi = false;
   @Input() exports = true;
+  @Input() checkboxes = false;
   @Input() id?: string;
   @Input() placeholderText = 'dt_search_keyword';
   @Input() selectedNodes: SelectedNode[] = [];
   @Input() node: SelectedNode | null = null;
   exportCols: ColumnConfig[] = [];
+  @Output() pageSelectionChanged = new EventEmitter<any[]>();
 
   ngOnInit() {
     this.exportCols = this.cols.filter((col) => !col.hideTable);
@@ -64,6 +68,12 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
 
   get defaultSearchFields() {
     return this.cols.map((obj) => obj.field);
+  }
+
+  selectedPages: any[] = [];
+
+  onSelectionChange(value = []) {
+   this.pageSelectionChanged.emit(value);
   }
 
   getEventValue(event: Event): string {

@@ -1,5 +1,6 @@
 export * from './lib/accordion/accordion.component';
 export * from './lib/alert/alert.component';
+export * from './lib/calendar/calendar.component';
 export * from './lib/card/card.component';
 export * from './lib/data-card/data-card.component';
 export * from './lib/data-kpi-card/data-kpi-card.component';

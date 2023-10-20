@@ -1,0 +1,53 @@
+<p-calendar 
+  [(ngModel)]="date"
+  [minDate]="minSelectableDate"
+  [maxDate]="maxSelectableDate"
+  [numberOfMonths]="2"
+  [selectionMode]="'range'"
+  [readonlyInput]="true"
+  [showIcon]="true"
+  [required]="true"
+  (onSelect)="handleDateSelect($event)"
+  dateFormat="yy-mm-dd">
+  
+  <ng-template pTemplate="header">
+    <div class="d-flex justify-content-center mt-3 mb-3">
+      <!-- Month Dropdown -->
+      <upd-dropdown
+        id="month-dropdown"
+        [label]="getSelectedMonthLabel()"
+        [options]="months"
+        [value]="selectedMonth"
+        (selectedValueChange)="handleMonthChange($event)">
+      </upd-dropdown>
+
+      <!-- Year Dropdown -->
+      <upd-dropdown
+        id="year-dropdown"
+        [label]="selectedYear.toString()"
+        [options]="yearRange"
+        [value]="selectedYear"
+        (selectedValueChange)="handleYearChange($event)">
+      </upd-dropdown>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <hr />
+
+    <strong>Preset: </strong> 
+    <upd-dropdown
+      id="range-button"
+      icon="calendar_today"
+      [label]="periodSelectionLabel$ | async"
+      [options]="selectionOptions"
+      [onSelect]="selectPeriod.bind(this)">
+    </upd-dropdown>
+
+    <div class="d-flex justify-content-end mt-3">
+      <button type="button" pButton icon="pi pi-times" label="Cancel" class="cancel-button me-2"></button>
+      <button type="button" pButton icon="pi pi-check" label="Apply"></button>
+    </div>
+  </ng-template>
+  
+</p-calendar>

@@ -1,0 +1,12 @@
+.cancel-button {
+    background: transparent !important;
+    border-color: red !important;
+    color: red !important; /* Setting the text color to red so it matches the border. */
+}
+
+.calendar-class:hover > :nth-child { background-color: cyan }
+
+.hovered-range {
+    background-color: rgba(100, 150, 250, 0.3);  // A light blue shade for illustration. Adjust as per your design.
+    border-radius: 50%;  // Optional: to make the cell look rounded
+}

@@ -29,6 +29,7 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import { PagesDetailsReadabilityComponent } from './pages-details/pages-details-readability/pages-details-readability.component';
 import { PipesModule } from '@dua-upd/upd/pipes';
+import { PagesBulkReportComponent } from './pages-home/pages-bulk-report/pages-bulk-report.component';
 
 @NgModule({
   imports: [
@@ -47,6 +48,7 @@ import { PipesModule } from '@dua-upd/upd/pipes';
   declarations: [
     PagesComponent,
     PagesHomeComponent,
+    PagesBulkReportComponent,
     PagesDetailsComponent,
     PagesDetailsSummaryComponent,
     PagesDetailsWebtrafficComponent,

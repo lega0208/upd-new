@@ -49,6 +49,7 @@ import { ApexDonutComponent } from './apex-donut/apex-donut.component';
 import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.component';
 import { FilterTableComponent } from './filter-table/filter-table.component';
 import { FilterTableSelectionComponent } from './filter-table-selection/filter-table-selection.component';
+import { CalendarComponent } from './calendar/calendar.component';
 
 @NgModule({
   imports: [
@@ -102,12 +103,14 @@ import { FilterTableSelectionComponent } from './filter-table-selection/filter-t
     ApexSparkLineComponent,
     FilterTableComponent,
     FilterTableSelectionComponent,
+    CalendarComponent,
   ],
   exports: [
     NgbPopoverModule,
     TableModule,
     ButtonModule,
     InputTextModule,
+    CalendarComponent,
     CardComponent,
     DataTableComponent,
     DateSelectorComponent,
