@@ -315,6 +315,7 @@ export type ProjectStatus =
   | 'Unknown';
 
   export type PageStatus =
+  | 'Live'
   | '404'
   | 'Redirected';
 

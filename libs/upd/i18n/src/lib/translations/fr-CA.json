@@ -100,6 +100,8 @@
   "yes": "Oui",
   "no": "Non",
   "Filter": "Filtre",
+  "Current status": "Statut actuel",
+  "Live": "En ligne",
   "d3-www": "Quel était le problème?",
   "d3-cant-find-info": "Je n'ai pas trouvé les renseignements",
   "d3-hard-to-understand": "L'info est difficile à comprendre",

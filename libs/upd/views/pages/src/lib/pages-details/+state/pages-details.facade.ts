@@ -72,7 +72,7 @@ export class PagesDetailsFacade {
       return '404';
     }
 
-    return null;
+    return 'Live';
   }));
 
   visitors$ = this.pagesDetailsData$.pipe(
