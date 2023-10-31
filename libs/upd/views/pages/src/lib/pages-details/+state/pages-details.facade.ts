@@ -1,24 +1,25 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map, debounceTime, combineLatest, filter } from 'rxjs';
+import { map, debounceTime, combineLatest } from 'rxjs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-
-import { LocaleId } from '@dua-upd/upd/i18n';
+import type { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade, selectDatePeriodSelection } from '@dua-upd/upd/state';
 import { percentChange, UnwrapObservable } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
-import {
+import type {
   GscSearchTermMetrics,
   PageAggregatedData,
   PageDetailsData,
 } from '@dua-upd/types-common';
-
 import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
-import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
+import type {
+  ApexAxisChartSeries,
+  ApexNonAxisChartSeries,
+} from 'ng-apexcharts';
 import {
   selectPageLang,
   selectReadabilityData,
@@ -32,12 +33,17 @@ dayjs.extend(utc);
 
 @Injectable()
 export class PagesDetailsFacade {
+  private readonly store = inject(Store);
+  private i18n = inject(I18nFacade);
+
   loaded$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsLoaded);
+
   loading$ = this.store
     .select(PagesDetailsSelectors.selectPagesDetailsLoading)
     .pipe(debounceTime(500));
+
   pagesDetailsData$ = this.store.select(
-    PagesDetailsSelectors.selectPagesDetailsData
+    PagesDetailsSelectors.selectPagesDetailsData,
   );
 
   currentLang$ = this.i18n.currentLang$;
@@ -54,8 +60,8 @@ export class PagesDetailsFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) =>
-      getWeeklyDatesLabel(data.comparisonDateRange || '', lang)
-    )
+      getWeeklyDatesLabel(data.comparisonDateRange || '', lang),
+    ),
   );
 
   apexBar$ = this.store.select(selectVisitsByDayChartData);
@@ -63,58 +69,60 @@ export class PagesDetailsFacade {
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
 
-  pageStatus$ = this.pagesDetailsData$.pipe(map((data) => {
-    if (data?.isRedirect) {
-      return 'Redirected';
-    }
+  pageStatus$ = this.pagesDetailsData$.pipe(
+    map((data) => {
+      if (data?.isRedirect) {
+        return 'Redirected';
+      }
 
-    if (data?.is404) {
-      return '404';
-    }
+      if (data?.is404) {
+        return '404';
+      }
 
-    return 'Live';
-  }));
+      return 'Live';
+    }),
+  );
 
   visitors$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visitors || 0)
+    map((data) => data?.dateRangeData?.visitors || 0),
   );
   visitorsPercentChange$ = this.pagesDetailsData$.pipe(
-    mapToPercentChange('visitors')
+    mapToPercentChange('visitors'),
   );
 
   visits$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visits || 0)
+    map((data) => data?.dateRangeData?.visits || 0),
   );
   visitsPercentChange$ = this.pagesDetailsData$.pipe(
-    mapToPercentChange('visits')
+    mapToPercentChange('visits'),
   );
 
   pageViews$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.views || 0)
+    map((data) => data?.dateRangeData?.views || 0),
   );
   pageViewsPercentChange$ = this.pagesDetailsData$.pipe(
-    mapToPercentChange('views')
+    mapToPercentChange('views'),
   );
 
   impressions$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gsc_total_impressions || 0)
+    map((data) => data?.dateRangeData?.gsc_total_impressions || 0),
   );
   impressionsPercentChange$ = this.pagesDetailsData$.pipe(
-    mapToPercentChange('gsc_total_impressions')
+    mapToPercentChange('gsc_total_impressions'),
   );
 
   ctr$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gsc_total_ctr || 0)
+    map((data) => data?.dateRangeData?.gsc_total_ctr || 0),
   );
   ctrPercentChange$ = this.pagesDetailsData$.pipe(
-    mapToPercentChange('gsc_total_ctr')
+    mapToPercentChange('gsc_total_ctr'),
   );
 
   avgRank$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gsc_total_position || 0)
+    map((data) => data?.dateRangeData?.gsc_total_position || 0),
   );
   avgRankPercentChange$ = this.pagesDetailsData$.pipe(
-    mapToPercentChange('gsc_total_position')
+    mapToPercentChange('gsc_total_position'),
   );
 
   tasks$ = this.pagesDetailsData$.pipe(map((data) => data?.tasks || 0));
@@ -126,55 +134,55 @@ export class PagesDetailsFacade {
   pageLang$ = this.store.select(selectPageLang);
 
   latestReadability$ = this.readability$.pipe(
-    map((readability) => readability[0])
+    map((readability) => readability[0]),
   );
 
   pageLastUpdated$ = this.latestReadability$.pipe(
-    map((readability) => readability?.date)
+    map((readability) => readability?.date),
   );
 
   totalScore$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_score)
+    map((readability) => readability?.total_score),
   );
 
   readabilityPoints$ = this.latestReadability$.pipe(
-    map((readability) => readability?.fk_points)
+    map((readability) => readability?.fk_points),
   );
 
   fleshKincaid$ = this.latestReadability$.pipe(
-    map((readability) => readability?.final_fk_score)
+    map((readability) => readability?.final_fk_score),
   );
 
   headingPoints$ = this.latestReadability$.pipe(
-    map((readability) => readability?.header_points)
+    map((readability) => readability?.header_points),
   );
 
   wordsPerHeading$ = this.latestReadability$.pipe(
-    map((readability) => readability?.avg_words_per_header)
+    map((readability) => readability?.avg_words_per_header),
   );
 
   paragraphPoints$ = this.latestReadability$.pipe(
-    map((readability) => readability?.paragraph_points)
+    map((readability) => readability?.paragraph_points),
   );
 
   wordsPerParagraph$ = this.latestReadability$.pipe(
-    map((readability) => readability?.avg_words_per_paragraph)
+    map((readability) => readability?.avg_words_per_paragraph),
   );
 
   mostFrequentWordsOnPage$ = this.latestReadability$.pipe(
-    map((readability) => readability?.word_counts || [])
+    map((readability) => readability?.word_counts || []),
   );
 
   wordCount$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_words)
+    map((readability) => readability?.total_words),
   );
 
   paragraphCount$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_paragraph)
+    map((readability) => readability?.total_paragraph),
   );
 
   headingCount$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_headings)
+    map((readability) => readability?.total_headings),
   );
 
   currentKpiFeedback$ = this.pagesDetailsData$.pipe(
@@ -183,7 +191,7 @@ export class PagesDetailsFacade {
       const visits = data?.dateRangeData?.visits || 0;
 
       return dyfNoCurrent / visits;
-    })
+    }),
   );
 
   comparisonKpiFeedback$ = combineLatest([this.pagesDetailsData$]).pipe(
@@ -192,7 +200,7 @@ export class PagesDetailsFacade {
       const visits = data?.comparisonDateRangeData?.visits || 0;
 
       return dyfNoComparison / visits;
-    })
+    }),
   );
 
   kpiFeedbackPercentChange$ = combineLatest([
@@ -200,8 +208,8 @@ export class PagesDetailsFacade {
     this.comparisonKpiFeedback$,
   ]).pipe(
     map(([currentKpi, comparisonKpi]) =>
-      percentChange(currentKpi, comparisonKpi)
-    )
+      percentChange(currentKpi, comparisonKpi),
+    ),
   );
 
   kpiFeedbackDifference$ = combineLatest([
@@ -217,13 +225,13 @@ export class PagesDetailsFacade {
           title: this.i18n.service.translate(d.title, lang),
         })) || []
       );
-    })
+    }),
   );
 
   activityMap$ = combineLatest([this.pagesDetailsData$]).pipe(
     map(([data]) => {
       return data?.activityMap || [];
-    })
+    }),
   );
 
   visitsByDay$ = combineLatest([
@@ -267,14 +275,14 @@ export class PagesDetailsFacade {
 
       const comparisonDateRangeLabel = getWeeklyDatesLabel(
         data.comparisonDateRange || '',
-        lang
+        lang,
       );
 
       const comparisonDateRangeSeries = comparisonVisitsByDay.map(
         ({ visits }) => ({
           name: comparisonDateRangeLabel,
           value: visits || 0,
-        })
+        }),
       );
 
       if (!isWeekly) {
@@ -295,7 +303,7 @@ export class PagesDetailsFacade {
               ...Array(daysToPad).fill({
                 date: '*',
                 visits: 0,
-              })
+              }),
             );
 
             dayCount += currMonthDays;
@@ -311,7 +319,7 @@ export class PagesDetailsFacade {
               ...Array(daysToPad).fill({
                 date: '*',
                 visits: 0,
-              })
+              }),
             );
 
             dayCount += prevMonthDays;
@@ -357,7 +365,7 @@ export class PagesDetailsFacade {
       }
 
       return visitsByDayData;
-    })
+    }),
   );
 
   visitsByDeviceType$ = combineLatest([
@@ -368,7 +376,7 @@ export class PagesDetailsFacade {
       const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
       const comparisonDateRangeLabel = getWeeklyDatesLabel(
         data.comparisonDateRange || '',
-        lang
+        lang,
       );
 
       const dataByDeviceType = [
@@ -428,7 +436,7 @@ export class PagesDetailsFacade {
       ];
 
       return barChartData;
-    })
+    }),
   );
 
   barTable$ = this.store.select(selectVisitsByDayChartTable);
@@ -460,7 +468,7 @@ export class PagesDetailsFacade {
           prevValue: data?.comparisonDateRangeData?.visits_device_other || 0,
         },
       ];
-    })
+    }),
   );
 
   dyfDataApex$ = combineLatest([
@@ -480,7 +488,7 @@ export class PagesDetailsFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   whatWasWrongDataApex$ = combineLatest([
@@ -502,7 +510,7 @@ export class PagesDetailsFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   apexVisitsByDeviceTypeChart$ = combineLatest([
@@ -513,7 +521,7 @@ export class PagesDetailsFacade {
         name,
         data: [currValue, prevValue],
       }));
-    })
+    }),
   );
 
   apexVisitsByDeviceTypeLabels$ = combineLatest([
@@ -521,7 +529,7 @@ export class PagesDetailsFacade {
   ]).pipe(
     map(([data]) => {
       return data.map(({ name }) => name);
-    })
+    }),
   );
 
   referrerTypePropToKeyMap = {
@@ -537,7 +545,7 @@ export class PagesDetailsFacade {
   ]).pipe(
     map(([data, lang]) => {
       const dataByReferrerType = Object.entries(
-        this.referrerTypePropToKeyMap
+        this.referrerTypePropToKeyMap,
       ).map(([prop, refType]) => {
         const currentVal = (data?.dateRangeData?.[
           prop as keyof PageAggregatedData
@@ -567,7 +575,7 @@ export class PagesDetailsFacade {
       }
 
       return dataByReferrerType;
-    })
+    }),
   );
 
   propToProvinceMap = {
@@ -609,7 +617,7 @@ export class PagesDetailsFacade {
             value: currentVal,
             change,
           };
-        }
+        },
       );
 
       const isZero = dataByLocation.every((v) => v.value === 0);
@@ -619,7 +627,7 @@ export class PagesDetailsFacade {
       }
 
       return dataByLocation;
-    })
+    }),
   );
 
   // topPagesVisitedWithPercentChange$ = this.pagesDetailsData$.pipe(
@@ -643,7 +651,7 @@ export class PagesDetailsFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   whatWasWrongData$ = combineLatest([
@@ -654,12 +662,12 @@ export class PagesDetailsFacade {
     map(([data, lang]) => {
       const cantFindInfo = this.i18n.service.translate(
         'd3-cant-find-info',
-        lang
+        lang,
       );
       const otherReason = this.i18n.service.translate('d3-other', lang);
       const hardToUnderstand = this.i18n.service.translate(
         'd3-hard-to-understand',
-        lang
+        lang,
       );
       const error = this.i18n.service.translate('d3-error', lang);
 
@@ -685,15 +693,15 @@ export class PagesDetailsFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   topSearchTermsIncrease$ = this.pagesDetailsData$.pipe(
-    map((data) => [...(data?.topSearchTermsIncrease || [])])
+    map((data) => [...(data?.topSearchTermsIncrease || [])]),
   );
 
   topSearchTermsDecrease$ = this.pagesDetailsData$.pipe(
-    map((data) => [...(data?.topSearchTermsDecrease || [])])
+    map((data) => [...(data?.topSearchTermsDecrease || [])]),
   );
 
   top25GSCSearchTerms$ = this.pagesDetailsData$.pipe(
@@ -701,8 +709,8 @@ export class PagesDetailsFacade {
       (data) =>
         [...(data?.top25GSCSearchTerms || [])] as (GscSearchTermMetrics & {
           change: number;
-        })[]
-    )
+        })[],
+    ),
   );
 
   feedbackComments$ = combineLatest([
@@ -719,7 +727,7 @@ export class PagesDetailsFacade {
         comment: d.comment,
       }));
       return [...(feedbackComments || [])];
-    })
+    }),
   );
 
   feedbackByTagsBarChart$ = combineLatest([
@@ -733,7 +741,7 @@ export class PagesDetailsFacade {
 
       const isCurrZero = feedbackByTags.every((v) => v.numComments === 0);
       const isPrevZero = feedbackByTagsPrevious.every(
-        (v) => v.numComments === 0
+        (v) => v.numComments === 0,
       );
 
       if (isCurrZero && isPrevZero) {
@@ -760,7 +768,7 @@ export class PagesDetailsFacade {
       };
 
       return [currentSeries, previousSeries];
-    })
+    }),
   );
 
   feedbackByTagsTable$ = combineLatest([
@@ -793,13 +801,13 @@ export class PagesDetailsFacade {
           prevValue,
         };
       });
-    })
+    }),
   );
 
   apexFeedbackByTagsData$ = combineLatest([this.feedbackByTagsTable$]).pipe(
     map(([feedbackByTagsTable]) => {
       const isZero = feedbackByTagsTable.every(
-        (v) => v.currValue === 0 && v.prevValue === 0
+        (v) => v.currValue === 0 && v.prevValue === 0,
       );
       if (isZero) {
         return [];
@@ -809,11 +817,11 @@ export class PagesDetailsFacade {
         name: feedback.tag,
         data: [feedback.currValue, feedback.prevValue],
       })) as ApexAxisChartSeries;
-    })
+    }),
   );
 
   topSearchTerms$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.searchTerms)
+    map((data) => data?.searchTerms),
   );
 
   searchTermsColConfig$ = createColConfigWithI18n<
@@ -831,8 +839,6 @@ export class PagesDetailsFacade {
   ]);
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
-
-  constructor(private readonly store: Store, private i18n: I18nFacade) {}
 
   /**
    * Use the initialization action to perform one
@@ -852,7 +858,7 @@ type DateRangeDataIndexKey = keyof PageAggregatedData &
 
 // helper function to get the percent change of a property vs. the comparison date range
 function mapToPercentChange(
-  propName: keyof PickByType<PageAggregatedData, number>
+  propName: keyof PickByType<PageAggregatedData, number>,
 ) {
   return map((data: PageDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
@@ -887,7 +893,7 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
 
 function mapObjectArraysWithPercentChange(
   propName: keyof PageAggregatedData,
-  propPath: string
+  propPath: string,
 ) {
   return map((data: PageDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
@@ -913,7 +919,7 @@ function mapObjectArraysWithPercentChange(
         ...val,
         percentChange: percentChange(
           val[propPath],
-          (previous as any)[i][propPath]
+          (previous as any)[i][propPath],
         ),
       }));
     }

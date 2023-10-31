@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest, map } from 'rxjs';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { OverviewFacade } from '../+state/overview/overview.facade';
-import { GetTableProps } from '@dua-upd/utils-common';
+import type { GetTableProps } from '@dua-upd/utils-common';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
 
 type searchAssessmentColTypes = GetTableProps<
@@ -17,6 +17,9 @@ type searchAssessmentColTypes = GetTableProps<
   styleUrls: ['./overview-search-analytics.component.css'],
 })
 export class OverviewSearchAnalyticsComponent implements OnInit {
+  private overviewService = inject(OverviewFacade);
+  private i18n = inject(I18nFacade);
+
   currentLang$ = this.i18n.currentLang$;
 
   gscImpressions$ = this.overviewService.impressions$;
@@ -40,17 +43,12 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
   satEnd = '';
 
   topSearchTermsEn$ = this.overviewService.top20SearchTermsEn$.pipe(
-    map((searchTerms) => [...searchTerms])
+    map((searchTerms) => [...searchTerms]),
   );
   topSearchTermsFr$ = this.overviewService.top20SearchTermsFr$.pipe(
-    map((searchTerms) => [...searchTerms])
+    map((searchTerms) => [...searchTerms]),
   );
   searchTermsColConfig$ = this.overviewService.searchTermsColConfig$;
-
-  constructor(
-    private overviewService: OverviewFacade,
-    private i18n: I18nFacade
-  ) {}
 
   ngOnInit() {
     combineLatest([

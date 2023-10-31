@@ -1,14 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
-import { ColumnConfig } from '@dua-upd/upd-components';
-
-import { LocaleId } from '@dua-upd/upd/i18n';
+import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { GetTableProps } from '@dua-upd/utils-common';
+import type { GetTableProps } from '@dua-upd/utils-common';
 import { map } from 'rxjs';
 
-type GscSearchTermsColTypes = GetTableProps<PagesDetailsSearchAnalyticsComponent, 'topGSCSearchTerms$'>
-type ReferrerTypeColTypes = GetTableProps<PagesDetailsSearchAnalyticsComponent, 'referrerType$'>
+type GscSearchTermsColTypes = GetTableProps<
+  PagesDetailsSearchAnalyticsComponent,
+  'topGSCSearchTerms$'
+>;
+type ReferrerTypeColTypes = GetTableProps<
+  PagesDetailsSearchAnalyticsComponent,
+  'referrerType$'
+>;
 
 @Component({
   selector: 'upd-page-details-search-analytics',
@@ -16,6 +21,9 @@ type ReferrerTypeColTypes = GetTableProps<PagesDetailsSearchAnalyticsComponent, 
   styleUrls: ['./pages-details-search-analytics.component.css'],
 })
 export class PagesDetailsSearchAnalyticsComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private pageDetailsService = inject(PagesDetailsFacade);
+
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
@@ -32,7 +40,7 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
   topGSCSearchTerms$ = this.pageDetailsService.top25GSCSearchTerms$;
 
   topSearchTerms$ = this.pageDetailsService.topSearchTerms$.pipe(
-    map((searchTerms) => [...searchTerms])
+    map((searchTerms) => [...searchTerms]),
   );
 
   searchTermsColConfig$ = this.pageDetailsService.searchTermsColConfig$;
@@ -42,11 +50,6 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
   topGSCSearchTermsCols: ColumnConfig<GscSearchTermsColTypes>[] = [];
   searchTermsCanadaCols: ColumnConfig[] = [];
   referrerTypeCols: ColumnConfig<ReferrerTypeColTypes>[] = [];
-
-  constructor(
-    private pageDetailsService: PagesDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 
   ngOnInit(): void {
     this.i18n.service.onLangChange(({ lang }) => {

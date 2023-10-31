@@ -1,19 +1,17 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
-import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
-
-import * as TasksHomeActions from './tasks-home.actions';
-
 import { Store } from '@ngrx/store';
-import {
-  DateSelectionState,
-  selectDatePeriod,
-  selectDateRanges,
-} from '@dua-upd/upd/state';
+import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
+import { selectDatePeriod, selectDateRanges } from '@dua-upd/upd/state';
 import { ApiService } from '@dua-upd/upd/services';
+import * as TasksHomeActions from './tasks-home.actions';
 
 @Injectable()
 export class TasksHomeEffects {
+  private readonly actions$ = inject(Actions);
+  private store = inject(Store);
+  private api = inject(ApiService);
+
   init$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(TasksHomeActions.loadTasksHomeInit),
@@ -21,22 +19,16 @@ export class TasksHomeEffects {
       mergeMap(([, { dateRange, comparisonDateRange }]) =>
         this.api.getTasksHomeData({ dateRange, comparisonDateRange }).pipe(
           map((data) => TasksHomeActions.loadTasksHomeSuccess({ data })),
-          catchError(() => EMPTY)
-        )
-      )
+          catchError(() => EMPTY),
+        ),
+      ),
     );
   });
 
   dateChange$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(selectDatePeriod),
-      mergeMap(() => of(TasksHomeActions.loadTasksHomeInit()))
+      mergeMap(() => of(TasksHomeActions.loadTasksHomeInit())),
     );
   });
-
-  constructor(
-    private readonly actions$: Actions,
-    private store: Store,
-    private api: ApiService
-  ) {}
 }

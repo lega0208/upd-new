@@ -1,16 +1,26 @@
-import { Injectable } from '@angular/core';
-import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
-import { LocaleId } from './i18n.types';
+import { inject, Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { type LangChangeEvent, TranslateService } from '@ngx-translate/core';
+import type { LocaleId } from './i18n.types';
 import { registerLocaleData } from '@angular/common';
 import localeEnCa from '@angular/common/locales/en-CA';
 import localeFrCa from '@angular/common/locales/fr-CA';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class I18nService {
-  constructor(private readonly translateService: TranslateService) {}
+  private translateService = inject(TranslateService);
+
+  langSignal = toSignal(
+    this.translateService.onLangChange.pipe(
+      map((event) => event.lang as LocaleId),
+    ),
+    {
+      initialValue: (this.translateService.currentLang || 'en-CA') as LocaleId,
+    },
+  );
 
   get currentLang() {
     return this.translateService.currentLang as LocaleId;
@@ -18,7 +28,7 @@ export class I18nService {
 
   async get(key: string | string[], interpolateParams?: object) {
     return firstValueFrom<string | Record<string, string>>(
-      this.translateService.get(key, interpolateParams)
+      this.translateService.get(key, interpolateParams),
     );
   }
 

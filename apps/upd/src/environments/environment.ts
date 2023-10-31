@@ -2,9 +2,36 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import type { RouterReducerState } from '@ngrx/router-store';
+import type { ActionReducer } from '@ngrx/store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { localStorageSync } from 'ngrx-store-localstorage';
+import { stateSanitizer, actionSanitizer } from '@dua-upd/upd/state';
+import type { DateSelectionState, I18nState } from '@dua-upd/upd/state';
+
+interface RootState {
+  dateSelection: DateSelectionState;
+  router: RouterReducerState;
+  i18n: I18nState;
+}
+
+const localStorageSyncReducer = (
+  reducer: ActionReducer<RootState>,
+): ActionReducer<RootState> =>
+  localStorageSync({
+    keys: ['dateSelection', 'router', 'i18n'],
+    rehydrate: true,
+  })(reducer);
+
 export const environment = {
   production: false,
-  gaTrackingId: '',
+  envImports: [
+    StoreDevtoolsModule.instrument({
+      actionSanitizer,
+      stateSanitizer,
+    }),
+  ],
+  metaReducers: [localStorageSyncReducer],
 };
 
 /*

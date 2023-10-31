@@ -1,16 +1,9 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import {
-  filter,
-  tap,
-  map,
-  withLatestFrom,
-  pairwise,
-  skip,
-} from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
-import {
+import type {
   ApexAnnotations,
   ApexAxisChartSeries,
   ApexChart,
@@ -34,7 +27,7 @@ import {
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { formatPercent } from '@angular/common';
 
-import {
+import type {
   KpiObjectiveCriteria,
   KpiObjectiveStatus,
   KpiObjectiveStatusConfig,
@@ -73,7 +66,9 @@ export interface ChartOptions {
 
 @Injectable()
 export class ApexStore extends ComponentStore<ChartOptions> {
-  constructor(private i18n: I18nFacade) {
+  private i18n = inject(I18nFacade);
+
+  constructor() {
     super({
       chart: {
         height: 350,
@@ -83,7 +78,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
       },
       stroke: {
         lineCap: 'round',
-        width: 0.5
+        width: 0.5,
       },
       dataLabels: {
         enabled: true,
@@ -123,7 +118,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
     (state, value: string[]): ChartOptions => ({
       ...state,
       colors: value ? value : [],
-    })
+    }),
   );
 
   readonly setCurrent = this.updater((state, value: number): ChartOptions => {
@@ -142,7 +137,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         fill: { colors: ['#000'] },
         labels: value !== 0 ? [comparison] : [],
       };
-    }
+    },
   );
 
   readonly setKpi = this.effect(
@@ -151,7 +146,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         kpi: KpiObjectiveCriteria;
         current: number;
         comparison: number;
-      }>
+      }>,
     ) => {
       return kpi$.pipe(
         tap(({ kpi, current, comparison }) => {
@@ -161,9 +156,9 @@ export class ApexStore extends ComponentStore<ChartOptions> {
             '';
 
           this.setComparison(comparison);
-        })
+        }),
       );
-    }
+    },
   );
 
   readonly current$ = this.select(({ series }) => series?.flat() as number[]);
@@ -177,7 +172,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         ...state.chart,
         defaultLocale: value === EN_CA ? 'en' : 'fr',
       },
-    })
+    }),
   );
 
   readonly vm$ = this.select(this.state$, (state) => state);

@@ -1,26 +1,21 @@
 import { NgModule } from '@angular/core';
-import { LocationStrategy, NgOptimizedImage } from "@angular/common";
+import {
+  APP_BASE_HREF,
+  LocationStrategy,
+  NgOptimizedImage,
+} from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
-import { ActionReducer, StoreModule } from '@ngrx/store';
+import { RouteReuseStrategy } from '@angular/router';
+import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import {
-  type RouterReducerState,
-  routerReducer,
-  StoreRouterConnectingModule,
-} from '@ngrx/router-store';
-import { localStorageSync } from 'ngrx-store-localstorage';
-
+import { routerReducer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
-
-import { I18nModule } from '@dua-upd/upd/i18n';
-
+import { I18nModule, I18nService } from '@dua-upd/upd/i18n';
 import {
   DateSelectionEffects,
   DateSelectionFacade,
@@ -28,33 +23,11 @@ import {
   i18nReducer,
   I18nEffects,
   I18nFacade,
-  actionSanitizer,
-  stateSanitizer,
-  DateSelectionState,
-  I18nState,
 } from '@dua-upd/upd/state';
 
 import { environment } from '../environments/environment';
 import { PathPreserveQueryLocationStrategy } from '@dua-upd/upd/services';
-
-import {
-  NgxGoogleAnalyticsModule,
-  NgxGoogleAnalyticsRouterModule,
-} from 'ngx-google-analytics';
-
-interface RootState {
-  dateSelection: DateSelectionState;
-  router: RouterReducerState;
-  i18n: I18nState;
-}
-
-const localStorageSyncReducer = (
-  reducer: ActionReducer<RootState>
-): ActionReducer<RootState> =>
-  localStorageSync({
-    keys: ['dateSelection', 'router', 'i18n'],
-    rehydrate: true,
-  })(reducer);
+import { AppRouteReuseStrategy } from './route-reuse.strategy';
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidebarComponent],
@@ -71,32 +44,26 @@ const localStorageSyncReducer = (
         i18n: i18nReducer,
       },
       {
-        metaReducers: !environment.production ? [localStorageSyncReducer] : [],
+        metaReducers: environment.metaReducers,
         runtimeChecks: {
           strictActionImmutability: true,
           strictStateImmutability: true,
         },
-      }
+      },
     ),
     StoreRouterConnectingModule.forRoot(),
     EffectsModule.forRoot([DateSelectionEffects, I18nEffects]),
-    !environment.production
-      ? StoreDevtoolsModule.instrument({
-          actionSanitizer,
-          stateSanitizer,
-        })
-      : [],
-    environment.production
-      ? NgxGoogleAnalyticsModule.forRoot(environment.gaTrackingId)
-      : [],
-    environment.production ? NgxGoogleAnalyticsRouterModule : [],
     NgOptimizedImage,
+    environment.envImports,
   ],
   providers: [
     Title,
     DateSelectionFacade,
+    I18nService,
     I18nFacade,
+    { provide: APP_BASE_HREF, useValue: '/' },
     { provide: LocationStrategy, useClass: PathPreserveQueryLocationStrategy },
+    { provide: RouteReuseStrategy, useClass: AppRouteReuseStrategy },
   ],
   bootstrap: [AppComponent],
 })

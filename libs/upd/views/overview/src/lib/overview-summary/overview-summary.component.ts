@@ -1,12 +1,17 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {
-  ColumnConfig,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
+import {
+  type ColumnConfig,
   searchKpiObjectiveCriteria,
   uxTestsKpiObjectiveCriteria,
   feedbackKpiObjectiveCriteria,
 } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
+import { EN_CA, type LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { combineLatest } from 'rxjs';
 
@@ -17,6 +22,9 @@ import { combineLatest } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OverviewSummaryComponent implements OnInit {
+  private overviewService = inject(OverviewFacade);
+  private i18n = inject(I18nFacade);
+
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
   searchKpiObjectiveCriteria = searchKpiObjectiveCriteria;
@@ -94,11 +102,6 @@ export class OverviewSummaryComponent implements OnInit {
   whatWasWrongChartLegend: string[] = [];
   whatWasWrongChartApex$ = this.overviewService.whatWasWrongDataApex$;
 
-  constructor(
-    private overviewService: OverviewFacade,
-    private i18n: I18nFacade
-  ) {}
-
   dyfTableCols: ColumnConfig<{ name: string; value: string }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: string }>[] = [];
   barTableCols: ColumnConfig<{
@@ -113,7 +116,6 @@ export class OverviewSummaryComponent implements OnInit {
   taskSurveyCols: ColumnConfig[] = [];
 
   ngOnInit() {
-    this.annotationsData$.subscribe((res) => console.log(res));
     combineLatest([
       this.currentLang$,
       this.dateRangeLabel$,
@@ -215,7 +217,7 @@ export class OverviewSummaryComponent implements OnInit {
           field: 'completion',
           header: this.i18n.service.translate(
             'Task Success Survey Completed',
-            lang
+            lang,
           ),
         },
       ];
@@ -238,7 +240,7 @@ export class OverviewSummaryComponent implements OnInit {
         {
           text: this.i18n.service.translate(
             'View more call drivers data',
-            lang
+            lang,
           ),
           link: 'calldrivers',
         },
@@ -258,7 +260,7 @@ export class OverviewSummaryComponent implements OnInit {
         {
           text: this.i18n.service.translate(
             'View more page feedback data',
-            lang
+            lang,
           ),
           link: 'pagefeedback',
         },

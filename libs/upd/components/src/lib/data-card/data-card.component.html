@@ -34,7 +34,7 @@
       <div class="col">
         <p class="mb-0 mt-2 row flex-nowrap">
           <span
-            [ngClass]="kpiConfig[kpiObjectiveStatus].colourClass"
+            [ngClass]="kpiConfig[kpiObjectiveStatus].colourClass || ''"
             class="text-nowrap me-0 col-auto pe-2"
             ><span class="material-icons" style="font-size: 1.7em">{{
               kpiConfig[kpiObjectiveStatus].iconName

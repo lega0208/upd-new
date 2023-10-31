@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ColumnConfig, ColumnConfigPipe } from './types';
+import { Component, inject, Input, OnInit } from '@angular/core';
+import type { ColumnConfig } from './types';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
@@ -11,19 +11,17 @@ import { I18nFacade } from '@dua-upd/upd/state';
   providers: [PercentPipe, DecimalPipe, DatePipe],
 })
 export class DataTableStylesComponent implements OnInit {
+  private percentPipe = inject(PercentPipe);
+  private decimalPipe = inject(DecimalPipe);
+  private datePipe = inject(DatePipe);
+  private i18n = inject(I18nFacade);
+
   @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() data: Record<string, number | string> = {};
 
   array: string[] = [];
   labelType?: 'project' | 'page';
   numberVal: number | string = 0;
-
-  constructor(
-    private percentPipe: PercentPipe,
-    private decimalPipe: DecimalPipe,
-    private datePipe: DatePipe,
-    private i18n: I18nFacade,
-  ) {}
 
   ngOnInit() {
     if (this.config.pipe) {

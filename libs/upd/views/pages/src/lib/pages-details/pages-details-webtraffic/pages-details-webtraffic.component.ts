@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@dua-upd/upd-components';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { GetTableProps } from '@dua-upd/utils-common';
+import type { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 
 type VisitorLocationColTypes = GetTableProps<
@@ -26,6 +26,9 @@ type ActivityMapColTypes = GetTableProps<
   styleUrls: ['./pages-details-webtraffic.component.css'],
 })
 export class PagesDetailsWebtrafficComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private pageDetailsService = inject(PagesDetailsFacade);
+
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
@@ -82,7 +85,10 @@ export class PagesDetailsWebtrafficComponent implements OnInit {
           }),
           pipe: 'number',
         },
-        { field: 'prevDate', header: this.i18n.service.translate('Dates', lang) },
+        {
+          field: 'prevDate',
+          header: this.i18n.service.translate('Dates', lang),
+        },
         {
           field: 'prevVisits',
           header: this.i18n.service.translate('Visits for ', lang, {
@@ -93,7 +99,10 @@ export class PagesDetailsWebtrafficComponent implements OnInit {
       ];
 
       this.activityMapCols = [
-        { field: 'link', header: this.i18n.service.translate('link-text', lang) },
+        {
+          field: 'link',
+          header: this.i18n.service.translate('link-text', lang),
+        },
         {
           field: 'clicks',
           header: this.i18n.service.translate('clicks', lang),
@@ -102,14 +111,9 @@ export class PagesDetailsWebtrafficComponent implements OnInit {
         {
           field: 'clicksChange',
           header: this.i18n.service.translate('comparison', lang),
-          pipe: 'percent'
-        }
+          pipe: 'percent',
+        },
       ];
     });
   }
-
-  constructor(
-    private pageDetailsService: PagesDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 }

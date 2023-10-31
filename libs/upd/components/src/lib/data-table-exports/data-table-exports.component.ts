@@ -1,10 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { formatDate, formatPercent, formatNumber } from '@angular/common';
 import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 import dayjs from 'dayjs';
-import autoTable, { RowInput } from 'jspdf-autotable';
+import type { RowInput } from 'jspdf-autotable';
 import * as FileSaver from 'file-saver';
-import { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '../data-table-styles/types';
 import { DropdownOption } from '../dropdown/dropdown.component';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
@@ -25,7 +25,11 @@ import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
   providers: [NgbPopoverConfig],
 })
 export class DataTableExportsComponent<T> {
+  private i18n = inject(I18nFacade);
+  private config: NgbPopoverConfig;
+
   utf8Encoder = new TextEncoder();
+
   exportOptions: DropdownOption<'csv' | 'pdf' | 'xlsx'>[] = [
     {
       label: 'CSV',
@@ -48,9 +52,13 @@ export class DataTableExportsComponent<T> {
   @Input() data: T[] = [];
   @Input() cols: ColumnConfig<T>[] = [];
 
-  constructor(config: NgbPopoverConfig, private i18n: I18nFacade) {
+  constructor() {
+    const config = inject(NgbPopoverConfig);
+
     config.placement = 'right';
     config.triggers = 'hover focus';
+
+    this.config = config;
   }
 
   async getFormattedExportData(replaceKeysWithHeaders = false) {
@@ -69,56 +77,57 @@ export class DataTableExportsComponent<T> {
       'Planning',
     ];
 
-    const pageStatusKeys: PageStatus[] = [
-      'Live',
-      '404', 
-      'Redirected'
-    ];
+    const pageStatusKeys: PageStatus[] = ['Live', '404', 'Redirected'];
 
     const projectStatuses = (await this.i18n.service.get(
-      projectStatusKeys
+      projectStatusKeys,
     )) as Record<string, string>;
 
     const pageStatuses = (await this.i18n.service.get(
-      pageStatusKeys
+      pageStatusKeys,
     )) as Record<string, string>;
 
     return this.data.map((row) =>
-      this.cols.reduce((formattedRow, col) => {
-        const colKey = replaceKeysWithHeaders ? col.header : col.field;
+      this.cols.reduce(
+        (formattedRow, col) => {
+          const colKey = replaceKeysWithHeaders ? col.header : col.field;
 
-        if (!row[col.field as keyof T]) {
-          formattedRow[colKey] = '';
-        } else if (col.pipe === 'percent') {
-          formattedRow[colKey] = formatPercent(
-            (<unknown>row[col.field as keyof T]) as number,
-            currentLang
-          );
-        } else if (col.pipe === 'number') {
-          formattedRow[colKey] = formatNumber(
-            (<unknown>row[col.field as keyof T]) as number,
-            currentLang
-          );
-        } else if (col.pipe === 'date') {
-          formattedRow[colKey] = formatDate(
-            (<unknown>row[col.field as keyof T]) as Date,
-            col.pipeParam ?? 'YYYY-MM-dd',
-            currentLang
-          );
-        } else if (col.typeParam === 'cops') {
-          formattedRow[colKey] = row[col.field as keyof T] ? cops : '';
-        } else if (col.filterConfig?.type === 'pageStatus') {
-          formattedRow[colKey] =
-            pageStatuses[(<unknown>row[col.field as keyof T]) as string];
-        } else if (col.type === 'label') {
-          formattedRow[colKey] =
-            projectStatuses[(<unknown>row[col.field as keyof T]) as string];
-        } else {
-          formattedRow[colKey] = (<unknown>row[col.field as keyof T]) as string;
-        }
+          if (!row[col.field as keyof T]) {
+            formattedRow[colKey] = '';
+          } else if (col.pipe === 'percent') {
+            formattedRow[colKey] = formatPercent(
+              (<unknown>row[col.field as keyof T]) as number,
+              currentLang,
+            );
+          } else if (col.pipe === 'number') {
+            formattedRow[colKey] = formatNumber(
+              (<unknown>row[col.field as keyof T]) as number,
+              currentLang,
+            );
+          } else if (col.pipe === 'date') {
+            formattedRow[colKey] = formatDate(
+              (<unknown>row[col.field as keyof T]) as Date,
+              col.pipeParam ?? 'YYYY-MM-dd',
+              currentLang,
+            );
+          } else if (col.typeParam === 'cops') {
+            formattedRow[colKey] = row[col.field as keyof T] ? cops : '';
+          } else if (col.filterConfig?.type === 'pageStatus') {
+            formattedRow[colKey] =
+              pageStatuses[(<unknown>row[col.field as keyof T]) as string];
+          } else if (col.type === 'label') {
+            formattedRow[colKey] =
+              projectStatuses[(<unknown>row[col.field as keyof T]) as string];
+          } else {
+            formattedRow[colKey] = (<unknown>(
+              row[col.field as keyof T]
+            )) as string;
+          }
 
-        return formattedRow;
-      }, {} as Record<string, string>)
+          return formattedRow;
+        },
+        {} as Record<string, string>,
+      ),
     );
   }
 
@@ -127,10 +136,10 @@ export class DataTableExportsComponent<T> {
       const data = await this.getFormattedExportData(true);
 
       const headerRow = Object.keys(data[0]).map(
-        (header: string) => `"${header}"`
+        (header: string) => `"${header}"`,
       );
       const dataRows = data.map((row) =>
-        Object.values(row).map((cellData) => `"${cellData}"`)
+        Object.values(row).map((cellData) => `"${cellData}"`),
       );
 
       const csvData = [headerRow, ...dataRows];
@@ -157,7 +166,11 @@ export class DataTableExportsComponent<T> {
   }
 
   async exportPdf() {
-    const jsPdf = await import('jspdf');
+    type JsPdf = typeof import('jspdf').jsPDF;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const jsPdf: JsPdf = (await import('jspdf/dist/jspdf.es.min.js')).default;
+    const autoTable = (await import('jspdf-autotable')).default;
 
     try {
       const columnsExport = this.cols.map((obj) => ({
@@ -168,7 +181,7 @@ export class DataTableExportsComponent<T> {
       const minCellWidth =
         columnsExport.length === 1 ? 100 : 100 / (columnsExport.length - 1);
 
-      const doc = new jsPdf.default('p', 'mm', 'a4');
+      const doc = new jsPdf('p', 'mm', 'a4');
 
       autoTable(doc, {
         styles: { halign: 'left' },
@@ -186,7 +199,7 @@ export class DataTableExportsComponent<T> {
   }
 
   async exportExcel() {
-    const xlsx = await import('xlsx');
+    const { utils, write } = await import('xlsx');
 
     try {
       if (this.data && this.data.length > 0) {
@@ -195,12 +208,12 @@ export class DataTableExportsComponent<T> {
 
         const exportData = await this.getFormattedExportData(true);
 
-        const worksheet = xlsx.utils.json_to_sheet(exportData);
+        const worksheet = utils.json_to_sheet(exportData);
         const workbook = {
           Sheets: { data: worksheet },
           SheetNames: ['data'],
         };
-        const excelBuffer: ArrayBuffer = xlsx.write(workbook, {
+        const excelBuffer: ArrayBuffer = write(workbook, {
           bookType: 'xlsx',
           type: 'array',
         });

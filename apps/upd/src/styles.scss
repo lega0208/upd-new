@@ -2,9 +2,9 @@
 @import url('./css/bootstrap.min.css');
 @import url('./css/datatables.min.css');
 @import url('./css/upd-custom.css');
-@import url('../../../node_modules/primeicons/primeicons.css');
-@import url('../../../node_modules/primeng/resources/themes/saga-blue/theme.css');
-@import url('../../../node_modules/primeng/resources/primeng.min.css');
+@import url('./css/primeicons.css');
+@import url('primeng/resources/themes/saga-blue/theme.css');
+@import url('primeng/resources/primeng.min.css');
 
 .p-dropdown-items {
   margin: 0;
@@ -155,4 +155,11 @@ div.apexcharts-tooltip.apexcharts-theme-light {
   font-size: 14px;
   font-weight: 400;
   font-family: 'Noto Sans', sans-serif;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  text-align: left;
+  border-style: solid;
+  border-color: #e9ecef;
+  border-width: 1px 0 1px 0;
 }

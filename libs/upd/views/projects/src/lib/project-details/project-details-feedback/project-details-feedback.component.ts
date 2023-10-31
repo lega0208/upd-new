@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import { GetTableProps } from '@dua-upd/utils-common';
+import type { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 type VisitsByPageColType = GetTableProps<
@@ -33,6 +33,9 @@ type FeedbackByTagsColTypes = GetTableProps<
   styleUrls: ['./project-details-feedback.component.css'],
 })
 export class ProjectDetailsFeedbackComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private readonly projectsDetailsService = inject(ProjectsDetailsFacade);
+
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
@@ -66,11 +69,6 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ =
     this.projectsDetailsService.comparisonDateRangeLabel$;
-
-  constructor(
-    private readonly projectsDetailsService: ProjectsDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 
   ngOnInit() {
     combineLatest([
@@ -130,7 +128,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
           field: 'feedbackToVisitsRatio',
           header: this.i18n.service.translate(
             'Ratio of feedback to visits',
-            lang
+            lang,
           ),
           pipe: 'percent',
           pipeParam: '1.2',
