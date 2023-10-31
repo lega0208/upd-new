@@ -1,12 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   Input,
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { ApexAxisChartSeries, ChartComponent } from 'ng-apexcharts';
-import { ColumnConfig } from '../data-table-styles/types';
+import { type ApexAxisChartSeries, ChartComponent } from 'ng-apexcharts';
+import type { ColumnConfig } from '../data-table-styles/types';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ApexStore } from './apex.store';
 
@@ -18,6 +19,9 @@ import { ApexStore } from './apex.store';
   providers: [ApexStore],
 })
 export class ApexBarComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private readonly apexStore = inject(ApexStore);
+
   @ViewChild('chart', { static: true }) chart!: ChartComponent;
   @Input() secondaryTitleCols: ColumnConfig = { field: '', header: '' };
   @Input() secondaryTitleData: Record<string, number | string>[] = [];
@@ -63,11 +67,6 @@ export class ApexBarComponent implements OnInit {
 
   readonly vm$ = this.apexStore.vm$;
   readonly hasData$ = this.apexStore.hasData$;
-
-  constructor(
-    private i18n: I18nFacade,
-    private readonly apexStore: ApexStore
-  ) {}
 
   ngOnInit(): void {
     this.i18n.currentLang$.subscribe((lang) => {

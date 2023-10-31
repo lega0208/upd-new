@@ -1,4 +1,4 @@
-import {
+import type {
   ApexAnnotations,
   ApexAxisChartSeries,
   ApexChart,
@@ -19,19 +19,19 @@ import {
   ApexTooltip,
   ApexXAxis,
   ApexYAxis,
-  ChartComponent,
   ChartType,
 } from 'ng-apexcharts';
+import { ChartComponent } from 'ng-apexcharts';
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   Input,
   OnChanges,
-  OnInit,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
-import { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '../data-table-styles/types';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { KpiObjectiveStatus } from '../data-card/data-card.component';
@@ -75,6 +75,8 @@ type ChartOptions = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApexRadialBarComponent implements OnChanges {
+  private i18n = inject(I18nFacade);
+
   @ViewChild('chart', { static: false }) chart!: ChartComponent;
   @Input() secondaryTitleCols: ColumnConfig = { field: '', header: '' };
   @Input() secondaryTitleData: Record<string, number | string>[] = [];
@@ -158,10 +160,10 @@ export class ApexRadialBarComponent implements OnChanges {
                 value: {
                   offsetY: -55,
                   fontSize: '26px',
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
       },
       {
@@ -179,10 +181,10 @@ export class ApexRadialBarComponent implements OnChanges {
                 value: {
                   offsetY: -40,
                   fontSize: '26px',
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
       },
       {
@@ -200,10 +202,10 @@ export class ApexRadialBarComponent implements OnChanges {
                 value: {
                   offsetY: -40,
                   fontSize: '20px',
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
       },
       {
@@ -221,10 +223,10 @@ export class ApexRadialBarComponent implements OnChanges {
                 value: {
                   offsetY: -30,
                   fontSize: '20px',
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
       },
       {
@@ -242,16 +244,14 @@ export class ApexRadialBarComponent implements OnChanges {
                 value: {
                   offsetY: -55,
                   fontSize: '32px',
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
       },
     ],
   };
-
-  constructor(private i18n: I18nFacade) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['current'] || changes['comparison'] || changes['labels']) {
@@ -276,10 +276,10 @@ export class ApexRadialBarComponent implements OnChanges {
           return this.postValue
             ? `${formatPercent(
                 data / 100,
-                locale
+                locale,
               )} ${this.i18n.service.translate(
                 this.postValue,
-                (locale + '-CA') as LocaleId
+                (locale + '-CA') as LocaleId,
               )}`
             : `${formatPercent(data / 100, locale)}`;
         };
@@ -295,7 +295,7 @@ export class ApexRadialBarComponent implements OnChanges {
               ? [
                   `${this.i18n.service.translate(
                     this.preLabel,
-                    (locale + '-CA') as LocaleId
+                    (locale + '-CA') as LocaleId,
                   )} ${formatPercent(this.valueLabel, locale)}`,
                 ]
               : this.comparison !== 0

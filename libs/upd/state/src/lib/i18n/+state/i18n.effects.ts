@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
 import { EMPTY, mergeMap, of } from 'rxjs';
-
-import { I18nService, LocaleId } from '@dua-upd/upd/i18n';
+import { I18nService, type LocaleId } from '@dua-upd/upd/i18n';
 import * as I18nActions from './i18n.actions';
 import { selectCurrentLang } from './i18n.selectors';
 import { selectRouteNestedParam } from '../../router/router.selectors';
-import { ActivatedRoute, Router } from '@angular/router';
 
 export type RouteLang = 'en' | 'fr';
+
 const langToLocaleId: Record<RouteLang, LocaleId> = {
   en: 'en-CA',
   fr: 'fr-CA',
@@ -22,6 +22,13 @@ const localeIdToLang: Record<LocaleId, RouteLang> = {
 
 @Injectable()
 export class I18nEffects {
+  private readonly actions$ = inject(Actions);
+  private store = inject(Store);
+  private readonly i18n = inject(I18nService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+
   init$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(I18nActions.init),
@@ -84,12 +91,4 @@ export class I18nEffects {
     },
     { dispatch: false }
   );
-
-  constructor(
-    private readonly actions$: Actions,
-    private store: Store,
-    private readonly i18n: I18nService,
-    private router: Router,
-    private route: ActivatedRoute,
-  ) {}
 }

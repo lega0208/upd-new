@@ -1,6 +1,6 @@
 import { map, Observable } from 'rxjs';
 import type { I18nService } from '@dua-upd/upd/i18n';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 
 /**
  * @description Returns an Observable that emits the ColumnConfigs with translated headers

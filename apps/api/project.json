@@ -47,6 +47,12 @@
         "buildTarget": "api:build"
       }
     },
+    "preview": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "api:build"
+      }
+    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],

@@ -1,6 +1,7 @@
 import { formatPercent, formatDate } from '@angular/common';
 import {
   Component,
+  inject,
   Input,
   OnChanges,
   OnInit,
@@ -15,7 +16,9 @@ import { combineLatest, map, of } from 'rxjs';
   templateUrl: './data-kpi-card.component.html',
   styleUrls: ['./data-kpi-card.component.scss'],
 })
-export class DataKpiCardComponent implements OnInit {
+export class DataKpiCardComponent implements OnInit, OnChanges {
+  private i18n = inject(I18nFacade);
+
   @Input() current: string | number = '';
   @Input() comparison$ = of(0);
   @Input() date$ = of(new Date(0));
@@ -40,7 +43,7 @@ export class DataKpiCardComponent implements OnInit {
   ]).pipe(map(([lang, difference]) => formatPercent(difference, lang)));
 
   dateFormatted$ = combineLatest([this.currentLang$, this.date$]).pipe(
-    map(([lang, date]) => formatDate(date, 'mediumDate', lang))
+    map(([lang, date]) => formatDate(date, 'mediumDate', lang)),
   );
 
   comparisonClass = 'hidden';
@@ -91,8 +94,6 @@ export class DataKpiCardComponent implements OnInit {
     }
   }
 
-  constructor(private i18n: I18nFacade) {}
-
   ngOnChanges(changes: SimpleChanges) {
     if (this.type === 'volume') {
       if (changes['comparison$']) {
@@ -107,7 +108,9 @@ export class DataKpiCardComponent implements OnInit {
           this.currentLang$,
           this.difference$,
         ]).pipe(
-          map(([lang, difference]) => formatPercent(Math.abs(difference), lang))
+          map(([lang, difference]) =>
+            formatPercent(Math.abs(difference), lang),
+          ),
         );
       }
     } else {
@@ -116,14 +119,16 @@ export class DataKpiCardComponent implements OnInit {
           this.currentLang$,
           this.comparison$,
         ]).pipe(
-          map(([lang, comparison]) => formatPercent(Math.abs(comparison), lang))
+          map(([lang, comparison]) =>
+            formatPercent(Math.abs(comparison), lang),
+          ),
         );
       }
     }
 
     if (changes['date$']) {
       this.dateFormatted$ = combineLatest([this.currentLang$, this.date$]).pipe(
-        map(([lang, date]) => formatDate(date, 'mediumDate', lang, '+0'))
+        map(([lang, date]) => formatDate(date, 'mediumDate', lang, '+0')),
       );
     }
   }

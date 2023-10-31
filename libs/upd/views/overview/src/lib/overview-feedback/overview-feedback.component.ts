@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
+import { EN_CA } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
@@ -11,6 +11,8 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
   styleUrls: ['./overview-feedback.component.css'],
 })
 export class OverviewFeedbackComponent implements OnInit {
+  private overviewService = inject(OverviewFacade);
+  private i18n = inject(I18nFacade);
   currentLang$ = this.i18n.currentLang$;
 
   dyfChart$ = this.overviewService.dyfData$;
@@ -39,11 +41,6 @@ export class OverviewFeedbackComponent implements OnInit {
     percentChange: number;
   }>[] = [];
   langLink = 'en';
-
-  constructor(
-    private overviewService: OverviewFacade,
-    private i18n: I18nFacade
-  ) {}
 
   ngOnInit() {
     combineLatest([this.currentLang$]).subscribe(([lang]) => {

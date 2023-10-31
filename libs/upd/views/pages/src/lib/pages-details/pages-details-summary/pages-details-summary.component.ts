@@ -1,14 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
+import { EN_CA, type LocaleId } from '@dua-upd/upd/i18n';
 import {
-  ColumnConfig,
+  type ColumnConfig,
   feedbackKpiObjectiveCriteria,
 } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { GetTableProps } from '@dua-upd/utils-common';
+import type { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
-import { _DisposeViewRepeaterStrategy } from '@angular/cdk/collections';
 
 type TasksTableColTypes = GetTableProps<PagesDetailsSummaryComponent, 'tasks$'>;
 type BarTableColTypes = GetTableProps<
@@ -26,6 +25,9 @@ type VisitsByDeviceColTypes = GetTableProps<
   styleUrls: ['./pages-details-summary.component.css'],
 })
 export class PagesDetailsSummaryComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private pageDetailsService = inject(PagesDetailsFacade);
+
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
@@ -76,11 +78,6 @@ export class PagesDetailsSummaryComponent implements OnInit {
   visitsByDeviceTypeTable$ = this.pageDetailsService.visitsByDeviceTypeTable$;
   visitsByDeviceTypeCols: ColumnConfig<VisitsByDeviceColTypes>[] = [];
   langLink = 'en';
-
-  constructor(
-    private pageDetailsService: PagesDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 
   topSearchTermsCols: ColumnConfig[] = [];
 

@@ -60,7 +60,6 @@
       </ng-container>
     </span>
   </div>
-  <!-- View URL / Copy URL stuff -->
 
   <upd-project-header
     [data]="(projects$ | async) || []"
@@ -68,9 +67,12 @@
   ></upd-project-header>
 
   <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
-  <upd-date-selector
-    *ngIf="!currentUrl.startsWith('readability')"
-  ></upd-date-selector>
+
+  <ng-container *ngIf="currentUrl$ | async as currentUrl">
+    <upd-date-selector
+      *ngIf="!currentUrl.startsWith('readability')"
+    ></upd-date-selector>
+  </ng-container>
 
   <router-outlet></router-outlet>
 </ng-template>

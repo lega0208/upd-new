@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { arrayToDictionary, sum } from '@dua-upd/utils-common';
@@ -30,13 +30,15 @@ export type SeriesWithXYData = {
 
 @Injectable()
 export class ApexStore extends ComponentStore<ApexOptions> {
-  constructor(private i18n: I18nFacade) {
+  private i18n = inject(I18nFacade);
+
+  constructor() {
     super(
       mergeDeepRight(
         createBaseConfig((val: number) =>
           val.toLocaleString(this.i18n.service.currentLang, {
             maximumFractionDigits: 0,
-          })
+          }),
         ),
         {
           toolbar: {
@@ -48,8 +50,8 @@ export class ApexStore extends ComponentStore<ApexOptions> {
             },
           },
           yaxis: [],
-        } as ApexOptions
-      )
+        } as ApexOptions,
+      ),
     );
   }
 
@@ -57,7 +59,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
     (state, value: string[]): ApexOptions => ({
       ...state,
       colors: value ? value : [],
-    })
+    }),
   );
 
   readonly setLocale = this.updater(
@@ -67,7 +69,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
         ...state.chart,
         defaultLocale: value === EN_CA ? 'en' : 'fr',
       } as ApexChart,
-    })
+    }),
   );
 
   readonly setAnnotations = this.updater(
@@ -78,11 +80,11 @@ export class ApexStore extends ComponentStore<ApexOptions> {
           y,
           text,
         })),
-        'x'
+        'x',
       );
 
       const seriesDicts = (state.series as SeriesWithXYData[])?.map((series) =>
-        arrayToDictionary(series.data, 'x')
+        arrayToDictionary(series.data, 'x'),
       );
 
       return {
@@ -118,7 +120,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
                   annotation,
                 },
                 this.i18n.service.currentLang,
-                this.i18n.service.instant('Event')
+                this.i18n.service.instant('Event'),
               );
             } catch (err) {
               console.error(err);
@@ -144,19 +146,19 @@ export class ApexStore extends ComponentStore<ApexOptions> {
           })),
         },
       };
-    }
+    },
   );
 
   readonly setYAxis = this.updater(
     (state, series: ApexAxisChartSeries): ApexOptions => {
       const firstDataSet: number[] = [0, 1].flatMap((i: number) =>
-        (series[i].data as { y: number }[]).map((data) => data.y)
+        (series[i].data as { y: number }[]).map((data) => data.y),
       );
 
       const secondDataSet: number[] =
         series[0]?.data?.length <= 7
           ? [2, 3].flatMap((p: number) =>
-              (series[p].data as { y: number }[]).map((d) => d.y)
+              (series[p].data as { y: number }[]).map((d) => d.y),
             )
           : firstDataSet.map((val) => Math.round(val / 5));
 
@@ -189,7 +191,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
           title: {
             text: this.i18n.service.translate(
               'visits',
-              this.i18n.service.currentLang
+              this.i18n.service.currentLang,
             ),
             style: {
               fontSize: '16px',
@@ -209,7 +211,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
           title: {
             text: this.i18n.service.translate(
               'Call volume',
-              this.i18n.service.currentLang
+              this.i18n.service.currentLang,
             ),
             style: {
               fontSize: '16px',
@@ -250,7 +252,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
       };
 
       return mergeDeepRight(state, chartOpts);
-    }
+    },
   );
 
   readonly vm$ = this.select(this.state$, (state) => state);
@@ -268,9 +270,9 @@ export class ApexStore extends ComponentStore<ApexOptions> {
                   'data' in series &&
                   series.data) ||
                 []
-              ).length
-          ) || []
-      ) > 0
+              ).length,
+          ) || [],
+      ) > 0,
   );
 }
 
@@ -298,7 +300,7 @@ export type TooltipConfig = {
 export function seriesTooltipHtml(
   { label, value, colour }: TooltipSeriesConfig,
   index: number,
-  locale: 'en-CA' | 'fr-CA'
+  locale: 'en-CA' | 'fr-CA',
 ) {
   return `
 
@@ -329,7 +331,7 @@ export function seriesTooltipHtml(
 export function getTooltipHtml(
   { title, series, annotation }: TooltipConfig,
   locale: 'en-CA' | 'fr-CA',
-  eventText = 'Event'
+  eventText = 'Event',
 ) {
   const annotationHtml = annotation
     ? `
@@ -357,7 +359,7 @@ export function getTooltipHtml(
 
   const seriesHtml = series
     .filter(
-      ({ value }) => value !== null && value !== undefined && !isNaN(value)
+      ({ value }) => value !== null && value !== undefined && !isNaN(value),
     )
     .map((series, i) => seriesTooltipHtml(series, i, locale))
     .join('');

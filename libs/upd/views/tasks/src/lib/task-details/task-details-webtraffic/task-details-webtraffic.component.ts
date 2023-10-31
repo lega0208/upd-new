@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@dua-upd/upd-components';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import { Component, inject, OnInit } from '@angular/core';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 import { EN_CA } from '@dua-upd/upd/i18n';
@@ -13,8 +12,9 @@ import { createCategoryConfig } from '@dua-upd/upd/utils';
   styleUrls: ['./task-details-webtraffic.component.css'],
 })
 export class TaskDetailsWebtrafficComponent implements OnInit {
-  currentLang!: LocaleId;
-  currentLang$ = this.i18n.currentLang$;
+  private i18n = inject(I18nFacade);
+  private readonly taskDetailsService = inject(TasksDetailsFacade);
+
   langLink = 'en';
 
   visitsByPage$ = this.taskDetailsService.visitsByPageWithPercentChange$;
@@ -25,11 +25,7 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
   visitsByPageCols: ColumnConfig[] = [];
 
   ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
-    combineLatest([this.visitsByPage$, this.currentLang$]).subscribe(
+    combineLatest([this.visitsByPage$, this.i18n.currentLang$]).subscribe(
       ([data, lang]) => {
         this.langLink = lang === EN_CA ? 'en' : 'fr';
         this.visitsByPageCols = [
@@ -72,12 +68,7 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
             type: 'comparison',
           },
         ];
-      }
+      },
     );
   }
-
-  constructor(
-    private readonly taskDetailsService: TasksDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 }

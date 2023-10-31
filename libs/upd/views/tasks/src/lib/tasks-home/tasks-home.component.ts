@@ -1,9 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { map } from 'rxjs';
-
-import { ColumnConfig } from '@dua-upd/upd-components';
-import { I18nFacade } from '@dua-upd/upd/state';
-import { TasksHomeAggregatedData } from '@dua-upd/types-common';
+import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { TasksHomeAggregatedData } from '@dua-upd/types-common';
 import { TasksHomeFacade } from './+state/tasks-home.facade';
 
 @Component({
@@ -12,7 +10,8 @@ import { TasksHomeFacade } from './+state/tasks-home.facade';
   styleUrls: ['./tasks-home.component.css'],
 })
 export class TasksHomeComponent implements OnInit {
-  currentLang$ = this.i18n.currentLang$;
+  private readonly tasksHomeService = inject(TasksHomeFacade);
+
   loading$ = this.tasksHomeService.loaded$.pipe(map((loaded) => !loaded));
 
   totalTasks$ = this.tasksHomeService.totalTasks$;
@@ -27,11 +26,6 @@ export class TasksHomeComponent implements OnInit {
 
   columns: ColumnConfig<TasksHomeAggregatedData>[] = [];
   searchFields = this.columns.map((col) => col.field);
-
-  constructor(
-    private readonly tasksHomeService: TasksHomeFacade,
-    private i18n: I18nFacade
-  ) {}
 
   ngOnInit() {
     this.tasksHomeService.init();

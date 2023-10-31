@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import { Component, inject, OnInit } from '@angular/core';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import { GetTableProps } from '@dua-upd/utils-common';
+import type { GetTableProps } from '@dua-upd/utils-common';
 import { combineLatest } from 'rxjs';
 
 type FeedbackCommentsColType = GetTableProps<
@@ -21,6 +21,9 @@ type FeedbackByTagsColTypes = GetTableProps<
   styleUrls: ['./task-details-feedback.component.css'],
 })
 export class TaskDetailsFeedbackComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private readonly taskDetailsService = inject(TasksDetailsFacade);
+
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
@@ -96,7 +99,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
           field: 'feedbackToVisitsRatio',
           header: this.i18n.service.translate(
             'Ratio of feedback to visits',
-            lang
+            lang,
           ),
           pipe: 'percent',
           pipeParam: '1.2',
@@ -161,9 +164,4 @@ export class TaskDetailsFeedbackComponent implements OnInit {
       ];
     });
   }
-
-  constructor(
-    private readonly taskDetailsService: TasksDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 }

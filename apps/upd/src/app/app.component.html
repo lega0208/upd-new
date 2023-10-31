@@ -1,7 +1,7 @@
 <div class="container vh-100">
-  <upd-header [lang]="(currentLang$ | async) || en"></upd-header>
+  <upd-header [lang]="currentLang()"></upd-header>
   <upd-sidebar></upd-sidebar>
-  <h1 class="visually-hidden">{{ title }}</h1>
+  <h1 class="visually-hidden">{{ translatedTitleFromNav() }}</h1>
   <main [@routeAnimations]="getRouteAnimationData()" style="min-height: 100%">
     <router-outlet></router-outlet>
   </main>
@@ -13,7 +13,7 @@
       <div class="col-lg-2 col-md-3 col-sm-4 col-4">
         <img
           class="img-fluid"
-          src="./assets/img/canada-black-30mm.png"
+          [src]="canadaLogo"
           alt="{{'government_of_canada' | translate}}"
         />
       </div>

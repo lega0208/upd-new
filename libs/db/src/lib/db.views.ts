@@ -205,6 +205,26 @@ export class PageVisitsView
       tasks: 1,
       projects: 1,
       ux_tests: 1,
+      is_404: {
+        $toBool: '$is_404',
+      },
+      redirect: 1,
+      is_redirect: {
+        $toBool: '$redirect',
+      },
+      pageStatus: {
+        $switch: {
+          branches: [
+            { case: { $eq: ['$is_404', true] }, then: '404' },
+            { case: { $eq: ['$redirect', ''] }, then: 'Live' },
+            {
+              case: { $eq: [{ $toBool: '$redirect' }, true] },
+              then: 'Redirected',
+            },
+          ],
+          default: 'Live',
+        },
+      },
     };
 
     const pages =

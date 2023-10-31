@@ -1,20 +1,21 @@
-import {
+import type {
   ApexAxisChartSeries,
   ApexChart,
   ApexOptions,
-  ChartComponent,
   ChartType,
 } from 'ng-apexcharts';
+import { ChartComponent } from 'ng-apexcharts';
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   Input,
   ViewChild,
 } from '@angular/core';
-import { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '../data-table-styles/types';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import {
+import type {
   KpiObjectiveStatusConfig,
   KpiOptionalConfig,
 } from '../data-card/data-card.component';
@@ -40,6 +41,8 @@ dayjs.extend(utc);
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApexSparkLineComponent {
+  private readonly i18n = inject(I18nFacade);
+
   @ViewChild('chart', { static: false }) chart!: ChartComponent;
   @Input() secondaryTitleCols: ColumnConfig = { field: '', header: '' };
   @Input() secondaryTitleData: Record<string, number | string>[] = [];
@@ -70,8 +73,8 @@ export class ApexSparkLineComponent {
                   'data' in series &&
                   series.data) ||
                 []
-              ).length
-          ) || []
+              ).length,
+          ) || [],
       ) > 0
     );
   }
@@ -124,16 +127,16 @@ export class ApexSparkLineComponent {
     },
   };
 
-  constructor(private i18n: I18nFacade) {}
-
   get kpiObjectiveStatus() {
-    return this.kpiObjectiveCriteria(this.current, this.comparison || 0);
+    return (
+      this.kpiObjectiveCriteria?.(this.current, this.comparison || 0) || 'none'
+    );
   }
 
   get kpiConfig(): KpiObjectiveStatusConfig {
     return mergeDeepRight(
       defaultKpiObjectiveStatusConfig,
-      this.kpiStylesConfig
+      this.kpiStylesConfig || {},
     );
   }
 
@@ -151,7 +154,7 @@ export class ApexSparkLineComponent {
       {
         minimumFractionDigits: 1,
         maximumFractionDigits: 2,
-      }
+      },
     );
   }
 
@@ -160,7 +163,7 @@ export class ApexSparkLineComponent {
       this.i18n.service.currentLang,
       {
         maximumFractionDigits: 1,
-      }
+      },
     );
   }
 }

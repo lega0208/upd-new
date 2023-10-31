@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import { Component, inject, OnInit } from '@angular/core';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
-import { OverviewProject } from '@dua-upd/types-common';
+import type { OverviewProject } from '@dua-upd/types-common';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
@@ -11,6 +11,9 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
   styleUrls: ['./overview-ux-tests.component.css'],
 })
 export class OverviewUxTestsComponent implements OnInit {
+  private overviewService = inject(OverviewFacade);
+  private i18n = inject(I18nFacade);
+
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
@@ -24,11 +27,6 @@ export class OverviewUxTestsComponent implements OnInit {
   testsConductedLastQuarter$ =
     this.overviewService.uxTestsConductedLastQuarter$;
   COPSTests$ = this.overviewService.uxCopsTestsCompleted$;
-
-  constructor(
-    private overviewService: OverviewFacade,
-    private i18n: I18nFacade
-  ) {}
 
   uxChartCols: ColumnConfig<OverviewProject>[] = [];
 

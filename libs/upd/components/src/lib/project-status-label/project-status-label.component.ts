@@ -5,7 +5,7 @@ import { ProjectStatus, PageStatus, ProjectType } from '@dua-upd/types-common';
   selector: 'upd-project-status-label',
   template: `
     <span *ngIf="projectStatus" class="badge {{ styleClass }}  {{ projectStatusClassMap[projectStatus] }}">{{ projectStatus | translate }}</span>
-    <span *ngIf="pageStatus" class="badge rounded-pill {{ styleClass }}  {{ pageStatusClassMap[pageStatus] }}">{{ pageStatus | translate }}</span>
+    <span *ngIf="pageStatus" class="badge w-100 {{ styleClass }}  {{ pageStatusClassMap[pageStatus] }}">{{ pageStatus | translate }}</span>
     <span *ngIf="projectType" class="badge {{ styleClass }} {{ projectTypeClassMap[projectType] }}">{{ projectType | translate }}</span>
   `,
   styleUrls: ['./project-status-label.component.scss'],
@@ -29,6 +29,7 @@ export class ProjectStatusLabelComponent {
   };
 
   pageStatusClassMap: Record<PageStatus, string> = {
+    'Live': 'bg-complete',
     '404': 'bg-404',
     'Redirected': 'bg-redirect',
   };

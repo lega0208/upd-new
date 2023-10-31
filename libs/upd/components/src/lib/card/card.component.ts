@@ -1,6 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
-import { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '../data-table-styles/types';
 
 @Component({
   selector: 'upd-card',
@@ -32,6 +32,8 @@ import { ColumnConfig } from '../data-table-styles/types';
   providers: [NgbPopoverConfig],
 })
 export class CardComponent {
+  private popoverConfig: NgbPopoverConfig;
+
   @Input() title = '';
   @Input() titleTooltip = '';
   @Input() titleSize: CardTitleSize = 'h6';
@@ -41,10 +43,14 @@ export class CardComponent {
   @Input() type = 'list';
   @Input() modal = '';
 
-  constructor(config: NgbPopoverConfig) {
-    config.disablePopover = this.titleTooltip !== '';
-    config.placement = 'right';
-    config.triggers = 'hover focus';
+  constructor() {
+    const popoverConfig = inject(NgbPopoverConfig);
+
+    popoverConfig.disablePopover = this.titleTooltip !== '';
+    popoverConfig.placement = 'right';
+    popoverConfig.triggers = 'hover focus';
+
+    this.popoverConfig = popoverConfig;
   }
 
   get cardHeight() {

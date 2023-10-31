@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '../data-table-styles/types';
 
 @Component({
   selector: 'upd-project-header',
