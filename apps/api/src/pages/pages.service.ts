@@ -70,41 +70,10 @@ export class PagesService {
       end: endDate,
     };
 
-    const urls = await this.urls
-      .aggregate()
-      .match({
-        $or: [{ is_404: true }, { redirect: { $exists: true } }],
-      })
-      .project({
-        _id: 0,
-        page: 1,
-        is_404: 1,
-        redirect: 1,
-        is_redirect: {
-          $cond: [{ $ifNull: ['$redirect', false] }, true, false],
-        },
-      })
-      .exec();
-
-    const urlsDict = arrayToDictionary(urls, 'page');
-
-    const results = (
-      await this.db.views.pageVisits.getVisitsWithPageData(
-        queryDateRange,
-        this.pageModel,
-      )
-    ).map((page) => {
-      const pageInfo = urlsDict[page._id.toString()];
-  
-      let pageStatus: PageStatus = 'Live';
-      if (pageInfo?.is_404 === true) {
-        pageStatus = '404';
-      } else if (pageInfo?.is_redirect === true) {
-        pageStatus = 'Redirected';
-      }
-  
-      return { ...page, pageStatus };
-    });
+    const results = await this.db.views.pageVisits.getVisitsWithPageData(
+      queryDateRange,
+      this.pageModel
+    );
 
     await this.cacheManager.set(cacheKey, results);
 
