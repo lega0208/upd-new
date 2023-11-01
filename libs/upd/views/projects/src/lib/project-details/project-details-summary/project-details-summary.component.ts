@@ -1,13 +1,17 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {
-  ColumnConfig,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
+import {
+  type ColumnConfig,
   callVolumeObjectiveCriteria,
   feedbackKpiObjectiveCriteria,
 } from '@dua-upd/upd-components';
-import { LocaleId, EN_CA } from '@dua-upd/upd/i18n';
+import { EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { GetTableProps } from '@dua-upd/utils-common';
-import { combineLatest, Observable, of } from 'rxjs';
+import type { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 type ParticipantTasksColTypes = GetTableProps<
@@ -35,7 +39,9 @@ type DocumentsColTypes = GetTableProps<
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectDetailsSummaryComponent implements OnInit {
-  currentLang!: LocaleId;
+  private i18n = inject(I18nFacade);
+  private readonly projectsDetailsService = inject(ProjectsDetailsFacade);
+
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
@@ -95,20 +101,11 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   startDate$ = this.projectsDetailsService.startDate$;
   launchDate$ = this.projectsDetailsService.launchDate$;
 
-  constructor(
-    private readonly projectsDetailsService: ProjectsDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
-
   participantTasksCols: ColumnConfig<ParticipantTasksColTypes>[] = [];
   dyfTableCols: ColumnConfig<DyfTableColTypes>[] = [];
   whatWasWrongTableCols: ColumnConfig<WhatWasWrongColTypes>[] = [];
 
-  ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
+  ngOnInit() {
     this.currentLang$.subscribe((lang) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
 
@@ -166,6 +163,7 @@ export class ProjectDetailsSummaryComponent implements OnInit {
         //   pipe: 'percent',
         // },
       ];
+
       this.dyfTableCols = [
         {
           field: 'name',
@@ -177,6 +175,7 @@ export class ProjectDetailsSummaryComponent implements OnInit {
           pipe: 'number',
         },
       ];
+
       this.whatWasWrongTableCols = [
         { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
         {
@@ -185,9 +184,7 @@ export class ProjectDetailsSummaryComponent implements OnInit {
           pipe: 'number',
         },
       ];
-    });
 
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
       this.memberListCols = [
         {
           field: 'name',

@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import { Component, inject, OnInit } from '@angular/core';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest, tap } from 'rxjs';
@@ -10,6 +10,8 @@ import { combineLatest, tap } from 'rxjs';
   styleUrls: ['./overview-webtraffic.component.css'],
 })
 export class OverviewWebtrafficComponent implements OnInit {
+  private overviewService = inject(OverviewFacade);
+  private i18n = inject(I18nFacade);
   currentLang$ = this.i18n.currentLang$;
 
   uniqueVisitors$ = this.overviewService.visitors$;
@@ -31,11 +33,6 @@ export class OverviewWebtrafficComponent implements OnInit {
 
   dateRangeLabel$ = this.overviewService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
-
-  constructor(
-    private overviewService: OverviewFacade,
-    private i18n: I18nFacade
-  ) {}
 
   topPagesCols: ColumnConfig<{
     _id: string;

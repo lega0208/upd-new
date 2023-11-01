@@ -1,8 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { of } from 'rxjs';
-import { DateRangePeriod } from "@dua-upd/upd/state";
-
-import { TranslateService } from '@ngx-translate/core';
+import type { DateRangePeriod } from '@dua-upd/upd/state';
 
 @Component({
   selector: 'upd-date-selector-dropdown',
@@ -12,9 +10,11 @@ import { TranslateService } from '@ngx-translate/core';
         class="btn bg-white border border-1 dropdown-toggle"
         id="range-button"
         ngbDropdownToggle
-        translate="{{ (selectedPeriod | async) || ''}}"
+        translate="{{ (selectedPeriod | async) || '' }}"
       >
-        <span class="material-icons align-top pe-1" aria-hidden="true">calendar_today</span>
+        <span class="material-icons align-top pe-1" aria-hidden="true"
+          >calendar_today</span
+        >
         <span></span>&nbsp;
       </button>
       <div ngbDropdownMenu aria-labelledby="range-button">
@@ -32,9 +32,8 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['./date-selector.component.css'],
 })
 export class DateSelectorDropdownComponent {
-
-  constructor(private translateService: TranslateService) {}
   @Input() selectedPeriod = of('');
   @Input() selectionOptions: { label: string; value: DateRangePeriod }[] = [];
-  @Input() onSelect: (value: DateRangePeriod) => void = (value) => console.log(value);
+  @Input() onSelect: (value: DateRangePeriod) => void = (value) =>
+    console.log(value);
 }

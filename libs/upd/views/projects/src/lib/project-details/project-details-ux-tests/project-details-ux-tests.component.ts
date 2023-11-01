@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
 import {
   difference,
   filter,
@@ -10,12 +15,12 @@ import {
   piped,
   uniq,
 } from 'rambdax';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
-import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
+import { EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
-import { GetTableProps } from '@dua-upd/utils-common';
+import type { GetTableProps } from '@dua-upd/utils-common';
 
 type DocumentsColTypes = GetTableProps<
   ProjectDetailsUxTestsComponent,
@@ -29,7 +34,9 @@ type DocumentsColTypes = GetTableProps<
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectDetailsUxTestsComponent implements OnInit {
-  currentLang!: LocaleId;
+  private i18n = inject(I18nFacade);
+  private readonly projectsDetailsService = inject(ProjectsDetailsFacade);
+
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
@@ -38,31 +45,29 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
 
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
+
   avgSuccessPercentChange$ =
     this.projectsDetailsService.avgSuccessPercentChange$;
+
   dateFromLastTest$ = this.projectsDetailsService.dateFromLastTest$;
+
   projectTasks$ = this.projectsDetailsService.projectTasks$;
+
   taskSuccessByUxTest$ = this.projectsDetailsService.taskSuccessByUxTest$;
+
   taskSuccessByUxTestKpi$ = this.projectsDetailsService.taskSuccessByUxTestKpi$;
+
   totalParticipants$ = this.projectsDetailsService.totalParticipants$;
 
   documents$ = this.projectsDetailsService.documents$;
-  documentsCols: ColumnConfig<DocumentsColTypes>[] = [];
 
-  constructor(
-    private readonly projectsDetailsService: ProjectsDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
+  documentsCols: ColumnConfig<DocumentsColTypes>[] = [];
 
   participantTasksCols: ColumnConfig[] = [];
   taskSuccessRateCols: ColumnConfig[] = [];
   successRateCols: ColumnConfig[] = [];
 
-  ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
+  ngOnInit() {
     combineLatest([this.currentLang$, this.taskSuccessByUxTestKpi$]).subscribe(
       ([lang, kpiData]) => {
         this.documentsCols = [
@@ -109,13 +114,13 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
             pipe(
               filter(
                 (val: number | boolean | string, key: string) =>
-                  !['isChange', 'task'].includes(key) && !isNaN(val as number)
+                  !['isChange', 'task'].includes(key) && !isNaN(val as number),
               ),
-              keys
-            )
+              keys,
+            ),
           ),
           (keys) => flatten<string>(keys),
-          uniq
+          uniq,
         );
 
         if (!testTypesWithSuccessRate.length) {
@@ -145,7 +150,7 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
             field: key,
             header: this.i18n.service.translate(key, lang),
             pipe: 'percent',
-          }))
+          })),
         );
 
         const endCols = piped(
@@ -155,11 +160,11 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
             field: key,
             header: this.i18n.service.translate(key, lang),
             pipe: 'percent',
-          }))
+          })),
         );
 
         this.successRateCols = flatten([startCols, middleCols, endCols]);
-      }
+      },
     );
   }
 }

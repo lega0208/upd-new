@@ -1,22 +1,17 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-
 import * as ReportsActions from './reports.actions';
 import * as ReportsSelectors from './reports.selectors';
 import { combineLatest, map } from 'rxjs';
-
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, FR_CA } from '@dua-upd/upd/i18n';
-import { AttachmentData } from '@dua-upd/types-common';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
 
 @Injectable()
 export class ReportsFacade {
-  /**
-   * Combine pieces of state using createSelector,
-   * and expose them as observables through the facade.
-   */
+  private i18n = inject(I18nFacade);
+  private readonly store = inject(Store);
 
   currentLang$ = this.i18n.currentLang$;
 
@@ -24,18 +19,16 @@ export class ReportsFacade {
   reportsData$ = this.store.select(ReportsSelectors.selectReportsData);
 
   tasksReports$ = combineLatest([this.reportsData$, this.currentLang$]).pipe(
-    map(([reportsData, lang]) => {
-      return (reportsData?.tasks || []).map((task) => {
-        return {
-          ...task,
-          title: lang === EN_CA ? task.en_title : task.fr_title,
-          en_filename: task.en_attachment[0]?.filename,
-          fr_filename: task.fr_attachment[0]?.filename,
-          en_attachment: task.en_attachment[0].storage_url,
-          fr_attachment: task.fr_attachment[0].storage_url,
-        };
-      });
-    })
+    map(([reportsData, lang]) =>
+      (reportsData?.tasks || []).map((task) => ({
+        ...task,
+        title: lang === EN_CA ? task.en_title : task.fr_title,
+        en_filename: task.en_attachment[0]?.filename,
+        fr_filename: task.fr_attachment[0]?.filename,
+        en_attachment: task.en_attachment[0].storage_url,
+        fr_attachment: task.fr_attachment[0].storage_url,
+      })),
+    ),
   );
 
   tasksReportsColumns$ = this.i18n.currentLang$.pipe(
@@ -58,40 +51,34 @@ export class ReportsFacade {
           typeParams: { link: 'fr_attachment', external: true },
         },
       ] as ColumnConfig[];
-    })
+    }),
   );
 
   projectsReports$ = combineLatest([this.reportsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       if (!data?.projects) return [];
 
-      return data.projects.flatMap((project) => {
-        const baseTitle = project.title
-          ? this.i18n.service.translate(
-              project.title.replace(/\s+/g, ' '),
-              lang
-            )
-          : '';
+      return (data.projects || []).flatMap((project) => {
+        const baseTitle = this.i18n.service.translate(
+          project.title?.replace(/\s+/g, ' ') || '',
+          lang,
+        );
 
-        return project.attachments.map((attachment, idx) => {
-          const titleSuffix =
-            project.attachments.length > 1 ? ` (${idx + 1})` : '';
-          return {
-            title: `${baseTitle}`, //${titleSuffix}
-            startDate: project.startDate || '',
-            status: project.status,
-            cops: !!project.cops,
-            filename: attachment.filename,
-            url: attachment.storage_url,
-          };
-        });
+        return project.attachments.map((attachment, idx) => ({
+          title: `${baseTitle}`,
+          startDate: project.startDate || '',
+          status: project.status,
+          cops: !!project.cops,
+          filename: attachment.filename,
+          url: attachment.storage_url,
+        }));
       });
-    })
+    }),
   );
 
   projectsReportsColumns$ = combineLatest([
     this.projectsReports$,
-    this.currentLang$,
+    this.i18n.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
       return [
@@ -140,17 +127,10 @@ export class ReportsFacade {
         //   pipe: 'percent',
         // },
       ] as ColumnConfig[];
-    })
+    }),
   );
 
   error$ = this.store.select(ReportsSelectors.selectReportsError);
-
-  constructor(private readonly store: Store, private i18n: I18nFacade) {}
-
-  /**
-   * Use the initialization action to perform one
-   * or more tasks in your Effects.
-   */
 
   init() {
     this.store.dispatch(ReportsActions.loadReportsInit());

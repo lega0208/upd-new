@@ -1,15 +1,16 @@
 import {
   ChangeDetectorRef,
+  inject,
   NgModule,
   Pipe,
   PipeTransform,
 } from '@angular/core';
 import { formatNumber, formatDate, formatPercent } from '@angular/common';
-import { I18nModule, I18nService, LocaleId } from '@dua-upd/upd/i18n';
+import { I18nModule, I18nService, type LocaleId } from '@dua-upd/upd/i18n';
 
 @Pipe({ name: 'localeNumber', pure: false })
 export class LocaleNumberPipe implements PipeTransform {
-  constructor(private i18n: I18nService) {}
+  private i18n = inject(I18nService);
 
   transform(value?: number | null, digitsInfo?: string) {
     return typeof value === 'number'
@@ -20,12 +21,13 @@ export class LocaleNumberPipe implements PipeTransform {
 
 @Pipe({ name: 'localeDate', pure: false })
 export class LocaleDatePipe implements PipeTransform {
-  constructor(private i18n: I18nService, private _ref: ChangeDetectorRef) {}
+  private i18n = inject(I18nService);
+  private _ref = inject(ChangeDetectorRef, { host: true });
 
   transform(
     value?: string | Date | null,
     format = 'mediumDate',
-    lang?: LocaleId
+    lang?: LocaleId,
   ) {
     return value instanceof Date || typeof value === 'string'
       ? formatDate(value, format, lang ?? this.i18n.currentLang, 'UTC')
@@ -35,7 +37,7 @@ export class LocaleDatePipe implements PipeTransform {
 
 @Pipe({ name: 'localePercent', pure: false })
 export class LocalePercentPipe implements PipeTransform {
-  constructor(private i18n: I18nService) {}
+  private i18n = inject(I18nService);
 
   transform(value?: number | null, digitsInfo?: string) {
     return typeof value === 'number'
@@ -46,12 +48,12 @@ export class LocalePercentPipe implements PipeTransform {
 
 @Pipe({ name: 'localeTemplate', pure: false })
 export class LocaleTemplatePipe implements PipeTransform {
-  constructor(private i18n: I18nService) {}
+  private i18n = inject(I18nService);
 
   transform(
     value?: number | number[] | null,
     template = '{{}}',
-    digitsInfo?: string
+    digitsInfo?: string,
   ) {
     if (!value) return value;
 
@@ -62,7 +64,7 @@ export class LocaleTemplatePipe implements PipeTransform {
         const formattedValue = formatNumber(
           val,
           this.i18n.currentLang,
-          digitsInfo
+          digitsInfo,
         );
 
         output = output.replace('{{}}', formattedValue);
@@ -74,7 +76,7 @@ export class LocaleTemplatePipe implements PipeTransform {
     const formattedValue = formatNumber(
       value,
       this.i18n.currentLang,
-      digitsInfo
+      digitsInfo,
     );
 
     return template.replace('{{}}', formattedValue);
@@ -83,11 +85,11 @@ export class LocaleTemplatePipe implements PipeTransform {
 
 @Pipe({ name: 'translateArray', pure: true })
 export class TranslateArrayPipe implements PipeTransform {
-  constructor(private i18n: I18nService) {}
+  private i18n = inject(I18nService);
 
   transform(values: string[]): string[] {
     return values.map((value) =>
-      this.i18n.translate(value, this.i18n.currentLang)
+      this.i18n.translate(value, this.i18n.currentLang),
     );
   }
 }

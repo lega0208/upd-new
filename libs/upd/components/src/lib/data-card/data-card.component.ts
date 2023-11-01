@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { I18nFacade } from '@dua-upd/upd/state';
+import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import {
   LocaleNumberPipe,
   LocalePercentPipe,
@@ -112,6 +111,10 @@ const defaultKpiObjectiveCriteria: KpiObjectiveCriteria = (
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DataCardComponent {
+  private numberPipe: LocaleNumberPipe = inject(LocaleNumberPipe);
+  private percentPipe: LocalePercentPipe = inject(LocalePercentPipe);
+  private templatePipe: LocaleTemplatePipe = inject(LocaleTemplatePipe);
+
   @Input() current: number | null = null;
   @Input() comparison?: number | null;
   @Input() title = '';
@@ -193,13 +196,6 @@ export class DataCardComponent {
         return comparisonStyling.neutral;
     }
   }
-
-  constructor(
-    private i18n: I18nFacade,
-    private numberPipe: LocaleNumberPipe,
-    private percentPipe: LocalePercentPipe,
-    private templatePipe: LocaleTemplatePipe
-  ) {}
 
   get localePipe() {
     switch (this.pipe) {

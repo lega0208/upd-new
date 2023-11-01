@@ -100,6 +100,8 @@
   "yes": "Yes",
   "no": "No",
   "Filter": "Filter",
+  "Current status": "Current status",
+  "Live": "Live",
   "d3-www": "What was wrong?",
   "d3-cant-find-info": "I can't find the info",
   "d3-hard-to-understand": "Info is hard to understand",
@@ -323,6 +325,7 @@
   "reports": "Reports",
   "English": "English",
   "French": "French",
+
 
   "kpi-calls-per-100-title": "Calls per 100 visits",
   "kpi-calls-per-100-tooltip": "The ratio of calls received by the CRA per 100 visits to the CRA pages on Canada.ca in the reporting time period.",

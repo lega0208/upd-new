@@ -1,7 +1,6 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgbAlert } from '@ng-bootstrap/ng-bootstrap';
 
-import { TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'upd-alert',
   templateUrl: './alert.component.html',
@@ -18,8 +17,6 @@ export class AlertComponent implements OnInit {
   @Input() dismissible = true;
   @Input() styleClass = '';
   style = '';
-
-  constructor(public translateService: TranslateService) {}
 
   ngOnInit(): void {
     if (this.selfClosing) {

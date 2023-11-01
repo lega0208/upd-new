@@ -1,14 +1,17 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
-
 import { selectDateRanges, selectDatePeriod } from '@dua-upd/upd/state';
 import { ApiService } from '@dua-upd/upd/services';
 import * as OverviewActions from './overview.actions';
-import { Store } from '@ngrx/store';
 
 @Injectable()
 export class OverviewEffects {
+  private readonly actions$ = inject(Actions);
+  private readonly api = inject(ApiService);
+  private readonly store = inject(Store);
+
   init$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(OverviewActions.init),
@@ -16,22 +19,16 @@ export class OverviewEffects {
       mergeMap(([, apiParams]) =>
         this.api.getOverviewData(apiParams).pipe(
           map((data) => OverviewActions.loadOverviewSuccess({ data })),
-          catchError(() => EMPTY)
-        )
-      )
+          catchError(() => EMPTY),
+        ),
+      ),
     );
   });
 
   dateChange$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(selectDatePeriod),
-      mergeMap(() => of(OverviewActions.init()))
+      mergeMap(() => of(OverviewActions.init())),
     );
   });
-
-  constructor(
-    private readonly actions$: Actions,
-    private readonly api: ApiService,
-    private readonly store: Store
-  ) {}
 }

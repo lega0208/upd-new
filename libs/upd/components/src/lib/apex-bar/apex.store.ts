@@ -1,20 +1,17 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { formatPercent } from '@angular/common';
 import { ComponentStore } from '@ngrx/component-store';
-import { tap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
-import {
+import type {
   ApexAxisChartSeries,
   ApexChart,
   ApexOptions,
   ApexYAxis,
 } from 'ng-apexcharts';
-
-import { EN_CA } from '@dua-upd/upd/i18n';
-import { formatPercent } from '@angular/common';
-import { createBaseConfig } from '../apex-base/apex.config.base';
 import { mergeDeepRight } from 'rambdax';
+import { EN_CA } from '@dua-upd/upd/i18n';
 import { sum } from '@dua-upd/utils-common';
+import { createBaseConfig } from '../apex-base/apex.config.base';
 
 export interface ChartOptions extends ApexOptions {
   chart: ApexChart;
@@ -27,12 +24,14 @@ export interface ChartOptions extends ApexOptions {
 
 @Injectable()
 export class ApexStore extends ComponentStore<ChartOptions> {
-  constructor(private i18n: I18nFacade) {
+  private i18n: I18nFacade = inject(I18nFacade);
+
+  constructor() {
     super({
       ...createBaseConfig((val: number) =>
         val.toLocaleString(this.i18n.service.currentLang, {
           maximumFractionDigits: 0,
-        })
+        }),
       ),
       added: {
         isPercent: false,
@@ -44,7 +43,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
     (state, value: string[]): ChartOptions => ({
       ...state,
       colors: value ? value : [],
-    })
+    }),
   );
 
   readonly setSeries = this.updater(
@@ -74,13 +73,13 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           opacity: 1,
         },
       };
-    }
+    },
   );
 
   readonly setHorizontal = this.updater(
     (
       state,
-      value: { isHorizontal: boolean; colorDistributed: boolean }
+      value: { isHorizontal: boolean; colorDistributed: boolean },
     ): ChartOptions => {
       return {
         ...state,
@@ -93,7 +92,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           },
         },
       };
-    }
+    },
   );
 
   readonly setXAxis = this.updater(
@@ -103,7 +102,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           type: 'category',
           categories: value,
         },
-      })
+      }),
   );
 
   readonly setYAxis = this.updater(
@@ -114,7 +113,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
             text: value,
           },
         },
-      })
+      }),
   );
 
   readonly setAnnotations = this.updater(
@@ -133,7 +132,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           },
         })),
       },
-    })
+    }),
   );
 
   readonly showPercent = this.updater(
@@ -144,7 +143,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         showTitleTooltip: boolean;
         showMarker: boolean;
         shared: boolean;
-      }
+      },
     ): ChartOptions => {
       if (value?.isPercent) {
         let titleTooltip = (seriesName: string) => {
@@ -196,10 +195,10 @@ export class ApexStore extends ComponentStore<ChartOptions> {
                 }
                 return `${formatPercent(
                   value,
-                  this.i18n.service.currentLang
+                  this.i18n.service.currentLang,
                 )} ${this.i18n.service.translate(
                   'success rate',
-                  this.i18n.service.currentLang
+                  this.i18n.service.currentLang,
                 )}`;
               },
               title: {
@@ -210,7 +209,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         };
       }
       return state;
-    }
+    },
   );
 
   readonly setLocale = this.updater(
@@ -220,7 +219,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         ...state.chart,
         defaultLocale: value === EN_CA ? 'en' : 'fr',
       } as ApexChart,
-    })
+    }),
   );
 
   readonly vm$ = this.select(this.state$, (state) => state);
@@ -236,7 +235,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
               (series) =>
                 typeof series === 'object' &&
                 'data' in series &&
-                series.data.length
+                series.data.length,
             ) as { data: number[] }[] | { data: { y: number }[] }[]
         ).flatMap((series) => {
           if (typeof series.data[0] === 'number') {
@@ -244,7 +243,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           }
 
           return (series.data as { y: number }[]).map((data) => data.y);
-        })
-      ) > 0
+        }),
+      ) > 0,
   );
 }

@@ -6,11 +6,11 @@
   "prefix": "upd",
   "targets": {
     "build": {
-      "executor": "@nx/angular:webpack-browser",
+      "executor": "@nx/vite:build",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/upd",
-        "index": "apps/upd/src/index.html",
+        "index": "apps/upd/index.html",
         "main": "apps/upd/src/main.ts",
         "polyfills": "apps/upd/src/polyfills.ts",
         "tsConfig": "apps/upd/tsconfig.app.json",
@@ -18,7 +18,10 @@
         "assets": ["apps/upd/src/favicon.ico", "apps/upd/src/assets"],
         "styles": ["apps/upd/src/styles.scss"],
         "scripts": [],
-        "vendorChunk": true
+        "vendorChunk": true,
+        "verbose": true,
+        "configFile": "apps/upd/vite.config.mts",
+        "logLevel": "info"
       },
       "configurations": {
         "production": {
@@ -62,22 +65,30 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nx/angular:webpack-dev-server",
+      "executor": "@nx/vite:dev-server",
       "configurations": {
-        "production": {
-          "browserTarget": "upd:build:production"
-        },
         "development": {
-          "browserTarget": "upd:build:development",
+          "buildTarget": "upd:build:development",
           "hmr": true,
-          "liveReload": false,
-          "proxyConfig": "apps/upd/proxy.conf.mjs"
+          "clearScreen": false,
+          "mode": "development",
+          "watch": true,
+          "logLevel": "info"
         }
       },
       "defaultConfiguration": "development",
       "options": {
-        "proxyConfig": "apps/upd/proxy.conf.json",
-        "browserTarget": "upd:build:development"
+        "buildTarget": "upd:build:development",
+        "configFile": "apps/upd/vite.config.mts"
+      }
+    },
+    "preview": {
+      "executor": "@nx/vite:preview-server",
+      "options": {
+        "buildTarget": "upd:build:production",
+        "configFile": "apps/upd/vite.config.mts",
+        "mode": "production",
+        "watch": true
       }
     },
     "extract-i18n": {

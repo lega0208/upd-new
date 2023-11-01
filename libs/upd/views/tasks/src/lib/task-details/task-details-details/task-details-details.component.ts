@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 
@@ -8,12 +8,10 @@ import { TasksDetailsFacade } from '../+state/tasks-details.facade';
   styleUrls: ['./task-details-details.component.css'],
 })
 export class TaskDetailsDetailsComponent {
+  private i18n = inject(I18nFacade);
+  private readonly taskDetailsService = inject(TasksDetailsFacade);
+
   currentLang$ = this.i18n.currentLang$;
 
   detailsTable$ = this.taskDetailsService.detailsTable$;
-
-  constructor(
-    private readonly taskDetailsService: TasksDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 }

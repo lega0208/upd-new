@@ -1,16 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   Input,
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {
-  ApexAxisChartSeries,
-  ApexNonAxisChartSeries,
-  ChartComponent,
-} from 'ng-apexcharts';
-import { ColumnConfig } from '../data-table-styles/types';
+import type { ApexNonAxisChartSeries } from 'ng-apexcharts';
+import { ChartComponent } from 'ng-apexcharts';
+import type { ColumnConfig } from '../data-table-styles/types';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ApexStore } from './apex.store';
 
@@ -22,6 +20,9 @@ import { ApexStore } from './apex.store';
   providers: [ApexStore],
 })
 export class ApexDonutComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private readonly apexStore = inject(ApexStore);
+
   @ViewChild('chart', { static: true }) chart!: ChartComponent;
   @Input() secondaryTitleCols: ColumnConfig = { field: '', header: '' };
   @Input() secondaryTitleData: Record<string, number | string>[] = [];
@@ -38,20 +39,11 @@ export class ApexDonutComponent implements OnInit {
     this.apexStore.setSeries(value);
   }
 
-  get series() {
-    return this.series;
-  }
-
   @Input() set labels(value: string[]) {
     this.apexStore.setLabels(value);
   }
 
   readonly vm$ = this.apexStore.vm$;
-
-  constructor(
-    private i18n: I18nFacade,
-    private readonly apexStore: ApexStore
-  ) {}
 
   ngOnInit(): void {
     this.i18n.currentLang$.subscribe((lang) => {

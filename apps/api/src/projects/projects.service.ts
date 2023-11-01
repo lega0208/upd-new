@@ -23,14 +23,15 @@ import {
   UxTest,
 } from '@dua-upd/db';
 import type {
+  ApiParams,
   FeedbackComment,
+  InternalSearchTerm,
   ProjectsDetailsData,
   ProjectDetailsAggregatedData,
   ProjectsHomeProject,
   ProjectStatus,
   ProjectsHomeData,
 } from '@dua-upd/types-common';
-import { ApiParams, InternalSearchTerm } from '@dua-upd/types-common';
 import { dateRangeSplit } from '@dua-upd/utils-common/date';
 import { getLatestTest, getLatestTestData } from '@dua-upd/utils-common/data';
 import { arrayToDictionary, AsyncLogTiming } from '@dua-upd/utils-common';
@@ -622,9 +623,6 @@ async function getAggregatedProjectMetrics(
   const projectMetrics = (
     await pageMetricsModel
       .aggregate<ProjectDetailsAggregatedData>()
-      // look for how to have the index be used "naturally" instead of hinting
-      // seems to significantly improve performance though (~300%?)
-      .hint('date_1_projects_exists')
       .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
       .project({
         date: 1,
