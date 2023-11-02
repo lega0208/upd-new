@@ -3,19 +3,14 @@
     <div>
       <a
         class="nav_logo"
-        [routerLink]="[langPath | async]"
+        [routerLink]="[langPath()]"
         [queryParamsHandling]="'merge'"
       >
-        <img
-          src="../../../assets/img/upd-logo{{
-            (isFr$ | async) ? '-fr' : ''
-          }}.png"
-          alt="{{ 'app.title' | translate }}"
-        />
+        <img [src]="updLogo()" alt="{{ 'app.title' | translate }}" />
       </a>
       <div class="nav_list mt-5">
         <a
-          [routerLink]="[langPath | async, 'overview']"
+          [routerLink]="[langPath(), 'overview']"
           [routerLinkActive]="['active']"
           [queryParamsHandling]="'merge'"
           class="nav_link"
@@ -29,7 +24,7 @@
         </a>
 
         <a
-          [routerLink]="[langPath | async, 'pages']"
+          [routerLink]="[langPath(), 'pages']"
           [routerLinkActive]="['active']"
           [queryParamsHandling]="'merge'"
           class="nav_link"
@@ -40,7 +35,7 @@
           }}</span>
         </a>
         <a
-          [routerLink]="[langPath | async, 'tasks']"
+          [routerLink]="[langPath(), 'tasks']"
           [routerLinkActive]="['active']"
           [queryParamsHandling]="'merge'"
           class="nav_link"
@@ -53,7 +48,7 @@
           }}</span>
         </a>
         <a
-          [routerLink]="[langPath | async, 'projects']"
+          [routerLink]="[langPath(), 'projects']"
           [routerLinkActive]="['active']"
           [queryParamsHandling]="'merge'"
           class="nav_link"
@@ -64,7 +59,7 @@
           }}</span>
         </a>
         <a
-          [routerLink]="[langPath | async, 'reports']"
+          [routerLink]="[langPath(), 'reports']"
           [routerLinkActive]="['active']"
           [queryParamsHandling]="'merge'"
           class="nav_link"
@@ -91,7 +86,7 @@
     </div>
     <div class="mb-4">
       <a
-        [routerLink]="[langPath | async, 'about-us']"
+        [routerLink]="[langPath(), 'about-us']"
         [routerLinkActive]="['active']"
         [queryParamsHandling]="'merge'"
         class="nav_link"

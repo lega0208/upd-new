@@ -1,7 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { map } from 'rxjs';
 import { ProjectsDetailsFacade } from './+state/projects-details.facade';
-
 import { I18nFacade } from '@dua-upd/upd/state';
 import { combineLatest } from 'rxjs';
 import { EN_CA } from '@dua-upd/upd/i18n';
@@ -13,16 +17,18 @@ import { EN_CA } from '@dua-upd/upd/i18n';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectDetailsComponent implements OnInit {
-  currentLang$ = this.i18n.currentLang$;
+  private i18n = inject(I18nFacade);
+  private readonly projectsDetailsService = inject(ProjectsDetailsFacade);
+
   langLink = 'en';
 
   title$ = combineLatest([
     this.projectsDetailsService.title$,
-    this.currentLang$,
+    this.i18n.currentLang$,
   ]).pipe(
     map(([title, lang]) =>
-      title ? this.i18n.service.translate(title, lang) : ''
-    )
+      title ? this.i18n.service.translate(title, lang) : '',
+    ),
   );
 
   status$ = this.projectsDetailsService.status$;
@@ -34,15 +40,10 @@ export class ProjectDetailsComponent implements OnInit {
 
   navTabs: { href: string; title: string }[] = [];
 
-  constructor(
-    private readonly projectsDetailsService: ProjectsDetailsFacade,
-    public i18n: I18nFacade
-  ) {}
-
   ngOnInit() {
     this.projectsDetailsService.init();
 
-    this.currentLang$.subscribe((lang) => {
+    this.i18n.currentLang$.subscribe((lang) => {
       this.navTabs = [
         {
           href: 'summary',

@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@dua-upd/upd-components';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import { Component, inject, OnInit } from '@angular/core';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 import { EN_CA } from '@dua-upd/upd/i18n';
@@ -13,8 +12,9 @@ import { combineLatest } from 'rxjs';
   styleUrls: ['./project-details-webtraffic.component.css'],
 })
 export class ProjectDetailsWebtrafficComponent implements OnInit {
-  currentLang$ = this.i18n.currentLang$;
-  currentLang!: LocaleId;
+  private i18n = inject(I18nFacade);
+  private readonly projectsDetailsService = inject(ProjectsDetailsFacade);
+
   langLink = 'en';
 
   visits$ = this.projectsDetailsService.visits$;
@@ -23,12 +23,8 @@ export class ProjectDetailsWebtrafficComponent implements OnInit {
   visitsByPage$ = this.projectsDetailsService.visitsByPageWithPercentChange$;
   visitsByPageCols: ColumnConfig[] = [];
 
-  ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
-    combineLatest([this.visitsByPage$, this.currentLang$]).subscribe(
+  ngOnInit() {
+    combineLatest([this.visitsByPage$, this.i18n.currentLang$]).subscribe(
       ([data, lang]) => {
         this.langLink = lang === EN_CA ? 'en' : 'fr';
         this.visitsByPageCols = [
@@ -71,12 +67,7 @@ export class ProjectDetailsWebtrafficComponent implements OnInit {
             pipe: 'percent',
           },
         ];
-      }
+      },
     );
   }
-
-  constructor(
-    private readonly projectsDetailsService: ProjectsDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 }

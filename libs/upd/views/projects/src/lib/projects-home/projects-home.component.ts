@@ -1,11 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { ProjectsHomeFacade } from './+state/projects-home.facade';
-import { ColumnConfig } from '@dua-upd/upd-components';
-
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
-import { ProjectsHomeProject } from '@dua-upd/types-common';
+import { FR_CA } from '@dua-upd/upd/i18n';
+import type { ProjectsHomeProject } from '@dua-upd/types-common';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
 
 @Component({
@@ -14,8 +13,8 @@ import { createCategoryConfig } from '@dua-upd/upd/utils';
   styleUrls: ['./projects-home.component.css'],
 })
 export class ProjectsHomeComponent implements OnInit {
-  currentLang!: LocaleId;
-  currentLang$ = this.i18n.currentLang$;
+  private i18n = inject(I18nFacade);
+  private readonly projectsHomeService = inject(ProjectsHomeFacade);
 
   data$ = this.projectsHomeService.projectsHomeData$;
   tableData$ = this.projectsHomeService.projectsHomeTableData$;
@@ -31,15 +30,10 @@ export class ProjectsHomeComponent implements OnInit {
 
   searchFields = this.columns.map((col) => col.field);
 
-  constructor(
-    private readonly projectsHomeService: ProjectsHomeFacade,
-    private i18n: I18nFacade
-  ) {}
-
   ngOnInit() {
     this.projectsHomeService.init();
 
-    combineLatest([this.tableData$, this.currentLang$]).subscribe(
+    combineLatest([this.tableData$, this.i18n.currentLang$]).subscribe(
       ([data, lang]) => {
         this.columns = [
           {
@@ -83,7 +77,7 @@ export class ProjectsHomeComponent implements OnInit {
             pipe: 'percent',
           },
         ];
-      }
+      },
     );
   }
 }

@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import {
-  ColumnConfig,
+  type ColumnConfig,
   callVolumeObjectiveCriteria,
 } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import type { LocaleId } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
@@ -14,6 +14,9 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
   styleUrls: ['./overview-calldrivers.component.css'],
 })
 export class OverviewCalldriversComponent implements OnInit {
+  private overviewService = inject(OverviewFacade);
+  private i18n = inject(I18nFacade);
+
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
 
@@ -52,11 +55,6 @@ export class OverviewCalldriversComponent implements OnInit {
     pass: { message: 'kpi-met-volume' },
     fail: { message: 'kpi-not-met-volume' },
   };
-
-  constructor(
-    private overviewService: OverviewFacade,
-    private i18n: I18nFacade
-  ) {}
 
   ngOnInit() {
     this.i18n.service.onLangChange(({ lang }) => {

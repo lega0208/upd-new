@@ -1,13 +1,13 @@
-import { Component, Input } from '@angular/core';
-import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
+import { Component, inject, Input } from '@angular/core';
+import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 
-import { TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'upd-modal',
   templateUrl: './modal.component.html',
-  styleUrls: ['./modal.component.scss']
+  styleUrls: ['./modal.component.scss'],
 })
 export class ModalComponent {
+  private modalService = inject(NgbModal);
 
   @Input() modalTitle = '';
   @Input() buttonTitle = '';
@@ -15,14 +15,17 @@ export class ModalComponent {
 
   closeResult = '';
 
-  constructor(private modalService: NgbModal, public translateService:TranslateService) {}
-
   open(content: any) {
-    this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    });
+    this.modalService
+      .open(content, { ariaLabelledBy: 'modal-basic-title' })
+      .result.then(
+        (result) => {
+          this.closeResult = `Closed with: ${result}`;
+        },
+        (reason) => {
+          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+        },
+      );
   }
 
   private getDismissReason(reason: any): string {
@@ -31,7 +34,7 @@ export class ModalComponent {
     } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
       return 'by clicking on a backdrop';
     } else {
-      return  `with: ${reason}`;
+      return `with: ${reason}`;
     }
   }
 

@@ -1,31 +1,32 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, map } from 'rxjs';
-
 import dayjs from 'dayjs/esm';
 import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
-
 import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
-import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
-import {
+import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
+import type {
   AttachmentData,
   TaskDetailsAggregatedData,
   TaskDetailsData,
   VisitsByPage,
 } from '@dua-upd/types-common';
 import {
-  GetTableProps,
-  KeysOfType,
+  type GetTableProps,
+  type KeysOfType,
   percentChange,
-  PickByType,
-  UnwrapObservable,
+  type PickByType,
+  type UnwrapObservable,
 } from '@dua-upd/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
-import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
+import type {
+  ApexAxisChartSeries,
+  ApexNonAxisChartSeries,
+} from 'ng-apexcharts';
 import {
   selectCallsPerVisitsChartData,
   selectDyfNoPerVisitsSeries,
@@ -38,14 +39,13 @@ type CallsByTopicTableType = GetTableProps<TasksDetailsFacade, 'callsByTopic$'>;
 
 @Injectable()
 export class TasksDetailsFacade {
-  /**
-   * Combine pieces of state using createSelector,
-   * and expose them as observables through the facade.
-   */
+  private i18n = inject(I18nFacade);
+  private readonly store = inject(Store);
+
   loaded$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsLoaded);
   loading$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsLoading);
   tasksDetailsData$ = this.store.select(
-    TasksDetailsSelectors.selectTasksDetailsData
+    TasksDetailsSelectors.selectTasksDetailsData,
   );
 
   currentLang$ = this.i18n.currentLang$;
@@ -87,39 +87,39 @@ export class TasksDetailsFacade {
           value ? this.i18n.service.translate(value, lang) : value,
         ];
       });
-    })
+    }),
   );
 
   avgTaskSuccessFromLastTest$ = this.tasksDetailsData$.pipe(
-    map((data) => data.avgTaskSuccessFromLastTest)
+    map((data) => data.avgTaskSuccessFromLastTest),
   );
 
   avgSuccessPercentChange$ = this.tasksDetailsData$.pipe(
-    map((data) => data.avgSuccessPercentChange)
+    map((data) => data.avgSuccessPercentChange),
   );
 
   dateFromLastTest$ = this.tasksDetailsData$.pipe(
     map((data) =>
       data?.dateFromLastTest
         ? new Date(data?.dateFromLastTest)
-        : data?.dateFromLastTest
-    )
+        : data?.dateFromLastTest,
+    ),
   );
 
   visits$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visits || 0)
+    map((data) => data?.dateRangeData?.visits || 0),
   );
   visitsPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('visits')
+    mapToPercentChange('visits'),
   );
 
   visitsByPage$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.visitsByPage)
+    map((data) => data?.dateRangeData?.visitsByPage),
   );
 
   visitsByPageWithPercentChange$ = combineLatest([
     this.tasksDetailsData$.pipe(
-      mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits')
+      mapPageMetricsArraysWithPercentChange('visitsByPage', 'visits'),
     ),
     this.currentLang$,
   ]).pipe(
@@ -132,11 +132,11 @@ export class TasksDetailsFacade {
       });
 
       return [...(visitsByPage || [])];
-    })
+    }),
   );
 
   visitsByPageGSCWithPercentChange$ = this.tasksDetailsData$.pipe(
-    mapObjectArraysWithPercentChange('visitsByPage', 'gscTotalClicks', '_id')
+    mapObjectArraysWithPercentChange('visitsByPage', 'gscTotalClicks', '_id'),
   );
 
   visitsByPageFeedbackWithPercentChange$ = this.tasksDetailsData$.pipe(
@@ -169,32 +169,32 @@ export class TasksDetailsFacade {
 
       return data;
     }),
-    mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo', '_id')
+    mapObjectArraysWithPercentChange('visitsByPage', 'dyfNo', '_id'),
   );
 
   apexCallDrivers$ = this.store.select(selectCallsPerVisitsChartData);
   apexKpiFeedback$ = this.store.select(selectDyfNoPerVisitsSeries);
 
   comparisonVisits$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.comparisonDateRangeData?.visits || 0)
+    map((data) => data?.comparisonDateRangeData?.visits || 0),
   );
 
   totalCalldriver$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.totalCalldrivers || 0)
+    map((data) => data?.dateRangeData?.totalCalldrivers || 0),
   );
 
   comparisonTotalCalldriver$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.comparisonDateRangeData?.totalCalldrivers || 0)
+    map((data) => data?.comparisonDateRangeData?.totalCalldrivers || 0),
   );
 
   totalCalldriverPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('totalCalldrivers')
+    mapToPercentChange('totalCalldrivers'),
   );
 
   callPerVisits$ = combineLatest([this.totalCalldriver$, this.visits$]).pipe(
     map(([currentCalls, visits]) => {
       return currentCalls / visits;
-    })
+    }),
   );
 
   callComparisonPerVisits$ = combineLatest([
@@ -203,7 +203,7 @@ export class TasksDetailsFacade {
   ]).pipe(
     map(([comparisonCalls, comparisonVisits]) => {
       return comparisonCalls / comparisonVisits;
-    })
+    }),
   );
 
   apexCallPercentChange$ = combineLatest([
@@ -211,15 +211,15 @@ export class TasksDetailsFacade {
     this.callComparisonPerVisits$,
   ]).pipe(
     map(([currentCalls, comparisonVisits]) =>
-      percentChange(currentCalls, comparisonVisits)
-    )
+      percentChange(currentCalls, comparisonVisits),
+    ),
   );
 
   apexCallDifference$ = combineLatest([
     this.callPerVisits$,
     this.callComparisonPerVisits$,
   ]).pipe(
-    map(([currentCalls, comparisonVisits]) => currentCalls - comparisonVisits)
+    map(([currentCalls, comparisonVisits]) => currentCalls - comparisonVisits),
   );
 
   currentKpiFeedback$ = this.tasksDetailsData$.pipe(
@@ -228,7 +228,7 @@ export class TasksDetailsFacade {
       const visits = data?.dateRangeData?.visits || 0;
 
       return dyfNoCurrent / visits;
-    })
+    }),
   );
 
   comparisonKpiFeedback$ = combineLatest([this.tasksDetailsData$]).pipe(
@@ -237,7 +237,7 @@ export class TasksDetailsFacade {
       const visits = data?.comparisonDateRangeData?.visits || 0;
 
       return dyfNoComparison / visits;
-    })
+    }),
   );
 
   kpiFeedbackPercentChange$ = combineLatest([
@@ -245,8 +245,8 @@ export class TasksDetailsFacade {
     this.comparisonKpiFeedback$,
   ]).pipe(
     map(([currentKpi, comparisonKpi]) =>
-      percentChange(currentKpi, comparisonKpi)
-    )
+      percentChange(currentKpi, comparisonKpi),
+    ),
   );
 
   kpiFeedbackDifference$ = combineLatest([
@@ -262,24 +262,25 @@ export class TasksDetailsFacade {
           title: this.i18n.service.translate(d.title, lang),
         })) || []
       );
-    })
+    }),
   );
 
   documents$ = this.tasksDetailsData$.pipe(
-    map((data) =>
-      data?.projects
-        .reduce(
-          (attachments, project) => [
-            ...attachments,
-            ...(project.attachments || []),
-          ],
-          [] as AttachmentData[]
-        )
-        .map((attachment) => ({
-          url: attachment.storage_url,
-          filename: attachment.filename,
-        }))
-    )
+    map(
+      (data) =>
+        data?.projects
+          .reduce(
+            (attachments, project) => [
+              ...attachments,
+              ...(project.attachments || []),
+            ],
+            [] as AttachmentData[],
+          )
+          .map((attachment) => ({
+            url: attachment.storage_url,
+            filename: attachment.filename,
+          })),
+    ),
   );
 
   dateRangeLabel$ = combineLatest([
@@ -292,8 +293,8 @@ export class TasksDetailsFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) =>
-      getWeeklyDatesLabel(data.comparisonDateRange || '', lang)
-    )
+      getWeeklyDatesLabel(data.comparisonDateRange || '', lang),
+    ),
   );
 
   calldriversChart$ = combineLatest([
@@ -304,7 +305,7 @@ export class TasksDetailsFacade {
       const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
       const comparisonDateRangeLabel = getWeeklyDatesLabel(
         data.comparisonDateRange || '',
-        lang
+        lang,
       );
 
       const dataEnquiryLine = (
@@ -330,7 +331,7 @@ export class TasksDetailsFacade {
 
       const dataEnquiryLineFinal = dataEnquiryLine.filter((v) => v.value > 0);
       const comparisonDataEnquiryLineFinal = comparisonDataEnquiryLine.filter(
-        (v) => v.value > 0
+        (v) => v.value > 0,
       );
 
       const barChartData = [
@@ -345,7 +346,7 @@ export class TasksDetailsFacade {
       ];
 
       return barChartData;
-    })
+    }),
   );
 
   calldriversTable$ = combineLatest([
@@ -387,7 +388,7 @@ export class TasksDetailsFacade {
         }
       });
       return dataEnquiryLine.filter((v) => v.currValue > 0 || v.prevValue > 0);
-    })
+    }),
   );
 
   apexCalldriversChart$ = combineLatest([this.calldriversTable$]).pipe(
@@ -398,7 +399,7 @@ export class TasksDetailsFacade {
           data: [d.currValue, d.prevValue],
         };
       });
-    })
+    }),
   );
 
   dyfDataApex$ = combineLatest([
@@ -418,7 +419,7 @@ export class TasksDetailsFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   whatWasWrongDataApex$ = combineLatest([
@@ -440,7 +441,7 @@ export class TasksDetailsFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   callsByTopic$ = this.tasksDetailsData$.pipe(
@@ -452,7 +453,7 @@ export class TasksDetailsFacade {
 
       return (data?.dateRangeData?.callsByTopic || []).map((callsByTopic) => {
         const previousCalls = comparisonData.find(
-          (prevTopic) => prevTopic.tpc_id === callsByTopic.tpc_id
+          (prevTopic) => prevTopic.tpc_id === callsByTopic.tpc_id,
         );
 
         return {
@@ -465,7 +466,7 @@ export class TasksDetailsFacade {
             : percentChange(callsByTopic.calls, previousCalls.calls),
         };
       });
-    })
+    }),
   );
 
   callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(
@@ -496,7 +497,7 @@ export class TasksDetailsFacade {
         header: 'comparison',
         pipe: 'percent',
       },
-    ]
+    ],
   );
 
   currentCallVolume$ = this.tasksDetailsData$.pipe(
@@ -504,9 +505,9 @@ export class TasksDetailsFacade {
       (data) =>
         data?.dateRangeData?.calldriversEnquiry.reduce(
           (totalCalls, enquiryLineCalls) => totalCalls + enquiryLineCalls.calls,
-          0
-        ) || 0
-    )
+          0,
+        ) || 0,
+    ),
   );
 
   comparisonCallVolume$ = this.tasksDetailsData$.pipe(
@@ -514,17 +515,17 @@ export class TasksDetailsFacade {
       (data) =>
         data?.comparisonDateRangeData?.calldriversEnquiry.reduce(
           (totalCalls, enquiryLineCalls) => totalCalls + enquiryLineCalls.calls,
-          0
-        ) || 0
-    )
+          0,
+        ) || 0,
+    ),
   );
   callPercentChange$ = combineLatest([
     this.currentCallVolume$,
     this.comparisonCallVolume$,
   ]).pipe(
     map(([currentCalls, comparisonCalls]) =>
-      percentChange(currentCalls, comparisonCalls)
-    )
+      percentChange(currentCalls, comparisonCalls),
+    ),
   );
 
   dyfData$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
@@ -543,7 +544,7 @@ export class TasksDetailsFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   whatWasWrongData$ = combineLatest([
@@ -553,12 +554,12 @@ export class TasksDetailsFacade {
     map(([data, lang]) => {
       const cantFindInfo = this.i18n.service.translate(
         'd3-cant-find-info',
-        lang
+        lang,
       );
       const otherReason = this.i18n.service.translate('d3-other', lang);
       const hardToUnderstand = this.i18n.service.translate(
         'd3-hard-to-understand',
-        lang
+        lang,
       );
       const error = this.i18n.service.translate('d3-error', lang);
 
@@ -584,14 +585,14 @@ export class TasksDetailsFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   taskSuccessChart$ = this.tasksDetailsData$.pipe(
     map((data) => {
       const taskSuccessByUxTest = data?.taskSuccessByUxTest;
       const tasksWithSuccessRate = taskSuccessByUxTest?.filter(
-        (task) => task.success_rate || task.success_rate === 0
+        (task) => task.success_rate || task.success_rate === 0,
       );
 
       if (!taskSuccessByUxTest || !tasksWithSuccessRate.length) {
@@ -602,14 +603,14 @@ export class TasksDetailsFacade {
         name: `UX Test: ${idx + 1} - ${title}`,
         value: success_rate || 0,
       }));
-    })
+    }),
   );
 
   taskSuccessChartData$ = this.tasksDetailsData$.pipe(
     map((data) => {
       const taskSuccessByUxTest = data?.taskSuccessByUxTest;
       const tasksWithSuccessRate = taskSuccessByUxTest?.filter(
-        (task) => task.success_rate || task.success_rate === 0
+        (task) => task.success_rate || task.success_rate === 0,
       );
 
       if (!taskSuccessByUxTest || !tasksWithSuccessRate.length) {
@@ -626,14 +627,14 @@ export class TasksDetailsFacade {
           data: ajax,
         },
       ] as ApexAxisChartSeries;
-    })
+    }),
   );
 
   taskSuccessChartLegend$ = this.tasksDetailsData$.pipe(
     map((data) => {
       const taskSuccessByUxTest = data?.taskSuccessByUxTest;
       const tasksWithSuccessRate = taskSuccessByUxTest?.filter(
-        (task) => task.success_rate || task.success_rate === 0
+        (task) => task.success_rate || task.success_rate === 0,
       );
 
       if (!taskSuccessByUxTest || !tasksWithSuccessRate.length) {
@@ -647,35 +648,35 @@ export class TasksDetailsFacade {
       });
 
       return name;
-    })
+    }),
   );
 
   gscTotalClicks$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalClicks || 0)
+    map((data) => data?.dateRangeData?.gscTotalClicks || 0),
   );
   gscTotalClicksPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('gscTotalClicks')
+    mapToPercentChange('gscTotalClicks'),
   );
 
   gscTotalImpressions$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalImpressions || 0)
+    map((data) => data?.dateRangeData?.gscTotalImpressions || 0),
   );
   gscTotalImpressionsPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('gscTotalImpressions')
+    mapToPercentChange('gscTotalImpressions'),
   );
 
   gscTotalCtr$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalCtr || 0)
+    map((data) => data?.dateRangeData?.gscTotalCtr || 0),
   );
   gscTotalCtrPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('gscTotalCtr')
+    mapToPercentChange('gscTotalCtr'),
   );
 
   gscTotalPosition$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.gscTotalPosition || 0)
+    map((data) => data?.dateRangeData?.gscTotalPosition || 0),
   );
   gscTotalPositionPercentChange$ = this.tasksDetailsData$.pipe(
-    mapToPercentChange('gscTotalPosition')
+    mapToPercentChange('gscTotalPosition'),
   );
 
   taskSuccessByUxTest$ = combineLatest([
@@ -691,16 +692,16 @@ export class TasksDetailsFacade {
         (acc, test) => {
           acc[test.title] = Math.max(
             acc[test.title] || 0,
-            test.total_users || 0
+            test.total_users || 0,
           );
           return acc;
         },
-        {}
+        {},
       );
 
       const totalSum = Object.values(maxTotalUsersByTitle).reduce(
         (sum, val) => sum + val,
-        0
+        0,
       );
 
       const taskSuccessByUxTest = uxTests?.map((d) => ({
@@ -713,7 +714,7 @@ export class TasksDetailsFacade {
         total_users: totalSum,
       }));
       return [...(taskSuccessByUxTest || [])];
-    })
+    }),
   );
 
   totalParticipants$ = this.tasksDetailsData$.pipe(
@@ -724,18 +725,18 @@ export class TasksDetailsFacade {
         (acc, test) => {
           acc[test.title] = Math.max(
             acc[test.title] || 0,
-            test.total_users || 0
+            test.total_users || 0,
           );
           return acc;
         },
-        {}
+        {},
       );
 
       return Object.values(maxTotalUsersByTitle).reduce(
         (sum, val) => sum + val,
-        0
+        0,
       );
-    })
+    }),
   );
 
   feedbackComments$ = combineLatest([
@@ -752,7 +753,7 @@ export class TasksDetailsFacade {
           : d.whats_wrong,
       }));
       return [...(feedbackComments || [])];
-    })
+    }),
   );
 
   feedbackByTagsBarChart$ = combineLatest([
@@ -766,7 +767,7 @@ export class TasksDetailsFacade {
 
       const isCurrZero = feedbackByTags.every((v) => v.numComments === 0);
       const isPrevZero = feedbackByTagsPrevious.every(
-        (v) => v.numComments === 0
+        (v) => v.numComments === 0,
       );
 
       if (isCurrZero && isPrevZero) {
@@ -793,7 +794,7 @@ export class TasksDetailsFacade {
       };
 
       return [currentSeries, previousSeries];
-    })
+    }),
   );
 
   feedbackByTagsTable$ = combineLatest([
@@ -826,7 +827,7 @@ export class TasksDetailsFacade {
           prevValue,
         };
       });
-    })
+    }),
   );
 
   apexFeedbackByTagsTable$ = combineLatest([this.feedbackByTagsTable$]).pipe(
@@ -837,11 +838,11 @@ export class TasksDetailsFacade {
           data: [d.currValue, d.prevValue],
         };
       }) as ApexAxisChartSeries;
-    })
+    }),
   );
 
   topSearchTerms$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.searchTerms)
+    map((data) => data?.searchTerms),
   );
 
   searchTermsColConfig$ = createColConfigWithI18n<
@@ -860,8 +861,6 @@ export class TasksDetailsFacade {
 
   error$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsError);
 
-  constructor(private readonly store: Store, private i18n: I18nFacade) {}
-
   /**
    * Use the initialization action to perform one
    * or more tasks in your Effects.
@@ -877,8 +876,8 @@ export class TasksDetailsFacade {
         map(([data, lang]) =>
           data[propName]
             ? this.i18n.service.translate(data[propName], lang)
-            : data[propName]
-        )
+            : data[propName],
+        ),
       );
   }
 }
@@ -904,7 +903,7 @@ type DateRangeDataIndexKey = keyof TaskDetailsAggregatedData &
 
 // helper function to get the percent change of a property vs. the comparison date range
 function mapToPercentChange(
-  propName: keyof PickByType<TaskDetailsAggregatedData, number>
+  propName: keyof PickByType<TaskDetailsAggregatedData, number>,
 ) {
   return map((data: TaskDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
@@ -926,7 +925,7 @@ function mapToPercentChange(
 function mapObjectArraysWithPercentChange(
   propName: keyof TaskDetailsAggregatedData,
   propPath: string,
-  sortPath?: string
+  sortPath?: string,
 ) {
   return map((data: TaskDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
@@ -969,7 +968,7 @@ function mapObjectArraysWithPercentChange(
         ...val,
         percentChange: percentChange(
           val[propPath],
-          (previous as any)[i][propPath]
+          (previous as any)[i][propPath],
         ),
       }));
     }
@@ -980,7 +979,7 @@ function mapObjectArraysWithPercentChange(
 
 function mapPageMetricsArraysWithPercentChange(
   propName: keyof TaskDetailsAggregatedData,
-  propPath: string
+  propPath: string,
 ) {
   return map((data: TaskDetailsData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
@@ -1000,7 +999,7 @@ function mapPageMetricsArraysWithPercentChange(
 
         return metricsByPage;
       },
-      {} as { [pageId: string]: Record<string, number> }
+      {} as { [pageId: string]: Record<string, number> },
     );
 
     const previousMetricsByPage = previous.reduce(
@@ -1011,7 +1010,7 @@ function mapPageMetricsArraysWithPercentChange(
 
         return metricsByPage;
       },
-      {} as { [pageId: string]: Record<string, number> }
+      {} as { [pageId: string]: Record<string, number> },
     );
 
     return Object.keys(currentMetricsByPage).map((pageId: string) => {

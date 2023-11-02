@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 
 @Component({
@@ -10,6 +10,9 @@ import { TasksDetailsFacade } from '../+state/tasks-details.facade';
   styleUrls: ['./task-details-calldrivers.component.css'],
 })
 export class TaskDetailsCalldriversComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private readonly taskDetailsService = inject(TasksDetailsFacade);
+
   currentLang$ = this.i18n.currentLang$;
 
   calldriversTable$ = this.taskDetailsService.calldriversTable$;
@@ -25,11 +28,6 @@ export class TaskDetailsCalldriversComponent implements OnInit {
 
   dateRange = '';
   comparisonDateRange = '';
-
-  constructor(
-    private readonly taskDetailsService: TasksDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 
   ngOnInit() {
     combineLatest([

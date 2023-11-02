@@ -571,9 +571,9 @@ export class AirtableService {
           filter: { page: page._id },
           update: {
             $set: {
-              tasks: page.tasks,
-              projects: page.projects,
-              ux_tests: page.ux_tests,
+              tasks: page.tasks || [],
+              projects: page.projects || [],
+              ux_tests: page.ux_tests || [],
             },
           },
         },

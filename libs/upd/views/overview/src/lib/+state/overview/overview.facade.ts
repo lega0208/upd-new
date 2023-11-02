@@ -1,36 +1,31 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import {
-  combineLatest,
-  debounceTime,
-  map,
-  mergeMap,
-  of,
-  pluck,
-  tap,
-} from 'rxjs';
-
-import dayjs, { QUnitType } from 'dayjs';
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-
-import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
-import { OverviewAggregatedData, OverviewData } from '@dua-upd/types-common';
-import { percentChange, UnwrapObservable } from '@dua-upd/utils-common';
+import { combineLatest, debounceTime, map, mergeMap, of } from 'rxjs';
+import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
+import type {
+  OverviewAggregatedData,
+  OverviewData,
+} from '@dua-upd/types-common';
+import { percentChange, type UnwrapObservable } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
 import {
   I18nFacade,
-  predefinedDateRanges,
   selectDatePeriodSelection,
   selectUrl,
 } from '@dua-upd/upd/state';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
-import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'ng-apexcharts';
+import type {
+  ApexAxisChartSeries,
+  ApexNonAxisChartSeries,
+} from 'ng-apexcharts';
 import {
   selectCallsPerVisitsChartData,
   selectComboChartData,
@@ -46,16 +41,19 @@ dayjs.extend(quarterOfYear);
 
 @Injectable()
 export class OverviewFacade {
+  private readonly store = inject(Store);
+  private readonly i18n = inject(I18nFacade);
+
   currentLang$ = this.i18n.currentLang$;
   loaded$ = this.store.select(OverviewSelectors.selectOverviewLoaded);
   loading$ = this.store
     .select(OverviewSelectors.selectOverviewLoading)
-    .pipe(debounceTime(500));
+    .pipe(debounceTime(100));
   dateRangeSelected$ = this.store.select(selectDatePeriodSelection);
   overviewData$ = this.store.select(OverviewSelectors.selectOverviewData);
 
   annotationsData$ = this.store.select(
-    OverviewSelectors.selectAnnotationsSeries
+    OverviewSelectors.selectAnnotationsSeries,
   );
 
   currentRoute$ = this.store
@@ -63,68 +61,68 @@ export class OverviewFacade {
     .pipe(map((url) => url.replace(/\?.+$/, '')));
 
   visitors$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.visitors || 0)
+    map((overviewData) => overviewData?.dateRangeData?.visitors || 0),
   );
   visitorsPercentChange$ = this.overviewData$.pipe(
-    mapToPercentChange('visitors')
+    mapToPercentChange('visitors'),
   );
 
   visits$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.visits || 0)
+    map((overviewData) => overviewData?.dateRangeData?.visits || 0),
   );
   comparisonVisits$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.comparisonDateRangeData?.visits || 0)
+    map((overviewData) => overviewData?.comparisonDateRangeData?.visits || 0),
   );
   visitsPercentChange$ = this.overviewData$.pipe(mapToPercentChange('visits'));
 
   views$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.pageViews || 0)
+    map((overviewData) => overviewData?.dateRangeData?.pageViews || 0),
   );
 
   viewsPercentChange$ = this.overviewData$.pipe(
-    mapToPercentChange('pageViews')
+    mapToPercentChange('pageViews'),
   );
 
   impressions$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.impressions || 0)
+    map((overviewData) => overviewData?.dateRangeData?.impressions || 0),
   );
   impressionsPercentChange$ = this.overviewData$.pipe(
-    mapToPercentChange('impressions')
+    mapToPercentChange('impressions'),
   );
 
   ctr$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.ctr || 0)
+    map((overviewData) => overviewData?.dateRangeData?.ctr || 0),
   );
   ctrPercentChange$ = this.overviewData$.pipe(mapToPercentChange('ctr'));
 
   avgRank$ = this.overviewData$.pipe(
-    map((overviewData) => overviewData?.dateRangeData?.position || 0)
+    map((overviewData) => overviewData?.dateRangeData?.position || 0),
   );
   avgRankPercentChange$ = this.overviewData$.pipe(
-    mapToPercentChange('position')
+    mapToPercentChange('position'),
   );
 
   topPagesVisited$ = this.overviewData$.pipe(
-    map((data) => data?.dateRangeData?.topPagesVisited || [])
+    map((data) => data?.dateRangeData?.topPagesVisited || []),
   );
 
   topPagesVisitedWithPercentChange$ = this.overviewData$.pipe(
     mapObjectArraysWithPercentChange('topPagesVisited', 'visits', 'url'),
-    map((topPages) => topPages?.sort((a, b) => b.visits - a.visits))
+    map((topPages) => topPages?.sort((a, b) => b.visits - a.visits)),
   );
 
   top10GSC$ = this.overviewData$.pipe(
-    mapObjectArraysWithPercentChange('top10GSC', 'clicks')
+    mapObjectArraysWithPercentChange('top10GSC', 'clicks'),
   );
 
   projects$ = this.overviewData$.pipe(
-    map((data) => data?.projects?.projects || [])
+    map((data) => data?.projects?.projects || []),
   );
   kpiLastAvgSuccessRate$ = this.overviewData$.pipe(
-    map((data) => data?.projects?.avgTestSuccessAvg || 0)
+    map((data) => data?.projects?.avgTestSuccessAvg || 0),
   );
   kpiTestsCompleted$ = this.overviewData$.pipe(
-    map((data) => data?.projects?.testsCompleted || 0)
+    map((data) => data?.projects?.testsCompleted || 0),
   );
   testTypeTranslations$ = combineLatest([
     this.projects$,
@@ -132,13 +130,13 @@ export class OverviewFacade {
   ]).pipe(
     mergeMap(([projects]) => {
       const splitTestTypes = projects.flatMap(
-        (project) => project.testType || []
+        (project) => project.testType || [],
       );
 
       const testTypes = [...new Set<string>(splitTestTypes)];
 
       return testTypes.length > 0 ? this.i18n.service.get(testTypes) : of({});
-    })
+    }),
   );
 
   projectsList$ = combineLatest([
@@ -156,7 +154,7 @@ export class OverviewFacade {
           maxUsersByTitleAndType[title] = maxUsersByTitleAndType[title] || {};
           maxUsersByTitleAndType[title][test_type] = Math.max(
             maxUsersByTitleAndType[title][test_type] || 0,
-            total_users
+            total_users,
           );
         }
       }
@@ -166,11 +164,11 @@ export class OverviewFacade {
           const typeValues = maxUsersByTitleAndType[title];
           accumulator[title] = Object.values(typeValues).reduce(
             (typeSum, value) => typeSum + value,
-            0
+            0,
           );
           return accumulator;
         },
-        {} as Record<string, number>
+        {} as Record<string, number>,
       );
 
       return (
@@ -183,14 +181,14 @@ export class OverviewFacade {
             .map(
               (testType: string) =>
                 (testTypeTranslations as Record<string, string>)[testType] ||
-                testType
+                testType,
             )
             .sort(),
           startDate: proj.startDate || '',
           totalUsers: maxUsersByTitle[proj.title] || 0,
         })) || []
       );
-    })
+    }),
   );
 
   calldriversTable$ = combineLatest([
@@ -232,7 +230,7 @@ export class OverviewFacade {
         }
       });
       return dataEnquiryLine.filter((v) => v.currValue > 0 || v.prevValue > 0);
-    })
+    }),
   );
 
   currentKpiFeedback$ = this.overviewData$.pipe(
@@ -241,7 +239,7 @@ export class OverviewFacade {
       const visits = data?.dateRangeData?.visits || 0;
 
       return dyfNoCurrent / visits;
-    })
+    }),
   );
 
   apexKpiFeedback$ = this.store.select(selectDyfNoPerVisitsSeries);
@@ -252,7 +250,7 @@ export class OverviewFacade {
       const visits = data?.comparisonDateRangeData?.visits || 0;
 
       return dyfNoComparison / visits;
-    })
+    }),
   );
 
   kpiFeedbackPercentChange$ = combineLatest([
@@ -260,8 +258,8 @@ export class OverviewFacade {
     this.comparisonKpiFeedback$,
   ]).pipe(
     map(([currentKpi, comparisonKpi]) =>
-      percentChange(currentKpi, comparisonKpi)
-    )
+      percentChange(currentKpi, comparisonKpi),
+    ),
   );
 
   kpiFeedbackDifference$ = combineLatest([
@@ -274,8 +272,8 @@ export class OverviewFacade {
       (data) =>
         data?.uxTests
           ?.filter((uxTest) => typeof uxTest.success_rate === 'number')
-          .map(({ success_rate }) => success_rate as number) || []
-    )
+          .map(({ success_rate }) => success_rate as number) || [],
+    ),
   );
 
   kpiUXTestsPercent$ = combineLatest([this.kpiUXTests$]).pipe(
@@ -284,13 +282,13 @@ export class OverviewFacade {
       const kpiUxTestsSum = data.reduce((a, b) => a + b, 0);
 
       return kpiUxTestsSum / kpiUxTestsLength;
-    })
+    }),
   );
 
   kpiUXTestsTotal$ = combineLatest([this.kpiUXTests$]).pipe(
     map(([data]) => {
       return data.length;
-    })
+    }),
   );
 
   apexCallDriversChart$ = combineLatest([this.calldriversTable$]).pipe(
@@ -301,7 +299,7 @@ export class OverviewFacade {
           data: [d.currValue, d.prevValue],
         };
       }) as ApexAxisChartSeries;
-    })
+    }),
   );
 
   apexBar$ = this.store.select(selectVisitsByDayChartData);
@@ -314,9 +312,9 @@ export class OverviewFacade {
       (data) =>
         data?.dateRangeData?.calldriversEnquiry.reduce(
           (totalCalls, enquiryLineCalls) => totalCalls + enquiryLineCalls.sum,
-          0
-        ) || 0
-    )
+          0,
+        ) || 0,
+    ),
   );
 
   comparisonCallVolume$ = this.overviewData$.pipe(
@@ -324,15 +322,15 @@ export class OverviewFacade {
       (data) =>
         data?.comparisonDateRangeData?.calldriversEnquiry.reduce(
           (totalCalls, enquiryLineCalls) => totalCalls + enquiryLineCalls.sum,
-          0
-        ) || 0
-    )
+          0,
+        ) || 0,
+    ),
   );
 
   callPerVisits$ = combineLatest([this.currentCallVolume$, this.visits$]).pipe(
     map(([currentCalls, visits]) => {
       return currentCalls / visits;
-    })
+    }),
   );
 
   callComparisonPerVisits$ = combineLatest([
@@ -341,7 +339,7 @@ export class OverviewFacade {
   ]).pipe(
     map(([comparisonCalls, comparisonVisits]) => {
       return comparisonCalls / comparisonVisits;
-    })
+    }),
   );
 
   callPercentChange$ = combineLatest([
@@ -349,8 +347,8 @@ export class OverviewFacade {
     this.comparisonCallVolume$,
   ]).pipe(
     map(([currentCalls, comparisonVisits]) =>
-      percentChange(currentCalls, comparisonVisits)
-    )
+      percentChange(currentCalls, comparisonVisits),
+    ),
   );
 
   apexCallPercentChange$ = combineLatest([
@@ -358,15 +356,15 @@ export class OverviewFacade {
     this.callComparisonPerVisits$,
   ]).pipe(
     map(([currentCalls, comparisonVisits]) =>
-      percentChange(currentCalls, comparisonVisits)
-    )
+      percentChange(currentCalls, comparisonVisits),
+    ),
   );
 
   apexCallDifference$ = combineLatest([
     this.callPerVisits$,
     this.callComparisonPerVisits$,
   ]).pipe(
-    map(([currentCalls, comparisonVisits]) => currentCalls - comparisonVisits)
+    map(([currentCalls, comparisonVisits]) => currentCalls - comparisonVisits),
   );
 
   barTable$ = this.store.select(selectVisitsByDayChartTable);
@@ -374,7 +372,7 @@ export class OverviewFacade {
   tableMerge$ = this.store.select(selectComboChartTable);
 
   dateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang))
+    map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)),
   );
 
   comparisonDateRangeLabel$ = combineLatest([
@@ -382,15 +380,15 @@ export class OverviewFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) =>
-      getWeeklyDatesLabel(data.comparisonDateRange || '', lang)
-    )
+      getWeeklyDatesLabel(data.comparisonDateRange || '', lang),
+    ),
   );
 
   satDateRangeLabel$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) => getWeeklyDatesLabel(data.satDateRange || '', lang))
+    map(([data, lang]) => getWeeklyDatesLabel(data.satDateRange || '', lang)),
   );
 
   dyfData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
@@ -410,7 +408,7 @@ export class OverviewFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   dyfDataApex$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
@@ -427,7 +425,7 @@ export class OverviewFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   whatWasWrongDataApex$ = combineLatest([
@@ -448,7 +446,7 @@ export class OverviewFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   whatWasWrongData$ = combineLatest([
@@ -458,12 +456,12 @@ export class OverviewFacade {
     map(([data, lang]) => {
       const cantFindInfo = this.i18n.service.translate(
         'd3-cant-find-info',
-        lang
+        lang,
       );
       const otherReason = this.i18n.service.translate('d3-other', lang);
       const hardToUnderstand = this.i18n.service.translate(
         'd3-hard-to-understand',
-        lang
+        lang,
       );
       const error = this.i18n.service.translate('d3-error', lang);
 
@@ -489,7 +487,7 @@ export class OverviewFacade {
       }
 
       return pieChartData;
-    })
+    }),
   );
 
   searchAssessmentData$ = combineLatest([
@@ -518,11 +516,11 @@ export class OverviewFacade {
         })
         .sort(
           (a, b) =>
-            a.lang.localeCompare(b.lang) || b.total_searches - a.total_searches
+            a.lang.localeCompare(b.lang) || b.total_searches - a.total_searches,
         );
 
       return [...(searchAssessment || [])];
-    })
+    }),
   );
 
   searchAssessmentPassed$ = combineLatest([
@@ -534,7 +532,7 @@ export class OverviewFacade {
         passed: data.filter((d) => d.pass === 'Pass').length,
         total: data.length,
       };
-    })
+    }),
   );
 
   comparisonSearchAssessmentData$ = combineLatest([
@@ -563,9 +561,9 @@ export class OverviewFacade {
         })
         .sort(
           (a, b) =>
-            a.lang.localeCompare(b.lang) || b.total_searches - a.total_searches
+            a.lang.localeCompare(b.lang) || b.total_searches - a.total_searches,
         );
-    })
+    }),
   );
 
   currentKpiSearchAssessment$ = combineLatest([
@@ -577,7 +575,7 @@ export class OverviewFacade {
         kpiSearchAssessment.filter((d) => d.pass === 'Pass').length /
         kpiSearchAssessment.length
       );
-    })
+    }),
   );
 
   comparisonKpiSearchAssessment$ = combineLatest([
@@ -589,7 +587,7 @@ export class OverviewFacade {
         kpiSearchAssessment.filter((d) => d.pass === 'Pass').length /
         kpiSearchAssessment.length
       );
-    })
+    }),
   );
 
   kpiSearchAssessmentPercentChange$ = combineLatest([
@@ -599,9 +597,9 @@ export class OverviewFacade {
     map(([currentKpiSearchAssessment, comparisonKpiSearchAssessment]) => {
       return percentChange(
         currentKpiSearchAssessment,
-        comparisonKpiSearchAssessment
+        comparisonKpiSearchAssessment,
       );
-    })
+    }),
   );
 
   comparisonFeedbackTable$ = combineLatest([
@@ -651,7 +649,7 @@ export class OverviewFacade {
         .filter((v) => v.currValue > 0 || v.prevValue > 0)
         .sort((a, b) => b.currValue - a.currValue)
         .splice(0, 5);
-    })
+    }),
   );
 
   comparisonFeedbackPagesTable$ = combineLatest([
@@ -705,26 +703,26 @@ export class OverviewFacade {
         .filter((v) => v.currValue > 0 || v.prevValue > 0)
         .sort((a, b) => b.currValue - a.currValue)
         .splice(0, 5);
-    })
+    }),
   );
 
   uxTestsCompleted$ = this.overviewData$.pipe(
-    map((data) => data.testsCompletedSince2018)
+    map((data) => data.testsCompletedSince2018),
   );
   uxTasksTested$ = this.overviewData$.pipe(
-    map((data) => data.tasksTestedSince2018)
+    map((data) => data.tasksTestedSince2018),
   );
   uxParticipantsTested$ = this.overviewData$.pipe(
-    map((data) => data.participantsTestedSince2018)
+    map((data) => data.participantsTestedSince2018),
   );
   uxTestsConductedLastFiscal$ = this.overviewData$.pipe(
-    map((data) => data.testsConductedLastFiscal)
+    map((data) => data.testsConductedLastFiscal),
   );
   uxTestsConductedLastQuarter$ = this.overviewData$.pipe(
-    map((data) => data.testsConductedLastQuarter)
+    map((data) => data.testsConductedLastQuarter),
   );
   uxCopsTestsCompleted$ = this.overviewData$.pipe(
-    map((data) => data.copsTestsCompletedSince2018)
+    map((data) => data.copsTestsCompletedSince2018),
   );
 
   top5CalldriverTopics$ = this.overviewData$.pipe(
@@ -735,8 +733,8 @@ export class OverviewFacade {
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
         change: topicData.change === 'Infinity' ? Infinity : topicData.change,
-      }))
-    )
+      })),
+    ),
   );
 
   top5CalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
@@ -755,8 +753,8 @@ export class OverviewFacade {
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
         change: topicData.change === 'Infinity' ? Infinity : topicData.change,
-      }))
-    )
+      })),
+    ),
   );
 
   top5IncreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
@@ -767,7 +765,7 @@ export class OverviewFacade {
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
       { field: 'calls', header: 'calls', pipe: 'number' },
       { field: 'change', header: 'comparison', pipe: 'percent' },
-    ]
+    ],
   );
 
   top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
@@ -778,8 +776,8 @@ export class OverviewFacade {
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
         change: topicData.change === 'Infinity' ? Infinity : topicData.change,
-      }))
-    )
+      })),
+    ),
   );
 
   top5DecreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
@@ -790,14 +788,14 @@ export class OverviewFacade {
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
       { field: 'calls', header: 'calls', pipe: 'number' },
       { field: 'change', header: 'comparison', pipe: 'percent' },
-    ]
+    ],
   );
 
   top20SearchTermsEn$ = this.overviewData$.pipe(
-    map((data) => data?.searchTermsEn)
+    map((data) => data?.searchTermsEn),
   );
   top20SearchTermsFr$ = this.overviewData$.pipe(
-    map((data) => data?.searchTermsFr)
+    map((data) => data?.searchTermsFr),
   );
 
   searchTermsColConfig$ = createColConfigWithI18n<
@@ -821,8 +819,6 @@ export class OverviewFacade {
   ]);
 
   error$ = this.store.select(OverviewSelectors.selectOverviewError);
-
-  constructor(private readonly store: Store, private i18n: I18nFacade) {}
 
   init() {
     this.store.dispatch(OverviewActions.init());
@@ -848,7 +844,7 @@ type DateRangeDataIndexKey = keyof OverviewAggregatedData &
 
 // helper function to get the percent change of a property vs. the comparison date range
 function mapToPercentChange(
-  propName: keyof PickByType<OverviewAggregatedData, number>
+  propName: keyof PickByType<OverviewAggregatedData, number>,
 ) {
   return map((data: OverviewData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
@@ -870,7 +866,7 @@ function mapToPercentChange(
 function mapObjectArraysWithPercentChange(
   propName: keyof OverviewAggregatedData,
   propPath: string,
-  sortPath?: string
+  sortPath?: string,
 ) {
   return map((data: OverviewData) => {
     if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
@@ -913,7 +909,7 @@ function mapObjectArraysWithPercentChange(
         ...val,
         percentChange: percentChange(
           val[propPath],
-          (previous as any)[i][propPath]
+          (previous as any)[i][propPath],
         ),
       }));
     }

@@ -11,6 +11,7 @@ services:
       - web
     restart: unless-stopped
     container_name: upd_nginx
+
   web:
     image: "upd_web"
     container_name: upd_web
@@ -60,25 +61,13 @@ services:
         volume:
           nocopy: true
 
-  python:
-    image: jupyter/scipy-notebook:latest
-    container_name: python-jupyter
-    restart: on-failure
-    ports:
-      - 8888:8888
-    volumes:
-      - python:/tmp/
-    depends_on:
-      - mongodb
-
 volumes:
   db-data:
     driver: local
     driver_opts:
       o: bind
       type: none
-      device: "Z:/docker-db"
-  python:
+      device: "D:/docker-db"
 
 secrets:
   .env:

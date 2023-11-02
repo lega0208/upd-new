@@ -1,24 +1,21 @@
-import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
+import { inject, Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { combineLatest, map } from 'rxjs';
-
-import { TasksHomeState } from './tasks-home.reducer';
 import * as TasksHomeActions from './tasks-home.actions';
 import * as TasksHomeSelectors from './tasks-home.selectors';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { round } from '@dua-upd/utils-common';
-import { EN_CA } from '@dua-upd/upd/i18n';
-import { AttachmentData, IReports } from '@dua-upd/types-common';
+import type { AttachmentData } from '@dua-upd/types-common';
 
 @Injectable()
 export class TasksHomeFacade {
-  /**
-   * Combine pieces of state using createSelector,
-   * and expose them as observables through the facade.
-   */
-  loaded$ = this.store.pipe(select(TasksHomeSelectors.getTasksHomeLoaded));
-  tasksHomeData$ = this.store.pipe(select(TasksHomeSelectors.getTasksHomeData));
+  private i18n = inject(I18nFacade);
+  private readonly store = inject(Store);
+
+  loaded$ = this.store.select(TasksHomeSelectors.getTasksHomeLoaded);
+  tasksHomeData$ = this.store.select(TasksHomeSelectors.getTasksHomeData);
+
   tasksHomeTableData$ = combineLatest([
     this.tasksHomeData$,
     this.i18n.currentLang$,
@@ -39,7 +36,7 @@ export class TasksHomeFacade {
         calls_per_100_visits:
           row.visits > 0 ? round((row.calls / row.visits) * 100, 3) || 0 : 0,
       }));
-    })
+    }),
   );
 
   tasksHomeTableColumns$ = this.i18n.currentLang$.pipe(
@@ -125,7 +122,7 @@ export class TasksHomeFacade {
           pipeParam: '1.3-3',
         },
       ] as ColumnConfig[];
-    })
+    }),
   );
 
   tasksReports$ = this.tasksHomeData$.pipe(
@@ -139,7 +136,7 @@ export class TasksHomeFacade {
           fr_attachment: extractUrl(report.fr_attachment),
         };
       });
-    })
+    }),
   );
 
   tasksReportsColumns$ = this.i18n.currentLang$.pipe(
@@ -158,35 +155,30 @@ export class TasksHomeFacade {
           typeParams: { link: 'fr_attachment', external: true },
         },
       ] as ColumnConfig[];
-    })
+    }),
   );
 
   totalTasks$ = this.tasksHomeTableData$.pipe(
-    map((tasksData) => tasksData.length)
+    map((tasksData) => tasksData.length),
   );
 
   totalVisits$ = this.tasksHomeData$.pipe(
-    map((tasksData) => tasksData.totalVisits || 0)
+    map((tasksData) => tasksData.totalVisits || 0),
   );
 
   totalCalls$ = this.tasksHomeData$.pipe(
-    map((tasksData) => tasksData.totalCalls || 0)
+    map((tasksData) => tasksData.totalCalls || 0),
   );
 
   totalVisitsChange$ = this.tasksHomeData$.pipe(
-    map((tasksData) => tasksData.percentChange || 0)
+    map((tasksData) => tasksData.percentChange || 0),
   );
 
   totalCallsChange$ = this.tasksHomeData$.pipe(
-    map((tasksData) => tasksData.percentChangeCalls || 0)
+    map((tasksData) => tasksData.percentChangeCalls || 0),
   );
 
-  error$ = this.store.pipe(select(TasksHomeSelectors.getTasksHomeError));
-
-  constructor(
-    private readonly store: Store<TasksHomeState>,
-    private i18n: I18nFacade
-  ) {}
+  error$ = this.store.select(TasksHomeSelectors.getTasksHomeError);
 
   /**
    * Use the initialization action to perform one

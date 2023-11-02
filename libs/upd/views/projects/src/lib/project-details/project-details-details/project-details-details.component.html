@@ -1,42 +1,36 @@
 <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col-lg-12">
-      <upd-card
-      [title]="'Project description'"
-    ></upd-card>
-      </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <upd-card [title]="'Project description'"></upd-card>
     </div>
   </div>
+</div>
 
-  <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col">
-        <upd-data-table-card
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
         [data]="(memberList$ | async) || []"
-        [cols]="memberListCols"
+        [cols]="(memberListCols$ | async) || []"
         [sort]="false"
         [filter]="false"
         [pagination]="false"
         [title]="'Members'"
       >
       </upd-data-table-card>
-
-      </div>
     </div>
   </div>
+</div>
 
-  <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <div class="col-lg-12">
-      <upd-card
-      [title]="'Timeline'"
-    >
-    <p>Start Date:</p>
-    <p>Launch Date:</p>
-    <p>Completed:</p>
-    <p>Year review:</p>
-
-</upd-card>
-      </div>
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-12">
+      <upd-card [title]="'Timeline'">
+        <p>Start Date:</p>
+        <p>Launch Date:</p>
+        <p>Completed:</p>
+        <p>Year review:</p>
+      </upd-card>
     </div>
   </div>
+</div>

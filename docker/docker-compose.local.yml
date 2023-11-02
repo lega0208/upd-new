@@ -73,22 +73,6 @@ services:
         volume:
           nocopy: true
 
-  python:
-    image: jupyter/scipy-notebook:latest
-    container_name: python-jupyter
-    restart: on-failure
-    ports:
-      - 8888:8888
-    volumes:
-      - python:/tmp/
-    environment:
-      RESTARTABLE: yes
-    command: >
-      start-notebook.sh
-      --LabApp.token=''
-    depends_on:
-      - mongodb
-
 volumes:
   db-data:
     driver: local
@@ -96,7 +80,6 @@ volumes:
       o: bind
       type: none
       device: /datadrive/db/data
-  python:
 
 secrets:
   .env:

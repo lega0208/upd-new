@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
 import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
@@ -17,6 +17,10 @@ import { selectTasksDetailsData } from './tasks-details.selectors';
 
 @Injectable()
 export class TasksDetailsEffects {
+  private readonly actions$ = inject(Actions);
+  private store = inject(Store);
+  private api = inject(ApiService);
+
   init$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(loadTasksDetailsInit),
@@ -53,23 +57,17 @@ export class TasksDetailsEffects {
             })
             .pipe(
               map((data) => loadTasksDetailsSuccess({ data })),
-              catchError(() => EMPTY)
+              catchError(() => EMPTY),
             );
-        }
-      )
+        },
+      ),
     );
   });
 
   dateChange$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(selectDatePeriod),
-      mergeMap(() => of(loadTasksDetailsInit()))
+      mergeMap(() => of(loadTasksDetailsInit())),
     );
   });
-
-  constructor(
-    private readonly actions$: Actions,
-    private store: Store,
-    private api: ApiService
-  ) {}
 }
