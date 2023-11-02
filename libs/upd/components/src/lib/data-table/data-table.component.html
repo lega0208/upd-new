@@ -5,7 +5,7 @@
   [rows]="displayRows"
   [rowHover]="true"
   [showCurrentPageReport]="true"
-  [rowsPerPageOptions]="[10, 25, 50, 100]"
+  [rowsPerPageOptions]="[5, 10, 25, 50, 100]"
   [loading]="loading"
   styleClass="p-datatable-striped p-datatable-sm border"
   [paginator]="pagination"
@@ -83,7 +83,7 @@
   <ng-template pTemplate="header" let-columns>
     <tr>
       <th *ngIf="checkboxes" style="width: 3rem">
-        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        <!-- <p-tableHeaderCheckbox></p-tableHeaderCheckbox> -->
     </th>
       <div *ngIf="sort; then thenBlock; else elseBlock"></div>
       <ng-template #thenBlock>

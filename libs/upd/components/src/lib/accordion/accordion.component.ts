@@ -7,4 +7,6 @@ import { Component, Input } from '@angular/core';
 })
 export class AccordionComponent {
   @Input() title = 'view-data-table';
+  @Input() expanded = false;
+  @Input() styleClass = '';
 }

@@ -101,6 +101,16 @@ export class ArrayToTextPipe implements PipeTransform {
   }
 }
 
+@Pipe({ name: 'truncate', pure: true })
+export class TruncatePipe implements PipeTransform {
+  transform(value: string, limit = 160): string {
+    if (value.length > limit) {
+      return value.substring(0, limit) + '...';
+    }
+    return value;
+  }
+}
+
 @NgModule({
   imports: [I18nModule],
   declarations: [
@@ -110,6 +120,7 @@ export class ArrayToTextPipe implements PipeTransform {
     LocaleTemplatePipe,
     TranslateArrayPipe,
     ArrayToTextPipe,
+    TruncatePipe,
   ],
   providers: [
     LocaleNumberPipe,
@@ -118,6 +129,7 @@ export class ArrayToTextPipe implements PipeTransform {
     LocaleTemplatePipe,
     TranslateArrayPipe,
     ArrayToTextPipe,
+    TruncatePipe,
   ],
   exports: [
     LocaleNumberPipe,
@@ -126,6 +138,7 @@ export class ArrayToTextPipe implements PipeTransform {
     LocaleTemplatePipe,
     TranslateArrayPipe,
     ArrayToTextPipe,
+    TruncatePipe,
   ],
 })
 export class PipesModule {}

@@ -1,11 +1,26 @@
 <h2 class="mb-4">Bulk Report</h2>
 
-<h3>Date picker:</h3>
+<h3 class="mb-2 h5">Select date range:</h3>
+
+<!-- <upd-datepicker [monthsDisplayed]="2" (rangeSelected)="handleRangeSelected($event)"></upd-datepicker> -->
 
 <upd-calendar></upd-calendar>
 
-<h3>Select pages:</h3>
+<h3 class="mt-2 mb-2 h5">Select pages:</h3>
 
+<upd-accordion
+[title]="'Paste in URLs that you want in the report'"
+styleClass="mb-2">
+<span class="p-float-label mt-3">
+  <textarea id="float-input" class="w-100" rows="5" pInputTextarea #urlTextarea rows="5"></textarea>
+  <label for="float-input">Enter URLs separated by comma, semicolon or new lines</label>
+</span>
+<button class="btn btn-success" (click)="addPages(urlTextarea.value)">Add pages and validate</button>
+</upd-accordion>
+
+<upd-accordion
+[title]="'Add pages by page selection'"
+styleClass="mb-3">
     <upd-data-table
       id="pages-home-"
       [data]="(pagesHomeData$ | async) || []"
@@ -17,25 +32,50 @@
       [exports]="false"
       [checkboxes]="true"
       (pageSelectionChanged)="handleSelectedPages($event)"
+      [ngClass]="'pages-home'"
     >
     </upd-data-table>
+    <button class="btn btn-success" (click)="addPages(urlTextarea.value)">Add pages and validate</button>
+</upd-accordion>
 
-    <label>Or paste in URLs:</label>
-    <div class="clearfix">  </div>
-    <textarea class="w-100" placeholder="Enter URLs separated by comma, semicolon or new lines" #urlTextarea rows="5"></textarea>
+    <upd-accordion
+    [styleClass]="'mb-2'"
+    *ngIf="urlsCount > 0"
+    [expanded]="true"
+    title="{{ 'URLs added to report' | translate: { count: (urlsCount) || 0 } }} ">
+      <div class="container">
+        <div class="row">
+          <div class="col p-0">
+              <ng-container *ngFor="let url of urls; let i = index">
+                <span class="badge-blue"
+                  ><span class="p-1 align-text-top"
+                    >{{ url | truncate }}</span>
+                  <button
+                    type="button"
+                    class="btn-close btn-close-white mt-1 me-1"
+                    aria-label="Close"
+                    (click)="removePage(i)"
+                  ></button
+                ></span>
+              </ng-container>
+          </div>
+        </div>
+      </div>
 
-    <div class="clearfix">  </div>
-    <button class="btn btn-success" (click)="addPages(urlTextarea.value)">Add pages</button>
-    <ul>
-      <li *ngFor="let url of urls; let i = index">
-        {{ url }}
-        <button (click)="removePage(i)">X</button>
-      </li>
-    </ul>
+    </upd-accordion>
+    
+    <h3 class="mt-2 mb-2 h5">Select metrics:</h3>
 
-  <div class="metrics">
-    <label>Select Metrics:</label>
-    <input type="checkbox" value="visits"> Visits
-  </div>
+    
+    <p-checkbox (onChange)="toggleSelectAll()" [inputId]="'all'" [value]="'all'"></p-checkbox>
+    <label [for]="'all'">Select all</label>
+
+    <hr />
+    
+    <div *ngFor="let category of categories" class="field-checkbox">
+      <p-checkbox name="group" [value]="category.name" [(ngModel)]="selectedCategories"
+          [inputId]="category.key"></p-checkbox>
+      <label [for]="category.key">{{category.name}}</label>
+    </div>
 
   <button class="btn btn-primary">Generate and download report</button>

@@ -8,7 +8,9 @@
   [showIcon]="true"
   [required]="true"
   (onSelect)="handleDateSelect($event)"
-  dateFormat="yy-mm-dd">
+  dateFormat="yy-mm-dd"
+  [monthNavigator]="true"
+  [yearNavigator]="true">
   
   <ng-template pTemplate="header">
     <div class="d-flex justify-content-center mt-3 mb-3">
@@ -31,6 +33,8 @@
       </upd-dropdown>
     </div>
   </ng-template>
+
+
 
   <ng-template pTemplate="footer">
     <hr />

@@ -1,7 +1,9 @@
-<ngb-accordion #acc="ngbAccordion">
-  <ngb-panel title="{{ title | translate }}">
+<ngb-accordion #acc="ngbAccordion" [activeIds]="expanded ? ['myPanel'] : []">
+  <ngb-panel id="myPanel" title="{{ title | translate }}">
     <ng-template ngbPanelContent>
       <ng-content></ng-content>
     </ng-template>
   </ngb-panel>
 </ngb-accordion>
+
+<div *ngIf="styleClass" [ngClass]="styleClass"></div>

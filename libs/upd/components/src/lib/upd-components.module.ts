@@ -27,6 +27,8 @@ import { NavTabsComponent } from './nav-tabs/nav-tabs.component';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { CheckboxModule } from 'primeng/checkbox';
 import { AlertComponent } from './alert/alert.component';
 import { AccordionComponent } from './accordion/accordion.component';
 import { ModalComponent } from './modal/modal.component';
@@ -64,6 +66,8 @@ import { CalendarComponent } from './calendar/calendar.component';
     TableModule,
     ButtonModule,
     InputTextModule,
+    InputTextareaModule,
+    CheckboxModule,
     NgbModule,
     I18nModule,
     DropdownModule,
@@ -110,6 +114,8 @@ import { CalendarComponent } from './calendar/calendar.component';
     TableModule,
     ButtonModule,
     InputTextModule,
+    InputTextareaModule,
+    CheckboxModule,
     CalendarComponent,
     CardComponent,
     DataTableComponent,
@@ -136,6 +142,7 @@ import { CalendarComponent } from './calendar/calendar.component';
     ApexSparkLineComponent,
     FilterTableComponent,
     FilterTableSelectionComponent,
+    FormsModule
   ],
 })
 export class UpdComponentsModule {}

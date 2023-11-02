@@ -72,7 +72,7 @@
           }}</span>
         </a>
         <a
-        [routerLink]="[langPath | async, 'pages', 'pages-bulk-report']"
+        [routerLink]="[langPath(), 'pages', 'pages-bulk-report']"
         [routerLinkActive]="['active']"
         [queryParamsHandling]="'merge'"
         class="nav_link"

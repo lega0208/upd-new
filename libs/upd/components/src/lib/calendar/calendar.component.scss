@@ -1,12 +1,69 @@
 .cancel-button {
     background: transparent !important;
     border-color: red !important;
-    color: red !important; /* Setting the text color to red so it matches the border. */
+    color: red !important;
 }
 
-.calendar-class:hover > :nth-child { background-color: cyan }
+.p-datepicker-calendar td span:not(.p-disabled):hover {
+    background-color: #e0e0e0;  // Some subtle hover effect
+}
 
 .hovered-range {
-    background-color: rgba(100, 150, 250, 0.3);  // A light blue shade for illustration. Adjust as per your design.
-    border-radius: 50%;  // Optional: to make the cell look rounded
+    background-color: #cfe8fc; // Light blue background for range hover effect
+}
+
+.calendar-item {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+
+    &:hover > :nth-child { 
+        background-color: cyan 
+    }
+
+    & > div {
+        position: relative;
+    }
+
+    &.endpoint::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 2px solid blue;
+        border-radius: 50%;
+        background-color: white;
+    }
+
+    &.endpoint > div {
+        color: blue;
+    }
+
+    &.in-range::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: blue;
+    }
+
+    &.in-range > div {
+        color: white;
+    }
+
+    // Styles to connect the range dots visually
+    &.in-range:not(.endpoint):first-of-type::before {
+        border-top-left-radius: 50%;
+        border-bottom-left-radius: 50%;
+    }
+
+    &.in-range:not(.endpoint):last-of-type::before {
+        border-top-right-radius: 50%;
+        border-bottom-right-radius: 50%;
+    }
 }
