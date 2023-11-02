@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
-import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
+import { catchError, EMPTY, mergeMap, map, of, filter } from 'rxjs';
 import * as ProjectsDetailsActions from './projects-details.actions';
 import { ApiService } from '@dua-upd/upd/services';
 import { Store } from '@ngrx/store';
@@ -26,6 +26,7 @@ export class ProjectsDetailsEffects {
         this.store.select(selectDateRanges),
         this.store.select(selectProjectsDetailsData),
       ]),
+      filter(([, projectId]) => !!projectId),
       mergeMap(
         ([
           ,
@@ -34,7 +35,7 @@ export class ProjectsDetailsEffects {
           projectDetailsData,
         ]) => {
           if (!projectId) {
-            console.error('pageId not found when trying to load page details');
+            console.error('projectId not found when trying to load page details');
           }
 
           const projectIsLoaded = projectDetailsData._id === projectId; // page is already loaded (but not necessarily with the correct data)

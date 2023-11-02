@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
-import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
+import { catchError, EMPTY, mergeMap, map, of, filter } from 'rxjs';
 import { ApiService } from '@dua-upd/upd/services';
 import {
   selectDatePeriod,
@@ -29,10 +29,11 @@ export class TasksDetailsEffects {
         this.store.select(selectDateRanges),
         this.store.select(selectTasksDetailsData),
       ]),
+      filter(([, taskId]) => !!taskId),
       mergeMap(
         ([, taskId, { dateRange, comparisonDateRange }, taskDetailsData]) => {
           if (!taskId) {
-            console.error('pageId not found when trying to load page details');
+            console.error('taskId not found when trying to load page details');
           }
 
           const taskIsLoaded = taskDetailsData._id === taskId; // page is already loaded (but not necessarily with the correct data)

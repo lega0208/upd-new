@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, mergeMap, map, of, EMPTY } from 'rxjs';
+import { catchError, mergeMap, map, of, EMPTY, filter } from 'rxjs';
 import { ApiService } from '@dua-upd/upd/services';
 import {
   selectDateRanges,
@@ -28,6 +28,7 @@ export class PagesDetailsEffects {
         this.store.select(selectDateRanges),
         this.store.select(selectPagesDetailsData),
       ]),
+      filter(([, pageId]) => !!pageId),
       mergeMap(
         ([, pageId, { dateRange, comparisonDateRange }, pageDetailsData]) => {
           if (!pageId) {

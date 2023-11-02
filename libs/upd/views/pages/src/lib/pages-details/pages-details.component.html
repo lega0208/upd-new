@@ -68,11 +68,9 @@
 
   <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
 
-  <ng-container *ngIf="currentUrl$ | async as currentUrl">
-    <upd-date-selector
-      *ngIf="!currentUrl.startsWith('readability')"
-    ></upd-date-selector>
-  </ng-container>
+  <upd-date-selector
+    *ngIf="!(currentUrl$ | async)?.startsWith('readability')"
+  ></upd-date-selector>
 
   <router-outlet></router-outlet>
 </ng-template>
