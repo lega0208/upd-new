@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { ReturnedData, StorageCache } from './storage-cache.decorator';
-import {
+import { inject, Injectable } from '@angular/core';
+import type {
   ApiParams,
   OverviewData,
   PageDetailsData,
@@ -13,14 +12,19 @@ import {
   ReportsData,
 } from '@dua-upd/types-common';
 
+export interface ReturnedData<T> {
+  dateRange: T;
+  comparisonDateRange?: T;
+}
+
 @Injectable()
 export class ApiService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   // @StorageCache
   private get<T extends ReturnedData<unknown>>(
     url: string,
-    params?: ApiParams
+    params?: ApiParams,
   ) {
     return this.http.get<T>(url, { params });
   }

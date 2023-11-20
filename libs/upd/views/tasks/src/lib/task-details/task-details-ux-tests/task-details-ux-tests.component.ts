@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import { Component, inject, OnInit } from '@angular/core';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { GetTableProps } from '@dua-upd/utils-common';
+import type { GetTableProps } from '@dua-upd/utils-common';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 
 type DocumentsColTypes = GetTableProps<
@@ -16,7 +15,8 @@ type DocumentsColTypes = GetTableProps<
   styleUrls: ['./task-details-ux-tests.component.css'],
 })
 export class TaskDetailsUxTestsComponent implements OnInit {
-  currentLang$ = this.i18n.currentLang$;
+  private i18n = inject(I18nFacade);
+  private readonly taskDetailsService = inject(TasksDetailsFacade);
 
   taskSuccessChart$ = this.taskDetailsService.taskSuccessChart$;
   taskSuccessChartData$ = this.taskDetailsService.taskSuccessChartData$;
@@ -40,13 +40,8 @@ export class TaskDetailsUxTestsComponent implements OnInit {
   avgTaskSuccessKpiCriteria = (successRate: number) =>
     successRate >= 0.8 ? 'pass' : 'fail';
 
-  constructor(
-    private readonly taskDetailsService: TasksDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
-
   ngOnInit() {
-    combineLatest([this.currentLang$]).subscribe(([lang]) => {
+    this.i18n.currentLang$.subscribe((lang) => {
       this.documentsCols = [
         {
           field: 'filename',

@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, mergeMap, map, of, EMPTY } from 'rxjs';
+import { catchError, mergeMap, map, of, EMPTY, filter } from 'rxjs';
 import { ApiService } from '@dua-upd/upd/services';
 import {
   selectDateRanges,
@@ -16,6 +16,10 @@ import { selectPagesDetailsData } from './pages-details.selectors';
 
 @Injectable()
 export class PagesDetailsEffects {
+  private readonly actions$ = inject(Actions);
+  private api = inject(ApiService);
+  private store = inject(Store);
+
   init$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(loadPagesDetailsInit),
@@ -24,6 +28,7 @@ export class PagesDetailsEffects {
         this.store.select(selectDateRanges),
         this.store.select(selectPagesDetailsData),
       ]),
+      filter(([, pageId]) => !!pageId),
       mergeMap(
         ([, pageId, { dateRange, comparisonDateRange }, pageDetailsData]) => {
           if (!pageId) {
@@ -52,23 +57,17 @@ export class PagesDetailsEffects {
             })
             .pipe(
               map((data) => loadPagesDetailsSuccess({ data })),
-              catchError(() => EMPTY)
+              catchError(() => EMPTY),
             );
-        }
-      )
+        },
+      ),
     );
   });
 
   dateChange$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(selectDatePeriod),
-      mergeMap(() => of(loadPagesDetailsInit()))
+      mergeMap(() => of(loadPagesDetailsInit())),
     );
   });
-
-  constructor(
-    private readonly actions$: Actions,
-    private api: ApiService,
-    private store: Store
-  ) {}
 }

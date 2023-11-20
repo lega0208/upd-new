@@ -1,6 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {
-  ColumnConfig,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
+import {
+  type ColumnConfig,
   callVolumeObjectiveCriteria,
   feedbackKpiObjectiveCriteria,
 } from '@dua-upd/upd-components';
@@ -17,6 +22,9 @@ import { combineLatest } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskDetailsSummaryComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private readonly taskDetailsService = inject(TasksDetailsFacade);
+
   avgTaskSuccessFromLastTest$ =
     this.taskDetailsService.avgTaskSuccessFromLastTest$;
   avgSuccessPercentChange$ = this.taskDetailsService.avgSuccessPercentChange$;
@@ -178,12 +186,7 @@ export class TaskDetailsSummaryComponent implements OnInit {
             pipe: 'number',
           },
         ];
-      }
+      },
     );
   }
-
-  constructor(
-    private readonly taskDetailsService: TasksDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 }

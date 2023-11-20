@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { combineLatest, map, Observable } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
-import {
+import type {
   ColumnConfig,
   KpiObjectiveCriteria,
   KpiOptionalConfig,
@@ -15,6 +15,9 @@ import { formatNumber } from '@angular/common';
   styleUrls: ['./pages-details-readability.component.css'],
 })
 export class PagesDetailsReadabilityComponent {
+  private i18n = inject(I18nFacade);
+  private pageDetailsService = inject(PagesDetailsFacade);
+
   currentLang$ = this.i18n.currentLang$;
 
   pageLang$ = this.pageDetailsService.pageLang$;
@@ -23,8 +26,8 @@ export class PagesDetailsReadabilityComponent {
     map((lang) =>
       lang === 'fr'
         ? 'calculation-of-readability-points-description-fr'
-        : 'calculation-of-readability-points-description'
-    )
+        : 'calculation-of-readability-points-description',
+    ),
   );
 
   pageLastUpdated$ = this.pageDetailsService.pageLastUpdated$;
@@ -35,9 +38,10 @@ export class PagesDetailsReadabilityComponent {
   wordsPerHeading$ = this.pageDetailsService.wordsPerHeading$;
   paragraphPoints$ = this.pageDetailsService.paragraphPoints$;
   wordsPerParagraph$ = this.pageDetailsService.wordsPerParagraph$;
-  mostFrequentWordsOnPage$ = this.pageDetailsService.mostFrequentWordsOnPage$.pipe(
-    map((words) => [...words])
-  );
+  mostFrequentWordsOnPage$ =
+    this.pageDetailsService.mostFrequentWordsOnPage$.pipe(
+      map((words) => [...words]),
+    );
   wordCount$ = this.pageDetailsService.wordCount$;
   paragraphCount$ = this.pageDetailsService.paragraphCount$;
   headingCount$ = this.pageDetailsService.headingCount$;
@@ -49,12 +53,12 @@ export class PagesDetailsReadabilityComponent {
     map(([fleshKincaid, lang]) => {
       const message = this.i18n.service.translate(
         'flesch-kincaid-readability-score',
-        lang
+        lang,
       );
       const value = formatNumber(fleshKincaid, lang, '1.0-2');
 
       return `${message} ${value}`;
-    })
+    }),
   );
 
   wordsPerHeadingFormatted$ = combineLatest([
@@ -64,12 +68,12 @@ export class PagesDetailsReadabilityComponent {
     map(([wordsPerHeading, lang]) => {
       const message = this.i18n.service.translate(
         'words-between-each-heading',
-        lang
+        lang,
       );
       const value = formatNumber(wordsPerHeading, lang, '1.0-2');
 
       return `${message} ${value}`;
-    })
+    }),
   );
 
   wordsPerParagraphFormatted$ = combineLatest([
@@ -81,7 +85,7 @@ export class PagesDetailsReadabilityComponent {
       const value = formatNumber(wordsPerParagraph, lang, '1.0-2');
 
       return `${message} ${value}`;
-    })
+    }),
   );
 
   mostFrequentWordsOnPageCols$ = this.currentLang$.pipe(
@@ -98,8 +102,8 @@ export class PagesDetailsReadabilityComponent {
             header: this.i18n.service.translate('count', lang),
             headerClass: 'col-auto',
           },
-        ] as ColumnConfig<{ word: string; count: number }>[]
-    )
+        ] as ColumnConfig<{ word: string; count: number }>[],
+    ),
   );
 
   totalScoreTemplateParams = ['{{}}/100', '1.0-2'];
@@ -138,7 +142,7 @@ export class PagesDetailsReadabilityComponent {
         partial: { messageFormatter },
         fail: { messageFormatter },
       };
-    })
+    }),
   );
 
   totalScoreKpiCriteria: KpiObjectiveCriteria = (totalScore: number) => {
@@ -153,9 +157,4 @@ export class PagesDetailsReadabilityComponent {
         return 'none';
     }
   };
-
-  constructor(
-    private pageDetailsService: PagesDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 }

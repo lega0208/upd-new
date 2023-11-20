@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { map } from 'rxjs';
-import { ColumnConfig } from '@dua-upd/upd-components';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import { GetTableProps } from '@dua-upd/utils-common';
+import type { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
 type VisitsByPageColTypes = GetTableProps<
@@ -18,8 +17,9 @@ type VisitsByPageColTypes = GetTableProps<
   styleUrls: ['./project-details-search-analytics.component.css'],
 })
 export class ProjectDetailsSearchAnalyticsComponent implements OnInit {
-  currentLang!: LocaleId;
-  currentLang$ = this.i18n.currentLang$;
+  private i18n = inject(I18nFacade);
+  private readonly projectsDetailsService = inject(ProjectsDetailsFacade);
+
   langLink = 'en';
 
   gscTotalClicks$ = this.projectsDetailsService.gscTotalClicks$;
@@ -38,9 +38,9 @@ export class ProjectDetailsSearchAnalyticsComponent implements OnInit {
           visitsByPage &&
           visitsByPage.sort(
             (a: { gscTotalClicks?: number }, b: { gscTotalClicks?: number }) =>
-              (b.gscTotalClicks || 0) - (a.gscTotalClicks || 0)
-          )
-      )
+              (b.gscTotalClicks || 0) - (a.gscTotalClicks || 0),
+          ),
+      ),
     );
   visitsByPageCols: ColumnConfig<VisitsByPageColTypes>[] = [];
 
@@ -48,17 +48,8 @@ export class ProjectDetailsSearchAnalyticsComponent implements OnInit {
 
   searchTermsColConfig$ = this.projectsDetailsService.searchTermsColConfig$;
 
-  constructor(
-    private readonly projectsDetailsService: ProjectsDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
-
   ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
-    this.currentLang$.subscribe((lang) => {
+    this.i18n.currentLang$.subscribe((lang) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.visitsByPageCols = [
         {

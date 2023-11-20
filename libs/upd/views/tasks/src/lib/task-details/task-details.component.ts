@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { TasksDetailsFacade } from './+state/tasks-details.facade';
-
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 
 @Component({
   selector: 'upd-task-details',
@@ -11,6 +10,9 @@ import { ColumnConfig } from '@dua-upd/upd-components';
   styleUrls: ['./task-details.component.css'],
 })
 export class TaskDetailsComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private readonly taskDetailsService = inject(TasksDetailsFacade);
+
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
@@ -24,11 +26,6 @@ export class TaskDetailsComponent implements OnInit {
 
   projects$ = this.taskDetailsService.projects$;
   projectsCol: ColumnConfig = { field: '', header: '' };
-
-  constructor(
-    private readonly taskDetailsService: TasksDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 
   ngOnInit() {
     this.taskDetailsService.init();

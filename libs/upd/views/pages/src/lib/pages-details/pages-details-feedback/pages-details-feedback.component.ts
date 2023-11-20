@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
-
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { GetTableProps } from '@dua-upd/utils-common';
+import type { GetTableProps } from '@dua-upd/utils-common';
 
 type FeedbackCommentsColType = GetTableProps<
   PagesDetailsFeedbackComponent,
@@ -21,6 +20,9 @@ type FeedbackByTagsColTypes = GetTableProps<
   styleUrls: ['./pages-details-feedback.component.css'],
 })
 export class PagesDetailsFeedbackComponent implements OnInit {
+  private pageDetailsService = inject(PagesDetailsFacade);
+  private i18n = inject(I18nFacade);
+
   currentLang$ = this.i18n.currentLang$;
 
   dyfChart$ = this.pageDetailsService.dyfData$;
@@ -46,11 +48,6 @@ export class PagesDetailsFeedbackComponent implements OnInit {
 
   dateRangeLabel$ = this.pageDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.pageDetailsService.comparisonDateRangeLabel$;
-
-  constructor(
-    private pageDetailsService: PagesDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 
   ngOnInit() {
     combineLatest([

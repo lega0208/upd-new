@@ -1,13 +1,7 @@
-import {
-  Component,
-  Input,
-  OnChanges,
-  OnInit,
-  SimpleChanges,
-} from '@angular/core';
-import { ColumnConfig, ColumnConfigPipe } from './types';
+import { Component, inject, Input, OnInit } from '@angular/core';
+import type { ColumnConfig } from './types';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
-import { ProjectStatus } from '@dua-upd/types-common';
+import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 
 @Component({
@@ -16,85 +10,90 @@ import { I18nFacade } from '@dua-upd/upd/state';
   styleUrls: ['./data-table-styles.component.scss'],
   providers: [PercentPipe, DecimalPipe, DatePipe],
 })
-export class DataTableStylesComponent implements OnInit, OnChanges {
-  @Input() config: ColumnConfig = { field: '', header: '' };
-  @Input() href = '';
-  @Input() data: Record<string, number | string> = {};
-  array: string[] = [];
+export class DataTableStylesComponent implements OnInit {
+  private percentPipe = inject(PercentPipe);
+  private decimalPipe = inject(DecimalPipe);
+  private datePipe = inject(DatePipe);
+  private i18n = inject(I18nFacade);
 
+  @Input() config: ColumnConfig = { field: '', header: '' };
+  @Input() data: Record<string, number | string> = {};
+
+  array: string[] = [];
+  labelType?: 'project' | 'page';
   numberVal: number | string = 0;
 
-  isProjectLabel = false;
-  projectLabel: ProjectStatus = 'Unknown';
-  hasType = false;
-  hasPipe = false;
-
-  comparisonClassMap = {
-    'text-danger': <number>this.data[this.config.field] < 0,
-    'text-success': <number>this.data[this.config.field] > 0,
-  };
-
   ngOnInit() {
-    this.hasType = !!this.config.type;
-    this.hasPipe = !!this.config.pipe;
-
-    if (this.hasPipe) {
-      this.numberVal =
-        this.configurePipe(
-          this.data[this.config.field] as number,
-          this.config.pipe,
-          this.config.pipeParam
-        ) || '';
+    if (this.config.pipe) {
+      this.numberVal = this.applyPipe(this.data[this.config.field] as number);
     }
 
-    if (
-      this.config.type === 'label' &&
-      this.config.typeParam !== 'cops' &&
-      this.config.typeParam !== 'passFail'
-    )
-      this.isProjectLabel = true;
-
-    this.projectLabel = this.data[this.config.field] as ProjectStatus;
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['data']) {
-      this.comparisonClassMap = {
-        'text-danger': <number>this.data[this.config.field] < 0,
-        'text-success': <number>this.data[this.config.field] > 0,
-      };
+    if (this.config.type === 'label') {
+      if (this.config.typeParam === 'status') {
+        this.labelType = 'project';
+      } else if (this.config.typeParam === 'pageStatus') {
+        this.labelType = 'page';
+      }
     }
   }
 
-  isArray(obj: any) {
+  isArray<T>(obj: T) {
     if (Array.isArray(obj)) {
       this.array = obj;
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
-  configurePipe(data: number, pipe?: ColumnConfigPipe, pipeParam?: string) {
-    if (pipe === 'number') {
-      return this.decimalPipe.transform(data, pipeParam, this.currentLang);
-    } else if (pipe === 'percent') {
-      return this.percentPipe.transform(data, pipeParam, this.currentLang);
-    } else if (pipe === 'date') {
-      return this.datePipe.transform(data, pipeParam, 'UTC', this.currentLang);
-    }
+  get projectStatus(): ProjectStatus {
+    return this.data[this.config.field] as ProjectStatus;
+  }
 
-    return data;
+  get pageStatus(): PageStatus {
+    return this.data[this.config.field] as PageStatus;
+  }
+
+  get comparisonClassMap() {
+    const value = this.data[this.config.field] as number;
+    return {
+      'text-danger': value < 0,
+      'text-success': value > 0,
+    };
+  }
+
+  private applyPipe(data: number): number | string {
+    switch (this.config.pipe) {
+      case 'number':
+        return (
+          this.decimalPipe.transform(
+            data,
+            this.config.pipeParam || undefined,
+            this.currentLang,
+          ) || ''
+        );
+      case 'percent':
+        return (
+          this.percentPipe.transform(
+            data,
+            this.config.pipeParam || undefined,
+            this.currentLang,
+          ) || ''
+        );
+      case 'date':
+        return (
+          this.datePipe.transform(
+            data,
+            this.config.pipeParam || undefined,
+            'UTC',
+            this.currentLang,
+          ) || ''
+        );
+      default:
+        return data;
+    }
   }
 
   get currentLang() {
     return this.i18n.service.currentLang;
   }
-
-  constructor(
-    private percentPipe: PercentPipe,
-    private decimalPipe: DecimalPipe,
-    private datePipe: DatePipe,
-    private i18n: I18nFacade
-  ) {}
 }

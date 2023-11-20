@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
@@ -10,6 +10,9 @@ import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
   styleUrls: ['./project-details-calldrivers.component.css'],
 })
 export class ProjectDetailsCalldriversComponent implements OnInit {
+  private i18n = inject(I18nFacade);
+  private readonly projectsDetailsService = inject(ProjectsDetailsFacade);
+
   currentLang$ = this.i18n.currentLang$;
 
   apexCalldriversChart$ = this.projectsDetailsService.apexCalldriversChart$;
@@ -27,11 +30,6 @@ export class ProjectDetailsCalldriversComponent implements OnInit {
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ =
     this.projectsDetailsService.comparisonDateRangeLabel$;
-
-  constructor(
-    private readonly projectsDetailsService: ProjectsDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 
   ngOnInit() {
     combineLatest([

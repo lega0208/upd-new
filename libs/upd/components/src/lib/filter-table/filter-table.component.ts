@@ -2,21 +2,21 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
+  inject,
   Input,
   OnInit,
   Output,
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import type { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { TreeNode } from 'primeng/api';
+import { FilterService } from 'primeng/api';
+import type { TreeNode } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { TreeSelect } from 'primeng/treeselect';
-
 import { FilterTableStore } from './filter-table.store';
-import { FilterService } from 'primeng/api';
-import { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '../data-table-styles/types';
 
 export interface SelectedNode {
   header: string;
@@ -39,6 +39,10 @@ interface SelectedItem {
 export class FilterTableComponent<T extends { [s: string]: unknown }>
   implements OnInit
 {
+  private i18n = inject(I18nFacade);
+  private readonly filterTableStore = inject(FilterTableStore<T>);
+  private filterService = inject(FilterService);
+
   @Input() cols: ColumnConfig<T>[] = [];
   _data: T[] = [];
   @Input() set data(value: T[]) {
@@ -56,7 +60,6 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
     return this._data;
   }
 
-
   @Input() set removedNode(node: SelectedNode | null) {
     if (node) {
       this.deleteFilter(node);
@@ -72,12 +75,6 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
   @ViewChild('treeSelect') treeSelect!: TreeSelect;
 
   readonly vm$ = this.filterTableStore.vm$;
-
-  constructor(
-    private i18n: I18nFacade,
-    private readonly filterTableStore: FilterTableStore<T>,
-    private filterService: FilterService
-  ) {}
 
   ngOnInit() {
     this.filterService.register('arrayFilter', arrayFilter);
@@ -107,7 +104,7 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
 
   private handleNodeSelectUnselect(
     { node }: { node: TreeNode<string> },
-    selected: boolean
+    selected: boolean,
   ) {
     const { label, data, parent } = node;
 
@@ -132,7 +129,7 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
     for (const node of selectedNode) {
       const nodeExists = this.selectedNodes.find(
         ({ header, label }) =>
-          header.includes(data?.split('|')?.[0]) && label === node.label
+          header.includes(data?.split('|')?.[0]) && label === node.label,
       );
 
       if ((selected && !nodeExists) || (!selected && nodeExists)) {
@@ -175,12 +172,12 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
 
   deleteFilter(node: SelectedNode) {
     this.selectedNodes = this.selectedNodes.filter(
-      (n) => n.header !== node.header || n.label !== node.label
+      (n) => n.header !== node.header || n.label !== node.label,
     );
     this.changedSelectedNodes.emit(this.selectedNodes);
     this.tableFilter(node.header);
     this.treeSelect.value = this.treeSelect.value.filter(
-      (n: { key: string; label: string }) => n.key !== node.header
+      (n: { key: string; label: string }) => n.key !== node.header,
     );
   }
 

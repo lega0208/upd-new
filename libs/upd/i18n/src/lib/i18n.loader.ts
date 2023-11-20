@@ -2,13 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
-import * as enCA from './translations/en-CA.json';
-import * as frCA from './translations/fr-CA.json';
-import * as calldriversEnCA from './translations/calldrivers_en-CA.json';
-import * as calldriversfrCA from './translations/calldrivers_fr-CA.json';
-import { LocaleId } from './i18n.types';
+import enCA from './translations/en-CA.json';
+import frCA from './translations/fr-CA.json';
+import calldriversEnCA from './translations/calldrivers_en-CA.json';
+import calldriversfrCA from './translations/calldrivers_fr-CA.json';
+import type { LocaleId } from './i18n.types';
 
-export type TranslationJson = Record<string, string | Record<string, unknown>>
+export type TranslationJson = Record<string, string | Record<string, unknown>>;
 
 export class JsonLoader implements TranslateLoader {
   getTranslation(lang: LocaleId): Observable<TranslationJson> {

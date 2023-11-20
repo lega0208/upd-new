@@ -1,25 +1,32 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
 import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
-import { catchError, EMPTY, mergeMap, map, of } from 'rxjs';
-
+import { catchError, EMPTY, mergeMap, map, of, filter } from 'rxjs';
 import * as ProjectsDetailsActions from './projects-details.actions';
 import { ApiService } from '@dua-upd/upd/services';
 import { Store } from '@ngrx/store';
-import { selectDatePeriod, selectDateRanges, selectRouteNestedParam } from '@dua-upd/upd/state';
+import {
+  selectDatePeriod,
+  selectDateRanges,
+  selectRouteNestedParam,
+} from '@dua-upd/upd/state';
 import { selectProjectsDetailsData } from './projects-details.selectors';
 import { loadProjectsDetailsSuccess } from './projects-details.actions';
 
 @Injectable()
 export class ProjectsDetailsEffects {
-  init$ = createEffect(() =>
-    this.actions$.pipe(
+  private readonly actions$ = inject(Actions);
+  private store = inject(Store);
+  private api = inject(ApiService);
+
+  init$ = createEffect(() => {
+    return this.actions$.pipe(
       ofType(ProjectsDetailsActions.loadProjectsDetailsInit),
       concatLatestFrom(() => [
-        this.store$.select(selectRouteNestedParam('id')),
-        this.store$.select(selectDateRanges),
-        this.store$.select(selectProjectsDetailsData),
+        this.store.select(selectRouteNestedParam('id')),
+        this.store.select(selectDateRanges),
+        this.store.select(selectProjectsDetailsData),
       ]),
+      filter(([, projectId]) => !!projectId),
       mergeMap(
         ([
           ,
@@ -28,7 +35,7 @@ export class ProjectsDetailsEffects {
           projectDetailsData,
         ]) => {
           if (!projectId) {
-            console.error('pageId not found when trying to load page details');
+            console.error('projectId not found when trying to load page details');
           }
 
           const projectIsLoaded = projectDetailsData._id === projectId; // page is already loaded (but not necessarily with the correct data)
@@ -36,36 +43,34 @@ export class ProjectsDetailsEffects {
           const comparisonDateRangeIsLoaded =
             projectDetailsData.comparisonDateRange === comparisonDateRange;
 
-          if (projectIsLoaded && dateRangeIsLoaded && comparisonDateRangeIsLoaded) {
+          if (
+            projectIsLoaded &&
+            dateRangeIsLoaded &&
+            comparisonDateRangeIsLoaded
+          ) {
             // if everything is already loaded in the state, don't update it
-            return of(
-              loadProjectsDetailsSuccess({ data: null })
-            );
+            return of(loadProjectsDetailsSuccess({ data: null }));
           }
 
           return this.api
-            .getProjectsDetailsData({ id: projectId, dateRange, ...{ comparisonDateRange } })
+            .getProjectsDetailsData({
+              id: projectId,
+              dateRange,
+              ...{ comparisonDateRange },
+            })
             .pipe(
-              map((data) =>
-                loadProjectsDetailsSuccess({ data })
-              ),
-              catchError(() => EMPTY)
+              map((data) => loadProjectsDetailsSuccess({ data })),
+              catchError(() => EMPTY),
             );
-        }
-      )
-    )
-  );
+        },
+      ),
+    );
+  });
 
-  dateChange$ = createEffect(() =>
-    this.actions$.pipe(
+  dateChange$ = createEffect(() => {
+    return this.actions$.pipe(
       ofType(selectDatePeriod),
-      mergeMap(() => of(ProjectsDetailsActions.loadProjectsDetailsInit()))
-    )
-  );
-
-  constructor(
-    private readonly actions$: Actions,
-    private store$: Store,
-    private api: ApiService
-  ) {}
+      mergeMap(() => of(ProjectsDetailsActions.loadProjectsDetailsInit())),
+    );
+  });
 }

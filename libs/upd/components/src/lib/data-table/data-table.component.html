@@ -119,7 +119,7 @@
               </ng-template>
 
               <!-- Category/Multiselect Filtering -->
-              <ng-template [ngIf]="col.filterConfig.type === 'category'">
+              <ng-template [ngIf]="col.filterConfig.type === 'category' || col.filterConfig.type === 'pageStatus'">
                 <p-columnFilter
                   [field]="col.field"
                   matchMode="in"

@@ -360,12 +360,12 @@ export class TasksService {
         latestDate: returnData.dateFromLastTest,
         percentChange: returnData.avgSuccessPercentChange,
       } = getAvgSuccessFromLatestTests(uxTests));
-
-      returnData.feedbackComments = await this.feedbackModel.getComments(
-        params.dateRange,
-        taskUrls
-      );
     }
+
+    returnData.feedbackComments = await this.feedbackModel.getComments(
+      params.dateRange,
+      taskUrls
+    );
 
     await this.cacheManager.set(cacheKey, returnData);
 

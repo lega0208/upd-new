@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { Table } from 'primeng/table';
 import { equals } from 'rambdax';
-import { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '../data-table-styles/types';
 import { SelectedNode } from '../filter-table/filter-table.component';
 
 @Component({

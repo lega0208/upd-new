@@ -1,8 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { ColumnConfig } from '@dua-upd/upd-components';
-import { LocaleId } from '@dua-upd/upd/i18n';
+import { Component, inject, OnInit } from '@angular/core';
+import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { combineLatest } from 'rxjs';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 import { EN_CA } from '@dua-upd/upd/i18n';
 
@@ -12,7 +10,9 @@ import { EN_CA } from '@dua-upd/upd/i18n';
   styleUrls: ['./task-details-search-analytics.component.css'],
 })
 export class TaskDetailsSearchAnalyticsComponent implements OnInit {
-  currentLang!: LocaleId;
+  private i18n = inject(I18nFacade);
+  private readonly taskDetailsService = inject(TasksDetailsFacade);
+
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
@@ -34,11 +34,7 @@ export class TaskDetailsSearchAnalyticsComponent implements OnInit {
 
   searchTermsColConfig$ = this.taskDetailsService.searchTermsColConfig$;
 
-  ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
+  ngOnInit() {
     this.currentLang$.subscribe((lang) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.visitsByPageCols = [
@@ -59,14 +55,22 @@ export class TaskDetailsSearchAnalyticsComponent implements OnInit {
           header: this.i18n.service.translate('clicks', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id', postLink: 'searchanalytics' },
+          typeParams: {
+            preLink: '/' + this.langLink + '/pages',
+            link: '_id',
+            postLink: 'searchanalytics',
+          },
         },
         {
           field: 'gscTotalImpressions',
           header: this.i18n.service.translate('impressions', lang),
           pipe: 'number',
           type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id', postLink: 'searchanalytics' },
+          typeParams: {
+            preLink: '/' + this.langLink + '/pages',
+            link: '_id',
+            postLink: 'searchanalytics',
+          },
         },
         {
           field: 'gscTotalCtr',
@@ -82,9 +86,4 @@ export class TaskDetailsSearchAnalyticsComponent implements OnInit {
       ];
     });
   }
-
-  constructor(
-    private readonly taskDetailsService: TasksDetailsFacade,
-    private i18n: I18nFacade
-  ) {}
 }
