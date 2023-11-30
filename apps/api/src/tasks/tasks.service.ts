@@ -340,6 +340,7 @@ export class TasksService {
         .map(
           (uxTest) =>
             typeof uxTest === 'object' && {
+              _id: uxTest.project,
               title: uxTest.title,
               date: uxTest.date,
               test_type: uxTest.test_type,
