@@ -46,7 +46,7 @@ export class ApexBarComponent implements OnInit {
     this.apexStore.setSeries(value);
   }
 
-  @Input() set xAxis(value: string[]) {
+  @Input() set xAxis(value: string[][] | string[]) {
     this.apexStore.setXAxis(value);
   }
 
@@ -59,6 +59,14 @@ export class ApexBarComponent implements OnInit {
     colorDistributed: boolean;
   }) {
     this.apexStore.setHorizontal(value);
+  }
+
+  @Input() set stacked(value: {
+    isStacked: boolean;
+    isStacked100: boolean;
+    hasDataLabels: boolean;
+  }) {
+    this.apexStore.setStacked(value);
   }
 
   @Input() set annotations(values: { x: Date; text: string }[]) {

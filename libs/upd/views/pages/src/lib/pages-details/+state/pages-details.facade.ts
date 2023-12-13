@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import type { LocaleId } from '@dua-upd/upd/i18n';
+import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade, selectDatePeriodSelection } from '@dua-upd/upd/state';
 import { percentChange, UnwrapObservable } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
@@ -61,6 +61,20 @@ export class PagesDetailsFacade {
   ]).pipe(
     map(([data, lang]) =>
       getWeeklyDatesLabel(data.comparisonDateRange || '', lang),
+    ),
+  );
+
+  fullDateRangeLabel$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(map(([data, lang]) => getFullDateRangeLabel(data.dateRange, lang)));
+
+  fullComparisonDateRangeLabel$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) =>
+      getFullDateRangeLabel(data.comparisonDateRange || '', lang),
     ),
   );
 
@@ -471,26 +485,6 @@ export class PagesDetailsFacade {
     }),
   );
 
-  dyfDataApex$ = combineLatest([
-    this.pagesDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
-    map(([data, lang]) => {
-      const pieChartData: any = [
-        data?.dateRangeData?.dyf_yes || 0,
-        data?.dateRangeData?.dyf_no || 0,
-      ] as ApexNonAxisChartSeries;
-
-      const isZero = pieChartData.every((v: number) => v === 0);
-      if (isZero) {
-        return [];
-      }
-
-      return pieChartData;
-    }),
-  );
-
   whatWasWrongDataApex$ = combineLatest([
     this.pagesDetailsData$,
     this.currentLang$,
@@ -635,22 +629,45 @@ export class PagesDetailsFacade {
   // );
 
   dyfData$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
-
+  
+      const currYesVal = data?.dateRangeData?.dyf_yes || 0;
+      const prevYesVal = data?.comparisonDateRangeData?.dyf_yes || NaN;
+      const currNoVal = data?.dateRangeData?.dyf_no || 0;
+      const prevNoVal = data?.comparisonDateRangeData?.dyf_no || NaN;
+  
       const pieChartData = [
-        { name: yes, value: data?.dateRangeData?.dyf_yes || 0 },
-        { name: no, value: data?.dateRangeData?.dyf_no || 0 },
+        { name: yes, currValue: currYesVal, prevValue: prevYesVal },
+        { name: no, currValue: currNoVal, prevValue: prevNoVal },
       ];
+  
+      const filteredPieChartData = pieChartData.filter((v) => v.currValue > 0 || v.prevValue > 0);
+  
+      return filteredPieChartData.length > 0 ? filteredPieChartData : [];
+    }),
+  );
 
-      const isZero = pieChartData.every((v) => v.value === 0);
+  dyfDataApex$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
+    map(([data, lang]) => {
+      const dyfData = [
+        {
+          name: this.i18n.service.translate('yes', lang),
+          data: [data?.dateRangeData?.dyf_yes || 0, data?.comparisonDateRangeData?.dyf_yes || 0],
+        },
+        {
+          name: this.i18n.service.translate('no', lang),
+          data: [data?.dateRangeData?.dyf_no || 0, data?.comparisonDateRangeData?.dyf_no || 0],
+        },
+      ] as ApexAxisChartSeries;
+  
+      const isZero = dyfData.every(item => item.data.every(value => value === 0));
       if (isZero) {
         return [];
       }
-
-      return pieChartData;
+  
+      return dyfData;
     }),
   );
 
@@ -890,6 +907,24 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };
+
+const getFullDateRangeLabel = (
+  dateRange: string, lang: LocaleId,
+) => {
+    const [startDate, endDate] = dateRange.split('/');
+
+    const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
+    const separator = lang === FR_CA ? ' au' : ' to';
+
+    const formattedStartDate = dayjs
+      .utc(startDate)
+      .locale(lang)
+      .format(dateFormat);
+
+    const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
+
+    return [`${formattedStartDate}${separator}`,`${formattedEndDate}`];
+  }
 
 function mapObjectArraysWithPercentChange(
   propName: keyof PageAggregatedData,
