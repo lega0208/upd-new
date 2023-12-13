@@ -1,24 +1,17 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-    <div class="col-lg-6 col-md-6 col-sm-12">
-      <upd-apex-donut
+    <div class="col-lg-12 col-md-12 col-sm-12">
+      <upd-apex-bar
         [title]="'d3-dyfwywlf'"
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [series]="(dyfChartApex$ | async) || []"
-        [labels]="dyfChartLegend"
+        [yAxis]="'Date range' | translate"
+        [xAxis]="[ (fullDateRangeLabel$ | async) || [], (fullComparisonDateRangeLabel$ | async) || [] ]"
         [tableCols]="dyfTableCols"
         [table]="dyfChart$ | async"
-      ></upd-apex-donut>
-    </div>
-    <div class="col-lg-6 col-md-6 col-sm-12">
-      <upd-apex-donut
-        [title]="'d3-www'"
-        titleTooltip="{{ 'tooltip-d3-www' | translate }}"
-        [series]="(whatWasWrongChartApex$ | async) || []"
-        [labels]="whatWasWrongChartLegend"
-        [tableCols]="whatWasWrongTableCols"
-        [table]="whatWasWrongChart$ | async"
-      ></upd-apex-donut>
+        [horizontal]="{ isHorizontal: true, colorDistributed: false }"
+        [stacked]="{ isStacked: true, isStacked100: true, hasDataLabels: true }"
+      ></upd-apex-bar>
     </div>
   </div>
 </div>

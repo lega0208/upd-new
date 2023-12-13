@@ -25,10 +25,14 @@ export class PagesDetailsFeedbackComponent implements OnInit {
 
   currentLang$ = this.i18n.currentLang$;
 
+  fullDateRangeLabel$ = this.pageDetailsService.fullDateRangeLabel$;
+  fullComparisonDateRangeLabel$ =
+    this.pageDetailsService.fullComparisonDateRangeLabel$;
+
   dyfChart$ = this.pageDetailsService.dyfData$;
   whatWasWrongChart$ = this.pageDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
 
   dyfChartApex$ = this.pageDetailsService.dyfDataApex$;
@@ -72,8 +76,13 @@ export class PagesDetailsFeedbackComponent implements OnInit {
           header: this.i18n.service.translate('Selection', lang),
         },
         {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
+          field: 'currValue',
+          header: dateRange,
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: comparisonDateRange,
           pipe: 'number',
         },
       ];

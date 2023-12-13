@@ -324,6 +324,7 @@
   "reports": "Rapports",
   "English": "Anglais",
   "French": "Français",
+  "Date range": "Plage de dates",
 
   "kpi-calls-per-100-title": "Appels pour 100 visites",
   "kpi-calls-per-100-tooltip": "Le ratio des appels reçus par l'ARC pour 100 visites des pages de l'ARC sur Canada.ca au cours de la période visée.",
