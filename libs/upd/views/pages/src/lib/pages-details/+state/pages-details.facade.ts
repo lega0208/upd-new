@@ -651,7 +651,7 @@ export class PagesDetailsFacade {
 
   dyfDataApex$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
-      const dyfData = [
+      const dyfData: ApexAxisChartSeries = [
         {
           name: this.i18n.service.translate('yes', lang),
           data: [data?.dateRangeData?.dyf_yes || 0, data?.comparisonDateRangeData?.dyf_yes || 0],
@@ -660,9 +660,12 @@ export class PagesDetailsFacade {
           name: this.i18n.service.translate('no', lang),
           data: [data?.dateRangeData?.dyf_no || 0, data?.comparisonDateRangeData?.dyf_no || 0],
         },
-      ] as ApexAxisChartSeries;
+      ];
   
-      const isZero = dyfData.every(item => item.data.every(value => value === 0));
+      const isZero = dyfData.every(item => 
+        (item.data as number[]).every(value => typeof value === 'number' && value === 0)
+      );
+      
       if (isZero) {
         return [];
       }
