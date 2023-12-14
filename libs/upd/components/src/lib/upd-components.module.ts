@@ -18,6 +18,7 @@ import { SliderModule } from 'primeng/slider';
 import { CalendarModule } from 'primeng/calendar';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TreeSelectModule } from 'primeng/treeselect';
+import { TabViewModule } from 'primeng/tabview';
 import { PipesModule } from '@dua-upd/upd/pipes';
 import { DataCardComponent } from './data-card/data-card.component';
 import { DataTableComponent } from './data-table/data-table.component';
@@ -29,6 +30,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { CheckboxModule } from 'primeng/checkbox';
+import { InputSwitchModule } from 'primeng/inputswitch';
 import { AlertComponent } from './alert/alert.component';
 import { AccordionComponent } from './accordion/accordion.component';
 import { ModalComponent } from './modal/modal.component';
@@ -52,6 +54,9 @@ import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.compon
 import { FilterTableComponent } from './filter-table/filter-table.component';
 import { FilterTableSelectionComponent } from './filter-table-selection/filter-table-selection.component';
 import { CalendarComponent } from './calendar/calendar.component';
+import { CheckboxComponent } from './checkbox/checkbox.component';
+import { TabsComponent } from './tabs/tabs.component';
+import { InputSwitchComponent } from './input-switch/input-switch.component';
 
 @NgModule({
   imports: [
@@ -68,6 +73,8 @@ import { CalendarComponent } from './calendar/calendar.component';
     InputTextModule,
     InputTextareaModule,
     CheckboxModule,
+    TabViewModule,
+    InputSwitchModule,
     NgbModule,
     I18nModule,
     DropdownModule,
@@ -108,6 +115,9 @@ import { CalendarComponent } from './calendar/calendar.component';
     FilterTableComponent,
     FilterTableSelectionComponent,
     CalendarComponent,
+    CheckboxComponent,
+    TabsComponent,
+    InputSwitchComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -116,6 +126,8 @@ import { CalendarComponent } from './calendar/calendar.component';
     InputTextModule,
     InputTextareaModule,
     CheckboxModule,
+    TabViewModule,
+    InputSwitchModule,
     CalendarComponent,
     CardComponent,
     DataTableComponent,
@@ -142,7 +154,10 @@ import { CalendarComponent } from './calendar/calendar.component';
     ApexSparkLineComponent,
     FilterTableComponent,
     FilterTableSelectionComponent,
-    FormsModule
+    CheckboxComponent,
+    DropdownComponent,
+    TabsComponent,
+    InputSwitchComponent
   ],
 })
 export class UpdComponentsModule {}

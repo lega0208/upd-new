@@ -325,6 +325,7 @@
   "English": "Anglais",
   "French": "Français",
   "URLs added to report": "URL ajoutées au rapport ({{count}})",
+  "to": "au",
 
   "kpi-calls-per-100-title": "Appels pour 100 visites",
   "kpi-calls-per-100-tooltip": "Le ratio des appels reçus par l'ARC pour 100 visites des pages de l'ARC sur Canada.ca au cours de la période visée.",
@@ -436,6 +437,14 @@
   "work-in-progress-desc": "Ce projet est en constante évolution. De nouvelles fonctionnalités et sections ont été prévues et seront intégrées au fil du temps.",
   "More to come": "Il y a plus à venir.",
   "UPD releases": "Versions du TBPC",
+
+  "--------CUSTOM REPORTS--------": "--------------------------------CUSTOM REPORTS--------------------------------",
+  "alert-date": "Veuillez sélectionner une plage de dates",
+  "alert-metric": "Veuillez sélectionner une métrique",
+  "alert-url": "Veuillez sélectionner une URL",
+  "select-date": "Sélectionnez une plage de dates",
+  "select-metric": "Sélectionnez une métrique",
+  "select-url": "Sélectionnez une URL",
 
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",
   "Get a business number": "Obtenir un numéro d’entreprise",

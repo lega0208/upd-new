@@ -54,10 +54,10 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
     }
 
     const prevHeaders = colChanges.previousValue.map(
-      (col: ColumnConfig) => col.header
+      (col: ColumnConfig) => col.header,
     );
     const currentHeaders = colChanges.currentValue.map(
-      (col: ColumnConfig) => col.header
+      (col: ColumnConfig) => col.header,
     );
 
     if (!equals(prevHeaders, currentHeaders)) {
@@ -73,13 +73,19 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
   selectedPages: any[] = [];
 
   onSelectionChange(value = []) {
-   this.pageSelectionChanged.emit(value);
+    this.selectedPages = value;
+    this.pageSelectionChanged.emit(value);
+  }
+
+  clearSelections() {
+    this.selectedPages = [];
+    this.pageSelectionChanged.emit(this.selectedPages);
   }
 
   getEventValue(event: Event): string {
     return (event.target as HTMLInputElement).value.replace(
       /^.+?(?=www\.)/i,
-      ''
+      '',
     );
   }
 

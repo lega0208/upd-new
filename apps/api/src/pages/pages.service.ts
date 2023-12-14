@@ -8,6 +8,8 @@ import type {
   MetricsConfig,
   PageDocument,
   PageMetricsModel,
+  ProjectDocument,
+  TaskDocument,
   UrlModel,
 } from '@dua-upd/db';
 import {
@@ -15,7 +17,9 @@ import {
   Feedback,
   Page,
   PageMetrics,
+  Project,
   Readability,
+  Task,
   Url,
 } from '@dua-upd/db';
 import type {
@@ -44,6 +48,10 @@ export class PagesService {
     private feedbackModel: FeedbackModel,
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
+    @InjectModel(Task.name, 'defaultConnection')
+    private taskModel: Model<TaskDocument>,
+    @InjectModel(Project.name, 'defaultConnection')
+    private projectModel: Model<ProjectDocument>,
     @InjectModel(Readability.name, 'defaultConnection')
     private readabilityModel: Model<Readability>,
     @InjectModel(Url.name, 'defaultConnection')
@@ -51,17 +59,24 @@ export class PagesService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
+  async listPages({ projection, populate }): Promise<Page[]> {
+    let query = this.pageModel.find({}, projection);
+    if (populate) {
+      const populateArray = populate.split(',').map(item => item.trim());
+      query = query.populate(populateArray);
+    }
+
+    return await query.exec();
+  }
+
   async getPagesHomeData(dateRange: string): Promise<PagesHomeData> {
     const cacheKey = `getPagesHomeData-${dateRange}`;
-    const cachedData = (await this.cacheManager.store.get(
-      cacheKey,
-    )) as PagesHomeAggregatedData[];
+    const cachedData = await this.cacheManager.store.get<PagesHomeData>(
+      cacheKey
+    );
 
     if (cachedData) {
-      return {
-        dateRange,
-        dateRangeData: cachedData,
-      };
+      return cachedData;
     }
 
     const [startDate, endDate] = dateRangeSplit(dateRange);
@@ -70,17 +85,37 @@ export class PagesService {
       end: endDate,
     };
 
-    const results = await this.db.views.pageVisits.getVisitsWithPageData(
+    const pageList = await this.db.views.pageVisits.getVisitsWithPageData(
       queryDateRange,
       this.pageModel
     );
 
+const extractUrls = (pages) => pages
+  .map(page => 'url' in page ? page.url : null)
+  .filter(url => url != null);
+
+const getData = async (model) => {
+  const items = await model.find().populate(['pages']).exec();
+  return items.map(item => ({
+    _id: item._id,
+    title: item.title,
+    urls: extractUrls(item.pages)
+  }));
+};
+
+const taskData = await getData(this.taskModel);
+const projectData = await getData(this.projectModel);
+
+    const results =  {
+      dateRange,
+      taskList: taskData,
+      projectList: projectData,
+      dateRangeData: pageList,
+    };
+
     await this.cacheManager.set(cacheKey, results);
 
-    return {
-      dateRange,
-      dateRangeData: results,
-    };
+    return results;
   }
 
   async getPageDetails(params: ApiParams): Promise<PageDetailsData> {

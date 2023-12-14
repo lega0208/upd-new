@@ -14,6 +14,12 @@ export class PagesHomeFacade {
   pagesHomeTableData$ = this.pagesHomeData$.pipe(
     map((pagesHomeData) => [...(pagesHomeData?.dateRangeData || [])]),
   );
+  projects$ = this.pagesHomeData$.pipe(
+    map((pagesHomeData) => pagesHomeData?.projectList || [])
+  );
+  tasks$ = this.pagesHomeData$.pipe(
+    map((pagesHomeData) => pagesHomeData?.taskList || [])
+  );
   error$ = this.store.select(PagesHomeSelectors.selectPagesHomeError);
 
   fetchData() {

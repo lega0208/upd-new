@@ -326,6 +326,7 @@
   "English": "English",
   "French": "French",
   "URLs added to report": "URLs added to report ({{count}})",
+  "to": "to",
 
   "kpi-calls-per-100-title": "Calls per 100 visits",
   "kpi-calls-per-100-tooltip": "The ratio of calls received by the CRA per 100 visits to the CRA pages on Canada.ca in the reporting time period.",
@@ -437,6 +438,15 @@
   "work-in-progress-desc": "This project is ever evolving. New features and sections have been planned and will be worked in over time.",
   "More to come": "More to come.",
   "UPD releases": "UPD releases",
+
+  "--------CUSTOM REPORTS--------": "--------------------------------CUSTOM REPORTS--------------------------------",
+  "alert-date": "Please select a date range",
+  "alert-metric": "Please select a metric",
+  "alert-url": "Please select or add a URL",
+  "select-date": "Select a date range",
+  "select-granularity": "Select reporting period",
+  "select-metric": "Select a metric",
+  "select-url": "Add pages",
 
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",
   "Get a business number": "Get a business number",

@@ -1,69 +1,91 @@
+.extended-calendar .p-datepicker td>span {
+    width: 30px !important;
+    height: 30px !important;
+}
+.extended-calendar > span > .p-inputtext {
+  width: 400px;
+}
+.extended-calendar .p-datepicker {
+  min-width: 200px;
+  width: 350px;
+}
+
 .cancel-button {
-    background: transparent !important;
-    border-color: red !important;
-    color: red !important;
+  background: transparent !important;
+  border-color: red !important;
+  color: red !important;
 }
 
 .p-datepicker-calendar td span:not(.p-disabled):hover {
-    background-color: #e0e0e0;  // Some subtle hover effect
+  background-color: #e0e0e0; // Some subtle hover effect
+}
+
+.p-datepicker table td.p-datepicker-today > span {
+  background: none;
+  color: none;
+  border-color: none;
+}
+
+.p-disabled {
+  opacity: 0.4;
 }
 
 .hovered-range {
-    background-color: #cfe8fc; // Light blue background for range hover effect
+  background-color: #cfe8fc; // Light blue background for range hover effect
 }
 
 .calendar-item {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+
+  &:hover > :nth-child {
+    background-color: cyan;
+  }
+
+  & > div {
     position: relative;
-    width: 100%;
-    height: 100%;
-    text-align: center;
+  }
 
-    &:hover > :nth-child { 
-        background-color: cyan 
-    }
+  &.endpoint::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px solid blue;
+    border-radius: 50%;
+    background-color: white;
+  }
 
-    & > div {
-        position: relative;
-    }
+  &.endpoint > div {
+    color: blue;
+  }
 
-    &.endpoint::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border: 2px solid blue;
-        border-radius: 50%;
-        background-color: white;
-    }
+  &.in-range::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: blue;
+  }
 
-    &.endpoint > div {
-        color: blue;
-    }
+  &.in-range > div {
+    color: white;
+  }
 
-    &.in-range::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: blue;
-    }
+  // Styles to connect the range dots visually
+  &.in-range:not(.endpoint):first-of-type::before {
+    border-top-left-radius: 50%;
+    border-bottom-left-radius: 50%;
+  }
 
-    &.in-range > div {
-        color: white;
-    }
-
-    // Styles to connect the range dots visually
-    &.in-range:not(.endpoint):first-of-type::before {
-        border-top-left-radius: 50%;
-        border-bottom-left-radius: 50%;
-    }
-
-    &.in-range:not(.endpoint):last-of-type::before {
-        border-top-right-radius: 50%;
-        border-bottom-right-radius: 50%;
-    }
+  &.in-range:not(.endpoint):last-of-type::before {
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+  }
 }
