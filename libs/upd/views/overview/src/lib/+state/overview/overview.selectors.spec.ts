@@ -28,7 +28,7 @@ describe('Overview Selectors', () => {
                 copsTestsCompletedSince2018: 0,
                 participantsTestedSince2018: 0,
                 testsCompletedSince2018: 0,
-                top5CalldriverTopics: [],
+                top25CalldriverTopics: [],
                 top5IncreasedCalldriverTopics: [],
                 top5DecreasedCalldriverTopics: [],
               },
@@ -65,7 +65,7 @@ describe('Overview Selectors', () => {
       copsTestsCompletedSince2018: 0,
       participantsTestedSince2018: 0,
       testsCompletedSince2018: 0,
-      top5CalldriverTopics: [
+      top25CalldriverTopics: [
         { topic: `PRODUCT-AAA`,
         change: 0,
         tpc_id: '',
@@ -101,10 +101,10 @@ describe('Overview Selectors', () => {
   it('getAllOverview() should return the list of Overview', () => {
     const results = OverviewSelectors.selectOverviewData({});
 
-    expect(results.top5CalldriverTopics.length).toBe(3);
+    expect(results.top25CalldriverTopics.length).toBe(3);
     // console.log(Object.entries(results));
     // console.log(Object.entries(results)[8][1]);
-    expect(results.top5CalldriverTopics[1].topic).toBe(`PRODUCT-BBB`);
+    expect(results.top25CalldriverTopics[1].topic).toBe(`PRODUCT-BBB`);
   });
 
   it('OverviewData should return the selected Entity', () => {
@@ -118,7 +118,7 @@ describe('Overview Selectors', () => {
         copsTestsCompletedSince2018: 0,
         participantsTestedSince2018: 0,
         testsCompletedSince2018: 0,
-        top5CalldriverTopics: [
+        top25CalldriverTopics: [
           { 'PRODUCT-AAA': String },
           { 'PRODUCT-BBB': String },
           { 'PRODUCT-CCC': String },
@@ -131,9 +131,9 @@ describe('Overview Selectors', () => {
       error: null,
     });
 
-    expect(results.top5CalldriverTopics.length).toBe(3);
-    // console.log(results.top5CalldriverTopics[1].topic);
-    expect(results.top5CalldriverTopics[1].topic).toBe('PRODUCT-BBB');
+    expect(results.top25CalldriverTopics.length).toBe(3);
+    // console.log(results.top25CalldriverTopics[1].topic);
+    expect(results.top25CalldriverTopics[1].topic).toBe('PRODUCT-BBB');
   });
 
   it('getOverviewLoaded() should return the current "loading" status', () => {
