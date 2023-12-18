@@ -7,7 +7,7 @@ import {
   Readability,
 } from '@dua-upd/db';
 import { DbUpdateService, processHtml, UrlsService } from '@dua-upd/db-update';
-import { singleDatesFromDateRange } from '@dua-upd/external-data';
+import { SearchAnalyticsClient, singleDatesFromDateRange } from '@dua-upd/external-data';
 import {
   arrayToDictionary,
   arrayToDictionaryFlat,
@@ -206,12 +206,12 @@ export async function cleanUrlsTitles(db: DbService) {
   console.log('Titles successfully cleaned 🧹🧹');
 }
 
-export async function repopulateGscSearchTerms() {
+export async function repopulateGscOverallSearchTerms() {
   const dbUpdateService = (<RunScriptCommand>this).inject<DbUpdateService>(
     DbUpdateService,
   );
 
-  console.time('repopulateGscSearchTerms');
+  console.time('repopulateGscOverallSearchTerms');
 
   const sixteenMonthsAgo = dayjs().subtract(16, 'months').format('YYYY-MM-DD');
 
@@ -228,7 +228,47 @@ export async function repopulateGscSearchTerms() {
     ) as Date[],
   );
 
-  console.timeEnd('repopulateGscSearchTerms');
+  console.timeEnd('repopulateGscOverallSearchTerms');
+}
+
+export async function repopulateGscPageSearchTerms(db: DbService) {
+  console.time('repopulateGscPageSearchTerms');
+  const client = new SearchAnalyticsClient();
+
+  const sixteenMonthsAgo = dayjs().subtract(16, 'months').format('YYYY-MM-DD');
+
+  console.log('16 months ago: ', sixteenMonthsAgo);
+
+  const bulkWriteOps = [];
+
+  const results = (await client.getPageMetrics({
+    start: sixteenMonthsAgo,
+    end: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
+  })).flat();
+
+  for (const result of results) {
+    bulkWriteOps.push({
+      updateOne: {
+        filter: {
+          url: result.url,
+          date: result.date,
+        },
+        update: {
+          $set: result,
+        },
+      },
+    });
+  }
+
+  while (bulkWriteOps.length) {
+    console.log('write ops remaining: ', bulkWriteOps.length);
+
+    const ops = bulkWriteOps.splice(0, 1000);
+
+    await db.collections.pageMetrics.bulkWrite(ops, { ordered: false });
+  }
+
+  console.timeEnd('repopulateGscPageSearchTerms');
 }
 
 // repopulate titles from blobs because of bug causing mangled titles
