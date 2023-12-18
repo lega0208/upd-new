@@ -96,7 +96,7 @@ export class SearchAnalyticsClient {
       .setStartDate(date)
       .setEndDate(date)
       .setFilters([craFilter])
-      .setDataState(options?.dataState || 'all')
+      .setDataState(options?.dataState || 'final')
       .setRowLimit(options?.rowLimit || 1)
       .build();
 
@@ -129,7 +129,7 @@ export class SearchAnalyticsClient {
       .setEndDate(date)
       .addDimensions(['query'])
       .setFilters([craFilter])
-      .setDataState(options?.dataState || 'all')
+      .setDataState(options?.dataState || 'final')
       .setRowLimit(options?.rowLimit || 250)
       .build();
 
@@ -252,7 +252,7 @@ export class SearchAnalyticsClient {
       .setEndDate(date)
       .addDimensions(dimensions)
       .setFilters([pageFilter]) // split into en/fr, experiment with regex to find ways to optimize
-      .setDataState(options?.dataState || 'all')
+      .setDataState(options?.dataState || 'final')
       .setRowLimit(options?.rowLimit || 25000)
       .build();
 
@@ -304,7 +304,7 @@ export class SearchAnalyticsClient {
       .setEndDate(date)
       .addDimensions(dimensions)
       .setFilters([pageFilter])
-      .setDataState(options?.dataState || 'all')
+      .setDataState(options?.dataState || 'final')
       .setRowLimit(options?.rowLimit || 25000)
       .build();
 
