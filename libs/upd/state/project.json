@@ -11,12 +11,11 @@
         "outputPath": "dist/libs/upd/state",
         "main": "libs/upd/state/src/index.ts",
         "tsConfig": "libs/upd/state/tsconfig.lib.json",
-        "assets": ["libs/upd/state/*.md"],
-        "updateBuildableProjectDepsInPackageJson": true
+        "assets": ["libs/upd/state/*.md"]
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["libs/upd/state/**/*.ts"]
@@ -26,8 +25,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/upd/state"],
       "options": {
-        "jestConfig": "libs/upd/state/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/upd/state/jest.config.ts"
       }
     }
   },

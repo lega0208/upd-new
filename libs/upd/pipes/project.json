@@ -9,8 +9,7 @@
       "executor": "@nx/angular:ng-packagr-lite",
       "outputs": ["{workspaceRoot}/dist/libs/upd/pipes"],
       "options": {
-        "project": "libs/upd/pipes/ng-package.json",
-        "updateBuildableProjectDepsInPackageJson": true
+        "project": "libs/upd/pipes/ng-package.json"
       },
       "configurations": {
         "production": {
@@ -26,12 +25,11 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/upd/pipes"],
       "options": {
-        "jestConfig": "libs/upd/pipes/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/upd/pipes/jest.config.ts"
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
           "libs/upd/pipes/**/*.ts",
