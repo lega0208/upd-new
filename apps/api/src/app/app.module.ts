@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 import { set } from 'mongoose';
+import { CustomReportsModule } from '@dua-upd/api/custom-reports';
 import { PagesModule } from '../pages/pages.module';
 import { OverallModule } from '../overall/overall.module';
 import { TasksModule } from '../tasks/tasks.module';
@@ -18,6 +20,13 @@ import { ReportsModule } from '../reports/reports.module';
     ProjectsModule,
     InternalSearchModule,
     ReportsModule,
+    CustomReportsModule,
+    BullModule.forRoot({
+      connection: {
+        host: environment.redisHost,
+        port: 6379,
+      },
+    }),
   ],
   providers: [],
 })

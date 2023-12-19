@@ -3075,4 +3075,4 @@ export const dimensions = {
   },
 };
 
-export type ReportQueryDimension = keyof typeof dimensions;
+export type ReportQueryDimension = keyof typeof dimensions | '';
