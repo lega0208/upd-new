@@ -16,7 +16,7 @@ export class FeedbackService {
     @Inject(AirtableClient.name) private airtableClient: AirtableClient,
     private logger: ConsoleLogger,
     @InjectModel(Feedback.name, 'defaultConnection')
-    private feedbackModel: Model<FeedbackDocument>
+    private feedbackModel: Model<FeedbackDocument>,
   ) {}
 
   @AsyncLogTiming
@@ -58,7 +58,9 @@ export class FeedbackService {
           .exec()) || [];
 
       const existingIds = new Set<string>(
-        existingFeedback.map(({ unique_id }) => unique_id.toString())
+        existingFeedback
+          .filter(({ unique_id }) => unique_id)
+          .map(({ unique_id }) => unique_id.toString()),
       );
 
       const lateAdditionsCra = await this.airtableClient.getFeedback({
@@ -72,7 +74,10 @@ export class FeedbackService {
       });
 
       const lateAdditions = [...lateAdditionsCra, ...lateAdditionsLive]
-        .filter(({ unique_id }) => !existingIds.has(unique_id.toString()))
+        .filter(
+          ({ unique_id }) =>
+            unique_id && !existingIds.has(unique_id.toString()),
+        )
         .map((feedback) => ({
           _id: new Types.ObjectId(),
           ...feedback,
@@ -80,7 +85,7 @@ export class FeedbackService {
 
       if (lateAdditions.length > 0) {
         this.logger.log(
-          `Found ${lateAdditions.length} "late additions" for Feedback`
+          `Found ${lateAdditions.length} "late additions" for Feedback`,
         );
       }
 
@@ -94,16 +99,15 @@ export class FeedbackService {
 
     // Promise.all() would be slower here because of rate-limiting
     const craFeedbackData = await this.airtableClient.getFeedback(dateRange);
-    const liveFeedbackData = await this.airtableClient.getLiveFeedback(
-      dateRange
-    );
+    const liveFeedbackData =
+      await this.airtableClient.getLiveFeedback(dateRange);
 
     const feedbackData = [...craFeedbackData, ...liveFeedbackData].map(
       (data) =>
         ({
           _id: new Types.ObjectId(),
           ...data,
-        } as IFeedback)
+        }) as IFeedback,
     );
 
     newFeedback.push(...feedbackData);
@@ -119,8 +123,8 @@ export class FeedbackService {
       .insertMany(newFeedback)
       .then(() =>
         this.logger.log(
-          `Successfully added ${newFeedback.length} Feedback data`
-        )
+          `Successfully added ${newFeedback.length} Feedback data`,
+        ),
       )
       .catch((err) => {
         this.logger.error('Error updating feedback data');
@@ -130,7 +134,7 @@ export class FeedbackService {
 
   async repopulateFeedback() {
     this.logger.log(
-      'Repopulating Feedback data... This may take several minutes.'
+      'Repopulating Feedback data... This may take several minutes.',
     );
 
     await this.feedbackModel.deleteMany({});
