@@ -10,11 +10,6 @@ import { selectRouteNestedParam } from '../../router/router.selectors';
 
 export type RouteLang = 'en' | 'fr';
 
-const langToLocaleId: Record<RouteLang, LocaleId> = {
-  en: 'en-CA',
-  fr: 'fr-CA',
-};
-
 const localeIdToLang: Record<LocaleId, RouteLang> = {
   'en-CA': 'en',
   'fr-CA': 'fr',
@@ -28,14 +23,13 @@ export class I18nEffects {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-
   init$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(I18nActions.init),
       concatLatestFrom(() => [this.store.select(selectCurrentLang)]),
       mergeMap(([, initialLang]) => {
         return of(I18nActions.setLang({ lang: initialLang }));
-      })
+      }),
     );
   });
 
@@ -57,14 +51,11 @@ export class I18nEffects {
           if (!routeLang || routeLang !== localeIdToLang[lang]) {
             if (!location.pathname || location.pathname === '/') {
               return of(
-                this.router.navigate(
-                  [`/${localeIdToLang[lang]}/`],
-                  {
-                    replaceUrl: true,
-                    queryParamsHandling: 'merge',
-                    queryParams,
-                  }
-                )
+                this.router.navigate([`/${localeIdToLang[lang]}/`], {
+                  replaceUrl: false,
+                  queryParamsHandling: 'merge',
+                  queryParams,
+                }),
               );
             }
 
@@ -73,22 +64,22 @@ export class I18nEffects {
                 [
                   location.pathname.replace(
                     /\/(en|fr)\//i,
-                    `/${localeIdToLang[lang]}/`
+                    `/${localeIdToLang[lang]}/`,
                   ),
                 ],
                 {
-                  replaceUrl: true,
+                  replaceUrl: false,
                   queryParamsHandling: 'merge',
                   queryParams,
-                }
-              )
+                },
+              ),
             );
           }
 
           return of(EMPTY);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 }

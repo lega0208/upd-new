@@ -62,7 +62,7 @@ import { AppRouteReuseStrategy } from './route-reuse.strategy';
     I18nService,
     I18nFacade,
     { provide: APP_BASE_HREF, useValue: '/' },
-    { provide: LocationStrategy, useClass: PathPreserveQueryLocationStrategy },
+    // { provide: LocationStrategy, useClass: PathPreserveQueryLocationStrategy },
     { provide: RouteReuseStrategy, useClass: AppRouteReuseStrategy },
   ],
   bootstrap: [AppComponent],

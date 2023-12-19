@@ -1,0 +1,8 @@
+<p><strong>Config:</strong></p>
+<pre><code>{{ config | json }}</code></pre>
+
+<div *ngIf="error() as error" class="alert alert-danger">
+    <strong>Error:</strong> {{ error }}
+</div>
+
+<button (click)="createReport(config)">Create report</button>
