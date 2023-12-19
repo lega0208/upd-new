@@ -47,7 +47,7 @@ export class UrlsService {
     @Inject('DB_UPDATE_LOGGER') private logger: BlobLogger,
     @Inject(BlobStorageService.name) private blobService: BlobStorageService,
     @Inject('ENV') private production: boolean,
-    @Optional() private readability: ReadabilityService
+    @Optional() private readability: ReadabilityService,
   ) {}
 
   private async getBlobClient() {
@@ -58,7 +58,7 @@ export class UrlsService {
     const dateString = new Date().toISOString().slice(0, 10);
 
     return this.blobService.blobModels.urls.blob(
-      `archive/${dateString}/${this.DATA_BLOB_NAME}`
+      `archive/${dateString}/${this.DATA_BLOB_NAME}`,
     );
   }
 
@@ -86,7 +86,7 @@ export class UrlsService {
             $set: { url: squishTrim(page.url).replace(httpsRegex, '') },
           },
         },
-      })
+      }),
     );
 
     await this.db.collections.pages.bulkWrite(updateOps);
@@ -100,7 +100,7 @@ export class UrlsService {
 
       if (!(await blobClient.exists())) {
         this.logger.warn(
-          `Tried to sync local Urls collection, but data blob does not exist.`
+          `Tried to sync local Urls collection, but data blob does not exist.`,
         );
         return;
       }
@@ -153,25 +153,32 @@ export class UrlsService {
 
       const bulkWriteOps: mongo.AnyBulkWriteOperation<Url>[] = JSON.parse(
         blobData,
-        jsonReviver
+        jsonReviver,
       ).map(
-        (url) =>
+        (url: IUrl) =>
           ({
             updateOne: {
-              filter: { _id: url._id },
-              update: { $set: url },
+              filter: { url: url.url },
+              update: {
+                $setOnInsert: {
+                  _id: url._id,
+                },
+                $set: omit(['_id'], url),
+              },
               upsert: true,
             },
-          } as mongo.AnyBulkWriteOperation<Url>)
+          }) as mongo.AnyBulkWriteOperation<Url>,
       );
 
       const bulkWriteResults = await this.db.collections.urls.bulkWrite(
         bulkWriteOps,
-        { ordered: true }
+        { ordered: true },
       );
 
       this.logger.accent(
-        `${bulkWriteResults.nModified + bulkWriteResults.nUpserted} urls updated.`
+        `${
+          bulkWriteResults.nModified + bulkWriteResults.nUpserted
+        } urls updated.`,
       );
 
       this.logger.log(`Urls collection successfully updated.`);
@@ -191,7 +198,7 @@ export class UrlsService {
       (options?.urls?.check404s || options?.urls?.checkAll)
     ) {
       throw new Error(
-        'Cannot use filter option with check404s or checkAll options.'
+        'Cannot use filter option with check404s or checkAll options.',
       );
     }
 
@@ -247,12 +254,12 @@ export class UrlsService {
     ).filter(
       // filter out pages that have an endless redirect loop (and pdfs)
       (urlDoc) =>
-        !ignoredUrls.includes(urlDoc.url) && !urlDoc.url.endsWith('.pdf')
+        !ignoredUrls.includes(urlDoc.url) && !urlDoc.url.endsWith('.pdf'),
     );
 
     if (urlsFromCollection?.length) {
       this.logger.info(
-        `Found ${urlsFromCollection.length} URLs from collection to check.`
+        `Found ${urlsFromCollection.length} URLs from collection to check.`,
       );
 
       return await this.checkAndUpdateUrlData(urlsFromCollection);
@@ -268,13 +275,13 @@ export class UrlsService {
     }
 
     throw new Error(
-      'Urls collection should be populated, but no data was found.'
+      'Urls collection should be populated, but no data was found.',
     );
   }
 
   private async assessReadability(
     content: string,
-    metadata: { url: string; page: Types.ObjectId; hash: string; date: Date }
+    metadata: { url: string; page: Types.ObjectId; hash: string; date: Date },
   ): Promise<Readability> {
     const langRegex = /canada\.ca\/(en|fr)/i;
     const lang = langRegex.exec(metadata.url)?.[1];
@@ -285,7 +292,7 @@ export class UrlsService {
 
     const readabilityScore = await this.readability.calculateReadability(
       content,
-      lang
+      lang,
     );
 
     return {
@@ -299,11 +306,10 @@ export class UrlsService {
   private async checkAndUpdateUrlData(urls: Url[]) {
     const urlsDataDict = arrayToDictionary(urls, 'url');
 
-    const pageUrls =
-      await this.db.collections.pages
-        .find({}, { url: 1 })
-        .lean()
-        .exec();
+    const pageUrls = await this.db.collections.pages
+      .find({}, { url: 1 })
+      .lean()
+      .exec();
 
     const urlsPageDict = arrayToDictionary(pageUrls, 'url');
 
@@ -316,14 +322,14 @@ export class UrlsService {
       100,
       async (ops) => {
         await this.db.collections.urls.bulkWrite(ops);
-      }
+      },
     );
 
     const readabilityQueue = createUpdateQueue<Readability>(
       100,
       async (ops) => {
         await this.db.collections.readability.insertMany(ops, { lean: true });
-      }
+      },
     );
 
     const flushQueues = async () => {
@@ -332,7 +338,7 @@ export class UrlsService {
 
     const addToQueues = async (
       urlData: Url & { hash?: UrlHash },
-      readabilityScore?: Readability
+      readabilityScore?: Readability,
     ) => {
       if (readabilityScore) {
         await readabilityQueue.add(readabilityScore);
@@ -390,7 +396,7 @@ export class UrlsService {
 
           if (!collectionData) {
             throw new Error(
-              `No collection data found for url ${response.url}.`
+              `No collection data found for url ${response.url}.`,
             );
           }
 
@@ -519,7 +525,7 @@ export class UrlsService {
               if (!existingReadabilityHashes.includes(hash)) {
                 const readabilityScore = await this.assessReadability(
                   processedHtml.body,
-                  readabilityMetadata
+                  readabilityMetadata,
                 );
 
                 return await addToQueues(
@@ -533,7 +539,7 @@ export class UrlsService {
                     links: processedHtml.links,
                     ...redirect,
                   },
-                  readabilityScore
+                  readabilityScore,
                 );
               }
 
@@ -549,7 +555,7 @@ export class UrlsService {
               });
             } catch (err) {
               this.logger.error(
-                'Error updating Url collection data or assessing readability:'
+                'Error updating Url collection data or assessing readability:',
               );
               this.logger.error(err.stack);
               return;
@@ -563,7 +569,7 @@ export class UrlsService {
 
             const readabilityScore = await this.assessReadability(
               processedHtml.body,
-              readabilityMetadata
+              readabilityMetadata,
             );
 
             return await addToQueues(
@@ -582,20 +588,20 @@ export class UrlsService {
                 hash: { hash, date },
                 latest_snapshot: hash,
               },
-              readabilityScore
+              readabilityScore,
             );
           } catch (err) {
             this.logger.error(
-              `An error occurred when inserting Url data to db for url:\n${response.url}\n`
+              `An error occurred when inserting Url data to db for url:\n${response.url}\n`,
             );
 
             if (/cheerio/.test(err.message) && !response.body) {
               this.logger.error(
-                `Cheerio loading error. Response body is empty!`
+                `Cheerio loading error. Response body is empty!`,
               );
             } else if (/cheerio/.test(err.message)) {
               this.logger.error(
-                `Cheerio loading error but response body is not empty.`
+                `Cheerio loading error but response body is not empty.`,
               );
               this.logger.error(err);
             } else {
@@ -603,7 +609,7 @@ export class UrlsService {
             }
           }
         },
-        true
+        true,
       );
     } catch (err) {
       this.logger.error('An error occurred during http.getAll():');
@@ -617,7 +623,7 @@ export class UrlsService {
       await this.syncDataWithPages();
     } catch (err) {
       this.logger.error(
-        'An error occurred while syncing urls data with pages:'
+        'An error occurred while syncing urls data with pages:',
       );
       this.logger.error(err);
     }
@@ -626,7 +632,7 @@ export class UrlsService {
       await this.saveCollectionToBlobStorage();
     } catch (err) {
       this.logger.error(
-        'An error occurred during saveCollectionToBlobStorage():'
+        'An error occurred during saveCollectionToBlobStorage():',
       );
       this.logger.error(err);
     }
@@ -635,7 +641,7 @@ export class UrlsService {
       await this.readability.saveCollectionToBlobStorage();
     } catch (err) {
       this.logger.error(
-        'An error occurred during readability.saveCollectionToBlobStorage():'
+        'An error occurred during readability.saveCollectionToBlobStorage():',
       );
       this.logger.error(err);
     }
@@ -683,7 +689,7 @@ export class UrlsService {
     const urlsNoTitle = await this.db.collections.urls
       .find(
         { $or: [{ title: '' }, { title: null }] },
-        { url: 1, title: 1, page: 1 }
+        { url: 1, title: 1, page: 1 },
       )
       .lean()
       .exec();
@@ -703,8 +709,8 @@ export class UrlsService {
         pipe(
           JSON.parse,
           filter((titles, url) => noTitleUrls.includes(url)),
-          mapObject(collapseStrings)
-        )
+          mapObject(collapseStrings),
+        ),
       );
 
     const titlesFromPagesMap = await this.blobService.blobModels.urls
@@ -715,11 +721,11 @@ export class UrlsService {
     this.logger.log(`${urlsNoTitle.length} urls with no title`);
 
     const urlsNoTitleMatch = urlsNoTitle.filter(
-      (url) => !urlsTitlesMap[url.url]
+      (url) => !urlsTitlesMap[url.url],
     );
 
     this.logger.log(
-      `${urlsNoTitleMatch.length} urls with no title match - will use titles from Pages`
+      `${urlsNoTitleMatch.length} urls with no title match - will use titles from Pages`,
     );
 
     // get titles from pages if no match
@@ -731,7 +737,7 @@ export class UrlsService {
       }));
 
     this.logger.log(
-      `${noMatchWithPageTitles.length} urls with no title match but with title from Pages`
+      `${noMatchWithPageTitles.length} urls with no title match but with title from Pages`,
     );
 
     const urlsWithTitleMatch = urlsNoTitle
@@ -753,9 +759,8 @@ export class UrlsService {
       },
     }));
 
-    const bulkWriteResults = await this.db.collections.urls.bulkWrite(
-      bulkWriteOps
-    );
+    const bulkWriteResults =
+      await this.db.collections.urls.bulkWrite(bulkWriteOps);
 
     this.logger.log(`updated ${bulkWriteResults.modifiedCount} url titles`);
   }
@@ -828,7 +833,8 @@ export class UrlsService {
     const toComparisonString = pipe(pickUrlsProps, JSON.stringify);
 
     const pagesToUpdate = urlsWithPages.filter(
-      (urlDoc) => toComparisonString(urlDoc) !== toComparisonString(urlDoc.page)
+      (urlDoc) =>
+        toComparisonString(urlDoc) !== toComparisonString(urlDoc.page),
     );
 
     if (!pagesToUpdate.length) {
@@ -845,7 +851,7 @@ export class UrlsService {
             $set: pickUrlsProps(url),
           },
         },
-      })
+      }),
     );
 
     if (!pageWriteOps.length) {
@@ -856,9 +862,8 @@ export class UrlsService {
 
     this.logger.info(`Updating ${pageWriteOps.length} pages...`);
 
-    const bulkWriteResults = await this.db.collections.pages.bulkWrite(
-      pageWriteOps
-    );
+    const bulkWriteResults =
+      await this.db.collections.pages.bulkWrite(pageWriteOps);
 
     this.logger.info(`Updated ${bulkWriteResults.modifiedCount} pages`);
   }
@@ -876,7 +881,7 @@ export class UrlsService {
 
     if (!pageUrls?.length) {
       throw new Error(
-        'Could not populate urls collection. The pages collection seems to be empty.'
+        'Could not populate urls collection. The pages collection seems to be empty.',
       );
     }
 
@@ -922,7 +927,7 @@ export class UrlsService {
         }
 
         this.logger.accent(
-          `Overwriting url data from date: ${date.toISOString()}`
+          `Overwriting url data from date: ${date.toISOString()}`,
         );
       }
 
@@ -942,7 +947,7 @@ export class UrlsService {
       }
     } catch (err) {
       this.logger.error(
-        `An error occurred uploading collection to blob storage:`
+        `An error occurred uploading collection to blob storage:`,
       );
       this.logger.error(err.stack);
     }
@@ -965,7 +970,7 @@ export class UrlsService {
 
     const urlsToUpdate = urlsWithPages
       .filter(
-        (urlDoc) => !urlDoc.page.length || urlDoc.page[0]?.url !== urlDoc.url
+        (urlDoc) => !urlDoc.page.length || urlDoc.page[0]?.url !== urlDoc.url,
       )
       .map(({ url }) => url);
 
@@ -983,26 +988,25 @@ export class UrlsService {
     if (!pagesForUpdates.length) {
       this.logger.error(
         `Invalid references found, but no corresponding pages were found for urls: ${prettyJson(
-          urlsToUpdate
-        )}`
+          urlsToUpdate,
+        )}`,
       );
 
       return;
     }
 
-    const bulkWriteOps: mongo.AnyBulkWriteOperation<IUrl>[] = pagesForUpdates.map(
-      (page) => ({
+    const bulkWriteOps: mongo.AnyBulkWriteOperation<IUrl>[] =
+      pagesForUpdates.map((page) => ({
         updateOne: {
           filter: { url: page.url },
           update: {
             $set: { page: page._id },
           },
         },
-      })
-    );
+      }));
 
     this.logger.log(
-      `Updating references to ${pagesForUpdates.length} pages...`
+      `Updating references to ${pagesForUpdates.length} pages...`,
     );
 
     await this.db.collections.urls.bulkWrite(bulkWriteOps);
@@ -1039,7 +1043,7 @@ export const processHtml = (html: string): ProcessedHtml => {
           meta.attribs.name &&
           meta.attribs.content &&
           meta.attribs.content !== 'IE=edge' &&
-          meta.attribs.content !== 'width=device-width,initial-scale=1'
+          meta.attribs.content !== 'width=device-width,initial-scale=1',
       )
       .map((meta) => {
         if (
@@ -1050,7 +1054,7 @@ export const processHtml = (html: string): ProcessedHtml => {
         }
 
         return [meta.attribs.name, meta.attribs.content];
-      })
+      }),
   );
 
   const links = $('main a[href]')
@@ -1070,7 +1074,7 @@ export const processHtml = (html: string): ProcessedHtml => {
         const href = link.attribs.href.replace('https://', '');
 
         return [link.attribs.hreflang, href];
-      })
+      }),
   );
 
   return {
