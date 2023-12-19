@@ -66,12 +66,19 @@ export class TaskDetailsSummaryComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
+  fullDateRangeLabel$ = this.taskDetailsService.fullDateRangeLabel$;
+  fullComparisonDateRangeLabel$ =
+    this.taskDetailsService.fullComparisonDateRangeLabel$;
+
   visitsByPageCols: ColumnConfig[] = [];
-  dyfTableCols: ColumnConfig[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
   whatWasWrongTableCols: ColumnConfig[] = [];
 
   dyfChartApex$ = this.taskDetailsService.dyfDataApex$;
   dyfChartLegend: string[] = [];
+
+  dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
+  comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
 
   whatWasWrongChartLegend: string[] = [];
   whatWasWrongChartApex$ = this.taskDetailsService.whatWasWrongDataApex$;
@@ -80,8 +87,13 @@ export class TaskDetailsSummaryComponent implements OnInit {
     successRate >= 0.8 ? 'pass' : 'fail';
 
   ngOnInit(): void {
-    combineLatest([this.visitsByPage$, this.currentLang$]).subscribe(
-      ([data, lang]) => {
+    combineLatest([
+      this.dateRangeLabel$,
+      this.comparisonDateRangeLabel$,
+      this.visitsByPage$, 
+      this.currentLang$,
+    ]).subscribe(
+      ([dateRange, comparisonDateRange, data, lang]) => {
         this.langLink = lang === EN_CA ? 'en' : 'fr';
 
         this.dyfChartLegend = [
@@ -164,8 +176,13 @@ export class TaskDetailsSummaryComponent implements OnInit {
             header: this.i18n.service.translate('Selection', lang),
           },
           {
-            field: 'value',
-            header: this.i18n.service.translate('visits', lang),
+            field: 'currValue',
+            header: dateRange,
+            pipe: 'number',
+          },
+          {
+            field: 'prevValue',
+            header: comparisonDateRange,
             pipe: 'number',
           },
         ];

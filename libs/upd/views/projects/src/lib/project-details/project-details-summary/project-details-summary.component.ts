@@ -4,6 +4,7 @@ import {
   inject,
   OnInit,
 } from '@angular/core';
+import { combineLatest } from 'rxjs';
 import {
   type ColumnConfig,
   callVolumeObjectiveCriteria,
@@ -18,10 +19,10 @@ type ParticipantTasksColTypes = GetTableProps<
   ProjectDetailsSummaryComponent,
   'participantTasks$'
 >;
-type DyfTableColTypes = GetTableProps<
-  ProjectDetailsSummaryComponent,
-  'dyfChart$'
->;
+// type DyfTableColTypes = GetTableProps<
+//   ProjectDetailsSummaryComponent,
+//   'dyfChart$'
+// >;
 type WhatWasWrongColTypes = GetTableProps<
   ProjectDetailsSummaryComponent,
   'whatWasWrongChart$'
@@ -44,6 +45,10 @@ export class ProjectDetailsSummaryComponent implements OnInit {
 
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
+
+  fullDateRangeLabel$ = this.projectsDetailsService.fullDateRangeLabel$;
+  fullComparisonDateRangeLabel$ =
+    this.projectsDetailsService.fullComparisonDateRangeLabel$;
 
   feedbackKpiObjectiveCriteria = feedbackKpiObjectiveCriteria;
 
@@ -102,12 +107,21 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   launchDate$ = this.projectsDetailsService.launchDate$;
 
   participantTasksCols: ColumnConfig<ParticipantTasksColTypes>[] = [];
-  dyfTableCols: ColumnConfig<DyfTableColTypes>[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
   whatWasWrongTableCols: ColumnConfig<WhatWasWrongColTypes>[] = [];
 
+  dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
+  comparisonDateRangeLabel$ =
+    this.projectsDetailsService.comparisonDateRangeLabel$;
+
   ngOnInit() {
-    this.currentLang$.subscribe((lang) => {
+    combineLatest([
+      this.dateRangeLabel$,
+      this.comparisonDateRangeLabel$,
+      this.currentLang$,
+    ]).subscribe(([dateRange, comparisonDateRange, lang]) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+
 
       this.documentsCols = [
         {
@@ -170,8 +184,13 @@ export class ProjectDetailsSummaryComponent implements OnInit {
           header: this.i18n.service.translate('Selection', lang),
         },
         {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
+          field: 'currValue',
+          header: dateRange,
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: comparisonDateRange,
           pipe: 'number',
         },
       ];

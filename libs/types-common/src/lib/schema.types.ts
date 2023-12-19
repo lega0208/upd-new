@@ -63,8 +63,6 @@ export interface ICallDriver {
 export interface FeedbackComment {
   url: string;
   date: Date;
-  tag: string;
-  whats_wrong: string;
   comment: string;
 }
 

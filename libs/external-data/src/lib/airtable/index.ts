@@ -47,7 +47,7 @@ export const createLastUpdatedFilterFormula = (date: DateType) =>
 
 export const createDateRangeFilterFormula = (
   dateRange: { start: DateType; end: DateType },
-  dateField: string
+  dateField: string,
 ) => {
   const start = dayjs(dateRange.start)
     .utc(true)
@@ -65,7 +65,7 @@ export const createDateRangeFilterFormula = (
 export class AirtableClient {
   client: AirTableAPI;
   feedbackClient: AirTableAPI = getATClient(
-    process.env.AIRTABLE_FEEDBACK_API_KEY
+    process.env.AIRTABLE_FEEDBACK_API_KEY,
   );
 
   constructor(apiKey?: string) {
@@ -75,7 +75,7 @@ export class AirtableClient {
   createQuery(
     baseId: string,
     tableName: string,
-    params: QueryParams<FieldSet> = {}
+    params: QueryParams<FieldSet> = {},
   ): Query<FieldSet> {
     return this.client.base(baseId)(tableName).select(params);
   }
@@ -83,7 +83,7 @@ export class AirtableClient {
   createFeedbackQuery(
     baseId: string,
     tableName: string,
-    params: QueryParams<FieldSet> = {}
+    params: QueryParams<FieldSet> = {},
   ): Query<FieldSet> {
     return this.feedbackClient.base(baseId)(tableName).select(params);
   }
@@ -91,7 +91,7 @@ export class AirtableClient {
   async createInsert(
     baseId: string,
     tableName: string,
-    fields: Partial<FieldSet>
+    fields: Partial<FieldSet>,
   ) {
     await this.client
       .base(baseId)(tableName)
@@ -105,7 +105,7 @@ export class AirtableClient {
   async createUpdate(
     baseId: string,
     tableName: string,
-    fields: RecordData<Partial<FieldSet>>[]
+    fields: RecordData<Partial<FieldSet>>[],
   ) {
     await this.client
       .base(baseId)(tableName)
@@ -138,14 +138,14 @@ export class AirtableClient {
     return await this.deleteRecords(
       bases.SEARCH_ASSESSMENT,
       `CRA - ${lang.toUpperCase()}`,
-      id
+      id,
     );
   }
 
   async insertRecords(
     baseId: string,
     tableName: string,
-    records: RecordData<Partial<FieldSet>>[]
+    records: RecordData<Partial<FieldSet>>[],
   ) {
     const chunkSize = 10;
     const chunks = [];
@@ -162,7 +162,7 @@ export class AirtableClient {
   async updateRecords(
     baseId: string,
     tableName: string,
-    records: RecordData<Partial<FieldSet>>[]
+    records: RecordData<Partial<FieldSet>>[],
   ) {
     const chunkSize = 10;
     const chunks = [];
@@ -190,7 +190,7 @@ export class AirtableClient {
 
   async getSearchAssessment(
     table = 'CRA - ',
-    lastUpdatedDate?: DateType
+    lastUpdatedDate?: DateType,
   ): Promise<FieldRecordQuery[]> {
     const params = lastUpdatedDate
       ? {
@@ -216,7 +216,7 @@ export class AirtableClient {
   async insertSearchAssessment(
     data,
     lang: Lang = 'en',
-    lastUpdatedDate?: DateType
+    lastUpdatedDate?: DateType,
   ) {
     const params = lastUpdatedDate
       ? {
@@ -227,7 +227,7 @@ export class AirtableClient {
     return await this.insertRecords(
       bases.SEARCH_ASSESSMENT,
       `CRA - ${lang.toUpperCase()}`,
-      data
+      data,
     );
   }
 
@@ -237,13 +237,13 @@ export class AirtableClient {
 
   async updateSearchAssessment(
     data: RecordData<Partial<FieldSet>>[],
-    lang: Lang = 'en'
+    lang: Lang = 'en',
   ) {
     console.log(lang);
     return await this.updateRecords(
       bases.SEARCH_ASSESSMENT,
       `CRA - ${lang.toUpperCase()}`,
-      data
+      data,
     );
   }
 
@@ -286,7 +286,7 @@ export class AirtableClient {
     const query = this.createQuery(
       bases.TASKS_INVENTORY,
       'TMF reports',
-      params
+      params,
     );
 
     return (await this.selectAll(query))
@@ -313,7 +313,7 @@ export class AirtableClient {
     const query = this.createQuery(
       bases.TASKS_INVENTORY,
       'User Testing',
-      params
+      params,
     );
 
     return (await this.selectAll(query))
@@ -365,7 +365,7 @@ export class AirtableClient {
             }
 
             return [key, val];
-          })
+          }),
         ) as UxTestData;
       });
   }
@@ -437,7 +437,7 @@ export class AirtableClient {
       const table = `${queryDate.format('MMMM')} ${queryDate.year()}`;
       const filterByFormula = createDateRangeFilterFormula(
         dateRange,
-        'CALL_DATE'
+        'CALL_DATE',
       );
       const sort = [
         { field: 'CALL_DATE', direction: 'asc' } as SortParameter<FieldSet>,
@@ -479,7 +479,7 @@ export class AirtableClient {
   }
 
   async getFeedback(
-    dateRange: { start: DateType; end: DateType } = {} as typeof dateRange
+    dateRange: { start: DateType; end: DateType } = {} as typeof dateRange,
   ) {
     const filterByFormula = createDateRangeFilterFormula(dateRange, 'Date');
     const query = this.createQuery(bases.FEEDBACK, 'Page feedback', {
@@ -488,23 +488,32 @@ export class AirtableClient {
 
     return (await this.selectAll(query))
       .filter(({ fields }) => fields['URL'] && fields['Date'])
-      .map(({ id, fields }) => ({
-        airtable_id: id,
-        unique_id: new Types.ObjectId(fields['Unique ID']),
-        url: squishTrim(fields['URL']).replace(/^https:\/\//i, ''),
-        date: dayjs.utc(fields['Date']).toDate(),
-        lang: fields['Lang'],
-        comment: fields['Comment'],
-        tags: fields['Lookup_tags'],
-        status: fields['Status'],
-        whats_wrong: fields["What's wrong"],
-        main_section: fields['Main section'],
-        theme: fields['Theme'],
-      })) as FeedbackData[];
+      .map(({ id, fields }) => {
+        const unique_id =
+          !fields['Unique ID'] ||
+          (typeof fields['Unique ID'] === 'string' &&
+            fields['Unique ID'].length !== 24)
+            ? undefined
+            : new Types.ObjectId(fields['Unique ID']);
+
+        return {
+          airtable_id: id,
+          unique_id,
+          url: squishTrim(fields['URL']).replace(/^https:\/\//i, ''),
+          date: dayjs.utc(fields['Date']).toDate(),
+          lang: fields['Lang'],
+          comment: fields['Comment'],
+          tags: fields['Lookup_tags'],
+          status: fields['Status'],
+          whats_wrong: fields["What's wrong"],
+          main_section: fields['Main section'],
+          theme: fields['Theme'],
+        };
+      }) as FeedbackData[];
   }
 
   async getLiveFeedback(
-    dateRange: { start: DateType; end: DateType } = {} as typeof dateRange
+    dateRange: { start: DateType; end: DateType } = {} as typeof dateRange,
   ) {
     const dateRangeFormula = createDateRangeFilterFormula(dateRange, 'Date');
     const craFilterFormula = '{Institution} = "CRA"';
@@ -520,19 +529,28 @@ export class AirtableClient {
 
     return (await this.selectAll(query))
       .filter(({ fields }) => fields['URL'] && fields['Date'])
-      .map(({ id, fields }) => ({
-        airtable_id: id,
-        unique_id: new Types.ObjectId(fields['Unique ID']),
-        url: squishTrim(fields['URL']).replace(/^https:\/\//i, ''),
-        date: dayjs.utc(fields['Date']).toDate(),
-        lang: fields['Lang'],
-        comment: fields['Comment'],
-        tags: fields['Lookup_tags'],
-        status: fields['Status'],
-        whats_wrong: fields["What's wrong"],
-        main_section: fields['Main section'],
-        theme: fields['Theme'],
-      })) as FeedbackData[];
+      .map(({ id, fields }) => {
+        const unique_id =
+          !fields['Unique ID'] ||
+          (typeof fields['Unique ID'] === 'string' &&
+            fields['Unique ID'].length !== 24)
+            ? undefined
+            : new Types.ObjectId(fields['Unique ID']);
+
+        return {
+          airtable_id: id,
+          unique_id,
+          url: squishTrim(fields['URL']).replace(/^https:\/\//i, ''),
+          date: dayjs.utc(fields['Date']).toDate(),
+          lang: fields['Lang'],
+          comment: fields['Comment'],
+          tags: fields['Lookup_tags'],
+          status: fields['Status'],
+          whats_wrong: fields["What's wrong"],
+          main_section: fields['Main section'],
+          theme: fields['Theme'],
+        };
+      }) as FeedbackData[];
   }
 
   async getTasksTopicsMap() {
@@ -547,7 +565,7 @@ export class AirtableClient {
       'Unique Call Drivers FINAL',
       {
         filterByFormula,
-      }
+      },
     );
 
     const results = (await this.selectAll(query)).map(
@@ -555,24 +573,30 @@ export class AirtableClient {
         ({
           tpc_id: fields['TPC_ID'],
           tasks: fields['Task link'],
-        } as { tpc_id: number; tasks: string[] })
+        }) as { tpc_id: number; tasks: string[] },
     );
 
-    const tasksTopicsMap = results.reduce((tasksTopicsMap, topicTasks) => {
-      for (const task of topicTasks.tasks) {
-        if (!tasksTopicsMap[task]) {
-          tasksTopicsMap[task] = new Set();
+    const tasksTopicsMap = results.reduce(
+      (tasksTopicsMap, topicTasks) => {
+        for (const task of topicTasks.tasks) {
+          if (!tasksTopicsMap[task]) {
+            tasksTopicsMap[task] = new Set();
+          }
+          tasksTopicsMap[task].add(topicTasks.tpc_id);
         }
-        tasksTopicsMap[task].add(topicTasks.tpc_id);
-      }
 
-      return tasksTopicsMap;
-    }, {} as Record<string, Set<number>>);
+        return tasksTopicsMap;
+      },
+      {} as Record<string, Set<number>>,
+    );
 
-    return Object.keys(tasksTopicsMap).reduce((newMap, task) => {
-      newMap[task] = Array.from(tasksTopicsMap[task]);
-      return newMap;
-    }, {} as Record<string, number[]>);
+    return Object.keys(tasksTopicsMap).reduce(
+      (newMap, task) => {
+        newMap[task] = Array.from(tasksTopicsMap[task]);
+        return newMap;
+      },
+      {} as Record<string, number[]>,
+    );
   }
 
   async getPagesList(lastUpdated?: Date): Promise<PageListData[]> {
@@ -587,7 +611,7 @@ export class AirtableClient {
     return (await this.selectAll(query)).map<PageListData>(({ id, fields }) => {
       const url = squishTrim(fields['Page path'] as string).replace(
         'https://',
-        ''
+        '',
       );
 
       return {
