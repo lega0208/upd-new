@@ -27,7 +27,7 @@ export const initialState: OverviewState = {
     copsTestsCompletedSince2018: 0,
     participantsTestedSince2018: 0,
     testsCompletedSince2018: 0,
-    top25CalldriverTopics: [],
+    top5CalldriverTopics: [],
     top5IncreasedCalldriverTopics: [],
     top5DecreasedCalldriverTopics: [],
     uxTests: [],

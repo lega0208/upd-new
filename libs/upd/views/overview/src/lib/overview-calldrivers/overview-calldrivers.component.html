@@ -59,12 +59,12 @@
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [data]="(top25CalldriverTopics$ | async) || []"
-        [cols]="(top25CalldriverTopicsConfig$ | async) || []"
+        [data]="(top5CalldriverTopics$ | async) || []"
+        [cols]="(top5CalldriverTopicsConfig$ | async) || []"
         [filter]="false"
-        [pagination]="true"
+        [pagination]="false"
         [sort]="false"
-        [title]="'top25-call-drivers'"
+        [title]="'top5-call-drivers'"
       >
       </upd-data-table-card>
     </div>

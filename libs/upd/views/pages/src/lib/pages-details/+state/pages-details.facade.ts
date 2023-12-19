@@ -740,9 +740,103 @@ export class PagesDetailsFacade {
     map(([data, lang]) => {
       const feedbackComments = data?.feedbackComments?.map((d) => ({
         date: d.date,
+        tag: d.tag && this.i18n.service.translate(d.tag, lang),
+        whats_wrong: d.whats_wrong
+          ? this.i18n.service.translate(d.whats_wrong, lang)
+          : d.whats_wrong,
         comment: d.comment,
       }));
       return [...(feedbackComments || [])];
+    }),
+  );
+
+  feedbackByTagsBarChart$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
+      const feedbackByTagsPrevious =
+        data.comparisonDateRangeData?.feedbackByTags || [];
+
+      const isCurrZero = feedbackByTags.every((v) => v.numComments === 0);
+      const isPrevZero = feedbackByTagsPrevious.every(
+        (v) => v.numComments === 0,
+      );
+
+      if (isCurrZero && isPrevZero) {
+        return [];
+      }
+
+      const dateRange = data.dateRange;
+      const comparisonDateRange = data.comparisonDateRange;
+
+      const currentSeries = {
+        name: getWeeklyDatesLabel(dateRange, lang),
+        series: feedbackByTags.map((feedback) => ({
+          name: this.i18n.service.translate(`${feedback.tag}`, lang),
+          value: feedback.numComments,
+        })),
+      };
+
+      const previousSeries = {
+        name: getWeeklyDatesLabel(comparisonDateRange || '', lang),
+        series: feedbackByTagsPrevious.map((feedback) => ({
+          name: this.i18n.service.translate(`${feedback.tag}`, lang),
+          value: feedback.numComments,
+        })),
+      };
+
+      return [currentSeries, previousSeries];
+    }),
+  );
+
+  feedbackByTagsTable$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
+      const feedbackByTagsPrevious =
+        data.comparisonDateRangeData?.feedbackByTags || [];
+
+      const allUniqueTags = [
+        ...new Set([
+          ...feedbackByTags.map((d) => d.tag),
+          ...feedbackByTagsPrevious.map((d) => d.tag),
+        ]),
+      ];
+
+      return allUniqueTags.map((tag) => {
+        const currValue =
+          feedbackByTags.find((feedback) => feedback.tag === tag)
+            ?.numComments || 0;
+        const prevValue =
+          feedbackByTagsPrevious.find((feedback) => feedback.tag === tag)
+            ?.numComments || 0;
+
+        return {
+          tag: this.i18n.service.translate(tag, lang),
+          currValue,
+          prevValue,
+        };
+      });
+    }),
+  );
+
+  apexFeedbackByTagsData$ = combineLatest([this.feedbackByTagsTable$]).pipe(
+    map(([feedbackByTagsTable]) => {
+      const isZero = feedbackByTagsTable.every(
+        (v) => v.currValue === 0 && v.prevValue === 0,
+      );
+      if (isZero) {
+        return [];
+      }
+
+      return feedbackByTagsTable.map((feedback) => ({
+        name: feedback.tag,
+        data: [feedback.currValue, feedback.prevValue],
+      })) as ApexAxisChartSeries;
     }),
   );
 

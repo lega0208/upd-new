@@ -619,6 +619,56 @@ export class OverviewFacade {
     }),
   );
 
+  comparisonFeedbackTable$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      const dateRange = data?.dateRangeData?.totalFeedback || [];
+      const comparisonDateRange =
+        data?.comparisonDateRangeData?.totalFeedback || [];
+
+      const dataFeedback = dateRange.map((d, i) => {
+        let prevVal = NaN;
+        comparisonDateRange.map((cd, i) => {
+          if (d.main_section === cd.main_section) {
+            prevVal = cd.sum;
+          }
+        });
+        return {
+          name: this.i18n.service.translate(`${d.main_section}`, lang),
+          currValue: d.sum,
+          prevValue: prevVal,
+        };
+      });
+
+      comparisonDateRange.map((d, i) => {
+        let currVal = 0;
+        dateRange.map((cd, i) => {
+          if (d.main_section === cd.main_section) {
+            currVal = cd.sum;
+          }
+        });
+        if (currVal === 0) {
+          dataFeedback.push({
+            name: this.i18n.service.translate(`${d.main_section}`, lang),
+            currValue: 0,
+            prevValue: d.sum,
+          });
+        }
+      });
+
+      return dataFeedback
+        .map((val: any, i) => ({
+          ...val,
+          percentChange: percentChange(val.currValue, val.prevValue),
+        }))
+        .filter((v) => v.currValue > 0 || v.prevValue > 0)
+        .sort((a, b) => b.currValue - a.currValue)
+        .splice(0, 5);
+    }),
+  );
+
   comparisonFeedbackPagesTable$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
@@ -669,7 +719,7 @@ export class OverviewFacade {
         }))
         .filter((v) => v.currValue > 0 || v.prevValue > 0)
         .sort((a, b) => b.currValue - a.currValue)
-        .splice(0, 25);
+        .splice(0, 5);
     }),
   );
 
@@ -692,9 +742,9 @@ export class OverviewFacade {
     map((data) => data.copsTestsCompletedSince2018),
   );
 
-  top25CalldriverTopics$ = this.overviewData$.pipe(
+  top5CalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
-      data.top25CalldriverTopics.map((topicData) => ({
+      data.top5CalldriverTopics.map((topicData) => ({
         topic: topicData.topic || '',
         subtopic: topicData.subtopic || '',
         sub_subtopic: topicData.sub_subtopic || '',
@@ -704,7 +754,7 @@ export class OverviewFacade {
     ),
   );
 
-  top25CalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
+  top5CalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
     { field: 'topic', header: 'topic', translate: true },
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },

@@ -25,6 +25,7 @@ export class OverviewFeedbackComponent implements OnInit {
 
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
+  comparisonFeedbackTable$ = this.overviewService.comparisonFeedbackTable$;
   comparisonFeedbackPagesTable$ =
     this.overviewService.comparisonFeedbackPagesTable$;
 
@@ -40,7 +41,11 @@ export class OverviewFeedbackComponent implements OnInit {
     prevValue: number;
   }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
-
+  feedbackCols: ColumnConfig<{
+    name: string;
+    currValue: number;
+    percentChange: number;
+  }>[] = [];
   feedbackPagesTableCols: ColumnConfig<{
     title: string;
     name: string;
@@ -95,6 +100,22 @@ export class OverviewFeedbackComponent implements OnInit {
           field: 'value',
           header: this.i18n.service.translate('visits', lang),
           pipe: 'number',
+        },
+      ];
+      this.feedbackCols = [
+        {
+          field: 'name',
+          header: this.i18n.service.translate('program-service', lang),
+        },
+        {
+          field: 'currValue',
+          header: this.i18n.service.translate('# of comments', lang),
+          pipe: 'number',
+        },
+        {
+          field: 'percentChange',
+          header: this.i18n.service.translate('comparison', lang),
+          pipe: 'percent',
         },
       ];
       this.feedbackPagesTableCols = [
