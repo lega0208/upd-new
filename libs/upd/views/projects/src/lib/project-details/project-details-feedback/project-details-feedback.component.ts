@@ -22,10 +22,6 @@ type FeedbackCommentsColType = GetTableProps<
   ProjectDetailsFeedbackComponent,
   'feedbackComments$'
 >;
-type FeedbackByTagsColTypes = GetTableProps<
-  ProjectDetailsFeedbackComponent,
-  'feedbackByTagsTable$'
->;
 
 @Component({
   selector: 'upd-project-details-feedback',
@@ -39,6 +35,10 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
+  fullDateRangeLabel$ = this.projectsDetailsService.fullDateRangeLabel$;
+  fullComparisonDateRangeLabel$ =
+    this.projectsDetailsService.fullComparisonDateRangeLabel$;
+
   visitsByPage$ =
     this.projectsDetailsService.visitsByPageFeedbackWithPercentChange$;
   visitsByPageCols: ColumnConfig<VisitsByPageColType>[] = [];
@@ -46,7 +46,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   dyfChart$ = this.projectsDetailsService.dyfData$;
   whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig<DyfTableColTypes>[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
   whatWasWrongTableCols: ColumnConfig<WhatWasWrongColTypes>[] = [];
 
   dyfChartApex$ = this.projectsDetailsService.dyfDataApex$;
@@ -55,16 +55,8 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   whatWasWrongChartLegend: string[] = [];
   whatWasWrongChartApex$ = this.projectsDetailsService.whatWasWrongDataApex$;
 
-  feedbackByTagsBarChartData$ =
-    this.projectsDetailsService.feedbackByTagsBarChart$;
-  apexFeedbackByTagsChart$ =
-    this.projectsDetailsService.apexFeedbackByTagsTable$;
-
   feedbackComments$ = this.projectsDetailsService.feedbackComments$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
-
-  feedbackByTagsTable$ = this.projectsDetailsService.feedbackByTagsTable$;
-  feedbackByTagsTableCols: ColumnConfig<FeedbackByTagsColTypes>[] = [];
 
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ =
@@ -141,12 +133,16 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
           header: this.i18n.service.translate('Selection', lang),
         },
         {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
+          field: 'currValue',
+          header: dateRange,
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: comparisonDateRange,
           pipe: 'number',
         },
       ];
-
       this.whatWasWrongTableCols = [
         { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
         {
@@ -163,32 +159,9 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
           header: this.i18n.service.translate('date', lang),
           pipe: 'date',
         },
-        { field: 'tag', header: this.i18n.service.translate('tags', lang) },
-        {
-          field: 'whats_wrong',
-          header: this.i18n.service.translate('d3-www', lang),
-        },
         {
           field: 'comment',
           header: this.i18n.service.translate('comment', lang),
-        },
-      ];
-
-      this.feedbackByTagsTableCols = [
-        { field: 'tag', header: this.i18n.service.translate('category', lang) },
-        {
-          field: 'currValue',
-          header: this.i18n.service.translate('# of comments for ', lang, {
-            value: dateRange,
-          }),
-          pipe: 'number',
-        },
-        {
-          field: 'prevValue',
-          header: this.i18n.service.translate('# of comments for ', lang, {
-            value: comparisonDateRange,
-          }),
-          pipe: 'number',
         },
       ];
     });
