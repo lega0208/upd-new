@@ -9,26 +9,6 @@ import {
   CustomReportsService,
 } from './custom-reports.service';
 
-//////// @@@@@@@@@@@@@ RIGHT NOW:
-//////// @@@@@@@@@@@@@ - brute force something together to get output to the server
-//////// @@@@@@@@@@@@@ - mock whatever data needed, add delays, whatever, and just display something on the frontend
-//////// @@@@@@@@@@@@@
-//////// @@@@@@@@@@@@@ NEXT:
-//////// @@@@@@@@@@@@@ - basic (proper) data flow (still mock data)
-//////// @@@@@@@@@@@@@ - event listeners for crucial stuff
-//////// @@@@@@@@@@@@@ - (blob logging? or maybe write to db?)
-//////// @@@@@@@@@@@@@ - (make some diagrams or something)
-//////// @@@@@@@@@@@@@ - (add createdDate/lastAccessed to registry?)
-//////// @@@@@@@@@@@@@ -
-//////// @@@@@@@@@@@@@ - observables (service) that are registered on request -> tie into SSE
-//////// @@@@@@@@@@@@@ - "finalize" skeleton for real logic
-//////// @@@@@@@@@@@@@ - ???
-//////// @@@@@@@@@@@@@ - add caching
-//////// @@@@@@@@@@@@@
-//////// @@@@@@@@@@@@@ LATER:
-//////// @@@@@@@@@@@@@ - analytics? (basic numbers that can be incremented on requests)
-//////// @@@@@@@@@@@@@ -
-
 type ReportCreationMetadata = {
   id: string;
   config: ReportConfig;

@@ -7,12 +7,12 @@ import {
   Body,
   Controller,
   Get,
-  MessageEvent,
+  type MessageEvent,
   Param,
   Post,
   Sse,
 } from '@nestjs/common';
-import { interval, map, Observable, of } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 import { CustomReportsService } from './custom-reports.service';
 
 @Controller('custom-reports')

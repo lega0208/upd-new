@@ -3,20 +3,6 @@ import { defaultQuerySettings } from '@dua-upd/types-common';
 import type { AAQueryConfig } from '@dua-upd/types-common';
 import { dimension, metricsConfig } from './adobe-analytics.config';
 
-// @@@@@@@@@ - test this with the new client to make sure everything makes sense so far
-// @@@@@@@@@ - start setting up ReportConfig-to-"multiquery" logic
-// @@@@@@@@@    - start ironing out the different kinds of queries/what can be combined/what different patterns might be needed
-// @@@@@@@@@    - probably best to keep queries as uniform as possible, even at the cost of performance/throughput
-// @@@@@@@@@ - start mapping out and implementing the overall flow of:
-// @@@@@@@@@    -> config
-// @@@@@@@@@    -> (filter existing)
-// @@@@@@@@@    -> split queries
-// @@@@@@@@@    -> (filter existing)
-// @@@@@@@@@    -> parse results
-// @@@@@@@@@    -> write to db
-// @@@@@@@@@    -> read and combine results
-// @@@@@@@@@        - start with just combining individual pieces, then if there's time, look into materialized views
-// @@@@@@@@@             or precomputing reports in general
 export function createQuery(config: AAQueryConfig) {
   const queryBuilder = new AdobeAnalyticsQueryBuilder();
 

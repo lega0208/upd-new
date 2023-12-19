@@ -1,5 +1,5 @@
 import { type AAResponseBody, queryDateFormat } from '@dua-upd/external-data';
-import { dateRangeToGranularity, logJson } from '@dua-upd/utils-common';
+import { dateRangeToGranularity } from '@dua-upd/utils-common';
 import { InjectFlowProducer, InjectQueue } from '@nestjs/bullmq';
 import { type FlowChildJob, FlowProducer, Queue } from 'bullmq';
 import { CustomReportsMetrics, DbService } from '@dua-upd/db';
@@ -208,9 +208,6 @@ export class CustomReportsService {
 
     await this.createAndDispatchFlow(reportId, config, queriesWithDataPoints);
 
-    // dispatch jobs to queue
-    // register observables for in-progress jobs
-    // return await this.createAndDispatchFlow(reportId, queriesWithDataPoints);
     return;
   }
 
@@ -219,7 +216,7 @@ export class CustomReportsService {
     config: ReportConfig,
     queriesWithDataPoints: QueryWithDataPoints[],
   ): Promise<void> {
-    // todo: check for running jobs
+    // todo: check for running jobs? duplicates are ignored so might not be necessary
 
     const children: FlowChildJob[] = queriesWithDataPoints.map(
       (queryWithDataPoints) => {
@@ -277,7 +274,6 @@ export class CustomReportsService {
     //  that don't already exist in the db
     const newQueriesWithDataPoints: QueryWithDataPoints[] = [];
 
-    console.log('FILTERING::::::::::::::::::');
     for (const queryWithDataPoints of queriesWithDataPoints) {
       const { dataPoints } = queryWithDataPoints;
 
@@ -294,11 +290,6 @@ export class CustomReportsService {
           ],
           dataPoint,
         );
-
-        console.log('FILTER QUERY:');
-        logJson(query);
-
-        //// @@@@@@@@@@ FIX FILTERING
 
         const record = await this.db.collections.customReportsMetrics
           .findOne(query)
@@ -406,7 +397,7 @@ export function deriveDataPoints(
   }));
 }
 
-// may well be unnecessary
+// may very well be unnecessary
 /**
  * A strategy to define the logic for each step of the pipeline,
  *  to be selected based on the report config.
