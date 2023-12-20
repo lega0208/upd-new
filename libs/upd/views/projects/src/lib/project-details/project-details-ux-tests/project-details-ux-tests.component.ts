@@ -135,7 +135,7 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
             header: this.i18n.service.translate('task', lang),
             type: 'link',
             typeParams: {
-              preLink: '/' + this.langLink + '/projects',
+              preLink: '/' + this.langLink + '/tasks',
               link: '_id',
             },
           } as ColumnConfig,

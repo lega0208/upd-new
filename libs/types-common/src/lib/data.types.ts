@@ -422,6 +422,7 @@ export interface ProjectsDetailsData
 }
 
 export interface TaskKpi {
+  _id: string;
   task: string;
   Baseline: number;
   Validation: number;

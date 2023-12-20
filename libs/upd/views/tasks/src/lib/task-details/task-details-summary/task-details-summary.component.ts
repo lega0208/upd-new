@@ -144,7 +144,7 @@ export class TaskDetailsSummaryComponent implements OnInit {
             type: 'link',
             typeParams: {
               preLink: '/' + this.langLink + '/projects',
-              link: '_id',
+              link: '_project_id',
             },
           },
           {
