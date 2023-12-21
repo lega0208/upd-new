@@ -9,10 +9,14 @@ import {
   SimpleChanges,
   OnChanges,
   ViewEncapsulation,
+  OnInit,
 } from '@angular/core';
+import { EN_CA } from '@dua-upd/upd/i18n';
 import { DateSelectionFacade } from '@dua-upd/upd/state';
 import { I18nFacade } from '@dua-upd/upd/state';
+import { dateRangeConfigs, getPeriodDateRange, today } from '@dua-upd/utils-common';
 import dayjs from 'dayjs';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'upd-calendar',
@@ -20,9 +24,8 @@ import dayjs from 'dayjs';
   styleUrls: ['./calendar.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class CalendarComponent implements OnChanges {
+export class CalendarComponent implements OnInit, OnChanges {
   private i18n = inject(I18nFacade);
-  private selectorService: DateSelectionFacade = inject(DateSelectionFacade);
   currentDate = new Date();
   currentYear = this.currentDate.getFullYear();
   currentMonth = this.currentDate.getMonth();
@@ -44,6 +47,28 @@ export class CalendarComponent implements OnChanges {
   dates: Date[] = [];
   disabledDays: number[] = [1, 2, 3, 4, 5, 6];
   disabledDates: Date[] = [this.startOfWeek];
+
+  presetOptions = [
+    {
+      label: 'None',
+      value: 'none',
+      dateRange: { start: '', end: '' }
+    },
+    ...dateRangeConfigs.map(config => {
+      const dateRange = config.getDateRange();
+      return {
+        label: config.label,
+        value: config.type,
+        dateRange: {
+          start: dateRange.start.format('YYYY-MM-DD'),
+          end: dateRange.end.format('YYYY-MM-DD'),
+        },
+      };
+    }).flat()
+  ];
+
+  lang = this.i18n.service.currentLang;
+  dateFormat = this.lang === 'fr-CA' ? 'dd M yy' : 'M dd yy'
 
   onWeekSelect(event: any): void {
     const startDate = this.dates[0];
@@ -87,6 +112,14 @@ export class CalendarComponent implements OnChanges {
 
   private emitDateChange(): void {
     this.dateChange.emit(this.dates);
+  }
+
+  ngOnInit(): void {
+    combineLatest([
+      this.i18n.currentLang$
+    ]).subscribe(([lang]) => {
+      this.dateFormat = lang === 'fr-CA' ? 'dd M yy' : 'M dd yy'
+    })
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -138,71 +171,6 @@ export class CalendarComponent implements OnChanges {
     }
   }
 
-  selectLastWeek() {
-    const startOfLastWeek = dayjs()
-      .subtract(1, 'week')
-      .startOf('week')
-      .toDate();
-    const endOfLastWeek = dayjs().subtract(1, 'week').endOf('week').toDate();
-    this.setDateRange(startOfLastWeek, endOfLastWeek);
-  }
-
-  selectLastMonth() {
-    const startOfLastMonth = dayjs()
-      .subtract(1, 'month')
-      .startOf('month')
-      .toDate();
-    const endOfLastMonth = dayjs().subtract(1, 'month').endOf('month').toDate();
-    this.setDateRange(startOfLastMonth, endOfLastMonth);
-  }
-
-  selectLastQuarter() {
-    const currentQuarter = Math.floor(dayjs().month() / 3);
-    const startOfLastQuarter = dayjs()
-      .subtract(1, 'quarter')
-      .startOf('quarter')
-      .toDate();
-    const endOfLastQuarter = dayjs()
-      .month(currentQuarter * 3 - 1)
-      .endOf('month')
-      .toDate();
-    this.setDateRange(startOfLastQuarter, endOfLastQuarter);
-  }
-
-  selectLastYear() {
-    const startOfLastYear = dayjs()
-      .subtract(1, 'year')
-      .startOf('year')
-      .toDate();
-    const endOfLastYear = dayjs().subtract(1, 'year').endOf('year').toDate();
-    this.setDateRange(startOfLastYear, endOfLastYear);
-  }
-
-  selectLastFiscalYear() {
-    const startOfLastFiscalYear = dayjs()
-      .month(3)
-      .startOf('month')
-      .subtract(1, 'year')
-      .toDate();
-    const endOfLastFiscalYear = dayjs().month(2).endOf('month').toDate();
-    this.setDateRange(startOfLastFiscalYear, endOfLastFiscalYear);
-  }
-
-  selectLast52Weeks() {
-    const startOfLast52Weeks = dayjs()
-      .subtract(52, 'week')
-      .startOf('week')
-      .toDate();
-    const endOfLast52Weeks = dayjs().subtract(1, 'week').endOf('week').toDate();
-    this.setDateRange(startOfLast52Weeks, endOfLast52Weeks);
-  }
-
-  selectYearToDate() {
-    const startOfYear = dayjs().startOf('year').toDate();
-    const currentDate = dayjs().subtract(1, 'day').toDate();
-    this.setDateRange(startOfYear, currentDate);
-  }
-
   setDateRange(start: Date, end: Date) {
     this.dates = [start, end];
     this.emitDateChange();
@@ -216,43 +184,10 @@ export class CalendarComponent implements OnChanges {
     );
     this.presetLabel = selectedOption ? selectedOption.label : 'None';
 
-    switch (presetValue) {
-      case 'NONE':
-        break;
-      case 'LAST_WEEK':
-        this.selectLastWeek();
-        break;
-      case 'LAST_MONTH':
-        this.selectLastMonth();
-        break;
-      case 'LAST_QUARTER':
-        this.selectLastQuarter();
-        break;
-      case 'LAST_YEAR':
-        this.selectLastYear();
-        break;
-      case 'LAST_FISCAL_YEAR':
-        this.selectLastFiscalYear();
-        break;
-      case 'LAST_52_WEEKS':
-        this.selectLast52Weeks();
-        break;
-      case 'YEAR_TO_DATE':
-        this.selectYearToDate();
-        break;
+    if (this.presetLabel !== 'None') {
+      this.setDateRange(dayjs(selectedOption?.dateRange.start).toDate(), dayjs(selectedOption?.dateRange.end).toDate());
     }
   }
-
-  presetOptions = [
-    { label: 'None', value: 'NONE' },
-    { label: 'Last Week', value: 'LAST_WEEK' },
-    { label: 'Last Month', value: 'LAST_MONTH' },
-    { label: 'Last Quarter', value: 'LAST_QUARTER' },
-    { label: 'Last Year', value: 'LAST_YEAR' },
-    { label: 'Last Fiscal Year', value: 'LAST_FISCAL_YEAR' },
-    { label: 'Last 52 Weeks', value: 'LAST_52_WEEKS' },
-    { label: 'Year to Date', value: 'YEAR_TO_DATE' },
-  ];
 
   selectPreset(label: string) {
     this.presetLabel = label;

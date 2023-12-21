@@ -9,6 +9,7 @@ export class InputSwitchComponent {
   @Input() id?: string;
   @Input() checked = false;
   @Input() disabled = false;
+  @Input() text = '';
 
   @Output() checkedChange = new EventEmitter<boolean>();
 

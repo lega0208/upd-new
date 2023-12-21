@@ -16,7 +16,6 @@ import {
   ColumnConfig,
   DataTableComponent,
   AccordionComponent,
-  AlertServiceComponent,
   TabsComponent,
   Tab,
   CalendarComponent,
@@ -48,30 +47,16 @@ dayjs.extend(utc);
 export class PagesBulkReportComponent implements OnInit {
 
   private i18n = inject(I18nFacade);
-  private alertService = inject(AlertServiceComponent);
-  private alertsSub!: Subscription;
   private readonly pagesHomeService = inject(PagesHomeFacade);
   pagesHomeData$ = this.pagesHomeService.pagesHomeTableData$;
   loading$ = this.pagesHomeService.loading$;
 
   projects$ = this.pagesHomeService.projects$;
   tasks$ = this.pagesHomeService.tasks$;
-
-  // constructor() {
-  //   this.alertsSub = this.alertService.alerts$.subscribe(alerts => {
-  //     this.alerts = alerts;
-  //   });
-  // }
-
-  ngOnDestroy(): void {
-    this.alertsSub.unsubscribe();
-  }
-
   validationTriggered = false;
 
   currentLang$ = this.i18n.currentLang$;
 
-  alerts: CustomAlert[] = [];
   allMetricsSelected = false;
   isMetricsIndeterminate = false;
   config = signal<ReportConfig>({
@@ -83,7 +68,7 @@ export class PagesBulkReportComponent implements OnInit {
     urls: [],
     grouped: false,
     metrics: [],
-    dimensions: [],
+    breakdownDimension: '',
   });
 
   dateRange = {
@@ -113,7 +98,7 @@ export class PagesBulkReportComponent implements OnInit {
   selectedTasks: any[] = [];
   selectedProjects: any[] = [];
   selectedReportMetrics: string[] = [];
-  selectedReportDimensions: string[] = [];
+  selectedReportDimensions = '';
 
   urls: string[] = [];
 
@@ -121,13 +106,7 @@ export class PagesBulkReportComponent implements OnInit {
   breakdownLabel = 'Select';
   granularityLabel = 'Select';
   granularityValue = 'Select';
-  breakdownCheck = false;
-
-  breakdownOptions = [
-    { label: 'Select', value: 'Select' },
-    { label: 'No', value: 'No' },
-    { label: 'Yes', value: 'Yes' },
-  ];
+  isGrouped = false;
 
   granularityOptions = [
     { label: 'Select', value: 'Select' },
@@ -157,15 +136,12 @@ export class PagesBulkReportComponent implements OnInit {
   ];
 
   reportDimensions: ReportDimension[] = [
+    { label: 'None', id: 'none', description: '' },
     { label: 'Devices', id: 'variables/evar4', description: '' },
     { label: 'Regions', id: 'variables/georegion', description: '' },
     { label: 'Cities', id: 'variables/geocity', description: '' },
     { label: 'Countries', id: 'variables/geocountry', description: '' },
   ];
-
-  trackByFn(index: number, item: CustomAlert): any {
-    return index; // or item.id if your alerts have a unique identifier
-  }
 
   addPages(inputValue: string) {
     this.invalidUrls = [];
@@ -210,15 +186,6 @@ export class PagesBulkReportComponent implements OnInit {
     this.duplicateUrls = Array.from(new Set(this.duplicateUrls));
     this.invalidUrls = Array.from(new Set(this.invalidUrls));
     this.successUrls = Array.from(new Set([...newUrls, ...this.successUrls]));
-
-    this.alerts.push({
-      type: 'success',
-      position: 'top',
-      selfClosing: true,
-      timeout: 5,
-      dismissible: true,
-      content: 'URLs added successfully',
-    });
 
     this.config.update((f) => {
       return {
@@ -360,7 +327,8 @@ export class PagesBulkReportComponent implements OnInit {
       return {
         ...f,
         metrics: this.selectedReportMetrics,
-        dimensions: this.selectedReportDimensions,
+        breakdownDimension: this.selectedReportDimensions,
+        grouped: this.isGrouped,
       };
     });
   }
@@ -431,10 +399,6 @@ export class PagesBulkReportComponent implements OnInit {
     this.granularityLabel = label;
   }
 
-  handleCheckedChange(event: any) {
-    this.breakdownCheck = event;
-  }
-
   onGranularitySelect(event: any) {
     this.granularityValue = event;
 
@@ -451,14 +415,5 @@ export class PagesBulkReportComponent implements OnInit {
 
     this.resetCalendar();
 
-  }
-
-  onDimensionSelect(event: any) {
-    this.selectedReportDimensions = [event];
-
-    const selectedOption = this.dimensionOptions.find(
-      (option) => option.value === event,
-    );
-    this.dimensionLabel = selectedOption ? selectedOption.label : 'None';
   }
 }

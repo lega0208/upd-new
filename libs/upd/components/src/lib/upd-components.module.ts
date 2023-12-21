@@ -30,6 +30,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { CheckboxModule } from 'primeng/checkbox';
+import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { AlertComponent } from './alert/alert.component';
 import { AccordionComponent } from './accordion/accordion.component';
@@ -57,6 +58,7 @@ import { CalendarComponent } from './calendar/calendar.component';
 import { CheckboxComponent } from './checkbox/checkbox.component';
 import { TabsComponent } from './tabs/tabs.component';
 import { InputSwitchComponent } from './input-switch/input-switch.component';
+import { RadioComponent } from './radio/radio.component';
 
 @NgModule({
   imports: [
@@ -73,6 +75,7 @@ import { InputSwitchComponent } from './input-switch/input-switch.component';
     InputTextModule,
     InputTextareaModule,
     CheckboxModule,
+    RadioButtonModule,
     TabViewModule,
     InputSwitchModule,
     NgbModule,
@@ -118,6 +121,7 @@ import { InputSwitchComponent } from './input-switch/input-switch.component';
     CheckboxComponent,
     TabsComponent,
     InputSwitchComponent,
+    RadioComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -126,6 +130,7 @@ import { InputSwitchComponent } from './input-switch/input-switch.component';
     InputTextModule,
     InputTextareaModule,
     CheckboxModule,
+    RadioButtonModule,
     TabViewModule,
     InputSwitchModule,
     CalendarComponent,
@@ -157,7 +162,8 @@ import { InputSwitchComponent } from './input-switch/input-switch.component';
     CheckboxComponent,
     DropdownComponent,
     TabsComponent,
-    InputSwitchComponent
+    InputSwitchComponent,
+    RadioComponent,
   ],
 })
 export class UpdComponentsModule {}

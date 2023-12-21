@@ -1,8 +1,8 @@
 export * from './lib/accordion/accordion.component';
 export * from './lib/alert/alert.component';
-export * from './lib/alert/alert.service';
 export * from './lib/calendar/calendar.component';
 export * from './lib/checkbox/checkbox.component';
+export * from './lib/radio/radio.component';
 export * from './lib/card/card.component';
 export * from './lib/data-card/data-card.component';
 export * from './lib/data-kpi-card/data-kpi-card.component';
@@ -12,6 +12,7 @@ export * from './lib/data-table-styles/data-table-styles.component';
 export * from './lib/data-table-styles/types';
 export * from './lib/date-selector/date-selector.component';
 export * from './lib/date-selector/date-selector-dropdown.component';
+export * from './lib/dropdown/dropdown.component';
 export * from './lib/loading-spinner/loading-spinner.component';
 export * from './lib/input-switch/input-switch.component';
 export * from './lib/modal/modal.component';

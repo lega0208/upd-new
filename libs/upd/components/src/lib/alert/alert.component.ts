@@ -8,6 +8,7 @@ import { NgbAlert } from '@ng-bootstrap/ng-bootstrap';
 })
 export class AlertComponent implements OnInit, OnDestroy, OnChanges {
   timeoutId?: number;
+  alertKey = 0;
 
   @ViewChild('staticAlert', { static: false }) staticAlert!: NgbAlert;
   @ViewChild('staticAlert', { read: ElementRef }) alertElementRef!: ElementRef;

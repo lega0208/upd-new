@@ -11,7 +11,7 @@
               [disabledDates]="granularity === 'week' ? disabledDates : []"
               [view]="granularity === 'month' ? 'month' : 'date'"
               [rangeSeparator]="'to' | translate"
-              dateFormat="M dd yy"
+              [dateFormat]="dateFormat"
               (onSelect)="handleSelect(granularity, $event)">
     <ng-template *ngIf="showPreset && showAction" pTemplate="footer">
       <hr />

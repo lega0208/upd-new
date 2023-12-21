@@ -28,6 +28,8 @@ export interface ViewData<T> {
   satComparisonDateRange?: string;
   dateRangeData?: T;
   comparisonDateRangeData?: T;
+  taskList?: string[];
+  projectList?: string[];
 }
 
 export interface EntityDetailsData<T> extends ViewData<T> {
