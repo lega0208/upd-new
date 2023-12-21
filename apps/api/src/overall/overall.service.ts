@@ -143,7 +143,7 @@ export class OverallService {
         params.comparisonDateRange
       );
 
-    const top5CalldriverTopics = topCalldriverTopics.slice(0, 5);
+    const top25CalldriverTopics = topCalldriverTopics.slice(0, 25);
 
     const top5IncreasedCalldriverTopics = topCalldriverTopics
       .sort((a, b) => Number(b.change) - Number(a.change))
@@ -211,7 +211,7 @@ export class OverallService {
       uxTests:
         (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [],
       ...(await getUxData(testsSince2018)),
-      top5CalldriverTopics,
+      top25CalldriverTopics,
       top5IncreasedCalldriverTopics,
       top5DecreasedCalldriverTopics,
       searchTermsEn: await this.getTopSearchTerms(params, 'en'),

@@ -10,8 +10,14 @@ import type {
 } from 'ng-apexcharts';
 import { mergeDeepRight } from 'rambdax';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import { sum } from '@dua-upd/utils-common';
+import { arrayToDictionary, round, sum } from '@dua-upd/utils-common';
 import { createBaseConfig } from '../apex-base/apex.config.base';
+import {
+  getTooltipHtml,
+  SeriesDates,
+  SeriesWithXYData,
+  formatDate,
+} from '../apex-bar-line/apex.store';
 
 export interface ChartOptions extends ApexOptions {
   chart: ApexChart;
@@ -95,10 +101,102 @@ export class ApexStore extends ComponentStore<ChartOptions> {
     },
   );
 
+  readonly setStacked = this.updater(
+    (
+      state,
+      value: {
+        isStacked: boolean;
+        isStacked100: boolean;
+        hasDataLabels: boolean;
+      },
+    ): ChartOptions => {
+      return {
+        ...state,
+        chart: {
+          ...state.chart,
+          stacked: value?.isStacked,
+          stackType: value?.isStacked100 ? '100%' : undefined,
+        },
+        dataLabels: {
+          enabled: value?.hasDataLabels,
+          style: {
+            fontSize: '14px',
+            colors: ['#fff'],
+          },
+          formatter: (val: string) => {
+            return this.i18n.service.currentLang === EN_CA
+              ? `${round(+val, 0)}%`
+              : `${round(+val, 0)} %`;
+          },
+        },
+        xaxis: {
+          ...state.xaxis,
+          labels: {
+            ...state.xaxis?.labels,
+            formatter: (val: string) => {
+              return this.i18n.service.currentLang === EN_CA
+                ? `${val}%`
+                : `${val} %`;
+            },
+          },
+        },
+        yaxis: {
+          ...state.yaxis,
+          labels: {
+            ...state.labels,
+            show: true,
+            style: {
+              ...state.yaxis?.labels?.style,
+              fontSize: '14px',
+            },
+          },
+          title: {
+            ...state?.yaxis?.title,
+            offsetX: 0,
+          },
+        },
+        tooltip: {
+          enabled: true,
+          custom: ({ series, seriesIndex, dataPointIndex, w }) => {
+            const date = w.globals.labels[dataPointIndex].join(' ');
+            const valuePercent = w.globals.seriesPercent.map(
+              (s: { [x: string]: number }) =>
+                this.i18n.service.currentLang === EN_CA
+                  ? `${round(s[dataPointIndex], 0)}%`
+                  : `${round(s[dataPointIndex], 0)} %`,
+            );
+
+            try {
+              return getTooltipHtml(
+                {
+                  title: date,
+                  series: series.map((s: number[], i: number) => ({
+                    label: w.globals.seriesNames[i],
+                    value: s[dataPointIndex],
+                    colour: w.config.colors?.[i],
+                    percent: valuePercent[i],
+                  })),
+                },
+                this.i18n.service.currentLang,
+              );
+            } catch (err) {
+              console.error(err);
+              return '';
+            }
+          },
+          style: {
+            fontSize: '14px',
+          },
+        },
+      };
+    },
+  );
+
   readonly setXAxis = this.updater(
-    (state, value: string[]): ChartOptions =>
+    (state, value: string[][] | string[]): ChartOptions =>
       mergeDeepRight(state, {
         xaxis: {
+          ...state.xaxis,
           type: 'category',
           categories: value,
         },
@@ -109,6 +207,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
     (state, value: string): ChartOptions =>
       mergeDeepRight(state, {
         yaxis: {
+          ...state.yaxis,
           title: {
             text: value,
           },

@@ -37,6 +37,10 @@ export class OverviewSummaryComponent implements OnInit {
   loading$ = this.overviewService.loading$;
   error$ = this.overviewService.error$;
 
+  fullDateRangeLabel$ = this.overviewService.fullDateRangeLabel$;
+  fullComparisonDateRangeLabel$ =
+    this.overviewService.fullComparisonDateRangeLabel$;
+
   comboChartData$ = this.overviewService.comboChartData$;
   annotationsData$ = this.overviewService.annotationsData$;
 
@@ -102,7 +106,7 @@ export class OverviewSummaryComponent implements OnInit {
   whatWasWrongChartLegend: string[] = [];
   whatWasWrongChartApex$ = this.overviewService.whatWasWrongDataApex$;
 
-  dyfTableCols: ColumnConfig<{ name: string; value: string }>[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; currValue: string; prevValue: string }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: string }>[] = [];
   barTableCols: ColumnConfig<{
     date: string;
@@ -127,17 +131,6 @@ export class OverviewSummaryComponent implements OnInit {
         this.i18n.service.translate('yes', lang),
         this.i18n.service.translate('no', lang),
       ];
-      this.dyfTableCols = [
-        {
-          field: 'name',
-          header: this.i18n.service.translate('Selection', lang),
-        },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-      ];
 
       this.whatWasWrongChartLegend = [
         this.i18n.service.translate('d3-cant-find-info', lang),
@@ -156,8 +149,13 @@ export class OverviewSummaryComponent implements OnInit {
           header: this.i18n.service.translate('Selection', lang),
         },
         {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
+          field: 'currValue',
+          header: dateRange,
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: comparisonDateRange,
           pipe: 'number',
         },
       ];

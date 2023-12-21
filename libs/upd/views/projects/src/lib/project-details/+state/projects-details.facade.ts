@@ -504,23 +504,28 @@ export class ProjectsDetailsFacade {
     ],
   );
 
-  dyfDataApex$ = combineLatest([
-    this.projectsDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
+  dyfDataApex$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
-      const pieChartData: any = [
-        data?.dateRangeData?.dyfYes || 0,
-        data?.dateRangeData?.dyfNo || 0,
-      ] as ApexNonAxisChartSeries;
-
-      const isZero = pieChartData.every((v: number) => v === 0);
+      const dyfData: ApexAxisChartSeries = [
+        {
+          name: this.i18n.service.translate('yes', lang),
+          data: [data?.dateRangeData?.dyfYes || 0, data?.comparisonDateRangeData?.dyfYes || 0],
+        },
+        {
+          name: this.i18n.service.translate('no', lang),
+          data: [data?.dateRangeData?.dyfNo || 0, data?.comparisonDateRangeData?.dyfNo || 0],
+        },
+      ];
+  
+      const isZero = dyfData.every(item => 
+        (item.data as number[]).every(value => typeof value === 'number' && value === 0)
+      );
+      
       if (isZero) {
         return [];
       }
-
-      return pieChartData;
+  
+      return dyfData;
     }),
   );
 
@@ -547,22 +552,23 @@ export class ProjectsDetailsFacade {
   );
 
   dyfData$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
-
+  
+      const currYesVal = data?.dateRangeData?.dyfYes || 0;
+      const prevYesVal = data?.comparisonDateRangeData?.dyfYes || NaN;
+      const currNoVal = data?.dateRangeData?.dyfNo || 0;
+      const prevNoVal = data?.comparisonDateRangeData?.dyfNo || NaN;
+  
       const pieChartData = [
-        { name: yes, value: data?.dateRangeData?.dyfYes || 0 },
-        { name: no, value: data?.dateRangeData?.dyfNo || 0 },
+        { name: yes, currValue: currYesVal, prevValue: prevYesVal },
+        { name: no, currValue: currNoVal, prevValue: prevNoVal },
       ];
-
-      const isZero = pieChartData.every((v) => v.value === 0);
-      if (isZero) {
-        return [];
-      }
-
-      return pieChartData;
+  
+      const filteredPieChartData = pieChartData.filter((v) => v.currValue > 0 || v.prevValue > 0);
+  
+      return filteredPieChartData.length > 0 ? filteredPieChartData : [];
     }),
   );
 
@@ -862,53 +868,8 @@ export class ProjectsDetailsFacade {
       const feedbackComments = data?.feedbackComments?.map((d) => ({
         ...d,
         date: d.date,
-        tag: d.tag ? this.i18n.service.translate(d.tag, lang) : d.tag,
-        whats_wrong: d.whats_wrong
-          ? this.i18n.service.translate(d.whats_wrong, lang)
-          : d.whats_wrong,
       }));
       return [...(feedbackComments || [])];
-    }),
-  );
-
-  feedbackByTagsBarChart$ = combineLatest([
-    this.projectsDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
-      const feedbackByTagsPrevious =
-        data.comparisonDateRangeData?.feedbackByTags || [];
-
-      const isCurrZero = feedbackByTags.every((v) => v.numComments === 0);
-      const isPrevZero = feedbackByTagsPrevious.every(
-        (v) => v.numComments === 0,
-      );
-
-      if (isCurrZero && isPrevZero) {
-        return [];
-      }
-
-      const dateRange = data.dateRange;
-      const comparisonDateRange = data.comparisonDateRange;
-
-      const currentSeries = {
-        name: getWeeklyDatesLabel(dateRange, lang),
-        series: feedbackByTags.map((feedback) => ({
-          name: this.i18n.service.translate(`${feedback.tag}`, lang),
-          value: feedback.numComments,
-        })),
-      };
-
-      const previousSeries = {
-        name: getWeeklyDatesLabel(comparisonDateRange || '', lang),
-        series: feedbackByTagsPrevious.map((feedback) => ({
-          name: this.i18n.service.translate(`${feedback.tag}`, lang),
-          value: feedback.numComments,
-        })),
-      };
-
-      return [currentSeries, previousSeries];
     }),
   );
 
@@ -926,48 +887,18 @@ export class ProjectsDetailsFacade {
     ),
   );
 
-  feedbackByTagsTable$ = combineLatest([
+  fullDateRangeLabel$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(map(([data, lang]) => getFullDateRangeLabel(data.dateRange, lang)));
+
+  fullComparisonDateRangeLabel$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) => {
-      const feedbackByTags = data.dateRangeData?.feedbackByTags || [];
-      const feedbackByTagsPrevious =
-        data.comparisonDateRangeData?.feedbackByTags || [];
-
-      const allUniqueTags = [
-        ...new Set([
-          ...feedbackByTags.map((d) => d.tag),
-          ...feedbackByTagsPrevious.map((d) => d.tag),
-        ]),
-      ];
-
-      return allUniqueTags.map((tag) => {
-        const currValue =
-          feedbackByTags.find((feedback) => feedback.tag === tag)
-            ?.numComments || 0;
-        const prevValue =
-          feedbackByTagsPrevious.find((feedback) => feedback.tag === tag)
-            ?.numComments || 0;
-
-        return {
-          tag: this.i18n.service.translate(tag, lang),
-          currValue,
-          prevValue,
-        };
-      });
-    }),
-  );
-
-  apexFeedbackByTagsTable$ = combineLatest([this.feedbackByTagsTable$]).pipe(
-    map(([data]) => {
-      return data.map((d) => {
-        return {
-          name: d.tag,
-          data: [d.currValue, d.prevValue],
-        };
-      }) as ApexAxisChartSeries;
-    }),
+    map(([data, lang]) =>
+      getFullDateRangeLabel(data.comparisonDateRange || '', lang),
+    ),
   );
 
   lineTaskChart$ = combineLatest([
@@ -1230,3 +1161,22 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };
+
+const getFullDateRangeLabel = (
+  dateRange: string, lang: LocaleId,
+) => {
+    const [startDate, endDate] = dateRange.split('/');
+
+    const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
+    const separator = lang === FR_CA ? ' au' : ' to';
+
+    const formattedStartDate = dayjs
+      .utc(startDate)
+      .locale(lang)
+      .format(dateFormat);
+
+    const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
+
+    return [`${formattedStartDate}${separator}`,`${formattedEndDate}`];
+  }
+
