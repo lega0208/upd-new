@@ -1,6 +1,5 @@
 import {
   Component,
-  ChangeDetectorRef,
   inject,
   ViewChild,
   Output,
@@ -12,9 +11,8 @@ import {
   OnInit,
 } from '@angular/core';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import { DateSelectionFacade } from '@dua-upd/upd/state';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { dateRangeConfigs, getPeriodDateRange, today } from '@dua-upd/utils-common';
+import { dateRangeConfigs } from '@dua-upd/utils-common';
 import dayjs from 'dayjs';
 import { combineLatest } from 'rxjs';
 
@@ -48,27 +46,10 @@ export class CalendarComponent implements OnInit, OnChanges {
   disabledDays: number[] = [1, 2, 3, 4, 5, 6];
   disabledDates: Date[] = [this.startOfWeek];
 
-  presetOptions = [
-    {
-      label: 'None',
-      value: 'none',
-      dateRange: { start: '', end: '' }
-    },
-    ...dateRangeConfigs.map(config => {
-      const dateRange = config.getDateRange();
-      return {
-        label: config.label,
-        value: config.type,
-        dateRange: {
-          start: dateRange.start.format('YYYY-MM-DD'),
-          end: dateRange.end.format('YYYY-MM-DD'),
-        },
-      };
-    }).flat()
-  ];
-
   lang = this.i18n.service.currentLang;
   dateFormat = this.lang === 'fr-CA' ? 'dd M yy' : 'M dd yy'
+
+  presetOptions: any[] = [];
 
   onWeekSelect(event: any): void {
     const startDate = this.dates[0];
@@ -119,6 +100,25 @@ export class CalendarComponent implements OnInit, OnChanges {
       this.i18n.currentLang$
     ]).subscribe(([lang]) => {
       this.dateFormat = lang === 'fr-CA' ? 'dd M yy' : 'M dd yy'
+
+      this.presetOptions = [
+        {
+          label: lang === EN_CA ? 'None' : 'Aucun',
+          value: 'none',
+          dateRange: { start: '', end: '' }
+        },
+        ...dateRangeConfigs.map(config => {
+          const dateRange = config.getDateRange();
+          return {
+            label: config.label,
+            value: config.type,
+            dateRange: {
+              start: dateRange.start.format('YYYY-MM-DD'),
+              end: dateRange.end.format('YYYY-MM-DD'),
+            },
+          };
+        }).flat()
+      ];
     })
   }
 
@@ -184,8 +184,9 @@ export class CalendarComponent implements OnInit, OnChanges {
     );
     this.presetLabel = selectedOption ? selectedOption.label : 'None';
 
-    if (this.presetLabel !== 'None') {
-      this.setDateRange(dayjs(selectedOption?.dateRange.start).toDate(), dayjs(selectedOption?.dateRange.end).toDate());
+    if (selectedOption.value !== 'none') {
+      const { start, end } = selectedOption.dateRange;
+      this.setDateRange(dayjs(start).toDate(), dayjs(end).toDate());
     }
   }
 

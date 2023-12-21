@@ -1,4 +1,4 @@
-`<div *ngIf="vm$ | async as vm">
+<div *ngIf="vm$ | async as vm">
   <ng-container *ngIf="nodeSelectionCount > 0">
     <a (click)="clearNodes()" class="blackText">{{
       'Clear all' | translate
