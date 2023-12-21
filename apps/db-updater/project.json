@@ -44,7 +44,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/db-updater/**/*.ts"]
@@ -54,8 +54,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/apps/db-updater"],
       "options": {
-        "jestConfig": "apps/db-updater/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/db-updater/jest.config.ts"
       }
     },
     "compodoc": {

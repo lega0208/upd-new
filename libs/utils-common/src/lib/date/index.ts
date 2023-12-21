@@ -9,7 +9,7 @@ import duration, { DurationUnitType } from 'dayjs/plugin/duration';
 import isBetween from 'dayjs/plugin/isBetween';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { partial } from 'rambdax';
+import { partial, zip } from 'rambdax';
 
 _dayjs.extend(utc);
 _dayjs.extend(quarterOfYear);
@@ -32,7 +32,7 @@ export type DateRange<T extends AbstractDate> = {
 export function datesFromDateRange(
   dateRange: DateRange<Dayjs>,
   format: string | false = 'YYYY-MM-DD',
-  inclusive = false
+  inclusive = false,
 ): Date[] | string[] {
   const dates: Dayjs[] = [];
 
@@ -102,7 +102,7 @@ export const dateRangeTypes = [
   'year_to_date',
 ] as const;
 
-export type DateRangeType = typeof dateRangeTypes[number];
+export type DateRangeType = (typeof dateRangeTypes)[number];
 
 export interface DateRangeConfig {
   type: DateRangeType;
@@ -114,7 +114,7 @@ export interface DateRangeConfig {
 // For "generic" date range types, i.e. last week/month/quarter/year, + previous
 export const getPeriodDateRange = (
   periodName: OpUnitType | QUnitType,
-  fromDate: AbstractDate = today()
+  fromDate: AbstractDate = today(),
 ) => {
   const end = dayjs.utc(fromDate).startOf(periodName).subtract(1, 'day');
 
@@ -126,14 +126,14 @@ export const getPeriodDateRange = (
 
 export const getComparisonDate = (
   [periodName]: OpUnitType | QUnitType,
-  fromDate: AbstractDate = today()
+  fromDate: AbstractDate = today(),
 ) => {
   // Convert duration to weeks for weekday alignment
   // Need to use Math.floor or else:
   //  1 month is 4.285714285714286 weeks,
   //  1 year 52.14285714... etc.
   const numWeeks = Math.floor(
-    dayjs.duration(1, periodName as DurationUnitType).asWeeks()
+    dayjs.duration(1, periodName as DurationUnitType).asWeeks(),
   );
 
   return dayjs.utc(fromDate).subtract(numWeeks, 'weeks');
@@ -148,7 +148,7 @@ const genericPeriods = Object.fromEntries<DateRangeConfig>(
       getDateRange: partial(getPeriodDateRange, [type]),
       getComparisonDate: partial(getComparisonDate, [type]),
     },
-  ])
+  ]),
 );
 
 const quarterlyConfig: DateRangeConfig = {
@@ -172,7 +172,7 @@ const quarterlyConfig: DateRangeConfig = {
       sevenDaysBeforeCurrentStart,
       sevenDaysAfterCurrentStart,
       null,
-      '[]'
+      '[]',
     );
 
     if (
@@ -257,3 +257,63 @@ export const minutes = (num: number) => seconds(num * 60);
  * @param num
  */
 export const hours = (num: number) => minutes(num * 60);
+
+/**
+ * From days to milliseconds
+ * @param num
+ */
+export const days = (num: number) => hours(num * 24);
+
+export type DateRangeGranularity = 'day' | 'week' | 'month' | 'year';
+
+export type GranularityPeriod =
+  | {
+      start: string;
+      end: string;
+    }
+  | {
+      start: Date;
+      end: Date;
+    };
+
+export function dateRangeToGranularity(
+  dateRange: DateRange<string>,
+  granularity: DateRangeGranularity = 'day',
+  format: string | false = 'YYYY-MM-DD',
+  inclusive = false,
+) {
+  const periodStartDates: Dayjs[] = [];
+
+  // currentPeriodStart won't necessarily be the start of the period
+  // if the dateRange start is not aligned with the granularity
+  // (same for end date)
+  let currentPeriodStart = dayjs.utc(dateRange.start).startOf('day');
+
+  const endDate = inclusive
+    ? dayjs.utc(dateRange.end).add(1, 'day')
+    : dayjs.utc(dateRange.end).endOf('day');
+
+  if (endDate.isBefore(currentPeriodStart)) {
+    throw Error('Invalid dateRange - end is before start');
+  }
+
+  while (currentPeriodStart.isBefore(endDate)) {
+    periodStartDates.push(currentPeriodStart);
+    currentPeriodStart = currentPeriodStart.add(1, granularity);
+  }
+
+  const endDates = periodStartDates
+    .slice(1)
+    .map((start) => start.subtract(1, 'ms'));
+
+  endDates.push(endDate);
+
+  const toOutput = format
+    ? (date: Dayjs) => date.format(format)
+    : (date: Dayjs) => date.toDate();
+
+  return zip(periodStartDates, endDates).map(([start, end]) => ({
+    start: toOutput(start),
+    end: toOutput(end),
+  })) as GranularityPeriod[];
+}

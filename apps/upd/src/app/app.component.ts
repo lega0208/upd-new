@@ -1,15 +1,14 @@
 import { Component, computed, effect, inject, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { I18nFacade } from '@dua-upd/upd/state';
-import { EN_CA } from '@dua-upd/upd/i18n';
-import { ChildrenOutletContexts } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { filter, map, mergeMap } from 'rxjs';
-import { PrimeNGConfig, Translation } from 'primeng/api';
-import { fader } from './app.animations';
+import { ActivatedRoute, ChildrenOutletContexts, NavigationEnd, Router } from '@angular/router';
+import { EN_CA } from '@dua-upd/upd/i18n';
+import { I18nFacade } from '@dua-upd/upd/state';
 import packageJson from 'package.json';
+import { PrimeNGConfig, Translation } from 'primeng/api';
+import { filter, map, mergeMap } from 'rxjs';
 import canadaLogo from '../assets/img/canada-black-30mm.png';
+import { fader } from './app.animations';
 
 @Component({
   selector: 'upd-root',
@@ -46,11 +45,9 @@ export class AppComponent implements OnInit {
   translatedTitleFromNav = computed(() => {
     const currentTitle = this.titleFromNavigation();
 
-    const translatedTitle = this.i18n.service.instant(
+    return this.i18n.service.instant(
       currentTitle || this.title,
     );
-
-    return translatedTitle;
   });
 
   en = EN_CA;

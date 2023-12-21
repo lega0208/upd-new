@@ -12,12 +12,11 @@
         "tsConfig": "libs/db-update/tsconfig.lib.json",
         "packageJson": "libs/db-update/package.json",
         "main": "libs/db-update/src/index.ts",
-        "extractLicenses": false,
-        "updateBuildableProjectDepsInPackageJson": true
+        "extractLicenses": false
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["libs/db-update/**/*.ts"]
@@ -27,8 +26,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/db-update"],
       "options": {
-        "jestConfig": "libs/db-update/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/db-update/jest.config.ts"
       }
     },
     "compodoc": {

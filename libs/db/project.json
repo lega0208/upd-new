@@ -11,12 +11,11 @@
         "outputPath": "dist/libs/db",
         "main": "libs/db/src/index.ts",
         "tsConfig": "libs/db/tsconfig.lib.json",
-        "assets": ["libs/db/*.md"],
-        "updateBuildableProjectDepsInPackageJson": true
+        "assets": ["libs/db/*.md"]
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["libs/db/**/*.ts"]
@@ -26,8 +25,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/db"],
       "options": {
-        "jestConfig": "libs/db/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/db/jest.config.ts"
       }
     },
     "compodoc": {

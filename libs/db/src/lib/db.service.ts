@@ -22,6 +22,9 @@ import {
   type PageMetricsModel,
   type ReadabilityModel,
   type UrlModel,
+  CustomReportsRegistry,
+  CustomReportsMetrics,
+  type CustomReportsModel,
 } from '../';
 import {
   arrayToDictionary,
@@ -62,12 +65,14 @@ export class DbService {
     readability: this.readability,
     annotations: this.annotations,
     reports: this.reports,
+    customReportsRegistry: this.customReportsRegistry,
+    customReportsMetrics: this.customReportsMetrics,
   } as const;
 
   readonly views = {
     pageVisits: new PageVisitsView(
       this.pageVisits,
-      this.collections.pageMetrics
+      this.collections.pageMetrics,
     ),
   } as const;
 
@@ -105,7 +110,11 @@ export class DbService {
     @InjectModel(Url.name, 'defaultConnection')
     private urls: UrlModel,
     @InjectModel(Reports.name, 'defaultConnection')
-    private reports: Model<Reports>
+    private reports: Model<Reports>,
+    @InjectModel(CustomReportsRegistry.name, 'defaultConnection')
+    private customReportsRegistry: Model<CustomReportsRegistry>,
+    @InjectModel(CustomReportsMetrics.name, 'defaultConnection')
+    private customReportsMetrics: CustomReportsModel,
   ) {}
 
   @AsyncLogTiming
@@ -129,7 +138,7 @@ export class DbService {
     if (!mostRecentTimeSeries) {
       throw Error(
         'No time series data found in pageMetricsTS collection.\n' +
-          'This is not a good way to populate the collection from scratch, mongodump/mongorestore should be used instead.'
+          'This is not a good way to populate the collection from scratch, mongodump/mongorestore should be used instead.',
       );
     }
 
@@ -198,7 +207,7 @@ export class DbService {
           bulkWriteOps as mongo.AnyBulkWriteOperation<PageMetrics>[],
           {
             ordered: false,
-          }
+          },
         );
         console.log('validateAllPageRefs writeResults:');
         logJson(writeResults);
@@ -234,7 +243,7 @@ export class DbService {
             },
           },
         },
-      })
+      }),
     );
 
     if (bulkWriteOps.length) {
@@ -248,7 +257,7 @@ export class DbService {
   }
 
   private async validateFilteredPageMetricsRefs(
-    filter: FilterQuery<PageMetrics>
+    filter: FilterQuery<PageMetrics>,
   ) {
     const pageMetrics: PageMetrics[] = await this.pageMetrics
       .find(filter, { page: 1, url: 1 })
@@ -274,7 +283,7 @@ export class DbService {
               $in: uniqueUrls,
             },
           },
-          { url: 1, projects: 1, ux_tests: 1, tasks: 1 }
+          { url: 1, projects: 1, ux_tests: 1, tasks: 1 },
         )
         .lean()
         .exec();
@@ -320,7 +329,7 @@ export class DbService {
               $in: uniqueUrls,
             },
           },
-          { url: 1, projects: 1, ux_tests: 1, tasks: 1 }
+          { url: 1, projects: 1, ux_tests: 1, tasks: 1 },
         )
         .lean()
         .exec();
@@ -360,7 +369,7 @@ export class DbService {
         bulkWriteOps as mongo.AnyBulkWriteOperation<PageMetrics>[],
         {
           ordered: false,
-        }
+        },
       );
 
       console.log('validatePageRefs writeResults:');
@@ -387,14 +396,14 @@ export class DbService {
             page: { $in: project.pages },
             projects: { $not: { $elemMatch: { $eq: project._id } } },
           },
-          { _id: 0, page: 1, projects: 1 }
+          { _id: 0, page: 1, projects: 1 },
         )
         .lean()
         .exec();
 
       if (metricsMissingRefs.length) {
         console.log(
-          `Found ${metricsMissingRefs.length} page metrics missing refs for Project: ${project.title}`
+          `Found ${metricsMissingRefs.length} page metrics missing refs for Project: ${project.title}`,
         );
 
         const results = await this.pageMetrics.updateMany(
@@ -404,7 +413,7 @@ export class DbService {
           },
           {
             $addToSet: { projects: project._id },
-          }
+          },
         );
 
         console.log('updateResult: ', prettyJson(results));
@@ -425,7 +434,7 @@ export class DbService {
 
       if (metricsMissingRefs.length) {
         console.log(
-          `Found ${metricsMissingRefs.length} page metrics missing refs for Task: ${task.title}`
+          `Found ${metricsMissingRefs.length} page metrics missing refs for Task: ${task.title}`,
         );
 
         const results = await this.pageMetrics.updateMany(
@@ -435,7 +444,7 @@ export class DbService {
           },
           {
             $addToSet: { tasks: task._id },
-          }
+          },
         );
 
         console.log('updateResult: ', prettyJson(results));
@@ -456,7 +465,7 @@ export class DbService {
 
       if (metricsMissingRefs.length) {
         console.log(
-          `Found ${metricsMissingRefs.length} page metrics missing refs for UX Test: ${uxTest.title}`
+          `Found ${metricsMissingRefs.length} page metrics missing refs for UX Test: ${uxTest.title}`,
         );
 
         const results = await this.pageMetrics.updateMany(
@@ -466,7 +475,7 @@ export class DbService {
           },
           {
             $addToSet: { ux_tests: uxTest._id },
-          }
+          },
         );
 
         console.log('updateResult: ', prettyJson(results));

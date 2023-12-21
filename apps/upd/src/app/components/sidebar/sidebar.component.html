@@ -61,7 +61,6 @@
         <a
           [routerLink]="[langPath(), 'reports']"
           [routerLinkActive]="['active']"
-          [queryParamsHandling]="'merge'"
           class="nav_link"
         >
           <span class="material-icons nav_icon" aria-hidden="true"
@@ -72,16 +71,17 @@
           }}</span>
         </a>
         <a
-        [routerLink]="[langPath(), 'pages', 'pages-bulk-report']"
-        [routerLinkActive]="['active']"
-        [queryParamsHandling]="'merge'"
-        class="nav_link"
-      >
-        <span class="material-icons nav_icon" aria-hidden="true">snippet_folder</span>
-        <span class="nav_name" data-i18n="menu-pages">{{
-          'Bulk Reports' | translate
-        }}</span>
-      </a>
+          [routerLink]="[langPath(), 'custom-reports']"
+          [routerLinkActive]="['active']"
+          class="nav_link"
+        >
+          <span class="material-icons nav_icon" aria-hidden="true"
+            >dashboard</span
+          >
+          <span class="nav_name" data-i18n="menu-custom-reports">{{
+            'menu-custom-reports' | translate
+          }}</span>
+        </a>
       </div>
     </div>
     <div class="mb-4">

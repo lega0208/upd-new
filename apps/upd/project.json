@@ -98,7 +98,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": ["apps/upd/src/**/*.ts", "apps/upd/src/**/*.html"]
       }
@@ -107,8 +107,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/apps/upd"],
       "options": {
-        "jestConfig": "apps/upd/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/upd/jest.config.ts"
       }
     },
     "compodoc": {

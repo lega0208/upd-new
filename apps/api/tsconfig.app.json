@@ -5,6 +5,7 @@
     "module": "ESNext",
     "types": ["node"],
     "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "target": "es2021",
     "lib": ["ESNext"]
   },

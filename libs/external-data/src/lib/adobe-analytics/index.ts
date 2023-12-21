@@ -55,13 +55,13 @@ export class AdobeAnalyticsClient {
 
   constructor(
     clientTokenExpiry = Math.floor(Date.now() / 1000) + 24 * 60 * 60,
-    private logger: Console | ConsoleLogger = console
+    private logger: Console | ConsoleLogger = console,
   ) {
     this.clientTokenExpiry = clientTokenExpiry;
   }
 
   async initClient(
-    clientTokenExpiry = Math.floor(Date.now() / 1000) + 24 * 60 * 60
+    clientTokenExpiry = Math.floor(Date.now() / 1000) + 24 * 60 * 60,
   ) {
     this.clientTokenExpiry = clientTokenExpiry;
 
@@ -78,12 +78,12 @@ export class AdobeAnalyticsClient {
   createMultiDayQueries(
     dateRange: DateRange,
     queryCreator: AAQueryCreatorParam,
-    inclusiveEndDate = false
+    inclusiveEndDate = false,
   ) {
     const dateRanges = singleDatesFromDateRange(
       dateRange,
       queryDateFormat,
-      inclusiveEndDate
+      inclusiveEndDate,
     )
       .map((date) => ({
         start: date,
@@ -92,7 +92,7 @@ export class AdobeAnalyticsClient {
       .filter(
         (dateRange) =>
           dayjs.utc(dateRange.start).startOf('day') !==
-          dayjs.utc().startOf('day')
+          dayjs.utc().startOf('day'),
       );
 
     return dateRanges.map((dateRange) => queryCreator(dateRange));
@@ -108,7 +108,7 @@ export class AdobeAnalyticsClient {
         post?: <U>(data: T[]) => U extends Promise<unknown> ? U : Promise<U>;
       };
       parseResults?: boolean;
-    } = {}
+    } = {},
   ): Promise<T extends AAResponse ? AAResponse : T[]> {
     if (!this.client || this.clientTokenIsExpired()) {
       if (this.clientTokenIsExpired()) {
@@ -119,7 +119,7 @@ export class AdobeAnalyticsClient {
     }
 
     const filterWithDateRange = query.globalFilters?.find(
-      (filter) => filter.dateRange !== undefined
+      (filter) => filter.dateRange !== undefined,
     );
 
     // This is only used to log the dateRange for now
@@ -148,7 +148,9 @@ export class AdobeAnalyticsClient {
     if (options.hooks?.post) {
       return Promise.resolve(parsedResults).then(
         (results) =>
-          options.hooks.post(results) as T extends AAResponse ? AAResponse : T[]
+          options.hooks.post(results) as T extends AAResponse
+            ? AAResponse
+            : T[],
       );
     }
 
@@ -167,12 +169,12 @@ export class AdobeAnalyticsClient {
       post?: (data: T[]) => void;
     },
     inclusiveEndDate = false,
-    maxParallel = 12
+    maxParallel = 12,
   ): Promise<void> {
     const queries = this.createMultiDayQueries(
       dateRange,
       queryCreator,
-      inclusiveEndDate
+      inclusiveEndDate,
     );
 
     const promises = [];
@@ -181,7 +183,7 @@ export class AdobeAnalyticsClient {
       const executeQueryWithRetry = withRetry(
         this.executeQuery.bind(this),
         2,
-        520
+        520,
       );
 
       const promise = executeQueryWithRetry<T>(query, {
@@ -197,8 +199,8 @@ export class AdobeAnalyticsClient {
         ]).catch((err) => {
           this.logger.error(
             chalk.red(
-              'An error occurred while waiting for a batch to complete:'
-            )
+              'An error occurred while waiting for a batch to complete:',
+            ),
           );
           this.logger.error(chalk.red(err.stack));
         });
@@ -216,7 +218,7 @@ export class AdobeAnalyticsClient {
 
   async getOverallMetrics(
     dateRange: DateRange,
-    options: ReportSettings = {}
+    options: ReportSettings = {},
   ): Promise<Partial<Overall>[]> {
     if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
@@ -253,7 +255,7 @@ export class AdobeAnalyticsClient {
               rowValues[columnId] = value;
               return rowValues;
             },
-            { date } as Partial<Overall>
+            { date } as Partial<Overall>,
           );
 
           return [...parsedResults, newDailyData];
@@ -269,7 +271,7 @@ export class AdobeAnalyticsClient {
       search?: ReportSearch;
       postProcess?: (data: Partial<PageMetrics[]>) => unknown | void;
       segment?: string;
-    }
+    },
   ): Promise<Partial<PageMetrics[]>[]> {
     if (!this.client || this.clientTokenIsExpired()) {
       if (this.clientTokenIsExpired()) {
@@ -287,7 +289,7 @@ export class AdobeAnalyticsClient {
       .filter(
         (dateRange) =>
           dayjs.utc(dateRange.start).startOf('day') !==
-          dayjs.utc().startOf('day')
+          dayjs.utc().startOf('day'),
       );
     const promises = [];
 
@@ -325,7 +327,7 @@ export class AdobeAnalyticsClient {
               {
                 date,
                 url: row.value,
-              } as Partial<PageMetrics>
+              } as Partial<PageMetrics>,
             );
 
             return [...parsedResults, newPageMetricsData];
@@ -338,9 +340,9 @@ export class AdobeAnalyticsClient {
             .then(options.postProcess)
             .then((data) =>
               console.log(
-                `Successfully inserted data for ${data?.modifiedCount} pages`
-              )
-            )
+                `Successfully inserted data for ${data?.modifiedCount} pages`,
+              ),
+            ),
         );
       } else {
         promises.push(promise);
@@ -354,7 +356,7 @@ export class AdobeAnalyticsClient {
 
   async getOverallCXMetrics(
     dateRange: DateRange,
-    options: ReportSettings = {}
+    options: ReportSettings = {},
   ): Promise<Partial<Overall>[]> {
     if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
@@ -392,7 +394,7 @@ export class AdobeAnalyticsClient {
               rowValues[columnId] = value;
               return rowValues;
             },
-            { date } as Partial<Overall>
+            { date } as Partial<Overall>,
           );
 
           return [...parsedResults, newDailyData];
@@ -426,7 +428,7 @@ export class AdobeAnalyticsClient {
         {
           url: row.value,
           itemid_url: row.itemId,
-        }
+        },
       );
 
       return [...parsedResults, newPageMetricsData];
@@ -435,7 +437,7 @@ export class AdobeAnalyticsClient {
 
   async getActivityMapItemIds(
     dateRange: DateRange,
-    options: ReportSettings = {}
+    options: ReportSettings = {},
   ) {
     if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
@@ -462,7 +464,7 @@ export class AdobeAnalyticsClient {
         {
           title: row.value,
           itemid_activitymap: row.itemId,
-        }
+        },
       );
 
       return [...parsedResults, newPageMetricsData];
@@ -471,7 +473,7 @@ export class AdobeAnalyticsClient {
 
   async getInternalSearchItemIds(
     dateRange: DateRange,
-    options: ReportSettings = {}
+    options: ReportSettings = {},
   ) {
     if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
@@ -484,7 +486,7 @@ export class AdobeAnalyticsClient {
 
     const internalSearchItemIdsQuery = createInternalSearchItemIdsQuery(
       dateRange,
-      options
+      options,
     );
     const results = await this.client.getReport(internalSearchItemIdsQuery);
 
@@ -501,7 +503,7 @@ export class AdobeAnalyticsClient {
         {
           url: row.value,
           itemid_internalsearch: row.itemId,
-        }
+        },
       );
 
       return [...parsedResults, newPageMetricsData];
@@ -511,7 +513,7 @@ export class AdobeAnalyticsClient {
   async getActivityMap(
     dateRange: DateRange,
     itemIds: string[],
-    options: ReportSettings = {}
+    options: ReportSettings = {},
   ) {
     if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
@@ -525,7 +527,7 @@ export class AdobeAnalyticsClient {
     const activityMapQuery = createActivityMapQuery(
       dateRange,
       itemIds,
-      options
+      options,
     );
     const results = await this.client.getReport(activityMapQuery);
 
@@ -549,14 +551,14 @@ export class AdobeAnalyticsClient {
           rowValues[columnId] = value;
           return rowValues;
         },
-        { date }
+        { date },
       );
   }
 
   async getWhereVisitorsCameFrom(
     dateRange: DateRange,
     itemIds: string[],
-    options: ReportSettings = {}
+    options: ReportSettings = {},
   ) {
     if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
@@ -570,7 +572,7 @@ export class AdobeAnalyticsClient {
     const whereVisitorsCameFromQuery = createWhereVisitorsCameFromQuery(
       dateRange,
       itemIds,
-      options
+      options,
     );
     const results = await this.client.getReport(whereVisitorsCameFromQuery);
 
@@ -596,7 +598,7 @@ export class AdobeAnalyticsClient {
           rowValues[columnId] = value;
           return rowValues;
         },
-        { date }
+        { date },
       );
   }
 
@@ -604,7 +606,7 @@ export class AdobeAnalyticsClient {
   async getInternalSearches(
     dateRange: DateRange,
     itemIds: string[],
-    options: ReportSettings = {}
+    options: ReportSettings = {},
   ) {
     if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
@@ -619,7 +621,7 @@ export class AdobeAnalyticsClient {
     const internalSearchQuery = createInternalSearchQuery(
       dateRange,
       itemIds,
-      options
+      options,
     );
     const results = await this.client.getReport(internalSearchQuery);
 
@@ -645,14 +647,14 @@ export class AdobeAnalyticsClient {
           rowValues[columnId] = value;
           return rowValues;
         },
-        { date }
+        { date },
       );
   }
 
   async getPhrasesSearchedOnPage(
     dateRange: DateRange,
     itemIds: string[],
-    options: ReportSettings = {}
+    options: ReportSettings = {},
   ) {
     if (!this.client || this.clientTokenIsExpired()) {
       await this.initClient();
@@ -667,7 +669,7 @@ export class AdobeAnalyticsClient {
     const internalSearchQuery = createPhrasesSearchedOnPageQuery(
       dateRange,
       itemIds,
-      options
+      options,
     );
     const results = await this.client.getReport(internalSearchQuery);
 
@@ -693,24 +695,24 @@ export class AdobeAnalyticsClient {
           rowValues[columnId] = value;
           return rowValues;
         },
-        { date }
+        { date },
       );
   }
 }
 
 export function createRowsParser<T>(
-  query: AdobeAnalyticsReportQuery
+  query: AdobeAnalyticsReportQuery,
 ): AAResultsParser<T> {
   const dimension = query.dimension;
 
   // globalFilters should be [segment, dateRange]
   const filterWithDateRange = query.globalFilters?.find(
-    (filter) => filter.dateRange !== undefined
+    (filter) => filter.dateRange !== undefined,
   );
   const dateRangeFilter = filterWithDateRange?.dateRange;
   if (!dateRangeFilter) {
     throw new Error(
-      'Expected global daterange filter at index 1 in AA query, but none was found'
+      'Expected global daterange filter at index 1 in AA query, but none was found',
     );
   }
 
@@ -726,7 +728,7 @@ export function createRowsParser<T>(
             itemId: row.itemId,
             value: row.value,
             type: 'internalSearch',
-          } as T)
+          }) as T,
       );
   }
 
@@ -738,7 +740,7 @@ export function createRowsParser<T>(
             itemId: row.itemId,
             value: row.value,
             type: 'activityMapTitle',
-          } as T)
+          }) as T,
       );
   }
 
@@ -791,8 +793,8 @@ export function createRowsParser<T>(
             {
               date: new Date(startDate),
               term: row.value,
-            }
-          ) as T
+            },
+          ) as T,
       );
   }
 
@@ -813,7 +815,7 @@ export function createRowsParser<T>(
           {
             date: startDate,
             term: row.value,
-          }
+          },
         );
       }) as ({ date: Date; term: string } & { [data: string]: number })[];
 
@@ -835,7 +837,7 @@ export function createRowsParser<T>(
               throw Error(
                 'Tried to assign a value to a key that already exists:\r\n' +
                   `itemId: ${itemId}, metric name: ${metricName},` +
-                  `value: ${val}, existing value: ${resultsById[itemId][metricName]}`
+                  `value: ${val}, existing value: ${resultsById[itemId][metricName]}`,
               );
             }
 
@@ -861,7 +863,7 @@ export function createRowsParser<T>(
           ({
             itemId,
             aa_searchterms,
-          } as T)
+          }) as T,
       );
     };
   }
@@ -882,8 +884,8 @@ export function createRowsParser<T>(
 
             return parsedRow;
           },
-          { date: startDate, url: row.value } as unknown as Partial<T>
-        )
+          { date: startDate, url: row.value } as unknown as Partial<T>,
+        ),
       ) as T[];
   }
 
@@ -906,7 +908,7 @@ export function createRowsParser<T>(
 
             return parsedRow;
           },
-          { date } as unknown as T
+          { date } as unknown as T,
         );
       }) as T[];
   };
@@ -918,7 +920,7 @@ export function parseQueryDateRange(dateRange: string) {
   if (!results || !results.length || results.length < 3) {
     throw new Error(
       'Error parsing dates from date range filter in AA query. dateRange: ' +
-        dateRange
+        dateRange,
     );
   }
 
