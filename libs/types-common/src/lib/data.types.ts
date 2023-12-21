@@ -199,7 +199,7 @@ export interface OverviewData
     total_users?: number;
     scenario?: string;
   }[];
-  top5CalldriverTopics: TopCalldriverTopics[];
+  top25CalldriverTopics: TopCalldriverTopics[];
   top5IncreasedCalldriverTopics: TopCalldriverTopics[];
   top5DecreasedCalldriverTopics: TopCalldriverTopics[];
   searchTermsEn: OverallSearchTerm[];
