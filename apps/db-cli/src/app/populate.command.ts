@@ -399,7 +399,7 @@ export class PopulateCommand extends CommandRunner {
     };
 
     const gscDataSource = async () => {
-      await this.searchAnalyticsService.getPageMetricsWithRetry(dateRange, {
+      await this.searchAnalyticsService.getPageMetrics(dateRange, {
         dataState: 'final',
         onComplete: async (results) => {
           return await insertFunc(results, 'GSC');
