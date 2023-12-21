@@ -3,22 +3,22 @@ import {
   SearchAnalyticsClient,
   SearchAnalyticsPageQueryOptions,
 } from './index';
-import { DateRange } from '../types';
+import type { DateRange } from '../types';
 import { Overall, PageMetrics } from '@dua-upd/db';
-import { withRetry } from '../utils';
+import { Retry } from '@dua-upd/utils-common';
 
 @Injectable()
 export class GoogleSearchConsoleService {
   constructor(
     private logger: ConsoleLogger,
     @Inject(SearchAnalyticsClient.name)
-    private readonly client: SearchAnalyticsClient
+    private readonly client: SearchAnalyticsClient,
   ) {}
 
   async getOverallMetrics(
     dateRange: DateRange,
     dataState: 'final' | 'all' = 'final',
-    onComplete?: (results: Overall[]) => void
+    onComplete?: (results: Overall[]) => void,
   ) {
     this.logger.log('Getting Overall GSC metrics for: ', dateRange);
 
@@ -31,18 +31,15 @@ export class GoogleSearchConsoleService {
     return metrics;
   }
 
+  @Retry(3, 520)
   async getPageMetrics(
     dateRange: DateRange,
     options: {
       onComplete?: (results: Partial<PageMetrics>[]) => Promise<void>;
-    } & SearchAnalyticsPageQueryOptions = {}
+    } & SearchAnalyticsPageQueryOptions = {},
   ) {
     this.logger.log('Getting GSC Page metrics for: ', dateRange);
 
     return await this.client.getPageMetrics(dateRange, options);
-  }
-
-  get getPageMetricsWithRetry() {
-    return withRetry(this.getPageMetrics.bind(this), 3, 520);
   }
 }
