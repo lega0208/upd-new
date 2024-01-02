@@ -737,9 +737,10 @@ export class ProjectsDetailsFacade {
 
   taskSuccessByUxTestKpi$ = combineLatest([
     this.projectsDetailsData$,
+    this.projectTasks$, // combined to access tasks id
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) => {
+    map(([data, projectTasks, lang]) => {
       const uxTests = data?.taskSuccessByUxTest;
 
       if (!uxTests) {
@@ -816,6 +817,7 @@ export class ProjectsDetailsFacade {
         });
 
         return {
+          _id: projectTasks.find((t) => t.title === task.task)?._id.toString(), // combined from projectTasks
           task: task.task
             ? this.i18n.service.translate(task.task, lang)
             : task.task,
