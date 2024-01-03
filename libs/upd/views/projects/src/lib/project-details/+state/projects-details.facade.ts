@@ -16,6 +16,7 @@ import {
   percentChange,
   type PickByType,
   type UnwrapObservable,
+  round,
 } from '@dua-upd/utils-common';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs/esm';
@@ -828,7 +829,7 @@ export class ProjectsDetailsFacade {
       return taskSuccessByUxTestKpi?.map((task) => {
         const validation = task.Validation;
         const baseline = task.Baseline;
-        const change = validation - baseline;
+        const change = round(validation,2) - round(baseline,2);
         let isChange = false;
 
         if (change >= 0.2) isChange = true;
