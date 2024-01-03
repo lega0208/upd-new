@@ -92,6 +92,8 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
           {
             field: 'tasks',
             header: this.i18n.service.translate('Task list', lang),
+            type: 'link',
+            typeParams: { preLink: `/${this.langLink}/tasks`, link: '_id' },
           },
           {
             field: 'test_type',
@@ -131,6 +133,11 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
           {
             field: 'task',
             header: this.i18n.service.translate('task', lang),
+            type: 'link',
+            typeParams: {
+              preLink: '/' + this.langLink + '/tasks',
+              link: '_id',
+            },
           } as ColumnConfig,
         ];
 
