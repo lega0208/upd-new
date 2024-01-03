@@ -17,4 +17,5 @@ export const bases = {
   DCD_2023_Q2: process.env.AIRTABLE_BASE_DCD_2023_Q2,
   DCD_2023_Q3: process.env.AIRTABLE_BASE_DCD_2023_Q3,
   DCD_2023_Q4: process.env.AIRTABLE_BASE_DCD_2023_Q4,
+  DCD_2024_Q1: process.env.AIRTABLE_BASE_DCD_2024_Q1,
 };
