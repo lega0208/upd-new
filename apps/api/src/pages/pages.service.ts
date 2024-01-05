@@ -8,6 +8,8 @@ import type {
   MetricsConfig,
   PageDocument,
   PageMetricsModel,
+  ProjectDocument,
+  TaskDocument,
   UrlModel,
 } from '@dua-upd/db';
 import {
@@ -15,7 +17,9 @@ import {
   Feedback,
   Page,
   PageMetrics,
+  Project,
   Readability,
+  Task,
   Url,
 } from '@dua-upd/db';
 import type {
@@ -44,12 +48,26 @@ export class PagesService {
     private feedbackModel: FeedbackModel,
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
+    @InjectModel(Task.name, 'defaultConnection')
+    private taskModel: Model<TaskDocument>,
+    @InjectModel(Project.name, 'defaultConnection')
+    private projectModel: Model<ProjectDocument>,
     @InjectModel(Readability.name, 'defaultConnection')
     private readabilityModel: Model<Readability>,
     @InjectModel(Url.name, 'defaultConnection')
     private urls: UrlModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+
+  async listPages({ projection, populate }): Promise<Page[]> {
+    let query = this.pageModel.find({}, projection);
+    if (populate) {
+      const populateArray = populate.split(',').map(item => item.trim());
+      query = query.populate(populateArray);
+    }
+
+    return await query.exec();
+  }
 
   async getPagesHomeData(dateRange: string): Promise<PagesHomeData> {
     const cacheKey = `getPagesHomeData-${dateRange}`;

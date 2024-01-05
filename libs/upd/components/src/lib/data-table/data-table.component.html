@@ -5,7 +5,7 @@
   [rows]="displayRows"
   [rowHover]="true"
   [showCurrentPageReport]="true"
-  [rowsPerPageOptions]="[10, 25, 50, 100]"
+  [rowsPerPageOptions]="[5, 10, 25, 50, 100]"
   [loading]="loading"
   styleClass="p-datatable-striped p-datatable-sm border"
   [paginator]="pagination"
@@ -20,6 +20,8 @@
   [sortField]="sortField"
   [sortOrder]="sortOrder === 'desc' ? -1 : 1"
   dataKey="_id"
+  (selectionChange)="onSelectionChange($event)"
+  [(selection)]="selectedPages"
 >
   <ng-template *ngIf="filter || captionTitle || exports" pTemplate="caption">
     <div>
@@ -81,6 +83,9 @@
 
   <ng-template pTemplate="header" let-columns>
     <tr>
+      <th *ngIf="checkboxes" style="width: 3rem">
+        <!-- <p-tableHeaderCheckbox></p-tableHeaderCheckbox> -->
+      </th>
       <div *ngIf="sort; then thenBlock; else elseBlock"></div>
       <ng-template #thenBlock>
         <th
@@ -119,7 +124,12 @@
               </ng-template>
 
               <!-- Category/Multiselect Filtering -->
-              <ng-template [ngIf]="col.filterConfig.type === 'category' || col.filterConfig.type === 'pageStatus'">
+              <ng-template
+                [ngIf]="
+                  col.filterConfig.type === 'category' ||
+                  col.filterConfig.type === 'pageStatus'
+                "
+              >
                 <p-columnFilter
                   [field]="col.field"
                   matchMode="in"
@@ -186,6 +196,9 @@
 
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr>
+      <td *ngIf="checkboxes">
+        <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+      </td>
       <td
         *ngFor="let col of columns"
         [ngClass]="{

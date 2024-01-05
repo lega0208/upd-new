@@ -1,8 +1,17 @@
+import { dateRangeSplit } from '@dua-upd/utils-common';
 import { InjectFlowProducer, InjectQueue } from '@nestjs/bullmq';
 import { type FlowChildJob, FlowProducer, Queue } from 'bullmq';
-import { CustomReportsMetrics, DbService } from '@dua-upd/db';
+
+import type { ProjectDocument, TaskDocument } from '@dua-upd/db';
+import {
+  DbService,
+  Page,
+  Project,
+  Task,
+  CustomReportsMetrics,
+} from '@dua-upd/db';
 import { Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import type { FilterQuery } from 'mongoose';
 import { omit } from 'rambdax';
 import { combineLatest, map, Observable, startWith } from 'rxjs';
@@ -10,6 +19,7 @@ import type {
   AADimensionName,
   AAMetricName,
   AAQueryConfig,
+  PagesHomeData,
   ReportConfig,
   ReportStatus,
 } from '@dua-upd/types-common';
@@ -22,6 +32,7 @@ import {
 } from './custom-reports.listeners';
 import { decomposeConfig } from './custom-reports.strategies';
 import { hashConfig, hashQueryConfig } from './custom-reports.utils';
+import { InjectModel } from '@nestjs/mongoose';
 
 export type ChildJobMetadata = {
   hash: string;
@@ -30,6 +41,12 @@ export type ChildJobMetadata = {
   query: AAQueryConfig;
   dataPoints: ReportDataPoint[];
 };
+
+interface BaseDocument {
+  _id: string; // Adjust the type as necessary
+  title: string;
+  pages?: Types.ObjectId[] | Page[] | undefined;
+}
 
 @Injectable()
 export class CustomReportsService {
@@ -47,7 +64,59 @@ export class CustomReportsService {
     private reportQueueEvents: ReportsQueueEvents,
     private childQueueEvents: ChildQueueEvents,
     private cache: CustomReportsCache,
+    @InjectModel(Page.name, 'defaultConnection')
+    private pageModel: Model<Page>,
+    @InjectModel(Task.name, 'defaultConnection')
+    private taskModel: Model<TaskDocument>,
+    @InjectModel(Project.name, 'defaultConnection')
+    private projectModel: Model<ProjectDocument>,
   ) {}
+
+  async getCustomReportData(): Promise<PagesHomeData> {
+    const dateRange = '2022-01-01/2022-01-31';
+
+    const [startDate, endDate] = dateRangeSplit(dateRange);
+    const queryDateRange = {
+      start: startDate,
+      end: endDate,
+    };
+
+    const pageList = await this.db.views.pageVisits.getVisitsWithPageData(
+      queryDateRange,
+      this.pageModel,
+    );
+
+    const extractUrls = (pages: Types.ObjectId[] | Page[] | undefined) => {
+      if (!pages) {
+        return null;
+      }
+
+      return pages
+        .map((page) => ('url' in page ? page.url : null))
+        .filter((url) => url != null);
+    };
+
+    const getData = async <T extends BaseDocument>(model: Model<T>) => {
+      const items = await model.find().populate(['pages']).exec();
+      return items.map((item) => ({
+        _id: item._id,
+        title: item.title,
+        urls: extractUrls(item.pages),
+      }));
+    };
+
+    const taskData = await getData<TaskDocument>(this.taskModel);
+    const projectData = await getData<ProjectDocument>(this.projectModel);
+
+    const results: PagesHomeData = {
+      dateRange,
+      taskList: taskData,
+      projectList: projectData,
+      dateRangeData: pageList,
+    };
+
+    return results;
+  }
 
   async getReportObservable(reportId: string, childJobIds: string[]) {
     const childJobStatuses = Object.fromEntries(

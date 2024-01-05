@@ -28,7 +28,15 @@ export interface ViewData<T> {
   satComparisonDateRange?: string;
   dateRangeData?: T;
   comparisonDateRangeData?: T;
+  taskList?: EntityList[]
+  projectList?: EntityList[];
 }
+
+export interface EntityList {
+    _id: string;
+    title: string;
+    urls: (string | null)[] | null;
+};
 
 export interface EntityDetailsData<T> extends ViewData<T> {
   _id: string;
