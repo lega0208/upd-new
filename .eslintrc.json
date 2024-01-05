@@ -25,7 +25,8 @@
               }
             ]
           }
-        ]
+        ],
+        "@nx/dependency-checks": "warn"
       }
     },
     {
