@@ -71,12 +71,15 @@ export class PagesService {
 
   async getPagesHomeData(dateRange: string): Promise<PagesHomeData> {
     const cacheKey = `getPagesHomeData-${dateRange}`;
-    const cachedData = await this.cacheManager.store.get<PagesHomeData>(
-      cacheKey
-    );
+    const cachedData = (await this.cacheManager.store.get(
+      cacheKey,
+    )) as PagesHomeAggregatedData[];
 
     if (cachedData) {
-      return cachedData;
+      return {
+        dateRange,
+        dateRangeData: cachedData,
+      };
     }
 
     const [startDate, endDate] = dateRangeSplit(dateRange);
@@ -85,37 +88,17 @@ export class PagesService {
       end: endDate,
     };
 
-    const pageList = await this.db.views.pageVisits.getVisitsWithPageData(
+    const results = await this.db.views.pageVisits.getVisitsWithPageData(
       queryDateRange,
       this.pageModel
     );
 
-const extractUrls = (pages) => pages
-  .map(page => 'url' in page ? page.url : null)
-  .filter(url => url != null);
-
-const getData = async (model) => {
-  const items = await model.find().populate(['pages']).exec();
-  return items.map(item => ({
-    _id: item._id,
-    title: item.title,
-    urls: extractUrls(item.pages)
-  }));
-};
-
-const taskData = await getData(this.taskModel);
-const projectData = await getData(this.projectModel);
-
-    const results =  {
-      dateRange,
-      taskList: taskData,
-      projectList: projectData,
-      dateRangeData: pageList,
-    };
-
     await this.cacheManager.set(cacheKey, results);
 
-    return results;
+    return {
+      dateRange,
+      dateRangeData: results,
+    };
   }
 
   async getPageDetails(params: ApiParams): Promise<PageDetailsData> {

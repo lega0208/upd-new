@@ -9,7 +9,6 @@ import { PagesDetailsWebtrafficComponent } from './pages-details/pages-details-w
 import { PagesDetailsSearchAnalyticsComponent } from './pages-details/pages-details-search-analytics/pages-details-search-analytics.component';
 import { PagesDetailsFeedbackComponent } from './pages-details/pages-details-feedback/pages-details-feedback.component';
 import { PagesDetailsReadabilityComponent } from './pages-details/pages-details-readability/pages-details-readability.component';
-import { PagesBulkReportComponent } from './pages-home/pages-bulk-report/pages-bulk-report.component';
 
 const routes: Routes = [
   {
@@ -17,7 +16,6 @@ const routes: Routes = [
     component: PagesComponent,
     children: [
       { path: '', component: PagesHomeComponent, pathMatch: 'full' },
-      { path: 'pages-bulk-report', component: PagesBulkReportComponent, pathMatch: 'full' },
       {
         path: ':id',
         component: PagesDetailsComponent,
