@@ -5,6 +5,8 @@ import {
   OnInit,
   SimpleChanges,
   ViewChild,
+  EventEmitter,
+  Output,
 } from '@angular/core';
 import { Table } from 'primeng/table';
 import { equals } from 'rambdax';
@@ -32,11 +34,13 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
   @Input() sortOrder: 'asc' | 'desc' = 'asc';
   @Input() kpi = false;
   @Input() exports = true;
+  @Input() checkboxes = false;
   @Input() id?: string;
   @Input() placeholderText = 'dt_search_keyword';
   @Input() selectedNodes: SelectedNode[] = [];
   @Input() node: SelectedNode | null = null;
   exportCols: ColumnConfig[] = [];
+  @Output() pageSelectionChanged = new EventEmitter<any[]>();
 
   ngOnInit() {
     this.exportCols = this.cols.filter((col) => !col.hideTable);
@@ -50,10 +54,10 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
     }
 
     const prevHeaders = colChanges.previousValue.map(
-      (col: ColumnConfig) => col.header
+      (col: ColumnConfig) => col.header,
     );
     const currentHeaders = colChanges.currentValue.map(
-      (col: ColumnConfig) => col.header
+      (col: ColumnConfig) => col.header,
     );
 
     if (!equals(prevHeaders, currentHeaders)) {
@@ -66,10 +70,22 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
     return this.cols.map((obj) => obj.field);
   }
 
+  selectedPages: any[] = [];
+
+  onSelectionChange(value = []) {
+    this.selectedPages = value;
+    this.pageSelectionChanged.emit(value);
+  }
+
+  clearSelections() {
+    this.selectedPages = [];
+    this.pageSelectionChanged.emit(this.selectedPages);
+  }
+
   getEventValue(event: Event): string {
     return (event.target as HTMLInputElement).value.replace(
       /^.+?(?=www\.)/i,
-      ''
+      '',
     );
   }
 

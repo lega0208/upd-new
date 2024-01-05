@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'upd-accordion',
@@ -7,4 +7,17 @@ import { Component, Input } from '@angular/core';
 })
 export class AccordionComponent {
   @Input() title = 'view-data-table';
+  @Input() styleClass = '';
+  @Input() expanded = false;
+  @ViewChild('accordionElement', { static: false })
+  accordionElement!: ElementRef;
+
+  flashAccordion() {
+    const element = this.accordionElement.nativeElement;
+    this.accordionElement.nativeElement.addClass(element, 'flash');
+
+    setTimeout(() => {
+      this.accordionElement.nativeElement.removeClass(element, 'flash');
+    }, 1000); // Duration should match the total animation time
+  }
 }

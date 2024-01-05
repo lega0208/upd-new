@@ -3,11 +3,13 @@
   [type]="type"
   [attr.style]="style"
   [ngClass]="styleClass"
-  *ngIf="!staticAlertClosed"
-  (closed)="staticAlertClosed = true"
+  (closed)="onAlertClosed()"
   [dismissible]="dismissible"
-  translate
   tabindex="0"
+  role="alert"
+  aria-live="assertive"
+  aria-atomic="true"
+  [class.alert-hidden]="!alertVisible"
 >
   <ng-content></ng-content>
 </ngb-alert>

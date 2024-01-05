@@ -1,0 +1,27 @@
+<div *ngIf="showSelectAll">
+  <p-checkbox
+    (onChange)="toggleSelectAll()"
+    [ngModel]="allSelected"
+    [binary]="true"
+    inputId="selectAll-{{ id }}"
+    [checkboxIcon]="isIndeterminate ? 'pi pi-minus' : 'pi pi-check'"
+    [trueValue]="isIndeterminate ? false : true"
+    [ngClass]="{ 'indeterminate-style': isIndeterminate }"
+  >
+  </p-checkbox>
+  <label for="selectAll-{{ id }}" class="p-checkbox-label">{{
+    selectAllText
+  }}</label>
+
+  <hr />
+</div>
+<div *ngFor="let item of items" class="field-checkbox">
+  <p-checkbox
+    [value]="item.id"
+    [(ngModel)]="selectedItems"
+    [inputId]="item.id"
+    (onChange)="updateIndividualSelection()"
+  >
+  </p-checkbox>
+  <label [for]="item.id" class="p-checkbox-label">{{ item.label }}</label>
+</div>

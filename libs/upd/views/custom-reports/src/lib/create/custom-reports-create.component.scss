@@ -1,0 +1,122 @@
+// .badge-blue {
+//   /* background-color: #2e5ea7; */
+//   background-color: #fff;
+//   /* color: #fff; */
+//   color:#6c757d;
+//   /* border-radius: 25px; */
+//   padding: 4px 6px;
+//   margin: 8px 3px 3px;
+//   font-size: 14px;
+//   display: flex;
+//   justify-content: space-between;
+//   overflow: hidden;
+//   width: 100%;
+//   white-space: nowrap; /* Prevent text from wrapping to the next line */
+// }
+// .badge-blue:first-child {
+//   margin-left: 0px;
+// }
+.urls-added-table a {
+  color: #6c757d;
+  text-decoration: underline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.invalid-url {
+  text-decoration: underline red dotted;
+}
+
+.valid-url,
+.invalid-url {
+  pointer-events: auto; /* Allow interaction with icons */
+}
+
+.indeterminate .p-checkbox-box {
+  background-color: #d9d9d9;
+  background-image: linear-gradient(#d9d9d9, #d9d9d9),
+    linear-gradient(#d9d9d9, #d9d9d9);
+  background-size:
+    50% 2px,
+    2px 50%;
+  background-position:
+    0% 50%,
+    50% 0%;
+  background-repeat: no-repeat;
+}
+
+.indeterminate-style .p-checkbox-box {
+  background-color: #d9d9d9;
+  border-color: #d9d9d9;
+}
+
+li[role='presentation'] a {
+  color: #6c757d;
+  text-decoration: none;
+  border-bottom: 0;
+}
+
+
+li[role='presentation'] a:hover {
+  background-color: #e3f2fd;
+}
+
+li[role='presentation'].p-highlight a {
+  color: #2e5ea7;
+  text-decoration: none;
+  border-bottom: 4px solid #2e5ea7;
+}
+
+/* Added by Kole - Dec 2023 */
+.add-pages-card {
+  border: none;
+  background: none;
+}
+
+.add-pages-card .p-tabview .p-tabview-nav {
+  background: #f8f9f8;
+}
+
+.add-pages-card .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background: #f8f9f8;
+  font-weight: normal;
+  padding: 0.5rem 1rem;
+}
+
+.add-pages-card .p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
+  background-color: #e3f2fd; 
+}
+
+.add-pages-card .p-tabview .p-tabview-nav li .p-tabview-nav-link:active {
+  border-bottom-width: 4px;
+}
+
+.add-pages-card .btn-outline-primary {
+  margin: 20px 20px 15px 20px;
+  align-self: flex-start;
+  color: #2e5ea7;
+  border-color: #2e5ea7;
+}
+.add-pages-card .btn-outline-primary:hover {
+  color: #fff;
+  background-color: #2e5ea7;
+} 
+
+.add-pages-card .p-tabview-nav-content ul {
+  padding-left: 0;
+}
+
+.add-pages-card .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  border-color: #2e5ea7;
+}
+
+.field-checkbox {
+  margin: 10px 10px 10px 15px;
+}
+
+.btn-generate-report {
+  color: #fff;
+  background-color: #2e5ea7;
+  border-color: #2e5ea7;
+  float: right;
+}

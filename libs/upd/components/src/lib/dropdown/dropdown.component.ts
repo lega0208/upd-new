@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Required } from '@dua-upd/utils-common';
 
 export interface DropdownOption<T> {
@@ -11,7 +11,7 @@ export interface DropdownOption<T> {
 @Component({
   selector: 'upd-dropdown',
   template: `
-    <p-dropdown [options]="options" optionLabel="label" optionValue="value">
+    <p-dropdown (onChange)="handleSelect($event.value)" [options]="options" optionLabel="label" optionValue="value">
         <ng-template pTemplate="selectedItem">
           <div style="color: rgb(33, 37, 41);">
           <span
@@ -61,5 +61,12 @@ export class DropdownComponent<T> {
   @Input() bg = 'white';
   @Input() styleClasses = '';
   @Input() icon?: string;
-  @Input() onSelect: (value: T) => void = (value) => console.log(value);
+  @Input() value: T | null = null;
+  @Input() onSelect: (value: T) => void = (value: T) => console.log(value);
+  @Output() selectedValueChange: EventEmitter<T> = new EventEmitter<T>();
+
+  handleSelect(optionValue: T) {
+    this.value = optionValue; 
+    this.selectedValueChange.emit(this.value); 
+  }
 }
