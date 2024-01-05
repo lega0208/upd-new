@@ -6,7 +6,7 @@ import { Component, Input, ViewChild, ElementRef } from '@angular/core';
   styleUrls: ['./accordion.component.scss'],
 })
 export class AccordionComponent {
-  @Input() title = '';
+  @Input() title = 'view-data-table';
   @Input() styleClass = '';
   @Input() expanded = false;
   @ViewChild('accordionElement', { static: false })

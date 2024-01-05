@@ -444,12 +444,18 @@
   "UPD releases": "Versions du TBPC",
 
   "--------CUSTOM REPORTS--------": "--------------------------------CUSTOM REPORTS--------------------------------",
+  "menu-custom-reports": "Rapports personnalisés",
+  "custom-reports-title": "Rapports personnalisés",
   "alert-date": "Veuillez sélectionner une plage de dates",
   "alert-metric": "Veuillez sélectionner une métrique",
   "alert-url": "Veuillez sélectionner une URL",
   "select-date": "Sélectionnez une plage de dates",
   "select-metric": "Sélectionnez une métrique",
+  "select-dimension": "Sélectionnez une dimension à décomposer",
   "select-url": "Sélectionnez une URL",
+  "generate-report": "Générer un rapport",
+  "remove-all": "Supprimer tout",
+  "copy-all": "Copier tout",
 
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",
   "Get a business number": "Obtenir un numéro d’entreprise",

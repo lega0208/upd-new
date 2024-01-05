@@ -1,8 +1,18 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
+import { Observable, map, of, switchMap, tap } from 'rxjs';
 
 export interface CustomReportState {
-  z: string;
+  reportData: ReportData | null;
+  loading: boolean;
+}
+
+export interface ReportData {
+  dateRange: string,
+  taskList: any,
+  projectList: any,
+  dateRangeData: any,
 }
 
 // @@ set up something basic for now -- to use for all subcomponents
@@ -15,11 +25,37 @@ export interface CustomReportState {
 @Injectable()
 export class CustomReportStore extends ComponentStore<CustomReportState> {
   constructor() {
-    super({ z: 'z' });
+    super({ reportData: null, loading: true });
   }
 
-  readonly z$ = this.select((s) => s.z);
+  private readonly http = inject(HttpClient);
 
-  readonly setZ = this.updater((state, z: string): CustomReportState => ({ ...state, z }));
+  readonly reportData$ = this.select((state) => state.reportData);
+  readonly loading$ = this.select((state) => state.loading);
 
+  readonly projects$ = this.reportData$.pipe(
+    map((reportData) => reportData?.projectList || [])
+  );
+
+  readonly tasks$ = this.reportData$.pipe(
+    map((reportData) => reportData?.taskList || [])
+  );
+
+  readonly pages$ = this.reportData$.pipe(
+    map((reportData) => [...(reportData?.dateRangeData || [])]),
+  );
+
+  readonly setReportData = this.updater((state, reportData: ReportData) => ({ ...state, reportData }));
+
+  readonly loadReportData = this.effect((trigger$: Observable<void>) =>
+    trigger$.pipe(
+      tap(() => this.patchState({ loading: true })),
+      switchMap(() => this.http.get('http://localhost:4205/api/custom-reports/report')),
+      switchMap((reportData) => {
+        this.setReportData(reportData as ReportData);
+        return of(reportData);
+      }),
+      tap(() => this.patchState({ loading: false }))
+    )
+  );
 }

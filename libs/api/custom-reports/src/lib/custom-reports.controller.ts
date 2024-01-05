@@ -11,6 +11,7 @@ import {
   Param,
   Post,
   Sse,
+  Query,
 } from '@nestjs/common';
 import { map, Observable, of } from 'rxjs';
 import { CustomReportsService } from './custom-reports.service';
@@ -18,6 +19,11 @@ import { CustomReportsService } from './custom-reports.service';
 @Controller('custom-reports')
 export class CustomReportsController {
   constructor(private reportsService: CustomReportsService) {}
+
+  @Get('report')
+  getPagesHomeData() {
+    return this.reportsService.getCustomReportData();
+  }
 
   @Post('create')
   async check(@Body() request: ReportConfig): Promise<ReportCreateResponse> {

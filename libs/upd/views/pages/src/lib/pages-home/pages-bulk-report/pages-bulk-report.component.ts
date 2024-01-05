@@ -1,28 +1,24 @@
 import {
-  AfterViewInit,
   Component,
   ElementRef,
+  NgZone,
   OnInit,
-  QueryList,
-  TemplateRef,
   ViewChild,
-  ViewChildren,
   ViewEncapsulation,
+  WritableSignal,
   inject,
   signal,
 } from '@angular/core';
-import { Subscription, combineLatest } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import {
   ColumnConfig,
   DataTableComponent,
   AccordionComponent,
-  TabsComponent,
-  Tab,
   CalendarComponent,
 } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { PagesHomeFacade } from '../+state/pages-home.facade';
-import { PagesHomeAggregatedData } from '@dua-upd/types-common';
+import { AADimensionName, AAMetricName, PagesHomeAggregatedData, ReportCreateResponse } from '@dua-upd/types-common';
 import dayjs from 'dayjs';
 
 import {
@@ -33,9 +29,10 @@ import {
   AAQueryDateStart,
   AAQueryDateEnd,
 } from '@dua-upd/types-common';
-import { dimensions, metricIds } from '@dua-upd/external-data';
 
 import utc from 'dayjs/plugin/utc';
+import { LocaleId } from '@dua-upd/upd/i18n';
+import { Router } from '@angular/router';
 dayjs.extend(utc);
 
 @Component({
@@ -45,7 +42,8 @@ dayjs.extend(utc);
   encapsulation: ViewEncapsulation.None,
 })
 export class PagesBulkReportComponent implements OnInit {
-
+  private router = inject(Router);
+  private zone: NgZone = inject(NgZone);
   private i18n = inject(I18nFacade);
   private readonly pagesHomeService = inject(PagesHomeFacade);
   pagesHomeData$ = this.pagesHomeService.pagesHomeTableData$;
@@ -54,8 +52,10 @@ export class PagesBulkReportComponent implements OnInit {
   projects$ = this.pagesHomeService.projects$;
   tasks$ = this.pagesHomeService.tasks$;
   validationTriggered = false;
-
+  error: WritableSignal<string | null> = signal(null);
   currentLang$ = this.i18n.currentLang$;
+
+  lang = signal<LocaleId>(this.i18n.service.currentLang);
 
   allMetricsSelected = false;
   isMetricsIndeterminate = false;
@@ -68,7 +68,6 @@ export class PagesBulkReportComponent implements OnInit {
     urls: [],
     grouped: false,
     metrics: [],
-    breakdownDimension: '',
   });
 
   dateRange = {
@@ -97,7 +96,7 @@ export class PagesBulkReportComponent implements OnInit {
   selectedPages: any[] = [];
   selectedTasks: any[] = [];
   selectedProjects: any[] = [];
-  selectedReportMetrics: string[] = [];
+  selectedReportMetrics: AAMetricName[] = [];
   selectedReportDimensions = '';
 
   urls: string[] = [];
@@ -120,27 +119,27 @@ export class PagesBulkReportComponent implements OnInit {
   reportMetrics: ReportMetric[] = [
     {
       label: 'Visits',
-      id: 'metrics/visits',
+      id: 'visits',
       description: 'The total number of visits to your site.',
     },
     {
       label: 'Page views',
-      id: 'metrics/pageviews',
+      id: 'views',
       description: 'The total number of pageviews for your site.',
     },
     {
       label: 'Visitors',
-      id: 'metrics/visitors',
+      id: 'visitors',
       description: 'The total number of visitors to your site.',
     },
   ];
 
   reportDimensions: ReportDimension[] = [
-    { label: 'None', id: 'none', description: '' },
-    { label: 'Devices', id: 'variables/evar4', description: '' },
-    { label: 'Regions', id: 'variables/georegion', description: '' },
-    { label: 'Cities', id: 'variables/geocity', description: '' },
-    { label: 'Countries', id: 'variables/geocountry', description: '' },
+    { label: 'None', id: '', description: '' },
+    { label: 'Devices', id: 'device_type', description: '' },
+    { label: 'Regions', id: 'region', description: '' },
+    { label: 'Cities', id: 'city', description: '' },
+    { label: 'Countries', id: 'country', description: '' },
   ];
 
   addPages(inputValue: string) {
@@ -323,11 +322,11 @@ export class PagesBulkReportComponent implements OnInit {
   }
 
   updateConfig() {
-    this.config.update((f) => {
+    this.config.update((f: ReportConfig) => {
       return {
         ...f,
         metrics: this.selectedReportMetrics,
-        breakdownDimension: this.selectedReportDimensions,
+        breakdownDimension: this.selectedReportDimensions as AADimensionName,
         grouped: this.isGrouped,
       };
     });
@@ -414,6 +413,30 @@ export class PagesBulkReportComponent implements OnInit {
     }));
 
     this.resetCalendar();
+  }
+  
+  async createReport(config: ReportConfig) {
 
+    console.log('Report Configuration:', config);
+    const res: ReportCreateResponse = await fetch(
+      '/api/custom-reports/create',
+      {
+        method: 'POST',
+        body: JSON.stringify(config),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    ).then((res) => res.json());
+
+    if ('error' in res) {
+      this.error.set(res.error);
+
+      return;
+    }
+
+    await this.zone.run(() =>
+      this.router.navigateByUrl(`/en/custom-reports/${res._id}`),
+    );
   }
 }

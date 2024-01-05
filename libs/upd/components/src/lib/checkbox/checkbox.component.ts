@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { AAMetricName } from '@dua-upd/types-common';
 
 @Component({
   selector: 'upd-checkbox',
@@ -11,16 +12,16 @@ export class CheckboxComponent {
   @Input() selectAllText = '';
   @Input() id?: string;
 
-  private _selectedItems: string[] = [];
-  @Input() set selectedItems(value: string[]) {
+  private _selectedItems: AAMetricName[] = [];
+  @Input() set selectedItems(value: AAMetricName[]) {
     this._selectedItems = value;
     this.updateSelectionState();
   }
-  get selectedItems(): string[] {
+  get selectedItems(): AAMetricName[] {
     return this._selectedItems;
   }
 
-  @Output() selectedItemsChange = new EventEmitter<string[]>();
+  @Output() selectedItemsChange = new EventEmitter<AAMetricName[]>();
 
   allSelected = false;
   isIndeterminate = false;
