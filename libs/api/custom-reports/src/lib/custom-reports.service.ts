@@ -1,18 +1,15 @@
-import { type AAResponseBody, queryDateFormat } from '@dua-upd/external-data';
-import { dateRangeToGranularity } from '@dua-upd/utils-common';
 import { InjectFlowProducer, InjectQueue } from '@nestjs/bullmq';
 import { type FlowChildJob, FlowProducer, Queue } from 'bullmq';
 import { CustomReportsMetrics, DbService } from '@dua-upd/db';
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import type { FilterQuery, mongo } from 'mongoose';
+import type { FilterQuery } from 'mongoose';
 import { omit } from 'rambdax';
 import { combineLatest, map, Observable, startWith } from 'rxjs';
 import type {
   AADimensionName,
   AAMetricName,
   AAQueryConfig,
-  AAQueryDateRange,
   ReportConfig,
   ReportStatus,
 } from '@dua-upd/types-common';
@@ -23,6 +20,7 @@ import {
   ReportJobStatus,
   ReportsQueueEvents,
 } from './custom-reports.listeners';
+import { decomposeConfig } from './custom-reports.strategies';
 import { hashConfig, hashQueryConfig } from './custom-reports.utils';
 
 export type ChildJobMetadata = {
@@ -35,8 +33,6 @@ export type ChildJobMetadata = {
 
 @Injectable()
 export class CustomReportsService {
-  // for reusing strategies instead of re-creating them every time
-  strategyRegistry = new Map<string, CustomReportsStrategy>();
   // todo: cleanup observables
   observablesRegistry = new Map<string, Observable<ReportStatus>>();
 
@@ -52,14 +48,6 @@ export class CustomReportsService {
     private childQueueEvents: ChildQueueEvents,
     private cache: CustomReportsCache,
   ) {}
-
-  getStrategy(reportId: string, config: ReportConfig) {
-    if (!this.strategyRegistry.has(reportId)) {
-      this.strategyRegistry.set(reportId, createReportStrategy(config));
-    }
-
-    return this.strategyRegistry.get(reportId) as CustomReportsStrategy;
-  }
 
   async getReportObservable(reportId: string, childJobIds: string[]) {
     const childJobStatuses = Object.fromEntries(
@@ -123,7 +111,6 @@ export class CustomReportsService {
       await this.childJobsQueue.getJobs([
         'active',
         'delayed',
-        'completed',
         'paused',
         'wait',
         'waiting',
@@ -183,12 +170,9 @@ export class CustomReportsService {
       throw Error('Report not found');
     }
 
-    // todo: "hard-code"/pre-define strategies
-    const strategy = this.getStrategy(reportId, config);
-
     // decompose config into queries and data points and skip existing data points
     const queriesWithDataPoints = await this.filterExistingData(
-      strategy.decomposeConfig(config),
+      decomposeConfig(config),
     );
 
     // logJson(queriesWithDataPoints);
@@ -350,189 +334,3 @@ export type QueryWithDataPoints = {
   query: AAQueryConfig;
   dataPoints: ReportDataPoint[];
 };
-
-/**
- * Derive the individual data points to be inserted from query results into the database.
- * To be used for identifying data points, for checking whether they already exist
- * in the db or will be processed by a currently running job.
- *
- * @param reportConfig The report config.
- * @param queryConfig The query config.
- */
-export function deriveDataPoints(
-  reportConfig: ReportConfig,
-  queryConfig: AAQueryConfig,
-): ReportDataPoint[] {
-  const { grouped, granularity, breakdownDimension } = reportConfig;
-  const { urls: _urls, metricNames, dateRange } = queryConfig;
-
-  const urls = Array.isArray(_urls) ? _urls : [_urls];
-  const metrics = Array.isArray(metricNames) ? metricNames : [metricNames];
-  const dimension = breakdownDimension
-    ? { breakdownDimension: breakdownDimension as AADimensionName }
-    : {};
-
-  const commonOutput = {
-    startDate: new Date(dateRange.start),
-    endDate: new Date(dateRange.end),
-    granularity,
-    grouped,
-    ...dimension,
-  };
-
-  if (grouped) {
-    return [
-      {
-        ...commonOutput,
-        urls,
-        metrics,
-      },
-    ];
-  }
-
-  return urls.map((url) => ({
-    ...commonOutput,
-    url,
-    metrics,
-  }));
-}
-
-// may very well be unnecessary
-/**
- * A strategy to define the logic for each step of the pipeline,
- *  to be selected based on the report config.
- */
-export interface CustomReportsStrategy {
-  /**
-   * Decompose the report config into a list queries for granular data, along with
-   * a list of the individual data points to be inserted (to be used for tracking/reuse).
-   * @param config The report config.
-   */
-  decomposeConfig(config: ReportConfig): QueryWithDataPoints[];
-
-  /**
-   * Parse the query results into a list of bulk write operations for inserting
-   * into the database.
-   * @param query
-   * @param dataPoints
-   * @param results
-   */
-  parseQueryResults<R extends AAResponseBody>(
-    query: AAQueryConfig,
-    dataPoints: ReportDataPoint[],
-    results: R,
-  ): mongo.AnyBulkWriteOperation<CustomReportsMetrics>[];
-}
-
-export function createReportStrategy(config: ReportConfig) {
-  const { dateRange, granularity, grouped, metrics, urls, breakdownDimension } =
-    config;
-
-  if (!grouped && !breakdownDimension) {
-    const strategy: CustomReportsStrategy = {
-      decomposeConfig() {
-        const dateRanges =
-          granularity === 'none'
-            ? [dateRange]
-            : dateRangeToGranularity(dateRange, granularity, queryDateFormat);
-
-        const queries: AAQueryConfig[] = dateRanges.map((dateRange) => ({
-          dateRange: dateRange as AAQueryDateRange,
-          metricNames: metrics as AAMetricName[],
-          dimensionName: 'url_last_255',
-          urls,
-        }));
-
-        return queries.map((query) => ({
-          query,
-          dataPoints: deriveDataPoints(config, query),
-        }));
-      },
-      parseQueryResults(
-        query: AAQueryConfig,
-        dataPoints: ReportDataPoint[],
-        results: AAResponseBody,
-      ) {
-        const startDate = new Date(query.dateRange.start);
-        const endDate = new Date(query.dateRange.end);
-        const columnIds = results.columns.columnIds;
-        const rows = results.rows;
-
-        // this logic will only work for non-grouped + no breakdownDimension
-        // may need to add dates to the key if query involves multiple dates
-        const resultsByUrl: Record<string, { [metricName: string]: number }> =
-          Object.fromEntries(
-            rows.map((row) => [
-              row.value,
-              Object.fromEntries(
-                row.data
-                  // filter out "NaN"s
-                  .filter((value) => typeof value !== 'string')
-                  .map((value, index) => [
-                    columnIds[index] as AAMetricName,
-                    value as number,
-                  ]),
-              ),
-            ]),
-          );
-
-        const dates =
-          config.granularity === 'day'
-            ? {
-                startDate,
-              }
-            : {
-                startDate,
-                endDate,
-              };
-
-        return dataPoints.map((dataPoint) => {
-          const { url, metrics: metricNames, grouped, granularity } = dataPoint;
-
-          const associatedResults = url ? resultsByUrl[url] : undefined;
-
-          if (!associatedResults) {
-            console.error('\nNo associated results found for url:');
-            console.error(url);
-            console.error('');
-          }
-
-          const metrics = Object.fromEntries(
-            metricNames.map((metricName) => [
-              `metrics.${metricName}`, // will need to adjust for breakdownDimension
-              associatedResults?.[metricName] || undefined,
-            ]),
-          );
-
-          return {
-            updateOne: {
-              filter: {
-                url,
-                ...dates,
-                grouped,
-                granularity,
-              },
-              update: {
-                $setOnInsert: {
-                  _id: new Types.ObjectId(),
-                  url,
-                  ...dates,
-                  grouped,
-                  granularity,
-                },
-                $set: {
-                  ...metrics,
-                },
-              },
-              upsert: true,
-            },
-          } as mongo.AnyBulkWriteOperation<CustomReportsMetrics>;
-        });
-      },
-    };
-
-    return strategy;
-  }
-
-  throw Error('Not implemented');
-}
