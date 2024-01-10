@@ -59,7 +59,7 @@ export class TaskDetailsUxTestsComponent implements OnInit {
         },
       ];
       this.taskSuccessDataCols = [
-        { field: 'title', header: this.i18n.service.translate('Title', lang) },
+        { field: 'title', header: this.i18n.service.translate('UX Test', lang) },
         {
           field: 'scenario',
           header: this.i18n.service.translate('Scenario', lang),
