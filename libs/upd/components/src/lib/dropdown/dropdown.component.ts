@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Required } from '@dua-upd/utils-common';
 
 export interface DropdownOption<T> {
@@ -11,24 +11,26 @@ export interface DropdownOption<T> {
 @Component({
   selector: 'upd-dropdown',
   template: `
-    <p-dropdown (onChange)="handleSelect($event.value)" [options]="options" optionLabel="label" optionValue="value">
-        <ng-template pTemplate="selectedItem">
-          <div style="color: rgb(33, 37, 41);">
+    <p-dropdown
+      (onChange)="this.selectOption.emit($event.value)"
+      [options]="options"
+      optionLabel="label"
+      optionValue="value"
+    >
+      <ng-template pTemplate="selectedItem">
+        <div style="color: rgb(33, 37, 41);">
           <span
             *ngIf="icon"
             class="material-icons align-top pe-1 "
             aria-hidden="true"
-          >{{ icon }}</span
+            >{{ icon }}</span
           >
-            <span class="dropdown-label">{{ label || '' | translate }}</span>
-          </div>
-        </ng-template>
+          <span class="dropdown-label">{{ label || '' | translate }}</span>
+        </div>
+      </ng-template>
 
       <ng-template pTemplate="item" let-option>
-        <div
-          (click)="onSelect(option.value)"
-          [class]="option.styleClasses || ''"
-        >
+        <div [class]="option.styleClasses || ''">
           <span
             *ngIf="option.icon"
             class="pe-1 pi pi-{{ option.icon }} me-2"
@@ -38,8 +40,6 @@ export interface DropdownOption<T> {
         </div>
       </ng-template>
     </p-dropdown>
-
-
   `,
   styles: [
     `
@@ -51,22 +51,16 @@ export interface DropdownOption<T> {
         font-size: 1rem;
       }
     `,
-  ]
+  ],
 })
-export class DropdownComponent<T> {
+export class DropdownComponent<T extends DropdownOption<unknown>> {
   @Input() @Required id!: string;
   @Input() label: string | null = '';
-  @Input() options: DropdownOption<T>[] = [];
+  @Input() options: T[] = [];
   @Input() display = 'inline-block';
   @Input() bg = 'white';
   @Input() styleClasses = '';
   @Input() icon?: string;
-  @Input() value: T | null = null;
-  @Input() onSelect: (value: T) => void = (value: T) => console.log(value);
-  @Output() selectedValueChange: EventEmitter<T> = new EventEmitter<T>();
 
-  handleSelect(optionValue: T) {
-    this.value = optionValue; 
-    this.selectedValueChange.emit(this.value); 
-  }
+  @Output() selectOption = new EventEmitter<T['value']>();
 }

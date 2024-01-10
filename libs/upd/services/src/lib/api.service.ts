@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { DbQuery } from '@dua-upd/api/query';
 import type {
   ApiParams,
   OverviewData,
@@ -22,11 +23,8 @@ export class ApiService {
   private http = inject(HttpClient);
 
   // @StorageCache
-  private get<T extends ReturnedData<unknown>>(
-    url: string,
-    params?: ApiParams,
-  ) {
-    return this.http.get<T>(url, { params });
+  private get<T>(url: string, params?: ApiParams) {
+    return this.http.get<T>(url, { params, responseType: 'json' });
   }
 
   getPagesHomeData(params: ApiParams) {
@@ -63,5 +61,16 @@ export class ApiService {
 
   getInternalSearchData(params: ApiParams) {
     return this.get('/api/internal-search/terms', params);
+  }
+
+  queryDb<T>(params: DbQuery) {
+    const serializedQueries = Object.fromEntries(
+      Object.entries(params).map(([key, value]) => [
+        key,
+        btoa(JSON.stringify(value)),
+      ]),
+    );
+
+    return this.http.get<T>('/api/query', { params: serializedQueries });
   }
 }

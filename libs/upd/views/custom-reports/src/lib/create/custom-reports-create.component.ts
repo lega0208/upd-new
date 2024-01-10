@@ -1,137 +1,230 @@
+import { CommonModule } from '@angular/common';
+import { ClipboardModule } from '@angular/cdk/clipboard';
+import { Router } from '@angular/router';
 import {
   Component,
   ElementRef,
   NgZone,
-  OnInit,
   ViewChild,
   ViewEncapsulation,
   WritableSignal,
   inject,
   signal,
+  Signal,
+  computed,
+  effect,
 } from '@angular/core';
-import { combineLatest, map } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslateModule } from '@ngx-translate/core';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import { I18nFacade } from '@dua-upd/upd/state';
+import { ApiService } from '@dua-upd/upd/services';
+import type { LocaleId } from '@dua-upd/upd/i18n';
 import {
-  ColumnConfig,
+  type ColumnConfig,
   DataTableComponent,
   AccordionComponent,
   CalendarComponent,
   UpdComponentsModule,
+  type DropdownOption,
 } from '@dua-upd/upd-components';
-import { I18nFacade } from '@dua-upd/upd/state';
-import { AADimensionName, AAMetricName, PagesHomeAggregatedData, ReportCreateResponse } from '@dua-upd/types-common';
-import dayjs from 'dayjs';
-import { CustomReportStore } from '../+state/custom-reports.store';
-
-import {
-  ReportDimension,
-  ReportMetric,
-  ReportGranularity,
-  ReportConfig,
+import type {
+  AADimensionName,
+  AAMetricName,
   AAQueryDateStart,
   AAQueryDateEnd,
+  ReportCreateResponse,
+  ReportConfig,
+  ReportDimension,
+  ReportGranularity,
+  ReportMetric,
 } from '@dua-upd/types-common';
 
-import utc from 'dayjs/plugin/utc';
-import { LocaleId } from '@dua-upd/upd/i18n';
-import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
-import { ClipboardModule } from '@angular/cdk/clipboard';
 dayjs.extend(utc);
 
-// @@@ basically just go through everything and start committing?
+type PageSelectionData = {
+  pages: { _id: string; url: string; title: string }[];
+  tasks: { title: string; pages: string[] }[];
+  projects: { title: string; pages: string[] }[];
+};
+
 @Component({
   selector: 'dua-upd-custom-reports-create',
   standalone: true,
-  imports: [CommonModule, UpdComponentsModule, TranslateModule, ClipboardModule],
+  imports: [
+    CommonModule,
+    UpdComponentsModule,
+    TranslateModule,
+    ClipboardModule,
+  ],
   templateUrl: './custom-reports-create.component.html',
   styleUrls: ['./custom-reports-create.component.scss'],
-  providers: [CustomReportStore],
+  providers: [ApiService],
   encapsulation: ViewEncapsulation.None,
 })
 export class CustomReportsCreateComponent {
   private router = inject(Router);
   private zone: NgZone = inject(NgZone);
   private i18n = inject(I18nFacade);
-  // private readonly pagesHomeService = inject(PagesHomeFacade);
-  // pagesHomeData$ = this.pagesHomeService.pagesHomeTableData$;
-  // loading$ = this.pagesHomeService.loading$;
+  private readonly api = inject(ApiService);
 
-  // projects$ = this.pagesHomeService.projects$;
-  // tasks$ = this.pagesHomeService.tasks$;
+  // get required data from the api
+  selectionData: Signal<PageSelectionData | null> = toSignal(
+    this.api.queryDb({
+      pages: {
+        collection: 'pages',
+        filter: {},
+        project: { url: 1, title: 1 },
+      },
+      tasks: {
+        collection: 'tasks',
+        filter: { pages: { $exists: true, $size: { $not: 0 } } },
+        project: { title: 1, pages: 1 },
+      },
+      projects: {
+        collection: 'projects',
+        filter: { pages: { $exists: true, $size: { $not: 0 } } },
+        project: { title: 1, pages: 1 },
+      },
+    }),
+    {
+      initialValue: null,
+    },
+  );
 
-  private readonly customReportStore = inject(CustomReportStore);
-  data = this.customReportStore.loadReportData();
-  loading$ = this.customReportStore.loading$;
+  pages = computed(() => this.selectionData()?.pages || []);
+  tasks = computed(() => this.selectionData()?.tasks || []);
+  projects = computed(() => this.selectionData()?.projects || []);
 
-  projects$ = this.customReportStore.projects$;
-  tasks$ = this.customReportStore.tasks$;
-  pages$ = this.customReportStore.pages$;
+  pagesMap = computed(
+    () => new Map(this.pages().map((page) => [page._id, page])),
+  );
 
   validationTriggered = false;
+
   error: WritableSignal<string | null> = signal(null);
-  currentLang$ = this.i18n.currentLang$;
 
-  lang = signal<LocaleId>(this.i18n.service.currentLang);
-
-  allMetricsSelected = false;
-  isMetricsIndeterminate = false;
-  config = signal<ReportConfig>({
-    dateRange: {
-      start: '',
-      end: '',
-    },
-    granularity: '' as ReportGranularity,
-    urls: [],
-    grouped: false,
-    metrics: [],
+  lang: Signal<LocaleId> = toSignal(this.i18n.currentLang$, {
+    initialValue: this.i18n.service.currentLang,
   });
 
-  dateRange = {
-    start: '' as string,
-    end: '' as string,
-  };
+  dateRange = signal({
+    start: '',
+    end: '',
+  });
 
-  @ViewChild('dataTable') dataTableComponent!: DataTableComponent<any>;
-  @ViewChild('tasksTable') tasksTableComponent!: DataTableComponent<any>;
-  @ViewChild('projectsTable') projectsTableComponent!: DataTableComponent<any>;
+  selectedReportMetrics = signal<AAMetricName[]>([]);
+
+  selectedReportDimensions = signal<string>('');
+
+  isGrouped = signal(false);
+
+  readonly granularityOptions: DropdownOption<ReportGranularity>[] = [
+    { label: 'Daily', value: 'day' },
+    { label: 'Weekly', value: 'week' },
+    { label: 'Monthly', value: 'month' },
+  ];
+
+  selectedGranularity = signal(this.granularityOptions[0].value);
+
+  granularityLabel = computed(() => {
+    return this.granularityOptions.find(
+      (option) => option.label === this.selectedGranularity(),
+    )?.label;
+  });
+
+  reportUrls = signal<string[]>([]);
+
+  config = computed<ReportConfig>(() => ({
+    dateRange: this.dateRange(),
+    granularity: this.selectedGranularity(),
+    urls: this.reportUrls(),
+    grouped: this.isGrouped(),
+    metrics: this.selectedReportMetrics(),
+    breakdownDimension: this.selectedReportDimensions() as AADimensionName,
+  }));
+
+  @ViewChild('dataTable') dataTableComponent!: DataTableComponent<
+    PageSelectionData['pages']
+  >;
+  @ViewChild('tasksTable') tasksTableComponent!: DataTableComponent<
+    PageSelectionData['tasks']
+  >;
+  @ViewChild('projectsTable') projectsTableComponent!: DataTableComponent<
+    PageSelectionData['projects']
+  >;
   @ViewChild('urlTextarea') urlTextarea!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('urlsAdded') accordionComponent!: AccordionComponent;
   @ViewChild('calendar') calendarComponent!: CalendarComponent;
 
-  columns: ColumnConfig<PagesHomeAggregatedData>[] = [];
-  taskColumns: ColumnConfig<any>[] = [];
+  columns: Signal<ColumnConfig<PageSelectionData['pages']>[]> = computed(() => [
+    {
+      field: 'title',
+      header: this.i18n.service.translate('Title', this.lang()),
+    },
+    {
+      field: 'url',
+      header: this.i18n.service.translate('URL', this.lang()),
+    },
+  ]);
 
-  searchFields = this.columns.map((col) => col.field);
+  taskColumns: Signal<ColumnConfig<PageSelectionData['tasks']>[]> = computed(
+    () => [
+      {
+        field: 'title',
+        header: this.i18n.service.translate('Title', this.lang()),
+      },
+    ],
+  );
 
-  validUrls: string[] = [];
-  validatedUrls: string[] = [];
-  invalidUrls: string[] = [];
-  duplicateUrls: string[] = [];
-  successUrls: string[] = [];
+  searchFields = computed(() => this.columns().map((col) => col.field));
 
-  selectedPages: any[] = [];
-  selectedTasks: any[] = [];
-  selectedProjects: any[] = [];
-  selectedReportMetrics: AAMetricName[] = [];
-  selectedReportDimensions = '';
+  validUrls = computed<string[]>(() => this.pages()?.map((p) => p.url) || []);
 
-  urls: string[] = [];
+  invalidUrls = signal<string[]>([]);
+  newUrls = signal<string[]>([]);
+
+  selectedPages = signal<PageSelectionData['pages']>([]);
+  selectedTasks = signal<PageSelectionData['tasks']>([]);
+  selectedProjects = signal<PageSelectionData['projects']>([]);
+
+  combinedSelectedUrls = computed(() => {
+    const selectedPageUrls = this.selectedPages().map((page) => page.url);
+
+    const selectedTaskIds = this.selectedTasks().flatMap((task) => task.pages);
+
+    const selectedProjectIds = this.selectedProjects().flatMap(
+      (project) => project.pages,
+    );
+
+    const pageIds = new Set(selectedTaskIds.concat(selectedProjectIds));
+
+    const combinedUrls = new Set(selectedPageUrls);
+
+    const pagesMap = this.pagesMap();
+
+    const reportUrls = this.reportUrls();
+
+    for (const id of pageIds) {
+      const page = pagesMap.get(id);
+
+      if (!page) {
+        // should probably change this to throw an error, seeing as these ids *should* always be valid
+        console.error(`Page with id ${id} not found`);
+        continue;
+      }
+
+      // pre-filter urls that are already included
+      if (reportUrls.includes(page.url)) continue;
+
+      combinedUrls.add(page.url);
+    }
+
+    return combinedUrls;
+  });
+
   showCopyAlert = false;
-
-  dimensionLabel = 'None';
-  breakdownLabel = 'Select';
-  granularityLabel = 'Daily';
-  granularityValue = 'day';
-  isGrouped = false;
-
-  granularityOptions = [
-    { label: 'Daily', value: 'day' },
-    { label: 'Weekly', value: 'week' },
-    { label: 'Monthly', value: 'month' }
-  ];
-
-  dimensionOptions!: { label: string; value: string }[];
 
   reportMetrics: ReportMetric[] = [
     {
@@ -159,132 +252,54 @@ export class CustomReportsCreateComponent {
     { label: 'Countries', id: 'country', description: '' },
   ];
 
+  constructor() {
+    effect(() => {
+      this.selectedGranularity(); // don't need the value, just need to trigger the effect on change
+      this.resetCalendar();
+    });
+  }
+
   copyToClipboard() {
     this.showCopyAlert = !this.showCopyAlert;
   }
 
   addPages(inputValue: string) {
-    this.invalidUrls = [];
-    this.duplicateUrls = [];
-    this.successUrls = [];
-
-    const previousUrls = new Set(this.urls);
+    const reportUrls = this.reportUrls();
 
     const parsedUrls = inputValue
       .split(/[\n,;]+/)
       .map((url) => url.trim().replace(/^https?:\/\//, ''))
-      .filter((url) => url.length > 0);
+      .filter((url) => !reportUrls.includes(url) && url.length > 0);
 
-    const selectedPageUrls = this.selectedPages.map((page) => page.url);
-    const selectedTaskUrls = this.selectedTasks.map((task) => task.urls).flat();
-    const selectedProjectUrls = this.selectedProjects
-      .map((project) => project.urls)
-      .flat();
+    const validNewUrls = new Set<string>();
+    const invalidUrls: string[] = [];
 
-    const allSelectedUrls = [
-      ...selectedPageUrls,
-      ...selectedTaskUrls,
-      ...selectedProjectUrls,
-    ];
+    const validUrls = this.validUrls();
 
-    const newUrls = allSelectedUrls.filter(url => !previousUrls.has(url));
-
-    for (const url of parsedUrls) {
-      if (this.validUrls.includes(url)) {
-        if (allSelectedUrls.includes(url) || this.urls.includes(url)) {
-          this.duplicateUrls.push(url);
-        } else {
-          this.urls.push(url);
-          this.successUrls.push(url);
-        }
-      } else {
-        this.invalidUrls.push(url);
+    for (const url of [...parsedUrls, ...this.combinedSelectedUrls()]) {
+      if (validUrls.includes(url)) {
+        validNewUrls.add(url);
+        continue;
       }
+
+      invalidUrls.push(url);
     }
 
-    this.urls = Array.from(new Set([...allSelectedUrls, ...this.urls]));
-    this.duplicateUrls = Array.from(new Set(this.duplicateUrls));
-    this.invalidUrls = Array.from(new Set(this.invalidUrls));
-    this.successUrls = Array.from(new Set([...newUrls, ...this.successUrls]));
-
-    this.config.update((f) => {
-      return {
-        ...f,
-        urls: this.urls,
-      };
-    });
-
-    console.log(this.successUrls)
+    this.invalidUrls.set(invalidUrls);
+    this.newUrls.set(Array.from(validNewUrls));
+    this.reportUrls.mutate((urls) => urls.push(...validNewUrls));
   }
 
   removePage(index: number) {
-    this.urls.splice(index, 1);
+    this.reportUrls.mutate((urls) => urls.splice(index, 1));
   }
 
   resetUrls() {
-    this.urls = [];
-    this.selectedPages = [];
-    this.config.update((f) => {
-      return {
-        ...f,
-        urls: this.urls,
-      };
-    });
+    this.reportUrls.set([]);
   }
 
   resetCalendar(): void {
-    if (this.calendarComponent) {
-      this.calendarComponent.resetCalendar();
-    }
-  }
-
-  ngOnInit() {
-    combineLatest([this.pages$, this.currentLang$]).subscribe(
-      ([data, lang]) => {
-        this.columns = [
-          {
-            field: 'title',
-            header: this.i18n.service.translate('Title', lang),
-          },
-          {
-            field: 'url',
-            header: this.i18n.service.translate('URL', lang),
-          },
-        ];
-      },
-    );
-
-    combineLatest([this.tasks$, this.currentLang$]).subscribe(
-      ([data, lang]) => {
-        this.taskColumns = [
-          {
-            field: 'title',
-            header: this.i18n.service.translate('Title', lang),
-          },
-        ];
-      },
-    );
-
-    this.pages$.subscribe((data) => {
-      this.validUrls = data.map((page) => page.url);
-    });
-    this.searchFields = this.columns.map((col) => col.field);
-
-    this.dimensionOptions = this.transformDimensionOptions(
-      this.reportDimensions,
-    );
-  }
-
-  handleSelectedPages(pages: any[]) {
-    this.selectedPages = pages;
-  }
-
-  handleSelectedTasks(tasks: any[]) {
-    this.selectedTasks = tasks;
-  }
-
-  handleSelectedProjects(projects: any[]) {
-    this.selectedProjects = projects;
+    this.calendarComponent?.resetCalendar();
   }
 
   resetTableSelection() {
@@ -295,78 +310,62 @@ export class CustomReportsCreateComponent {
   }
 
   handleDateChange(date: Date | Date[]) {
-    if (Array.isArray(date)) {
-      const startDate = date[0];
-      let endDate = date[1];
-
-      if (endDate === null) endDate = startDate;
-
-      if (this.granularityValue === 'day') {
-      this.dateRange = {
-        start: dayjs(startDate)
-          .utc()
-          .format('YYYY-MM-DDT00:00:00.000') as AAQueryDateStart,
-        end: dayjs(endDate)
-          .utc()
-          .format('YYYY-MM-DDT23:59:59.999') as AAQueryDateEnd,
-      };
-    } else if (this.granularityValue === 'week') {
-      this.dateRange = {
-        start: dayjs(startDate)
-          .utc()
-          .format('YYYY-MM-DDT00:00:00.000') as AAQueryDateStart,
-        end: dayjs(endDate)
-          .utc()
-          .format('YYYY-MM-DDT23:59:59.999') as AAQueryDateEnd,
-      };
-    }
-    else if (this.granularityValue === 'month') {
-      this.dateRange = {
-        start: dayjs(startDate)
-          .utc()
-          .format('YYYY-MM-DDT00:00:00.000') as AAQueryDateStart,
-        end: dayjs(endDate)
-          .utc()
-          .format('YYYY-MM-DDT23:59:59.999') as AAQueryDateEnd,
-      };
-    }
-    } else {
-      this.dateRange = {
+    if (!Array.isArray(date)) {
+      this.dateRange.set({
         start: '',
         end: '',
-      };
+      });
+
+      return;
     }
-    this.config.update((f) => {
-      return {
-        ...f,
-        dateRange: this.dateRange,
-      };
+
+    const [startDate, endDate] = date;
+
+    // make sure the timezone offset is correct
+    this.dateRange.set({
+      start: dayjs(startDate)
+        .utc()
+        .format('YYYY-MM-DDT00:00:00.000') as AAQueryDateStart,
+      end: dayjs(endDate || startDate)
+        .utc()
+        .format('YYYY-MM-DDT23:59:59.999') as AAQueryDateEnd,
     });
   }
 
-  get urlsCount(): number {
-    return this.urls.length;
+  selectPages(pages: PageSelectionData['pages']) {
+    this.selectedPages.set(pages);
+  }
+
+  selectTasks(tasks: PageSelectionData['tasks']) {
+    this.selectedTasks.set(tasks);
+  }
+
+  selectProjects(tasks: PageSelectionData['projects']) {
+    this.selectedProjects.set(tasks);
+  }
+
+  selectDimension(dimension: string) {
+    this.selectedReportDimensions.set(dimension);
+  }
+
+  selectGranularity(granularity: string) {
+    this.selectedGranularity.set(granularity as ReportGranularity);
+  }
+
+  selectMetrics(metrics: AAMetricName[]) {
+    this.selectedReportMetrics.set(metrics);
+  }
+
+  setIsGrouped(isGrouped: boolean) {
+    this.isGrouped.set(isGrouped);
   }
 
   get isAccordionExpanded(): boolean {
-    return this.urlsCount < 10;
+    return this.reportUrls().length < 10;
   }
 
-  updateConfig() {
-    this.config.update((f: ReportConfig) => {
-      return {
-        ...f,
-        metrics: this.selectedReportMetrics,
-        breakdownDimension: this.selectedReportDimensions as AADimensionName,
-        grouped: this.isGrouped,
-      };
-    });
-  }
-
-  isMetricSelected(): boolean {
-    return this.selectedReportMetrics.length > 0;
-  }
-
+  // is it even an option to have granularity of 'none'?
+  // also the logic in the template is confusing me
   isGranularitySelected(): boolean {
     return this.config().granularity && this.config().granularity !== 'none';
   }
@@ -377,12 +376,6 @@ export class CustomReportsCreateComponent {
     } else {
       event.preventDefault();
     }
-  }
-
-  generateAndDownloadReport() {
-    this.validationTriggered = true;
-
-    // console.log('Report Configuration:', this.config());
   }
 
   isDateRangeValid(): boolean {
@@ -410,69 +403,37 @@ export class CustomReportsCreateComponent {
     return JSON.stringify(this.config(), null, 2);
   }
 
-  transformDimensionOptions(dimensions: ReportDimension[]) {
-    return [
-      { label: 'None', value: 'None' },
-      ...dimensions.map((d) => ({ label: d.label, value: d.id })),
-    ];
-  }
-
-  dimensionSelect(label: string) {
-    this.dimensionLabel = label;
-  }
-
-  breakdownSelect(label: string) {
-    this.breakdownLabel = label;
-  }
-
-  granularitySelect(label: string) {
-    this.granularityLabel = label;
-  }
-
-  onGranularitySelect(event: any) {
-    this.granularityValue = event;
-
-    const selectedOption = this.granularityOptions.find(
-      (option) => option.value === this.granularityValue,
-    );
-
-    this.granularityLabel = selectedOption ? selectedOption.label : 'Select';
-
-    this.config.update((f) => ({
-      ...f,
-      granularity: this.granularityLabel === 'Select' ? 'none' : this.granularityValue as ReportGranularity,
-    }));
-
-    this.resetCalendar();
-  }
-  
   async createReport(config: ReportConfig) {
-
-    if (this.isDateRangeValid() && this.areUrlsValid() && this.areMetricsValid() ) {
-
-    console.log('Report Configuration:', config);
-    const res: ReportCreateResponse = await fetch(
-      '/api/custom-reports/create',
-      {
-        method: 'POST',
-        body: JSON.stringify(config),
-        headers: {
-          'Content-Type': 'application/json',
+    if (
+      this.isDateRangeValid() &&
+      this.areUrlsValid() &&
+      this.areMetricsValid()
+    ) {
+      console.log('Report Configuration:', config);
+      const res: ReportCreateResponse = await fetch(
+        '/api/custom-reports/create',
+        {
+          method: 'POST',
+          body: JSON.stringify(config),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      },
-    ).then((res) => res.json());
+      ).then((res) => res.json());
 
-    if ('error' in res) {
-      this.error.set(res.error);
+      if ('error' in res) {
+        this.error.set(res.error);
 
-      return;
+        return;
+      }
+
+      await this.zone.run(() =>
+        this.router.navigateByUrl(
+          `/${this.lang().slice(0, 2)}/custom-reports/${res._id}`,
+        ),
+      );
+    } else {
+      this.validationTriggered = true;
     }
-
-    await this.zone.run(() =>
-      this.router.navigateByUrl(`/en/custom-reports/${res._id}`),
-    );
-  } else {
-    this.validationTriggered = true;
-  }
   }
 }

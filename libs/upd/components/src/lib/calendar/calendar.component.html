@@ -1,38 +1,52 @@
-  <p-calendar #myCalendar
-              class="extended-calendar"
-              [(ngModel)]="dates"
-              [minDate]="minSelectableDate"
-              [maxDate]="maxSelectableDate"
-              [selectionMode]="'range'"
-              [readonlyInput]="true"
-              [showIcon]="true"
-              [required]="required"
-              [disabledDays]="granularity === 'week' ? disabledDays : []"
-              [disabledDates]="granularity === 'week' ? disabledDates : []"
-              [view]="granularity === 'month' ? 'month' : 'date'"
-              [rangeSeparator]="'to' | translate"
-              [dateFormat]="dateFormat"
-              (onSelect)="handleSelect(granularity, $event)">
-    <ng-template *ngIf="showPreset && showAction" pTemplate="footer">
-      <hr />
-      <ng-container *ngIf="showPreset && granularity === 'day'">
-        <strong>Preset: </strong>
-        <upd-dropdown id="range-button"
-                      icon="calendar_today"
-                      [label]="presetLabel"
-                      [options]="presetOptions"
-                      (selectedValueChange)="onPresetSelect($event)"
-                      [onSelect]="selectPreset.bind(this)">
-        </upd-dropdown>
-      </ng-container>
+<p-calendar
+  #myCalendar
+  class="extended-calendar"
+  [(ngModel)]="calendarDates"
+  [minDate]="minSelectableDate"
+  [maxDate]="maxSelectableDate"
+  [selectionMode]="'range'"
+  [readonlyInput]="true"
+  [showIcon]="true"
+  [required]="required"
+  [disabledDays]="granularity === 'week' ? disabledDays : []"
+  [disabledDates]="granularity === 'week' ? disabledDates : []"
+  [view]="granularity === 'month' ? 'month' : 'date'"
+  [rangeSeparator]="'to' | translate"
+  [dateFormat]="dateFormat()"
+  (onSelect)="handleSelect(granularity, $event)"
+>
+  <ng-template *ngIf="showPreset && showAction" pTemplate="footer">
+    <hr />
+    <ng-container *ngIf="showPreset && granularity === 'day'">
+      <strong>Preset: </strong>
+      <upd-dropdown
+        id="range-button"
+        icon="calendar_today"
+        [label]="selectedPreset.label"
+        [options]="presetOptions"
+        (selectOption)="onPresetSelect($event)"
+      >
+      </upd-dropdown>
+    </ng-container>
 
-      <ng-container *ngIf="showAction">
-        <div class="d-flex justify-content-end mt-3">
-          <button type="button" pButton icon="pi pi-times" label="Cancel"
-                  class="cancel-button me-2" (click)="resetCalendar(); closeCalendar()"></button>
-          <button type="button" pButton icon="pi pi-check" label="Apply"
-                  (click)="confirmCalendar(); closeCalendar()"></button>
-        </div>
-      </ng-container>
-    </ng-template>
-  </p-calendar>
+    <ng-container *ngIf="showAction">
+      <div class="d-flex justify-content-end mt-3">
+        <button
+          type="button"
+          pButton
+          icon="pi pi-times"
+          label="Cancel"
+          class="cancel-button me-2"
+          (click)="resetCalendar(); closeCalendar()"
+        ></button>
+        <button
+          type="button"
+          pButton
+          icon="pi pi-check"
+          label="Apply"
+          (click)="closeCalendar()"
+        ></button>
+      </div>
+    </ng-container>
+  </ng-template>
+</p-calendar>

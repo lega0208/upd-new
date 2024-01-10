@@ -16,7 +16,7 @@ import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
       [options]="exportOptions"
       label="{{ 'Export' | translate }}"
       [id]="'exports-' + id"
-      [onSelect]="this.exportFile.bind(this)"
+      (selectOption)="this.exportFile($event)"
       icon="file_download"
     >
     </upd-dropdown>

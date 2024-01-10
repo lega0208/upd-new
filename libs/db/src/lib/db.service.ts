@@ -25,6 +25,7 @@ import {
   CustomReportsRegistry,
   CustomReportsMetrics,
   type CustomReportsModel,
+  type CallDriverModel,
 } from '../';
 import {
   arrayToDictionary,
@@ -78,7 +79,7 @@ export class DbService {
 
   constructor(
     @InjectModel(CallDriver.name, 'defaultConnection')
-    private callDrivers: Model<CallDriver>,
+    private callDrivers: CallDriverModel,
     @InjectModel(Feedback.name, 'defaultConnection')
     private feedback: Model<Feedback>,
     @InjectModel(Overall.name, 'defaultConnection')

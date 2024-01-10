@@ -1,3 +1,4 @@
+import { logJson } from '@dua-upd/utils-common';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types, Schema as MongooseSchema, Model } from 'mongoose';
 import type {
@@ -56,7 +57,10 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
   ) {
     const urls = config.grouped
       ? {
-          urls: { $all: config.urls, $size: config.urls.length },
+          urls: {
+            $all: config.urls.map((url) => ({ $elemMatch: { $eq: url } })),
+            $size: config.urls.length,
+          },
         }
       : {
           url: { $in: config.urls },
@@ -67,17 +71,17 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
         ? {
             startDate: {
               $gte: new Date(config.dateRange.start),
-              $lte: new Date(config.dateRange.end),
+              $lte: new Date(config.dateRange.end + 'T23:59:59.999Z'),
             },
           }
         : {
             startDate: {
               $gte: new Date(config.dateRange.start),
-              $lte: new Date(config.dateRange.end),
+              $lte: new Date(config.dateRange.end + 'T23:59:59.999Z'),
             },
             endDate: {
               $gte: new Date(config.dateRange.start),
-              $lte: new Date(config.dateRange.end),
+              $lte: new Date(config.dateRange.end + 'T23:59:59.999Z'),
             },
           };
 
@@ -87,6 +91,8 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
       grouped: config.grouped,
       granularity: config.granularity,
     };
+
+    logJson(query);
 
     return (await this.find(query).lean().exec()) || [];
   }
@@ -107,6 +113,8 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
     const docToRows = (document: ICustomReportsMetrics) => {
       const dates = toDates(document);
 
+      const urls = grouped ? {} : { url: document.url };
+
       if (breakdownDimension) {
         const dimensionMetricsByValue: Record<string, Metrics> =
           filterDimensionMetrics(document.metrics_by[breakdownDimension]);
@@ -114,7 +122,7 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
         return Object.entries(dimensionMetricsByValue).map(
           ([dimensionValue, dimensionMetrics]) => ({
             ...dates,
-            url: document.url,
+            ...urls,
             [breakdownDimension]: dimensionValue,
             ...dimensionMetrics,
           }),
@@ -125,32 +133,29 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
 
       return {
         ...dates,
-        url: document.url,
+        ...urls,
         ...docMetrics,
       };
     };
 
     const sortRows = (a, b) => {
-      const aDate = a.startDate || a.date;
-      const bDate = b.startDate || b.date;
+      const aDate = a.startDate;
+      const bDate = b.startDate;
 
       const dateCompare = aDate.getTime() - bDate.getTime();
+      const urlCompare = a.url?.localeCompare(b.url);
+      const breakdownCompare = a[breakdownDimension]?.localeCompare(
+        b[breakdownDimension],
+      );
 
-      return dateCompare !== 0 ? dateCompare : a.url.localeCompare(b.url);
+      return dateCompare !== 0 ? dateCompare : urlCompare || breakdownCompare;
     };
 
-    if (!grouped) {
-      return (documents: ICustomReportsMetrics[]) =>
-        documents.flatMap(docToRows).sort(sortRows);
-    }
-
-    // TODO: ungrouped
+    return (documents: ICustomReportsMetrics[]) =>
+      documents.flatMap(docToRows).sort(sortRows);
   }
 
-  static async getReport(
-    this: CustomReportsModel,
-    config: ReportConfig,
-  ) {
+  static async getReport(this: CustomReportsModel, config: ReportConfig) {
     const formatter = this.createReportFormatter(config);
     const metrics = await this.getMetrics(config);
 

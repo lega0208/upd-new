@@ -28,15 +28,13 @@ export interface ViewData<T> {
   satComparisonDateRange?: string;
   dateRangeData?: T;
   comparisonDateRangeData?: T;
-  taskList?: EntityList[]
-  projectList?: EntityList[];
 }
 
 export interface EntityList {
-    _id: string;
-    title: string;
-    urls: (string | null)[] | null;
-};
+  _id: string;
+  title: string;
+  urls: (string | null)[] | null;
+}
 
 export interface EntityDetailsData<T> extends ViewData<T> {
   _id: string;
@@ -322,13 +320,9 @@ export type ProjectStatus =
   | 'Delayed'
   | 'Unknown';
 
-  export type PageStatus =
-  | 'Live'
-  | '404'
-  | 'Redirected';
+export type PageStatus = 'Live' | '404' | 'Redirected';
 
-  export type ProjectType =
-  | 'COPS';
+export type ProjectType = 'COPS';
 
 export interface searchAssessmentColTypes {
   query: string;

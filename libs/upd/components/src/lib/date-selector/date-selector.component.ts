@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map } from 'rxjs';
 import { DateSelectionFacade } from '@dua-upd/upd/state';
 import type { LocaleId } from '@dua-upd/upd/i18n';
@@ -14,7 +15,7 @@ import { dateRangeConfigs, dayjs, DateRangeType } from '@dua-upd/utils-common';
         icon="calendar_today"
         [label]="periodSelectionLabel$ | async"
         [options]="selectionOptions"
-        [onSelect]="selectPeriod.bind(this)"
+        (selectOption)="selectPeriod($event)"
       ></upd-dropdown>
 
       <span class="text-secondary ps-3 pe-2 text-nowrap dates-header-week">
@@ -37,7 +38,7 @@ export class DateSelectorComponent {
   private i18n: I18nFacade = inject(I18nFacade);
   private selectorService: DateSelectionFacade = inject(DateSelectionFacade);
 
-  selectedPeriod$ = this.selectorService.dateSelectionPeriod$;
+  selectedPeriod = toSignal(this.selectorService.dateSelectionPeriod$);
 
   periodSelectionLabel$ = this.selectorService.periodSelectionLabel$;
 

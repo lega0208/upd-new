@@ -6,11 +6,11 @@
   "prefix": "upd",
   "targets": {
     "build": {
-      "executor": "@nx/vite:build",
+      "executor": "@nx/angular:browser-esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/upd",
-        "index": "apps/upd/index.html",
+        "index": "apps/upd/src/index.html",
         "main": "apps/upd/src/main.ts",
         "polyfills": "apps/upd/src/polyfills.ts",
         "tsConfig": "apps/upd/tsconfig.app.json",
@@ -19,9 +19,7 @@
         "styles": ["apps/upd/src/styles.scss"],
         "scripts": [],
         "vendorChunk": true,
-        "verbose": true,
-        "configFile": "apps/upd/vite.config.mts",
-        "logLevel": "info"
+        "verbose": true
       },
       "configurations": {
         "production": {

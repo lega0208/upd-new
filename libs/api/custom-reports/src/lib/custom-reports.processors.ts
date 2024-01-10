@@ -8,6 +8,7 @@ import {
   ChildJobMetadata,
   CustomReportsService,
 } from './custom-reports.service';
+import { processResults } from './custom-reports.strategies';
 
 type ReportCreationMetadata = {
   id: string;
@@ -50,13 +51,12 @@ export class FetchAndProcessDataProcessor extends WorkerHost {
   async process(job: Job<ChildJobMetadata, void, string>) {
     // check if data already exists, otherwise fetch it
 
-    const { reportId, config, query, dataPoints } = job.data;
-
-    const strategy = this.reportsService.getStrategy(reportId, config);
+    const { config, query, dataPoints } = job.data;
 
     const queryResults = await this.aaClient.execute(createQuery(query));
 
-    const bulkWriteOps = strategy.parseQueryResults(
+    const bulkWriteOps = processResults(
+      config,
       query,
       dataPoints,
       queryResults,

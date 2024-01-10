@@ -8,14 +8,24 @@ import {
   SimpleChanges,
   OnChanges,
   ViewEncapsulation,
-  OnInit,
   signal,
+  computed,
+  WritableSignal,
+  effect,
 } from '@angular/core';
-import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
+import dayjs from 'dayjs';
+import { Calendar } from 'primeng/calendar';
+import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { dateRangeConfigs } from '@dua-upd/utils-common';
-import dayjs from 'dayjs';
-import { combineLatest } from 'rxjs';
+
+export type DateRangePreset = {
+  label: string;
+  value: {
+    start: Date;
+    end: Date;
+  } | null;
+};
 
 @Component({
   selector: 'upd-calendar',
@@ -23,141 +33,127 @@ import { combineLatest } from 'rxjs';
   styleUrls: ['./calendar.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class CalendarComponent implements OnInit, OnChanges {
-  private i18n = inject(I18nFacade);
-  currentDate = new Date();
-  currentYear = this.currentDate.getFullYear();
-  currentMonth = this.currentDate.getMonth();
+export class CalendarComponent implements OnChanges {
+  @ViewChild('myCalendar') datePicker!: Calendar;
 
-  @ViewChild('myCalendar') datePicker: any;
   @Input() granularity = 'day';
   @Input() showPreset = false;
   @Input() showAction = false;
   @Input() required = false;
+
   @Output() dateChange = new EventEmitter<Date[] | Date>();
-  presetLabel = 'None';
 
-  minSelectableDate: Date = new Date(2020, 0, 1);
-
-  maxSelectableDate = dayjs().subtract(1, 'day').toDate();
-
-  startOfWeek = dayjs().startOf('week').toDate();
-  endOfWeek = dayjs().endOf('week').toDate();
-  dates: Date[] = [];
-  disabledDays: number[] = [1, 2, 3, 4, 5, 6];
-  disabledDates: Date[] = [this.startOfWeek];
+  private i18n = inject(I18nFacade);
 
   lang = signal<LocaleId>(this.i18n.service.currentLang);
 
-  dateFormat = this.lang() === EN_CA ? 'M dd yy' : 'dd M yy';
-  presetOptions: any[] = [];
+  dates: WritableSignal<Date[]> = signal([]);
+
+  dateFormat = computed(() => (this.lang() === EN_CA ? 'M dd yy' : 'dd M yy'));
+
+  calendarDates: Date[] = [];
+
+  presetLabel = 'None';
+
+  minSelectableDate: Date = new Date(2020, 0, 1);
+  maxSelectableDate = dayjs().subtract(1, 'day').toDate();
+
+  startOfWeek = dayjs().startOf('week').toDate();
+
+  disabledDays: number[] = [1, 2, 3, 4, 5, 6];
+  disabledDates: Date[] = [this.startOfWeek];
+
+  presetOptions: DateRangePreset[] = [
+    {
+      label: this.lang() === EN_CA ? 'None' : 'Aucun',
+      value: null,
+    },
+    ...dateRangeConfigs.map((config) => {
+      const dateRange = config.getDateRange();
+      return {
+        label: config.label,
+        value: {
+          start: dateRange.start.toDate(),
+          end: dateRange.end.toDate(),
+        },
+      };
+    }),
+  ];
+
+  selectedPreset: DateRangePreset = this.presetOptions[0];
 
   onWeekSelect(event: any): void {
-    const startDate = this.dates[0];
-    const endDate = this.dates[1];
+    const [startDate, endDate] = this.dates();
 
-    if (startDate && startDate.getDay() === 6) {
+    if (!startDate) {
+      this.resetSelection();
+      return;
+    }
+
+    if (startDate.getDay() === 6) {
       this.resetSelection();
       this.dateChange.emit(new Date());
       return;
     }
 
-    if (startDate && !endDate) {
+    if (!endDate) {
       this.disabledDays = [0, 1, 2, 3, 4, 5];
-    } else if (startDate && endDate) {
-      if (dayjs(endDate).isBefore(dayjs(startDate))) {
-        this.resetSelection();
-      } else {
-        this.disabledDays = [1, 2, 3, 4, 5, 6];
-      }
-      this.emitDateChange();
-    } else {
-      this.resetSelection();
+      return;
     }
+
+    if (dayjs(endDate).isBefore(dayjs(startDate))) {
+      this.resetSelection();
+      return;
+    }
+
+    this.disabledDays = [1, 2, 3, 4, 5, 6];
   }
 
   onMonthChange(event: any): void {
-    const selectedDate = dayjs(event);
-    if (this.dates[0] && !this.dates[1]) {
-      this.dates = [selectedDate.toDate()];
-    } else if (this.dates[0] && this.dates[1]) {
-      this.dates = [this.dates[0], selectedDate.endOf('month').toDate()];
-      this.emitDateChange();
-    }
+    // is this right? seems like it replaces values when it should be adding them?
+    const selectedDate =
+      this.dates().length === 2 ? dayjs(event).endOf('month') : dayjs(event);
+
+    this.dates.mutate(
+      (dates) => (dates[dates.length - 1] = selectedDate.toDate()),
+    );
   }
 
   resetSelection(): void {
-    this.dates = [];
+    this.dates.set([]);
     this.disabledDays = [1, 2, 3, 4, 5, 6];
-    this.emitDateChange();
   }
 
-  private emitDateChange(): void {
-    this.dateChange.emit(this.dates);
-  }
+  constructor() {
+    effect(() => {
+      const dates = this.dates();
 
-  ngOnInit(): void {
-    this.presetOptions = [
-      {
-        label: this.lang() === EN_CA ? 'None' : 'Aucun',
-        value: 'none',
-        dateRange: { start: '', end: '' }
-      },
-      ...dateRangeConfigs.map(config => {
-        const dateRange = config.getDateRange();
-        return {
-          label: config.label,
-          value: config.type,
-          dateRange: {
-            start: dateRange.start.format('YYYY-MM-DD'),
-            end: dateRange.end.format('YYYY-MM-DD'),
-          },
-        };
-      }).flat()
-    ];
-  
-
-      // this.presetOptions = [
-      //   {
-      //     label: lang === EN_CA ? 'None' : 'Aucun',
-      //     value: 'none',
-      //     dateRange: { start: '', end: '' }
-      //   },
-      //   ...dateRangeConfigs.map(config => {
-      //     const dateRange = config.getDateRange();
-      //     return {
-      //       label: config.label,
-      //       value: config.type,
-      //       dateRange: {
-      //         start: dateRange.start.format('YYYY-MM-DD'),
-      //         end: dateRange.end.format('YYYY-MM-DD'),
-      //       },
-      //     };
-      //   }).flat()
-      // ];
-    
+      if (dates.length === 0 || dates.length === 2) {
+        this.dateChange.emit(dates);
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['dates']) {
-      this.emitDateChange();
+    if (!changes['granularity']) return;
+
+    if (this.granularity === 'day') {
+      this.maxSelectableDate = dayjs().subtract(1, 'day').toDate();
+      return;
     }
 
-    if (changes['granularity']) {
-      this.updateMaxSelectableDate();
+    if (this.granularity === 'week') {
+      this.maxSelectableDate = dayjs()
+        .subtract(1, 'week')
+        .endOf('week')
+        .toDate();
+      return;
     }
-  }
-  updateMaxSelectableDate() {
-    this.maxSelectableDate =
-      this.granularity === 'day'
-        ? dayjs().subtract(1, 'day').toDate()
-        : this.granularity === 'week'
-        ? dayjs().subtract(1, 'week').endOf('week').toDate()
-        : dayjs().subtract(1, 'month').endOf('month').toDate();
-  }
 
-  handleDateSelect() {
-    this.emitDateChange();
+    this.maxSelectableDate = dayjs()
+      .subtract(1, 'month')
+      .endOf('month')
+      .toDate();
   }
 
   closeCalendar() {
@@ -165,48 +161,41 @@ export class CalendarComponent implements OnInit, OnChanges {
   }
 
   resetCalendar() {
-    this.dates = [];
+    this.dates.set([]);
     this.dateChange.emit(new Date());
   }
 
-  confirmCalendar() {
-    this.dateChange.emit(this.dates);
-  }
+  handleSelect(granularity: string, event: Date) {
+    const dates = this.dates();
 
-  handleSelect(granularity: string, event: any): void {
     switch (granularity) {
       case 'day':
-        this.handleDateSelect();
+        if (dates.length === 2) {
+          this.dates.set([event]);
+          break;
+        }
+
+        this.dates.mutate((dates) => dates.push(event));
         break;
+
       case 'week':
         this.onWeekSelect(event);
         break;
+
       case 'month':
         this.onMonthChange(event);
         break;
     }
   }
 
-  setDateRange(start: Date, end: Date) {
-    this.dates = [start, end];
-    this.emitDateChange();
-  }
-
-  onPresetSelect(event: any) {
-    const presetValue = event;
-
-    const selectedOption = this.presetOptions.find(
-      (option) => option.value === presetValue,
-    );
-    this.presetLabel = selectedOption ? selectedOption.label : 'None';
-
-    if (selectedOption.value !== 'none') {
-      const { start, end } = selectedOption.dateRange;
-      this.setDateRange(dayjs(start).toDate(), dayjs(end).toDate());
+  onPresetSelect(preset: DateRangePreset['value']) {
+    if (!preset) {
+      return;
     }
-  }
 
-  selectPreset(label: string) {
-    this.presetLabel = label;
+    const { start, end } = preset;
+
+    // make sure timezone offset is correct
+    this.dates.set([start, end]);
   }
 }
