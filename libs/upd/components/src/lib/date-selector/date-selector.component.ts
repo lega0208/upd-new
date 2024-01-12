@@ -15,7 +15,7 @@ import { dateRangeConfigs, dayjs, DateRangeType } from '@dua-upd/utils-common';
         icon="calendar_today"
         [label]="periodSelectionLabel$ | async"
         [options]="selectionOptions"
-        (selectOption)="selectPeriod($event)"
+        (selectOption)="selectPeriod($event.value)"
       ></upd-dropdown>
 
       <span class="text-secondary ps-3 pe-2 text-nowrap dates-header-week">
@@ -65,7 +65,9 @@ export class DateSelectorComponent {
     label: config.label,
   }));
 
-  selectPeriod(period: DateRangeType) {
+  selectPeriod(period: DateRangeType | null) {
+    if (!period) return;
+
     this.selectorService.selectDatePeriod(period);
   }
 }

@@ -63,7 +63,7 @@ export class DropdownComponent<T> implements OnInit {
   @Input() icon?: string;
   @Input() autoDisplayFirst = false;
 
-  @Output() selectOption = new EventEmitter<T>();
+  @Output() selectOption = new EventEmitter<DropdownOption<T>>();
 
   selectedOption?: DropdownOption<T>;
 
