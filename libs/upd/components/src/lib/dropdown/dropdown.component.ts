@@ -1,9 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { Required } from '@dua-upd/utils-common';
 
 export interface DropdownOption<T> {
   label: string;
-  value: T;
+  value: T | null;
   styleClasses?: string;
   icon?: string;
 }
@@ -12,10 +12,11 @@ export interface DropdownOption<T> {
   selector: 'upd-dropdown',
   template: `
     <p-dropdown
-      (onChange)="this.selectOption.emit($event.value)"
       [options]="options"
       optionLabel="label"
-      optionValue="value"
+      [(ngModel)]="selectedOption"
+      (onChange)="this.selectOption.emit(selectedOption)"
+      [autoDisplayFirst]="autoDisplayFirst"
     >
       <ng-template pTemplate="selectedItem">
         <div style="color: rgb(33, 37, 41);">
@@ -25,7 +26,9 @@ export interface DropdownOption<T> {
             aria-hidden="true"
             >{{ icon }}</span
           >
-          <span class="dropdown-label">{{ label || '' | translate }}</span>
+          <span class="dropdown-label">{{
+            selectedOption?.label || '' | translate
+          }}</span>
         </div>
       </ng-template>
 
@@ -43,9 +46,6 @@ export interface DropdownOption<T> {
   `,
   styles: [
     `
-      .dropdown-height {
-        height: 42px;
-      }
       .dropdown-label {
         font-family: 'Noto Sans', sans-serif;
         font-size: 1rem;
@@ -53,14 +53,33 @@ export interface DropdownOption<T> {
     `,
   ],
 })
-export class DropdownComponent<T extends DropdownOption<unknown>> {
+export class DropdownComponent<T> implements OnInit {
   @Input() @Required id!: string;
-  @Input() label: string | null = '';
-  @Input() options: T[] = [];
+  @Input() label?: string;
+  @Input() options: DropdownOption<T>[] = [];
   @Input() display = 'inline-block';
   @Input() bg = 'white';
   @Input() styleClasses = '';
   @Input() icon?: string;
+  @Input() autoDisplayFirst = false;
 
-  @Output() selectOption = new EventEmitter<T['value']>();
+  @Output() selectOption = new EventEmitter<T>();
+
+  selectedOption?: DropdownOption<T>;
+
+  get placeholder(): DropdownOption<T> {
+    return {
+      label: this.label || '',
+      value: null as T | null,
+    };
+  }
+
+  ngOnInit() {
+    if (!this.autoDisplayFirst) {
+      this.selectedOption = this.placeholder;
+      return;
+    }
+
+    this.selectedOption = this.options[0];
+  }
 }

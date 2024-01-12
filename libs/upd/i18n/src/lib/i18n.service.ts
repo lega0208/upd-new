@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { type LangChangeEvent, TranslateService } from '@ngx-translate/core';
 import type { LocaleId } from './i18n.types';
@@ -44,6 +44,19 @@ export class I18nService {
 
   observeKeys(keys: string[]): Observable<Record<string, string>> {
     return this.translateService.stream(keys);
+  }
+
+  // todo: add support for passing an array of keys
+  translationSignal<T>(key: string, computation: (signal: Signal<string>) => T): Signal<T>;
+  translationSignal(key: string): Signal<string>;
+  translationSignal<T>(key: string, computation?: (signal: Signal<string>) => T): Signal<string> | Signal<T> {
+    const signal: Signal<string> = toSignal(this.translateService.stream(key), { initialValue: key });
+
+    if (computation) {
+      return computed(() => computation(signal));
+    }
+
+    return signal;
   }
 
   onLangChange(callback: (event: LangChangeEvent) => void) {

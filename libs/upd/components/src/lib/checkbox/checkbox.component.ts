@@ -1,27 +1,29 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { AAMetricName } from '@dua-upd/types-common';
+import { Required } from '@dua-upd/utils-common';
 
 @Component({
   selector: 'upd-checkbox',
   templateUrl: './checkbox.component.html',
   styleUrls: ['./checkbox.component.scss'],
 })
-export class CheckboxComponent {
+export class CheckboxComponent<
+  T extends { value: string; label: string; description?: string },
+> {
   @Input() showSelectAll = false;
-  @Input() items: any[] = [];
+  @Input() items: T[] = [];
   @Input() selectAllText = '';
-  @Input() id?: string;
+  @Input() @Required id!: string;
 
-  private _selectedItems: AAMetricName[] = [];
-  @Input() set selectedItems(value: AAMetricName[]) {
+  private _selectedItems: T['value'][] = [];
+  @Input() set selectedItems(value: T['value'][]) {
     this._selectedItems = value;
     this.updateSelectionState();
   }
-  get selectedItems(): AAMetricName[] {
+  get selectedItems(): string[] {
     return this._selectedItems;
   }
 
-  @Output() selectedItemsChange = new EventEmitter<AAMetricName[]>();
+  @Output() selectedItemsChange = new EventEmitter<T['value'][]>();
 
   allSelected = false;
   isIndeterminate = false;
@@ -37,7 +39,7 @@ export class CheckboxComponent {
   }
 
   selectAll() {
-    this.selectedItems = this.items.map((item) => item.id);
+    this.selectedItems = this.items.map((item) => item.value);
     this.allSelected = true;
   }
 

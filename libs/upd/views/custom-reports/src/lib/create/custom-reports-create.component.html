@@ -2,9 +2,10 @@
 
 <upd-dropdown
   id="granularity"
-  [label]="selectedGranularity() || 'Select' | translate"
+  [label]="'Select' | translate"
   [options]="granularityOptions"
-  (selectOption)="selectGranularity($event); resetValidation()"
+  (selectOption)="selectGranularity($event.value); resetValidation()"
+  [autoDisplayFirst]="true"
 >
 </upd-dropdown>
 
@@ -15,12 +16,14 @@
 <ng-container *ngIf="isGranularitySelected()">
   <h3 class="mb-2 h5 pt-2 pb-2" [translate]="'select-date'"></h3>
 
-  <div *ngIf="validationTriggered && !isDateRangeValid()">
+  <div *ngIf="(validationTriggered && !isDateRangeValid()) || this.error()">
     <upd-alert [type]="'danger'" [dismissible]="false" [selfClosing]="false">
       <span class="material-icons align-top pe-1" aria-hidden="true"
         >error</span
       >
       <span [translate]="'alert-date'"></span>
+      <!--  I don't actually think error handling is implemented on this page yet    -->
+      <span *ngIf="this.error()" [translate]="this.error() || 'error'"></span>
     </upd-alert>
   </div>
 
@@ -29,7 +32,7 @@
     [showAction]="true"
     [showPreset]="true"
     (dateChange)="handleDateChange($event); resetValidation()"
-    [granularity]="selectedGranularity().value"
+    [granularity]="selectedGranularity()"
     [required]="false"
   ></upd-calendar>
 </ng-container>
@@ -193,10 +196,9 @@
           'URLs added to report' | translate: { count: reportUrls().length }
         }} "
       >
-        <div class="d-flex justify-content-between">
+        <div class="d-flex justify-content-between mb-2">
           <upd-input-switch
             id="group"
-            [(checked)]="isGrouped()"
             [text]="'Group pages as a segment'"
             (checkedChange)="setIsGrouped($event); resetValidation()"
           >
@@ -220,39 +222,37 @@
             </button>
           </div>
         </div>
-        <div class="container">
-          <div class="row">
-            <div class="col p-0">
-              <p-table
-                [value]="reportUrls()"
-                styleClass="p-datatable-striped"
-                class="urls-added-table w-100"
-              >
-                <ng-template pTemplate="body" let-url let-rowIndex="rowIndex">
-                  <tr>
-                    <td>
-                      <a
-                        href="{{ 'https://' + url }}"
-                        (click)="openLink($event, 'https://' + url)"
-                        class="p-1 align-text-top"
-                        placement="top"
-                        >{{ url }}</a
-                      >
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        class="btn-close btn-close-black mt-1 me-1"
-                        aria-label="Close"
-                        (click)="removePage(rowIndex); resetValidation()"
-                      ></button>
-                    </td>
-                  </tr>
-                </ng-template>
-              </p-table>
-            </div>
-          </div>
-        </div>
+        <p-table
+          [value]="reportUrls()"
+          styleClass="p-datatable-striped"
+          class="urls-added-table w-100"
+          [styleClass]="'p-datatable-sm'"
+        >
+          <ng-template pTemplate="body" let-url let-rowIndex="rowIndex">
+            <tr>
+              <td>
+                <a
+                  href="{{ 'https://' + url }}"
+                  (click)="openLink($event, 'https://' + url)"
+                  class="p-1 align-text-top"
+                  >{{ url }}</a
+                >
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="mt-1 me-1 rounded p-0 btn btn-light"
+                  aria-label="Remove"
+                  (click)="removePage(rowIndex); resetValidation()"
+                >
+                  <span aria-hidden="true" class="material-icons text-danger"
+                    >close</span
+                  >
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
       </upd-accordion>
     </div>
   </div>
@@ -278,7 +278,6 @@
       <upd-checkbox
         [id]="'metrics'"
         [items]="reportMetrics"
-        [(selectedItems)]="selectedReportMetrics()"
         (selectedItemsChange)="selectMetrics($event); resetValidation()"
       >
       </upd-checkbox>
@@ -294,8 +293,7 @@
       <upd-radio
         [id]="'dimensions'"
         [items]="reportDimensions"
-        [(selectedItems)]="selectedReportDimensions()"
-        (selectedItemsChange)="selectDimension($event); resetValidation()"
+        (selectedItemsChange)="selectDimension($event.value); resetValidation()"
       >
       </upd-radio>
     </div>
@@ -311,5 +309,11 @@
     <span class="material-icons" aria-hidden="true">navigate_next</span>
   </button>
 </div>
+
+<upd-card styleClass="mt-3 d-inline-block">
+  <code>
+    <pre>{{ config() | json }}</pre>
+  </code>
+</upd-card>
 
 <hr />

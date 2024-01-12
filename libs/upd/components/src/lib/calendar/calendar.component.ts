@@ -13,10 +13,10 @@ import {
   WritableSignal,
   effect,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import dayjs from 'dayjs';
 import { Calendar } from 'primeng/calendar';
-import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
-import { I18nFacade } from '@dua-upd/upd/state';
+import { EN_CA, I18nService, LocaleId } from '@dua-upd/upd/i18n';
 import { dateRangeConfigs } from '@dua-upd/utils-common';
 
 export type DateRangePreset = {
@@ -43,17 +43,15 @@ export class CalendarComponent implements OnChanges {
 
   @Output() dateChange = new EventEmitter<Date[] | Date>();
 
-  private i18n = inject(I18nFacade);
+  private i18n = inject(I18nService);
 
-  lang = signal<LocaleId>(this.i18n.service.currentLang);
+  lang = this.i18n.langSignal;
 
   dates: WritableSignal<Date[]> = signal([]);
 
   dateFormat = computed(() => (this.lang() === EN_CA ? 'M dd yy' : 'dd M yy'));
 
   calendarDates: Date[] = [];
-
-  presetLabel = 'None';
 
   minSelectableDate: Date = new Date(2020, 0, 1);
   maxSelectableDate = dayjs().subtract(1, 'day').toDate();
@@ -80,9 +78,7 @@ export class CalendarComponent implements OnChanges {
     }),
   ];
 
-  selectedPreset: DateRangePreset = this.presetOptions[0];
-
-  onWeekSelect(event: any): void {
+  onWeekSelect() {
     const [startDate, endDate] = this.dates();
 
     if (!startDate) {
@@ -98,6 +94,7 @@ export class CalendarComponent implements OnChanges {
 
     if (!endDate) {
       this.disabledDays = [0, 1, 2, 3, 4, 5];
+      this.minSelectableDate = startDate;
       return;
     }
 
@@ -106,13 +103,14 @@ export class CalendarComponent implements OnChanges {
       return;
     }
 
+    this.minSelectableDate = new Date(2020, 0, 1);
     this.disabledDays = [1, 2, 3, 4, 5, 6];
   }
 
-  onMonthChange(event: any): void {
+  onMonthChange(date: Date): void {
     // is this right? seems like it replaces values when it should be adding them?
     const selectedDate =
-      this.dates().length === 2 ? dayjs(event).endOf('month') : dayjs(event);
+      this.dates().length === 2 ? dayjs(date).endOf('month') : dayjs(date);
 
     this.dates.mutate(
       (dates) => (dates[dates.length - 1] = selectedDate.toDate()),
@@ -121,17 +119,23 @@ export class CalendarComponent implements OnChanges {
 
   resetSelection(): void {
     this.dates.set([]);
+    this.minSelectableDate = new Date(2020, 0, 1);
     this.disabledDays = [1, 2, 3, 4, 5, 6];
   }
 
   constructor() {
-    effect(() => {
-      const dates = this.dates();
+    effect(
+      () => {
+        const dates = this.dates();
+        console.log(dates);
 
-      if (dates.length === 0 || dates.length === 2) {
-        this.dateChange.emit(dates);
-      }
-    });
+        if (dates.length === 0 || dates.length === 2) {
+          this.calendarDates = dates;
+          this.dateChange.emit(dates);
+        }
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -165,26 +169,21 @@ export class CalendarComponent implements OnChanges {
     this.dateChange.emit(new Date());
   }
 
-  handleSelect(granularity: string, event: Date) {
-    const dates = this.dates();
+  handleSelect(granularity: string, date: Date) {
+    if (this.dates().length === 2) {
+      this.dates.set([date]);
+    } else {
+      this.dates.mutate((dates) => dates.push(date));
+    }
 
-    switch (granularity) {
-      case 'day':
-        if (dates.length === 2) {
-          this.dates.set([event]);
-          break;
-        }
+    if (granularity === 'week') {
+      this.onWeekSelect();
+      return;
+    }
 
-        this.dates.mutate((dates) => dates.push(event));
-        break;
-
-      case 'week':
-        this.onWeekSelect(event);
-        break;
-
-      case 'month':
-        this.onMonthChange(event);
-        break;
+    if (granularity === 'month') {
+      this.onMonthChange(date);
+      return;
     }
   }
 
@@ -192,6 +191,8 @@ export class CalendarComponent implements OnChanges {
     if (!preset) {
       return;
     }
+
+    console.log(preset);
 
     const { start, end } = preset;
 

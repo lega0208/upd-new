@@ -12,10 +12,7 @@ import type {
   ReportConfig,
   ReportStatus,
 } from '@dua-upd/types-common';
-import {
-  DbService,
-  CustomReportsMetrics,
-} from '@dua-upd/db';
+import { DbService, CustomReportsMetrics } from '@dua-upd/db';
 import { CustomReportsCache } from './custom-reports.cache';
 import { decomposeConfig } from './custom-reports.strategies';
 import { hashConfig, hashQueryConfig } from './custom-reports.utils';
@@ -105,6 +102,7 @@ export class CustomReportsService {
     return this.observablesRegistry.get(reportId);
   }
 
+  // are these necessary? duplicate jobs are ignored
   async findExistingReportJobs(reportId: string) {
     return await this.reportsQueue.getJob(reportId);
   }

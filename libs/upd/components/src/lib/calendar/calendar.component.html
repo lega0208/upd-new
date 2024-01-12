@@ -22,9 +22,9 @@
       <upd-dropdown
         id="range-button"
         icon="calendar_today"
-        [label]="selectedPreset.label"
         [options]="presetOptions"
-        (selectOption)="onPresetSelect($event)"
+        (selectOption)="onPresetSelect($event.value)"
+        [autoDisplayFirst]="true"
       >
       </upd-dropdown>
     </ng-container>

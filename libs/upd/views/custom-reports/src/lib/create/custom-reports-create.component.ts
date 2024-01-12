@@ -15,12 +15,12 @@ import {
   effect,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { today } from '@dua-upd/utils-common';
 import { TranslateModule } from '@ngx-translate/core';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { I18nFacade } from '@dua-upd/upd/state';
 import { ApiService } from '@dua-upd/upd/services';
-import type { LocaleId } from '@dua-upd/upd/i18n';
+import { I18nModule, I18nService } from '@dua-upd/upd/i18n';
 import {
   type ColumnConfig,
   DataTableComponent,
@@ -36,9 +36,7 @@ import type {
   AAQueryDateEnd,
   ReportCreateResponse,
   ReportConfig,
-  ReportDimension,
   ReportGranularity,
-  ReportMetric,
 } from '@dua-upd/types-common';
 
 dayjs.extend(utc);
@@ -57,16 +55,17 @@ type PageSelectionData = {
     UpdComponentsModule,
     TranslateModule,
     ClipboardModule,
+    I18nModule,
   ],
   templateUrl: './custom-reports-create.component.html',
   styleUrls: ['./custom-reports-create.component.scss'],
-  providers: [ApiService],
+  providers: [ApiService, I18nService],
   encapsulation: ViewEncapsulation.None,
 })
 export class CustomReportsCreateComponent {
   private router = inject(Router);
   private zone: NgZone = inject(NgZone);
-  private i18n = inject(I18nFacade);
+  private i18n = inject(I18nService);
   private readonly api = inject(ApiService);
 
   // get required data from the api
@@ -79,12 +78,12 @@ export class CustomReportsCreateComponent {
       },
       tasks: {
         collection: 'tasks',
-        filter: { pages: { $exists: true, $size: { $not: 0 } } },
+        filter: { pages: { $exists: true, $not: { $size: 0 } } },
         project: { title: 1, pages: 1 },
       },
       projects: {
         collection: 'projects',
-        filter: { pages: { $exists: true, $size: { $not: 0 } } },
+        filter: { pages: { $exists: true, $not: { $size: 0 } } },
         project: { title: 1, pages: 1 },
       },
     }),
@@ -105,9 +104,7 @@ export class CustomReportsCreateComponent {
 
   error: WritableSignal<string | null> = signal(null);
 
-  lang: Signal<LocaleId> = toSignal(this.i18n.currentLang$, {
-    initialValue: this.i18n.service.currentLang,
-  });
+  lang = this.i18n.langSignal;
 
   dateRange = signal({
     start: '',
@@ -126,13 +123,7 @@ export class CustomReportsCreateComponent {
     { label: 'Monthly', value: 'month' },
   ];
 
-  selectedGranularity = signal(this.granularityOptions[0].value);
-
-  granularityLabel = computed(() => {
-    return this.granularityOptions.find(
-      (option) => option.label === this.selectedGranularity(),
-    )?.label;
-  });
+  selectedGranularity = signal<ReportGranularity>('day');
 
   reportUrls = signal<string[]>([]);
 
@@ -158,24 +149,23 @@ export class CustomReportsCreateComponent {
   @ViewChild('urlsAdded') accordionComponent!: AccordionComponent;
   @ViewChild('calendar') calendarComponent!: CalendarComponent;
 
+  titleCol = this.i18n.translationSignal('Title', (title) => ({
+    field: 'title',
+    header: title(),
+  }));
+
+  urlCol = this.i18n.translationSignal('Title', (url) => ({
+    field: 'url',
+    header: url(),
+  }));
+
   columns: Signal<ColumnConfig<PageSelectionData['pages']>[]> = computed(() => [
-    {
-      field: 'title',
-      header: this.i18n.service.translate('Title', this.lang()),
-    },
-    {
-      field: 'url',
-      header: this.i18n.service.translate('URL', this.lang()),
-    },
+    this.titleCol(),
+    this.urlCol(),
   ]);
 
   taskColumns: Signal<ColumnConfig<PageSelectionData['tasks']>[]> = computed(
-    () => [
-      {
-        field: 'title',
-        header: this.i18n.service.translate('Title', this.lang()),
-      },
-    ],
+    () => [this.titleCol()],
   );
 
   searchFields = computed(() => this.columns().map((col) => col.field));
@@ -226,37 +216,40 @@ export class CustomReportsCreateComponent {
 
   showCopyAlert = false;
 
-  reportMetrics: ReportMetric[] = [
+  reportMetrics = [
     {
       label: 'Visits',
-      id: 'visits',
+      value: 'visits',
       description: 'The total number of visits to your site.',
     },
     {
       label: 'Page views',
-      id: 'views',
+      value: 'views',
       description: 'The total number of pageviews for your site.',
     },
     {
       label: 'Visitors',
-      id: 'visitors',
+      value: 'visitors',
       description: 'The total number of visitors to your site.',
     },
   ];
 
-  reportDimensions: ReportDimension[] = [
-    { label: 'None', id: '', description: '' },
-    { label: 'Devices', id: 'device_type', description: '' },
-    { label: 'Regions', id: 'region', description: '' },
-    { label: 'Cities', id: 'city', description: '' },
-    { label: 'Countries', id: 'country', description: '' },
+  reportDimensions = [
+    { label: 'None', value: '', description: '' },
+    { label: 'Devices', value: 'device_type', description: '' },
+    { label: 'Regions', value: 'region', description: '' },
+    { label: 'Cities', value: 'city', description: '' },
+    { label: 'Countries', value: 'country', description: '' },
   ];
 
   constructor() {
-    effect(() => {
-      this.selectedGranularity(); // don't need the value, just need to trigger the effect on change
-      this.resetCalendar();
-    });
+    effect(
+      () => {
+        this.selectedGranularity(); // don't need the value, just need to trigger the effect on change
+        this.resetCalendar();
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   copyToClipboard() {
@@ -345,6 +338,7 @@ export class CustomReportsCreateComponent {
   }
 
   selectDimension(dimension: string) {
+    console.log(dimension);
     this.selectedReportDimensions.set(dimension);
   }
 
@@ -352,8 +346,9 @@ export class CustomReportsCreateComponent {
     this.selectedGranularity.set(granularity as ReportGranularity);
   }
 
-  selectMetrics(metrics: AAMetricName[]) {
-    this.selectedReportMetrics.set(metrics);
+  selectMetrics(metrics: string[]) {
+    // not typesafe: ensure the values passed to checkboxes are valid
+    this.selectedReportMetrics.set(metrics as AAMetricName[]);
   }
 
   setIsGrouped(isGrouped: boolean) {
@@ -364,8 +359,7 @@ export class CustomReportsCreateComponent {
     return this.reportUrls().length < 10;
   }
 
-  // is it even an option to have granularity of 'none'?
-  // also the logic in the template is confusing me
+  // there doesn't seem to be an option to have granularity of 'none'
   isGranularitySelected(): boolean {
     return this.config().granularity && this.config().granularity !== 'none';
   }
@@ -380,17 +374,22 @@ export class CustomReportsCreateComponent {
 
   isDateRangeValid(): boolean {
     const config = this.config();
-    return !!config.dateRange.start && !!config.dateRange.end;
+
+    const startDate = dayjs.utc(config.dateRange.start);
+
+    return (
+      !!config.dateRange.start &&
+      !!config.dateRange.end &&
+      startDate.isBefore(today())
+    );
   }
 
   areUrlsValid(): boolean {
-    const config = this.config();
-    return config.urls && config.urls.length > 0;
+    return this.config().urls?.length > 0;
   }
 
   areMetricsValid(): boolean {
-    const config = this.config();
-    return config.metrics && config.metrics.length > 0;
+    return this.config().metrics?.length > 0;
   }
 
   resetValidation() {
@@ -399,41 +398,39 @@ export class CustomReportsCreateComponent {
     }
   }
 
-  get displayConfig() {
-    return JSON.stringify(this.config(), null, 2);
-  }
-
   async createReport(config: ReportConfig) {
     if (
-      this.isDateRangeValid() &&
-      this.areUrlsValid() &&
-      this.areMetricsValid()
+      !this.isDateRangeValid() ||
+      !this.areUrlsValid() ||
+      !this.areMetricsValid()
     ) {
-      console.log('Report Configuration:', config);
-      const res: ReportCreateResponse = await fetch(
-        '/api/custom-reports/create',
-        {
-          method: 'POST',
-          body: JSON.stringify(config),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      ).then((res) => res.json());
-
-      if ('error' in res) {
-        this.error.set(res.error);
-
-        return;
-      }
-
-      await this.zone.run(() =>
-        this.router.navigateByUrl(
-          `/${this.lang().slice(0, 2)}/custom-reports/${res._id}`,
-        ),
-      );
-    } else {
       this.validationTriggered = true;
+      return;
     }
+
+    console.log('Report Configuration:', config);
+
+    const res: ReportCreateResponse = await fetch(
+      '/api/custom-reports/create',
+      {
+        method: 'POST',
+        body: JSON.stringify(config),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    ).then((res) => res.json());
+
+    if ('error' in res) {
+      this.error.set(res.error);
+
+      return;
+    }
+
+    await this.zone.run(() =>
+      this.router.navigateByUrl(
+        `/${this.lang().slice(0, 2)}/custom-reports/${res._id}`,
+      ),
+    );
   }
 }

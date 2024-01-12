@@ -1,21 +1,20 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ReportDimension } from '@dua-upd/types-common';
+import { Required } from '@dua-upd/utils-common';
 
 @Component({
   selector: 'upd-radio',
   templateUrl: './radio.component.html',
   styleUrls: ['./radio.component.scss'],
 })
-export class RadioComponent {
-  @Input() items: ReportDimension[] = [];
+export class RadioComponent<
+  T extends { value: string; label: string; description?: string },
+> {
+  @Input() items: T[] = [];
   @Input() selectAllText = '';
-  @Input() id?: string;
-  @Input() selectedItems = '';
+  @Input() @Required id!: string;
   @Input() disabled = false;
 
-  @Output() selectedItemsChange = new EventEmitter<string>();
+  @Output() selectedItemsChange = new EventEmitter<T>();
 
-  updateIndividualSelection() {
-    this.selectedItemsChange.emit(this.selectedItems);
-  }
+  selectedItem?: T;
 }

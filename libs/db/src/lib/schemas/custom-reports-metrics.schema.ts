@@ -71,17 +71,17 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
         ? {
             startDate: {
               $gte: new Date(config.dateRange.start),
-              $lte: new Date(config.dateRange.end + 'T23:59:59.999Z'),
+              $lte: new Date(config.dateRange.end),
             },
           }
         : {
             startDate: {
               $gte: new Date(config.dateRange.start),
-              $lte: new Date(config.dateRange.end + 'T23:59:59.999Z'),
+              $lte: new Date(config.dateRange.end),
             },
             endDate: {
               $gte: new Date(config.dateRange.start),
-              $lte: new Date(config.dateRange.end + 'T23:59:59.999Z'),
+              $lte: new Date(config.dateRange.end),
             },
           };
 
@@ -139,8 +139,8 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
     };
 
     const sortRows = (a, b) => {
-      const aDate = a.startDate;
-      const bDate = b.startDate;
+      const aDate = granularity === 'day' ? a.date : a.startDate;
+      const bDate = granularity === 'day' ? b.date : b.startDate;
 
       const dateCompare = aDate.getTime() - bDate.getTime();
       const urlCompare = a.url?.localeCompare(b.url);

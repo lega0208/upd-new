@@ -1,25 +1,27 @@
-<div class="d-flex flex-fill align-content-center h-100 w-100">
-  <div class="card align-middle w-100">
-    <div class="card-body">
-      <div class="w-100">
-        <p-progressBar
-          [value]="progress()"
-          *ngIf="status() !== 'complete'"
-        ></p-progressBar>
-      </div>
+<div [ngClass]="{ 'w-50 d-inline-block mx-auto': status() !== 'complete' }">
+  <div class="d-flex flex-fill align-content-center h-100 w-100">
+    <div class="card align-middle w-100">
+      <div class="card-body">
+        <div class="w-100">
+          <p-progressBar
+            [value]="progress()"
+            *ngIf="status() !== 'complete'"
+          ></p-progressBar>
+        </div>
 
-      <p *ngIf="status() !== 'complete'" class="h2">
-<!--        Status: <span class="badge bg-in-progress align-middle">{{ status() }}</span>-->
-        fetching data...
-      </p>
+        <p *ngIf="status() !== 'complete'" class="h2">
+          <!--        Status: <span class="badge bg-in-progress align-middle">{{ status() }}</span>-->
+          fetching data...
+        </p>
 
-      <div *ngIf="status() === 'complete' && data()">
-        <upd-data-table [data]="data()" [cols]="columns()"></upd-data-table>
-      </div>
+        <div *ngIf="status() === 'complete' && data()">
+          <upd-data-table [data]="data()" [cols]="columns()"></upd-data-table>
+        </div>
 
-      <div *ngIf="error()" class="alert alert-danger">
-        <h5 class="alert-heading">Error</h5>
-        <p class="mb-0">{{ error() }}</p>
+        <div *ngIf="error()" class="alert alert-danger">
+          <h5 class="alert-heading">Error</h5>
+          <p class="mb-0">{{ error() }}</p>
+        </div>
       </div>
     </div>
   </div>

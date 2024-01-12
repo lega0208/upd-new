@@ -83,9 +83,7 @@
 
   <ng-template pTemplate="header" let-columns>
     <tr>
-      <th *ngIf="checkboxes" style="width: 3rem">
-        <!-- <p-tableHeaderCheckbox></p-tableHeaderCheckbox> -->
-      </th>
+      <th *ngIf="checkboxes" style="min-width: 2rem; width: 2rem">&nbsp;</th>
       <div *ngIf="sort; then thenBlock; else elseBlock"></div>
       <ng-template #thenBlock>
         <th
@@ -197,7 +195,7 @@
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr>
       <td *ngIf="checkboxes">
-        <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+        <p-tableCheckbox [value]="rowData" class="ps-2"></p-tableCheckbox>
       </td>
       <td
         *ngFor="let col of columns"

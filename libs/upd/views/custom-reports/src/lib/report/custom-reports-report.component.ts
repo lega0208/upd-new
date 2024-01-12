@@ -1,23 +1,31 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, computed, inject, NgZone, Signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  NgZone,
+  OnInit,
+  Signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import type { ReportStatus } from '@dua-upd/types-common';
 import { ColumnConfig, UpdComponentsModule } from '@dua-upd/upd-components';
 import { round } from '@dua-upd/utils-common';
-import {
-  iif,
-  map,
-  mergeMap,
-  Observable,
-} from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { iif, map, mergeMap, Observable } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
   selector: 'dua-upd-custom-reports-report',
   standalone: true,
-  imports: [CommonModule, UpdComponentsModule, ProgressBarModule],
+  imports: [
+    CommonModule,
+    UpdComponentsModule,
+    ProgressBarModule,
+    TranslateModule,
+  ],
   templateUrl: './custom-reports-report.component.html',
   styles: [
     `
@@ -29,7 +37,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
     `,
   ],
 })
-export class CustomReportsReportComponent {
+export class CustomReportsReportComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private _zone = inject(NgZone);
@@ -85,6 +93,7 @@ export class CustomReportsReportComponent {
 
     const statusStream$ = this.setupEventSource();
 
+    // todo: add takeUntil: report is loaded
     this.reportStatus = toSignal(
       status$.pipe(
         takeUntilDestroyed(),
@@ -93,6 +102,10 @@ export class CustomReportsReportComponent {
         ),
       ),
     );
+  }
+
+  ngOnInit() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   setupEventSource() {

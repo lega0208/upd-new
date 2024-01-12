@@ -28,9 +28,14 @@ export class PrepareReportDataProcessor extends WorkerHost {
   }
 
   async process(job: Job<ReportCreationMetadata, void, string>) {
-    return await this.db.collections.customReportsMetrics.getReport(
-      job.data.config,
-    );
+    try {
+      return await this.db.collections.customReportsMetrics.getReport(
+        job.data.config,
+      );
+    } catch (err) {
+      console.error((<Error>err).stack);
+      throw err;
+    }
   }
 }
 
