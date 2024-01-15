@@ -51,7 +51,7 @@ export class CalendarComponent implements OnChanges {
 
   dateFormat = computed(() => (this.lang() === EN_CA ? 'M dd yy' : 'dd M yy'));
 
-  calendarDates: Date[] = [];
+  calendarDates?: Date[];
 
   minSelectableDate: Date = new Date(2020, 0, 1);
   maxSelectableDate = dayjs().subtract(1, 'day').toDate();
@@ -77,6 +77,23 @@ export class CalendarComponent implements OnChanges {
       };
     }),
   ];
+
+  constructor() {
+    effect(
+      () => {
+        // don't run this effect on init
+        if (!this.calendarDates) return;
+
+        const dates = this.dates();
+
+        if (dates.length === 0 || dates.length === 2) {
+          this.calendarDates = dates;
+          this.dateChange.emit(dates);
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   onWeekSelect() {
     const [startDate, endDate] = this.dates();
@@ -121,21 +138,6 @@ export class CalendarComponent implements OnChanges {
     this.dates.set([]);
     this.minSelectableDate = new Date(2020, 0, 1);
     this.disabledDays = [1, 2, 3, 4, 5, 6];
-  }
-
-  constructor() {
-    effect(
-      () => {
-        const dates = this.dates();
-        console.log(dates);
-
-        if (dates.length === 0 || dates.length === 2) {
-          this.calendarDates = dates;
-          this.dateChange.emit(dates);
-        }
-      },
-      { allowSignalWrites: true },
-    );
   }
 
   ngOnChanges(changes: SimpleChanges) {
