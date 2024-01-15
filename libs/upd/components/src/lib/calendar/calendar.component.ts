@@ -81,13 +81,9 @@ export class CalendarComponent implements OnChanges {
   constructor() {
     effect(
       () => {
-        // don't run this effect on init
-        if (!this.calendarDates) return;
-
         const dates = this.dates();
 
         if (dates.length === 0 || dates.length === 2) {
-          this.calendarDates = dates;
           this.dateChange.emit(dates);
         }
       },
