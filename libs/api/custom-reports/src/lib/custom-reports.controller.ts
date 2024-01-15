@@ -20,7 +20,7 @@ export class CustomReportsController {
   constructor(private reportsService: CustomReportsService) {}
 
   @Post('create')
-  async check(@Body() request: ReportConfig): Promise<ReportCreateResponse> {
+  async create(@Body() request: ReportConfig): Promise<ReportCreateResponse> {
     return { _id: await this.reportsService.create(request) };
   }
 
@@ -53,7 +53,12 @@ export class CustomReportsController {
 
     return reportStatus$.pipe(
       map((status) => ({
-        data: status,
+        data: status.error
+          ? {
+              ...status,
+              message: 'Could not fetch report data',
+            }
+          : status,
       })),
     );
   }

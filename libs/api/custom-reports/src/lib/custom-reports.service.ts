@@ -10,7 +10,6 @@ import type {
   AAMetricName,
   AAQueryConfig,
   ReportConfig,
-  ReportStatus,
 } from '@dua-upd/types-common';
 import { DbService, CustomReportsMetrics } from '@dua-upd/db';
 import { CustomReportsCache } from './custom-reports.cache';
@@ -34,7 +33,7 @@ export type ChildJobMetadata = {
 @Injectable()
 export class CustomReportsService {
   // todo: cleanup observables
-  observablesRegistry = new Map<string, Observable<ReportStatus>>();
+  observablesRegistry = new Map<string, Observable<ReportJobStatus>>();
 
   constructor(
     private db: DbService,

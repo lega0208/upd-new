@@ -114,14 +114,13 @@ export class ReportsQueueEvents extends QueueEventsHost {
   onFailed({
     jobId,
     failedReason,
-    prev,
   }: {
     jobId: string;
     failedReason: string;
     prev?: string;
   }) {
+    console.error('Job failed:');
     console.error(jobId, failedReason);
-    console.error('prev:', prev);
 
     this.globalReportEvents$.next({
       jobId,

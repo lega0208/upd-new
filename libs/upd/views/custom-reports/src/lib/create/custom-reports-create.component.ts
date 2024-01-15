@@ -405,6 +405,7 @@ export class CustomReportsCreateComponent {
       !this.areMetricsValid()
     ) {
       this.validationTriggered = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 

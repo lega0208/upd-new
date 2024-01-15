@@ -14,7 +14,7 @@ import type { ReportStatus } from '@dua-upd/types-common';
 import { ColumnConfig, UpdComponentsModule } from '@dua-upd/upd-components';
 import { round } from '@dua-upd/utils-common';
 import { TranslateModule } from '@ngx-translate/core';
-import { iif, map, mergeMap, Observable } from 'rxjs';
+import { iif, map, mergeMap, Observable, takeWhile } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
@@ -93,9 +93,12 @@ export class CustomReportsReportComponent implements OnInit {
 
     const statusStream$ = this.setupEventSource();
 
-    // todo: add takeUntil: report is loaded
     this.reportStatus = toSignal(
       status$.pipe(
+        takeWhile(
+          (response) => !['error', 'complete'].includes(response.status),
+          true,
+        ),
         takeUntilDestroyed(),
         mergeMap(({ status }) =>
           iif(() => status !== 'complete', statusStream$, status$),

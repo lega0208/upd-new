@@ -33,6 +33,7 @@ export class PrepareReportDataProcessor extends WorkerHost {
         job.data.config,
       );
     } catch (err) {
+      console.error('jobId: ', job.id);
       console.error((<Error>err).stack);
       throw err;
     }
