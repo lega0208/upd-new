@@ -19,7 +19,6 @@ export interface DropdownOption<T> {
       [autoDisplayFirst]="autoDisplayFirst"
     >
       <ng-template pTemplate="selectedItem">
-        <div style="color: rgb(33, 37, 41);">
           <span
             *ngIf="icon"
             class="material-icons align-top pe-1 "
@@ -29,7 +28,6 @@ export interface DropdownOption<T> {
           <span class="dropdown-label">{{
             selectedOption?.label || '' | translate
           }}</span>
-        </div>
       </ng-template>
 
       <ng-template pTemplate="item" let-option>
