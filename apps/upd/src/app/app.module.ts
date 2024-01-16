@@ -21,7 +21,6 @@ import {
   I18nFacade,
 } from '@dua-upd/upd/state';
 import { environment } from '../environments/environment';
-import { AppRouteReuseStrategy } from './route-reuse.strategy';
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidebarComponent],
@@ -56,7 +55,6 @@ import { AppRouteReuseStrategy } from './route-reuse.strategy';
     I18nService,
     I18nFacade,
     { provide: APP_BASE_HREF, useValue: '/' },
-    { provide: RouteReuseStrategy, useClass: AppRouteReuseStrategy },
   ],
   bootstrap: [AppComponent],
 })

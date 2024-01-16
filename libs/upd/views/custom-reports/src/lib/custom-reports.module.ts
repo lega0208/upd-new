@@ -7,7 +7,6 @@ import { CustomReportsReportComponent } from './report/custom-reports-report.com
 @NgModule({
   imports: [
     CustomReportsComponent,
-    CustomReportsCreateComponent,
     RouterModule.forChild([
       {
         path: '',
@@ -24,6 +23,7 @@ import { CustomReportsReportComponent } from './report/custom-reports-report.com
             component: CustomReportsReportComponent,
             data: { title: 'UPD | Custom reports | Report' },
           },
+          { path: '**', redirectTo: 'create', pathMatch: 'full' },
         ],
       },
     ]),

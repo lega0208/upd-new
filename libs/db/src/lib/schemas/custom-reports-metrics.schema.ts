@@ -117,7 +117,9 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
 
       if (breakdownDimension) {
         const dimensionMetricsByValue: Record<string, Metrics> =
-          filterDimensionMetrics(document.metrics_by[breakdownDimension]);
+          filterDimensionMetrics(
+            document.metrics_by?.[breakdownDimension] || {},
+          );
 
         return Object.entries(dimensionMetricsByValue).map(
           ([dimensionValue, dimensionMetrics]) => ({
@@ -129,7 +131,12 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
         );
       }
 
-      const docMetrics: Metrics = filterMetrics(document.metrics);
+      const docMetrics: Metrics = filterMetrics(document.metrics || {});
+
+      if (Object.keys(docMetrics).length === 0) {
+        // flatMap will filter out empty rows
+        return [];
+      }
 
       return {
         ...dates,

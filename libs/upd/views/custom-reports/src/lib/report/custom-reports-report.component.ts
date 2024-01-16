@@ -14,7 +14,7 @@ import type { ReportStatus } from '@dua-upd/types-common';
 import { ColumnConfig, UpdComponentsModule } from '@dua-upd/upd-components';
 import { round } from '@dua-upd/utils-common';
 import { TranslateModule } from '@ngx-translate/core';
-import { iif, map, mergeMap, Observable, takeWhile } from 'rxjs';
+import { debounceTime, iif, map, mergeMap, Observable, takeWhile } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
@@ -103,6 +103,7 @@ export class CustomReportsReportComponent implements OnInit {
         mergeMap(({ status }) =>
           iif(() => status !== 'complete', statusStream$, status$),
         ),
+        // debounceTime(500), // play around with this if we want to try to avoid flickering
       ),
     );
   }

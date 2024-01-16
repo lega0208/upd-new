@@ -1,28 +1,47 @@
-<div [ngClass]="{ 'w-50 d-inline-block mx-auto': status() !== 'complete' }">
+<div
+  [ngClass]="{
+    'w-50 d-inline-block mx-auto mt-5': status() !== 'complete'
+  }"
+  *ngIf="!error() && data()?.length !== 0"
+>
   <div class="d-flex flex-fill align-content-center h-100 w-100">
     <div class="card align-middle w-100">
       <div class="card-body">
-        <div class="w-100">
-          <p-progressBar
-            [value]="progress()"
-            *ngIf="status() !== 'complete'"
-          ></p-progressBar>
-        </div>
+        <ng-container *ngIf="status() === 'pending'">
+          <div class="w-100">
+            <p-progressBar [value]="progress()"></p-progressBar>
+          </div>
 
-        <p *ngIf="status() !== 'complete'" class="h2">
-          <!--        Status: <span class="badge bg-in-progress align-middle">{{ status() }}</span>-->
-          fetching data...
-        </p>
+          <p class="h2">
+            <!--        Status: <span class="badge bg-in-progress align-middle">{{ status() }}</span>-->
+            fetching data...
+          </p>
+        </ng-container>
 
-        <div *ngIf="status() === 'complete' && data()">
+        <div *ngIf="status() === 'complete' && data()?.length">
           <upd-data-table [data]="data()" [cols]="columns()"></upd-data-table>
-        </div>
-
-        <div *ngIf="error()" class="alert alert-danger">
-          <h5 class="alert-heading">Error</h5>
-          <p class="mb-0">{{ error() }}</p>
         </div>
       </div>
     </div>
   </div>
+</div>
+
+<div
+  *ngIf="error()"
+  class="alert alert-danger d-inline-block mx-auto mt-5"
+  style="width: 33%"
+>
+  <h5 class="alert-heading">Error</h5>
+  <p class="mb-0">{{ error() }}</p>
+</div>
+
+<div
+  *ngIf="data()?.length === 0"
+  class="alert alert-warning d-inline-block mx-auto mt-5 w-50"
+>
+  <p>No data was found for the selected url(s) in the specified date range.</p>
+  <p class="mb-0">
+    The URL may have changed or the page may not have existed during this time
+    period.
+  </p>
 </div>
