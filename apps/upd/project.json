@@ -6,13 +6,14 @@
   "prefix": "upd",
   "targets": {
     "build": {
-      "executor": "@nx/angular:browser-esbuild",
+      "executor": "@nx/vite:build",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/upd",
-        "index": "apps/upd/src/index.html",
+        "index": "apps/upd/index.html",
         "main": "apps/upd/src/main.ts",
         "polyfills": "apps/upd/src/polyfills.ts",
+        "configFile": "apps/upd/vite.config.mts",
         "tsConfig": "apps/upd/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": ["apps/upd/src/favicon.ico", "apps/upd/src/assets"],
@@ -43,7 +44,8 @@
           ],
           "outputHashing": "all",
           "statsJson": true,
-          "buildLibsFromSource": true
+          "buildLibsFromSource": true,
+          "vendorChunk": false
         },
         "development": {
           "buildOptimizer": false,

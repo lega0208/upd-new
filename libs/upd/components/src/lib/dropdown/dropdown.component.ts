@@ -53,7 +53,7 @@ export interface DropdownOption<T> {
 })
 export class DropdownComponent<T> implements OnInit {
   @Input() @Required id!: string;
-  @Input() label?: string;
+  @Input() label?: string | null;
   @Input() options: DropdownOption<T>[] = [];
   @Input() display = 'inline-block';
   @Input() bg = 'white';

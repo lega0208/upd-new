@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { DbQuery } from '@dua-upd/api/query';
+import type { DbQuery } from '@dua-upd/types-common';
 import type {
   ApiParams,
   OverviewData,

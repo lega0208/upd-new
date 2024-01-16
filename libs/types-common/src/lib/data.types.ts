@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { type FilterQuery, type ProjectionType, Types } from 'mongoose';
 import type {
   AttachmentData,
   CallsByTopic,
@@ -438,3 +438,33 @@ export interface CalldriversTableRow {
   currValue: number;
   prevValue: number;
 }
+
+// this has to be manually kept in sync with DbService['collections']
+// because of circular dependency issues
+export type CollectionKeys =
+  | 'callDrivers'
+  | 'feedback'
+  | 'overall'
+  | 'pageMetrics'
+  | 'pageMetricsTS'
+  | 'pages'
+  | 'pagesList'
+  | 'tasks'
+  | 'uxTests'
+  | 'projects'
+  | 'aaItemIds'
+  | 'searchAssessment'
+  | 'urls'
+  | 'readability'
+  | 'annotations'
+  | 'reports'
+  | 'customReportsRegistry'
+  | 'customReportsMetrics';
+
+export type DbQuery = {
+  [key: string]: {
+    collection: CollectionKeys;
+    filter: FilterQuery<unknown>;
+    project?: ProjectionType<unknown>;
+  };
+};

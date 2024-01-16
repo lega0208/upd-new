@@ -1,7 +1,7 @@
 import { DbService } from '@dua-upd/db';
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { DbQuery } from './query.controller';
+import type { DbQuery } from '@dua-upd/types-common';
 
 @Injectable()
 export class QueryService {
