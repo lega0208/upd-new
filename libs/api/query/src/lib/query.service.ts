@@ -19,7 +19,13 @@ export class QueryService {
 
       const collectionModel = this.db.collections[collection] as Model<unknown>;
 
-      results[key] = await collectionModel.find(filter, project).lean().exec();
+      // large queries on this collection can cripple the db, so we'll limit the results like this for now
+      const limit = collection === 'pageMetrics' ? 1000 : undefined;
+
+      results[key] = await collectionModel
+        .find(filter, project, { limit })
+        .lean()
+        .exec();
     }
 
     return results;
