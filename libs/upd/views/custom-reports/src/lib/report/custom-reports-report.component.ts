@@ -10,12 +10,22 @@ import {
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import type { ReportStatus } from '@dua-upd/types-common';
+import type { ReportConfig, ReportStatus } from '@dua-upd/types-common';
 import { ColumnConfig, UpdComponentsModule } from '@dua-upd/upd-components';
 import { round } from '@dua-upd/utils-common';
 import { TranslateModule } from '@ngx-translate/core';
 import { debounceTime, iif, map, mergeMap, Observable, takeWhile } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { ApiService } from '@dua-upd/upd/services';
+import { I18nService } from '@dua-upd/upd/i18n';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+interface ConfigData {
+  data: {
+    config: ReportConfig;
+  }[];
+}
 
 @Component({
   selector: 'dua-upd-custom-reports-report',
@@ -36,13 +46,51 @@ import { ProgressBarModule } from 'primeng/progressbar';
       }
     `,
   ],
+  providers: [ApiService, I18nService],
 })
 export class CustomReportsReportComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private _zone = inject(NgZone);
+  private readonly api = inject(ApiService);
 
   id: Signal<string> = toSignal(this.route.params.pipe(map((p) => p['id'])));
+
+  configData: Signal<ConfigData | null | undefined> = toSignal(
+    this.api.queryDb({
+      data: {
+        collection: 'customReportsRegistry',
+        filter: { _id: this.id() },
+        project: { config: 1 },
+      },
+    }),
+  );
+
+  config = computed(() => this.configData()?.data[0].config || null);
+
+  grouped = computed(() => (this.config()?.grouped ? 'Yes' : 'No'));
+  granularity = computed(() =>
+    this.config()?.granularity === 'day'
+      ? 'Daily'
+      : this.config()?.granularity === 'month'
+      ? 'Monthly'
+      : 'Weekly',
+  );
+  startDate = computed(() =>
+    dayjs(this.config()?.dateRange?.start as string)
+      .utc()
+      .format('YYYY-MM-DD'),
+  );
+  endDate = computed(() =>
+    dayjs(this.config()?.dateRange?.end as string)
+      .utc()
+      .format('YYYY-MM-DD'),
+  );
+  urls = computed(() => this.config()?.urls || []);
+  metrics = computed(() => this.config()?.metrics || []);
+  breakdownDimension = computed(
+    () => this.config()?.breakdownDimension || 'None',
+  );
 
   reportStatus: Signal<ReportStatus | undefined>;
 

@@ -1,3 +1,29 @@
+<div class="card-container">
+  <div class="card">
+    <h3 class="card-header">Preview</h3>
+    <div class="card-body">
+      <h4>Granularity</h4>
+      <p>{{ granularity() }}</p>
+      <h4>Start Date</h4>
+      <p>{{ startDate() }}</p>
+      <h4>End Date</h4>
+      <p>{{ endDate() }}</p>
+      <h4>URLs</h4>
+      <ul>
+        <li *ngFor="let url of urls()">{{ url }}</li>
+      </ul>
+      <h4>Grouped pages</h4>
+      <p>{{ grouped() }}</p>
+      <h4>Metrics</h4>
+      <ul>
+        <li *ngFor="let metric of metrics()">{{ metric | translate }}</li>
+      </ul>
+      <h4>Breakdown Dimension</h4>
+      <p>{{ breakdownDimension() }}</p>
+    </div>
+  </div>
+</div>
+
 <div
   [ngClass]="{
     'w-50 d-inline-block mx-auto mt-5': status() !== 'complete'
