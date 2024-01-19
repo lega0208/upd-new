@@ -40,6 +40,7 @@ export class CalendarComponent implements OnChanges {
   @Input() showPreset = false;
   @Input() showAction = false;
   @Input() required = false;
+  @Input() calendarDates?: Date[];
 
   @Output() dateChange = new EventEmitter<Date[] | Date>();
 
@@ -50,8 +51,6 @@ export class CalendarComponent implements OnChanges {
   dates: WritableSignal<Date[]> = signal([]);
 
   dateFormat = computed(() => (this.lang() === EN_CA ? 'M dd yy' : 'dd M yy'));
-
-  calendarDates?: Date[];
 
   minSelectableDate: Date = new Date(2020, 0, 1);
   maxSelectableDate = dayjs().subtract(1, 'day').toDate();

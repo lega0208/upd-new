@@ -60,10 +60,9 @@ export class DropdownComponent<T> implements OnInit {
   @Input() styleClasses = '';
   @Input() icon?: string;
   @Input() autoDisplayFirst = false;
+  @Input() selectedOption?: DropdownOption<T>;
 
   @Output() selectOption = new EventEmitter<DropdownOption<T>>();
-
-  selectedOption?: DropdownOption<T>;
 
   get placeholder(): DropdownOption<T> {
     return {
@@ -73,6 +72,10 @@ export class DropdownComponent<T> implements OnInit {
   }
 
   ngOnInit() {
+    if (this.selectedOption !== undefined) {
+      return;
+    }
+    
     if (!this.autoDisplayFirst) {
       this.selectedOption = this.placeholder;
       return;
