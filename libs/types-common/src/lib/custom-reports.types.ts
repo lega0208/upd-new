@@ -63,7 +63,6 @@ export const dimensions = {
   none: '',
 } as const satisfies DimensionsConfig;
 
-
 export const dimensionNamesMap = Object.fromEntries(
   Object.entries(dimensions).map(([key, value]) => [value, key]),
 );
@@ -71,7 +70,7 @@ export const dimensionNamesMap = Object.fromEntries(
 export type AADimensionName = keyof typeof dimensions;
 export type AAReportDimensionId = (typeof dimensions)[AADimensionName];
 
-export type ReportGranularity = 'day' | 'week' | 'month' | 'year' | 'none';
+export type ReportGranularity = 'day' | 'week' | 'month' | 'none';
 
 export type ReportMetric = {
   id: string;
@@ -130,7 +129,7 @@ export type ICustomReportsMetrics = {
     [dimension in AADimensionName]?: {
       [dimensionValue: string]: {
         [metric in AAMetricName]?: number;
-      }
+      };
     };
   };
-}
+};

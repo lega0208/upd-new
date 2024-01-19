@@ -1,11 +1,13 @@
-<button class="btn btn-outline-primary w-50" (click)="goBack()"><span class="material-icons">arrow_back</span> Back</button>
+<button class="btn btn-outline-primary w-50" (click)="goBack()">
+  <span class="material-icons">arrow_back</span> {{ 'Back' | translate }}
+</button>
 
 <div class="card-container">
   <div class="card">
     <h3 class="card-header">Preview</h3>
     <div class="card-body">
       <h4>Granularity</h4>
-      <p>{{ granularity() }}</p>
+      <p>{{ granularity() | translate }}</p>
       <h4>Start Date</h4>
       <p>{{ startDate() }}</p>
       <h4>End Date</h4>
@@ -21,7 +23,7 @@
         <li *ngFor="let metric of metrics()">{{ metric | translate }}</li>
       </ul>
       <h4>Breakdown Dimension</h4>
-      <p>{{ breakdownDimension() }}</p>
+      <p>{{ breakdownDimension() | translate }}</p>
     </div>
   </div>
 </div>

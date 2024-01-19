@@ -1,7 +1,12 @@
-import { Component, computed, effect, inject, OnInit } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, ChildrenOutletContexts, NavigationEnd, Router } from '@angular/router';
+import {
+  ActivatedRoute,
+  ChildrenOutletContexts,
+  NavigationEnd,
+  Router,
+} from '@angular/router';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import packageJson from 'package.json';
@@ -16,7 +21,7 @@ import { fader } from './app.animations';
   styleUrls: ['./app.component.css'],
   animations: [fader],
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   i18n = inject(I18nFacade);
   contexts = inject(ChildrenOutletContexts);
   router = inject(Router);
@@ -26,7 +31,7 @@ export class AppComponent implements OnInit {
 
   primeNgConfigSignal = toSignal(this.i18n.service.observeKey('primeng'));
 
-  currentLang = this.i18n.service.langSignal;
+  currentLang = this.i18n.currentLang;
 
   titleFromNavigation = toSignal(
     this.router.events.pipe(
@@ -40,26 +45,26 @@ export class AppComponent implements OnInit {
       mergeMap((route: ActivatedRoute) => route.data),
       map((data): string => data['title'] ?? 'Usability Performance Dashboard'),
     ),
+    {
+      initialValue: 'Usability Performance Dashboard',
+    },
   );
 
-  translatedTitleFromNav = computed(() => {
-    const currentTitle = this.titleFromNavigation();
-
-    return this.i18n.service.instant(
-      currentTitle || this.title,
-    );
-  });
-
   en = EN_CA;
-  title = 'Usability Performance Dashboard';
   updVersion = packageJson.version;
   canadaLogo = canadaLogo;
 
   constructor() {
-    effect(() => {
-      this.title = this.translatedTitleFromNav();
+    this.i18n.init();
 
-      this.titleService.setTitle(this.translatedTitleFromNav());
+    effect(() => {
+      this.currentLang();
+
+      const translatedTitle = this.i18n.service.instant(
+        this.titleFromNavigation(),
+      );
+
+      this.titleService.setTitle(translatedTitle);
     });
 
     effect(() =>
@@ -67,10 +72,6 @@ export class AppComponent implements OnInit {
         this.primeNgConfigSignal() as Translation,
       ),
     );
-  }
-
-  ngOnInit() {
-    this.i18n.init();
   }
 
   getRouteAnimationData() {

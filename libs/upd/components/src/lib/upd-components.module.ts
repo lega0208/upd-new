@@ -11,6 +11,7 @@ import {
   NgbModalModule,
   NgbTooltipModule,
 } from '@ng-bootstrap/ng-bootstrap';
+import { ProgressBar, ProgressBarModule } from 'primeng/progressbar';
 import { CardComponent } from './card/card.component';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -89,6 +90,7 @@ import { RadioComponent } from './radio/radio.component';
     InputNumberModule,
     PipesModule,
     NgApexchartsModule,
+    ProgressBarModule,
   ],
   declarations: [
     CardComponent,
@@ -164,6 +166,7 @@ import { RadioComponent } from './radio/radio.component';
     TabsComponent,
     InputSwitchComponent,
     RadioComponent,
+    ProgressBar,
   ],
 })
 export class UpdComponentsModule {}

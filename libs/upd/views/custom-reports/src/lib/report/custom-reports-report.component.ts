@@ -12,14 +12,15 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { ReportConfig, ReportStatus } from '@dua-upd/types-common';
 import { ColumnConfig, UpdComponentsModule } from '@dua-upd/upd-components';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { round } from '@dua-upd/utils-common';
-import { TranslateModule } from '@ngx-translate/core';
 import { debounceTime, iif, map, mergeMap, Observable, takeWhile } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ApiService } from '@dua-upd/upd/services';
-import { I18nModule, I18nService } from '@dua-upd/upd/i18n';
+import { I18nModule } from '@dua-upd/upd/i18n';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+
 dayjs.extend(utc);
 
 interface ConfigData {
@@ -31,13 +32,7 @@ interface ConfigData {
 @Component({
   selector: 'dua-upd-custom-reports-report',
   standalone: true,
-  imports: [
-    I18nModule,
-    CommonModule,
-    UpdComponentsModule,
-    ProgressBarModule,
-    TranslateModule,
-  ],
+  imports: [I18nModule, CommonModule, UpdComponentsModule, ProgressBarModule],
   templateUrl: './custom-reports-report.component.html',
   styles: [
     `
@@ -48,17 +43,18 @@ interface ConfigData {
       }
     `,
   ],
-  providers: [ApiService, I18nService],
+  providers: [ApiService, I18nFacade],
 })
 export class CustomReportsReportComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
   private _zone = inject(NgZone);
-  private i18n = inject(I18nService);
+  private i18n = inject(I18nFacade);
   private readonly api = inject(ApiService);
 
-  lang = this.i18n.langSignal;
+  lang = this.i18n.currentLang;
+
   id: Signal<string> = toSignal(this.route.params.pipe(map((p) => p['id'])));
 
   configData: Signal<ConfigData | null | undefined> = toSignal(
@@ -71,17 +67,9 @@ export class CustomReportsReportComponent implements OnInit {
     }),
   );
 
-  config = computed(() => {
-    const config = this.configData()?.data[0].config as ReportConfig;
-
-    return {
-      ...config,
-      dateRange: {
-        start: config.dateRange.start,
-        end: config.dateRange.end
-      }
-    };
-  });
+  config: Signal<ReportConfig | undefined> = computed(
+    () => this.configData()?.data?.[0].config,
+  );
 
   grouped = computed(() => (this.config()?.grouped ? 'Yes' : 'No'));
   granularity = computed(() =>
@@ -92,14 +80,10 @@ export class CustomReportsReportComponent implements OnInit {
       : 'Weekly',
   );
   startDate = computed(() =>
-    dayjs(this.config()?.dateRange?.start as string)
-      .utc()
-      .format('YYYY-MM-DD'),
+    dayjs.utc(this.config()?.dateRange?.start).format('YYYY-MM-DD'),
   );
   endDate = computed(() =>
-    dayjs(this.config()?.dateRange?.end as string)
-      .utc()
-      .format('YYYY-MM-DD'),
+    dayjs.utc(this.config()?.dateRange?.end).format('YYYY-MM-DD'),
   );
   urls = computed(() => this.config()?.urls || []);
   metrics = computed(() => this.config()?.metrics || []);
@@ -108,10 +92,10 @@ export class CustomReportsReportComponent implements OnInit {
   );
 
   goBack() {
-    this.router.navigate(
-      [`/${this.lang().slice(0, 2)}/custom-reports/create`],
-      { state: { config: this.config() } },
-    );
+    this.router.navigate(['../create'], {
+      state: { config: this.config() },
+      relativeTo: this.route,
+    });
   }
 
   reportStatus: Signal<ReportStatus | undefined>;
@@ -142,7 +126,7 @@ export class CustomReportsReportComponent implements OnInit {
       (key) =>
         ({
           field: key,
-          header: this.i18n.translate(key, this.lang()),
+          header: key,
           ...(['startDate', 'endDate', 'date'].includes(key)
             ? { pipe: 'date' }
             : {}),

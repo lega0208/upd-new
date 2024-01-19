@@ -10,12 +10,12 @@
   >
   </p-checkbox>
   <label for="{{ id }}-selectAll" class="p-checkbox-label">{{
-    selectAllText
+    selectAllText | translate
   }}</label>
 
   <hr />
 </div>
-<div *ngFor="let item of items; index as i;" class="field-checkbox">
+<div *ngFor="let item of items; index as i" class="field-checkbox">
   <p-checkbox
     [value]="item.value"
     [(ngModel)]="selectedItems"
@@ -23,5 +23,7 @@
     (onChange)="updateIndividualSelection()"
   >
   </p-checkbox>
-  <label [for]="id + i" class="p-checkbox-label">{{ item.label }}</label>
+  <label [for]="id + i" class="p-checkbox-label">{{
+    item.label | translate
+  }}</label>
 </div>

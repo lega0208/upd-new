@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   Component,
   ElementRef,
@@ -13,15 +13,15 @@ import {
   Signal,
   computed,
   effect,
-  OnInit,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { today } from '@dua-upd/utils-common';
 import { TranslateModule } from '@ngx-translate/core';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { ApiService } from '@dua-upd/upd/services';
-import { I18nModule, I18nService } from '@dua-upd/upd/i18n';
+import { I18nModule } from '@dua-upd/upd/i18n';
 import {
   type ColumnConfig,
   DataTableComponent,
@@ -48,12 +48,6 @@ type PageSelectionData = {
   projects: { title: string; pages: string[] }[];
 };
 
-type ReportQueries= {
-  label: string;
-  value: string;
-  description: string;
-};
-
 @Component({
   selector: 'dua-upd-custom-reports-create',
   standalone: true,
@@ -66,44 +60,19 @@ type ReportQueries= {
   ],
   templateUrl: './custom-reports-create.component.html',
   styleUrls: ['./custom-reports-create.component.scss'],
-  providers: [ApiService, I18nService],
+  providers: [ApiService, I18nFacade],
   encapsulation: ViewEncapsulation.None,
 })
-export class CustomReportsCreateComponent implements OnInit {
+export class CustomReportsCreateComponent {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private zone: NgZone = inject(NgZone);
-  private i18n = inject(I18nService);
+  private i18n = inject(I18nFacade);
   private readonly api = inject(ApiService);
 
-  stateDimension?: ReportQueries;
-  stateMetrics: string[] = [];
-  stateCalendarDates: Date[] = [];
-  selectedGranularityOption?: DropdownOption<ReportGranularity>;
-
-  ngOnInit() {
-    const config = history.state['config'] as ReportConfig;
-
-    if (config) {
-      this.dateRange.set(config.dateRange);
-      this.selectedGranularity.set(config.granularity);
-      this.reportUrls.set(config.urls);
-      this.isGrouped.set(config.grouped);
-      this.selectedReportMetrics.set(config.metrics);
-      this.selectedReportDimensions.set(config.breakdownDimension || '');
-
-      this.stateDimension = this.reportDimensions.find(
-        (d) => d.value === config.breakdownDimension,
-      );
-      this.stateMetrics = config.metrics as string[];
-      this.stateCalendarDates = [
-        dayjs(config.dateRange.start).toDate(),
-        dayjs(config.dateRange.end).toDate(),
-      ];
-      this.selectedGranularityOption = this.granularityOptions.find(
-        (option) => option.value === config.granularity,
-      );
-    }
-  }
+  storageConfig: ReportConfig | undefined =
+    history.state['config'] ||
+    JSON.parse(sessionStorage.getItem('custom-reports-config') || '');
 
   // get required data from the api
   selectionData: Signal<PageSelectionData | null> = toSignal(
@@ -141,18 +110,26 @@ export class CustomReportsCreateComponent implements OnInit {
 
   error: WritableSignal<string | null> = signal(null);
 
-  lang = this.i18n.langSignal;
+  lang = this.i18n.currentLang;
+
+  calendarDateFormat = computed(() =>
+    this.lang() === 'en-CA' ? 'M dd yy' : 'dd M yy',
+  );
 
   dateRange = signal({
-    start: '',
-    end: '',
+    start: this.storageConfig?.dateRange.start || '',
+    end: this.storageConfig?.dateRange.end || '',
   });
 
-  selectedReportMetrics = signal<AAMetricName[]>([]);
+  selectedReportMetrics = signal<AAMetricName[]>(
+    this.storageConfig?.metrics || [],
+  );
 
-  selectedReportDimensions = signal<string>('');
+  selectedReportDimensions = signal<string>(
+    this.storageConfig?.breakdownDimension || '',
+  );
 
-  isGrouped = signal(false);
+  isGrouped = signal(this.storageConfig?.grouped || false);
 
   readonly granularityOptions: DropdownOption<ReportGranularity>[] = [
     { label: 'Daily', value: 'day' },
@@ -160,9 +137,11 @@ export class CustomReportsCreateComponent implements OnInit {
     { label: 'Monthly', value: 'month' },
   ];
 
-  selectedGranularity = signal<ReportGranularity>('day');
+  selectedGranularity = signal<ReportGranularity>(
+    this.storageConfig?.granularity || 'day',
+  );
 
-  reportUrls = signal<string[]>([]);
+  reportUrls = signal<string[]>(this.storageConfig?.urls || []);
 
   config = computed<ReportConfig>(() => ({
     dateRange: this.dateRange(),
@@ -186,12 +165,12 @@ export class CustomReportsCreateComponent implements OnInit {
   @ViewChild('urlsAdded') accordionComponent!: AccordionComponent;
   @ViewChild('calendar') calendarComponent!: CalendarComponent;
 
-  titleCol = this.i18n.translationSignal('Title', (title) => ({
+  titleCol = this.i18n.service.translationSignal('Title', (title) => ({
     field: 'title',
     header: title(),
   }));
 
-  urlCol = this.i18n.translationSignal('Title', (url) => ({
+  urlCol = this.i18n.service.translationSignal('Title', (url) => ({
     field: 'url',
     header: url(),
   }));
@@ -297,7 +276,33 @@ export class CustomReportsCreateComponent implements OnInit {
       },
       { allowSignalWrites: true },
     );
+
+    effect(() => {
+      console.log('\n\ncurrent sessionStorage:');
+      console.log(
+        JSON.parse(sessionStorage.getItem('custom-reports-config') || ''),
+      );
+
+      console.log('\nsaving to sessionStorage:');
+      console.log(JSON.stringify(this.config(), null, 2));
+
+      sessionStorage.setItem(
+        'custom-reports-config',
+        JSON.stringify(this.config()),
+      );
+    });
   }
+
+  stateDimension = this.reportDimensions.find(
+    (d) => d.value === this.storageConfig?.breakdownDimension,
+  );
+  stateMetrics: string[] = this.storageConfig?.metrics || [];
+  stateCalendarDates: Date[] = this.storageConfig?.dateRange
+    ? dateRangeToCalendarDates(this.storageConfig.dateRange)
+    : [];
+  selectedGranularityOption = this.granularityOptions.find(
+    (option) => option.value === this.storageConfig?.granularity,
+  );
 
   copyToClipboard() {
     this.showCopyAlert = !this.showCopyAlert;
@@ -391,7 +396,7 @@ export class CustomReportsCreateComponent implements OnInit {
     this.selectedReportDimensions.set(dimension);
   }
 
-  selectGranularity(granularity: string | null) {
+  selectGranularity(granularity: 'day' | 'week' | 'month' | 'none' | null) {
     this.selectedGranularity.set(granularity as ReportGranularity);
   }
 
@@ -453,8 +458,6 @@ export class CustomReportsCreateComponent implements OnInit {
       return;
     }
 
-    console.log('Report Configuration:', config);
-
     const res: ReportCreateResponse = await fetch(
       '/api/custom-reports/create',
       {
@@ -473,9 +476,23 @@ export class CustomReportsCreateComponent implements OnInit {
     }
 
     await this.zone.run(() =>
-      this.router.navigateByUrl(
-        `/${this.lang().slice(0, 2)}/custom-reports/${res._id}`,
-      ),
+      this.router.navigate(['../', res._id], { relativeTo: this.route }),
     );
   }
+}
+
+function dateRangeToCalendarDates(
+  dateRange: ReportConfig['dateRange'],
+): Date[] {
+  const dates: Date[] = [];
+
+  if (dateRange.start) {
+    dates.push(new Date(dateRange.start));
+  }
+
+  if (dateRange.end) {
+    dates.push(new Date(dateRange.end));
+  }
+
+  return dates;
 }

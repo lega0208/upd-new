@@ -28,6 +28,7 @@ export class I18nEffects {
       ofType(I18nActions.init),
       concatLatestFrom(() => [this.store.select(selectCurrentLang)]),
       mergeMap(([, initialLang]) => {
+        this.i18n.use(initialLang);
         return of(I18nActions.setLang({ lang: initialLang }));
       }),
     );
@@ -38,15 +39,12 @@ export class I18nEffects {
       return this.actions$.pipe(
         ofType(I18nActions.setLang),
         concatLatestFrom(() => [
-          this.store.select(selectCurrentLang),
           this.store.select(selectRouteNestedParam('lang')),
           this.route.queryParams,
         ]),
 
-        mergeMap(([{ lang }, currentLang, routeLang, queryParams]) => {
-          if (lang !== currentLang) {
-            this.i18n.use(lang);
-          }
+        mergeMap(([{ lang }, routeLang, queryParams]) => {
+          this.i18n.use(lang);
 
           if (!routeLang || routeLang !== localeIdToLang[lang]) {
             if (!location.pathname || location.pathname === '/') {

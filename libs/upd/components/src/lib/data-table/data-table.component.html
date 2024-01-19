@@ -69,7 +69,7 @@
   <ng-template pTemplate="header" let-columns>
     <tr>
       <th *ngFor="let col of columns">
-        {{ col.header }}
+        {{ col.header | translate }}
       </th>
     </tr>
   </ng-template>
@@ -101,11 +101,13 @@
                 [ngbPopover]="col.tooltip"
                 placement="end"
               >
-                {{ col.header }}
+                {{ col.header | translate }}
               </span>
             </ng-container>
             <ng-container *ngIf="!col.tooltip">
-              <span class="datatable-headers">{{ col.header }}</span>
+              <span class="datatable-headers">{{
+                col.header | translate
+              }}</span>
             </ng-container>
             <p-sortIcon [field]="col.field"></p-sortIcon>
             <ng-template [ngIf]="col.filterConfig">
@@ -181,11 +183,11 @@
               [ngbPopover]="col.tooltip"
               placement="end"
             >
-              {{ col.header }}
+              {{ col.header | translate }}
             </span>
           </ng-container>
           <ng-container *ngIf="!col.tooltip">
-            <span class="datatable-headers">{{ col.header }}</span>
+            <span class="datatable-headers">{{ col.header | translate }}</span>
           </ng-container>
         </th>
       </ng-template>
@@ -215,7 +217,7 @@
           [ngbPopover]="col.tooltip"
           placement="end"
           [class.card-tooltip]="col.tooltip"
-          >{{ col.header }}</span
+          >{{ col.header | translate }}</span
         >
         <upd-data-table-styles [config]="col" [data]="rowData">
         </upd-data-table-styles>

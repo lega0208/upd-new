@@ -14,28 +14,27 @@
   <upd-alert position="top">Copied successfully!</upd-alert>
 </ng-container>
 
-  <h3 class="mb-2 h5 pt-2 pb-2" [translate]="'select-date'"></h3>
+<h3 class="mb-2 h5 pt-2 pb-2" [translate]="'select-date'"></h3>
 
-  <div *ngIf="(validationTriggered && !isDateRangeValid()) || this.error()">
-    <upd-alert [type]="'danger'" [dismissible]="false" [selfClosing]="false">
-      <span class="material-icons align-top pe-1" aria-hidden="true"
-        >error</span
-      >
-      <span [translate]="'alert-date'"></span>
-      <!--  I don't actually think error handling is implemented on this page yet    -->
-      <span *ngIf="this.error()" [translate]="this.error() || 'error'"></span>
-    </upd-alert>
-  </div>
+<div *ngIf="(validationTriggered && !isDateRangeValid()) || this.error()">
+  <upd-alert [type]="'danger'" [dismissible]="false" [selfClosing]="false">
+    <span class="material-icons align-top pe-1" aria-hidden="true">error</span>
+    <span [translate]="'alert-date'"></span>
+    <!--  I don't actually think error handling is implemented on this page yet    -->
+    <span *ngIf="this.error()" [translate]="this.error() || 'error'"></span>
+  </upd-alert>
+</div>
 
-  <upd-calendar
-    #calendar
-    [showAction]="true"
-    [showPreset]="true"
-    [calendarDates]="stateCalendarDates"
-    (dateChange)="handleDateChange($event); resetValidation()"
-    [granularity]="selectedGranularity()"
-    [required]="false"
-  ></upd-calendar>
+<upd-calendar
+  #calendar
+  [showAction]="true"
+  [showPreset]="true"
+  [calendarDates]="stateCalendarDates"
+  (dateChange)="handleDateChange($event); resetValidation()"
+  [granularity]="selectedGranularity()"
+  [required]="false"
+  [dateFormat]="calendarDateFormat()"
+></upd-calendar>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
@@ -97,7 +96,7 @@
         <p-tabView styleClass="tabview-custom">
           <p-tabPanel>
             <ng-template pTemplate="header">
-              <span>Bulk Pages</span>
+              <span>{{ 'Bulk Pages' | translate }}</span>
             </ng-template>
             <span class="p-float-label mt-3">
               <textarea
@@ -114,7 +113,7 @@
           </p-tabPanel>
           <p-tabPanel>
             <ng-template pTemplate="header">
-              <span>Pages</span>
+              <span>{{ 'Pages' | translate }}</span>
             </ng-template>
             <upd-data-table
               #dataTable
@@ -134,7 +133,7 @@
           </p-tabPanel>
           <p-tabPanel>
             <ng-template pTemplate="header">
-              <span>Tasks</span>
+              <span>{{ 'tasks' | translate }}</span>
             </ng-template>
             <upd-data-table
               #tasksTable
@@ -152,7 +151,7 @@
           </p-tabPanel>
           <p-tabPanel>
             <ng-template pTemplate="header">
-              <span>UX projects</span>
+              <span>{{ 'ux_projects' | translate }}</span>
             </ng-template>
             <upd-data-table
               #projectsTable
@@ -290,7 +289,7 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-6">
-      <h3 class="mb-2 h5 pt-2 pb-2">Select a dimension for breakdown:</h3>
+      <h3 class="mb-2 h5 pt-2 pb-2" translate="select-dimension"></h3>
 
       <upd-radio
         [id]="'dimensions'"

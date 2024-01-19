@@ -19,15 +19,15 @@ export interface DropdownOption<T> {
       [autoDisplayFirst]="autoDisplayFirst"
     >
       <ng-template pTemplate="selectedItem">
-          <span
-            *ngIf="icon"
-            class="material-icons align-top pe-1 "
-            aria-hidden="true"
-            >{{ icon }}</span
-          >
-          <span class="dropdown-label">{{
-            selectedOption?.label || '' | translate
-          }}</span>
+        <span
+          *ngIf="icon"
+          class="material-icons align-top pe-1 "
+          aria-hidden="true"
+          >{{ icon }}</span
+        >
+        <span class="dropdown-label">{{
+          selectedOption?.label || '' | translate
+        }}</span>
       </ng-template>
 
       <ng-template pTemplate="item" let-option>
@@ -75,7 +75,7 @@ export class DropdownComponent<T> implements OnInit {
     if (this.selectedOption !== undefined) {
       return;
     }
-    
+
     if (!this.autoDisplayFirst) {
       this.selectedOption = this.placeholder;
       return;

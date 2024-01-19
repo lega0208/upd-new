@@ -1,6 +1,5 @@
 import {
   Component,
-  inject,
   ViewChild,
   Output,
   EventEmitter,
@@ -9,14 +8,11 @@ import {
   OnChanges,
   ViewEncapsulation,
   signal,
-  computed,
   WritableSignal,
   effect,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import dayjs from 'dayjs';
 import { Calendar } from 'primeng/calendar';
-import { EN_CA, I18nService, LocaleId } from '@dua-upd/upd/i18n';
 import { dateRangeConfigs } from '@dua-upd/utils-common';
 
 export type DateRangePreset = {
@@ -41,16 +37,11 @@ export class CalendarComponent implements OnChanges {
   @Input() showAction = false;
   @Input() required = false;
   @Input() calendarDates?: Date[];
+  @Input() dateFormat = 'M dd yy';
 
   @Output() dateChange = new EventEmitter<Date[] | Date>();
 
-  private i18n = inject(I18nService);
-
-  lang = this.i18n.langSignal;
-
   dates: WritableSignal<Date[]> = signal([]);
-
-  dateFormat = computed(() => (this.lang() === EN_CA ? 'M dd yy' : 'dd M yy'));
 
   minSelectableDate: Date = new Date(2020, 0, 1);
   maxSelectableDate = dayjs().subtract(1, 'day').toDate();
@@ -62,7 +53,7 @@ export class CalendarComponent implements OnChanges {
 
   presetOptions: DateRangePreset[] = [
     {
-      label: this.lang() === EN_CA ? 'None' : 'Aucun',
+      label: 'None',
       value: null,
     },
     ...dateRangeConfigs.map((config) => {

@@ -12,7 +12,6 @@ export const granularities: readonly ReportGranularity[] = [
   'day',
   'week',
   'month',
-  'year',
   'none',
 ] as const;
 
@@ -97,7 +96,9 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
     return (await this.find(query).lean().exec()) || [];
   }
 
-  static createReportFormatter(config: ReportConfig) {
+  static createReportFormatter<T extends { [columnName: string]: unknown }>(
+    config: ReportConfig,
+  ) {
     const { metrics, granularity, grouped, breakdownDimension } = config;
     const toDates = (document: ICustomReportsMetrics) =>
       granularity === 'day'
@@ -159,7 +160,7 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
     };
 
     return (documents: ICustomReportsMetrics[]) =>
-      documents.flatMap(docToRows).sort(sortRows);
+      documents.flatMap(docToRows).sort(sortRows) as unknown as T[];
   }
 
   static async getReport(this: CustomReportsModel, config: ReportConfig) {
