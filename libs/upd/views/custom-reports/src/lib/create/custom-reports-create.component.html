@@ -4,6 +4,7 @@
   id="granularity"
   [label]="'Select' | translate"
   [options]="granularityOptions"
+  [selectedOption]="selectedGranularityOption"
   (selectOption)="selectGranularity($event.value); resetValidation()"
   [autoDisplayFirst]="true"
 >
@@ -13,7 +14,6 @@
   <upd-alert position="top">Copied successfully!</upd-alert>
 </ng-container>
 
-<ng-container *ngIf="isGranularitySelected()">
   <h3 class="mb-2 h5 pt-2 pb-2" [translate]="'select-date'"></h3>
 
   <div *ngIf="(validationTriggered && !isDateRangeValid()) || this.error()">
@@ -31,11 +31,11 @@
     #calendar
     [showAction]="true"
     [showPreset]="true"
+    [calendarDates]="stateCalendarDates"
     (dateChange)="handleDateChange($event); resetValidation()"
     [granularity]="selectedGranularity()"
     [required]="false"
   ></upd-calendar>
-</ng-container>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
@@ -200,6 +200,7 @@
           <upd-input-switch
             id="group"
             [text]="'Group pages as a segment'"
+            [checked]="isGrouped()"
             (checkedChange)="setIsGrouped($event); resetValidation()"
           >
           </upd-input-switch>
@@ -278,6 +279,7 @@
       <upd-checkbox
         [id]="'metrics'"
         [items]="reportMetrics"
+        [selectedItems]="stateMetrics"
         (selectedItemsChange)="selectMetrics($event); resetValidation()"
       >
       </upd-checkbox>
@@ -293,9 +295,9 @@
       <upd-radio
         [id]="'dimensions'"
         [items]="reportDimensions"
+        [selectedItem]="stateDimension"
         (selectedItemsChange)="selectDimension($event.value); resetValidation()"
-      >
-      </upd-radio>
+      ></upd-radio>
     </div>
   </div>
 </div>

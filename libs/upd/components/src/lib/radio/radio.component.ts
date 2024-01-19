@@ -14,7 +14,11 @@ export class RadioComponent<
   @Input() @Required id!: string;
   @Input() disabled = false;
 
+  @Input() selectedItem?: T;
   @Output() selectedItemsChange = new EventEmitter<T>();
 
-  selectedItem?: T;
+  onSelectionChange(item: T) {
+    this.selectedItem = item;
+    this.selectedItemsChange.emit(item);
+  }
 }

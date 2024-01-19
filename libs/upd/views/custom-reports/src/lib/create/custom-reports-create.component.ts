@@ -13,6 +13,7 @@ import {
   Signal,
   computed,
   effect,
+  OnInit,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { today } from '@dua-upd/utils-common';
@@ -47,6 +48,12 @@ type PageSelectionData = {
   projects: { title: string; pages: string[] }[];
 };
 
+type ReportQueries= {
+  label: string;
+  value: string;
+  description: string;
+};
+
 @Component({
   selector: 'dua-upd-custom-reports-create',
   standalone: true,
@@ -62,11 +69,41 @@ type PageSelectionData = {
   providers: [ApiService, I18nService],
   encapsulation: ViewEncapsulation.None,
 })
-export class CustomReportsCreateComponent {
+export class CustomReportsCreateComponent implements OnInit {
   private router = inject(Router);
   private zone: NgZone = inject(NgZone);
   private i18n = inject(I18nService);
   private readonly api = inject(ApiService);
+
+  stateDimension?: ReportQueries;
+  stateMetrics: string[] = [];
+  stateCalendarDates: Date[] = [];
+  selectedGranularityOption?: DropdownOption<ReportGranularity>;
+
+  ngOnInit() {
+    const config = history.state['config'] as ReportConfig;
+
+    if (config) {
+      this.dateRange.set(config.dateRange);
+      this.selectedGranularity.set(config.granularity);
+      this.reportUrls.set(config.urls);
+      this.isGrouped.set(config.grouped);
+      this.selectedReportMetrics.set(config.metrics);
+      this.selectedReportDimensions.set(config.breakdownDimension || '');
+
+      this.stateDimension = this.reportDimensions.find(
+        (d) => d.value === config.breakdownDimension,
+      );
+      this.stateMetrics = config.metrics as string[];
+      this.stateCalendarDates = [
+        dayjs(config.dateRange.start).toDate(),
+        dayjs(config.dateRange.end).toDate(),
+      ];
+      this.selectedGranularityOption = this.granularityOptions.find(
+        (option) => option.value === config.granularity,
+      );
+    }
+  }
 
   // get required data from the api
   selectionData: Signal<PageSelectionData | null> = toSignal(
@@ -220,17 +257,27 @@ export class CustomReportsCreateComponent {
     {
       label: 'Visits',
       value: 'visits',
-      description: 'The total number of visits to your site.',
+      description: 'The total number of visits on the page',
     },
     {
       label: 'Page views',
       value: 'views',
-      description: 'The total number of pageviews for your site.',
+      description: 'The total number of pageviews on the page',
     },
     {
       label: 'Visitors',
       value: 'visitors',
-      description: 'The total number of visitors to your site.',
+      description: 'The total number of visitors on the page',
+    },
+    {
+      label: 'Average time spent',
+      value: 'average_time_spent',
+      description: 'The average time spent on the page',
+    },
+    {
+      label: 'Bounce rate',
+      value: 'bouncerate',
+      description: 'The bounce rate on the page',
     },
   ];
 
@@ -312,17 +359,19 @@ export class CustomReportsCreateComponent {
       return;
     }
 
-    const [startDate, endDate] = date;
+    if (date.length !== 0) {
+      const [startDate, endDate] = date;
 
-    // make sure the timezone offset is correct
-    this.dateRange.set({
-      start: dayjs(startDate)
-        .utc()
-        .format('YYYY-MM-DDT00:00:00.000') as AAQueryDateStart,
-      end: dayjs(endDate || startDate)
-        .utc()
-        .format('YYYY-MM-DDT23:59:59.999') as AAQueryDateEnd,
-    });
+      // make sure the timezone offset is correct
+      this.dateRange.set({
+        start: dayjs(startDate)
+          .utc()
+          .format('YYYY-MM-DDT00:00:00.000') as AAQueryDateStart,
+        end: dayjs(endDate || startDate)
+          .utc()
+          .format('YYYY-MM-DDT23:59:59.999') as AAQueryDateEnd,
+      });
+    }
   }
 
   selectPages(pages: PageSelectionData['pages']) {
@@ -342,7 +391,7 @@ export class CustomReportsCreateComponent {
     this.selectedReportDimensions.set(dimension);
   }
 
-  selectGranularity(granularity: string) {
+  selectGranularity(granularity: string | null) {
     this.selectedGranularity.set(granularity as ReportGranularity);
   }
 
@@ -357,11 +406,6 @@ export class CustomReportsCreateComponent {
 
   get isAccordionExpanded(): boolean {
     return this.reportUrls().length < 10;
-  }
-
-  // there doesn't seem to be an option to have granularity of 'none'
-  isGranularitySelected(): boolean {
-    return this.config().granularity && this.config().granularity !== 'none';
   }
 
   openLink(event: MouseEvent, link: string) {
