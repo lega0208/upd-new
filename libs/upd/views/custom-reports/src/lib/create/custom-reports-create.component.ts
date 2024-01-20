@@ -170,7 +170,7 @@ export class CustomReportsCreateComponent {
     header: title(),
   }));
 
-  urlCol = this.i18n.service.translationSignal('Title', (url) => ({
+  urlCol = this.i18n.service.translationSignal('URL', (url) => ({
     field: 'url',
     header: url(),
   }));
@@ -258,6 +258,26 @@ export class CustomReportsCreateComponent {
       value: 'bouncerate',
       description: 'The bounce rate on the page',
     },
+    {
+      label: 'Navigation menu initiated',
+      value: 'nav_menu_initiated',
+      description: 'The number of times the navigation menu was opened',
+    },
+    {
+      label: '"Did you find what you were looking for?" - Submit',
+      value: 'dyf_submit',
+      description: 'The number of times the submit button was clicked',
+    },
+    {
+      label: '"Did you find what you were looking for?" - Yes',
+      value: 'dyf_yes',
+      description: 'The number of times the "yes" button was clicked',
+    },
+    {
+      label: '"Did you find what you were looking for?" - No',
+      value: 'dyf_no',
+      description: 'The number of times the "no" button was clicked',
+    },
   ];
 
   reportDimensions = [
@@ -266,6 +286,10 @@ export class CustomReportsCreateComponent {
     { label: 'Regions', value: 'region', description: '' },
     { label: 'Cities', value: 'city', description: '' },
     { label: 'Countries', value: 'country', description: '' },
+    { label: 'Referrer', value: 'referrer', description: '' },
+    { label: 'Referrer type', value: 'referrer_type', description: '' },
+    { label: 'Previous page', value: 'prev_page', description: '' },
+    { label: 'Time spent', value: 'time_spent', description: '' },
   ];
 
   constructor() {
