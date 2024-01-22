@@ -75,29 +75,24 @@ export class CalendarComponent implements OnChanges {
 
         if (dates.length === 0 || dates.length === 2) {
           this.dateChange.emit(dates);
+          this.calendarDates = dates;
         }
       },
       { allowSignalWrites: true },
     );
   }
 
-  onWeekSelect() {
-    const [startDate, endDate] = this.dates();
-
+  processDateSelection(startDate: Date, endDate: Date, isWeekSelect = false) {
     if (!startDate) {
       this.resetSelection();
       return;
     }
 
-    if (startDate.getDay() === 6) {
-      this.resetSelection();
-      this.dateChange.emit(new Date());
-      return;
-    }
-
     if (!endDate) {
-      this.disabledDays = [0, 1, 2, 3, 4, 5];
       this.minSelectableDate = startDate;
+      if (isWeekSelect) {
+        this.disabledDays = [0, 1, 2, 3, 4, 5];
+      }
       return;
     }
 
@@ -107,17 +102,10 @@ export class CalendarComponent implements OnChanges {
     }
 
     this.minSelectableDate = new Date(2020, 0, 1);
-    this.disabledDays = [1, 2, 3, 4, 5, 6];
-  }
 
-  onMonthChange(date: Date): void {
-    // is this right? seems like it replaces values when it should be adding them?
-    const selectedDate =
-      this.dates().length === 2 ? dayjs(date).endOf('month') : dayjs(date);
-
-    this.dates.mutate(
-      (dates) => (dates[dates.length - 1] = selectedDate.toDate()),
-    );
+    if (isWeekSelect) {
+      this.disabledDays = [1, 2, 3, 4, 5, 6];
+    }
   }
 
   resetSelection(): void {
@@ -129,12 +117,16 @@ export class CalendarComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (!changes['granularity']) return;
 
+    this.disabledDays = [];
+    this.minSelectableDate = new Date(2020, 0, 1);
+
     if (this.granularity === 'day') {
       this.maxSelectableDate = dayjs().subtract(1, 'day').toDate();
       return;
     }
 
     if (this.granularity === 'week') {
+      this.disabledDays = [1, 2, 3, 4, 5, 6];
       this.maxSelectableDate = dayjs()
         .subtract(1, 'week')
         .endOf('week')
@@ -164,13 +156,32 @@ export class CalendarComponent implements OnChanges {
       this.dates.mutate((dates) => dates.push(date));
     }
 
+    const [startDate, endDate] = this.dates();
+
+    if (granularity === 'day') {
+      this.processDateSelection(startDate, endDate);
+      return;
+    }
+
     if (granularity === 'week') {
-      this.onWeekSelect();
+      if (!startDate || startDate.getDay() === 6) {
+        this.resetSelection();
+        if (startDate && startDate.getDay() === 6) {
+          this.dateChange.emit(new Date());
+        }
+        return;
+      }
+      this.processDateSelection(startDate, endDate, true);
       return;
     }
 
     if (granularity === 'month') {
-      this.onMonthChange(date);
+      const selectedDate =
+        this.dates().length === 2 ? dayjs(date).endOf('month') : dayjs(date);
+      this.dates.mutate(
+        (dates) => (dates[dates.length - 1] = selectedDate.toDate()),
+      );
+      this.processDateSelection(startDate, endDate);
       return;
     }
   }
@@ -179,8 +190,6 @@ export class CalendarComponent implements OnChanges {
     if (!preset) {
       return;
     }
-
-    console.log(preset);
 
     const { start, end } = preset;
 
