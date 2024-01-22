@@ -60,6 +60,7 @@ import { CheckboxComponent } from './checkbox/checkbox.component';
 import { TabsComponent } from './tabs/tabs.component';
 import { InputSwitchComponent } from './input-switch/input-switch.component';
 import { RadioComponent } from './radio/radio.component';
+import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
 
 @NgModule({
   imports: [
@@ -124,6 +125,7 @@ import { RadioComponent } from './radio/radio.component';
     TabsComponent,
     InputSwitchComponent,
     RadioComponent,
+    DidYouKnowComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -167,6 +169,7 @@ import { RadioComponent } from './radio/radio.component';
     InputSwitchComponent,
     RadioComponent,
     ProgressBar,
+    DidYouKnowComponent,
   ],
 })
 export class UpdComponentsModule {}
