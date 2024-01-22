@@ -338,7 +338,7 @@ export class CustomReportsCreateComponent {
     const validUrls = this.validUrls();
 
     for (const url of [...parsedUrls, ...this.combinedSelectedUrls()]) {
-      if (validUrls.includes(url)) {
+      if (validUrls.includes(url) && !reportUrls.includes(url)) {
         validNewUrls.add(url);
         continue;
       }
