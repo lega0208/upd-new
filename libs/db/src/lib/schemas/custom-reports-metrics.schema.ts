@@ -204,7 +204,6 @@ CustomReportsMetricsSchema.index(
       urls: { $exists: true },
       grouped: true,
     },
-    unique: true,
   },
 );
 
@@ -228,6 +227,5 @@ CustomReportsMetricsSchema.index(
       grouped: true,
       granularity: 'day',
     },
-    unique: true,
   },
 );
