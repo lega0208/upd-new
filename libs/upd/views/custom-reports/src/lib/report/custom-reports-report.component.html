@@ -4,7 +4,7 @@
 
 <div class="card-container">
   <div class="card">
-    <h3 class="card-header">Preview</h3>
+    <h3 class="card-header">Report details</h3>
     <div class="card-body">
       <h4>Granularity</h4>
       <p>{{ granularity() | translate }}</p>
@@ -13,9 +13,17 @@
       <h4>End Date</h4>
       <p>{{ endDate() }}</p>
       <h4>URLs</h4>
-      <ul>
-        <li *ngFor="let url of urls()">{{ url }}</li>
-      </ul>
+      <upd-accordion
+        [styleClass]="'mb-2'"
+        [expanded]="isAccordionExpanded"
+        title="{{
+          'URLs added to report' | translate: { count: urls().length }
+        }} "
+      >
+        <ul>
+          <li *ngFor="let url of urls()">{{ url }}</li>
+        </ul>
+      </upd-accordion>
       <h4>Grouped pages</h4>
       <p>{{ grouped() }}</p>
       <h4>Metrics</h4>
@@ -28,9 +36,11 @@
   </div>
 </div>
 
+<upd-did-you-know *ngIf="status() !== 'complete'"></upd-did-you-know>
+
 <div
   [ngClass]="{
-    'w-50 d-inline-block mx-auto mt-5': status() !== 'complete'
+    'w-100 d-inline-block mx-auto mt-5': status() !== 'complete'
   }"
   *ngIf="!error() && data()?.length !== 0"
 >
