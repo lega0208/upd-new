@@ -70,9 +70,9 @@ export class CustomReportsCreateComponent {
   private i18n = inject(I18nFacade);
   private readonly api = inject(ApiService);
 
-  storageConfig: ReportConfig | undefined =
+  storageConfig: ReportConfig | null =
     history.state['config'] ||
-    JSON.parse(sessionStorage.getItem('custom-reports-config') || '');
+    JSON.parse(sessionStorage.getItem('custom-reports-config') || 'null');
 
   // get required data from the api
   selectionData: Signal<PageSelectionData | null> = toSignal(
@@ -302,14 +302,6 @@ export class CustomReportsCreateComponent {
     );
 
     effect(() => {
-      console.log('\n\ncurrent sessionStorage:');
-      console.log(
-        JSON.parse(sessionStorage.getItem('custom-reports-config') || ''),
-      );
-
-      console.log('\nsaving to sessionStorage:');
-      console.log(JSON.stringify(this.config(), null, 2));
-
       sessionStorage.setItem(
         'custom-reports-config',
         JSON.stringify(this.config()),
