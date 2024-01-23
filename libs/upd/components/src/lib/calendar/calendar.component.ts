@@ -36,7 +36,7 @@ export class CalendarComponent implements OnChanges {
   @Input() showPreset = false;
   @Input() showAction = false;
   @Input() required = false;
-  @Input() calendarDates?: Date[];
+  @Input() calendarDates: Date[] = [];
   @Input() dateFormat = 'M dd yy';
 
   @Output() dateChange = new EventEmitter<Date[] | Date>();
@@ -82,28 +82,29 @@ export class CalendarComponent implements OnChanges {
     );
   }
 
-  processDateSelection(startDate: Date, endDate: Date, isWeekSelect = false) {
+  processDateSelection(
+    startDate: Date,
+    endDate: Date,
+    currentDate: Date,
+    isWeekSelect = false,
+  ) {
     if (!startDate) {
       this.resetSelection();
-      return;
     }
 
-    if (!endDate) {
+    if (!endDate && isWeekSelect) {
       this.minSelectableDate = startDate;
-      if (isWeekSelect) {
-        this.disabledDays = [0, 1, 2, 3, 4, 5];
-      }
+      this.disabledDays = [0, 1, 2, 3, 4, 5];
       return;
     }
 
     if (dayjs(endDate).isBefore(dayjs(startDate))) {
       this.resetSelection();
-      return;
+      this.dates.set([currentDate]);
     }
 
-    this.minSelectableDate = new Date(2020, 0, 1);
-
     if (isWeekSelect) {
+      this.minSelectableDate = new Date(2020, 0, 1);
       this.disabledDays = [1, 2, 3, 4, 5, 6];
     }
   }
@@ -111,21 +112,20 @@ export class CalendarComponent implements OnChanges {
   resetSelection(): void {
     this.dates.set([]);
     this.minSelectableDate = new Date(2020, 0, 1);
-    this.disabledDays = [1, 2, 3, 4, 5, 6];
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (!changes['granularity']) return;
 
     this.disabledDays = [];
-    this.minSelectableDate = new Date(2020, 0, 1);
 
-    if (this.granularity === 'day') {
+    if (this.granularity === 'day' || this.granularity === 'none') {
       this.maxSelectableDate = dayjs().subtract(1, 'day').toDate();
       return;
     }
 
     if (this.granularity === 'week') {
+      this.minSelectableDate = new Date(2020, 0, 1);
       this.disabledDays = [1, 2, 3, 4, 5, 6];
       this.maxSelectableDate = dayjs()
         .subtract(1, 'week')
@@ -158,11 +158,6 @@ export class CalendarComponent implements OnChanges {
 
     const [startDate, endDate] = this.dates();
 
-    if (granularity === 'day') {
-      this.processDateSelection(startDate, endDate);
-      return;
-    }
-
     if (granularity === 'week') {
       if (!startDate || startDate.getDay() === 6) {
         this.resetSelection();
@@ -171,7 +166,7 @@ export class CalendarComponent implements OnChanges {
         }
         return;
       }
-      this.processDateSelection(startDate, endDate, true);
+      this.processDateSelection(startDate, endDate, date, true);
       return;
     }
 
@@ -181,9 +176,11 @@ export class CalendarComponent implements OnChanges {
       this.dates.mutate(
         (dates) => (dates[dates.length - 1] = selectedDate.toDate()),
       );
-      this.processDateSelection(startDate, endDate);
+      this.processDateSelection(startDate, endDate, date);
       return;
     }
+
+    this.processDateSelection(startDate, endDate, date);
   }
 
   onPresetSelect(preset: DateRangePreset['value']) {

@@ -17,7 +17,7 @@
 >
   <ng-template *ngIf="showPreset && showAction" pTemplate="footer">
     <hr />
-    <ng-container *ngIf="showPreset && granularity === 'day'">
+    <ng-container *ngIf="showPreset && ( granularity === 'day' || granularity === 'none')">
       <strong>Preset: </strong>
       <upd-dropdown
         id="range-button"
