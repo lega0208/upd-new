@@ -117,10 +117,11 @@ export class CalendarComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (!changes['granularity']) return;
 
-    this.disabledDays = [];
-
-    if (this.granularity === 'day' || this.granularity === 'none') {
-      this.maxSelectableDate = dayjs().subtract(1, 'day').toDate();
+    if (this.granularity === 'month') {
+      this.maxSelectableDate = dayjs()
+        .subtract(1, 'month')
+        .endOf('month')
+        .toDate();
       return;
     }
 
@@ -134,10 +135,7 @@ export class CalendarComponent implements OnChanges {
       return;
     }
 
-    this.maxSelectableDate = dayjs()
-      .subtract(1, 'month')
-      .endOf('month')
-      .toDate();
+    this.maxSelectableDate = dayjs().subtract(1, 'day').toDate();
   }
 
   closeCalendar() {
