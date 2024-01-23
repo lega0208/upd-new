@@ -56,9 +56,9 @@
 
       <div
         [title]="'Validation Results'"
-        *ngIf="invalidUrls.length > 0 || reportUrls.length > 0"
+        *ngIf="invalidUrls().length > 0 || reportUrls().length > 0"
       >
-        <div *ngIf="reportUrls.length > 0">
+        <div *ngIf="reportUrls().length > 0">
           <upd-alert
             [type]="'success'"
             position="static"
@@ -74,7 +74,7 @@
             </ol>
           </upd-alert>
         </div>
-        <div *ngIf="invalidUrls.length > 0">
+        <div *ngIf="invalidUrls().length > 0">
           <upd-alert
             [type]="'danger'"
             [dismissible]="false"
@@ -85,9 +85,9 @@
               >error</span
             >
             <span>Invalid URLs:</span>
-            <ul>
+            <ol>
               <li *ngFor="let url of invalidUrls()">{{ url }}</li>
-            </ul>
+            </ol>
           </upd-alert>
         </div>
       </div>
