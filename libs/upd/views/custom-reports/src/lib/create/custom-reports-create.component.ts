@@ -70,6 +70,8 @@ export class CustomReportsCreateComponent {
   private i18n = inject(I18nFacade);
   private readonly api = inject(ApiService);
 
+  lang = this.i18n.currentLang;
+
   storageConfig: ReportConfig | null =
     history.state['config'] ||
     JSON.parse(sessionStorage.getItem('custom-reports-config') || 'null');
@@ -99,9 +101,25 @@ export class CustomReportsCreateComponent {
   );
 
   pages = computed(() => this.selectionData()?.pages || []);
-  tasks = computed(() => this.selectionData()?.tasks || []);
-  projects = computed(() => this.selectionData()?.projects || []);
+  tasks = computed(
+    () =>
+      this.selectionData()?.tasks.map((task) => {
+        return {
+          ...task,
+          title: this.i18n.service.translate(task.title, this.lang()),
+        };
+      }) || [],
+  );
+  projects = computed(
+    () =>
+      this.selectionData()?.projects.map((project) => {
+        return {
+          ...project,
+          title: this.i18n.service.translate(project.title, this.lang()),
+        };
+      }) || [],
 
+  );
   pagesMap = computed(
     () => new Map(this.pages().map((page) => [page._id, page])),
   );
@@ -109,8 +127,6 @@ export class CustomReportsCreateComponent {
   validationTriggered = false;
 
   error: WritableSignal<string | null> = signal(null);
-
-  lang = this.i18n.currentLang;
 
   calendarDateFormat = computed(() =>
     this.lang() === 'en-CA' ? 'M dd yy' : 'dd M yy',
@@ -132,7 +148,7 @@ export class CustomReportsCreateComponent {
   isGrouped = signal(this.storageConfig?.grouped || false);
 
   readonly granularityOptions: DropdownOption<ReportGranularity>[] = [
-    { label: 'None', value: 'none'},
+    { label: 'None', value: 'none' },
     { label: 'Daily', value: 'day' },
     { label: 'Weekly', value: 'week' },
     { label: 'Monthly', value: 'month' },
@@ -442,11 +458,13 @@ export class CustomReportsCreateComponent {
     const config = this.config();
 
     const startDate = dayjs.utc(config.dateRange.start);
+    const endDate = dayjs.utc(config.dateRange.end);
 
     return (
       !!config.dateRange.start &&
       !!config.dateRange.end &&
-      startDate.isBefore(today())
+      startDate.isBefore(today()) &&
+      endDate.isAfter(startDate)
     );
   }
 
