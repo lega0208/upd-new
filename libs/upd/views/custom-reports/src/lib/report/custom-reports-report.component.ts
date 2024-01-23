@@ -77,7 +77,9 @@ export class CustomReportsReportComponent implements OnInit {
       ? 'Daily'
       : this.config()?.granularity === 'month'
       ? 'Monthly'
-      : 'Weekly',
+      : this.config()?.granularity === 'week'
+      ? 'Weekly'
+      : 'None'
   );
   startDate = computed(() =>
     dayjs.utc(this.config()?.dateRange?.start).format('YYYY-MM-DD'),
@@ -160,6 +162,10 @@ export class CustomReportsReportComponent implements OnInit {
         // debounceTime(500), // play around with this if we want to try to avoid flickering
       ),
     );
+  }
+
+  get isAccordionExpanded(): boolean {
+    return this.urls().length < 10;
   }
 
   ngOnInit() {

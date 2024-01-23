@@ -132,6 +132,7 @@ export class CustomReportsCreateComponent {
   isGrouped = signal(this.storageConfig?.grouped || false);
 
   readonly granularityOptions: DropdownOption<ReportGranularity>[] = [
+    { label: 'None', value: 'none'},
     { label: 'Daily', value: 'day' },
     { label: 'Weekly', value: 'week' },
     { label: 'Monthly', value: 'month' },
