@@ -40,7 +40,7 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
   @Input() selectedNodes: SelectedNode[] = [];
   @Input() node: SelectedNode | null = null;
   exportCols: ColumnConfig[] = [];
-  @Output() pageSelectionChanged = new EventEmitter<any[]>();
+  @Output() pageSelectionChanged = new EventEmitter<T[]>();
 
   ngOnInit() {
     this.exportCols = this.cols.filter((col) => !col.hideTable);
@@ -70,7 +70,7 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
     return this.cols.map((obj) => obj.field);
   }
 
-  selectedPages: any[] = [];
+  selectedPages: T[] = [];
 
   onSelectionChange(value = []) {
     this.selectedPages = value;

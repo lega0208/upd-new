@@ -20,6 +20,7 @@
     [value]="item.value"
     [(ngModel)]="selectedItems"
     [inputId]="id + i"
+    [ngClass]="{ 'ng-invalid ng-dirty': invalid }"
     (onChange)="updateIndividualSelection()"
   >
   </p-checkbox>

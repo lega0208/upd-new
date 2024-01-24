@@ -13,6 +13,7 @@
   [view]="granularity === 'month' ? 'month' : 'date'"
   [rangeSeparator]="'to' | translate"
   [dateFormat]="dateFormat"
+  [ngClass]="{ 'ng-invalid ng-dirty': invalid }"
   (onSelect)="handleSelect(granularity, $event)"
 >
   <ng-template *ngIf="showPreset && showAction" pTemplate="footer">
