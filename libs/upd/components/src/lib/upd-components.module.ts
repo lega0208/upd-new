@@ -25,6 +25,7 @@ import { DataCardComponent } from './data-card/data-card.component';
 import { DataTableComponent } from './data-table/data-table.component';
 import { DateSelectorComponent } from './date-selector/date-selector.component';
 import { DateSelectorDropdownComponent } from './date-selector/date-selector-dropdown.component';
+import { NavTabsComponent } from './nav-tabs/nav-tabs.component';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -97,6 +98,7 @@ import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
     DataTableComponent,
     DateSelectorComponent,
     DateSelectorDropdownComponent,
+    NavTabsComponent,
     DataCardComponent,
     AlertComponent,
     AccordionComponent,
@@ -140,6 +142,7 @@ import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
     DataTableComponent,
     DateSelectorComponent,
     DateSelectorDropdownComponent,
+    NavTabsComponent,
     DataCardComponent,
     AlertComponent,
     AccordionComponent,
