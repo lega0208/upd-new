@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, ViewportScroller } from '@angular/common';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -68,6 +68,7 @@ export class CustomReportsCreateComponent {
   private route = inject(ActivatedRoute);
   private zone: NgZone = inject(NgZone);
   private i18n = inject(I18nFacade);
+  private scroller = inject(ViewportScroller);
   private readonly api = inject(ApiService);
 
   lang = this.i18n.currentLang;
@@ -101,25 +102,8 @@ export class CustomReportsCreateComponent {
   );
 
   pages = computed(() => this.selectionData()?.pages || []);
-  tasks = computed(
-    () =>
-      this.selectionData()?.tasks.map((task) => {
-        return {
-          ...task,
-          title: this.i18n.service.translate(task.title, this.lang()),
-        };
-      }) || [],
-  );
-  projects = computed(
-    () =>
-      this.selectionData()?.projects.map((project) => {
-        return {
-          ...project,
-          title: this.i18n.service.translate(project.title, this.lang()),
-        };
-      }) || [],
-
-  );
+  tasks = computed(() => this.selectionData()?.tasks || []);
+  projects = computed(() => this.selectionData()?.projects || []);
   pagesMap = computed(
     () => new Map(this.pages().map((page) => [page._id, page])),
   );
@@ -185,6 +169,7 @@ export class CustomReportsCreateComponent {
   titleCol = this.i18n.service.translationSignal('Title', (title) => ({
     field: 'title',
     header: title(),
+    translate: true,
   }));
 
   urlCol = this.i18n.service.translationSignal('URL', (url) => ({
@@ -480,6 +465,10 @@ export class CustomReportsCreateComponent {
     if (this.validationTriggered) {
       this.validationTriggered = false;
     }
+  }
+
+  scrollToAnchor(link: string) {
+    this.scroller.scrollToAnchor(link);
   }
 
   async createReport(config: ReportConfig) {
