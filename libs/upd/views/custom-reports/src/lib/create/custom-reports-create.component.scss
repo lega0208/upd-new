@@ -1,3 +1,10 @@
+.required-star {
+  color: red;
+
+  &::after {
+    content: '*';
+  }
+}
 .urls-added-table a {
   color: #6c757d;
   text-decoration: underline;
@@ -5,13 +12,11 @@
   text-overflow: ellipsis;
 }
 
-
 li[role='presentation'] a {
   color: #6c757d;
   text-decoration: none;
   border-bottom: 0;
 }
-
 
 li[role='presentation'] a:hover {
   background-color: #e3f2fd;
@@ -23,10 +28,19 @@ li[role='presentation'].p-highlight a {
   border-bottom: 4px solid #2e5ea7;
 }
 
+.alert-link {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* Added by Kole - Dec 2023 */
 .add-pages-card {
   border: none;
   background: none;
+}
+
+.card-invalid {
+  border: 1px solid red;
 }
 
 .add-pages-card .p-tabview .p-tabview-nav {

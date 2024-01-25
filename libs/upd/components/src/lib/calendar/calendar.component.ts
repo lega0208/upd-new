@@ -38,6 +38,7 @@ export class CalendarComponent implements OnChanges {
   @Input() required = false;
   @Input() calendarDates: Date[] = [];
   @Input() dateFormat = 'M dd yy';
+  @Input() invalid = false;
 
   @Output() dateChange = new EventEmitter<Date[] | Date>();
 

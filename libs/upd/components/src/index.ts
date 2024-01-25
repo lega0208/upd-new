@@ -17,7 +17,6 @@ export * from './lib/loading-spinner/loading-spinner.component';
 export * from './lib/input-switch/input-switch.component';
 export * from './lib/modal/modal.component';
 export * from './lib/nav-tabs/nav-tabs.component';
-export * from './lib/tabs/tabs.component';
 export * from './lib/page-404/page-404.component';
 export * from './lib/project-status-label/project-status-label.component';
 export * from './lib/project-header/project-header.component';

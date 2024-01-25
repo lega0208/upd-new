@@ -12,6 +12,7 @@ export class CheckboxComponent<
   @Input() showSelectAll = false;
   @Input() items: T[] = [];
   @Input() selectAllText = '';
+  @Input() invalid = false;
   @Input() @Required id!: string;
 
   private _selectedItems: T['value'][] = [];

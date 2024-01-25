@@ -57,7 +57,6 @@ import { FilterTableComponent } from './filter-table/filter-table.component';
 import { FilterTableSelectionComponent } from './filter-table-selection/filter-table-selection.component';
 import { CalendarComponent } from './calendar/calendar.component';
 import { CheckboxComponent } from './checkbox/checkbox.component';
-import { TabsComponent } from './tabs/tabs.component';
 import { InputSwitchComponent } from './input-switch/input-switch.component';
 import { RadioComponent } from './radio/radio.component';
 import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
@@ -122,7 +121,6 @@ import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
     FilterTableSelectionComponent,
     CalendarComponent,
     CheckboxComponent,
-    TabsComponent,
     InputSwitchComponent,
     RadioComponent,
     DidYouKnowComponent,
@@ -165,7 +163,6 @@ import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
     FilterTableSelectionComponent,
     CheckboxComponent,
     DropdownComponent,
-    TabsComponent,
     InputSwitchComponent,
     RadioComponent,
     ProgressBar,
