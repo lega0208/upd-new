@@ -25,8 +25,13 @@ export class ReportsFacade {
         title: lang === EN_CA ? task.en_title : task.fr_title,
         en_filename: task.en_attachment[0]?.filename,
         fr_filename: task.fr_attachment[0]?.filename,
-        en_attachment: task.en_attachment[0].storage_url,
-        fr_attachment: task.fr_attachment[0].storage_url,
+        en_attachment: task.en_attachment[0]
+          ? task.en_attachment[0].storage_url
+          : null,
+        fr_attachment:
+          task.fr_attachment && task.fr_attachment[0]
+            ? task.fr_attachment[0].storage_url
+            : null,
       })),
     ),
   );
