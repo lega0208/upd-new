@@ -14,7 +14,13 @@ export function createQuery(config: AAQueryConfig) {
     .setDimension(dimension(dimensionName))
     .setMetrics(metricsConfig(metricNames))
     .setGlobalFilters([
-      { type: 'dateRange', dateRange: `${dateRange.start}/${dateRange.end}` },
+      {
+        type: 'dateRange',
+        dateRange: `${dateRange.start.replace(
+          /z$/i,
+          '',
+        )}/${dateRange.end.replace(/z$/i, '')}`,
+      },
       { type: 'segment', segmentDefinition },
       // <- breakdown goes here if not using dimension
     ])
