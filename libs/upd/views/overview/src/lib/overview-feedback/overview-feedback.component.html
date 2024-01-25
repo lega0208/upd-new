@@ -44,3 +44,20 @@
     </div>
   </div>
 </div>
+
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [filter]="false"
+        [sort]="false"
+        [pagination]="true"
+        [data]="(comparisonFeedbackPagesTable$ | async) || []"
+        [cols]="feedbackPagesTableCols"
+        [title]="'all-pages-feedback'"
+      >
+      </upd-data-table-card>
+    </div>
+  </div>
+</div>
