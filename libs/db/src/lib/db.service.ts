@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { type FilterQuery, Model, mongo } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { type Connection, type FilterQuery, Model, mongo } from 'mongoose';
 import { uniq } from 'rambdax';
 import {
   CallDriver,
@@ -116,6 +116,8 @@ export class DbService {
     private customReportsRegistry: Model<CustomReportsRegistry>,
     @InjectModel(CustomReportsMetrics.name, 'defaultConnection')
     private customReportsMetrics: CustomReportsModel,
+    @InjectConnection('defaultConnection')
+    private connection: Connection,
   ) {}
 
   @AsyncLogTiming
@@ -162,6 +164,25 @@ export class DbService {
   @AsyncLogTiming
   async validatePageMetricsRefs(filter: FilterQuery<PageMetrics> = {}) {
     return await this.simplifiedValidatePageRefs(filter);
+  }
+
+  /**
+   * Wraps a function in a transaction
+   * The session *must* be passed to each operation that should be part of the transaction
+   * @param fn - The function to wrap in a transaction
+   */
+  async transaction(fn: (session: mongo.ClientSession) => Promise<void>) {
+    const session = await this.connection.startSession();
+
+    try {
+      await session.withTransaction(fn, { retryWrites: true });
+    } catch (err) {
+      console.error('Transaction aborted. Caught error during transaction.');
+
+      throw err;
+    } finally {
+      await session.endSession();
+    }
   }
 
   private async validateAllPageMetricsRefs() {

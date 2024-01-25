@@ -71,16 +71,17 @@ export class FetchAndProcessDataProcessor extends WorkerHost {
 
     const queryResults = await this.aaClient.execute(createQuery(query));
 
-    const bulkWriteOps = processResults(
-      config,
-      query,
-      dataPoints,
-      queryResults,
-    );
+    const updates = processResults(config, query, dataPoints, queryResults);
 
     // todo: handle errors
 
-    await this.db.collections.customReportsMetrics.bulkWrite(bulkWriteOps);
+    if (typeof updates === 'function') {
+      await updates(this.db);
+
+      return;
+    }
+
+    await this.db.collections.customReportsMetrics.bulkWrite(updates);
 
     return;
   }

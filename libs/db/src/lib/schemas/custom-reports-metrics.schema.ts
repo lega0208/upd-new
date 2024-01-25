@@ -1,4 +1,4 @@
-import { logJson } from '@dua-upd/utils-common';
+import { isNullish, logJson } from '@dua-upd/utils-common';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types, Schema as MongooseSchema, Model } from 'mongoose';
 import type {
@@ -6,7 +6,7 @@ import type {
   ReportConfig,
   ReportGranularity,
 } from '@dua-upd/types-common';
-import { filter, mapObject } from 'rambdax';
+import { filter, map } from 'rambdax';
 
 export const granularities: readonly ReportGranularity[] = [
   'day',
@@ -105,30 +105,48 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
         ? { date: document.startDate }
         : { startDate: document.startDate, endDate: document.endDate };
 
-    type Metrics = { [p: string]: { [metricName: string]: number } };
+    type Metrics = { [metricName: string]: number };
+
+    type DimensionMetrics = { dimensionValue: string } & {
+      [metricName: string]: number;
+    };
 
     const filterMetrics = filter((v, k) => metrics.includes(k));
 
-    const filterDimensionMetrics = mapObject(filterMetrics);
+    const dimensionMetrics = ['dimensionValue', ...metrics];
+    const filterDimensionMetrics = filter((v, k) =>
+      dimensionMetrics.includes(k),
+    );
 
     const docToRows = (document: ICustomReportsMetrics) => {
       const dates = toDates(document);
 
-      const urls = grouped ? {} : { url: document.url };
+      const url = grouped ? {} : { url: document.url };
 
       if (breakdownDimension) {
-        const dimensionMetricsByValue: Record<string, Metrics> =
-          filterDimensionMetrics(
-            document.metrics_by?.[breakdownDimension] || {},
-          );
+        const dimensionMetrics = map(
+          filterDimensionMetrics,
+          document.metrics_by?.[breakdownDimension] || [],
+        ) as DimensionMetrics[];
 
-        return Object.entries(dimensionMetricsByValue).map(
-          ([dimensionValue, dimensionMetrics]) => ({
-            ...dates,
-            ...urls,
-            [breakdownDimension]: dimensionValue,
-            ...dimensionMetrics,
-          }),
+        return dimensionMetrics.map(
+          ({ dimensionValue, ...dimensionMetrics }) => {
+            const row = {
+              ...dates,
+              ...url,
+              [breakdownDimension]: dimensionValue,
+              ...dimensionMetrics,
+            };
+
+            // fill in missing values with null
+            for (const metric of metrics) {
+              if (isNullish(row[metric])) {
+                row[metric] = null;
+              }
+            }
+
+            return row;
+          },
         );
       }
 
@@ -139,11 +157,20 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
         return [];
       }
 
-      return {
+      const row = {
         ...dates,
-        ...urls,
+        ...url,
         ...docMetrics,
       };
+
+      // fill in missing values with null
+      for (const metric of metrics) {
+        if (isNullish(row[metric])) {
+          row[metric] = null;
+        }
+      }
+
+      return row;
     };
 
     const sortRows = (a, b) => {

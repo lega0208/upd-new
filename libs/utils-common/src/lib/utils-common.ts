@@ -10,6 +10,12 @@ export function squishTrim<T extends string>(str?: T) {
   return (str?.replaceAll(/\s+/g, ' ').trim() as T) || '';
 }
 
+// Because including 0 is important 😉
+export function isNullish(val: unknown): val is null | undefined {
+  return val === null || val === undefined;
+}
+
+// Checks if an array has duplicate values (not including deep comparison)
 export const hasDuplicates = <T>(array: T[]) =>
   array.length !== 0 && new Set(array).size !== array.length;
 

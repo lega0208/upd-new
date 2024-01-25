@@ -158,7 +158,6 @@ export class CustomReportsService {
       return cachedReport;
     }
 
-    // todo: implement config caching?
     const config = (
       await this.db.collections.customReportsRegistry
         .findOne({ _id: new Types.ObjectId(reportId) })
@@ -264,7 +263,7 @@ export class CustomReportsService {
       const newDataPoints: ReportDataPoint[] = [];
 
       for (const dataPoint of dataPoints) {
-        const { metrics, breakdownDimension } = dataPoint;
+        const { metrics: metricsList, breakdownDimension } = dataPoint;
 
         const query: FilterQuery<CustomReportsMetrics> = omit(
           [
@@ -285,19 +284,28 @@ export class CustomReportsService {
           continue;
         }
 
-        const metricsObject = breakdownDimension
+        const metrics = breakdownDimension
           ? record.metrics_by?.[breakdownDimension]
           : record.metrics;
 
-        if (!metricsObject) {
+        if (!metrics) {
           newDataPoints.push(dataPoint);
           continue;
         }
 
         const newDataPointMetrics: AAMetricName[] = [];
 
-        for (const metric of metrics) {
-          if (!metricsObject[metric]) {
+        for (const metric of metricsList) {
+          // if breakdownDimension
+          if (
+            Array.isArray(metrics) &&
+            !metrics.some((valueMetrics) => valueMetrics[metric])
+          ) {
+            newDataPointMetrics.push(metric);
+            continue;
+          }
+
+          if (!(<typeof record.metrics>metrics)[metric]) {
             newDataPointMetrics.push(metric);
           }
         }

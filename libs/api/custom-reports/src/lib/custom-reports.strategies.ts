@@ -1,35 +1,22 @@
-import { CustomReportsMetrics } from '@dua-upd/db';
+import { mongo, Types, UpdateQuery } from 'mongoose';
+import { keys, union } from 'rambdax';
+import { CustomReportsMetrics, DbService } from '@dua-upd/db';
 import { type AAResponseBody, queryDateFormat } from '@dua-upd/external-data';
 import type {
+  AADimensionName,
   AAMetricName,
   AAQueryConfig,
   AAQueryDateRange,
+  DimensionMetrics,
   ReportConfig,
 } from '@dua-upd/types-common';
-import { AADimensionName } from '@dua-upd/types-common';
-import { dateRangeToGranularity } from '@dua-upd/utils-common';
-import { mongo, Types } from 'mongoose';
+import {
+  arrayToDictionary,
+  dateRangeToGranularity,
+} from '@dua-upd/utils-common';
 import type { ReportDataPoint } from './custom-reports.service';
 
-// may very well be unnecessary
-/**
- * A strategy to define the logic for each step of the pipeline,
- *  to be selected based on the report config.
- */
-export interface CustomReportsStrategy {
-  /**
-   * Parse the query results into a list of bulk write operations for inserting
-   * into the database.
-   * @param query
-   * @param dataPoints
-   * @param results
-   */
-  parseQueryResults<R extends AAResponseBody>(
-    query: AAQueryConfig,
-    dataPoints: ReportDataPoint[],
-    results: R,
-  ): mongo.AnyBulkWriteOperation<CustomReportsMetrics>[];
-}
+// todo: refactor all the strategy stuff...
 
 /**
  * Derive the individual data points to be inserted from query results into the database.
@@ -124,7 +111,7 @@ export function decomposeConfig(config: ReportConfig) {
 export function dataPointToBulkInsert(
   dataPoint: ReportDataPoint,
   metrics: mongo.MatchKeysAndValues<CustomReportsMetrics>,
-): mongo.AnyBulkWriteOperation<CustomReportsMetrics> {
+) {
   const { startDate, endDate, url, urls, grouped, granularity } = dataPoint;
 
   if (grouped && !urls?.length) {
@@ -181,25 +168,21 @@ export function dataPointToBulkInsert(
       },
       upsert: true,
     },
-  };
+  } satisfies mongo.AnyBulkWriteOperation<CustomReportsMetrics>;
 }
 
 export function getStrategy(config: ReportConfig) {
   const { grouped, breakdownDimension } = config;
 
-  if (grouped && breakdownDimension) {
-    return groupedWithDimensionStrategy;
+  if (breakdownDimension) {
+    return withDimensionStrategy;
   }
 
-  if (grouped && !breakdownDimension) {
+  if (grouped) {
     return groupedNoDimensionStrategy;
   }
 
-  if (!grouped && breakdownDimension) {
-    return ungroupedWithDimensionStrategy;
-  }
-
-  if (!grouped && !breakdownDimension) {
+  if (!grouped) {
     return ungroupedNoDimensionStrategy;
   }
 
@@ -212,7 +195,7 @@ export function processResults(
   dataPoints: ReportDataPoint[],
   results: AAResponseBody,
 ) {
-  return getStrategy(config).toBulkInserts(dataPoints, query, results);
+  return getStrategy(config).toDbUpdates(dataPoints, query, results);
 }
 
 export interface QueryResultsProcessor<ParsedData> {
@@ -221,14 +204,32 @@ export interface QueryResultsProcessor<ParsedData> {
     dataPoint: ReportDataPoint,
     parsedData: ParsedData,
   ): mongo.MatchKeysAndValues<CustomReportsMetrics>;
-  toBulkInserts(
+}
+
+export interface NoDimensionQueryResultsProcessor<ParsedData>
+  extends QueryResultsProcessor<ParsedData> {
+  toDbUpdates(
     dataPoints: ReportDataPoint[],
     query: AAQueryConfig,
     queryResults: AAResponseBody,
   ): mongo.AnyBulkWriteOperation<CustomReportsMetrics>[];
 }
 
-export const ungroupedNoDimensionStrategy: QueryResultsProcessor<
+export type DimensionQueryResultsProcessor<ParsedData> =
+  QueryResultsProcessor<ParsedData> & {
+    /*
+     * instead of returning a list of bulk write operations, return a function
+     * that just needs to be passed an instance of the db service, and will perform
+     * all the updates itself
+     */
+    toDbUpdates(
+      dataPoints: ReportDataPoint[],
+      query: AAQueryConfig,
+      queryResults: AAResponseBody,
+    ): (db: DbService) => Promise<void>;
+  };
+
+export const ungroupedNoDimensionStrategy: NoDimensionQueryResultsProcessor<
   Record<string, { [metricName: string]: number }>
 > = {
   parseQueryResults(query, results) {
@@ -263,19 +264,20 @@ export const ungroupedNoDimensionStrategy: QueryResultsProcessor<
     const associatedResults = url ? resultsByUrl[url.slice(-255)] : undefined;
 
     if (!associatedResults) {
-      console.error('\nNo associated results found for url:');
-      console.error(url);
-      console.error('');
+      console.error(`
+        No associated results found for url:
+        ${url}
+      `);
     }
 
     return Object.fromEntries(
       metricNames.map((metricName) => [
-        `metrics.${metricName}`, // will need to adjust for breakdownDimension
+        `metrics.${metricName}`,
         associatedResults?.[metricName] || undefined,
       ]),
     );
   },
-  toBulkInserts(dataPoints, query, queryResults) {
+  toDbUpdates(dataPoints, query, queryResults) {
     const parsedData = this.parseQueryResults(query, queryResults);
 
     return dataPoints.map((dataPoint) => {
@@ -286,56 +288,118 @@ export const ungroupedNoDimensionStrategy: QueryResultsProcessor<
   },
 };
 
-export const ungroupedWithDimensionStrategy: QueryResultsProcessor<
-  Record<string, { [metricName: string]: number }>
+export const withDimensionStrategy: DimensionQueryResultsProcessor<
+  DimensionMetrics[]
 > = {
   parseQueryResults(query, results) {
     const columnIds = results.columns.columnIds;
 
-    const resultsByDimensionValue: Record<
-      string,
-      { [metricName: string]: number }
-    > = Object.fromEntries(
-      results.rows.map((row) => [
-        row.value,
-        Object.fromEntries(
-          row.data
-            // filter out "NaN"s
-            .filter((value) => typeof value !== 'string')
-            .map((value, index) => [
-              columnIds[index] as AAMetricName,
-              value as number,
-            ]),
-        ),
-      ]),
-    );
-
-    return resultsByDimensionValue;
-  },
-  dataPointToMetrics(dataPoint, resultsByDimensionValue) {
-    const { metrics: metricNames, breakdownDimension } = dataPoint;
-
-    return Object.fromEntries(
-      metricNames.flatMap((metricName) =>
-        Object.keys(resultsByDimensionValue).map((dimensionValue) => [
-          `metrics_by.${breakdownDimension}.${dimensionValue}.${metricName}`,
-          resultsByDimensionValue[dimensionValue][metricName] || undefined,
-        ]),
+    return results.rows.map((row) =>
+      Object.fromEntries(
+        row.data
+          // filter out "NaN"s
+          .filter((value) => typeof value !== 'string')
+          .map((value, index) => [columnIds[index], value as number])
+          .concat([['dimensionValue' as const, row.value]]),
       ),
     );
   },
-  toBulkInserts(dataPoints, query, queryResults) {
+  // this is more or less unnecessary now, should probably get rid of it eventually
+  dataPointToMetrics({ breakdownDimension }, dimensionMetrics) {
+    return {
+      [`metrics_by.${breakdownDimension}`]: dimensionMetrics,
+    };
+  },
+  toDbUpdates(dataPoints, query, queryResults) {
     const parsedData = this.parseQueryResults(query, queryResults);
 
-    return dataPoints.map((dataPoint) => {
+    const dataPointsToInsert = dataPoints.map((dataPoint) => {
       const metrics = this.dataPointToMetrics(dataPoint, parsedData);
 
-      return dataPointToBulkInsert(dataPoint, metrics);
+      // we don't actually need the bulkWriteOps themselves, only a subset, but there's no need to write new logic
+      const bulkWriteOps = dataPointToBulkInsert(dataPoint, metrics);
+
+      return {
+        ...dataPoint,
+        filterExpression: bulkWriteOps.updateOne.filter,
+        updateExpression: bulkWriteOps.updateOne
+          .update as UpdateQuery<CustomReportsMetrics>,
+      };
     });
+
+    return async (db: DbService) => {
+      const performUpdate = async (
+        dataPointToInsert: (typeof dataPointsToInsert)[number],
+      ) => {
+        const { breakdownDimension, filterExpression, updateExpression } =
+          dataPointToInsert;
+
+        const newMetricsArray = updateExpression.$set![
+          `metrics_by.${breakdownDimension}`
+        ] as DimensionMetrics[];
+
+        const newDataDict = arrayToDictionary(
+          newMetricsArray,
+          'dimensionValue',
+        );
+
+        // the easiest way to update an array of objects is to read the current value and
+        // just replace the whole thing
+        // ideally we would use a transaction to avoid conflicting writes,
+        // but that's not possible without using replica sets
+
+        const currentDbDoc = await db.collections.customReportsMetrics
+          .findOne(filterExpression, { metrics: 0 })
+          .lean()
+          .exec();
+
+        const currentDbMetrics =
+          currentDbDoc?.metrics_by?.[breakdownDimension!] || [];
+
+        const dbMetricsDict = arrayToDictionary(
+          currentDbMetrics,
+          'dimensionValue',
+        );
+
+        const allDimensionValues = union(
+          keys(dbMetricsDict),
+          keys(newDataDict),
+        );
+
+        updateExpression['$set']![`metrics_by.${breakdownDimension}`] =
+          allDimensionValues.map((dimensionValue) => ({
+            ...(dbMetricsDict[dimensionValue] || {}),
+            ...(newDataDict[dimensionValue] || {}),
+          }));
+
+        await db.collections.customReportsMetrics.updateOne(
+          filterExpression,
+          updateExpression,
+          { upsert: true },
+        );
+      };
+
+      const results = await Promise.allSettled(
+        dataPointsToInsert.map(performUpdate),
+      );
+
+      const failedResults = results.filter(
+        (result) => result.status === 'rejected',
+      );
+
+      if (failedResults.length) {
+        throw new Error(
+          'Error(s) occurred while updating db:\n' +
+            failedResults
+              .map((result) => 'reason' in result && result.reason)
+              .join('\n'),
+        );
+      }
+    };
   },
 };
 
-export const groupedNoDimensionStrategy: QueryResultsProcessor<
+export const groupedNoDimensionStrategy: NoDimensionQueryResultsProcessor<
   Record<string, number>
 > = {
   parseQueryResults(query, results) {
@@ -366,45 +430,7 @@ export const groupedNoDimensionStrategy: QueryResultsProcessor<
       ]),
     );
   },
-  toBulkInserts(dataPoints, query, queryResults) {
-    const parsedData = this.parseQueryResults(query, queryResults);
-
-    return dataPoints.map((dataPoint) => {
-      const metrics = this.dataPointToMetrics(dataPoint, parsedData);
-
-      return dataPointToBulkInsert(dataPoint, metrics);
-    });
-  },
-};
-
-export const groupedWithDimensionStrategy: QueryResultsProcessor<
-  Record<string, { [metricName: string]: number }>
-> = {
-  parseQueryResults(query, results) {
-    const columnIds = results.columns.columnIds;
-
-    const resultsByDimensionValue: Record<
-      string,
-      { [metricName: string]: number }
-    > = Object.fromEntries(
-      results.rows.map((row) => [
-        row.value,
-        Object.fromEntries(
-          row.data
-            // filter out "NaN"s
-            .filter((value) => typeof value !== 'string')
-            .map((value, index) => [
-              columnIds[index] as AAMetricName,
-              value as number,
-            ]),
-        ),
-      ]),
-    );
-
-    return resultsByDimensionValue;
-  },
-  dataPointToMetrics: ungroupedWithDimensionStrategy.dataPointToMetrics,
-  toBulkInserts(dataPoints, query, queryResults) {
+  toDbUpdates(dataPoints, query, queryResults) {
     const parsedData = this.parseQueryResults(query, queryResults);
 
     return dataPoints.map((dataPoint) => {

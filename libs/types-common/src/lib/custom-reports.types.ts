@@ -114,6 +114,10 @@ export type ReportStatus = {
   completedChildJobs?: number;
 };
 
+export type DimensionMetrics = { dimensionValue: string } & {
+  [metric in AAMetricName]?: number;
+};
+
 export type ICustomReportsMetrics = {
   _id: Types.ObjectId;
   url?: string;
@@ -126,10 +130,6 @@ export type ICustomReportsMetrics = {
     [metric in AAMetricName]?: number;
   };
   metrics_by: {
-    [dimension in AADimensionName]?: {
-      [dimensionValue: string]: {
-        [metric in AAMetricName]?: number;
-      };
-    };
+    [dimension in AADimensionName]?: DimensionMetrics[];
   };
 };
