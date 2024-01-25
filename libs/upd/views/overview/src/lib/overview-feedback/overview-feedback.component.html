@@ -1,5 +1,18 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
+    <div class="col">
+      <upd-data-card
+        [current]="currentTotalComments$ | async"
+        [comparison]="commentsPercentChange$ | async"
+        [title]="'Total comments'"
+        [tooltip]="'total # of comments'"
+      ></upd-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
     <div class="col-lg-12 col-md-12 col-sm-12">
       <upd-apex-bar
         [title]="'d3-dyfwywlf'"
@@ -26,6 +39,23 @@
         [data]="(comparisonFeedbackPagesTable$ | async) || []"
         [cols]="feedbackPagesTableCols"
         [title]="'top25-pages-most-feedback'"
+      >
+      </upd-data-table-card>
+    </div>
+  </div>
+</div>
+
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-table-card
+        [filter]="false"
+        [sort]="false"
+        [pagination]="true"
+        [data]="(comparisonFeedbackPagesTable$ | async) || []"
+        [cols]="feedbackPagesTableCols"
+        [title]="'all-pages-feedback'"
       >
       </upd-data-table-card>
     </div>
