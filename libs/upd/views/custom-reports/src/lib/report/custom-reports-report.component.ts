@@ -14,7 +14,7 @@ import type { ReportConfig, ReportStatus } from '@dua-upd/types-common';
 import { ColumnConfig, UpdComponentsModule } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { round } from '@dua-upd/utils-common';
-import { debounceTime, iif, map, mergeMap, Observable, takeWhile } from 'rxjs';
+import { iif, map, mergeMap, Observable, takeWhile } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ApiService } from '@dua-upd/upd/services';
 import { I18nModule } from '@dua-upd/upd/i18n';
@@ -53,8 +53,6 @@ export class CustomReportsReportComponent implements OnInit {
   private i18n = inject(I18nFacade);
   private readonly api = inject(ApiService);
 
-  lang = this.i18n.currentLang;
-
   id: Signal<string> = toSignal(this.route.params.pipe(map((p) => p['id'])));
 
   configData: Signal<ConfigData | null | undefined> = toSignal(
@@ -79,7 +77,7 @@ export class CustomReportsReportComponent implements OnInit {
       ? 'Monthly'
       : this.config()?.granularity === 'week'
       ? 'Weekly'
-      : 'None'
+      : 'None',
   );
   startDate = computed(() =>
     dayjs.utc(this.config()?.dateRange?.start).format('YYYY-MM-DD'),
@@ -159,13 +157,8 @@ export class CustomReportsReportComponent implements OnInit {
         mergeMap(({ status }) =>
           iif(() => status !== 'complete', statusStream$, status$),
         ),
-        // debounceTime(500), // play around with this if we want to try to avoid flickering
       ),
     );
-  }
-
-  get isAccordionExpanded(): boolean {
-    return this.urls().length < 10;
   }
 
   ngOnInit() {

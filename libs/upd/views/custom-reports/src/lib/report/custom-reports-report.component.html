@@ -2,9 +2,37 @@
   <span class="material-icons">arrow_back</span> {{ 'Back' | translate }}
 </button>
 
+<div
+  [ngClass]="{
+    'w-100 d-inline-block mx-auto mt-5': status() !== 'complete'
+  }"
+  *ngIf="!error() && data()?.length !== 0"
+>
+  <div class="d-flex flex-fill align-content-center h-100 w-100">
+    <div class="card align-middle w-100">
+      <div class="card-body">
+        <ng-container *ngIf="status() === 'pending'">
+          <p class="text-muted">{{ 'fetching data' | translate }}</p>
+          <div class="w-100">
+            <p-progressBar [value]="progress() || 0"></p-progressBar>
+          </div>
+        </ng-container>
+
+        <div *ngIf="status() === 'complete' && data()?.length">
+          <upd-data-table
+            [data]="data()"
+            [cols]="columns()"
+            [displayRows]="50"
+          ></upd-data-table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="card-container">
   <div class="card">
-    <h3 class="card-header">Report details</h3>
+    <h3 class="card-header">{{ 'Report details' | translate }}</h3>
     <div class="card-body">
       <h4>Granularity</h4>
       <p>{{ granularity() | translate }}</p>
@@ -15,7 +43,7 @@
       <h4>URLs</h4>
       <upd-accordion
         [styleClass]="'mb-2'"
-        [expanded]="isAccordionExpanded"
+        [expanded]="urls().length < 10"
         title="{{
           'URLs added to report' | translate: { count: urls().length }
         }} "
@@ -37,34 +65,6 @@
 </div>
 
 <upd-did-you-know *ngIf="status() !== 'complete'"></upd-did-you-know>
-
-<div
-  [ngClass]="{
-    'w-100 d-inline-block mx-auto mt-5': status() !== 'complete'
-  }"
-  *ngIf="!error() && data()?.length !== 0"
->
-  <div class="d-flex flex-fill align-content-center h-100 w-100">
-    <div class="card align-middle w-100">
-      <div class="card-body">
-        <ng-container *ngIf="status() === 'pending'">
-          <div class="w-100">
-            <p-progressBar [value]="progress()"></p-progressBar>
-          </div>
-
-          <p class="h2">
-            <!--        Status: <span class="badge bg-in-progress align-middle">{{ status() }}</span>-->
-            fetching data...
-          </p>
-        </ng-container>
-
-        <div *ngIf="status() === 'complete' && data()?.length">
-          <upd-data-table [data]="data()" [cols]="columns()"></upd-data-table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <div
   *ngIf="error()"
