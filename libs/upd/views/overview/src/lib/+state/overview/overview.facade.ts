@@ -375,6 +375,10 @@ export class OverviewFacade {
     map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)),
   );
 
+  fullDateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => getFullDateRangeLabel(data.dateRange, lang)),
+  );
+
   comparisonDateRangeLabel$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
@@ -382,6 +386,10 @@ export class OverviewFacade {
     map(([data, lang]) =>
       getWeeklyDatesLabel(data.comparisonDateRange || '', lang),
     ),
+  );
+
+  fullComparisonDateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
+    map(([data, lang]) => getFullDateRangeLabel(data.comparisonDateRange || '', lang)),
   );
 
   satDateRangeLabel$ = combineLatest([
@@ -392,39 +400,48 @@ export class OverviewFacade {
   );
 
   dyfData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
-
+  
+      const currYesVal = data?.dateRangeData?.dyf_yes || 0;
+      const prevYesVal = data?.comparisonDateRangeData?.dyf_yes || NaN;
+      const currNoVal = data?.dateRangeData?.dyf_no || 0;
+      const prevNoVal = data?.comparisonDateRangeData?.dyf_no || NaN;
+  
       const pieChartData = [
-        { name: yes, value: data?.dateRangeData?.dyf_yes || 0 },
-        { name: no, value: data?.dateRangeData?.dyf_no || 0 },
+        { name: yes, currValue: currYesVal, prevValue: prevYesVal },
+        { name: no, currValue: currNoVal, prevValue: prevNoVal },
       ];
-
-      const isZero = pieChartData.every((v) => v.value === 0);
-      if (isZero) {
-        return [];
-      }
-
-      return pieChartData;
+  
+      const filteredPieChartData = pieChartData.filter((v) => v.currValue > 0 || v.prevValue > 0);
+  
+      return filteredPieChartData.length > 0 ? filteredPieChartData : [];
     }),
   );
 
   dyfDataApex$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
     map(([data, lang]) => {
-      const pieChartData = [
-        data?.dateRangeData?.dyf_yes || 0,
-        data?.dateRangeData?.dyf_no || 0,
-      ] as ApexNonAxisChartSeries;
-
-      const isZero = pieChartData.every((v: number) => v === 0);
+      const dyfData: ApexAxisChartSeries = [
+        {
+          name: this.i18n.service.translate('yes', lang),
+          data: [data?.dateRangeData?.dyf_yes || 0, data?.comparisonDateRangeData?.dyf_yes || 0],
+        },
+        {
+          name: this.i18n.service.translate('no', lang),
+          data: [data?.dateRangeData?.dyf_no || 0, data?.comparisonDateRangeData?.dyf_no || 0],
+        },
+      ];
+  
+      const isZero = dyfData.every(item => 
+        (item.data as number[]).every(value => typeof value === 'number' && value === 0)
+      );
+      
       if (isZero) {
         return [];
       }
-
-      return pieChartData;
+  
+      return dyfData;
     }),
   );
 
@@ -602,56 +619,6 @@ export class OverviewFacade {
     }),
   );
 
-  comparisonFeedbackTable$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const dateRange = data?.dateRangeData?.totalFeedback || [];
-      const comparisonDateRange =
-        data?.comparisonDateRangeData?.totalFeedback || [];
-
-      const dataFeedback = dateRange.map((d, i) => {
-        let prevVal = NaN;
-        comparisonDateRange.map((cd, i) => {
-          if (d.main_section === cd.main_section) {
-            prevVal = cd.sum;
-          }
-        });
-        return {
-          name: this.i18n.service.translate(`${d.main_section}`, lang),
-          currValue: d.sum,
-          prevValue: prevVal,
-        };
-      });
-
-      comparisonDateRange.map((d, i) => {
-        let currVal = 0;
-        dateRange.map((cd, i) => {
-          if (d.main_section === cd.main_section) {
-            currVal = cd.sum;
-          }
-        });
-        if (currVal === 0) {
-          dataFeedback.push({
-            name: this.i18n.service.translate(`${d.main_section}`, lang),
-            currValue: 0,
-            prevValue: d.sum,
-          });
-        }
-      });
-
-      return dataFeedback
-        .map((val: any, i) => ({
-          ...val,
-          percentChange: percentChange(val.currValue, val.prevValue),
-        }))
-        .filter((v) => v.currValue > 0 || v.prevValue > 0)
-        .sort((a, b) => b.currValue - a.currValue)
-        .splice(0, 5);
-    }),
-  );
-
   comparisonFeedbackPagesTable$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
@@ -702,8 +669,37 @@ export class OverviewFacade {
         }))
         .filter((v) => v.currValue > 0 || v.prevValue > 0)
         .sort((a, b) => b.currValue - a.currValue)
-        .splice(0, 5);
+        .splice(0, 25);
     }),
+  );
+
+  currentTotalComments$ = this.overviewData$.pipe(
+    map(
+      (data) =>
+        data?.dateRangeData?.feedbackPages.reduce(
+          (totalComments, feedback) => totalComments + feedback.sum,
+          0,
+        ) || 0,
+    ),
+  );
+
+  comparisonTotalComments$ = this.overviewData$.pipe(
+    map(
+      (data) =>
+        data?.comparisonDateRangeData?.feedbackPages.reduce(
+          (totalComments, feedback) => totalComments + feedback.sum,
+          0,
+        ) || 0,
+    ),
+  );
+
+  commentsPercentChange$ = combineLatest([
+    this.currentTotalComments$,
+    this.comparisonTotalComments$,
+  ]).pipe(
+    map(([currentComments, comparisonComments]) =>
+      percentChange(currentComments, comparisonComments),
+    ),
   );
 
   uxTestsCompleted$ = this.overviewData$.pipe(
@@ -725,9 +721,9 @@ export class OverviewFacade {
     map((data) => data.copsTestsCompletedSince2018),
   );
 
-  top5CalldriverTopics$ = this.overviewData$.pipe(
+  top25CalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
-      data.top5CalldriverTopics.map((topicData) => ({
+      data.top25CalldriverTopics.map((topicData) => ({
         topic: topicData.topic || '',
         subtopic: topicData.subtopic || '',
         sub_subtopic: topicData.sub_subtopic || '',
@@ -737,7 +733,7 @@ export class OverviewFacade {
     ),
   );
 
-  top5CalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
+  top25CalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
     { field: 'topic', header: 'topic', translate: true },
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
@@ -838,6 +834,24 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
 
   return `${formattedStartDate}-${formattedEndDate}`;
 };
+
+const getFullDateRangeLabel = (
+  dateRange: string, lang: LocaleId,
+) => {
+    const [startDate, endDate] = dateRange.split('/');
+
+    const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
+    const separator = lang === FR_CA ? ' au' : ' to';
+
+    const formattedStartDate = dayjs
+      .utc(startDate)
+      .locale(lang)
+      .format(dateFormat);
+
+    const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
+
+    return [`${formattedStartDate}${separator}`,`${formattedEndDate}`];
+  }
 
 type DateRangeDataIndexKey = keyof OverviewAggregatedData &
   keyof PickByType<OverviewAggregatedData, number>;

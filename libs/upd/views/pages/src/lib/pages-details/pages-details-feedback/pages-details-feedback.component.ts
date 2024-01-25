@@ -9,10 +9,6 @@ type FeedbackCommentsColType = GetTableProps<
   PagesDetailsFeedbackComponent,
   'feedbackComments$'
 >;
-type FeedbackByTagsColTypes = GetTableProps<
-  PagesDetailsFeedbackComponent,
-  'feedbackByTagsTable$'
->;
 
 @Component({
   selector: 'upd-page-details-feedback',
@@ -25,10 +21,14 @@ export class PagesDetailsFeedbackComponent implements OnInit {
 
   currentLang$ = this.i18n.currentLang$;
 
+  fullDateRangeLabel$ = this.pageDetailsService.fullDateRangeLabel$;
+  fullComparisonDateRangeLabel$ =
+    this.pageDetailsService.fullComparisonDateRangeLabel$;
+
   dyfChart$ = this.pageDetailsService.dyfData$;
   whatWasWrongChart$ = this.pageDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
+  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
 
   dyfChartApex$ = this.pageDetailsService.dyfDataApex$;
@@ -37,14 +37,8 @@ export class PagesDetailsFeedbackComponent implements OnInit {
   whatWasWrongChartLegend: string[] = [];
   whatWasWrongChartApex$ = this.pageDetailsService.whatWasWrongDataApex$;
 
-  feedbackByTagsBarChartData$ = this.pageDetailsService.feedbackByTagsBarChart$;
-  apexFeedbackByTagsData$ = this.pageDetailsService.apexFeedbackByTagsData$;
-
   feedbackComments$ = this.pageDetailsService.feedbackComments$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
-
-  feedbackByTagsTable$ = this.pageDetailsService.feedbackByTagsTable$;
-  feedbackByTagsTableCols: ColumnConfig<FeedbackByTagsColTypes>[] = [];
 
   dateRangeLabel$ = this.pageDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.pageDetailsService.comparisonDateRangeLabel$;
@@ -72,8 +66,13 @@ export class PagesDetailsFeedbackComponent implements OnInit {
           header: this.i18n.service.translate('Selection', lang),
         },
         {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
+          field: 'currValue',
+          header: dateRange,
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: comparisonDateRange,
           pipe: 'number',
         },
       ];
@@ -92,34 +91,12 @@ export class PagesDetailsFeedbackComponent implements OnInit {
           header: this.i18n.service.translate('date', lang),
           pipe: 'date',
         },
-        { field: 'tag', header: this.i18n.service.translate('tags', lang) },
-        {
-          field: 'whats_wrong',
-          header: this.i18n.service.translate('d3-www', lang),
-        },
         {
           field: 'comment',
           header: this.i18n.service.translate('comment', lang),
         },
       ];
 
-      this.feedbackByTagsTableCols = [
-        { field: 'tag', header: this.i18n.service.translate('category', lang) },
-        {
-          field: 'currValue',
-          header: this.i18n.service.translate('# of comments for ', lang, {
-            value: dateRange,
-          }),
-          pipe: 'number',
-        },
-        {
-          field: 'prevValue',
-          header: this.i18n.service.translate('# of comments for ', lang, {
-            value: comparisonDateRange,
-          }),
-          pipe: 'number',
-        },
-      ];
     });
   }
 }
