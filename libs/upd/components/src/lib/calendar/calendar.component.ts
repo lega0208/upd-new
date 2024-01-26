@@ -36,13 +36,17 @@ export class CalendarComponent implements OnChanges {
   @Input() showPreset = false;
   @Input() showAction = false;
   @Input() required = false;
-  @Input() calendarDates: Date[] = [];
   @Input() dateFormat = 'M dd yy';
   @Input() invalid = false;
+  @Input() set initialDates(dates: [Date, Date] | undefined) {
+    this.calendarDates = dates?.length ? dates : undefined;
+  }
 
   @Output() dateChange = new EventEmitter<Date[] | Date>();
 
-  dates: WritableSignal<Date[]> = signal([]);
+  calendarDates?: Date[] = this.initialDates;
+
+  dates: WritableSignal<Date[]> = signal(this.initialDates || []);
 
   minSelectableDate: Date = new Date(2020, 0, 1);
   maxSelectableDate = dayjs().subtract(1, 'day').toDate();
@@ -76,7 +80,6 @@ export class CalendarComponent implements OnChanges {
 
         if (dates.length === 0 || dates.length === 2) {
           this.dateChange.emit(dates);
-          this.calendarDates = dates;
         }
       },
       { allowSignalWrites: true },
@@ -133,6 +136,7 @@ export class CalendarComponent implements OnChanges {
         .subtract(1, 'week')
         .endOf('week')
         .toDate();
+
       return;
     }
 
@@ -144,8 +148,9 @@ export class CalendarComponent implements OnChanges {
   }
 
   resetCalendar() {
+    this.datePicker.clear();
+    this.minSelectableDate = new Date(2020, 0, 1);
     this.dates.set([]);
-    this.dateChange.emit(new Date());
   }
 
   handleSelect(granularity: string, date: Date) {
@@ -160,9 +165,6 @@ export class CalendarComponent implements OnChanges {
     if (granularity === 'week') {
       if (!startDate || startDate.getDay() === 6) {
         this.resetSelection();
-        if (startDate && startDate.getDay() === 6) {
-          this.dateChange.emit(new Date());
-        }
         return;
       }
       this.processDateSelection(startDate, endDate, date, true);

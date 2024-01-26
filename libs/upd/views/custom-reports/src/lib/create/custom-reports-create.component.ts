@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { today } from '@dua-upd/utils-common';
+import { logJson, today } from '@dua-upd/utils-common';
 import { TranslateModule } from '@ngx-translate/core';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -304,6 +304,9 @@ export class CustomReportsCreateComponent {
     );
 
     effect(() => {
+      console.log('setting sessionStorage');
+      logJson(this.config());
+
       sessionStorage.setItem(
         'custom-reports-config',
         JSON.stringify(this.config()),
@@ -315,9 +318,9 @@ export class CustomReportsCreateComponent {
     (d) => d.value === this.storageConfig?.breakdownDimension,
   );
   stateMetrics: string[] = this.storageConfig?.metrics || [];
-  stateCalendarDates: Date[] = this.storageConfig?.dateRange
-    ? dateRangeToCalendarDates(this.storageConfig.dateRange)
-    : [];
+  stateCalendarDates?: Date[] =
+    this.storageConfig?.dateRange &&
+    dateRangeToCalendarDates(this.storageConfig.dateRange);
   selectedGranularityOption = this.granularityOptions.find(
     (option) => option.value === this.storageConfig?.granularity,
   );
@@ -373,7 +376,7 @@ export class CustomReportsCreateComponent {
   }
 
   handleDateChange(date: Date | Date[]) {
-    if (!Array.isArray(date)) {
+    if (!Array.isArray(date) || date.length === 0) {
       this.dateRange.set({
         start: '',
         end: '',
@@ -410,7 +413,6 @@ export class CustomReportsCreateComponent {
   }
 
   selectDimension(dimension: string) {
-    console.log(dimension);
     this.selectedReportDimensions.set(dimension);
   }
 

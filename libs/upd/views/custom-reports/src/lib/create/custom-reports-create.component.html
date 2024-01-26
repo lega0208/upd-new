@@ -57,7 +57,9 @@
 </div>
 
 <ng-container *ngIf="showCopyAlert">
-  <upd-alert position="top" [selfClosing]="true">Copied successfully!</upd-alert>
+  <upd-alert position="top" [selfClosing]="true"
+    >Copied successfully!</upd-alert
+  >
 </ng-container>
 
 <div class="container-fluid my-4 gx-0">
@@ -90,7 +92,7 @@
         #calendar
         [showAction]="true"
         [showPreset]="true"
-        [calendarDates]="stateCalendarDates"
+        [initialDates]="stateCalendarDates"
         (dateChange)="handleDateChange($event); resetValidation()"
         [granularity]="selectedGranularity()"
         [required]="false"
@@ -160,8 +162,10 @@
         <span class="required-star"></span>
       </h3>
 
-      <div class="card add-pages-card"
-      [ngClass]="{'card-invalid': validationTriggered && !areUrlsValid()}">
+      <div
+        class="card add-pages-card"
+        [ngClass]="{ 'card-invalid': validationTriggered && !areUrlsValid() }"
+      >
         <p-tabView styleClass="tabview-custom">
           <p-tabPanel>
             <ng-template pTemplate="header">
