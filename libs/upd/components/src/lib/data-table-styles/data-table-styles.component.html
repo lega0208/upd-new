@@ -1,62 +1,30 @@
 <!-- Utility Template for Displaying Data -->
 <ng-template #displayData let-item="item">
-  {{
-    config.translate
-      ? (item.toString() || '' | translate: undefined : currentLang)
-      : item
-  }}
+  {{ config.translate ? (item.toString() || '' | translate: undefined:currentLang) : item }}
 </ng-template>
 
 <ng-container *ngIf="config.typeParam">
+
   <!-- Link Type -->
   <ng-container *ngIf="config.type === 'link'">
     <a [routerLink]="[data[config.typeParam]]" [queryParamsHandling]="'merge'">
-      <ng-container
-        [ngTemplateOutlet]="displayData"
-        [ngTemplateOutletContext]="{ item: data[config.field] }"
-      ></ng-container>
+      <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
     </a>
   </ng-container>
 
   <!-- Status Labels -->
-  <upd-project-status-label
-    *ngIf="labelType === 'project'"
-    [projectStatus]="projectStatus"
-  ></upd-project-status-label>
-  <upd-project-status-label
-    *ngIf="labelType === 'page'"
-    [pageStatus]="pageStatus"
-  ></upd-project-status-label>
+  <upd-project-status-label *ngIf="labelType === 'project'" [projectStatus]="projectStatus"></upd-project-status-label>
+  <upd-project-status-label *ngIf="labelType === 'page'" [pageStatus]="pageStatus"></upd-project-status-label>
 
   <!-- COPS Type -->
-  <upd-project-status-label
-    *ngIf="
-      config.type === 'label' &&
-      config.typeParam === 'cops' &&
-      data[config.field]
-    "
-    [projectType]="'COPS'"
-  ></upd-project-status-label>
+  <upd-project-status-label *ngIf="config.type === 'label' && config.typeParam === 'cops' && data[config.field]" [projectType]="'COPS'"></upd-project-status-label>
 
   <!-- Pass/Fail Label -->
-  <span
-    *ngIf="
-      config.type === 'text' &&
-      config.typeParam === 'passFail' &&
-      data[config.field]
-    "
-    class="badge"
-    [ngClass]="{
-      'bg-completed': data[config.field] === 'Pass',
-      'bg-delayed': data[config.field] === 'Fail'
-    }"
-    translate
-  >
-    <ng-container
-      [ngTemplateOutlet]="displayData"
-      [ngTemplateOutletContext]="{ item: data[config.field] }"
-    ></ng-container>
+  <span *ngIf="config.type === 'text' && config.typeParam === 'passFail' && data[config.field]" class="badge"
+    [ngClass]="{'bg-completed': data[config.field] === 'Pass', 'bg-delayed': data[config.field] === 'Fail'}" translate>
+    <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
   </span>
+
 </ng-container>
 
 <ng-container *ngIf="config.type === 'link' && config.typeParams">
@@ -67,57 +35,34 @@
       <ng-container *ngIf="data[config.field]; else notAvailable">
         <span class="material-icons material-icon-wysiwyg">wysiwyg</span>
         <a [href]="'https://' + data[config.typeParams.link]" target="_blank">
-          <ng-container
-            [ngTemplateOutlet]="displayData"
-            [ngTemplateOutletContext]="{ item: data[config.field] }"
-          ></ng-container>
+          <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
         </a>
       </ng-container>
-      <ng-template #notAvailable
-        ><span>{{ 'n/a' | translate }}</span></ng-template
-      >
+      <ng-template #notAvailable><span>{{ 'n/a' | translate }}</span></ng-template>
     </ng-container>
 
     <!-- When external is false -->
     <ng-container *ngSwitchDefault>
-      <a
-        *ngIf="config.typeParams.postLink"
-        [routerLink]="[
-          config.typeParams.preLink,
-          data[config.typeParams.link],
-          config.typeParams.postLink
-        ]"
+      <a *ngIf="config.typeParams.postLink"
+        [routerLink]="[config.typeParams.preLink, data[config.typeParams.link], config.typeParams.postLink]"
         [queryParamsHandling]="'merge'"
       >
         <ng-container *ngIf="config.pipe === 'number'; else displayField">
-          {{ data[config.field] | number: config.pipeParam : currentLang }}
+          {{ data[config.field] | number: config.pipeParam:currentLang }}
         </ng-container>
         <ng-template #displayField>
-          <ng-container
-            [ngTemplateOutlet]="displayData"
-            [ngTemplateOutletContext]="{ item: data[config.field] }"
-          ></ng-container>
+          <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
         </ng-template>
       </a>
-      <a
-        *ngIf="!config.typeParams.postLink"
-        [routerLink]="[config.typeParams.preLink, data[config.typeParams.link]]"
-      >
-        <ng-container
-          [ngTemplateOutlet]="displayData"
-          [ngTemplateOutletContext]="{ item: data[config.field] }"
-        ></ng-container>
+      <a *ngIf="!config.typeParams.postLink" [routerLink]="[config.typeParams.preLink, data[config.typeParams.link]]">
+        <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
       </a>
     </ng-container>
   </ng-container>
 </ng-container>
 
 <!-- Comparison with Pipe -->
-<span
-  *ngIf="config.pipe && config.type === 'comparison'"
-  [ngClass]="comparisonClassMap"
-  >{{ numberVal }}</span
->
+<span *ngIf="config.pipe && config.type === 'comparison'" [ngClass]="comparisonClassMap">{{ numberVal }}</span>
 
 <!-- Only Pipe -->
 <ng-container *ngIf="config.pipe && !config.type">
@@ -130,11 +75,6 @@
 </ng-container>
 
 <!-- Default Data Display -->
-<ng-container
-  *ngIf="!config.type && !config.pipe && !isArray(data[config.field])"
->
-  <ng-container
-    [ngTemplateOutlet]="displayData"
-    [ngTemplateOutletContext]="{ item: data[config.field] }"
-  ></ng-container>
+<ng-container *ngIf="!config.type && !config.pipe && !isArray(data[config.field])">
+  <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
 </ng-container>
