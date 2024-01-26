@@ -34,6 +34,7 @@ interface ConfigData {
   standalone: true,
   imports: [I18nModule, CommonModule, UpdComponentsModule, ProgressBarModule],
   templateUrl: './custom-reports-report.component.html',
+  styleUrls: ['./custom-reports-report.component.scss'],
   styles: [
     `
       :host {
