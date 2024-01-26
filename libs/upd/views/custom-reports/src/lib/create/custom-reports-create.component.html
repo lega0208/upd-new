@@ -12,9 +12,9 @@
       <span class="material-icons align-top pe-1" aria-hidden="true"
         >error</span
       >
-      Oops! Seems there is an error in your report configuration.
+      {{'Oops' | translate}}
     </p>
-    <p class="align-top pe-1">Please fix the following:</p>
+    <p class="align-top pe-1">{{'please-fix-following' | translate}}</p>
     <ul>
       <li *ngIf="!isDateRangeValid()">
         <a class="alert-link" (click)="scrollToAnchor('select-date')"
@@ -41,7 +41,20 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <h3 class="mb-2 h5 pt-2 pb-2" [translate]="'select-granularity'"></h3>
+      <p translate="custom-report-desc"></p>
+    </div>
+  </div>
+</div>  
+   
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <h3 class="mb-2 h5 pt-2 pb-2 me-2 card-tooltip">
+        <span placement="top" ngbTooltip="{{'tooltip-select-granularity' | translate}}">{{
+          'select-granularity' | translate
+        }}</span>
+        </h3>
 
       <upd-dropdown
         id="granularity"
@@ -57,7 +70,7 @@
 </div>
 
 <ng-container *ngIf="showCopyAlert">
-  <upd-alert position="top" [selfClosing]="true">Copied successfully!</upd-alert>
+  <upd-alert position="top" [selfClosing]="true">{{'Copied successfully!' | translate}}</upd-alert>
 </ng-container>
 
 <div class="container-fluid my-4 gx-0">
@@ -81,8 +94,10 @@
         </upd-alert>
       </div> -->
 
-      <h3 class="mb-2 h5 pt-2 pb-2" id="select-date">
-        {{ 'select-date' | translate }}
+      <h3 class="mb-2 h5 pt-2 pb-2 card-tooltip" id="select-date">
+        <span placement="top" ngbTooltip="{{'tooltip-select-date' | translate}}">{{
+          'select-date' | translate
+        }}</span>
         <span class="required-star"></span>
       </h3>
 
@@ -131,7 +146,7 @@
             <span class="material-icons align-top pe-1" aria-hidden="true"
               >check</span
             >
-            <span>Success URLs:</span>
+            <span>{{'success-urls' | translate}}</span>
             <ol>
               <li *ngFor="let url of newUrls()">{{ url }}</li>
             </ol>
@@ -147,7 +162,7 @@
             <span class="material-icons align-top pe-1" aria-hidden="true"
               >error</span
             >
-            <span>Invalid URLs:</span>
+            <span>{{'invalid-urls' | translate}}</span>
             <ol>
               <li *ngFor="let url of invalidUrls()">{{ url }}</li>
             </ol>
@@ -155,11 +170,15 @@
         </div>
       </div>
 
-      <h3 class="mb-2 h5 pt-2 pb-2" id="select-url">
-        {{ 'select-url' | translate }}
-        <span class="required-star"></span>
-      </h3>
-
+      <div class="row">
+        <div class="col guidance-modal">
+          <h3 class="mb-2 h5 pt-2 pb-2" id="select-url">
+            {{ 'select-url' | translate }}
+            <span class="required-star"></span>
+          </h3>
+          <upd-modal id="add-pages-modal" [modalTitle]="'select-url'" modalContent="{{'select-pages-modal' | translate}}"> </upd-modal>
+        </div>
+      </div> 
       <div class="card add-pages-card"
       [ngClass]="{'card-invalid': validationTriggered && !areUrlsValid()}">
         <p-tabView styleClass="tabview-custom">
@@ -176,7 +195,7 @@
                 class="w-100"
               ></textarea>
               <label for="float-input"
-                >Enter URLs separated by comma, semicolon or new lines</label
+                >{{'Enter URLs' | translate}}</label
               >
             </span>
           </p-tabPanel>
@@ -240,13 +259,13 @@
 
         <button
           class="btn btn-outline-primary"
+          [translate]="'Add pages'"
           (click)="
             addPages(urlTextarea.value);
             resetTableSelection();
             resetValidation()
           "
         >
-          Add page(s)
         </button>
       </div>
     </div>
@@ -267,7 +286,7 @@
         <div class="d-flex justify-content-between mb-2">
           <upd-input-switch
             id="group"
-            [text]="'Group pages as a segment'"
+            [text]="'Group pages as a segment' | translate"
             [checked]="isGrouped()"
             (checkedChange)="setIsGrouped($event); resetValidation()"
           >
@@ -362,7 +381,11 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-12">
-      <h3 class="mb-2 h5 pt-2 pb-2" translate="select-dimension"></h3>
+      <h3 class="mb-2 h5 pt-2 pb-2 card-tooltip">
+        <span placement="top" ngbTooltip="{{'tooltip-select-dimension' | translate}}">{{
+          'select-dimension' | translate
+        }}</span>
+        </h3>
 
       <upd-radio
         [id]="'dimensions'"

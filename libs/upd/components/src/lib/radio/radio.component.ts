@@ -7,7 +7,7 @@ import { Required } from '@dua-upd/utils-common';
   styleUrls: ['./radio.component.scss'],
 })
 export class RadioComponent<
-  T extends { value: string; label: string; description?: string },
+  T extends { value: string; label: string; description: string },
 > {
   @Input() items: T[] = [];
   @Input() selectAllText = '';

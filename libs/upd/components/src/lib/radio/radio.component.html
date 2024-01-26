@@ -6,5 +6,7 @@
     [name]="item.value"
     [(ngModel)]="selectedItem"
   ></p-radioButton>
-  <label [for]="id + i" class="p-checkbox-label" translate="{{ item.label }}"></label>
+  <label [for]="id + i" class="p-checkbox-label card-tooltip" placement="right" [ngbTooltip]="item.description | translate">
+    {{ item.label | translate}}
+  </label>
 </div>

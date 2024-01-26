@@ -30,6 +30,7 @@ import {
   UpdComponentsModule,
   type DropdownOption,
 } from '@dua-upd/upd-components';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import type {
   AADimensionName,
   AAMetricName,
@@ -57,6 +58,7 @@ type PageSelectionData = {
     TranslateModule,
     ClipboardModule,
     I18nModule,
+    NgbTooltipModule
   ],
   templateUrl: './custom-reports-create.component.html',
   styleUrls: ['./custom-reports-create.component.scss'],
@@ -133,9 +135,9 @@ export class CustomReportsCreateComponent {
 
   readonly granularityOptions: DropdownOption<ReportGranularity>[] = [
     { label: 'None', value: 'none' },
-    { label: 'Daily', value: 'day' },
-    { label: 'Weekly', value: 'week' },
-    { label: 'Monthly', value: 'month' },
+    { label: 'Daily granularity', value: 'day' },
+    { label: 'Weekly granularity', value: 'week' },
+    { label: 'Monthly granularity', value: 'month' },
   ];
 
   selectedGranularity = signal<ReportGranularity>(
@@ -238,60 +240,60 @@ export class CustomReportsCreateComponent {
     {
       label: 'Visits',
       value: 'visits',
-      description: 'The total number of visits on the page',
+      description: 'tooltip-visits-cb',
     },
     {
       label: 'Page views',
       value: 'views',
-      description: 'The total number of pageviews on the page',
+      description: 'tooltip-views-cb',
     },
     {
       label: 'Visitors',
       value: 'visitors',
-      description: 'The total number of visitors on the page',
+      description: 'tooltip-visitors-cb',
     },
     {
       label: 'Average time spent',
       value: 'average_time_spent',
-      description: 'The average time spent on the page',
+      description: 'tooltip-avgtime-cb',
     },
     {
       label: 'Bounce rate',
       value: 'bouncerate',
-      description: 'The bounce rate on the page',
+      description: 'tooltip-bounce-cb',
     },
-    {
-      label: 'Navigation menu initiated',
-      value: 'nav_menu_initiated',
-      description: 'The number of times the navigation menu was opened',
-    },
+    // {
+    //   label: 'Navigation menu initiated',
+    //   value: 'nav_menu_initiated',
+    //   description: 'The number of times the navigation menu was opened',
+    // },
     {
       label: '"Did you find what you were looking for?" - Submit',
       value: 'dyf_submit',
-      description: 'The number of times the submit button was clicked',
+      description: 'tooltip-dyfsubmit-cb',
     },
     {
       label: '"Did you find what you were looking for?" - Yes',
       value: 'dyf_yes',
-      description: 'The number of times the "yes" button was clicked',
+      description: 'tooltip-dyfyes-cb',
     },
     {
       label: '"Did you find what you were looking for?" - No',
       value: 'dyf_no',
-      description: 'The number of times the "no" button was clicked',
+      description: 'tooltip-dyfno-cb',
     },
   ];
 
   reportDimensions = [
-    { label: 'None', value: '', description: '' },
-    { label: 'Devices', value: 'device_type', description: '' },
-    { label: 'Regions', value: 'region', description: '' },
-    { label: 'Cities', value: 'city', description: '' },
-    { label: 'Countries', value: 'country', description: '' },
-    { label: 'Referrer', value: 'referrer', description: '' },
-    { label: 'Referrer type', value: 'referrer_type', description: '' },
-    { label: 'Previous page', value: 'prev_page', description: '' },
-    { label: 'Time spent', value: 'time_spent', description: '' },
+    { label: 'None', value: '', description: 'tooltip-none-rb' },
+    { label: 'Device type', value: 'device_type', description: 'tooltip-device-rb' },
+    { label: 'Regions', value: 'region', description: 'tooltip-regions-rb' },
+    { label: 'Cities', value: 'city', description: 'tooltip-cities-rb' },
+    { label: 'Countries', value: 'country', description: 'tooltip-countries-rb' },
+    { label: 'Referrer', value: 'referrer', description: 'tooltip-referrer-rb' },
+    { label: 'Referrer type', value: 'referrer_type', description: 'tooltip-referrertype-rb' },
+    // { label: 'Previous page', value: 'prev_page', description: 'tooltip-visits' },
+    { label: 'Time spent', value: 'time_spent', description: 'tooltip-timespent-rb' },
   ];
 
   constructor() {

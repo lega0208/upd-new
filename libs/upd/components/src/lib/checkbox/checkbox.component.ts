@@ -7,7 +7,7 @@ import { Required } from '@dua-upd/utils-common';
   styleUrls: ['./checkbox.component.scss'],
 })
 export class CheckboxComponent<
-  T extends { value: string; label: string; description?: string },
+  T extends { value: string; label: string; description: string },
 > {
   @Input() showSelectAll = false;
   @Input() items: T[] = [];
