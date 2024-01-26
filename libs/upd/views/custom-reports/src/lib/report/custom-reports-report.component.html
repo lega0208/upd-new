@@ -1,6 +1,13 @@
-<button class="btn btn-outline-primary w-50" (click)="goBack()">
-  <span class="material-icons">arrow_back</span> {{ 'Back' | translate }}
-</button>
+<div class="container">
+  <div class="row">
+    <div class="col-sm-2 mb-3">
+      <button class="btn btn-outline-primary" (click)="goBack()">
+        <span class="material-icons">arrow_back</span> {{ 'Back' | translate }}
+      </button>
+    </div>
+  </div>
+</div>
+
 
 <div
   [ngClass]="{
@@ -30,17 +37,19 @@
   </div>
 </div>
 
-<div class="card-container">
+<div class="card-container mt-3">
   <div class="card">
-    <h3 class="card-header">{{ 'Report details' | translate }}</h3>
+    <h5 class="card-header">{{ 'Report details' | translate }}</h5>
     <div class="card-body">
-      <h4>Granularity</h4>
-      <p>{{ granularity() | translate }}</p>
-      <h4>Start Date</h4>
+      <h6><span>{{'data-granularity' | translate}}</span>: <span class="no-bold">{{ granularity() | translate }}</span></h6>
+      <!-- <p></p> -->
+      <h6><span>{{'Date range' | translate}}</span>: <span class="no-bold">{{ startDate() | translate }} - {{ endDate() | translate }}</span></h6>
+      <h6><span>{{'URL' | translate}}</span>:</h6>
+      <!-- <h4>Start Date</h4>
       <p>{{ startDate() }}</p>
       <h4>End Date</h4>
-      <p>{{ endDate() }}</p>
-      <h4>URLs</h4>
+      <p>{{ endDate() }}</p> -->
+      <!-- <h4>URLs</h4> -->
       <upd-accordion
         [styleClass]="'mb-2'"
         [expanded]="urls().length < 10"
@@ -52,14 +61,17 @@
           <li *ngFor="let url of urls()">{{ url }}</li>
         </ul>
       </upd-accordion>
-      <h4>Grouped pages</h4>
-      <p>{{ grouped() }}</p>
-      <h4>Metrics</h4>
+      <h6><span>{{'Group pages as a segment' | translate}}</span>: <span class="no-bold">{{ grouped() | translate }}</span></h6>
+      <!-- <h4>Grouped pages</h4>
+      <p>{{ grouped() }}</p> -->
+      <h6><span>{{'metrics' | translate}}</span>:</h6>
+      <!-- <h4>Metrics</h4> -->
       <ul>
         <li *ngFor="let metric of metrics()">{{ metric | translate }}</li>
       </ul>
-      <h4>Breakdown Dimension</h4>
-      <p>{{ breakdownDimension() | translate }}</p>
+      <h6><span>{{'breakdown-dimension' | translate}}</span>: <span class="no-bold">{{ breakdownDimension() | translate }}</span></h6>
+      <!-- <h4>Breakdown Dimension</h4> -->
+      <!-- <p>{{ breakdownDimension() | translate }}</p> -->
     </div>
   </div>
 </div>
@@ -79,9 +91,8 @@
   *ngIf="data()?.length === 0"
   class="alert alert-warning d-inline-block mx-auto mt-5 w-50"
 >
-  <p>No data was found for the selected url(s) in the specified date range.</p>
+  <p>{{'No data was found' | translate}}</p>
   <p class="mb-0">
-    The URL may have changed or the page may not have existed during this time
-    period.
+    {{'The URL may have changed' | translate}}
   </p>
 </div>

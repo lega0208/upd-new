@@ -1,8 +1,9 @@
 .required-star {
   color: red;
+  vertical-align: sub;
 
   &::after {
-    content: '*';
+    content: ' *';
   }
 }
 .urls-added-table a {
@@ -89,4 +90,16 @@ li[role='presentation'].p-highlight a {
   background-color: #2e5ea7;
   border-color: #2e5ea7;
   float: right;
+}
+
+#granularity .p-dropdown {
+  width: 438px;
+}
+
+.guidance-modal {
+  display: flex;
+}
+
+#add-pages-modal {
+  margin: 7px 0px 0px 10px;
 }
