@@ -192,6 +192,7 @@ export class CustomReportsCreateComponent {
 
   validUrls = computed<string[]>(() => this.pages()?.map((p) => p.url) || []);
 
+  duplicateUrls = signal<string[]>([]);
   invalidUrls = signal<string[]>([]);
   newUrls = signal<string[]>([]);
 
@@ -337,14 +338,21 @@ export class CustomReportsCreateComponent {
     const parsedUrls = inputValue
       .split(/[\n,;]+/)
       .map((url) => url.trim().replace(/^https?:\/\//, ''))
-      .filter((url) => !reportUrls.includes(url) && url.length > 0);
+      .filter((url) => url.length > 0);
 
     const validNewUrls = new Set<string>();
     const invalidUrls: string[] = [];
+    const duplicateUrls: string[] = [];
 
     const validUrls = this.validUrls();
 
     for (const url of [...parsedUrls, ...this.combinedSelectedUrls()]) {
+
+      if (reportUrls.includes(url)) {
+        duplicateUrls.push(url);
+        continue;
+      }
+
       if (validUrls.includes(url) && !reportUrls.includes(url)) {
         validNewUrls.add(url);
         continue;
@@ -354,6 +362,7 @@ export class CustomReportsCreateComponent {
     }
 
     this.invalidUrls.set(invalidUrls);
+    this.duplicateUrls.set(duplicateUrls);
     this.newUrls.set(Array.from(validNewUrls));
     this.reportUrls.mutate((urls) => urls.push(...validNewUrls));
   }

@@ -26,8 +26,8 @@
           ><span [translate]="'alert-url'"></span>
         </a>
       </li>
-      <li class="alert-link" *ngIf="!areMetricsValid()">
-        <a (click)="scrollToAnchor('select-metric')"
+      <li *ngIf="!areMetricsValid()">
+        <a class="alert-link" (click)="scrollToAnchor('select-metric')"
           ><span [translate]="'alert-metric'"></span>
         </a>
       </li>
@@ -71,15 +71,9 @@
 </div>
 
 <ng-container *ngIf="showCopyAlert">
-  <<<<<<< HEAD
-  <upd-alert position="top" [selfClosing]="true"
-    >Copied successfully!</upd-alert
-  >
-  =======
   <upd-alert position="top" [selfClosing]="true">{{
     'Copied successfully!' | translate
   }}</upd-alert>
-  >>>>>>> 1791270e10b04cf2272dceb8bf535203cd759163
 </ng-container>
 
 <div class="container-fluid my-4 gx-0">
@@ -102,18 +96,21 @@
           ></span>
         </upd-alert>
       </div> -->
-
-      <h3 class="mb-2 h5 pt-2 pb-2 card-tooltip" id="select-date">
+      <h3 class="mb-2 h5 pt-2 pb-2">
+        <span class="required-star"></span>
         <span
           placement="top"
           ngbTooltip="{{ 'tooltip-select-date' | translate }}"
+          class="card-tooltip"
           >{{ 'select-date' | translate }}</span
         >
-        <span class="required-star"></span>
+        <span class="required-title">
+          {{ 'required' | translate }}
+        </span>
       </h3>
-
       <upd-calendar
         #calendar
+        [id]="'date_range'"
         [showAction]="true"
         [showPreset]="true"
         [initialDates]="stateCalendarDates"
@@ -145,7 +142,11 @@
 
       <div
         [title]="'Validation Results'"
-        *ngIf="invalidUrls().length > 0 || reportUrls().length > 0"
+        *ngIf="
+          invalidUrls().length > 0 ||
+          reportUrls().length > 0 ||
+          duplicateUrls().length > 0
+        "
       >
         <div *ngIf="reportUrls().length > 0 && newUrls().length > 0">
           <upd-alert
@@ -179,20 +180,44 @@
             </ol>
           </upd-alert>
         </div>
+        <div *ngIf="duplicateUrls().length > 0">
+          <upd-alert
+            [type]="'warning'"
+            [dismissible]="true"
+            [selfClosing]="false"
+            position="static"
+          >
+            <p>
+              <span class="material-icons align-top pe-1" aria-hidden="true"
+                >warning</span
+              >
+              <span>Duplicate URL(s) detected:</span>
+            </p>
+            <p>
+              The following URL(s) were already present in our list and were not
+              added again to avoid duplication:
+            </p>
+            <ol>
+              <li *ngFor="let url of duplicateUrls()">{{ url }}</li>
+            </ol>
+          </upd-alert>
+        </div>
       </div>
-
       <div class="row">
         <div class="col guidance-modal">
-          <h3 class="mb-2 h5 pt-2 pb-2" id="select-url">
-            {{ 'select-url' | translate }}
+          <h3 class="mb-2 h5 pt-2 pb-2">
             <span class="required-star"></span>
+            {{ 'select-url' | translate }}
+            <span class="required-title">
+              {{ 'required' | translate }}
+            </span>
+            <upd-modal
+              id="add-pages-modal"
+              [modalTitle]="'select-url'"
+              [modalContent]="'select-pages-modal' | translate"
+            >
+            </upd-modal>
           </h3>
-          <upd-modal
-            id="add-pages-modal"
-            [modalTitle]="'select-url'"
-            modalContent="{{ 'select-pages-modal' | translate }}"
-          >
-          </upd-modal>
         </div>
       </div>
       <div
@@ -376,9 +401,12 @@
           <span [translate]="'alert-metric'"></span>
         </upd-alert>
       </div> -->
-      <h3 class="mb-2 h5 pt-2 pb-2" id="select-metric">
-        {{ 'select-metric' | translate }}
+      <h3 class="mb-2 h5 pt-2 pb-2">
         <span class="required-star"></span>
+        {{ 'select-metric' | translate }}
+        <span class="required-title">
+          {{ 'required' | translate }}
+        </span>
       </h3>
 
       <upd-checkbox

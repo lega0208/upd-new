@@ -504,7 +504,7 @@
   "success-urls": "Success URLs:",
   "invalid-urls": "Invalid URLs:",
   "Back": "Back",
-  "required": " (required)",
+  "required": "(required)",
   "Region": "Region",
   "region": "Region",
   "tooltip-visits-cb": "Total number of visits for the selected pages.",

@@ -38,8 +38,9 @@ export class CalendarComponent implements OnChanges {
   @Input() required = false;
   @Input() dateFormat = 'M dd yy';
   @Input() invalid = false;
-  @Input() set initialDates(dates: [Date, Date] | undefined) {
+  @Input() set initialDates(dates: Date[] | undefined) {
     this.calendarDates = dates?.length ? dates : undefined;
+    this.dates.set(dates || []);
   }
 
   @Output() dateChange = new EventEmitter<Date[] | Date>();
@@ -193,5 +194,6 @@ export class CalendarComponent implements OnChanges {
 
     // make sure timezone offset is correct
     this.dates.set([start, end]);
+    this.calendarDates = [start, end];
   }
 }

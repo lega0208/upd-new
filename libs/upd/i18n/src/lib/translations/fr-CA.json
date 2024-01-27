@@ -503,7 +503,7 @@
   "success-urls": "URL de réussite :",
   "invalid-urls": "URL invalides :",
   "Back": "Arrière",
-  "required": " (requis)",
+  "required": "(obligatoire)",
   "Region": "Région",
   "region": "Région",
   "tooltip-visits-cb": "Nombre total de visites pour les pages sélectionnées.",
