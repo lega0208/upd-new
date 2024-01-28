@@ -87,33 +87,6 @@ export class CalendarComponent implements OnChanges {
     );
   }
 
-  processDateSelection(
-    startDate: Date,
-    endDate: Date,
-    currentDate: Date,
-    isWeekSelect = false,
-  ) {
-    if (!startDate) {
-      this.resetSelection();
-    }
-
-    if (!endDate && isWeekSelect) {
-      this.minSelectableDate = startDate;
-      this.disabledDays = [0, 1, 2, 3, 4, 5];
-      return;
-    }
-
-    if (dayjs(endDate).isBefore(dayjs(startDate))) {
-      this.resetSelection();
-      this.dates.set([currentDate]);
-    }
-
-    if (isWeekSelect) {
-      this.minSelectableDate = new Date(2020, 0, 1);
-      this.disabledDays = [1, 2, 3, 4, 5, 6];
-    }
-  }
-
   resetSelection(): void {
     this.dates.set([]);
     this.minSelectableDate = new Date(2020, 0, 1);
@@ -155,34 +128,43 @@ export class CalendarComponent implements OnChanges {
   }
 
   handleSelect(granularity: string, date: Date) {
-    if (this.dates().length === 2) {
-      this.dates.set([date]);
+    let dates = this.dates();
+    if (dates.length === 2 || !dates.length) {
+      dates = [date];
     } else {
-      this.dates.mutate((dates) => dates.push(date));
+      dates.push(date);
     }
 
-    const [startDate, endDate] = this.dates();
+    this.dates.set(dates);
+    const [startDate, endDate] = dates;
+
+    if (!startDate) {
+      this.resetSelection();
+      return;
+    }
+
+    if (endDate && dayjs(endDate).isBefore(dayjs(startDate))) {
+      this.resetSelection();
+      this.dates.set([date]);
+      return;
+    }
 
     if (granularity === 'week') {
       if (!startDate || startDate.getDay() === 6) {
         this.resetSelection();
         return;
+      } else if (!endDate) {
+        this.minSelectableDate = startDate;
+        this.disabledDays = [0, 1, 2, 3, 4, 5];
+        return;
       }
-      this.processDateSelection(startDate, endDate, date, true);
-      return;
+      this.minSelectableDate = new Date(2020, 0, 1);
+      this.disabledDays = [1, 2, 3, 4, 5, 6];
+    } else if (granularity === 'month' && dates.length === 2) {
+      const endOfMonth = dayjs(date).endOf('month').toDate();
+      this.dates.mutate((dates) => (dates[1] = endOfMonth));
+      this.calendarDates = [dates[0], endOfMonth];
     }
-
-    if (granularity === 'month') {
-      const selectedDate =
-        this.dates().length === 2 ? dayjs(date).endOf('month') : dayjs(date);
-      this.dates.mutate(
-        (dates) => (dates[dates.length - 1] = selectedDate.toDate()),
-      );
-      this.processDateSelection(startDate, endDate, date);
-      return;
-    }
-
-    this.processDateSelection(startDate, endDate, date);
   }
 
   onPresetSelect(preset: DateRangePreset['value']) {
