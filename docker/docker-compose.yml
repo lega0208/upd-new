@@ -52,7 +52,7 @@ services:
       - mongodb
   mongodb:
     image: mongo:7.0.5-jammy
-    pull_policy: missing
+    pull_policy: if_not_present
     container_name: upd_mongo
     restart: unless-stopped
     ports:
