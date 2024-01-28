@@ -49,7 +49,8 @@ services:
     depends_on:
       - mongodb
   mongodb:
-    image: mongo:6
+    image: mongo:7.0.5-jammy
+    pull_policy: missing
     container_name: upd_mongo
     restart: unless-stopped
     ports:
