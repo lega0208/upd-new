@@ -242,33 +242,11 @@ PageMetricsSchema.index(
   { background: true, partialFilterExpression: { page: { $exists: true } } },
 );
 PageMetricsSchema.index(
-  { url: 1, page: 1 },
-  { background: true, partialFilterExpression: { page: { $exists: true } } },
-);
-PageMetricsSchema.index(
-  { url: 1, projects: 1 },
-  {
-    background: true,
-    partialFilterExpression: { projects: { $exists: true } },
-  },
-);
-PageMetricsSchema.index(
   { date: 1, projects: 1 },
   {
     name: 'date_1_projects_exists',
     background: true,
     partialFilterExpression: { 'projects.0': { $exists: true } },
-  },
-);
-PageMetricsSchema.index(
-  { url: 1, tasks: 1 },
-  { background: true, partialFilterExpression: { tasks: { $exists: true } } },
-);
-PageMetricsSchema.index(
-  { url: 1, ux_tests: 1 },
-  {
-    background: true,
-    partialFilterExpression: { ux_tests: { $exists: true } },
   },
 );
 PageMetricsSchema.index(

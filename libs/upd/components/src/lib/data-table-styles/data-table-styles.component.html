@@ -32,10 +32,13 @@
   <ng-container [ngSwitch]="config.typeParams.external">
     <!-- When external is true -->
     <ng-container *ngSwitchCase="true">
-      <span class="material-icons material-icon-wysiwyg">wysiwyg</span>
-      <a [href]="'https://' + data[config.typeParams.link]" target="_blank">
-        <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
-      </a>
+      <ng-container *ngIf="data[config.field]; else notAvailable">
+        <span class="material-icons material-icon-wysiwyg">wysiwyg</span>
+        <a [href]="'https://' + data[config.typeParams.link]" target="_blank">
+          <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
+        </a>
+      </ng-container>
+      <ng-template #notAvailable><span>{{ 'n/a' | translate }}</span></ng-template>
     </ng-container>
 
     <!-- When external is false -->
