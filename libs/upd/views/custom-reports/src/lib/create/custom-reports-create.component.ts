@@ -58,7 +58,7 @@ type PageSelectionData = {
     TranslateModule,
     ClipboardModule,
     I18nModule,
-    NgbTooltipModule
+    NgbTooltipModule,
   ],
   templateUrl: './custom-reports-create.component.html',
   styleUrls: ['./custom-reports-create.component.scss'],
@@ -135,13 +135,13 @@ export class CustomReportsCreateComponent {
 
   readonly granularityOptions: DropdownOption<ReportGranularity>[] = [
     { label: 'None', value: 'none' },
-    { label: 'Daily granularity', value: 'day' },
-    { label: 'Weekly granularity', value: 'week' },
-    { label: 'Monthly granularity', value: 'month' },
+    { label: 'Daily', value: 'day' },
+    { label: 'Weekly', value: 'week' },
+    { label: 'Monthly', value: 'month' },
   ];
 
   selectedGranularity = signal<ReportGranularity>(
-    this.storageConfig?.granularity || 'day',
+    this.storageConfig?.granularity || 'none',
   );
 
   reportUrls = signal<string[]>(this.storageConfig?.urls || []);
@@ -293,7 +293,7 @@ export class CustomReportsCreateComponent {
     { label: 'Countries', value: 'country', description: 'tooltip-countries-rb' },
     { label: 'Referrer', value: 'referrer', description: 'tooltip-referrer-rb' },
     { label: 'Referrer type', value: 'referrer_type', description: 'tooltip-referrertype-rb' },
-    // { label: 'Previous page', value: 'prev_page', description: 'tooltip-visits' },
+    { label: 'Previous page', value: 'prev_page', description: 'tooltip-visits' },
     { label: 'Time spent', value: 'time_spent', description: 'tooltip-timespent-rb' },
   ];
 
@@ -307,9 +307,6 @@ export class CustomReportsCreateComponent {
     );
 
     effect(() => {
-      console.log('setting sessionStorage');
-      logJson(this.config());
-
       sessionStorage.setItem(
         'custom-reports-config',
         JSON.stringify(this.config()),
@@ -324,9 +321,6 @@ export class CustomReportsCreateComponent {
   stateCalendarDates?: Date[] =
     this.storageConfig?.dateRange &&
     dateRangeToCalendarDates(this.storageConfig.dateRange);
-  selectedGranularityOption = this.granularityOptions.find(
-    (option) => option.value === this.storageConfig?.granularity,
-  );
 
   copyToClipboard() {
     this.showCopyAlert = !this.showCopyAlert;
@@ -347,7 +341,6 @@ export class CustomReportsCreateComponent {
     const validUrls = this.validUrls();
 
     for (const url of [...parsedUrls, ...this.combinedSelectedUrls()]) {
-
       if (reportUrls.includes(url)) {
         duplicateUrls.push(url);
         continue;

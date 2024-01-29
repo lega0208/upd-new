@@ -60,9 +60,28 @@ export class DropdownComponent<T> implements OnInit {
   @Input() styleClasses = '';
   @Input() icon?: string;
   @Input() autoDisplayFirst = false;
-  @Input() selectedOption?: DropdownOption<T>;
+  @Input() set initialSelection(
+    option: DropdownOption<T> | DropdownOption<T>['value'] | undefined,
+  ) {
+    if (!option) {
+      return;
+    }
+
+    if (typeof option === 'object' && 'label' in option && 'value' in option) {
+      this.selectedOption = option;
+      return;
+    }
+
+    const selectedOption = this.options.find((o) => o.value === option);
+
+    if (selectedOption) {
+      this.selectedOption = selectedOption;
+    }
+  }
 
   @Output() selectOption = new EventEmitter<DropdownOption<T>>();
+
+  selectedOption?: DropdownOption<T>;
 
   get placeholder(): DropdownOption<T> {
     return {

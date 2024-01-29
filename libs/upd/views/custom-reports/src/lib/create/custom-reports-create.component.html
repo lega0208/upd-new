@@ -61,7 +61,7 @@
         id="granularity"
         [label]="'Select' | translate"
         [options]="granularityOptions"
-        [selectedOption]="selectedGranularityOption"
+        [initialSelection]="selectedGranularity()"
         (selectOption)="selectGranularity($event.value); resetValidation()"
         [autoDisplayFirst]="true"
       >
