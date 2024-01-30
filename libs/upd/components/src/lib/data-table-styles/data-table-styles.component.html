@@ -48,7 +48,7 @@
         [queryParamsHandling]="'merge'"
       >
         <ng-container *ngIf="config.pipe === 'number'; else displayField">
-          {{ data[config.field] | number: config.pipeParam:currentLang }}
+          {{ data[config.field] | number: config.pipeParam:i18n.currentLang() }}
         </ng-container>
         <ng-template #displayField>
           <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
@@ -65,9 +65,17 @@
 <span *ngIf="config.pipe && config.type === 'comparison'" [ngClass]="comparisonClassMap">{{ numberVal }}</span>
 
 <!-- Only Pipe -->
-<ng-container *ngIf="config.pipe && !config.type">
-  {{ numberVal }}
+<ng-container *ngIf="config.pipe === 'number' && !config.type">
+{{ data[config.field] | number: config.pipeParam : i18n.currentLang() }}
 </ng-container>
+
+<ng-container *ngIf="config.pipe !== 'number' && config.pipe && !config.type">
+{{ numberVal }}
+</ng-container>
+<!-- 
+<ng-container *ngIf="config.pipe && !config.type">
+{{ numberVal }}
+</ng-container> -->
 
 <!-- Array Data -->
 <ng-container *ngIf="isArray(data[config.field])">
