@@ -16,12 +16,12 @@ import { CustomReportsReportComponent } from './report/custom-reports-report.com
           {
             path: 'create',
             component: CustomReportsCreateComponent,
-            data: { title: 'UPD | Custom reports | Create' },
+            data: { title: 'Custom reports | Create' },
           },
           {
             path: ':id',
             component: CustomReportsReportComponent,
-            data: { title: 'UPD | Custom reports | Report' },
+            data: { title: 'Custom reports | Report' },
           },
           { path: '**', redirectTo: 'create', pathMatch: 'full' },
         ],

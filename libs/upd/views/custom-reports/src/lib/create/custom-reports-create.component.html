@@ -141,7 +141,7 @@
       </div> -->
 
       <div
-        [title]="'Validation Results'"
+        [title]="'Validation Results' | translate"
         *ngIf="
           invalidUrls().length > 0 ||
           reportUrls().length > 0 ||
@@ -187,16 +187,11 @@
             [selfClosing]="false"
             position="static"
           >
-            <p>
               <span class="material-icons align-top pe-1" aria-hidden="true"
                 >warning</span
               >
-              <span>Duplicate URL(s) detected:</span>
-            </p>
-            <p>
-              The following URL(s) were already present in our list and were not
-              added again to avoid duplication:
-            </p>
+              <span>{{ 'duplicate-urls' | translate }}</span><br/>
+              <span>{{ 'duplicate-urls-note' | translate }}</span>
             <ol>
               <li *ngFor="let url of duplicateUrls()">{{ url }}</li>
             </ol>
@@ -452,10 +447,10 @@
   </button>
 </div>
 
-<upd-card styleClass="mt-3 d-inline-block">
+<!-- <upd-card styleClass="mt-3 d-inline-block">
   <code>
     <pre>{{ config() | json }}</pre>
   </code>
-</upd-card>
+</upd-card> -->
 
 <hr />
