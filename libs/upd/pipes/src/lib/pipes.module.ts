@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { formatNumber, formatDate, formatPercent } from '@angular/common';
 import { I18nModule, I18nService, type LocaleId } from '@dua-upd/upd/i18n';
+import { val } from 'cheerio/lib/api/attributes';
 
 @Pipe({ name: 'localeNumber', pure: false })
 export class LocaleNumberPipe implements PipeTransform {
@@ -111,6 +112,16 @@ export class TruncatePipe implements PipeTransform {
   }
 }
 
+@Pipe({ name: 'secondsToMinutes', pure: true })
+export class SecondsToMinutesPipe implements PipeTransform {
+  transform(value: number): string {
+    value = Math.round(value);
+    const minutes = Math.floor(value / 60);
+    const seconds = value - minutes * 60;
+    return `${minutes}m ${seconds}s`;
+  }
+}
+
 @NgModule({
   imports: [I18nModule],
   declarations: [
@@ -121,6 +132,7 @@ export class TruncatePipe implements PipeTransform {
     TranslateArrayPipe,
     ArrayToTextPipe,
     TruncatePipe,
+    SecondsToMinutesPipe,
   ],
   providers: [
     LocaleNumberPipe,
@@ -130,6 +142,7 @@ export class TruncatePipe implements PipeTransform {
     TranslateArrayPipe,
     ArrayToTextPipe,
     TruncatePipe,
+    SecondsToMinutesPipe,
   ],
   exports: [
     LocaleNumberPipe,
@@ -139,6 +152,7 @@ export class TruncatePipe implements PipeTransform {
     TranslateArrayPipe,
     ArrayToTextPipe,
     TruncatePipe,
+    SecondsToMinutesPipe,
   ],
 })
 export class PipesModule {}
