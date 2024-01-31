@@ -143,6 +143,7 @@ export class CustomReportsReportComponent implements OnInit {
             : ['average_time_spent'].includes(key)
             ? { pipe: 'secondsToMinutes' }
             : []),
+        translate: true,  
         }) as ColumnConfig,
     );
   });

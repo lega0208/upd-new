@@ -73,14 +73,20 @@
         <a
           [routerLink]="[langPath(), 'custom-reports']"
           [routerLinkActive]="['active']"
-          class="nav_link"
+          class="nav_link cr-link"
         >
-          <span class="material-icons nav_icon" aria-hidden="true"
-            >dashboard</span
-          >
-          <span class="nav_name" data-i18n="menu-custom-reports">{{
-            'menu-custom-reports' | translate
-          }}</span>
+        <div class="row">
+          <div id="menu-custom-report-label" class="col">
+              <span class="material-icons nav_icon" aria-hidden="true"
+              >dashboard</span
+            >
+          </div>
+          <div class="col ps-1">
+            <span class="nav_name" data-i18n="menu-custom-reports">{{
+              'menu-custom-reports' | translate
+            }}</span>
+          </div>  
+        </div>
         </a>
       </div>
     </div>
