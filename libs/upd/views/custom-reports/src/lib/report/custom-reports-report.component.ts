@@ -136,8 +136,10 @@ export class CustomReportsReportComponent implements OnInit {
           header: key,
           ...(['startDate', 'endDate', 'date'].includes(key)
             ? { pipe: 'date' }
-            : ['visits', 'views', 'visitors'].includes(key)
+            : ['visits', 'views', 'visitors', 'dyf_no', 'dyf_yes', 'dyf_submit'].includes(key)
             ? { pipe: 'number' }
+            : ['bouncerate'].includes(key)
+            ? { pipe: 'percent' }
             : ['average_time_spent'].includes(key)
             ? { pipe: 'secondsToMinutes' }
             : []),

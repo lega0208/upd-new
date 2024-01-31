@@ -65,17 +65,20 @@
 <span *ngIf="config.pipe && config.type === 'comparison'" [ngClass]="comparisonClassMap">{{ numberVal }}</span>
 
 <!-- Only Pipe -->
-<ng-container *ngIf="config.pipe === 'number' && !config.type">
-{{ data[config.field] | number: config.pipeParam : i18n.currentLang() }}
+<ng-container *ngIf="!config.type">
+  <ng-container *ngIf="config.pipe === 'date'">
+    {{ data[config.field] | date: config.pipeParam : 'UTC' : i18n.currentLang() }}
+  </ng-container>
+  <ng-container *ngIf="config.pipe === 'percent'">
+    {{ data[config.field] | percent: config.pipeParam : i18n.currentLang() }}
+  </ng-container>
+  <ng-container *ngIf="config.pipe === 'number'">
+    {{ data[config.field] | number: config.pipeParam : i18n.currentLang() }}
+  </ng-container>
+  <ng-container *ngIf="config.pipe !== 'number' && config.pipe !== 'date' && config.pipe !== 'percent' && config.pipe">
+    {{ numberVal }}
+  </ng-container>
 </ng-container>
-
-<ng-container *ngIf="config.pipe !== 'number' && config.pipe && !config.type">
-{{ numberVal }}
-</ng-container>
-<!-- 
-<ng-container *ngIf="config.pipe && !config.type">
-{{ numberVal }}
-</ng-container> -->
 
 <!-- Array Data -->
 <ng-container *ngIf="isArray(data[config.field])">
