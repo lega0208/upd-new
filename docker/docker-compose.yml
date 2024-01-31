@@ -28,10 +28,15 @@ services:
       - '9000'
     secrets:
       - .env
+      - secret.pem
+      - aa_creds_pool
     environment:
       DOTENV_CONFIG_PATH: /run/secrets/.env
+      AA_KEY_PATH: /run/secrets/secret.pem
+      AA_KEY_POOL_PATH: /run/secrets/aa_creds_pool.json
     depends_on:
       - mongodb
+      - redis
 
   db-updater:
     image: 'ghcr.io/lega0208/upd-new/db-updater:latest'
@@ -50,6 +55,7 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/service-account-credentials.json
     depends_on:
       - mongodb
+
   mongodb:
     image: mongo:7.0.5-jammy
     pull_policy: if_not_present
@@ -64,6 +70,13 @@ services:
         volume:
           nocopy: true
 
+  redis:
+    image: redis:7.2.4
+    pull_policy: if_not_present
+    command: "redis-server --appendonly yes --maxmemory noeviction"
+    ports:
+      - '6379'
+
 volumes:
   db-data:
     driver: local
@@ -77,5 +90,7 @@ secrets:
     file: ../.env
   secret.pem:
     file: ../keys/secret.pem
+  aa_creds_pool:
+    file: ../keys/aa_creds_pool.json
   service-account-credentials.json:
     file: ../keys/service-account-credentials.json

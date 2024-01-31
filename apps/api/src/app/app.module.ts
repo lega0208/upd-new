@@ -21,7 +21,7 @@ import { ReportsModule } from '../reports/reports.module';
     ProjectsModule,
     InternalSearchModule,
     ReportsModule,
-    CustomReportsModule,
+    CustomReportsModule.register(environment.production),
     QueryModule,
     BullModule.forRoot({
       connection: {

@@ -1,23 +1,27 @@
+import type { AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
+import { days, withMutex } from '@dua-upd/utils-common';
 import type {
   AAMaybeResponse,
   AAResponseBody,
   AdobeAnalyticsReportQuery,
-  AnalyticsCoreAPI,
 } from '@dua-upd/external-data';
-import { getAAClient } from '@dua-upd/external-data';
-import { days, withMutex } from '@dua-upd/utils-common';
+import type { AuthParams } from '@dua-upd/types-common';
+import { getAAClient, getDefaultAuthParams } from './adobe-analytics.api';
 
 class AAClient {
-  private client: AnalyticsCoreAPI;
+  private client!: AnalyticsCoreAPI;
+  private authParams!: AuthParams;
   private delay: Promise<void> = Promise.resolve();
   private tokenExpiry = 0;
 
-  constructor(private keyPath?: string) {}
+  constructor(authParams?: AuthParams) {
+    if (authParams) {
+      this.authParams = authParams;
+    }
+  }
 
   async execute(query: AdobeAnalyticsReportQuery) {
-    if (!this.client || this.tokenIsExpired()) {
-      await this.initClient();
-    }
+    await this.ensureClient();
 
     await this.delay;
 
@@ -28,22 +32,42 @@ class AAClient {
 
     return resultsPromise.then((results) => {
       if ('errorCode' in results.body) {
-        throw new Error(`Error response received from AA API call:
-      Error code ${results.body.errorCode}: ${results.body.errorDescription}`);
+        throw new Error(
+          `Error response received from AA API call:
+          Error code ${results.body.errorCode}: ${results.body.errorDescription}`,
+        );
       }
 
       return results.body as AAResponseBody;
     });
   }
 
-  async initClient(
-    clientTokenExpiry = Math.floor((Date.now() + days(1)) / 1000),
-  ) {
-    this.tokenExpiry = clientTokenExpiry;
+  async initClient(authParams?: AuthParams) {
+    this.authParams =
+      authParams || this.authParams || (await getDefaultAuthParams());
 
-    this.client = await getAAClient(clientTokenExpiry, this.keyPath);
+    if (!this.authParams.expiryDateTime) {
+      this.authParams.expiryDateTime = Math.floor(
+        (Date.now() + days(1)) / 1000,
+      );
+
+      this.tokenExpiry = this.authParams.expiryDateTime;
+    }
+
+    this.client = await getAAClient(this.authParams);
 
     return this.client;
+  }
+
+  private async ensureClient() {
+    if (!this.client || this.tokenIsExpired()) {
+      await this.initClient(
+        this.authParams && {
+          ...this.authParams,
+          expiryDateTime: undefined,
+        },
+      );
+    }
   }
 
   private tokenIsExpired() {
@@ -55,21 +79,22 @@ class AAClient {
   }
 }
 
-const createAAClient = (keyPath?: string) => withMutex(new AAClient(keyPath));
+const createAAClient = (authParams?: AuthParams) =>
+  withMutex(new AAClient(authParams));
 
 // use pool to invisibly intersperse requests between clients
 // can make this generic to any client type and add settings like concurrency, rate limiting, etc.
 export class AdobeAnalyticsClient {
   private clientPool: AAClient[] = [];
 
-  constructor(keyPaths: AnalyticsCoreAPI[] = []) {
-    if (keyPaths.length === 0) {
+  constructor(authParams: AuthParams[] = []) {
+    if (authParams.length === 0) {
       this.clientPool = [createAAClient()];
 
       return;
     }
 
-    this.clientPool = keyPaths.map((keyPath) => createAAClient(keyPath));
+    this.clientPool = authParams.map((params) => createAAClient(params));
   }
 
   async init() {

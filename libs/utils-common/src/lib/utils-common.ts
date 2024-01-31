@@ -555,7 +555,7 @@ export function withMutex<T extends object>(obj: T): T {
           await mutex.lock();
 
           try {
-            return await origMethod.apply(target, args);
+            return origMethod.apply(target, args);
           } finally {
             mutex.unlock();
           }

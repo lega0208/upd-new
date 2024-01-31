@@ -199,8 +199,6 @@ export class CustomReportsService {
     config: ReportConfig,
     queriesWithDataPoints: QueryWithDataPoints[],
   ): Promise<void> {
-    // todo: check for running jobs? duplicates are ignored so might not be necessary
-
     const children: FlowChildJob[] = queriesWithDataPoints.map(
       (queryWithDataPoints) => {
         const { query, dataPoints } = queryWithDataPoints;
@@ -219,8 +217,12 @@ export class CustomReportsService {
           opts: {
             jobId: hash,
             attempts: 3,
-            removeOnComplete: true,
-            removeOnFail: true,
+            removeOnComplete: {
+              age: 1000 * 60 * 30, // 30 minutes
+            },
+            removeOnFail: {
+              age: 1000 * 60 * 30, // 30 minutes
+            },
           },
         };
       },
@@ -236,9 +238,13 @@ export class CustomReportsService {
       },
       opts: {
         jobId: reportId,
-        removeOnComplete: true,
         attempts: 3,
-        removeOnFail: true,
+        removeOnComplete: {
+          age: 1000 * 60 * 30, // 30 minutes
+        },
+        removeOnFail: {
+          age: 1000 * 60 * 30, // 30 minutes
+        },
       },
       children,
     });
