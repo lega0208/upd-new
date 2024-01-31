@@ -43,12 +43,12 @@ const routes: Routes = [
       ),
   },
   {
-    path: 'reports',
+    path: 'documents',
     loadChildren: () =>
       import('@dua-upd/upd/views/reports').then(
         (module) => module.ReportsModule,
       ),
-    data: { animation: 'reports', title: 'Reports' },
+    data: { animation: 'documents', title: 'Documents | Home' },
   },
   {
     path: 'custom-reports',
