@@ -73,6 +73,11 @@ export class CustomReportsCreateComponent {
   private scroller = inject(ViewportScroller);
   private readonly api = inject(ApiService);
 
+  successUrls = true;
+  dangerUrls = true;
+  warningUrls = true;
+  overviewError = true;
+
   lang = this.i18n.currentLang;
 
   storageConfig: ReportConfig | null =
@@ -484,6 +489,7 @@ export class CustomReportsCreateComponent {
       !this.areMetricsValid()
     ) {
       this.validationTriggered = true;
+      this.overviewError = true;
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
