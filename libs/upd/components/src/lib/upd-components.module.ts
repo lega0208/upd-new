@@ -127,6 +127,7 @@ import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
   ],
   exports: [
     NgbPopoverModule,
+    NgbAlertModule,
     TableModule,
     ButtonModule,
     InputTextModule,
