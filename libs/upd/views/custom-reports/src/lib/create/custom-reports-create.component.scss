@@ -39,7 +39,8 @@ li[role='presentation'].p-highlight a {
 /* Added by Kole - Dec 2023 */
 .add-pages-card {
   border: none;
-  background: none;
+  border-bottom: #e2e2e2 2px solid;
+  // background: none;
 }
 
 .card-invalid {
@@ -104,4 +105,23 @@ li[role='presentation'].p-highlight a {
 
 #add-pages-modal {
   margin: 7px 0px 0px 10px;
+}
+
+#copy_url.btn-outline-primary, 
+#remove_all.btn-outline-primary {
+  color: #444;
+  border: none !important;
+}
+
+#copy_url.btn-outline-primary:hover, 
+#remove_all.btn-outline-primary:hover {
+  background: none !important;
+} 
+
+#copy_url.btn-outline-primary:hover {
+  color: #2e5ea7 !important;
+}
+
+#remove_all.btn-outline-primary:hover {
+  color: red !important;
 }

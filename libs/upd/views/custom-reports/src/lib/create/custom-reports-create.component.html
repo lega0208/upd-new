@@ -205,7 +205,10 @@
               <span class="material-icons" aria-hidden="true">content_copy</span>
               <span [translate]="'copy-all'"></span>
             </button>
-            <button class="btn btn-outline-danger btn-sm" (click)="resetUrls()">
+            <button 
+            id="remove_all"  
+            class="btn btn-outline-primary btn-sm" 
+            (click)="resetUrls()">
               <span class="material-icons" aria-hidden="true">close</span>
               <span [translate]="'remove-all'"></span>
             </button>
