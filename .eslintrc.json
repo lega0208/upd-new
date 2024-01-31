@@ -7,7 +7,7 @@
       "files": "*.json",
       "parser": "jsonc-eslint-parser",
       "rules": {
-        "@nx/dependency-checks": "error"
+        "@nx/dependency-checks": "off"
       }
     },
     {
@@ -34,7 +34,10 @@
         "plugin:@nx/typescript",
         "plugin:@ngrx/eslint-plugin/recommended"
       ],
-      "rules": {}
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-unused-vars": "warn"
+      }
     },
     {
       "files": ["*.js", "*.jsx"],

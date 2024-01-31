@@ -19,7 +19,7 @@ const localStorageSyncReducer = (
   reducer: ActionReducer<RootState>,
 ): ActionReducer<RootState> =>
   localStorageSync({
-    keys: ['dateSelection', 'router', 'i18n'],
+    keys: ['dateSelection', 'i18n'],
     rehydrate: true,
   })(reducer);
 

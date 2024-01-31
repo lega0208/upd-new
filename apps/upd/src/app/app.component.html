@@ -1,7 +1,7 @@
 <div class="container vh-100">
-  <upd-header [lang]="currentLang()"></upd-header>
+  <upd-header></upd-header>
   <upd-sidebar></upd-sidebar>
-  <h1 class="visually-hidden">{{ translatedTitleFromNav() }}</h1>
+  <h1 class="visually-hidden">{{ this.titleFromNavigation() | translate }}</h1>
   <main [@routeAnimations]="getRouteAnimationData()" style="min-height: 100%">
     <router-outlet></router-outlet>
   </main>

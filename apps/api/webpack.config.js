@@ -1,21 +1,25 @@
-const { join } = require('path');
 const { merge } = require('webpack-merge');
-const CopyPlugin = require('copy-webpack-plugin');
+const { composePlugins, withNx } = require('@nx/webpack');
 
-module.exports = (config, context) => {
-  return merge(config, {
+module.exports = composePlugins(withNx(), (config, { options, context }) =>
+  merge(config, {
     optimization: {
-      nodeEnv: process.env.NODE_ENV || 'development'
+      nodeEnv: process.env.NODE_ENV || 'development',
     },
-    plugins: [
-      new CopyPlugin({
-        patterns: [
-          {
-            from: 'apps/api/src/assets/package.json',
-            to: join(config.output.path, 'package.json'),
-          },
-        ],
-      }),
+    module: {
+      rules: [
+        {
+          test: /\.node$/,
+          loader: 'node-loader',
+        },
+      ],
+    },
+    ignoreWarnings: [
+      new RegExp(
+        'Failed to parse source map|' +
+          'the request of a dependency is an expression|' +
+          "Module not found: Error: Can't resolve '(.\\/zstd|@mongodb-js)",
+      ),
     ],
-  });
-};
+  }),
+);

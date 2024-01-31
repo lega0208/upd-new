@@ -13,15 +13,14 @@
         "index": "apps/upd/index.html",
         "main": "apps/upd/src/main.ts",
         "polyfills": "apps/upd/src/polyfills.ts",
+        "configFile": "apps/upd/vite.config.mts",
         "tsConfig": "apps/upd/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": ["apps/upd/src/favicon.ico", "apps/upd/src/assets"],
         "styles": ["apps/upd/src/styles.scss"],
         "scripts": [],
         "vendorChunk": true,
-        "verbose": true,
-        "configFile": "apps/upd/vite.config.mts",
-        "logLevel": "info"
+        "verbose": true
       },
       "configurations": {
         "production": {
@@ -45,7 +44,8 @@
           ],
           "outputHashing": "all",
           "statsJson": true,
-          "buildLibsFromSource": true
+          "buildLibsFromSource": true,
+          "vendorChunk": false
         },
         "development": {
           "buildOptimizer": false,
@@ -98,7 +98,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": ["apps/upd/src/**/*.ts", "apps/upd/src/**/*.html"]
       }
@@ -107,8 +107,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/apps/upd"],
       "options": {
-        "jestConfig": "apps/upd/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/upd/jest.config.ts"
       }
     },
     "compodoc": {

@@ -6,16 +6,21 @@
         [ngSrc]="craLogo"
         width="834"
         height="76"
-        alt="{{'government_of_canada' | translate}}"
+        alt="{{ 'government_of_canada' | translate }}"
         priority="true"
       />
     </div>
-    <div
-      class="col-lg-9 col-md-8 col-sm-6 col-6 text-end lang-toggle"
-    >
+    <div class="col-lg-9 col-md-8 col-sm-6 col-6 text-end lang-toggle">
       <div class="language-picker-area">
-        <div class="picker-label" ></div>
-          <a style="cursor:pointer" class="langs" (click)="selectLanguage(oppositeLang)" tabindex="0"> {{ 'opposite.language' | translate }} </a>
+        <div class="picker-label"></div>
+        <a
+          style="cursor: pointer"
+          class="langs"
+          (click)="selectLanguage(oppositeLang())"
+          tabindex="0"
+        >
+          {{ 'opposite.language' | translate }}
+        </a>
       </div>
     </div>
   </div>

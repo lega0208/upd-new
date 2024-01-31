@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { combineLatest } from 'rxjs';
+import { map } from 'rxjs';
 import type { ColumnConfig } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type { PagesHomeAggregatedData } from '@dua-upd/types-common';
@@ -20,23 +20,19 @@ export class PagesHomeComponent implements OnInit {
 
   currentLang$ = this.i18n.currentLang$;
 
-  columns: ColumnConfig<PagesHomeAggregatedData>[] = [];
-
-  searchFields = this.columns.map((col) => col.field);
-
-  ngOnInit() {
-    combineLatest([this.pagesHomeData$, this.currentLang$]).subscribe(
-      ([data, lang]) => {
-        this.columns = [
+  columns = this.pagesHomeData$.pipe(
+    map(
+      (data) =>
+        [
           {
             field: 'title',
-            header: this.i18n.service.translate('Title', lang),
+            header: 'Title',
             type: 'link',
             typeParam: '_id',
           },
           {
             field: 'pageStatus',
-            header: this.i18n.service.translate('Current status', lang),
+            header: 'Current status',
             type: 'label',
             typeParam: 'pageStatus',
             filterConfig: {
@@ -50,20 +46,24 @@ export class PagesHomeComponent implements OnInit {
           },
           {
             field: 'url',
-            header: this.i18n.service.translate('URL', lang),
+            header: 'URL',
             type: 'link',
             typeParams: { link: 'url', external: true },
           },
           {
             field: 'visits',
-            header: this.i18n.service.translate('visits', lang),
+            header: 'visits',
             pipe: 'number',
           },
-        ];
-      },
-    );
+        ] as ColumnConfig<PagesHomeAggregatedData>[],
+    ),
+  );
 
+  searchFields = this.columns.pipe(
+    map((columns) => columns.map((col) => col.field)),
+  );
+
+  ngOnInit() {
     this.pagesHomeService.fetchData();
-    this.searchFields = this.columns.map((col) => col.field);
   }
 }

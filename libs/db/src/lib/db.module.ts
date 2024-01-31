@@ -9,6 +9,8 @@ import {
   AAItemIdSchema,
   CallDriver,
   CallDriverSchema,
+  CustomReportsRegistry,
+  CustomReportsRegistrySchema,
   Feedback,
   FeedbackSchema,
   Overall,
@@ -37,6 +39,8 @@ import {
   AnnotationsSchema,
   Reports,
   ReportsSchema,
+  CustomReportsMetrics,
+  CustomReportsMetricsSchema,
 } from './db.schemas';
 import { PageVisitsViewSchema, PageVisitsView } from './db.views';
 
@@ -60,6 +64,14 @@ export const models = {
   readability: { model: Readability, schema: ReadabilitySchema },
   annotations: { model: Annotations, schema: AnnotationsSchema },
   reports: { model: Reports, schema: ReportsSchema },
+  customReportsRegistry: {
+    model: CustomReportsRegistry,
+    schema: CustomReportsRegistrySchema,
+  },
+  customReportsMetrics: {
+    model: CustomReportsMetrics,
+    schema: CustomReportsMetricsSchema,
+  },
 } as const;
 
 export const views = {
@@ -78,7 +90,7 @@ export const views = {
           schema: collection.schema,
         })),
       ],
-      'defaultConnection'
+      'defaultConnection',
     ),
   ],
   providers: [],

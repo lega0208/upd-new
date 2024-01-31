@@ -65,7 +65,7 @@ export const createDateRangeFilterFormula = (
 export class AirtableClient {
   client: AirTableAPI;
   feedbackClient: AirTableAPI = getATClient(
-    process.env.AIRTABLE_FEEDBACK_API_KEY,
+    process.env.AIRTABLE_TOKEN,
   );
 
   constructor(apiKey?: string) {

@@ -10,6 +10,12 @@ export function squishTrim<T extends string>(str?: T) {
   return (str?.replaceAll(/\s+/g, ' ').trim() as T) || '';
 }
 
+// Because including 0 is important 😉
+export function isNullish(val: unknown): val is null | undefined {
+  return val === null || val === undefined;
+}
+
+// Checks if an array has duplicate values (not including deep comparison)
 export const hasDuplicates = <T>(array: T[]) =>
   array.length !== 0 && new Set(array).size !== array.length;
 
@@ -19,7 +25,7 @@ export function LogTiming(message = '') {
   return function (
     _target: object,
     name: string,
-    descriptor: PropertyDescriptor
+    descriptor: PropertyDescriptor,
   ) {
     const method = descriptor.value;
     descriptor.value = async function () {
@@ -29,7 +35,7 @@ export function LogTiming(message = '') {
       console.log(
         `${message || name} took ${
           endTime.getTime() - startTime.getTime()
-        }ms to complete.`
+        }ms to complete.`,
       );
     };
   };
@@ -38,7 +44,7 @@ export function LogTiming(message = '') {
 export const AsyncLogTiming = <T extends (...args: unknown[]) => ReturnType<T>>(
   _target: object,
   propertyKey: string,
-  descriptor: PropertyDescriptor
+  descriptor: PropertyDescriptor,
 ) => {
   const originalMethod: T = descriptor.value;
 
@@ -49,7 +55,7 @@ export const AsyncLogTiming = <T extends (...args: unknown[]) => ReturnType<T>>(
     console.log(
       `${propertyKey} Execution time: ${
         Math.round((finish - start) / 10) / 100
-      } seconds`
+      } seconds`,
     );
     return result;
   };
@@ -109,7 +115,7 @@ export function Required(target: object, propertyKey: string) {
 export function arrayToDictionary<T extends object>(
   array: T[],
   keyProp: keyof T,
-  allowDuplicateKeys = false
+  allowDuplicateKeys = false,
 ) {
   if (!array.length) return {};
 
@@ -122,7 +128,7 @@ export function arrayToDictionary<T extends object>(
       throw Error(
         'Could not convert array to dictionary: the value of the key property is invalid or undefined.\r\n' +
           'Object where error occurred:\r\n\r\n' +
-          JSON.stringify(obj, null, 2)
+          JSON.stringify(obj, null, 2),
       );
     }
 
@@ -130,12 +136,12 @@ export function arrayToDictionary<T extends object>(
       if (!allowDuplicateKeys) {
         throw Error(
           'Could not convert array to dictionary: received duplicate key: ' +
-            key
+            key,
         );
       }
 
       console.warn(
-        'Duplicate key found when converting array to dictionary: ' + key
+        'Duplicate key found when converting array to dictionary: ' + key,
       );
       console.warn(JSON.stringify(obj, null, 2));
     }
@@ -149,7 +155,7 @@ export function arrayToDictionary<T extends object>(
 export function arrayToDictionaryFlat<T extends object>(
   array: T[],
   keyProp: keyof T,
-  allowDuplicateKeys = false
+  allowDuplicateKeys = false,
 ) {
   if (!array.length) return {};
 
@@ -166,7 +172,7 @@ export function arrayToDictionaryFlat<T extends object>(
       throw Error(
         'Could not convert array to dictionary: the value of the key property is invalid or undefined.\r\n' +
           'Object where error occurred:\r\n\r\n' +
-          JSON.stringify(obj, null, 2)
+          JSON.stringify(obj, null, 2),
       );
     }
 
@@ -174,7 +180,7 @@ export function arrayToDictionaryFlat<T extends object>(
       if (!allowDuplicateKeys && dictionary[key]) {
         throw Error(
           'Could not convert array to dictionary: received duplicate key: ' +
-            key
+            key,
         );
       }
 
@@ -196,7 +202,7 @@ export function arrayToDictionaryFlat<T extends object>(
 export function arrayToDictionaryMultiref<T extends object>(
   array: T[],
   keyProp: keyof T,
-  flat = false
+  flat = false,
 ) {
   if (!array.length) return {};
 
@@ -205,7 +211,7 @@ export function arrayToDictionaryMultiref<T extends object>(
   const error = Error(
     'Could not convert array to dictionary: the value of the key property is invalid or undefined.\r\n' +
       'Object where error occurred:\r\n\r\n' +
-      JSON.stringify(array[0], null, 2)
+      JSON.stringify(array[0], null, 2),
   );
 
   if (flat) {
@@ -321,7 +327,7 @@ export async function batchAwait<T, U>(
   paramsArray: T[],
   fn: (param: T) => Promise<U>,
   batchSize: number,
-  delay: number | { delay: number } = 0
+  delay: number | { delay: number } = 0,
 ): Promise<U[]> {
   const promises: Promise<U>[] = [];
 
@@ -350,7 +356,7 @@ export async function batchAwait<T, U>(
 export function chunkMap<T, ReturnT>(
   array: T[],
   mapFunc: (val: T[]) => ReturnT,
-  chunkSize: number
+  chunkSize: number,
 ): ReturnT[] {
   const chunks = [];
 
@@ -373,7 +379,7 @@ export class TimingUtility {
   private calculateAverage(): void {
     const sum = this.iterationDurations.reduce(
       (total, duration) => total + duration,
-      0
+      0,
     );
     this.averageDuration = sum / this.iterationDurations.length;
   }
@@ -400,12 +406,12 @@ export class TimingUtility {
     this.iterationCount++;
     this.calculateAverage();
     const timeRemaining = this.formatTimeRemaining(
-      (this.totalIterations - this.iterationCount) * this.averageDuration
+      (this.totalIterations - this.iterationCount) * this.averageDuration,
     );
     const message =
       `${chalk.green('✔')}  ${chalk.dim(new Date().toLocaleTimeString())} | ` +
       `${chalk.bold(this.formatIterationCount())}: ${chalk.yellow(
-        `${iterationDuration}ms`
+        `${iterationDuration}ms`,
       )} | ` +
       `${chalk.blue(`Average: ${this.averageDuration.toFixed(2)}ms`)} | ` +
       `${chalk.magenta(`Time remaining: ${timeRemaining}`)} | ${
@@ -423,7 +429,7 @@ export function Retry(retries: number, delay: number) {
   return function (
     _target: object,
     _propertyKey: string,
-    descriptor: PropertyDescriptor
+    descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;
 
@@ -434,7 +440,7 @@ export function Retry(retries: number, delay: number) {
 
       const attempt = async (
         retries: number,
-        delay: number
+        delay: number,
       ): Promise<ReturnType<typeof originalMethod>> => {
         try {
           return await originalMethod.apply(this, args);
@@ -442,8 +448,8 @@ export function Retry(retries: number, delay: number) {
           console.error(
             chalk.red(
               `Error occurred in ${originalMethod.name}, retrying (${retries} attempts left)` +
-                `\n${err}`
-            )
+                `\n${err}`,
+            ),
           );
 
           if (retries > 0) {
@@ -454,7 +460,9 @@ export function Retry(retries: number, delay: number) {
             return await attempt(retries - 1, delay * delayMultiplier);
           } else {
             console.error(
-              chalk.red(`All retry attempts for ${originalMethod.name} failed:`)
+              chalk.red(
+                `All retry attempts for ${originalMethod.name} failed:`,
+              ),
             );
             console.error(chalk.red(err));
 
@@ -477,7 +485,7 @@ export function Timeout(milliseconds: number) {
   return function (
     _target: object,
     _propertyKey: string,
-    descriptor: PropertyDescriptor
+    descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;
 
@@ -486,7 +494,7 @@ export function Timeout(milliseconds: number) {
     ): Promise<ReturnType<typeof originalMethod>> {
       const timeout = setTimeout(() => {
         throw new Error(
-          `Timeout of ${milliseconds}ms exceeded in ${originalMethod.name}`
+          `Timeout of ${milliseconds}ms exceeded in ${originalMethod.name}`,
         );
       }, milliseconds);
 
@@ -507,3 +515,53 @@ export function Timeout(milliseconds: number) {
 export const collapseStrings = (strings: string[]) => [
   ...new Set(strings.map((s) => s.replace(/\s+/g, ' ').trim())),
 ];
+
+class Mutex {
+  private queue: (() => void)[] = [];
+  private locked = false;
+
+  async lock() {
+    if (this.locked) {
+      return new Promise<void>((resolve) => {
+        this.queue.push(resolve);
+      });
+    }
+
+    this.locked = true;
+  }
+
+  unlock() {
+    const resolve = this.queue.shift();
+
+    if (resolve) {
+      resolve();
+
+      return;
+    }
+
+    this.locked = false;
+  }
+}
+
+export function withMutex<T extends object>(obj: T): T {
+  const mutex = new Mutex();
+
+  return new Proxy(obj, {
+    get(target, propKey, receiver) {
+      const origMethod = Reflect.get(target, propKey, receiver);
+
+      if (typeof origMethod === 'function') {
+        return async (...args: unknown[]) => {
+          await mutex.lock();
+
+          try {
+            return await origMethod.apply(target, args);
+          } finally {
+            mutex.unlock();
+          }
+        };
+      }
+      return origMethod;
+    },
+  });
+}

@@ -32,10 +32,13 @@
   <ng-container [ngSwitch]="config.typeParams.external">
     <!-- When external is true -->
     <ng-container *ngSwitchCase="true">
-      <span class="material-icons material-icon-wysiwyg">wysiwyg</span>
-      <a [href]="'https://' + data[config.typeParams.link]" target="_blank">
-        <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
-      </a>
+      <ng-container *ngIf="data[config.field]; else notAvailable">
+        <span class="material-icons material-icon-wysiwyg">wysiwyg</span>
+        <a [href]="'https://' + data[config.typeParams.link]" target="_blank">
+          <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
+        </a>
+      </ng-container>
+      <ng-template #notAvailable><span>{{ 'n/a' | translate }}</span></ng-template>
     </ng-container>
 
     <!-- When external is false -->
@@ -45,7 +48,7 @@
         [queryParamsHandling]="'merge'"
       >
         <ng-container *ngIf="config.pipe === 'number'; else displayField">
-          {{ data[config.field] | number: config.pipeParam:currentLang }}
+          {{ data[config.field] | number: config.pipeParam:i18n.currentLang() }}
         </ng-container>
         <ng-template #displayField>
           <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
@@ -62,8 +65,19 @@
 <span *ngIf="config.pipe && config.type === 'comparison'" [ngClass]="comparisonClassMap">{{ numberVal }}</span>
 
 <!-- Only Pipe -->
-<ng-container *ngIf="config.pipe && !config.type">
-  {{ numberVal }}
+<ng-container *ngIf="!config.type">
+  <ng-container *ngIf="config.pipe === 'date'">
+    {{ data[config.field] | date: config.pipeParam : 'UTC' : i18n.currentLang() }}
+  </ng-container>
+  <ng-container *ngIf="config.pipe === 'percent'">
+    {{ data[config.field] | percent: config.pipeParam : i18n.currentLang() }}
+  </ng-container>
+  <ng-container *ngIf="config.pipe === 'number'">
+    {{ data[config.field] | number: config.pipeParam : i18n.currentLang() }}
+  </ng-container>
+  <ng-container *ngIf="config.pipe !== 'number' && config.pipe !== 'date' && config.pipe !== 'percent' && config.pipe">
+    {{ numberVal }}
+  </ng-container>
 </ng-container>
 
 <!-- Array Data -->

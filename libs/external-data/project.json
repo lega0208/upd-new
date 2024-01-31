@@ -12,12 +12,11 @@
         "tsConfig": "libs/external-data/tsconfig.lib.json",
         "packageJson": "libs/external-data/package.json",
         "main": "libs/external-data/src/index.ts",
-        "extractLicenses": false,
-        "updateBuildableProjectDepsInPackageJson": true
+        "extractLicenses": false
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["libs/external-data/**/*.ts"]
@@ -27,8 +26,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/external-data"],
       "options": {
-        "jestConfig": "libs/external-data/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/external-data/jest.config.ts"
       }
     },
     "compodoc": {

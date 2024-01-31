@@ -1,0 +1,37 @@
+{
+  "name": "query",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/api/query/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/api/query",
+        "tsConfig": "libs/api/query/tsconfig.lib.json",
+        "packageJson": "libs/api/query/package.json",
+        "main": "libs/api/query/src/index.ts",
+        "assets": ["libs/api/query/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/api/query/**/*.ts",
+          "libs/api/query/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/api/query/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

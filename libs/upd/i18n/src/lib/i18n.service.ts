@@ -1,26 +1,17 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { type LangChangeEvent, TranslateService } from '@ngx-translate/core';
 import type { LocaleId } from './i18n.types';
 import { registerLocaleData } from '@angular/common';
 import localeEnCa from '@angular/common/locales/en-CA';
 import localeFrCa from '@angular/common/locales/fr-CA';
-import { Observable, firstValueFrom, map } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class I18nService {
   private translateService = inject(TranslateService);
-
-  langSignal = toSignal(
-    this.translateService.onLangChange.pipe(
-      map((event) => event.lang as LocaleId),
-    ),
-    {
-      initialValue: (this.translateService.currentLang || 'en-CA') as LocaleId,
-    },
-  );
 
   get currentLang() {
     return this.translateService.currentLang as LocaleId;
@@ -46,17 +37,37 @@ export class I18nService {
     return this.translateService.stream(keys);
   }
 
+  // todo: add support for passing an array of keys
+  translationSignal<T>(
+    key: string,
+    computation: (signal: Signal<string>) => T,
+  ): Signal<T>;
+  translationSignal(key: string): Signal<string>;
+  translationSignal<T>(
+    key: string,
+    computation?: (signal: Signal<string>) => T,
+  ): Signal<string> | Signal<T> {
+    const signal: Signal<string> = toSignal(this.translateService.stream(key), {
+      initialValue: key,
+    });
+
+    if (computation) {
+      return computed(() => computation(signal));
+    }
+
+    return signal;
+  }
+
   onLangChange(callback: (event: LangChangeEvent) => void) {
     this.translateService.onLangChange.subscribe(callback);
   }
 
   use(lang: LocaleId) {
-    console.log('Setting lang to: ', lang);
     return this.translateService.use(lang);
   }
 
+  // todo: refactor all uses of this (removed the need to use lang param)
   translate(key: string, lang: LocaleId, interpolateParams?: object): string {
-    this.translateService.use(lang);
     return this.translateService.instant(key, interpolateParams);
   }
 

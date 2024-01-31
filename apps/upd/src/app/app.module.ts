@@ -1,9 +1,5 @@
 import { NgModule } from '@angular/core';
-import {
-  APP_BASE_HREF,
-  LocationStrategy,
-  NgOptimizedImage,
-} from '@angular/common';
+import { APP_BASE_HREF, NgOptimizedImage } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -24,10 +20,7 @@ import {
   I18nEffects,
   I18nFacade,
 } from '@dua-upd/upd/state';
-
 import { environment } from '../environments/environment';
-import { PathPreserveQueryLocationStrategy } from '@dua-upd/upd/services';
-import { AppRouteReuseStrategy } from './route-reuse.strategy';
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidebarComponent],
@@ -62,8 +55,6 @@ import { AppRouteReuseStrategy } from './route-reuse.strategy';
     I18nService,
     I18nFacade,
     { provide: APP_BASE_HREF, useValue: '/' },
-    { provide: LocationStrategy, useClass: PathPreserveQueryLocationStrategy },
-    { provide: RouteReuseStrategy, useClass: AppRouteReuseStrategy },
   ],
   bootstrap: [AppComponent],
 })

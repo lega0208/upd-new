@@ -14,9 +14,9 @@ import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
   template: `
     <upd-dropdown
       [options]="exportOptions"
-      label="{{ 'Export' | translate }}"
+      label="Export"
       [id]="'exports-' + id"
-      [onSelect]="this.exportFile.bind(this)"
+      (selectOption)="this.exportFile($event.value)"
       icon="file_download"
     >
     </upd-dropdown>
@@ -236,7 +236,9 @@ export class DataTableExportsComponent<T> {
     FileSaver.saveAs(data, `${fileName}_export_${date}.xlsx`);
   }
 
-  async exportFile(fileType: 'csv' | 'pdf' | 'xlsx') {
+  async exportFile(fileType: 'csv' | 'pdf' | 'xlsx' | null) {
+    if (!fileType) return;
+
     switch (fileType) {
       case 'csv':
         await this.exportCsv();
