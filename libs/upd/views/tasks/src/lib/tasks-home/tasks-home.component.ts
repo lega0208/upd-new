@@ -21,8 +21,6 @@ export class TasksHomeComponent implements OnInit {
   totalVisitsChange$ = this.tasksHomeService.totalVisitsChange$;
   totalCalls$ = this.tasksHomeService.totalCalls$;
   totalCallsChange$ = this.tasksHomeService.totalCallsChange$;
-  tasksReports$ = this.tasksHomeService.tasksReports$;
-  tasksReportsColumns$ = this.tasksHomeService.tasksReportsColumns$;
 
   columns: ColumnConfig<TasksHomeAggregatedData>[] = [];
   searchFields = this.columns.map((col) => col.field);
