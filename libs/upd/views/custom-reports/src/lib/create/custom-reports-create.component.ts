@@ -96,11 +96,13 @@ export class CustomReportsCreateComponent {
         collection: 'tasks',
         filter: { pages: { $exists: true, $not: { $size: 0 } } },
         project: { title: 1, pages: 1 },
+        sort: { title: 1 },
       },
       projects: {
         collection: 'projects',
         filter: { pages: { $exists: true, $not: { $size: 0 } } },
         project: { title: 1, pages: 1 },
+        sort: { title: 1 },
       },
     }),
     {

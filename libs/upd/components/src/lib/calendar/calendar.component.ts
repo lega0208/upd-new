@@ -11,9 +11,12 @@ import {
   WritableSignal,
   effect,
 } from '@angular/core';
-import dayjs from 'dayjs';
 import { Calendar } from 'primeng/calendar';
-import { dateRangeConfigs } from '@dua-upd/utils-common';
+import { dateRangeConfigs, today } from '@dua-upd/utils-common';
+
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 
 export type DateRangePreset = {
   label: string;
@@ -50,9 +53,9 @@ export class CalendarComponent implements OnChanges {
   dates: WritableSignal<Date[]> = signal(this.initialDates || []);
 
   minSelectableDate: Date = new Date(2020, 0, 1);
-  maxSelectableDate = dayjs().subtract(1, 'day').toDate();
+  maxSelectableDate = today().subtract(1, 'day').toDate();
 
-  startOfWeek = dayjs().startOf('week').toDate();
+  startOfWeek = dayjs.utc().startOf('week').toDate();
 
   disabledDays: number[] = [1, 2, 3, 4, 5, 6];
   disabledDates: Date[] = [this.startOfWeek];
@@ -97,6 +100,7 @@ export class CalendarComponent implements OnChanges {
 
     if (this.granularity === 'month') {
       this.maxSelectableDate = dayjs()
+        .utc()
         .subtract(1, 'month')
         .endOf('month')
         .toDate();
@@ -106,7 +110,8 @@ export class CalendarComponent implements OnChanges {
     if (this.granularity === 'week') {
       this.minSelectableDate = new Date(2020, 0, 1);
       this.disabledDays = [1, 2, 3, 4, 5, 6];
-      this.maxSelectableDate = dayjs()
+      this.maxSelectableDate = dayjs
+        .utc()
         .subtract(1, 'week')
         .endOf('week')
         .toDate();
@@ -114,7 +119,7 @@ export class CalendarComponent implements OnChanges {
       return;
     }
 
-    this.maxSelectableDate = dayjs().subtract(1, 'day').toDate();
+    this.maxSelectableDate = dayjs.utc().subtract(1, 'day').toDate();
   }
 
   closeCalendar() {
@@ -129,10 +134,11 @@ export class CalendarComponent implements OnChanges {
 
   handleSelect(granularity: string, date: Date) {
     let dates = this.dates();
+    const currentDate = dayjs.utc(date).toDate();
     if (dates.length === 2 || !dates.length) {
-      dates = [date];
+      dates = [currentDate];
     } else {
-      dates.push(date);
+      dates.push(currentDate);
     }
 
     this.dates.set(dates);
@@ -143,9 +149,9 @@ export class CalendarComponent implements OnChanges {
       return;
     }
 
-    if (endDate && dayjs(endDate).isBefore(dayjs(startDate))) {
+    if (endDate && dayjs.utc(endDate).isBefore(dayjs.utc(startDate))) {
       this.resetSelection();
-      this.dates.set([date]);
+      this.dates.set([currentDate]);
       return;
     }
 
@@ -161,7 +167,7 @@ export class CalendarComponent implements OnChanges {
       this.minSelectableDate = new Date(2020, 0, 1);
       this.disabledDays = [1, 2, 3, 4, 5, 6];
     } else if (granularity === 'month' && dates.length === 2) {
-      const endOfMonth = dayjs(date).endOf('month').toDate();
+      const endOfMonth = dayjs.utc(date).endOf('month').toDate();
       this.dates.mutate((dates) => (dates[1] = endOfMonth));
       this.calendarDates = [dates[0], endOfMonth];
     }
@@ -174,8 +180,11 @@ export class CalendarComponent implements OnChanges {
 
     const { start, end } = preset;
 
+    const startDate = dayjs.utc(start).toDate();
+    const endDate = dayjs.utc(end).toDate();
+
     // make sure timezone offset is correct
-    this.dates.set([start, end]);
-    this.calendarDates = [start, end];
+    this.dates.set([startDate, endDate]);
+    this.calendarDates = [startDate, endDate];
   }
 }
