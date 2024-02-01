@@ -25,7 +25,7 @@ services:
     secrets:
       - .env
       - secret.pem
-      - aa_creds_pool
+      - aa_creds_pool.json
     environment:
       DOTENV_CONFIG_PATH: /run/secrets/.env
       AA_KEY_PATH: /run/secrets/secret.pem
@@ -71,7 +71,7 @@ services:
   redis:
     image: redis:7.2.4
     pull_policy: if_not_present
-    command: "redis-server --appendonly yes --maxmemory noeviction"
+    command: "redis-server --appendonly yes --maxmemory-policy noeviction"
     ports:
       - '6379'
 
@@ -88,7 +88,7 @@ secrets:
     file: ../.env
   secret.pem:
     file: ../keys/secret.pem
-  aa_creds_pool:
+  aa_creds_pool.json:
     file: ../keys/aa_creds_pool.json
   service-account-credentials.json:
     file: ../keys/service-account-credentials.json

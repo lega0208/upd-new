@@ -1,22 +1,8 @@
-const { join } = require('path');
-const { merge } = require('webpack-merge');
-const CopyPlugin = require('copy-webpack-plugin');
+const { composePlugins, withNx } = require('@nx/webpack');
 
-module.exports = (config, context) => {
-  return merge(config, {
-    devtool: 'eval-cheap-module-source-map',
-    optimization: {
-      nodeEnv: process.env.NODE_ENV || 'development'
-    },
-    plugins: [
-      new CopyPlugin({
-        patterns: [
-          {
-            from: 'apps/db-updater/src/assets/package.json',
-            to: join(config.output.path, 'package.json'),
-          },
-        ],
-      }),
-    ],
-  });
-};
+// Nx plugins for webpack.
+module.exports = composePlugins(withNx(), (config) => {
+  // Note: This was added by an Nx migration. Webpack builds are required to have a corresponding Webpack config file.
+  // See: https://nx.dev/recipes/webpack/webpack-config-setup
+  return config;
+});

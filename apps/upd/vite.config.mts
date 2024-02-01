@@ -1,3 +1,4 @@
+import { replaceFiles } from '@nx/vite/plugins/rollup-replace-files.plugin';
 import { resolve } from 'path';
 import { defineConfig, splitVendorChunkPlugin, type AliasOptions } from 'vite';
 import { angular } from './vite-plugin/plugin';
@@ -13,8 +14,9 @@ export default defineConfig(({ mode }) => {
   const prod = mode === 'production';
 
   return {
+    root: __dirname,
     base: '/',
-    root: projectRoot,
+    // root: projectRoot,
     mode,
     esbuild: {
       logLevel: 'info',
@@ -24,6 +26,7 @@ export default defineConfig(({ mode }) => {
       color: true,
     },
     build: {
+      commonjsOptions: { transformMixedEsModules: true },
       sourcemap: prod ? 'hidden' : 'inline',
       outDir: resolve(workspaceRoot, 'dist/apps/upd'),
       assetsDir: './',
@@ -36,13 +39,17 @@ export default defineConfig(({ mode }) => {
         logLevel: 'info',
         treeshake: prod,
         cache: true,
-        plugins: !prod && [visualizer() as any],
-        external: prod && [
-          'core-js',
-          'html2canvas',
-          'canvg',
-          'dompurify',
-        ],
+        plugins: prod
+          ? [
+              replaceFiles([
+                {
+                  replace: 'apps/upd/src/environments/environment.ts',
+                  with: 'apps/upd/src/environments/environment.prod.ts',
+                },
+              ]),
+            ]
+          : [visualizer() as any],
+        external: prod && ['core-js', 'html2canvas', 'canvg', 'dompurify'],
       },
       minify: prod,
       cssMinify: prod,
@@ -59,7 +66,7 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/api': `http://localhost:${process.env['PORT'] || 9000}`,
-      }
+      },
     },
     logLevel: 'info',
     json: {
