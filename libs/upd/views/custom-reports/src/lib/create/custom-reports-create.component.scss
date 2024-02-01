@@ -114,14 +114,16 @@ li[role='presentation'].p-highlight a {
 }
 
 #copy_url.btn-outline-primary:hover, 
-#remove_all.btn-outline-primary:hover {
+#remove_all.btn-outline-primary:hover,
+#copy_url.btn-outline-primary:active, 
+#remove_all.btn-outline-primary:active {
   background: none !important;
 } 
 
-#copy_url.btn-outline-primary:hover {
+#copy_url.btn-outline-primary:hover, #copy_url.btn-outline-primary:hover {
   color: #2e5ea7 !important;
 }
 
-#remove_all.btn-outline-primary:hover {
+#remove_all.btn-outline-primary:hover, #remove_all.btn-outline-primary:hover {
   color: red !important;
 }
