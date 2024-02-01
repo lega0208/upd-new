@@ -1,4 +1,4 @@
-import { type FilterQuery, type ProjectionType, Types } from 'mongoose';
+import { type FilterQuery, type ProjectionType, Types, SortOrder } from 'mongoose';
 import type {
   AttachmentData,
   CallsByTopic,
@@ -461,10 +461,15 @@ export type CollectionKeys =
   | 'customReportsRegistry'
   | 'customReportsMetrics';
 
+  export type SortOption<T> = {
+    [P in keyof T]?: SortOrder;
+  };
+
 export type DbQuery = {
   [key: string]: {
     collection: CollectionKeys;
     filter: FilterQuery<unknown>;
     project?: ProjectionType<unknown>;
+    sort?: SortOption<unknown>;
   };
 };
