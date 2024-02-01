@@ -300,7 +300,7 @@ export class CustomReportsCreateComponent {
     { label: 'Countries', value: 'country', description: 'tooltip-countries-rb' },
     { label: 'Referrer', value: 'referrer', description: 'tooltip-referrer-rb' },
     { label: 'Referrer type', value: 'referrer_type', description: 'tooltip-referrertype-rb' },
-    { label: 'Previous page', value: 'prev_page', description: 'tooltip-visits' },
+    { label: 'Previous page', value: 'prev_page', description: 'tooltip-prevpage-rb' },
     { label: 'Time spent', value: 'time_spent', description: 'tooltip-timespent-rb' },
   ];
 
