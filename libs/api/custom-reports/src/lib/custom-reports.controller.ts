@@ -7,6 +7,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   type MessageEvent,
   Param,
   Post,
@@ -39,6 +40,10 @@ export class CustomReportsController {
   }
 
   @Sse(':id/status')
+  @Header('Content-Type', 'text/event-stream')
+  @Header('Connection', 'keep-alive')
+  @Header('Cache-Control', 'no-cache')
+  @Header('X-Accel-Buffering', 'no')
   getStatus(@Param('id') id: string): Observable<MessageEvent> {
     const reportStatus$ = this.reportsService.getStatusObservable(id);
 
