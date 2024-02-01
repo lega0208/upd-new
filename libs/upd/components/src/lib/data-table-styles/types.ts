@@ -1,6 +1,6 @@
 import type { OptionalKeyOf } from '@dua-upd/utils-common';
 
-export type ColumnConfigPipe = 'percent' | 'number' | 'date';
+export type ColumnConfigPipe = 'percent' | 'number' | 'date' | 'secondsToMinutes';
 
 export interface ColumnConfig<T = any> {
   field: OptionalKeyOf<T>;

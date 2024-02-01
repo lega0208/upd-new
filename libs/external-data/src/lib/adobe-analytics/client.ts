@@ -7,8 +7,8 @@ import dayjs from 'dayjs';
 
 export { AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
 
-export async function getJWT(expiryDateTime: number) {
-  const keyPath = process.env.AA_KEY_PATH || 'keys/secret.pem';
+export async function getJWT(expiryDateTime: number, customKeyPath?: string) {
+  const keyPath = customKeyPath || process.env.AA_KEY_PATH || 'keys/secret.pem';
   const privateKey = await readFile(keyPath);
   const jwtPayload = {
     exp: expiryDateTime,
@@ -46,9 +46,10 @@ export async function getToken(jwt: string) {
 }
 
 export async function getAAClient(
-  expiryDateTime: number
+  expiryDateTime = Math.floor(Date.now() / 1000) + 24 * 60 * 60,
+  customKeyPath?: string
 ): Promise<AnalyticsCoreAPI> {
-  const jwt = await getJWT(expiryDateTime);
+  const jwt = await getJWT(expiryDateTime, customKeyPath);
   const token = await getToken(jwt);
 
   const formattedExpiryDateTime = dayjs(expiryDateTime * 1000).format(

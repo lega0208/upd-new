@@ -1,0 +1,15 @@
+#menu-custom-report-label.col {
+    flex: 0 0 0%!important; 
+    flex-grow: 0!important;
+}
+
+a.cr-link > .row > .col:nth-child(2){    
+    /* flex: 0 0 0%!important;  */
+    flex-grow: 0!important; 
+}
+
+
+a.cr-link > .row > .col:nth-child(1){    
+    flex: 0 0 0%!important; 
+    flex-grow: 0!important; 
+}

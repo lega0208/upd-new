@@ -1,9 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { Required } from '@dua-upd/utils-common';
 
 export interface DropdownOption<T> {
   label: string;
-  value: T;
+  value: T | null;
   styleClasses?: string;
   icon?: string;
 }
@@ -11,24 +11,27 @@ export interface DropdownOption<T> {
 @Component({
   selector: 'upd-dropdown',
   template: `
-    <p-dropdown [options]="options" optionLabel="label" optionValue="value">
-        <ng-template pTemplate="selectedItem">
-          <div style="color: rgb(33, 37, 41);">
-          <span
-            *ngIf="icon"
-            class="material-icons align-top pe-1 "
-            aria-hidden="true"
+    <p-dropdown
+      [options]="options"
+      optionLabel="label"
+      [(ngModel)]="selectedOption"
+      (onChange)="this.selectOption.emit(selectedOption)"
+      [autoDisplayFirst]="autoDisplayFirst"
+    >
+      <ng-template pTemplate="selectedItem">
+        <span
+          *ngIf="icon"
+          class="material-icons align-top pe-1 "
+          aria-hidden="true"
           >{{ icon }}</span
-          >
-            <span class="dropdown-label">{{ label || '' | translate }}</span>
-          </div>
-        </ng-template>
+        >
+        <span class="dropdown-label">{{
+          selectedOption?.label || '' | translate
+        }}</span>
+      </ng-template>
 
       <ng-template pTemplate="item" let-option>
-        <div
-          (click)="onSelect(option.value)"
-          [class]="option.styleClasses || ''"
-        >
+        <div [class]="option.styleClasses || ''">
           <span
             *ngIf="option.icon"
             class="pe-1 pi pi-{{ option.icon }} me-2"
@@ -38,28 +41,65 @@ export interface DropdownOption<T> {
         </div>
       </ng-template>
     </p-dropdown>
-
-
   `,
   styles: [
     `
-      .dropdown-height {
-        height: 42px;
-      }
       .dropdown-label {
         font-family: 'Noto Sans', sans-serif;
         font-size: 1rem;
       }
     `,
-  ]
+  ],
 })
-export class DropdownComponent<T> {
+export class DropdownComponent<T> implements OnInit {
   @Input() @Required id!: string;
-  @Input() label: string | null = '';
+  @Input() label?: string | null;
   @Input() options: DropdownOption<T>[] = [];
   @Input() display = 'inline-block';
   @Input() bg = 'white';
   @Input() styleClasses = '';
   @Input() icon?: string;
-  @Input() onSelect: (value: T) => void = (value) => console.log(value);
+  @Input() autoDisplayFirst = false;
+  @Input() set initialSelection(
+    option: DropdownOption<T> | DropdownOption<T>['value'] | undefined,
+  ) {
+    if (!option) {
+      return;
+    }
+
+    if (typeof option === 'object' && 'label' in option && 'value' in option) {
+      this.selectedOption = option;
+      return;
+    }
+
+    const selectedOption = this.options.find((o) => o.value === option);
+
+    if (selectedOption) {
+      this.selectedOption = selectedOption;
+    }
+  }
+
+  @Output() selectOption = new EventEmitter<DropdownOption<T>>();
+
+  selectedOption?: DropdownOption<T>;
+
+  get placeholder(): DropdownOption<T> {
+    return {
+      label: this.label || '',
+      value: null as T | null,
+    };
+  }
+
+  ngOnInit() {
+    if (this.selectedOption !== undefined) {
+      return;
+    }
+
+    if (!this.autoDisplayFirst) {
+      this.selectedOption = this.placeholder;
+      return;
+    }
+
+    this.selectedOption = this.options[0];
+  }
 }

@@ -1,0 +1,13 @@
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-lg-12">
+      <upd-card>
+        <h2 class="h4">
+          <span class="material-icons-outlined">emoji_objects</span>
+          {{ 'Did you know?' | translate }}
+        </h2>
+        <p [@fadeInOut]="factIndex" class="fact">{{ fact() | translate }}</p>
+      </upd-card>
+    </div>
+  </div>
+</div>

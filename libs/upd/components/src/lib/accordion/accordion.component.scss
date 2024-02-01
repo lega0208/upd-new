@@ -1,0 +1,13 @@
+@keyframes flashAnimation {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: yellow;
+  } /* Change 'yellow' to your preferred flash color */
+}
+
+.flash {
+  animation: flashAnimation 0.5s 2; /* Adjust the duration and iteration count as needed */
+}

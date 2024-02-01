@@ -10,8 +10,7 @@
       "outputs": ["{workspaceRoot}/dist/libs/upd/views/tasks"],
       "options": {
         "project": "libs/upd/views/tasks/ng-package.json",
-        "tsConfig": "libs/upd/views/tasks/tsconfig.lib.json",
-        "updateBuildableProjectDepsInPackageJson": true
+        "tsConfig": "libs/upd/views/tasks/tsconfig.lib.json"
       },
       "configurations": {
         "production": {
@@ -27,18 +26,11 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/upd/views/tasks"],
       "options": {
-        "jestConfig": "libs/upd/views/tasks/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/upd/views/tasks/jest.config.ts"
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/upd/views/tasks/src/**/*.ts",
-          "libs/upd/views/tasks/src/**/*.html"
-        ]
-      }
+      "executor": "@nx/eslint:lint"
     }
   },
   "tags": []

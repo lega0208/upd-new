@@ -22,6 +22,7 @@
             'menu-overview' | translate
           }}</span>
         </a>
+
         <a
           [routerLink]="[langPath(), 'pages']"
           [routerLinkActive]="['active']"
@@ -58,17 +59,34 @@
           }}</span>
         </a>
         <a
-          [routerLink]="[langPath(), 'reports']"
+          [routerLink]="[langPath(), 'documents']"
           [routerLinkActive]="['active']"
-          [queryParamsHandling]="'merge'"
           class="nav_link"
         >
           <span class="material-icons nav_icon" aria-hidden="true"
             >summarize</span
           >
-          <span class="nav_name" data-i18n="menu-reports">{{
-            'menu-reports' | translate
+          <span class="nav_name" data-i18n="menu-documents">{{
+            'menu-documents' | translate
           }}</span>
+        </a>
+        <a
+          [routerLink]="[langPath(), 'custom-reports']"
+          [routerLinkActive]="['active']"
+          class="nav_link cr-link"
+        >
+        <div class="row">
+          <div id="menu-custom-report-label" class="col">
+              <span class="material-icons nav_icon" aria-hidden="true"
+              >dashboard</span
+            >
+          </div>
+          <div class="col ps-1">
+            <span class="nav_name" data-i18n="menu-custom-reports">{{
+              'menu-custom-reports' | translate
+            }}</span>
+          </div>  
+        </div>
         </a>
       </div>
     </div>

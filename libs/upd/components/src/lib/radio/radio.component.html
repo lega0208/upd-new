@@ -1,0 +1,12 @@
+<div *ngFor="let item of items; index as i;" class="field-checkbox">
+  <p-radioButton
+    [value]="item"
+    [inputId]="id + i"
+    (onClick)="onSelectionChange(item)"
+    [name]="item.value"
+    [(ngModel)]="selectedItem"
+  ></p-radioButton>
+  <label [for]="id + i" class="p-checkbox-label card-tooltip" placement="right" [ngbTooltip]="item.description | translate">
+    {{ item.label | translate}}
+  </label>
+</div>

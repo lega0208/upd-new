@@ -17,7 +17,8 @@
         "compiler": "tsc",
         "generateIndexHtml": false,
         "runtimeChunk": false,
-        "target": "node"
+        "target": "node",
+        "webpackConfig": "apps/db-cli/webpack.config.js"
       },
       "configurations": {
         "production": {
@@ -55,18 +56,14 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/db-cli/**/*.ts"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/apps/db-cli"],
       "options": {
-        "jestConfig": "apps/db-cli/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/db-cli/jest.config.ts"
       }
     },
     "compodoc": {

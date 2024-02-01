@@ -56,7 +56,7 @@ export class ProjectDetailsSearchAnalyticsComponent implements OnInit {
           field: 'title',
           header: this.i18n.service.translate('Title', lang),
           type: 'link',
-          typeParam: '_id',
+          typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
         },
         {
           field: 'url',

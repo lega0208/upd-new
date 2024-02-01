@@ -1,0 +1,30 @@
+{
+  "name": "custom-reports-api",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/api/custom-reports/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/api/custom-reports",
+        "main": "libs/api/custom-reports/src/index.ts",
+        "tsConfig": "libs/api/custom-reports/tsconfig.lib.json",
+        "assets": ["libs/api/custom-reports/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/api/custom-reports/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

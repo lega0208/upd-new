@@ -1,0 +1,54 @@
+<p-calendar
+  #myCalendar
+  class="extended-calendar"
+  [(ngModel)]="calendarDates"
+  [minDate]="minSelectableDate"
+  [maxDate]="maxSelectableDate"
+  [selectionMode]="'range'"
+  [readonlyInput]="true"
+  [showIcon]="true"
+  [required]="required"
+  [disabledDays]="granularity === 'week' ? disabledDays : []"
+  [disabledDates]="granularity === 'week' ? disabledDates : []"
+  [view]="granularity === 'month' ? 'month' : 'date'"
+  [rangeSeparator]="'to' | translate"
+  [dateFormat]="dateFormat"
+  [ngClass]="{ 'ng-invalid ng-dirty': invalid }"
+  (onSelect)="handleSelect(granularity, $event)"
+>
+  <ng-template *ngIf="showPreset && showAction" pTemplate="footer">
+    <hr />
+    <ng-container *ngIf="showPreset && ( granularity === 'day' || granularity === 'none')">
+      <strong>Preset: </strong>
+      <upd-dropdown
+        id="range-button"
+        icon="calendar_today"
+        [options]="presetOptions"
+        (selectOption)="onPresetSelect($event.value)"
+        [autoDisplayFirst]="true"
+      >
+      </upd-dropdown>
+    </ng-container>
+
+    <ng-container *ngIf="showAction">
+      <div class="d-flex justify-content-end mt-3">
+        <button
+          type="button"
+          pButton
+          icon="pi pi-times"
+          [label]="'primeng.cancel' | translate"
+          class="cancel-button me-2 rounded"
+          (click)="resetCalendar(); closeCalendar()"
+        ></button>
+        <button
+          type="button"
+          pButton
+          icon="pi pi-check"
+          [label]="'primeng.apply' | translate"
+          class="rounded"
+          (click)="closeCalendar()"
+        ></button>
+      </div>
+    </ng-container>
+  </ng-template>
+</p-calendar>

@@ -26,9 +26,13 @@
           "class-transformer",
           "class-validator",
           "cache-manager",
-          "mongoose"
+          "mongoose",
+          "@adobe/aio-lib-analytics",
+          "brotli-wasm"
         ],
-        "inspect": false
+        "inspect": false,
+        "sourceMap": true,
+        "webpackConfig": "apps/api/webpack.config.js"
       },
       "configurations": {
         "production": {
@@ -54,18 +58,14 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/api/**/*.ts"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/apps/api"],
       "options": {
-        "jestConfig": "apps/api/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/api/jest.config.ts"
       }
     },
     "compodoc": {

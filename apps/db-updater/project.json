@@ -20,7 +20,8 @@
         "runtimeChunk": false,
         "optimization": false,
         "externalDependencies": "all",
-        "inspect": false
+        "inspect": false,
+        "webpackConfig": "apps/db-updater/webpack.config.js"
       },
       "configurations": {
         "production": {
@@ -44,18 +45,14 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/db-updater/**/*.ts"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/apps/db-updater"],
       "options": {
-        "jestConfig": "apps/db-updater/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/db-updater/jest.config.ts"
       }
     },
     "compodoc": {

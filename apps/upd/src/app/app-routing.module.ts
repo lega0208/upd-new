@@ -11,7 +11,7 @@ const routes: Routes = [
     path: 'overview',
     loadChildren: () =>
       import('@dua-upd/upd/views/overview').then(
-        (module) => module.OverviewModule
+        (module) => module.OverviewModule,
       ),
     data: { animation: 'overview', title: 'Overview | Summary' },
   },
@@ -31,7 +31,7 @@ const routes: Routes = [
     path: 'projects',
     loadChildren: () =>
       import('@dua-upd/upd/views/projects').then(
-        (module) => module.ProjectsModule
+        (module) => module.ProjectsModule,
       ),
     data: { animation: 'projects', title: 'Projects | Home' },
   },
@@ -39,16 +39,24 @@ const routes: Routes = [
     path: 'about-us',
     loadChildren: () =>
       import('@dua-upd/upd/views/about-us').then(
-        (module) => module.AboutUsModule
+        (module) => module.AboutUsModule,
       ),
   },
   {
-    path: 'reports',
+    path: 'documents',
     loadChildren: () =>
       import('@dua-upd/upd/views/reports').then(
-        (module) => module.ReportsModule
+        (module) => module.ReportsModule,
       ),
-    data: { animation: 'reports', title: 'Reports' },
+    data: { animation: 'documents', title: 'Documents | Home' },
+  },
+  {
+    path: 'custom-reports',
+    loadChildren: () =>
+      import('@dua-upd/upd/views/custom-reports').then(
+        (module) => module.CustomReportsModule,
+      ),
+    data: { animation: 'custom-reports', title: 'UPD | Custom reports' },
   },
   { path: '**', redirectTo: 'overview' },
 ];

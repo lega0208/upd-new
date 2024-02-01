@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@dua-upd/api-interfaces": ["libs/api-interfaces/src/index.ts"],
+      "@dua-upd/api/custom-reports": ["libs/api/custom-reports/src/index.ts"],
+      "@dua-upd/api/query": ["libs/api/query/src/index.ts"],
       "@dua-upd/blob-storage": ["libs/blob-storage/src/index.ts"],
       "@dua-upd/data-integrity": ["libs/data-integrity/src/index.ts"],
       "@dua-upd/db": ["libs/db/src/index.ts"],
@@ -31,6 +32,9 @@
       "@dua-upd/upd/state": ["libs/upd/state/src/index.ts"],
       "@dua-upd/upd/utils": ["libs/upd/utils/src/index.ts"],
       "@dua-upd/upd/views/about-us": ["libs/upd/views/about-us/src/index.ts"],
+      "@dua-upd/upd/views/custom-reports": [
+        "libs/upd/views/custom-reports/src/index.ts"
+      ],
       "@dua-upd/upd/views/overview": ["libs/upd/views/overview/src/index.ts"],
       "@dua-upd/upd/views/pages": ["libs/upd/views/pages/src/index.ts"],
       "@dua-upd/upd/views/projects": ["libs/upd/views/projects/src/index.ts"],

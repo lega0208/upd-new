@@ -12,23 +12,18 @@
         "tsConfig": "libs/node-utils/tsconfig.lib.json",
         "packageJson": "libs/node-utils/package.json",
         "main": "libs/node-utils/src/index.ts",
-        "assets": ["libs/node-utils/*.md"],
-        "updateBuildableProjectDepsInPackageJson": true
+        "assets": ["libs/node-utils/*.md"]
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/node-utils/**/*.ts"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "libs/node-utils/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/node-utils/jest.config.ts"
       }
     }
   },

@@ -11,6 +11,7 @@ import {
   NgbModalModule,
   NgbTooltipModule,
 } from '@ng-bootstrap/ng-bootstrap';
+import { ProgressBar, ProgressBarModule } from 'primeng/progressbar';
 import { CardComponent } from './card/card.component';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -18,6 +19,7 @@ import { SliderModule } from 'primeng/slider';
 import { CalendarModule } from 'primeng/calendar';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TreeSelectModule } from 'primeng/treeselect';
+import { TabViewModule } from 'primeng/tabview';
 import { PipesModule } from '@dua-upd/upd/pipes';
 import { DataCardComponent } from './data-card/data-card.component';
 import { DataTableComponent } from './data-table/data-table.component';
@@ -27,6 +29,10 @@ import { NavTabsComponent } from './nav-tabs/nav-tabs.component';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { CheckboxModule } from 'primeng/checkbox';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { InputSwitchModule } from 'primeng/inputswitch';
 import { AlertComponent } from './alert/alert.component';
 import { AccordionComponent } from './accordion/accordion.component';
 import { ModalComponent } from './modal/modal.component';
@@ -49,6 +55,11 @@ import { ApexDonutComponent } from './apex-donut/apex-donut.component';
 import { ApexSparkLineComponent } from './apex-spark-line/apex-spark-line.component';
 import { FilterTableComponent } from './filter-table/filter-table.component';
 import { FilterTableSelectionComponent } from './filter-table-selection/filter-table-selection.component';
+import { CalendarComponent } from './calendar/calendar.component';
+import { CheckboxComponent } from './checkbox/checkbox.component';
+import { InputSwitchComponent } from './input-switch/input-switch.component';
+import { RadioComponent } from './radio/radio.component';
+import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
 
 @NgModule({
   imports: [
@@ -63,6 +74,11 @@ import { FilterTableSelectionComponent } from './filter-table-selection/filter-t
     TableModule,
     ButtonModule,
     InputTextModule,
+    InputTextareaModule,
+    CheckboxModule,
+    RadioButtonModule,
+    TabViewModule,
+    InputSwitchModule,
     NgbModule,
     I18nModule,
     DropdownModule,
@@ -74,6 +90,7 @@ import { FilterTableSelectionComponent } from './filter-table-selection/filter-t
     InputNumberModule,
     PipesModule,
     NgApexchartsModule,
+    ProgressBarModule,
   ],
   declarations: [
     CardComponent,
@@ -102,12 +119,24 @@ import { FilterTableSelectionComponent } from './filter-table-selection/filter-t
     ApexSparkLineComponent,
     FilterTableComponent,
     FilterTableSelectionComponent,
+    CalendarComponent,
+    CheckboxComponent,
+    InputSwitchComponent,
+    RadioComponent,
+    DidYouKnowComponent,
   ],
   exports: [
     NgbPopoverModule,
+    NgbAlertModule,
     TableModule,
     ButtonModule,
     InputTextModule,
+    InputTextareaModule,
+    CheckboxModule,
+    RadioButtonModule,
+    TabViewModule,
+    InputSwitchModule,
+    CalendarComponent,
     CardComponent,
     DataTableComponent,
     DateSelectorComponent,
@@ -133,6 +162,12 @@ import { FilterTableSelectionComponent } from './filter-table-selection/filter-t
     ApexSparkLineComponent,
     FilterTableComponent,
     FilterTableSelectionComponent,
+    CheckboxComponent,
+    DropdownComponent,
+    InputSwitchComponent,
+    RadioComponent,
+    ProgressBar,
+    DidYouKnowComponent,
   ],
 })
 export class UpdComponentsModule {}

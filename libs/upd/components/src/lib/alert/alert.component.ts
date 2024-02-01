@@ -1,4 +1,12 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  WritableSignal,
+  signal,
+} from '@angular/core';
 import { NgbAlert } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -7,31 +15,56 @@ import { NgbAlert } from '@ng-bootstrap/ng-bootstrap';
   styleUrls: ['./alert.component.scss'],
 })
 export class AlertComponent implements OnInit {
-  staticAlertClosed = false;
-
   @ViewChild('staticAlert', { static: false }) staticAlert!: NgbAlert;
+  @ViewChild('staticAlert', { read: ElementRef }) alertElementRef!: ElementRef;
+
   @Input() type: Type = 'success';
-  @Input() secondsTimeout = 5;
-  @Input() selfClosing = true;
+  @Input() duration = 5;
+  @Input() selfClosing = false;
   @Input() position: Position = 'static';
   @Input() dismissible = true;
   @Input() styleClass = '';
+  @Input() widthPercentage = 70;
+  alertVisible: WritableSignal<boolean | null> = signal(false);
   style = '';
 
   ngOnInit(): void {
-    if (this.selfClosing) {
-      setTimeout(() => this.staticAlert.close(), this.secondsTimeout * 1000);
-      this.staticAlertClosed = false;
-    }
-
-    this.getPosition();
+    this.updateAlert();
   }
 
-  getPosition() {
-    if (this.position === 'top')
-      this.style = 'position: fixed; top: 10px; width: 70%; z-index: 99999;';
-    else if (this.position === 'bottom')
-      this.style = 'position: fixed; bottom: 5px; width: 70%; z-index: 99999;';
+  updateAlert(): void {
+    this.alertVisible.set(true);
+    if (this.selfClosing) {
+      setTimeout(() => {
+        this.closeAlert();
+      }, this.duration * 1000);
+    }
+    this.getPosition();
+    this.focusAlert();
+  }
+
+  getPosition(): void {
+    switch (this.position) {
+      case 'top':
+        this.style = `position: fixed; top: 10px; width: ${this.widthPercentage}%; z-index: 99999;`;
+        break;
+      case 'bottom':
+        this.style = `position: fixed; bottom: 5px; width: ${this.widthPercentage}%; z-index: 99999;`;
+        break;
+      default:
+        this.style = '';
+        break;
+    }
+  }
+
+  focusAlert(): void {
+    if (this.alertElementRef) {
+      this.alertElementRef.nativeElement.focus();
+    }
+  }
+
+  closeAlert(): void {
+    this.alertVisible.set(false);
   }
 }
 

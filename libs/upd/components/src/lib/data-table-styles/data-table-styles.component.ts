@@ -3,6 +3,7 @@ import type { ColumnConfig } from './types';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
+import { SecondsToMinutesPipe } from '@dua-upd/upd/pipes';
 
 @Component({
   selector: 'upd-data-table-styles',
@@ -14,7 +15,8 @@ export class DataTableStylesComponent implements OnInit {
   private percentPipe = inject(PercentPipe);
   private decimalPipe = inject(DecimalPipe);
   private datePipe = inject(DatePipe);
-  private i18n = inject(I18nFacade);
+  private secondsToMinutesPipe = inject(SecondsToMinutesPipe);
+  public i18n = inject(I18nFacade);
 
   @Input() config: ColumnConfig = { field: '', header: '' };
   @Input() data: Record<string, number | string> = {};
@@ -88,6 +90,12 @@ export class DataTableStylesComponent implements OnInit {
             this.currentLang,
           ) || ''
         );
+      case 'secondsToMinutes':
+        return (
+          this.secondsToMinutesPipe.transform(
+            data
+          ) || ''
+        ) 
       default:
         return data;
     }

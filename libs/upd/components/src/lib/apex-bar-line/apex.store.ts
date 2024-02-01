@@ -287,6 +287,7 @@ export type TooltipSeriesConfig = {
   label: string;
   value?: number;
   colour: string;
+  percent?: string;
 };
 
 export type TooltipConfig = {
@@ -295,13 +296,15 @@ export type TooltipConfig = {
   annotation?: {
     text: string;
   };
+  percent?: string;
 };
 
 export function seriesTooltipHtml(
-  { label, value, colour }: TooltipSeriesConfig,
+  { label, value, colour, percent }: TooltipSeriesConfig,
   index: number,
   locale: 'en-CA' | 'fr-CA',
 ) {
+  const percentHtml = percent ? `(${percent})` : '';
   return `
 
   <div
@@ -322,6 +325,7 @@ export function seriesTooltipHtml(
         ><span class="apexcharts-tooltip-text-y-value">${(
           value || 0
         ).toLocaleString(locale)}</span>
+        <span class="apexcharts-tooltip-text-y-value">${percentHtml}</span>
       </div>
     </div>
   </div>
@@ -329,7 +333,7 @@ export function seriesTooltipHtml(
 }
 
 export function getTooltipHtml(
-  { title, series, annotation }: TooltipConfig,
+  { title, series, annotation, percent }: TooltipConfig,
   locale: 'en-CA' | 'fr-CA',
   eventText = 'Event',
 ) {

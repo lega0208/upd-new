@@ -26,7 +26,8 @@ export class DateSelectionEffects {
               dateRange,
               comparisonDateRange,
             },
-            queryParamsHandling: 'merge', // remove to replace all query params by provided
+            queryParamsHandling: '',
+            replaceUrl: false,
           }),
         ),
       );

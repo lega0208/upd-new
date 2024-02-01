@@ -125,39 +125,6 @@ export class TasksHomeFacade {
     }),
   );
 
-  tasksReports$ = this.tasksHomeData$.pipe(
-    map((tasksHomeData) => {
-      return (tasksHomeData?.reports || []).map((report) => {
-        const extractUrl = (attachment: AttachmentData[]) =>
-          attachment[0]?.storage_url?.replace('https://', '');
-        return {
-          ...report,
-          en_attachment: extractUrl(report.en_attachment),
-          fr_attachment: extractUrl(report.fr_attachment),
-        };
-      });
-    }),
-  );
-
-  tasksReportsColumns$ = this.i18n.currentLang$.pipe(
-    map((lang) => {
-      return [
-        {
-          field: 'en_title',
-          header: this.i18n.service.translate('english-report', lang),
-          type: 'link',
-          typeParams: { link: 'en_attachment', external: true },
-        },
-        {
-          field: 'fr_title',
-          header: this.i18n.service.translate('french-report', lang),
-          type: 'link',
-          typeParams: { link: 'fr_attachment', external: true },
-        },
-      ] as ColumnConfig[];
-    }),
-  );
-
   totalTasks$ = this.tasksHomeTableData$.pipe(
     map((tasksData) => tasksData.length),
   );

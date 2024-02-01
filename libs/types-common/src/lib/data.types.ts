@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { type FilterQuery, type ProjectionType, Types } from 'mongoose';
 import type {
   AttachmentData,
   CallsByTopic,
@@ -28,6 +28,12 @@ export interface ViewData<T> {
   satComparisonDateRange?: string;
   dateRangeData?: T;
   comparisonDateRangeData?: T;
+}
+
+export interface EntityList {
+  _id: string;
+  title: string;
+  urls: (string | null)[] | null;
 }
 
 export interface EntityDetailsData<T> extends ViewData<T> {
@@ -197,7 +203,7 @@ export interface OverviewData
     total_users?: number;
     scenario?: string;
   }[];
-  top5CalldriverTopics: TopCalldriverTopics[];
+  top25CalldriverTopics: TopCalldriverTopics[];
   top5IncreasedCalldriverTopics: TopCalldriverTopics[];
   top5DecreasedCalldriverTopics: TopCalldriverTopics[];
   searchTermsEn: OverallSearchTerm[];
@@ -314,13 +320,9 @@ export type ProjectStatus =
   | 'Delayed'
   | 'Unknown';
 
-  export type PageStatus =
-  | 'Live'
-  | '404'
-  | 'Redirected';
+export type PageStatus = 'Live' | '404' | 'Redirected';
 
-  export type ProjectType =
-  | 'COPS';
+export type ProjectType = 'COPS';
 
 export interface searchAssessmentColTypes {
   query: string;
@@ -422,6 +424,7 @@ export interface ProjectsDetailsData
 }
 
 export interface TaskKpi {
+  _id: string;
   task: string;
   Baseline: number;
   Validation: number;
@@ -435,3 +438,33 @@ export interface CalldriversTableRow {
   currValue: number;
   prevValue: number;
 }
+
+// this has to be manually kept in sync with DbService['collections']
+// because of circular dependency issues
+export type CollectionKeys =
+  | 'callDrivers'
+  | 'feedback'
+  | 'overall'
+  | 'pageMetrics'
+  | 'pageMetricsTS'
+  | 'pages'
+  | 'pagesList'
+  | 'tasks'
+  | 'uxTests'
+  | 'projects'
+  | 'aaItemIds'
+  | 'searchAssessment'
+  | 'urls'
+  | 'readability'
+  | 'annotations'
+  | 'reports'
+  | 'customReportsRegistry'
+  | 'customReportsMetrics';
+
+export type DbQuery = {
+  [key: string]: {
+    collection: CollectionKeys;
+    filter: FilterQuery<unknown>;
+    project?: ProjectionType<unknown>;
+  };
+};

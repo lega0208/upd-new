@@ -5,7 +5,7 @@ import type { ColumnConfig } from '../data-table-styles/types';
 @Component({
   selector: 'upd-card',
   template: `
-    <div class="card pt-2" [ngClass]="cardHeight" tabindex="0">
+    <div class="card pt-2" [ngClass]="[cardHeight, styleClass]" tabindex="0">
       <div class="card-body card-pad pt-2 h-100">
         <div class="d-flex justify-content-between">
           <h3
@@ -42,6 +42,7 @@ export class CardComponent {
   @Input() data: Record<string, number | string>[] = [];
   @Input() type = 'list';
   @Input() modal = '';
+  @Input() styleClass = '';
 
   constructor() {
     const popoverConfig = inject(NgbPopoverConfig);
