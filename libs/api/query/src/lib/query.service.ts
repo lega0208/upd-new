@@ -15,7 +15,7 @@ export class QueryService {
         atob(serializedQueries[key]),
       );
 
-      const { collection, filter, project } = query;
+      const { collection, filter, project, sort } = query;
 
       if ( filter['_id'] ) {
         filter['_id'] = new Types.ObjectId(filter['_id']);
@@ -28,6 +28,7 @@ export class QueryService {
 
       results[key] = await collectionModel
         .find(filter, project, { limit })
+        .sort(sort)
         .lean()
         .exec();
     }
