@@ -323,7 +323,7 @@ export class CustomReportsCreateComponent {
 
   stateDimension = this.reportDimensions.find(
     (d) => d.value === this.storageConfig?.breakdownDimension,
-  );
+  ) || this.reportDimensions[0];
   stateMetrics: string[] = this.storageConfig?.metrics || [];
   stateCalendarDates?: Date[] =
     this.storageConfig?.dateRange &&
