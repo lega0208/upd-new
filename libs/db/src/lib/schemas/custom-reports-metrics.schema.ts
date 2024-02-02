@@ -65,24 +65,30 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
           url: { $in: config.urls },
         };
 
+    const defaultQuery = {
+      startDate: {
+        $gte: new Date(config.dateRange.start),
+        $lte: new Date(config.dateRange.end),
+      },
+      endDate: {
+        $gte: new Date(config.dateRange.start),
+        $lte: new Date(config.dateRange.end),
+      },
+    };
+
+    const noneGranularityQuery = {
+      startDate: new Date(config.dateRange.start),
+      endDate: new Date(config.dateRange.end),
+    };
+
     const dates =
       config.granularity === 'day'
         ? {
-            startDate: {
-              $gte: new Date(config.dateRange.start),
-              $lte: new Date(config.dateRange.end),
-            },
+            startDate: defaultQuery.startDate,
           }
-        : {
-            startDate: {
-              $gte: new Date(config.dateRange.start),
-              $lte: new Date(config.dateRange.end),
-            },
-            endDate: {
-              $gte: new Date(config.dateRange.start),
-              $lte: new Date(config.dateRange.end),
-            },
-          };
+        : config.granularity === 'none'
+        ? noneGranularityQuery
+        : defaultQuery;
 
     const query = {
       ...urls,
