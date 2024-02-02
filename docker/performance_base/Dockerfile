@@ -49,6 +49,6 @@ EXPOSE 443
 FROM nginx:alpine as nginx-dev
 RUN apk update && apk add tzdata
 ENV TZ=America/Toronto
-COPY --from=apps apps/upd/ /var/www/html/
+COPY ../dist/apps/upd/ /var/www/html/
 COPY docker/performance_nginx/nginx.dev.conf /etc/nginx/nginx.conf
 EXPOSE 8080

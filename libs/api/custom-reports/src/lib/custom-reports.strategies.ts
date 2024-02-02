@@ -339,7 +339,8 @@ export const withDimensionStrategy: DimensionQueryResultsProcessor<
         ] as DimensionMetrics[];
 
         const newDataDict = arrayToDictionary(
-          newMetricsArray,
+          // ignore undefined/null dimension values
+          newMetricsArray.filter((metric) => metric.dimensionValue),
           'dimensionValue',
         );
 
@@ -357,7 +358,8 @@ export const withDimensionStrategy: DimensionQueryResultsProcessor<
           currentDbDoc?.metrics_by?.[breakdownDimension!] || [];
 
         const dbMetricsDict = arrayToDictionary(
-          currentDbMetrics,
+          // ignore undefined/null dimension values
+          currentDbMetrics.filter((metric) => metric.dimensionValue),
           'dimensionValue',
         );
 
