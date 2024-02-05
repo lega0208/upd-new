@@ -30,13 +30,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/upd/views/about-us/**/*.ts",
-          "libs/upd/views/about-us/**/*.html"
-        ]
-      }
+      "executor": "@nx/eslint:lint"
     },
     "compodoc": {
       "executor": "@twittwer/compodoc:compodoc",

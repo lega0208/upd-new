@@ -17,7 +17,8 @@
         "compiler": "tsc",
         "generateIndexHtml": false,
         "runtimeChunk": false,
-        "target": "node"
+        "target": "node",
+        "webpackConfig": "apps/db-cli/webpack.config.js"
       },
       "configurations": {
         "production": {
@@ -56,10 +57,7 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/db-cli/**/*.ts"]
-      }
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",

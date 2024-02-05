@@ -31,11 +31,15 @@ services:
       dockerfile: docker/performance_base/Dockerfile
       target: web
     ports:
-      - "9000"
+      - '9000'
     secrets:
       - .env
+      - secret.pem
+      - aa_creds_pool.json
     environment:
       DOTENV_CONFIG_PATH: /run/secrets/.env
+      AA_KEY_PATH: /run/secrets/secret.pem
+      AA_KEY_POOL_PATH: /run/secrets/aa_creds_pool.json
     depends_on:
       - mongodb
 
@@ -48,7 +52,7 @@ services:
       dockerfile: docker/performance_base/Dockerfile
       target: db-updater
     ports:
-      - "9001"
+      - '9001'
     secrets:
       - .env
       - secret.pem
@@ -74,6 +78,13 @@ services:
         volume:
           nocopy: true
 
+  redis:
+    image: redis:7.2.4
+    pull_policy: if_not_present
+    command: "redis-server --appendonly yes --maxmemory-policy noeviction"
+    ports:
+      - '6379'
+
 volumes:
   db-data:
     driver: local
@@ -87,5 +98,7 @@ secrets:
     file: ../.env
   secret.pem:
     file: ../keys/secret.pem
+  aa_creds_pool.json:
+    file: ../keys/aa_creds_pool.json
   service-account-credentials.json:
     file: ../keys/service-account-credentials.json

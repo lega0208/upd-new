@@ -73,7 +73,8 @@
         <a
           [routerLink]="[langPath(), 'custom-reports']"
           [routerLinkActive]="['active']"
-          class="nav_link cr-link"
+          class="nav_link"
+          [ngClass]="{ 'cr-link': langPath() === 'fr' }"
         >
         <div class="row">
           <div id="menu-custom-report-label" class="col">

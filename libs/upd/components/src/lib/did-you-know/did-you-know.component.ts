@@ -36,7 +36,7 @@ import { seconds } from '@dua-upd/utils-common';
 export class DidYouKnowComponent implements OnInit {
   @Input() interval: number = seconds(10);
   fact: WritableSignal<string> = signal('');
-  factIndex: number = -1;
+  factIndex = -1;
   facts: string[] = facts;
 
   ngOnInit() {

@@ -20,7 +20,8 @@
         "runtimeChunk": false,
         "optimization": false,
         "externalDependencies": "all",
-        "inspect": false
+        "inspect": false,
+        "webpackConfig": "apps/db-updater/webpack.config.js"
       },
       "configurations": {
         "production": {
@@ -45,10 +46,7 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/db-updater/**/*.ts"]
-      }
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",

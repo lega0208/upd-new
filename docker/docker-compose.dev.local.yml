@@ -20,47 +20,53 @@ services:
       context: ../
       dockerfile: docker/performance_base/Dockerfile
       target: web
-    ports:
-      - "9000"
-    secrets:
-      - .env
-    environment:
-      DOTENV_CONFIG_PATH: /run/secrets/.env
-    depends_on:
-      - mongodb
-  db-updater:
-    image: "upd_db-updater"
-    container_name: upd_db-updater
-    restart: unless-stopped
-    build:
-      context: ../
-      dockerfile: docker/performance_base/Dockerfile
-      target: db-updater
-    ports:
-      - "9001"
     secrets:
       - .env
       - secret.pem
-      - service-account-credentials.json
+      - aa_creds_pool.json
     environment:
       DOTENV_CONFIG_PATH: /run/secrets/.env
       AA_KEY_PATH: /run/secrets/secret.pem
-      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/service-account-credentials.json
+      AA_KEY_POOL_PATH: /run/secrets/aa_creds_pool.json
+      PORT: 9000
     depends_on:
       - mongodb
+
+#  db-updater:
+#    image: "upd_db-updater"
+#    container_name: upd_db-updater
+#    restart: unless-stopped
+#    build:
+#      context: ../
+#      dockerfile: docker/performance_base/Dockerfile
+#      target: db-updater
+#    secrets:
+#      - .env
+#      - secret.pem
+#      - service-account-credentials.json
+#    environment:
+#      DOTENV_CONFIG_PATH: /run/secrets/.env
+#      AA_KEY_PATH: /run/secrets/secret.pem
+#      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/service-account-credentials.json
+#    depends_on:
+#      - mongodb
+
   mongodb:
     image: mongo:7.0.5-jammy
     pull_policy: if_not_present
     container_name: upd_mongo
     restart: unless-stopped
-    ports:
-      - '27017:27017'
     volumes:
       - type: volume
         source: db-data
         target: /data
         volume:
           nocopy: true
+
+  redis:
+    image: redis:7.2.4
+    pull_policy: if_not_present
+    command: "redis-server --appendonly yes --maxmemory-policy noeviction"
 
 volumes:
   db-data:
@@ -75,7 +81,7 @@ secrets:
     file: ../.env
   secret.pem:
     file: ../keys/secret.pem
+  aa_creds_pool.json:
+    file: ../keys/aa_creds_pool.json
   service-account-credentials.json:
     file: ../keys/service-account-credentials.json
-
-

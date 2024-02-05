@@ -35,7 +35,16 @@ export interface ReportFilter {
   excludeItemIds?: string[];
 }
 
-
 export type MetricsConfig = {
   [key: string]: AAMetricId | MetricConfig;
+};
+
+export type AuthParams = {
+  expiryDateTime?: number;
+  organizationId: string;
+  technicalId: string;
+  companyId: string;
+  clientId: string;
+  clientSecret: string;
+  privateKey: string;
 };

@@ -16,7 +16,8 @@
         "assets": [],
         "target": "node",
         "compiler": "swc",
-        "generateIndexHtml": false
+        "generateIndexHtml": false,
+        "webpackConfig": "libs/data-integrity/webpack.config.js"
       },
       "configurations": {
         "production": {
@@ -31,10 +32,7 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/data-integrity/**/*.ts"]
-      }
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",

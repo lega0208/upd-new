@@ -6,6 +6,7 @@ import { normalizePath, Plugin } from 'vite';
 export const DirImporterPlugin: Plugin = {
   name: 'vite-plugin-angular/dir-importer',
   enforce: 'pre',
+// @ts-ignore
   async resolveId(source, importer, options) {
     if (!importer || !options.ssr) {
       return;
@@ -32,10 +33,10 @@ export const DirImporterPlugin: Plugin = {
                 skipSelf: true,
               });
             }
-          } catch {}
+          } catch { /* empty */ }
         }
       }
-    } catch {}
+    } catch { /* empty */ }
   },
   config(config, env) {
     return {

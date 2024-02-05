@@ -54,7 +54,7 @@ export class PrepareReportDataProcessor extends WorkerHost {
  * Sub-level processor for the `fetchAndProcessReportData` queue.
  * Fetches and parses data from a datasource, and writes it to the db.
  */
-@Processor('fetchAndProcessReportData')
+@Processor('fetchAndProcessReportData', { concurrency: 1000 })
 export class FetchAndProcessDataProcessor extends WorkerHost {
   constructor(
     private reportsService: CustomReportsService,

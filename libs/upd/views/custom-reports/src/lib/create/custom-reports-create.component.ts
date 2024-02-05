@@ -96,11 +96,13 @@ export class CustomReportsCreateComponent {
         collection: 'tasks',
         filter: { pages: { $exists: true, $not: { $size: 0 } } },
         project: { title: 1, pages: 1 },
+        sort: { title: 1 },
       },
       projects: {
         collection: 'projects',
         filter: { pages: { $exists: true, $not: { $size: 0 } } },
         project: { title: 1, pages: 1 },
+        sort: { title: 1 },
       },
     }),
     {
@@ -298,7 +300,7 @@ export class CustomReportsCreateComponent {
     { label: 'Countries', value: 'country', description: 'tooltip-countries-rb' },
     { label: 'Referrer', value: 'referrer', description: 'tooltip-referrer-rb' },
     { label: 'Referrer type', value: 'referrer_type', description: 'tooltip-referrertype-rb' },
-    { label: 'Previous page', value: 'prev_page', description: 'tooltip-visits' },
+    { label: 'Previous page', value: 'prev_page', description: 'tooltip-prevpage-rb' },
     { label: 'Time spent', value: 'time_spent', description: 'tooltip-timespent-rb' },
   ];
 
@@ -321,7 +323,7 @@ export class CustomReportsCreateComponent {
 
   stateDimension = this.reportDimensions.find(
     (d) => d.value === this.storageConfig?.breakdownDimension,
-  );
+  ) || this.reportDimensions[0];
   stateMetrics: string[] = this.storageConfig?.metrics || [];
   stateCalendarDates?: Date[] =
     this.storageConfig?.dateRange &&
