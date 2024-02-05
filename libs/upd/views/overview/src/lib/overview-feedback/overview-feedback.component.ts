@@ -17,6 +17,9 @@ export class OverviewFeedbackComponent implements OnInit {
   private i18n = inject(I18nFacade);
   currentLang$ = this.i18n.currentLang$;
 
+  currentTotalComments$ = this.overviewService.currentTotalComments$;
+  commentsPercentChange$ = this.overviewService.commentsPercentChange$;
+
   fullDateRangeLabel$ = this.overviewService.fullDateRangeLabel$;
   fullComparisonDateRangeLabel$ = this.overviewService.fullComparisonDateRangeLabel$;
 
@@ -40,6 +43,11 @@ export class OverviewFeedbackComponent implements OnInit {
     prevValue: number;
   }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
+
+  feedbackPagesTotalTableCols: ColumnConfig<{
+    currValue: number;
+    percentChange: number;
+  }>[] = [];
 
   feedbackPagesTableCols: ColumnConfig<{
     title: string;

@@ -1,5 +1,18 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
+    <div class="col">
+      <upd-data-card
+        [current]="currentTotalComments$ | async"
+        [comparison]="commentsPercentChange$ | async"
+        [title]="'Total comments'"
+        [tooltip]="'total # of comments'"
+      ></upd-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
     <div class="col-lg-12 col-md-12 col-sm-12">
       <upd-apex-bar
         [title]="'d3-dyfwywlf'"
@@ -31,3 +44,4 @@
     </div>
   </div>
 </div>
+
