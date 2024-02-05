@@ -153,6 +153,7 @@
   "top5-pages-most-feedback": "Cinq pages ayant reçu le plus de commentaires",
   "top25-pages-most-feedback": "Vingt cinq pages ayant reçu le plus de commentaires",
   "program-service": "Programme/Service",
+  "total # of comments": "Nombre total de commentaires",
   "# of comments": "Nombre de commentaires",
   "# of comments for ": "Nombre de commentaires pour {{value}}",
   "# of calls": "Nombre d'appels",

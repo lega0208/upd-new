@@ -673,6 +673,35 @@ export class OverviewFacade {
     }),
   );
 
+  currentTotalComments$ = this.overviewData$.pipe(
+    map(
+      (data) =>
+        data?.dateRangeData?.feedbackPages.reduce(
+          (totalComments, feedback) => totalComments + feedback.sum,
+          0,
+        ) || 0,
+    ),
+  );
+
+  comparisonTotalComments$ = this.overviewData$.pipe(
+    map(
+      (data) =>
+        data?.comparisonDateRangeData?.feedbackPages.reduce(
+          (totalComments, feedback) => totalComments + feedback.sum,
+          0,
+        ) || 0,
+    ),
+  );
+
+  commentsPercentChange$ = combineLatest([
+    this.currentTotalComments$,
+    this.comparisonTotalComments$,
+  ]).pipe(
+    map(([currentComments, comparisonComments]) =>
+      percentChange(currentComments, comparisonComments),
+    ),
+  );
+
   uxTestsCompleted$ = this.overviewData$.pipe(
     map((data) => data.testsCompletedSince2018),
   );
