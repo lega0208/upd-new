@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  redisHost: 'localhost',
+  redisHost: process.env.REDIS_HOST || 'localhost',
 };
