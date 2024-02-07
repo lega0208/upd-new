@@ -28,6 +28,17 @@ EXPOSE 9000
 USER node
 CMD ["node", "main.js"]
 
+FROM node_base as web-dev-base
+COPY ["dist/apps/api/package.json", "dist/apps/api/package-lock.json", "./"]
+RUN --mount=type=cache,target=/home/node/.npm npm ci
+
+FROM node_base as web-dev
+COPY --from=web-dev-base . .
+COPY dist/apps/api/ .
+EXPOSE 9000
+USER node
+CMD ["node", "main.js"]
+
 FROM node_base as db-updater
 RUN echo -e '#!/bin/sh\nnode db-cli/main.js "$@"' >> /bin/db-cli && chmod +x /bin/db-cli
 COPY --from=apps apps/db-updater/package.json .

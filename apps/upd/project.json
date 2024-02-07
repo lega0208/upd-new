@@ -45,7 +45,8 @@
           "outputHashing": "all",
           "statsJson": true,
           "buildLibsFromSource": true,
-          "vendorChunk": false
+          "vendorChunk": false,
+          "mode": "production"
         },
         "development": {
           "buildOptimizer": false,
@@ -59,7 +60,8 @@
           },
           "namedChunks": true,
           "verbose": true,
-          "buildLibsFromSource": true
+          "buildLibsFromSource": true,
+          "mode": "development"
         }
       },
       "defaultConfiguration": "production"
