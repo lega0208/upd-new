@@ -16,7 +16,6 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { logJson, today } from '@dua-upd/utils-common';
 import { TranslateModule } from '@ngx-translate/core';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -461,7 +460,7 @@ export class CustomReportsCreateComponent {
     return (
       !!config.dateRange.start &&
       !!config.dateRange.end &&
-      startDate.isBefore(today()) &&
+      startDate.isBefore(dayjs.utc().startOf('day')) &&
       endDate.isAfter(startDate)
     );
   }
