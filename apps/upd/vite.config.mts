@@ -1,11 +1,9 @@
 import { replaceFiles } from '@nx/vite/plugins/rollup-replace-files.plugin';
 import { resolve } from 'path';
-import { defineConfig, splitVendorChunkPlugin, type AliasOptions } from 'vite';
+import { defineConfig, splitVendorChunkPlugin, PluginOption } from 'vite';
 import { angular } from './vite-plugin/plugin';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { visualizer } from 'rollup-plugin-visualizer';
-
-import purgecss from '@fullhuman/postcss-purgecss';
 
 const workspaceRoot = resolve(__dirname, '../..');
 const projectRoot = resolve(workspaceRoot, 'apps/upd');
@@ -16,7 +14,6 @@ export default defineConfig(({ mode }) => {
   return {
     root: __dirname,
     base: '/',
-    // root: projectRoot,
     mode,
     esbuild: {
       logLevel: 'info',
@@ -39,16 +36,6 @@ export default defineConfig(({ mode }) => {
         logLevel: 'info',
         treeshake: prod,
         cache: true,
-        plugins: prod
-          ? [
-              replaceFiles([
-                {
-                  replace: 'apps/upd/src/environments/environment.ts',
-                  with: 'apps/upd/src/environments/environment.prod.ts',
-                },
-              ]),
-            ]
-          : [visualizer() as any],
         external: prod && ['core-js', 'html2canvas', 'canvg', 'dompurify'],
       },
       minify: prod,
@@ -76,12 +63,20 @@ export default defineConfig(({ mode }) => {
       tsconfigPaths({
         root: workspaceRoot,
       }),
+      prod &&
+        replaceFiles([
+          {
+            replace: `apps/upd/src/environments/environment.ts`,
+            with: `apps/upd/src/environments/environment.prod.ts`,
+          },
+        ]),
       angular({
         typecheck: true,
         workspaceRoot: projectRoot,
         tsConfigPath: 'tsconfig.json',
       }),
       splitVendorChunkPlugin(),
+      // visualizer() as unknown as PluginOption, // uncomment to output visualization of bundle sizes
     ],
     preview: {
       proxy: {
