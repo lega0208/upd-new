@@ -2,7 +2,7 @@ import { Inject, Injectable, Optional } from '@nestjs/common';
 import * as cheerio from 'cheerio/lib/slim';
 import dayjs from 'dayjs';
 import { minify } from 'html-minifier-terser';
-import { FilterQuery, Types, mongo } from 'mongoose';
+import { FilterQuery, Types, type mongo } from 'mongoose';
 import { filter, mapObject, omit, pick, pipe } from 'rambdax';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { DbService, Page, Readability, Url } from '@dua-upd/db';
