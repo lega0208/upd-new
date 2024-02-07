@@ -19,7 +19,7 @@ services:
     build:
       context: ../
       dockerfile: docker/performance_base/Dockerfile
-      target: web
+      target: web-dev
     secrets:
       - .env
       - secret.pem

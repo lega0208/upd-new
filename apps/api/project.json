@@ -28,7 +28,8 @@
           "cache-manager",
           "mongoose",
           "@adobe/aio-lib-analytics",
-          "brotli-wasm"
+          "brotli-wasm",
+          "@mongodb-js/zstd-linux-x64-musl"
         ],
         "inspect": false,
         "sourceMap": true,
