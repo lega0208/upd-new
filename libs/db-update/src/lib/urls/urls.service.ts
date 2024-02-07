@@ -313,9 +313,13 @@ export class UrlsService {
 
     const urlsPageDict = arrayToDictionary(pageUrls, 'url');
 
-    const existingReadabilityHashes = await this.db.collections.readability
-      .distinct<string>('hash')
-      .exec();
+    const existingReadabilityHashes = (
+      await this.db.collections.readability
+        .aggregate<{ _id: string }>()
+        .project({ hash: 1 })
+        .group({ _id: '$hash' })
+        .exec()
+    ).map(({ _id }) => _id);
 
     // using an update queue to batch updates rather than flooding the db with requests
     const urlsQueue = createUpdateQueue<mongo.AnyBulkWriteOperation<Url>>(
