@@ -39,7 +39,7 @@ export class ChildQueueEvents extends QueueEventsHost {
 
   @OnQueueEvent('error')
   onError(error: Error) {
-    // console.error(error.stack);
+    console.error(error.stack);
   }
 
   @OnQueueEvent('completed')
