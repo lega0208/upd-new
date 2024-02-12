@@ -231,7 +231,7 @@ export class CustomReportsService implements OnApplicationBootstrap {
           } as ChildJobMetadata,
           opts: {
             jobId: hash,
-            attempts: 1,
+            attempts: 3,
             backoff: {
               type: 'exponential',
               delay: 510,
