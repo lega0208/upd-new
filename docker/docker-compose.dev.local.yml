@@ -29,6 +29,7 @@ services:
       AA_KEY_PATH: /run/secrets/secret.pem
       AA_KEY_POOL_PATH: /run/secrets/aa_creds_pool.json
       PORT: 9000
+      INSTANCE_ID: "docker-dev-001"
     depends_on:
       - mongodb
 

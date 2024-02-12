@@ -40,6 +40,7 @@ services:
       DOTENV_CONFIG_PATH: /run/secrets/.env
       AA_KEY_PATH: /run/secrets/secret.pem
       AA_KEY_POOL_PATH: /run/secrets/aa_creds_pool.json
+      INSTANCE_ID: "prod-001"
     depends_on:
       - mongodb
 

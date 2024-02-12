@@ -1,6 +1,6 @@
 import { InjectFlowProducer, InjectQueue } from '@nestjs/bullmq';
 import { type FlowChildJob, FlowProducer, Queue } from 'bullmq';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { Types } from 'mongoose';
 import type { FilterQuery } from 'mongoose';
 import { omit } from 'rambdax';
@@ -13,6 +13,7 @@ import type {
 } from '@dua-upd/types-common';
 import { DbService, CustomReportsMetrics } from '@dua-upd/db';
 import { CustomReportsCache } from './custom-reports.cache';
+import { instanceId } from './custom-reports.module';
 import { decomposeConfig } from './custom-reports.strategies';
 import { hashConfig, hashQueryConfig } from './custom-reports.utils';
 import {
@@ -31,7 +32,7 @@ export type ChildJobMetadata = {
 };
 
 @Injectable()
-export class CustomReportsService {
+export class CustomReportsService implements OnApplicationBootstrap {
   // todo: cleanup observables
   observablesRegistry = new Map<string, Observable<ReportJobStatus>>();
 
@@ -46,7 +47,14 @@ export class CustomReportsService {
     private reportQueueEvents: ReportsQueueEvents,
     private childQueueEvents: ChildQueueEvents,
     private cache: CustomReportsCache,
+    @Inject('INSTANCE_ID')
+    private instanceId: string,
   ) {}
+
+  async onApplicationBootstrap() {
+    await this.reportsQueue.obliterate();
+    await this.childJobsQueue.obliterate();
+  }
 
   async getReportObservable(reportId: string, childJobIds: string[]) {
     const childJobStatuses = Object.fromEntries(
@@ -189,6 +197,12 @@ export class CustomReportsService {
       return report;
     }
 
+    const reportStatus$ = this.getStatusObservable(reportId);
+
+    if (reportStatus$) {
+      return;
+    }
+
     await this.createAndDispatchFlow(reportId, config, queriesWithDataPoints);
 
     return;
@@ -200,13 +214,14 @@ export class CustomReportsService {
     queriesWithDataPoints: QueryWithDataPoints[],
   ): Promise<void> {
     const children: FlowChildJob[] = queriesWithDataPoints.map(
-      (queryWithDataPoints) => {
+      (queryWithDataPoints): FlowChildJob => {
         const { query, dataPoints } = queryWithDataPoints;
         const hash = hashQueryConfig(query);
 
         return {
           name: hash,
           queueName: 'fetchAndProcessReportData',
+          prefix: instanceId,
           data: {
             hash,
             reportId,
@@ -217,12 +232,17 @@ export class CustomReportsService {
           opts: {
             jobId: hash,
             attempts: 3,
+            backoff: {
+              type: 'exponential',
+              delay: 510,
+            },
             removeOnComplete: {
               age: 1000 * 60 * 30, // 30 minutes
             },
             removeOnFail: {
               age: 1000 * 60 * 30, // 30 minutes
             },
+            failParentOnFailure: true,
           },
         };
       },
@@ -231,6 +251,7 @@ export class CustomReportsService {
     await this.reportFlowProducer.add({
       name: reportId,
       queueName: 'prepareReportData',
+      prefix: instanceId,
       data: {
         id: reportId,
         config,
@@ -244,6 +265,10 @@ export class CustomReportsService {
         },
         removeOnFail: {
           age: 1000 * 60 * 30, // 30 minutes
+        },
+        backoff: {
+          type: 'fixed',
+          delay: 2000,
         },
       },
       children,
