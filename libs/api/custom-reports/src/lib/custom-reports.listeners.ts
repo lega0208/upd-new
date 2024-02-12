@@ -39,7 +39,7 @@ export class ChildQueueEvents extends QueueEventsHost {
 
   @OnQueueEvent('error')
   onError(error: Error) {
-    console.error(error.stack);
+    // console.error(error.stack);
   }
 
   @OnQueueEvent('completed')
@@ -77,6 +77,8 @@ export class ReportsQueueEvents extends QueueEventsHost {
   constructor(
     @InjectQueue('prepareReportData')
     private queue: Queue,
+    @InjectQueue('fetchAndProcessReportData')
+    private childQueue: Queue,
     private childQueueEvents: ChildQueueEvents,
   ) {
     super();
@@ -94,7 +96,7 @@ export class ReportsQueueEvents extends QueueEventsHost {
   }
 
   @OnQueueEvent('completed')
-  onCompleted({
+  async onCompleted({
     jobId,
     returnvalue,
   }: {
@@ -108,6 +110,9 @@ export class ReportsQueueEvents extends QueueEventsHost {
       status: 'complete',
       data: returnvalue,
     });
+
+    await this.queue.clean(60 * 1000, 100);
+    await this.childQueue.clean(0, 300);
   }
 
   @OnQueueEvent('failed')

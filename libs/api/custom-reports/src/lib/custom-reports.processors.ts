@@ -5,10 +5,7 @@ import { Job } from 'bullmq';
 import { AdobeAnalyticsClient } from './clients/adobe-analytics.client';
 import { createQuery } from './clients/adobe-analytics.query';
 import { CustomReportsCache } from './custom-reports.cache';
-import {
-  ChildJobMetadata,
-  CustomReportsService,
-} from './custom-reports.service';
+import { ChildJobMetadata } from './custom-reports.service';
 import { processResults } from './custom-reports.strategies';
 
 type ReportCreationMetadata = {
@@ -54,10 +51,18 @@ export class PrepareReportDataProcessor extends WorkerHost {
  * Sub-level processor for the `fetchAndProcessReportData` queue.
  * Fetches and parses data from a datasource, and writes it to the db.
  */
-@Processor('fetchAndProcessReportData', { concurrency: 1000 })
+@Processor('fetchAndProcessReportData', {
+  concurrency: 1000,
+  maxStalledCount: 0,
+  lockDuration: 600 * 1000,
+  skipStalledCheck: true,
+  limiter: {
+    max: 20,
+    duration: 200,
+  },
+})
 export class FetchAndProcessDataProcessor extends WorkerHost {
   constructor(
-    private reportsService: CustomReportsService,
     private aaClient: AdobeAnalyticsClient,
     private db: DbService,
   ) {
@@ -67,22 +72,29 @@ export class FetchAndProcessDataProcessor extends WorkerHost {
   async process(job: Job<ChildJobMetadata, void, string>) {
     // check if data already exists, otherwise fetch it
 
-    const { config, query, dataPoints } = job.data;
+    try {
+      const { config, query, dataPoints } = job.data;
 
-    const queryResults = await this.aaClient.execute(createQuery(query));
+      const queryResults = await this.aaClient.execute(createQuery(query));
 
-    const updates = processResults(config, query, dataPoints, queryResults);
+      const updates = processResults(config, query, dataPoints, queryResults);
 
-    // todo: handle errors
+      if (typeof updates === 'function') {
+        await updates(this.db);
 
-    if (typeof updates === 'function') {
-      await updates(this.db);
+        return;
+      }
+
+      await this.db.collections.customReportsMetrics.bulkWrite(updates);
 
       return;
+    } catch (err) {
+      console.error('\nAn error occurred processing child job:');
+      console.error('jobId: ', job.id);
+      console.error('parent report id: ', job.data.reportId);
+      console.error('AA query: ', job.data.query);
+      console.error((<Error>err).stack);
+      throw err;
     }
-
-    await this.db.collections.customReportsMetrics.bulkWrite(updates);
-
-    return;
   }
 }

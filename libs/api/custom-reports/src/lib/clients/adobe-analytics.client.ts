@@ -11,7 +11,6 @@ import { getAAClient, getDefaultAuthParams } from './adobe-analytics.api';
 class AAClient {
   private client!: AnalyticsCoreAPI;
   private authParams!: AuthParams;
-  private delay: Promise<void> = Promise.resolve();
   private tokenExpiry = 0;
 
   constructor(authParams?: AuthParams) {
@@ -23,12 +22,8 @@ class AAClient {
   async execute(query: AdobeAnalyticsReportQuery) {
     await this.ensureClient();
 
-    await this.delay;
-
     const resultsPromise: Promise<AAMaybeResponse> =
       this.client.getReport(query);
-
-    this.resetDelay();
 
     return resultsPromise.then((results) => {
       if ('errorCode' in results.body) {
@@ -73,14 +68,10 @@ class AAClient {
   private tokenIsExpired() {
     return this.tokenExpiry < Math.floor(Date.now() / 1000);
   }
-
-  private resetDelay() {
-    this.delay = new Promise((resolve) => setTimeout(resolve, 510));
-  }
 }
 
 const createAAClient = (authParams?: AuthParams) =>
-  withMutex(new AAClient(authParams));
+  withMutex(new AAClient(authParams), 510);
 
 // use pool to invisibly intersperse requests between clients
 // can make this generic to any client type and add settings like concurrency, rate limiting, etc.

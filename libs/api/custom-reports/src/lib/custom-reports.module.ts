@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { getAACredsPool } from '@dua-upd/node-utils';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
@@ -17,6 +18,8 @@ import {
   PrepareReportDataProcessor,
 } from './custom-reports.processors';
 
+export const instanceId = process.env['INSTANCE_ID'] || randomUUID();
+
 @Module({})
 export class CustomReportsModule {
   static register(production = false) {
@@ -27,12 +30,15 @@ export class CustomReportsModule {
         DbModule,
         BullModule.registerQueue({
           name: 'prepareReportData',
+          prefix: instanceId,
         }),
         BullModule.registerQueue({
           name: 'fetchAndProcessReportData',
+          prefix: instanceId,
         }),
         BullModule.registerFlowProducer({
           name: 'reportFlow',
+          prefix: instanceId,
         }),
       ],
       controllers: [CustomReportsController],
@@ -55,6 +61,10 @@ export class CustomReportsModule {
 
             return client;
           },
+        },
+        {
+          provide: 'INSTANCE_ID',
+          useValue: instanceId,
         },
       ],
     };
