@@ -20,14 +20,8 @@ import { ApiService } from '@dua-upd/upd/services';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import {
-  LocaleNumberPipe,
-  LocalePercentPipe,
-} from '@dua-upd/upd/pipes';
 
 dayjs.extend(utc);
-dayjs.extend(timezone);
 
 interface ConfigData {
   data: {
