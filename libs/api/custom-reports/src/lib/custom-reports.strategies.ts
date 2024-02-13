@@ -40,8 +40,8 @@ export function deriveDataPoints(
     : {};
 
   const commonOutput = {
-    startDate: new Date(dateRange.start),
-    endDate: new Date(dateRange.end),
+    startDate: new Date(dateRange.start + 'Z'),
+    endDate: new Date(dateRange.end + 'Z'),
     granularity,
     grouped,
     ...dimension,
@@ -234,7 +234,7 @@ export const ungroupedNoDimensionStrategy: NoDimensionQueryResultsProcessor<
 > = {
   parseQueryResults(query, results) {
     const columnIds = results.columns.columnIds;
-    const row = (results.summaryData?.['totals'] || []) as (number | string)[];
+    const row = (results.summaryData?.['totals'] || []) as (number | string)[]; // ***
 
     if (!row.length) {
       throw new Error('No data found for grouped data point');
