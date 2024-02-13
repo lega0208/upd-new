@@ -20,12 +20,14 @@ import { ApiService } from '@dua-upd/upd/services';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import {
   LocaleNumberPipe,
   LocalePercentPipe,
 } from '@dua-upd/upd/pipes';
 
 dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface ConfigData {
   data: {
@@ -55,10 +57,7 @@ export class CustomReportsReportComponent implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
   private _zone = inject(NgZone);
-  private i18n = inject(I18nFacade);
   private readonly api = inject(ApiService);
-  private numberPipe: LocaleNumberPipe = inject(LocaleNumberPipe);
-  private percentPipe: LocalePercentPipe = inject(LocalePercentPipe);
 
   id: Signal<string> = toSignal(this.route.params.pipe(map((p) => p['id'])));
 
@@ -143,7 +142,7 @@ export class CustomReportsReportComponent implements OnInit {
             : ['average_time_spent'].includes(key)
             ? { pipe: 'secondsToMinutes' }
             : []),
-        translate: true,  
+        translate: true,
         }) as ColumnConfig,
     );
   });

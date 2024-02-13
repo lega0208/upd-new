@@ -405,10 +405,10 @@ export class CustomReportsCreateComponent {
       this.dateRange.set({
         start: dayjs(startDate)
           .utc()
-          .format('YYYY-MM-DDT00:00:00.000') as AAQueryDateStart,
+          .format('YYYY-MM-DDT00:00:00.000Z') as AAQueryDateStart,
         end: dayjs(endDate || startDate)
           .utc()
-          .format('YYYY-MM-DDT23:59:59.999') as AAQueryDateEnd,
+          .format('YYYY-MM-DDT23:59:59.999Z') as AAQueryDateEnd,
       });
     }
   }
