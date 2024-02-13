@@ -234,11 +234,6 @@ export const ungroupedNoDimensionStrategy: NoDimensionQueryResultsProcessor<
 > = {
   parseQueryResults(query, results) {
     const columnIds = results.columns.columnIds;
-    const row = (results.summaryData?.['totals'] || []) as (number | string)[]; // ***
-
-    if (!row.length) {
-      throw new Error('No data found for grouped data point');
-    }
 
     const resultsByUrl: Record<string, { [metricName: string]: number }> =
       Object.fromEntries(
