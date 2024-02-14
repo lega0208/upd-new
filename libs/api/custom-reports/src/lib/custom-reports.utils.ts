@@ -5,15 +5,17 @@ import { createHash } from 'crypto';
  * Normalize a ReportConfig to ensure consistent hashing
  * @param config The object to normalize
  */
-export function normalizeConfig(config: ReportConfig): ReportConfig {
+export function normalizeConfig(
+  config: ReportConfig<string | Date>,
+): ReportConfig<Date> {
   const breakdownDimension = config.breakdownDimension
     ? { breakdownDimension: config.breakdownDimension }
     : {};
 
   return {
     dateRange: {
-      start: config.dateRange.start,
-      end: config.dateRange.end,
+      start: new Date(config.dateRange.start),
+      end: new Date(config.dateRange.end),
     },
     granularity: config.granularity,
     urls: config.urls.sort(),
@@ -47,7 +49,7 @@ export function normalizeQueryConfig(config: AAQueryConfig): AAQueryConfig {
  * Hash a ReportConfig
  * @param config The object to hash
  */
-export function hashConfig(config: ReportConfig) {
+export function hashConfig(config: ReportConfig<string | Date>) {
   return createHash('md5')
     .update(JSON.stringify(normalizeConfig(config)))
     .digest('hex');

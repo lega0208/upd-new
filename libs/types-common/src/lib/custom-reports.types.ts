@@ -61,6 +61,7 @@ export const dimensions = {
   prev_page: 'variables/evar19.1',
   url_last_255: 'variables/evar22',
   none: '',
+  '': '',
 } as const satisfies DimensionsConfig;
 
 export const dimensionNamesMap = Object.fromEntries(
@@ -84,10 +85,10 @@ export type ReportDimension = {
   description: string;
 };
 
-export type ReportConfig = {
+export type ReportConfig<DateType = string> = {
   dateRange: {
-    start: string;
-    end: string;
+    start: DateType;
+    end: DateType;
   };
   granularity: ReportGranularity;
   urls: string[];
