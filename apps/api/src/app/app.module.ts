@@ -30,7 +30,8 @@ import { ReportsModule } from '../reports/reports.module';
         username: environment.redisUsername,
         password: environment.redisPassword,
         reconnectOnError: () => 2,
-        keepAlive: 1
+        keepAlive: 10000,
+        failoverDetector: true,
       },
     }),
   ],
