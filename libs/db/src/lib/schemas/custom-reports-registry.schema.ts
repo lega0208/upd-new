@@ -9,6 +9,7 @@ const ReportConfigSchema = new MongooseSchema<ReportConfig>({
       end: Date,
     },
     required: true,
+    _id: false,
   },
   granularity: {
     type: String,
@@ -36,7 +37,7 @@ export class CustomReportsRegistry {
   _id: Types.ObjectId;
 
   @Prop({ type: ReportConfigSchema, required: true })
-  config: ReportConfig;
+  config: ReportConfig<Date>;
 
   @Prop({ type: String, required: true, unique: true })
   configHash: string;
