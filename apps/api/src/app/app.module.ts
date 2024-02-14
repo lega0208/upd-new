@@ -27,6 +27,10 @@ import { ReportsModule } from '../reports/reports.module';
       connection: {
         host: environment.redisHost,
         port: 6379,
+        username: environment.redisUsername,
+        password: environment.redisPassword,
+        reconnectOnError: () => 2,
+        keepAlive: 1
       },
     }),
   ],
