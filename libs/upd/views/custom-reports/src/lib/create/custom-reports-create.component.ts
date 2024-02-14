@@ -403,12 +403,12 @@ export class CustomReportsCreateComponent {
 
       // make sure the timezone offset is correct
       this.dateRange.set({
-        start: dayjs(startDate)
-          .utc()
-          .format('YYYY-MM-DDT00:00:00.000Z') as AAQueryDateStart,
-        end: dayjs(endDate || startDate)
-          .utc()
-          .format('YYYY-MM-DDT23:59:59.999Z') as AAQueryDateEnd,
+        start: dayjs(startDate).format(
+          'YYYY-MM-DDT00:00:00.000[Z]',
+        ) as AAQueryDateStart,
+        end: dayjs(endDate || startDate).format(
+          'YYYY-MM-DDT23:59:59.999[Z]',
+        ) as AAQueryDateEnd,
       });
     }
   }
