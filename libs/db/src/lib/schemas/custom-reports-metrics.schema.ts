@@ -52,7 +52,7 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
 
   static async getMetrics(
     this: Model<CustomReportsMetrics>,
-    config: ReportConfig,
+    config: ReportConfig<Date>,
   ) {
     const urls = config.grouped
       ? {
@@ -67,18 +67,18 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
 
     const defaultQuery = {
       startDate: {
-        $gte: new Date(config.dateRange.start),
-        $lte: new Date(config.dateRange.end),
+        $gte: config.dateRange.start,
+        $lte: config.dateRange.end,
       },
       endDate: {
-        $gte: new Date(config.dateRange.start),
-        $lte: new Date(config.dateRange.end),
+        $gte: config.dateRange.start,
+        $lte: config.dateRange.end,
       },
     };
 
     const noneGranularityQuery = {
-      startDate: new Date(config.dateRange.start),
-      endDate: new Date(config.dateRange.end),
+      startDate: config.dateRange.start,
+      endDate: config.dateRange.end,
     };
 
     const dates =
@@ -103,7 +103,7 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
   }
 
   static createReportFormatter<T extends { [columnName: string]: unknown }>(
-    config: ReportConfig,
+    config: ReportConfig<Date>,
   ) {
     const { metrics, granularity, grouped, breakdownDimension } = config;
     const toDates = (document: ICustomReportsMetrics) =>
@@ -196,7 +196,7 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
       documents.flatMap(docToRows).sort(sortRows) as unknown as T[];
   }
 
-  static async getReport(this: CustomReportsModel, config: ReportConfig) {
+  static async getReport(this: CustomReportsModel, config: ReportConfig<Date>) {
     const formatter = this.createReportFormatter(config);
     const metrics = await this.getMetrics(config);
 

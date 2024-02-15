@@ -16,10 +16,10 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { logJson, today } from '@dua-upd/utils-common';
 import { TranslateModule } from '@ngx-translate/core';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import { ApiService } from '@dua-upd/upd/services';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import {
@@ -42,6 +42,7 @@ import type {
 } from '@dua-upd/types-common';
 
 dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type PageSelectionData = {
   pages: { _id: string; url: string; title: string }[];
@@ -321,9 +322,10 @@ export class CustomReportsCreateComponent {
     });
   }
 
-  stateDimension = this.reportDimensions.find(
-    (d) => d.value === this.storageConfig?.breakdownDimension,
-  ) || this.reportDimensions[0];
+  stateDimension =
+    this.reportDimensions.find(
+      (d) => d.value === this.storageConfig?.breakdownDimension,
+    ) || this.reportDimensions[0];
   stateMetrics: string[] = this.storageConfig?.metrics || [];
   stateCalendarDates?: Date[] =
     this.storageConfig?.dateRange &&
@@ -401,12 +403,12 @@ export class CustomReportsCreateComponent {
 
       // make sure the timezone offset is correct
       this.dateRange.set({
-        start: dayjs(startDate)
-          .utc()
-          .format('YYYY-MM-DDT00:00:00.000') as AAQueryDateStart,
-        end: dayjs(endDate || startDate)
-          .utc()
-          .format('YYYY-MM-DDT23:59:59.999') as AAQueryDateEnd,
+        start: dayjs(startDate).format(
+          'YYYY-MM-DDT00:00:00.000[Z]',
+        ) as AAQueryDateStart,
+        end: dayjs(endDate || startDate).format(
+          'YYYY-MM-DDT23:59:59.999[Z]',
+        ) as AAQueryDateEnd,
       });
     }
   }
@@ -461,7 +463,7 @@ export class CustomReportsCreateComponent {
     return (
       !!config.dateRange.start &&
       !!config.dateRange.end &&
-      startDate.isBefore(today()) &&
+      startDate.isBefore(dayjs.utc().startOf('day')) &&
       endDate.isAfter(startDate)
     );
   }
@@ -525,11 +527,19 @@ function dateRangeToCalendarDates(
   const dates: Date[] = [];
 
   if (dateRange.start) {
-    dates.push(new Date(dateRange.start));
+    const newStartDate = dayjs(dateRange.start.slice(0, 10))
+      .tz(dayjs.tz.guess(), true)
+      .toDate();
+
+    dates.push(newStartDate);
   }
 
   if (dateRange.end) {
-    dates.push(new Date(dateRange.end));
+    const newEndDate = dayjs(dateRange.end.slice(0, 10))
+      .tz(dayjs.tz.guess(), true)
+      .toDate();
+
+    dates.push(newEndDate);
   }
 
   return dates;

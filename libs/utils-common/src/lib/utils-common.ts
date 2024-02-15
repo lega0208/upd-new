@@ -543,7 +543,7 @@ class Mutex {
   }
 }
 
-export function withMutex<T extends object>(obj: T): T {
+export function withMutex<T extends object>(obj: T, unlockDelay = 0): T {
   const mutex = new Mutex();
 
   return new Proxy(obj, {
@@ -557,6 +557,7 @@ export function withMutex<T extends object>(obj: T): T {
           try {
             return origMethod.apply(target, args);
           } finally {
+            await wait(unlockDelay);
             mutex.unlock();
           }
         };

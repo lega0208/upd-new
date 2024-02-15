@@ -27,7 +27,7 @@ import type { ReportDataPoint } from './custom-reports.service';
  * @param queryConfig The query config.
  */
 export function deriveDataPoints(
-  reportConfig: ReportConfig,
+  reportConfig: ReportConfig<Date>,
   queryConfig: AAQueryConfig,
 ): ReportDataPoint[] {
   const { grouped, granularity, breakdownDimension } = reportConfig;
@@ -40,8 +40,8 @@ export function deriveDataPoints(
     : {};
 
   const commonOutput = {
-    startDate: new Date(dateRange.start),
-    endDate: new Date(dateRange.end),
+    startDate: new Date(dateRange.start + 'Z'),
+    endDate: new Date(dateRange.end + 'Z'),
     granularity,
     grouped,
     ...dimension,
@@ -69,7 +69,7 @@ export function deriveDataPoints(
  * a list of the individual data points to be inserted (to be used for tracking/reuse).
  * @param config The report config.
  */
-export function decomposeConfig(config: ReportConfig) {
+export function decomposeConfig(config: ReportConfig<Date>) {
   const {
     dateRange,
     granularity,
@@ -81,7 +81,12 @@ export function decomposeConfig(config: ReportConfig) {
 
   const dateRanges = (
     granularity === 'none'
-      ? [dateRange]
+      ? [
+          {
+            start: dateRange.start.toISOString().slice(0, -1),
+            end: dateRange.end.toISOString().slice(0, -1),
+          },
+        ]
       : dateRangeToGranularity(dateRange, granularity, queryDateFormat)
   ) as AAQueryDateRange[];
 
@@ -171,7 +176,7 @@ export function dataPointToBulkInsert(
   } satisfies mongo.AnyBulkWriteOperation<CustomReportsMetrics>;
 }
 
-export function getStrategy(config: ReportConfig) {
+export function getStrategy(config: ReportConfig<unknown>) {
   const { grouped, breakdownDimension } = config;
 
   if (breakdownDimension) {
@@ -190,7 +195,7 @@ export function getStrategy(config: ReportConfig) {
 }
 
 export function processResults(
-  config: ReportConfig,
+  config: ReportConfig<unknown>,
   query: AAQueryConfig,
   dataPoints: ReportDataPoint[],
   results: AAResponseBody,
@@ -234,11 +239,6 @@ export const ungroupedNoDimensionStrategy: NoDimensionQueryResultsProcessor<
 > = {
   parseQueryResults(query, results) {
     const columnIds = results.columns.columnIds;
-    const row = (results.summaryData?.['totals'] || []) as (number | string)[];
-
-    if (!row.length) {
-      throw new Error('No data found for grouped data point');
-    }
 
     const resultsByUrl: Record<string, { [metricName: string]: number }> =
       Object.fromEntries(
