@@ -26,7 +26,7 @@ import {
 export type ChildJobMetadata = {
   hash: string;
   reportId: string;
-  config: ReportConfig;
+  config: ReportConfig<Date>;
   query: AAQueryConfig;
   dataPoints: ReportDataPoint[];
 };
@@ -210,7 +210,7 @@ export class CustomReportsService implements OnApplicationBootstrap {
 
   async createAndDispatchFlow(
     reportId: string,
-    config: ReportConfig,
+    config: ReportConfig<Date>,
     queriesWithDataPoints: QueryWithDataPoints[],
   ): Promise<void> {
     const children: FlowChildJob[] = queriesWithDataPoints.map(

@@ -277,7 +277,7 @@ export type GranularityPeriod =
     };
 
 export function dateRangeToGranularity(
-  dateRange: DateRange<string>,
+  dateRange: DateRange<string> | DateRange<Date>,
   granularity: DateRangeGranularity = 'day',
   format: string | false = 'YYYY-MM-DD',
   inclusive = false,

@@ -10,7 +10,7 @@ import { processResults } from './custom-reports.strategies';
 
 type ReportCreationMetadata = {
   id: string;
-  config: ReportConfig;
+  config: ReportConfig<Date>;
   hash: string;
 };
 
