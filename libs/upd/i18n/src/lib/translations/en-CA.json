@@ -592,6 +592,9 @@
   "less than 15 seconds": "less than 15 seconds",
   "Unspecified": "Unspecified",
   "open-link": "Open link (ctrl + click)",
+  "Oops! No data was found": "Oops! We can't find that report.",
+  "It looks like the report ID not found": "<p>It looks like the report ID you've entered isn't quite right.</p><p>The report you're looking for might have been removed or is temporarily unavailable.</p><p>Please double-check the ID you've entered for any typos or missing characters.</p>",
+
 
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",
   "Get a business number": "Get a business number",

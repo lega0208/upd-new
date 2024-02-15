@@ -27,16 +27,23 @@ export class CustomReportsController {
 
   @Get(':id')
   async getReport(@Param('id') id: string): Promise<ReportStatus> {
-    const report = await this.reportsService.fetchOrPrepareReport(id);
+    try {
+      const report = await this.reportsService.fetchOrPrepareReport(id);
 
-    if (report) {
+      if (report) {
+        return {
+          status: 'complete',
+          data: report,
+        } as ReportStatus;
+      }
+
+      return { status: 'pending', message: 'fetching data...' };
+    } catch (err) {
       return {
-        status: 'complete',
-        data: report,
-      } as ReportStatus;
+        status: 'error',
+        message: (<Error>err).message,
+      };
     }
-
-    return { status: 'pending', message: 'fetching data...' };
   }
 
   @Sse(':id/status')

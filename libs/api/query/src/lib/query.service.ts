@@ -1,6 +1,6 @@
 import { DbService } from '@dua-upd/db';
 import { Injectable } from '@nestjs/common';
-import { Model, Types } from 'mongoose';
+import { Model, Types, isValidObjectId } from 'mongoose';
 import type { DbQuery } from '@dua-upd/types-common';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class QueryService {
 
       const { collection, filter, project, sort } = query;
 
-      if ( filter['_id'] ) {
+      if (isValidObjectId(filter['_id'])) {
         filter['_id'] = new Types.ObjectId(filter['_id']);
       }
 
