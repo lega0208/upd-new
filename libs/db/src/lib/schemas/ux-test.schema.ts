@@ -1,9 +1,9 @@
-import { Prop, Schema, SchemaFactory, PropOptions } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Types } from 'mongoose';
 import { Page } from './page.schema';
 import { Project } from './project.schema';
 import { Task } from './task.schema';
-import { AttachmentData, IUxTest } from '@dua-upd/types-common';
+import type { IUxTest } from '@dua-upd/types-common';
 
 export type UxTestDocument = UxTest & Document;
 
@@ -77,6 +77,9 @@ export class UxTest implements IUxTest {
 
   @Prop({ type: Boolean })
   cops?: boolean;
+
+  @Prop({ type: Date })
+  start_date?: Date;
 }
 
 export const UxTestSchema = SchemaFactory.createForClass(UxTest);

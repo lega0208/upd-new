@@ -64,9 +64,7 @@ export const createDateRangeFilterFormula = (
 
 export class AirtableClient {
   client: AirTableAPI;
-  feedbackClient: AirTableAPI = getATClient(
-    process.env.AIRTABLE_TOKEN,
-  );
+  feedbackClient: AirTableAPI = getATClient(process.env.AIRTABLE_TOKEN);
 
   constructor(apiKey?: string) {
     this.client = getATClient(apiKey);
@@ -216,14 +214,7 @@ export class AirtableClient {
   async insertSearchAssessment(
     data,
     lang: Lang = 'en',
-    lastUpdatedDate?: DateType,
   ) {
-    const params = lastUpdatedDate
-      ? {
-          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
-        }
-      : {};
-
     return await this.insertRecords(
       bases.SEARCH_ASSESSMENT,
       `CRA - ${lang.toUpperCase()}`,
@@ -348,6 +339,7 @@ export class AirtableClient {
           cops: fields['COPS'],
           attachments: fields['Attachments (Ex. Scorecard)'],
           description: fields['Project Description'],
+          start_date: fields['Start Date'],
         };
 
         return Object.fromEntries(
