@@ -593,7 +593,7 @@
   "Unspecified": "Unspecified",
   "open-link": "Open link (ctrl + click)",
   "Oops! No data was found": "Oops! We can't find that report.",
-  "It looks like the report ID not found": "<p>It looks like the report ID you've entered isn't quite right.</p><p>The report you're looking for might have been removed or is temporarily unavailable.</p><p>Please double-check the ID you've entered for any typos or missing characters.</p>",
+  "It looks like the report ID not found": "<p>The report you're looking for might have been removed or is temporarily unavailable.</p><p>Please try again.</p>",
 
 
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",
