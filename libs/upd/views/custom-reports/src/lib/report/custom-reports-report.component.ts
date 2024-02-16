@@ -205,10 +205,18 @@ export class CustomReportsReportComponent implements OnInit {
           this._zone.run(() => subscriber.complete());
         } else if (message.status === 'error') {
           this._zone.run(() => subscriber.error(new Error(message.message)));
+          this._zone.run(() => subscriber.complete());
         }
       };
 
-      return () => es.close();
+      es.onerror = (event: Event) => {
+        this._zone.run(() => subscriber.error(event));
+        this._zone.run(() => subscriber.complete());
+      }
+
+      return () => {
+        es.close();
+      }
     });
   }
 }
