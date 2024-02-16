@@ -14,7 +14,15 @@ import type { ReportConfig, ReportStatus } from '@dua-upd/types-common';
 import { ColumnConfig, UpdComponentsModule } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { round } from '@dua-upd/utils-common';
-import { iif, map, mergeMap, Observable, takeWhile } from 'rxjs';
+import {
+  catchError,
+  iif,
+  map,
+  mergeMap,
+  Observable,
+  takeWhile,
+  of,
+} from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ApiService } from '@dua-upd/upd/services';
 import { I18nModule } from '@dua-upd/upd/i18n';
@@ -66,7 +74,7 @@ export class CustomReportsReportComponent implements OnInit {
   );
 
   config: Signal<ReportConfig | undefined> = computed(
-    () => this.configData()?.data?.[0].config,
+    () => this.configData()?.data?.[0]?.config || undefined,
   );
 
   grouped = computed(() => (this.config()?.grouped ? 'Yes' : 'No'));
@@ -129,14 +137,21 @@ export class CustomReportsReportComponent implements OnInit {
           header: key,
           ...(['startDate', 'endDate', 'date'].includes(key)
             ? { pipe: 'date' }
-            : ['visits', 'views', 'visitors', 'dyf_no', 'dyf_yes', 'dyf_submit'].includes(key)
+            : [
+                'visits',
+                'views',
+                'visitors',
+                'dyf_no',
+                'dyf_yes',
+                'dyf_submit',
+              ].includes(key)
             ? { pipe: 'number' }
             : ['bouncerate'].includes(key)
             ? { pipe: 'percent' }
             : ['average_time_spent'].includes(key)
             ? { pipe: 'secondsToMinutes' }
             : []),
-        translate: true,
+          translate: true,
         }) as ColumnConfig,
     );
   });
@@ -164,6 +179,12 @@ export class CustomReportsReportComponent implements OnInit {
         mergeMap(({ status }) =>
           iif(() => status !== 'complete', statusStream$, status$),
         ),
+        catchError((err) => {
+          return of({
+            status: 'error',
+            message: err.message,
+          }) as Observable<ReportStatus>;
+        }),
       ),
     );
   }
@@ -182,10 +203,20 @@ export class CustomReportsReportComponent implements OnInit {
 
         if (message.status === 'complete') {
           this._zone.run(() => subscriber.complete());
+        } else if (message.status === 'error') {
+          this._zone.run(() => subscriber.error(new Error(message.message)));
+          this._zone.run(() => subscriber.complete());
         }
       };
 
-      return () => es.close();
+      es.onerror = (event: Event) => {
+        this._zone.run(() => subscriber.error(event));
+        this._zone.run(() => subscriber.complete());
+      }
+
+      return () => {
+        es.close();
+      }
     });
   }
 }

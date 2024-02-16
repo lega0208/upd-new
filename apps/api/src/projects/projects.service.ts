@@ -147,14 +147,13 @@ export class ProjectsService {
     private feedbackModel: FeedbackModel,
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async getProjectsHomeData(): Promise<ProjectsHomeData> {
     const cacheKey = `getProjectsHomeData`;
-    const cachedData = await this.cacheManager.store.get<ProjectsHomeData>(
-      cacheKey
-    );
+    const cachedData =
+      await this.cacheManager.store.get<ProjectsHomeData>(cacheKey);
 
     if (cachedData) {
       return cachedData;
@@ -301,7 +300,7 @@ export class ProjectsService {
       });
 
     const completedCOPS = projectsData.filter(
-      (data) => data.cops && data.status === 'Complete'
+      (data) => data.cops && data.status === 'Complete',
     ).length;
 
     for (const data of projectsData) {
@@ -325,14 +324,13 @@ export class ProjectsService {
   async getProjectDetails(params: ApiParams): Promise<ProjectsDetailsData> {
     if (!params.id) {
       throw Error(
-        'Attempted to get Project details from API but no id was provided.'
+        'Attempted to get Project details from API but no id was provided.',
       );
     }
 
     const cacheKey = `getProjectDetails-${params.id}-${params.dateRange}-${params.comparisonDateRange}`;
-    const cachedData = await this.cacheManager.store.get<ProjectsDetailsData>(
-      cacheKey
-    );
+    const cachedData =
+      await this.cacheManager.store.get<ProjectsDetailsData>(cacheKey);
 
     if (cachedData) {
       return cachedData;
@@ -384,7 +382,7 @@ export class ProjectsService {
     const status = getProjectStatus(
       (populatedProjectDoc.ux_tests as UxTest[])
         .filter((test) => !(test instanceof Types.ObjectId))
-        .map((test) => test.status as ProjectStatus)
+        .map((test) => test.status as ProjectStatus),
     );
     console.timeEnd('getProjectStatus');
 
@@ -430,10 +428,14 @@ export class ProjectsService {
 
     const tasks = populatedProjectDoc.tasks as Task[];
 
-    const startDate = uxTests.find((uxTest) => uxTest.date)?.date.toISOString();
+    const startDate = uxTests
+      .find((uxTest) => uxTest.start_date)
+      ?.start_date.toISOString();
+
     const launchDate = uxTests
       .find((uxTest) => uxTest.launch_date)
       ?.launch_date.toISOString();
+
     const members = uxTests.find((uxTest) => uxTest.project_lead)?.project_lead;
 
     console.time('dateRangeData');
@@ -445,7 +447,7 @@ export class ProjectsService {
       this.pageModel,
       new Types.ObjectId(params.id),
       params.dateRange,
-      projectUrls
+      projectUrls,
     );
     console.timeEnd('dateRangeData');
 
@@ -458,7 +460,7 @@ export class ProjectsService {
       this.pageModel,
       new Types.ObjectId(params.id),
       params.comparisonDateRange,
-      projectUrls
+      projectUrls,
     );
     console.timeEnd('comparisonDateRangeData');
 
@@ -466,7 +468,7 @@ export class ProjectsService {
     const feedbackComments = await getProjectFeedbackComments(
       params.dateRange,
       projectUrls,
-      this.feedbackModel
+      this.feedbackModel,
     );
     console.timeEnd('getProjectFeedbackComments');
 
@@ -497,7 +499,7 @@ export class ProjectsService {
       attachments: populatedProjectDoc.attachments.map((attachment) => {
         attachment.storage_url = attachment.storage_url?.replace(
           /^https:\/\//,
-          ''
+          '',
         );
 
         return attachment;
@@ -608,14 +610,14 @@ async function getAggregatedProjectMetrics(
   pageModel: Model<PageDocument>,
   id: Types.ObjectId,
   dateRange: string,
-  projectUrls: string[]
+  projectUrls: string[],
 ): Promise<ProjectDetailsAggregatedData> {
   const [startDate, endDate] = dateRangeSplit(dateRange);
 
   console.time('feedbackByTags');
   const feedbackByTags = await feedbackModel.getCommentsByTag(
     dateRange,
-    projectUrls
+    projectUrls,
   );
   console.timeEnd('feedbackByTags');
 
@@ -737,7 +739,7 @@ async function getAggregatedProjectMetrics(
         date: { $gte: startDate, $lte: endDate },
         tpc_id: { $in: tpcIds },
       },
-      { _id: 1 }
+      { _id: 1 },
     )
     .lean()
     .exec();
@@ -803,15 +805,14 @@ async function getAggregatedProjectMetrics(
   const calldriversEnquiry =
     await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
 
-  const callsByTopic = await calldriversModel.getCallsByTopicFromIds(
-    documentIds
-  );
+  const callsByTopic =
+    await calldriversModel.getCallsByTopicFromIds(documentIds);
   console.timeEnd('calldriversEnquiry');
 
   console.time('callsByTasks');
   const callsByTasks = await calldriversModel.getCallsByTaskFromIds(
     dateRange,
-    tpcIds
+    tpcIds,
   );
   console.timeEnd('callsByTasks');
 
@@ -869,7 +870,7 @@ async function getAggregatedProjectMetrics(
     })
     .exec();
 
-    console.timeEnd('pageMetricsByTasks');
+  console.timeEnd('pageMetricsByTasks');
 
   return {
     ...projectMetrics,
@@ -888,7 +889,7 @@ async function getAggregatedProjectMetrics(
 async function getProjectFeedbackComments(
   dateRange: string,
   projectUrls: string[],
-  feedbackModel: FeedbackModel
+  feedbackModel: FeedbackModel,
 ): Promise<FeedbackComment[]> {
   const [startDate, endDate] = dateRangeSplit(dateRange);
 
@@ -907,10 +908,10 @@ async function getProjectFeedbackComments(
 }
 
 async function getUniqueProjectUrls(
-  project: ProjectDocument
+  project: ProjectDocument,
 ): Promise<string[]> {
   const projectPageUrls = ((await project.populate('pages')).pages || []).map(
-    (page) => 'url' in page && page.url
+    (page) => 'url' in page && page.url,
   );
 
   return [...new Set(projectPageUrls)];
