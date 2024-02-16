@@ -188,4 +188,30 @@ export class CalendarComponent implements OnChanges {
     this.dates.set([startDate, endDate]);
     this.calendarDates = [startDate, endDate];
   }
+
+  isInRangeDate(date: { month: number; day: number; year: number }) {
+    const [startDate, endDate] = this.datePicker.value 
+      ? this.datePicker.value.map((d: Date) => dayjs(d))
+      : [null, null];
+    const currentDate = dayjs(new Date(date.year, date.month, date.day));
+    return startDate && endDate && currentDate.isAfter(startDate) && currentDate.isBefore(endDate);
+  }
+  
+  isStartDate(date: { month: number; day: number; year: number }) {
+    const startDate = this.datePicker.value ? dayjs(this.datePicker.value[0]) : null;
+    return startDate 
+      ? date.day === startDate.date() &&
+        date.month === startDate.month() &&
+        date.year === startDate.year()
+      : false;
+  }
+  
+  isEndDate(date: { month: number; day: number; year: number }) {
+    const endDate = this.datePicker.value ? dayjs(this.datePicker.value[1]) : null;
+    return endDate 
+      ? date.day === endDate.date() &&
+        date.month === endDate.month() &&
+        date.year === endDate.year()
+      : false;
+  }
 }
