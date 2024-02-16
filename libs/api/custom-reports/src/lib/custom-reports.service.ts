@@ -2,8 +2,6 @@ import { InjectFlowProducer, InjectQueue } from '@nestjs/bullmq';
 import { type FlowChildJob, FlowProducer, Queue } from 'bullmq';
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { Types } from 'mongoose';
-import type { FilterQuery } from 'mongoose';
-import { omit } from 'rambdax';
 import { combineLatest, map, Observable, startWith } from 'rxjs';
 import type {
   AADimensionName,
@@ -179,6 +177,7 @@ export class CustomReportsService implements OnApplicationBootstrap {
 
     // decompose config into queries and data points and skip existing data points
     const queriesWithDataPoints = await this.filterExistingData(
+      config,
       decomposeConfig(config),
     );
 
@@ -283,10 +282,41 @@ export class CustomReportsService implements OnApplicationBootstrap {
     this.observablesRegistry.set(reportId, reportStatus$);
   }
 
-  async filterExistingData(queriesWithDataPoints: QueryWithDataPoints[]) {
+  async filterExistingData(
+    config: ReportConfig<Date>,
+    queriesWithDataPoints: QueryWithDataPoints[],
+  ) {
     // rebuild the `queriesWithDataPoints` array, including only the data points
     //  that don't already exist in the db
     const newQueriesWithDataPoints: QueryWithDataPoints[] = [];
+
+    const existingReportData =
+      await this.db.collections.customReportsMetrics.getMetrics(config);
+
+    // use dates+url as a key to look up existing data points
+    const generateKey = (doc: Partial<CustomReportsMetrics>) => {
+      const dates = `${doc.startDate?.toISOString() || ''}${
+        doc.endDate?.toISOString() || ''
+      }`;
+
+      const url = doc['url'] || '';
+
+      return `${dates}-${url}`;
+    };
+
+    // use a map for faster lookups
+    const existingDataMap = new Map(
+      existingReportData.map((row) => [generateKey(row), row]),
+    );
+
+    const findDataPoint = ({ url, startDate, endDate }: ReportDataPoint) =>
+      existingDataMap.get(
+        generateKey({
+          url,
+          startDate,
+          endDate,
+        }),
+      );
 
     for (const queryWithDataPoints of queriesWithDataPoints) {
       const { dataPoints } = queryWithDataPoints;
@@ -296,19 +326,7 @@ export class CustomReportsService implements OnApplicationBootstrap {
       for (const dataPoint of dataPoints) {
         const { metrics: metricsList, breakdownDimension } = dataPoint;
 
-        const query: FilterQuery<CustomReportsMetrics> = omit(
-          [
-            'metrics',
-            'metrics_by',
-            ...(dataPoint.granularity === 'day' ? ['endDate'] : []),
-          ],
-          dataPoint,
-        );
-
-        const record = await this.db.collections.customReportsMetrics
-          .findOne(query)
-          .lean()
-          .exec();
+        const record = findDataPoint(dataPoint);
 
         if (!record) {
           newDataPoints.push(dataPoint);
