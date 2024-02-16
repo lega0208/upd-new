@@ -8,15 +8,22 @@
   </div>
 </div>
 
-<upd-did-you-know *ngIf="status() !== 'complete'"></upd-did-you-know>
+<upd-did-you-know
+  *ngIf="!error() && data()?.length !== 0 && status() !== 'complete'"
+></upd-did-you-know>
 
-<ng-container *ngIf="!error() && data()?.length !== 0 && status() === 'complete'">
+<ng-container
+  *ngIf="!error() && data()?.length !== 0 && status() === 'complete'"
+>
   <upd-alert position="top" [selfClosing]="true">{{
     'success-generating-report' | translate
-    }}</upd-alert>
+  }}</upd-alert>
 </ng-container>
 
-<div class="w-100 d-inline-block mx-auto mb-2" *ngIf="!error() && data()?.length !== 0 && status() !== 'complete'">
+<div
+  class="w-100 d-inline-block mx-auto mb-2"
+  *ngIf="!error() && data()?.length !== 0 && status() !== 'complete'"
+>
   <div class="d-flex flex-fill align-content-center h-100 w-100">
     <div class="card align-middle w-100">
       <div class="card-body">
@@ -31,7 +38,7 @@
   </div>
 </div>
 
-<div class="card-container mt-3">
+<div class="card-container mt-3" *ngIf="!error() && data()?.length !== 0">
   <div class="card">
     <h5 class="card-header">{{ 'Report details' | translate }}</h5>
     <div class="card-body">
@@ -82,7 +89,10 @@
     </div>
   </div>
 
-  <div class="w-100 d-inline-block mx-mx-auto mt-4" *ngIf="status() === 'complete'">
+  <div
+    class="w-100 d-inline-block mx-mx-auto mt-4"
+    *ngIf="status() === 'complete'"
+  >
     <div class="d-flex flex-fill align-content-center h-100 w-100">
       <div class="card align-middle w-100">
         <div class="card-body">
@@ -98,22 +108,30 @@
     </div>
   </div>
 
-    <div
-      *ngIf="error()"
-      class="alert alert-danger d-inline-block mx-auto mt-5"
-      style="width: 33%"
-    >
-      <h5 class="alert-heading">Error</h5>
-      <p class="mb-0">{{ error() }}</p>
-    </div>
-
-    <div
-      *ngIf="data()?.length === 0"
-      class="alert alert-warning d-inline-block mx-auto mt-5 w-50"
-    >
-      <p>{{ 'No data was found' | translate }}</p>
-      <p class="mb-0">
-        {{ 'The URL may have changed' | translate }}
-      </p>
-    </div>
+  <div
+    *ngIf="error()"
+    class="alert alert-danger d-inline-block mx-auto mt-5"
+    style="width: 33%"
+  >
+    <h5 class="alert-heading">Error</h5>
+    <p class="mb-0">{{ error() }}</p>
   </div>
+
+  <div
+    *ngIf="data()?.length === 0"
+    class="alert alert-warning d-inline-block mx-auto mt-5 w-50"
+  >
+    <p>{{ 'No data was found' | translate }}</p>
+    <p class="mb-0">
+      {{ 'The URL may have changed' | translate }}
+    </p>
+  </div>
+</div>
+
+<div
+  *ngIf="!config() && configData()"
+  class="alert alert-warning d-inline-block mx-auto mt-5 w-50"
+>
+  <h3>{{ 'Oops! No data was found' | translate }}</h3>
+  <p [innerHTML]="'It looks like the report ID not found' | translate"></p>
+</div>

@@ -591,6 +591,8 @@
   "less than 15 seconds": "moins de 15 secondes",
   "Unspecified": "Non spécifié",
   "open-link": "Ouvrir le lien (ctrl + click)",
+  "Oops! No data was found": "Oops! Nous ne pouvons pas trouver ce rapport.",
+  "It looks like the report ID not found": "<p>Le rapport que vous recherchez a peut-être été supprimé ou est temporairement indisponible.</p><p>Veuillez réessayer.</p>",
   "United States": "États-Unis",
   "Albania": "Albanie",
   "Algeria": "Algérie",
