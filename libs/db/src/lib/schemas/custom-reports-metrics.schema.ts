@@ -1,12 +1,12 @@
-import { isNullish, logJson } from '@dua-upd/utils-common';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types, Schema as MongooseSchema, Model } from 'mongoose';
+import { filter, map } from 'rambdax';
+import { isNullish, logJson } from '@dua-upd/utils-common';
 import type {
   ICustomReportsMetrics,
   ReportConfig,
   ReportGranularity,
 } from '@dua-upd/types-common';
-import { filter, map } from 'rambdax';
 
 export const granularities: readonly ReportGranularity[] = [
   'day',
@@ -14,6 +14,13 @@ export const granularities: readonly ReportGranularity[] = [
   'month',
   'none',
 ] as const;
+
+export type ReportRow = {
+  startDate: Date;
+  endDate?: Date;
+  date?: Date;
+  [p: string]: unknown;
+};
 
 @Schema({ collection: 'custom_reports_metrics' })
 export class CustomReportsMetrics implements ICustomReportsMetrics {
@@ -53,7 +60,7 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
   static async getMetrics(
     this: Model<CustomReportsMetrics>,
     config: ReportConfig<Date>,
-  ) {
+  ): Promise<CustomReportsMetrics[]> {
     const urls = config.grouped
       ? {
           urls: {
@@ -196,8 +203,11 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
       documents.flatMap(docToRows).sort(sortRows) as unknown as T[];
   }
 
-  static async getReport(this: CustomReportsModel, config: ReportConfig<Date>) {
-    const formatter = this.createReportFormatter(config);
+  static async getReport(
+    this: CustomReportsModel,
+    config: ReportConfig<Date>,
+  ): Promise<ReportRow[]> {
+    const formatter = this.createReportFormatter<ReportRow>(config);
     const metrics = await this.getMetrics(config);
 
     return formatter(metrics);

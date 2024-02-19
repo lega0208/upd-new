@@ -16,9 +16,23 @@
   [ngClass]="{ 'ng-invalid ng-dirty': invalid }"
   (onSelect)="handleSelect(granularity, $event)"
 >
+  <ng-template pTemplate="date" let-date>
+    <span
+      class="calendar-item"
+      [ngClass]="{
+        'in-range': isInRangeDate(date),
+        'start-point': isStartDate(date),
+        'end-point': isEndDate(date)
+      }"
+      >{{ date.day }}</span
+    >
+  </ng-template>
+
   <ng-template *ngIf="showPreset && showAction" pTemplate="footer">
     <hr />
-    <ng-container *ngIf="showPreset && ( granularity === 'day' || granularity === 'none')">
+    <ng-container
+      *ngIf="showPreset && (granularity === 'day' || granularity === 'none')"
+    >
       <strong>Preset: </strong>
       <upd-dropdown
         id="range-button"
