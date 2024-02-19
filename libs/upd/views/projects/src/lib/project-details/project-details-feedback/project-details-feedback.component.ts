@@ -35,6 +35,10 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
+  // currentTotalComments$ = this.projectsDetailsService.currentTotalComments$;       // future dateRangeData
+  // comparisonTotalComments$ = this.projectsDetailsService.comparisonTotalComments$; // future dateRangeData
+  // commentsPercentChange$ = this.projectsDetailsService.commentsPercentChange$;     // future dateRangeData
+
   fullDateRangeLabel$ = this.projectsDetailsService.fullDateRangeLabel$;
   fullComparisonDateRangeLabel$ =
     this.projectsDetailsService.fullComparisonDateRangeLabel$;
@@ -56,6 +60,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   whatWasWrongChartApex$ = this.projectsDetailsService.whatWasWrongDataApex$;
 
   feedbackComments$ = this.projectsDetailsService.feedbackComments$;
+  feedbackTotalComments$ = this.projectsDetailsService.feedbackTotalComments$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
 
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;

@@ -774,6 +774,49 @@ export class TasksDetailsFacade {
     }),
   );
 
+  feedbackTotalComments$ = this.tasksDetailsData$.pipe(
+    map(
+      (data) =>
+        data?.feedbackComments.reduce(
+          (totalComments, feedback) => totalComments + 1,
+          0,
+        ) || 0,
+    ),
+  );
+  
+  // no dateRangeData, yet!
+  
+  currentTotalComments$ = this.tasksDetailsData$.pipe(
+    map(
+      (data) =>
+        data?.dateRangeData?.feedbackPages.reduce(
+          (totalComments, feedback) => totalComments + feedback.sum,
+          0,
+        ) || 0,
+    ),
+  );
+
+  // no dateRangeData, yet!
+  
+  comparisonTotalComments$ = this.tasksDetailsData$.pipe(
+    map(
+      (data) =>
+        data?.comparisonDateRangeData?.feedbackPages.reduce(
+          (totalComments, feedback) => totalComments + feedback.sum,
+          0,
+        ) || 0,
+    ),
+  );
+
+  commentsPercentChange$ = combineLatest([
+    this.currentTotalComments$,
+    this.comparisonTotalComments$,
+  ]).pipe(
+    map(([currentComments, comparisonComments]) =>
+      percentChange(currentComments, comparisonComments),
+    ),
+  );
+
   // feedbackByTagsBarChart$ = combineLatest([
   //   this.tasksDetailsData$,
   //   this.currentLang$,
