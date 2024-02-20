@@ -44,15 +44,17 @@ export class CalendarComponent implements OnChanges {
   @Input() dateFormat = 'M dd yy';
   @Input() invalid = false;
   @Input() set initialDates(dates: Date[] | undefined) {
-    this.calendarDates = dates?.length ? dates : undefined;
-    this.dates.set(dates || []);
+    if (dates?.length) {
+      this.calendarDates = dates;
+      this.dates.set([...dates]);
+    }
   }
 
   @Output() dateChange = new EventEmitter<Date[] | Date>();
 
-  calendarDates?: Date[] = this.initialDates;
+  calendarDates?: Date[];
 
-  dates: WritableSignal<Date[]> = signal(this.initialDates || []);
+  dates: WritableSignal<Date[]> = signal([]);
 
   minSelectableDate: Date = new Date(2020, 0, 1);
   maxSelectableDate = dayjs().startOf('day').subtract(1, 'day').toDate();
@@ -142,7 +144,7 @@ export class CalendarComponent implements OnChanges {
       dates.push(currentDate);
     }
 
-    this.dates.set(dates);
+    this.dates.set([...dates]);
     const [startDate, endDate] = dates;
 
     if (!startDate) {
@@ -170,11 +172,7 @@ export class CalendarComponent implements OnChanges {
     } else if (granularity === 'month' && dates.length === 2) {
       const endOfMonth = dayjs(date).endOf('month').toDate();
 
-      this.dates.update((dates) => {
-        dates[1] = endOfMonth;
-
-        return dates;
-      });
+      this.dates.update((dates) => [dates[0], endOfMonth]);
 
       this.calendarDates = [dates[0], endOfMonth];
     }
@@ -200,24 +198,33 @@ export class CalendarComponent implements OnChanges {
       ? this.datePicker.value.map((d: Date) => dayjs(d))
       : [null, null];
     const currentDate = dayjs(new Date(date.year, date.month, date.day));
-    return startDate && endDate && currentDate.isAfter(startDate) && currentDate.isBefore(endDate);
+    return (
+      startDate &&
+      endDate &&
+      currentDate.isAfter(startDate) &&
+      currentDate.isBefore(endDate)
+    );
   }
 
   isStartDate(date: { month: number; day: number; year: number }) {
-    const startDate = this.datePicker.value ? dayjs(this.datePicker.value[0]) : null;
+    const startDate = this.datePicker.value
+      ? dayjs(this.datePicker.value[0])
+      : null;
     return startDate
       ? date.day === startDate.date() &&
-        date.month === startDate.month() &&
-        date.year === startDate.year()
+          date.month === startDate.month() &&
+          date.year === startDate.year()
       : false;
   }
 
   isEndDate(date: { month: number; day: number; year: number }) {
-    const endDate = this.datePicker.value ? dayjs(this.datePicker.value[1]) : null;
+    const endDate = this.datePicker.value
+      ? dayjs(this.datePicker.value[1])
+      : null;
     return endDate
       ? date.day === endDate.date() &&
-        date.month === endDate.month() &&
-        date.year === endDate.year()
+          date.month === endDate.month() &&
+          date.year === endDate.year()
       : false;
   }
 }

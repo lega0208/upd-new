@@ -306,10 +306,21 @@ export class CustomReportsCreateComponent {
   ];
 
   constructor() {
+    const initialGranularity = this.selectedGranularity();
+    let granularityChanged = false;
+
     effect(
       () => {
-        this.selectedGranularity(); // don't need the value, just need to trigger the effect on change
-        this.resetCalendar();
+        const granularity = this.selectedGranularity(); // don't need the value, just need to trigger the effect on change
+
+        // resetCalendar was firing on initial load, so we need to check if the granularity actually changed
+        if (!granularityChanged && initialGranularity !== granularity) {
+          granularityChanged = true;
+        }
+
+        if (granularityChanged) {
+          this.calendarComponent?.resetCalendar();
+        }
       },
       { allowSignalWrites: true },
     );
@@ -366,15 +377,15 @@ export class CustomReportsCreateComponent {
     this.invalidUrls.set(invalidUrls);
     this.duplicateUrls.set(duplicateUrls);
     this.newUrls.set(Array.from(validNewUrls));
-    this.reportUrls.update((urls) => {
-      urls.push(...validNewUrls);
-
-      return urls;
-    });
+    this.reportUrls.update((urls) => [...urls, ...validNewUrls]);
   }
 
   removePage(index: number) {
-    this.reportUrls.update((urls) => urls.splice(index, 1));
+    this.reportUrls.update((urls) => {
+      urls.splice(index, 1);
+
+      return [...urls];
+    });
   }
 
   resetUrls() {
