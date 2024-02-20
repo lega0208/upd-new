@@ -11,36 +11,38 @@ export interface DropdownOption<T> {
 @Component({
   selector: 'upd-dropdown',
   template: `
-    <p-dropdown
-      [options]="options"
-      optionLabel="label"
-      [(ngModel)]="selectedOption"
-      (onChange)="this.selectOption.emit(selectedOption)"
-      [autoDisplayFirst]="autoDisplayFirst"
-    >
-      <ng-template pTemplate="selectedItem">
-        <span
-          *ngIf="icon"
-          class="material-icons align-top pe-1 "
-          aria-hidden="true"
-          >{{ icon }}</span
-        >
-        <span class="dropdown-label">{{
-          selectedOption?.label || '' | translate
-        }}</span>
-      </ng-template>
-
-      <ng-template pTemplate="item" let-option>
-        <div [class]="option.styleClasses || ''">
+    @if (selectedOption && options.length > 0) {
+      <p-dropdown
+        [options]="options"
+        [placeholder]="label || ''"
+        optionLabel="label"
+        [(ngModel)]="selectedOption"
+        (onChange)="this.selectOption.emit(selectedOption)"
+      >
+        <ng-template pTemplate="selectedItem">
           <span
-            *ngIf="option.icon"
-            class="pe-1 pi pi-{{ option.icon }} me-2"
+            *ngIf="icon"
+            class="material-icons align-top pe-1 "
             aria-hidden="true"
-          ></span
-          >{{ option.label | translate }}
-        </div>
-      </ng-template>
-    </p-dropdown>
+            >{{ icon }}</span
+          >
+          <span class="dropdown-label">{{
+            selectedOption?.label || '' | translate
+          }}</span>
+        </ng-template>
+
+        <ng-template pTemplate="item" let-option>
+          <div [class]="option.styleClasses || ''">
+            <span
+              *ngIf="option.icon"
+              class="pe-1 pi pi-{{ option.icon }} me-2"
+              aria-hidden="true"
+            ></span
+            >{{ option.label | translate }}
+          </div>
+        </ng-template>
+      </p-dropdown>
+    }
   `,
   styles: [
     `
@@ -53,7 +55,7 @@ export interface DropdownOption<T> {
 })
 export class DropdownComponent<T> implements OnInit {
   @Input() @Required id!: string;
-  @Input() label?: string | null;
+  @Input() label?: string;
   @Input() options: DropdownOption<T>[] = [];
   @Input() display = 'inline-block';
   @Input() bg = 'white';
@@ -72,34 +74,20 @@ export class DropdownComponent<T> implements OnInit {
       return;
     }
 
-    const selectedOption = this.options.find((o) => o.value === option);
-
-    if (selectedOption) {
-      this.selectedOption = selectedOption;
-    }
+    this.selectedOption = this.options.find((o) => o.value === option);
   }
 
   @Output() selectOption = new EventEmitter<DropdownOption<T>>();
 
   selectedOption?: DropdownOption<T>;
 
-  get placeholder(): DropdownOption<T> {
-    return {
-      label: this.label || '',
-      value: null as T | null,
-    };
-  }
-
   ngOnInit() {
     if (this.selectedOption !== undefined) {
       return;
     }
 
-    if (!this.autoDisplayFirst) {
-      this.selectedOption = this.placeholder;
-      return;
+    if (this.autoDisplayFirst) {
+      this.selectedOption = this.options[0];
     }
-
-    this.selectedOption = this.options[0];
   }
 }

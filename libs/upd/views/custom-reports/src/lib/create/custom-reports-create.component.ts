@@ -366,11 +366,15 @@ export class CustomReportsCreateComponent {
     this.invalidUrls.set(invalidUrls);
     this.duplicateUrls.set(duplicateUrls);
     this.newUrls.set(Array.from(validNewUrls));
-    this.reportUrls.mutate((urls) => urls.push(...validNewUrls));
+    this.reportUrls.update((urls) => {
+      urls.push(...validNewUrls);
+
+      return urls;
+    });
   }
 
   removePage(index: number) {
-    this.reportUrls.mutate((urls) => urls.splice(index, 1));
+    this.reportUrls.update((urls) => urls.splice(index, 1));
   }
 
   resetUrls() {

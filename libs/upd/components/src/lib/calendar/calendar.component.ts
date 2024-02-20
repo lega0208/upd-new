@@ -169,7 +169,13 @@ export class CalendarComponent implements OnChanges {
       this.disabledDays = [1, 2, 3, 4, 5, 6];
     } else if (granularity === 'month' && dates.length === 2) {
       const endOfMonth = dayjs(date).endOf('month').toDate();
-      this.dates.mutate((dates) => (dates[1] = endOfMonth));
+
+      this.dates.update((dates) => {
+        dates[1] = endOfMonth;
+
+        return dates;
+      });
+
       this.calendarDates = [dates[0], endOfMonth];
     }
   }
@@ -190,25 +196,25 @@ export class CalendarComponent implements OnChanges {
   }
 
   isInRangeDate(date: { month: number; day: number; year: number }) {
-    const [startDate, endDate] = this.datePicker.value 
+    const [startDate, endDate] = this.datePicker.value
       ? this.datePicker.value.map((d: Date) => dayjs(d))
       : [null, null];
     const currentDate = dayjs(new Date(date.year, date.month, date.day));
     return startDate && endDate && currentDate.isAfter(startDate) && currentDate.isBefore(endDate);
   }
-  
+
   isStartDate(date: { month: number; day: number; year: number }) {
     const startDate = this.datePicker.value ? dayjs(this.datePicker.value[0]) : null;
-    return startDate 
+    return startDate
       ? date.day === startDate.date() &&
         date.month === startDate.month() &&
         date.year === startDate.year()
       : false;
   }
-  
+
   isEndDate(date: { month: number; day: number; year: number }) {
     const endDate = this.datePicker.value ? dayjs(this.datePicker.value[1]) : null;
-    return endDate 
+    return endDate
       ? date.day === endDate.date() &&
         date.month === endDate.month() &&
         date.year === endDate.year()

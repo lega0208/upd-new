@@ -70,11 +70,11 @@ export default defineConfig(({ mode }) => {
             with: `apps/upd/src/environments/environment.prod.ts`,
           },
         ]),
-      angular({
-        typecheck: true,
-        workspaceRoot: projectRoot,
-        tsConfigPath: 'tsconfig.json',
-      }),
+      // angular({
+      //   typecheck: true,
+      //   workspaceRoot: projectRoot,
+      //   tsConfigPath: 'tsconfig.json',
+      // }),
       splitVendorChunkPlugin(),
       // visualizer() as unknown as PluginOption, // uncomment to output visualization of bundle sizes
     ],
