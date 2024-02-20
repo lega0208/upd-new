@@ -11,38 +11,42 @@ export interface DropdownOption<T> {
 @Component({
   selector: 'upd-dropdown',
   template: `
-    @if (selectedOption && options.length > 0) {
-      <p-dropdown
-        [options]="options"
-        [placeholder]="label || ''"
-        optionLabel="label"
-        [(ngModel)]="selectedOption"
-        (onChange)="this.selectOption.emit(selectedOption)"
-      >
-        <ng-template pTemplate="selectedItem">
-          <span
-            *ngIf="icon"
-            class="material-icons align-top pe-1 "
-            aria-hidden="true"
-            >{{ icon }}</span
-          >
-          <span class="dropdown-label">{{
-            selectedOption?.label || '' | translate
-          }}</span>
-        </ng-template>
+    <p-dropdown
+      [options]="this.placeholder ? displayedOptions : options"
+      optionLabel="label"
+      [(ngModel)]="selectedOption"
+      (onChange)="
+        this.selectOption.emit(selectedOption);
+        this.displayPlaceholder(actionOnly)
+      "
+      filterValue="placeholder"
+      filterMatchMode="notEquals"
+      (onShow)="this.showOptions()"
+      (onHide)="this.hideOptions()"
+    >
+      <ng-template pTemplate="selectedItem">
+        <span
+          *ngIf="icon"
+          class="material-icons align-top pe-1 "
+          aria-hidden="true"
+          >{{ icon }}</span
+        >
+        <span class="dropdown-label">{{
+          selectedOption?.label || '' | translate
+        }}</span>
+      </ng-template>
 
-        <ng-template pTemplate="item" let-option>
-          <div [class]="option.styleClasses || ''">
-            <span
-              *ngIf="option.icon"
-              class="pe-1 pi pi-{{ option.icon }} me-2"
-              aria-hidden="true"
-            ></span
-            >{{ option.label | translate }}
-          </div>
-        </ng-template>
-      </p-dropdown>
-    }
+      <ng-template pTemplate="item" let-option>
+        <div [class]="option.styleClasses || ''">
+          <span
+            *ngIf="option.icon"
+            class="pe-1 pi pi-{{ option.icon }} me-2"
+            aria-hidden="true"
+          ></span
+          >{{ option.label | translate }}
+        </div>
+      </ng-template>
+    </p-dropdown>
   `,
   styles: [
     `
@@ -76,10 +80,40 @@ export class DropdownComponent<T> implements OnInit {
 
     this.selectedOption = this.options.find((o) => o.value === option);
   }
+  @Input() placeholder?: DropdownOption<'placeholder'>;
+
+  // only perform an action on select, always display the placeholder
+  @Input() actionOnly = false;
 
   @Output() selectOption = new EventEmitter<DropdownOption<T>>();
 
-  selectedOption?: DropdownOption<T>;
+  displayedOptions = this.placeholder ? [this.placeholder] : this.options;
+
+  selectedOption?: DropdownOption<T> = this.placeholder as DropdownOption<T>;
+
+  displayPlaceholder(bool = true) {
+    if (bool) {
+      this.displayedOptions = [this.placeholder as DropdownOption<T>];
+      this.selectedOption = this.placeholder as DropdownOption<T>;
+      return;
+    }
+
+    this.displayedOptions = this.options;
+  }
+
+  showOptions() {
+    if (!this.placeholder) return;
+
+    this.displayedOptions = this.options;
+  }
+
+  hideOptions() {
+    if (!this.placeholder) return;
+
+    this.displayedOptions = this.placeholder
+      ? [this.placeholder]
+      : this.options;
+  }
 
   ngOnInit() {
     if (this.selectedOption !== undefined) {
@@ -88,6 +122,11 @@ export class DropdownComponent<T> implements OnInit {
 
     if (this.autoDisplayFirst) {
       this.selectedOption = this.options[0];
+      return;
+    }
+
+    if (this.placeholder) {
+      this.displayPlaceholder();
     }
   }
 }
