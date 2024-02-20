@@ -311,7 +311,7 @@ export class CustomReportsCreateComponent {
 
     effect(
       () => {
-        const granularity = this.selectedGranularity(); // don't need the value, just need to trigger the effect on change
+        const granularity = this.selectedGranularity();
 
         // resetCalendar was firing on initial load, so we need to check if the granularity actually changed
         if (!granularityChanged && initialGranularity !== granularity) {
