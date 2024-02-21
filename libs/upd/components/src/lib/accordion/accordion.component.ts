@@ -1,23 +1,38 @@
-import { Component, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'upd-accordion',
-  templateUrl: './accordion.component.html',
+  template: `
+    <div ngbAccordion [class]="flash">
+      <div ngbAccordionItem [collapsed]="!expanded">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton>{{ title | translate }}</button>
+        </h2>
+
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              <ng-content></ng-content>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
   styleUrls: ['./accordion.component.scss'],
 })
 export class AccordionComponent {
   @Input() title = 'view-data-table';
   @Input() styleClass = '';
   @Input() expanded = false;
-  @ViewChild('accordionElement', { static: false })
-  accordionElement!: ElementRef;
+
+  flash = '';
 
   flashAccordion() {
-    const element = this.accordionElement.nativeElement;
-    this.accordionElement.nativeElement.addClass(element, 'flash');
+    this.flash = 'flash';
 
     setTimeout(() => {
-      this.accordionElement.nativeElement.removeClass(element, 'flash');
+      this.flash = '';
     }, 1000); // Duration should match the total animation time
   }
 }

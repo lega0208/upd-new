@@ -17,12 +17,17 @@ export const selectDateSelectionState =
 
 export const selectDatePeriodSelection = createSelector(
   selectDateSelectionState,
-  (state: DateSelectionState) => state.periodSelection
+  (state: DateSelectionState) => state.periodSelection,
+);
+
+export const selectDatePeriodSelectionWithLabel = createSelector(
+  selectDatePeriodSelection,
+  (periodSelection) => predefinedDateRanges[periodSelection],
 );
 
 export const selectPeriodSelectionLabel = createSelector(
   selectDatePeriodSelection,
-  (periodSelection) => predefinedDateRanges[periodSelection].label
+  (periodSelection) => predefinedDateRanges[periodSelection].label,
 );
 
 export const selectDateRanges = createSelector(
@@ -30,31 +35,31 @@ export const selectDateRanges = createSelector(
   (state: DateSelectionState) => ({
     dateRange: state.dateRange,
     comparisonDateRange: state.comparisonDateRange,
-  })
+  }),
 );
 
 export const selectDateRange = createSelector(
   selectDateRanges,
-  ({ dateRange }) => dateRange
+  ({ dateRange }) => dateRange,
 );
 
 export const selectComparisonDateRange = createSelector(
   selectDateRanges,
-  ({ comparisonDateRange }) => comparisonDateRange
+  ({ comparisonDateRange }) => comparisonDateRange,
 );
 
 export const selectPeriodDates = createSelector(
   selectDatePeriodSelection,
-  (dateRangePeriod) => predefinedDateRanges[dateRangePeriod].dates
+  (dateRangePeriod) => predefinedDateRanges[dateRangePeriod].dates,
 );
 
 export const selectNumberOfDaysInPeriod = createSelector(
   selectPeriodDates,
-  (dates) => dates.size
+  (dates) => dates.size,
 );
 
 export const selectDateRangeLabel = (
-  dateRangeSelector: Selector<object, string>
+  dateRangeSelector: Selector<object, string>,
 ) =>
   createSelector(dateRangeSelector, selectCurrentLang, (dateRange, lang) => {
     const [startDate, endDate] = dateRange.split('/');

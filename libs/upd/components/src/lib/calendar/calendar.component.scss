@@ -50,12 +50,14 @@ td:has(.calendar-item) {
 }
 
 td:has(.start-point) {
-  border-radius: .25rem 0 0 .25rem;
+  border-top-left-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
   background-color: #96ccf3;
 }
 
 td:has(.end-point) {
-  border-radius: 0 .25rem .25rem 0;
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
   background-color: #96ccf3;
 }
 

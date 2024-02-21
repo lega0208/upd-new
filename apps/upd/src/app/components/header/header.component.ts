@@ -6,7 +6,6 @@ import {
 } from '@angular/core';
 import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
-import craLogo from '../../../assets/img/CRA-FIP-9pt-e.png';
 
 @Component({
   selector: 'upd-header',
@@ -18,7 +17,7 @@ export class HeaderComponent {
   private i18n: I18nFacade = inject(I18nFacade);
 
   lang = this.i18n.currentLang;
-  craLogo = craLogo;
+  craLogo = '../../../assets/img/CRA-FIP-9pt-e.png';
 
   oppositeLang = computed(() => {
     if (!this.lang()) return null;

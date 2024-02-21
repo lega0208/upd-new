@@ -6,20 +6,18 @@
   "prefix": "upd",
   "targets": {
     "build": {
-      "executor": "@nx/vite:build",
+      "executor": "@nx/angular:browser-esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/upd",
-        "index": "apps/upd/index.html",
+        "index": "apps/upd/src/index.html",
         "main": "apps/upd/src/main.ts",
         "polyfills": "apps/upd/src/polyfills.ts",
-        "configFile": "apps/upd/vite.config.mts",
         "tsConfig": "apps/upd/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": ["apps/upd/src/favicon.ico", "apps/upd/src/assets"],
         "styles": ["apps/upd/src/styles.scss"],
         "scripts": [],
-        "vendorChunk": true,
         "verbose": true
       },
       "configurations": {
@@ -45,13 +43,16 @@
           "outputHashing": "all",
           "statsJson": true,
           "buildLibsFromSource": true,
-          "vendorChunk": false,
-          "mode": "production"
+          "externalDependencies": [
+            "core-js",
+            "html2canvas",
+            "canvg",
+            "dompurify"
+          ]
         },
         "development": {
           "buildOptimizer": false,
           "optimization": false,
-          "vendorChunk": true,
           "extractLicenses": false,
           "sourceMap": {
             "scripts": true,
@@ -60,28 +61,24 @@
           },
           "namedChunks": true,
           "verbose": true,
-          "buildLibsFromSource": true,
-          "mode": "development"
+          "buildLibsFromSource": true
         }
       },
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nx/vite:dev-server",
+      "executor": "@nx/angular:dev-server",
       "configurations": {
         "development": {
           "buildTarget": "upd:build:development",
           "hmr": true,
-          "clearScreen": false,
-          "mode": "development",
-          "watch": true,
-          "logLevel": "info"
+          "watch": true
         }
       },
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "upd:build:development",
-        "configFile": "apps/upd/vite.config.mts"
+        "proxyConfig": "apps/upd/proxy.conf.mjs"
       }
     },
     "preview": {
@@ -89,7 +86,6 @@
       "options": {
         "buildTarget": "upd:build:production",
         "configFile": "apps/upd/vite.config.mts",
-        "mode": "production",
         "watch": true
       }
     },

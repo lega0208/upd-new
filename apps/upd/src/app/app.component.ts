@@ -12,7 +12,6 @@ import { I18nFacade } from '@dua-upd/upd/state';
 import packageJson from 'package.json';
 import { PrimeNGConfig, Translation } from 'primeng/api';
 import { filter, map, mergeMap } from 'rxjs';
-import canadaLogo from '../assets/img/canada-black-30mm.png';
 import { fader } from './app.animations';
 
 @Component({
@@ -52,7 +51,7 @@ export class AppComponent {
 
   en = EN_CA;
   updVersion = packageJson.version;
-  canadaLogo = canadaLogo;
+  canadaLogo = '../assets/img/canada-black-30mm.png';
 
   constructor() {
     this.i18n.init();

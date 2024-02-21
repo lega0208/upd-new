@@ -14,10 +14,11 @@ import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
   template: `
     <upd-dropdown
       [options]="exportOptions"
-      label="Export"
       [id]="'exports-' + id"
-      (selectOption)="this.exportFile($event.value)"
       icon="file_download"
+      (selectOption)="this.exportFile($event.value)"
+      [placeholder]="placeholder"
+      [actionOnly]="true"
     >
     </upd-dropdown>
   `,
@@ -30,7 +31,12 @@ export class DataTableExportsComponent<T> {
 
   utf8Encoder = new TextEncoder();
 
-  exportOptions: DropdownOption<'csv' | 'pdf' | 'xlsx'>[] = [
+  placeholder: DropdownOption<'placeholder'> = {
+    label: 'Export',
+    value: 'placeholder',
+  };
+
+  exportOptions: DropdownOption<'csv' | 'pdf' | 'xlsx' | null>[] = [
     {
       label: 'CSV',
       icon: 'file',
