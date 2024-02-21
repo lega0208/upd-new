@@ -1,10 +1,14 @@
 import { Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map } from 'rxjs';
 import { DateSelectionFacade } from '@dua-upd/upd/state';
 import type { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { dateRangeConfigs, dayjs, DateRangeType } from '@dua-upd/utils-common';
+
+export type DateRangeOption = {
+  value: DateRangeType;
+  label: string;
+};
 
 @Component({
   selector: 'upd-date-selector',
@@ -13,7 +17,7 @@ import { dateRangeConfigs, dayjs, DateRangeType } from '@dua-upd/utils-common';
       <upd-dropdown
         id="range-button"
         icon="calendar_today"
-        [label]="periodSelectionLabel$ | async"
+        [initialSelection]="selectedPeriod | async"
         [options]="selectionOptions"
         (selectOption)="selectPeriod($event.value)"
       ></upd-dropdown>
@@ -38,7 +42,15 @@ export class DateSelectorComponent {
   private i18n: I18nFacade = inject(I18nFacade);
   private selectorService: DateSelectionFacade = inject(DateSelectionFacade);
 
-  selectedPeriod = toSignal(this.selectorService.dateSelectionPeriod$);
+  selectedPeriod = this.selectorService.dateSelection$.pipe(
+    map(
+      (dateRange) =>
+        ({
+          value: dateRange.type,
+          label: dateRange.label,
+        }) as DateRangeOption,
+    ),
+  );
 
   periodSelectionLabel$ = this.selectorService.periodSelectionLabel$;
 
@@ -60,10 +72,13 @@ export class DateSelectorComponent {
     map(({ comparisonDateRange }) => comparisonDateRange),
   );
 
-  selectionOptions = dateRangeConfigs.map((config) => ({
-    value: config.type,
-    label: config.label,
-  }));
+  selectionOptions = dateRangeConfigs.map(
+    (config) =>
+      ({
+        value: config.type,
+        label: config.label,
+      }) as DateRangeOption,
+  );
 
   selectPeriod(period: DateRangeType | null) {
     if (!period) return;

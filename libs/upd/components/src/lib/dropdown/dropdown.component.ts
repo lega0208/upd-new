@@ -12,11 +12,17 @@ export interface DropdownOption<T> {
   selector: 'upd-dropdown',
   template: `
     <p-dropdown
-      [options]="options"
+      [options]="this.placeholder ? displayedOptions : options"
       optionLabel="label"
       [(ngModel)]="selectedOption"
-      (onChange)="this.selectOption.emit(selectedOption)"
-      [autoDisplayFirst]="autoDisplayFirst"
+      (onChange)="
+        this.selectOption.emit(selectedOption);
+        this.displayPlaceholder(actionOnly)
+      "
+      filterValue="placeholder"
+      filterMatchMode="notEquals"
+      (onShow)="this.showOptions()"
+      (onHide)="this.hideOptions()"
     >
       <ng-template pTemplate="selectedItem">
         <span
@@ -53,7 +59,7 @@ export interface DropdownOption<T> {
 })
 export class DropdownComponent<T> implements OnInit {
   @Input() @Required id!: string;
-  @Input() label?: string | null;
+  @Input() label?: string;
   @Input() options: DropdownOption<T>[] = [];
   @Input() display = 'inline-block';
   @Input() bg = 'white';
@@ -72,22 +78,41 @@ export class DropdownComponent<T> implements OnInit {
       return;
     }
 
-    const selectedOption = this.options.find((o) => o.value === option);
-
-    if (selectedOption) {
-      this.selectedOption = selectedOption;
-    }
+    this.selectedOption = this.options.find((o) => o.value === option);
   }
+  @Input() placeholder?: DropdownOption<'placeholder'>;
+
+  // only perform an action on select, always display the placeholder
+  @Input() actionOnly = false;
 
   @Output() selectOption = new EventEmitter<DropdownOption<T>>();
 
-  selectedOption?: DropdownOption<T>;
+  displayedOptions = this.placeholder ? [this.placeholder] : this.options;
 
-  get placeholder(): DropdownOption<T> {
-    return {
-      label: this.label || '',
-      value: null as T | null,
-    };
+  selectedOption?: DropdownOption<T> = this.placeholder as DropdownOption<T>;
+
+  displayPlaceholder(bool = true) {
+    if (bool) {
+      this.displayedOptions = [this.placeholder as DropdownOption<T>];
+      this.selectedOption = this.placeholder as DropdownOption<T>;
+      return;
+    }
+
+    this.displayedOptions = this.options;
+  }
+
+  showOptions() {
+    if (!this.placeholder) return;
+
+    this.displayedOptions = this.options;
+  }
+
+  hideOptions() {
+    if (!this.placeholder) return;
+
+    this.displayedOptions = this.placeholder
+      ? [this.placeholder]
+      : this.options;
   }
 
   ngOnInit() {
@@ -95,11 +120,13 @@ export class DropdownComponent<T> implements OnInit {
       return;
     }
 
-    if (!this.autoDisplayFirst) {
-      this.selectedOption = this.placeholder;
+    if (this.autoDisplayFirst) {
+      this.selectedOption = this.options[0];
       return;
     }
 
-    this.selectedOption = this.options[0];
+    if (this.placeholder) {
+      this.displayPlaceholder();
+    }
   }
 }
