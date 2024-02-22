@@ -40,7 +40,7 @@ services:
 #    build:
 #      context: ../
 #      dockerfile: docker/performance_base/Dockerfile
-#      target: db-updater
+#      target: db-updater-dev
 #    secrets:
 #      - .env
 #      - secret.pem

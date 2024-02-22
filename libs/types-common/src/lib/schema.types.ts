@@ -215,6 +215,7 @@ export interface ITask {
   status?: string;
   channel?: string[];
   core?: string[];
+  portfolio?: string;
 }
 
 /*

@@ -49,6 +49,20 @@ EXPOSE 9001
 USER node
 CMD ["node", "main.js"]
 
+FROM node_base as db-updater-dev-base
+COPY ["dist/apps/db-updater/package.json", "dist/apps/db-updater/package-lock.json", "./"]
+RUN --mount=type=cache,target=/home/node/.npm npm ci
+
+FROM node_base as db-updater-dev
+RUN echo -e '#!/bin/sh\nnode db-cli/main.js "$@"' >> /bin/db-cli && chmod +x /bin/db-cli
+COPY --from=db-updater-dev-base . .
+COPY dist/apps/db-updater/ .
+#RUN apk update && \
+#    apk upgrade && \
+#    apk add bash && \
+#    apk add nano
+CMD ["node", "main.js"]
+
 FROM nginx:alpine as nginx
 RUN apk update && apk add tzdata
 ENV TZ=America/Toronto
