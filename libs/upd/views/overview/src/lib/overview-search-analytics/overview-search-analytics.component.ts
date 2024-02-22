@@ -126,10 +126,12 @@ export class OverviewSearchAnalyticsComponent implements OnInit {
         {
           field: 'total_searches',
           header: this.i18n.service.translate('Total searches', lang),
+          pipe: 'number',
         },
         {
           field: 'target_clicks',
           header: this.i18n.service.translate('Target URL clicks', lang),
+          pipe: 'number',
         },
         {
           field: 'position',

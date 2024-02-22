@@ -338,6 +338,34 @@ export interface IReadability extends ReadabilityScore {
 }
 
 /*
+ * GC Tasks interface
+ */
+
+export interface IGCTasks {
+  _id: Types.ObjectId;
+  date: Date;
+  timeStamp: string;
+  surveyReferrerUrl: string;
+  language: string;
+  device?: string;
+  screener: string;
+  department: string;
+  theme: string;
+  themeOther?: string;
+  grouping?: string;
+  task: string;
+  taskOther?: string;
+  taskSatisfaction: string;
+  taskEase: string;
+  taskCompletion: string;
+  taskImprove?: string;
+  taskImproveComment?: string;
+  taskWhyNot?: string;
+  taskWhyNotComment?: string;
+  sampling?: string;
+}
+
+/*
  * Annotations interface
  */
 export interface IAnnotations {
