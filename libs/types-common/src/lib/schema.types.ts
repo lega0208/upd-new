@@ -344,24 +344,24 @@ export interface IReadability extends ReadabilityScore {
 export interface IGCTasks {
   _id: Types.ObjectId;
   date: Date;
-  timeStamp: string;
-  surveyReferrerUrl: string;
+  time_stamp: string;
+  url: string;
   language: string;
   device?: string;
-  screener: string;
+  screener: boolean;
   department: string;
   theme: string;
-  themeOther?: string;
+  theme_other?: string;
   grouping?: string;
-  task: string;
-  taskOther?: string;
-  taskSatisfaction: string;
-  taskEase: string;
-  taskCompletion: string;
-  taskImprove?: string;
-  taskImproveComment?: string;
-  taskWhyNot?: string;
-  taskWhyNotComment?: string;
+  gc_task: string;
+  gc_task_other?: string;
+  satisfaction: string;
+  ease: string;
+  able_to_complete: string;
+  what_would_improve?: string;
+  what_would_improve_comment?: string;
+  reason_not_complete?: string;
+  reason_not_complete_comment?: string;
   sampling?: string;
 }
 

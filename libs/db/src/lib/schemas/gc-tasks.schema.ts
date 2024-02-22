@@ -9,23 +9,23 @@ export class GcTasks implements IGCTasks {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date, required: true, index: true })
   date: Date;
 
   @Prop({ type: String, required: true })
-  timeStamp: string;
+  time_stamp: string;
 
-  @Prop({ type: String, required: true })
-  surveyReferrerUrl: string;
+  @Prop({ type: String, required: true, index: true })
+  url: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, index: true })
   language: string;
 
   @Prop({ type: String })
   device?: string;
 
-  @Prop({ type: String, required: true })
-  screener: string;
+  @Prop({ type: Boolean, required: true })
+  screener: boolean;
 
   @Prop({ type: String, required: true })
   department: string;
@@ -34,43 +34,46 @@ export class GcTasks implements IGCTasks {
   theme: string;
 
   @Prop({ type: String })
-  themeOther?: string;
+  theme_other?: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: true })
   grouping?: string;
 
-  @Prop({ type: String, required: true })
-  task: string;
+  @Prop({ type: String, required: true, index: true })
+  gc_task: string;
 
   @Prop({ type: String })
-  taskOther?: string;
+  gc_task_other?: string;
 
-  @Prop({ type: String, required: true })
-  taskSatisfaction: string;
+  @Prop({ type: String, required: true, index: true })
+  satisfaction: string;
 
-  @Prop({ type: String, required: true })
-  taskEase: string;
+  @Prop({ type: String, required: true, index: true })
+  ease: string;
 
-  @Prop({ type: String, required: true })
-  taskCompletion: string;
-
-  @Prop({ type: String })
-  taskImprove?: string;
+  @Prop({ type: String, required: true, index: true })
+  able_to_complete: string;
 
   @Prop({ type: String })
-  taskImproveComment?: string;
+  what_would_improve?: string;
 
   @Prop({ type: String })
-  taskWhyNot?: string;
+  what_would_improve_comment?: string;
 
   @Prop({ type: String })
-  taskWhyNotComment?: string;
+  reason_not_complete?: string;
+
+  @Prop({ type: String })
+  reason_not_complete_comment?: string;
 
   @Prop({ type: String })
   sampling?: string;
 }
 
 export const GcTasksSchema = SchemaFactory.createForClass(GcTasks);
+
+GcTasksSchema.index({date: 1, url: 1})
+GcTasksSchema.index({date: 1, gc_task: 1})
 
 export function getGCTasksModel() {
   return model(GcTasks.name, GcTasksSchema);
