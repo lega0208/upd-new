@@ -226,6 +226,13 @@ export type ActivityMap = {
 export interface TasksHomeAggregatedData {
   _id: string | Types.ObjectId;
   title: string;
+  tmf_rank?: number;
+  tmf_ranking_index?: number;
+  top_task?: boolean;
+  cops?: boolean;
+  ux_testing?: boolean;
+  pages_mapped?: number;
+  projects_mapped?: number;
   group: string;
   subgroup: string;
   topic: string;
@@ -236,10 +243,13 @@ export interface TasksHomeAggregatedData {
   user_journey?: string[];
   status?: string;
   core?: string[];
+  secure_portal?: boolean;
   channel?: string[];
+  portfolio?: string;
   visits: number;
   user_type: string[];
   calls: number;
+  // gc_survey_participants?: number; // to be added?
 }
 
 export type TasksHomeData = ViewData<TasksHomeAggregatedData[]> & {

@@ -5,7 +5,7 @@ import * as TasksHomeActions from './tasks-home.actions';
 import * as TasksHomeSelectors from './tasks-home.selectors';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type { ColumnConfig } from '@dua-upd/upd-components';
-import { round } from '@dua-upd/utils-common';
+import { round, UnwrapObservable } from '@dua-upd/utils-common';
 import type { AttachmentData } from '@dua-upd/types-common';
 
 @Injectable()
@@ -36,92 +36,6 @@ export class TasksHomeFacade {
         calls_per_100_visits:
           row.visits > 0 ? round((row.calls / row.visits) * 100, 3) || 0 : 0,
       }));
-    }),
-  );
-
-  tasksHomeTableColumns$ = this.i18n.currentLang$.pipe(
-    map((lang) => {
-      return [
-        {
-          field: 'group',
-          header: this.i18n.service.translate('group', lang),
-          hideTable: true,
-        },
-        {
-          field: 'tasks_subgroup',
-          header: this.i18n.service.translate('tasks_subgroup', lang),
-          hideTable: true,
-        },
-        {
-          field: 'service',
-          header: this.i18n.service.translate('service', lang),
-          hideTable: true,
-        },
-        {
-          field: 'user_journey',
-          header: this.i18n.service.translate('user_journey', lang),
-          hideTable: true,
-        },
-        {
-          field: 'status',
-          header: this.i18n.service.translate('status', lang),
-          hideTable: true,
-        },
-        {
-          field: 'channel',
-          header: this.i18n.service.translate('channel', lang),
-          hideTable: true,
-        },
-        {
-          field: 'core',
-          header: this.i18n.service.translate('core', lang),
-          hideTable: true,
-        },
-        {
-          field: 'task',
-          header: this.i18n.service.translate('task', lang),
-          type: 'link',
-          typeParam: '_id',
-          translate: true,
-        },
-        {
-          field: 'program',
-          header: this.i18n.service.translate('Program', lang),
-          translate: true,
-        },
-        {
-          field: 'user_type',
-          header: this.i18n.service.translate('Audience', lang),
-          translate: true,
-        },
-        {
-          field: 'topic',
-          header: this.i18n.service.translate('topic', lang),
-          translate: true,
-        },
-        {
-          field: 'tasks_subtopic',
-          header: this.i18n.service.translate('tasks_subtopic', lang),
-          translate: true,
-          hideTable: true,
-        },
-        {
-          field: 'visits',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-        {
-          field: 'calls',
-          header: this.i18n.service.translate('calls', lang),
-          pipe: 'number',
-        },
-        {
-          field: 'calls_per_100_visits',
-          header: this.i18n.service.translate('kpi-calls-per-100-title', lang),
-          pipe: 'number',
-          pipeParam: '1.3-3',
-        },
-      ] as ColumnConfig[];
     }),
   );
 

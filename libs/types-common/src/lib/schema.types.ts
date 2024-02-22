@@ -215,6 +215,7 @@ export interface ITask {
   status?: string;
   channel?: string[];
   core?: string[];
+  portfolio?: string;
 }
 
 /*
@@ -335,6 +336,34 @@ export interface IReadability extends ReadabilityScore {
   date: Date;
   page?: Types.ObjectId;
   hash: string;
+}
+
+/*
+ * GC Tasks interface
+ */
+
+export interface IGCTasks {
+  _id: Types.ObjectId;
+  date: Date;
+  time_stamp: string;
+  url: string;
+  language: string;
+  device?: string;
+  screener: boolean;
+  department: string;
+  theme: string;
+  theme_other?: string;
+  grouping?: string;
+  gc_task: string;
+  gc_task_other?: string;
+  satisfaction: string;
+  ease: string;
+  able_to_complete: string;
+  what_would_improve?: string;
+  what_would_improve_comment?: string;
+  reason_not_complete?: string;
+  reason_not_complete_comment?: string;
+  sampling?: string;
 }
 
 /*

@@ -14,5 +14,6 @@ export * from './schemas/url.schema';
 export * from './schemas/readability.schema';
 export * from './schemas/annotations.schema';
 export * from './schemas/reports.schema';
+export * from './schemas/gc-tasks.schema';
 export * from './schemas/custom-reports-registry.schema';
 export * from './schemas/custom-reports-metrics.schema';

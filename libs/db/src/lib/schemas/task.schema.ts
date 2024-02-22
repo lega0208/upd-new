@@ -3,7 +3,7 @@ import { model, Document, Types } from 'mongoose';
 import { UxTest } from './ux-test.schema';
 import { Page } from './page.schema';
 import { Project } from './project.schema';
-import { ITask } from '@dua-upd/types-common';
+import type { ITask } from '@dua-upd/types-common';
 
 export type TaskDocument = Task & Document;
 
@@ -65,6 +65,9 @@ export class Task implements ITask {
 
   @Prop({ type: [String] })
   core: string[] = [];
+
+  @Prop({ type: String })
+  portfolio = '';
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

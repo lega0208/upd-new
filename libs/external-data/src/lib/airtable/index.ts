@@ -265,6 +265,7 @@ export class AirtableClient {
         status: squishTrim(fields['Status']),
         channel: fields['Channel']?.map(squishTrim),
         core: fields['Core']?.map(squishTrim),
+        portfolio: squishTrim(fields['Portfolio']),
       })) as TaskData[];
   }
 

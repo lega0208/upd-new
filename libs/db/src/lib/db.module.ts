@@ -13,6 +13,8 @@ import {
   CustomReportsRegistrySchema,
   Feedback,
   FeedbackSchema,
+  GcTasks,
+  GcTasksSchema,
   Overall,
   OverallSchema,
   Page,
@@ -64,6 +66,7 @@ export const models = {
   readability: { model: Readability, schema: ReadabilitySchema },
   annotations: { model: Annotations, schema: AnnotationsSchema },
   reports: { model: Reports, schema: ReportsSchema },
+  gcTasks: { model: GcTasks, schema: GcTasksSchema},
   customReportsRegistry: {
     model: CustomReportsRegistry,
     schema: CustomReportsRegistrySchema,

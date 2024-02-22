@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
-import { Cache } from 'cache-manager';
+import { type FilterQuery, Model, Types } from 'mongoose';
+import type { Cache } from 'cache-manager';
 import type {
   CallDriverModel,
   FeedbackModel,
@@ -24,21 +24,21 @@ import {
   UxTest,
 } from '@dua-upd/db';
 import type {
+  ApiParams,
+  InternalSearchTerm,
+  IReports,
+  TaskDetailsAggregatedData,
   TaskDetailsData,
   TasksHomeData,
-  TaskDetailsAggregatedData,
-  AttachmentData,
-  IReports,
 } from '@dua-upd/types-common';
-import type { ApiParams } from '@dua-upd/types-common';
 import {
-  dateRangeSplit,
   arrayToDictionary,
-  logJson,
-  percentChange,
+  arrayToDictionaryMultiref,
+  dateRangeSplit,
   getAvgSuccessFromLatestTests,
+  isNullish,
+  percentChange,
 } from '@dua-upd/utils-common';
-import { InternalSearchTerm } from '@dua-upd/types-common';
 
 @Injectable()
 export class TasksService {
@@ -60,17 +60,16 @@ export class TasksService {
     private pageModel: Model<PageDocument>,
     @InjectModel(Reports.name, 'defaultConnection')
     private reportsModel: Model<Reports>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async getTasksHomeData(
     dateRange: string,
-    comparisonDateRange: string
+    comparisonDateRange: string,
   ): Promise<TasksHomeData> {
     const cacheKey = `getTasksHomeData-${dateRange}-${comparisonDateRange}`;
-    const cachedData = await this.cacheManager.store.get<TasksHomeData>(
-      cacheKey
-    );
+    const cachedData =
+      await this.cacheManager.store.get<TasksHomeData>(cacheKey);
 
     if (cachedData) {
       return cachedData;
@@ -109,7 +108,7 @@ export class TasksService {
       .exec();
     const allIds = tpcIds.reduce(
       (idsArray, tpcIds) => idsArray.concat(tpcIds.tpc_ids),
-      []
+      [],
     );
     const uniqueIds = [...new Set(allIds)];
 
@@ -194,23 +193,45 @@ export class TasksService {
         start,
         end,
       },
-      this.taskModel
+      this.taskModel,
     );
 
     const callsByTasks: { [key: string]: number } = {};
 
     for (const task of tasks as Task[]) {
-      const calls = (
+      callsByTasks[task._id.toString()] = (
         await this.calldriversModel.getCallsByTpcId(dateRange, task.tpc_ids)
       ).reduce((a, b) => a + b.calls, 0);
-
-      callsByTasks[task._id.toString()] = calls;
     }
 
-    const task = tasks.map((task) => ({
-      ...task,
-      calls: callsByTasks[task._id.toString()] ?? 0,
-    }));
+    const uxTests = await this.uxTestModel
+      .find({ tasks: { $exists: true, $not: { $size: 0 } } })
+      .lean()
+      .exec();
+
+    const uxTestsDict = arrayToDictionaryMultiref(uxTests, 'tasks');
+
+    const task = tasks.map((task) => {
+      const calls = callsByTasks[task._id.toString()] ?? 0;
+
+      return {
+        ...task,
+        calls,
+        tmf_ranking_index: task.visits * 0.1 + calls * 0.6, // todo: + gsc_survey_participants * 0.3
+        secure_portal: !!task.channel.find(
+          (channel) => channel === 'Fully online - portal',
+        ),
+        ux_testing: !!uxTestsDict[task._id.toString()]?.find(
+          (test) => !isNullish(test.success_rate),
+        ),
+        cops: !!uxTestsDict[task._id.toString()]?.find((test) => !test.cops),
+        pages_mapped: task.pages?.length ?? 0,
+        projects_mapped: task.projects?.length ?? 0,
+        // survey: task.gc_survey_participants, // todo: add survey data when available
+      };
+    });
+
+    task.sort((a, b) => b.tmf_ranking_index - a.tmf_ranking_index);
 
     const reports = (await this.reportsModel
       .find(
@@ -221,13 +242,17 @@ export class TasksService {
           fr_title: 1,
           en_attachment: 1,
           fr_attachment: 1,
-        }
+        },
       )
       .exec()) as IReports[];
 
     const results = {
       dateRange,
-      dateRangeData: task,
+      dateRangeData: task.map((task, i) => ({
+        ...task,
+        tmf_rank: i + 1,
+        top_task: i < 50,
+      })),
       totalVisits,
       percentChange: change,
       totalCalls,
@@ -243,14 +268,13 @@ export class TasksService {
   async getTaskDetails(params: ApiParams): Promise<TaskDetailsData> {
     if (!params.id) {
       throw Error(
-        'Attempted to get Task details from API but no id was provided.'
+        'Attempted to get Task details from API but no id was provided.',
       );
     }
 
     const cacheKey = `getTaskDetails-${params.id}-${params.dateRange}-${params.comparisonDateRange}`;
-    const cachedData = await this.cacheManager.store.get<TaskDetailsData>(
-      cacheKey
-    );
+    const cachedData =
+      await this.cacheManager.store.get<TaskDetailsData>(cacheKey);
 
     if (cachedData) {
       return cachedData;
@@ -272,7 +296,7 @@ export class TasksService {
       attachments: project.attachments.map((attachment) => {
         attachment.storage_url = attachment.storage_url?.replace(
           /^https:\/\//,
-          ''
+          '',
         );
 
         return attachment;
@@ -310,7 +334,7 @@ export class TasksService {
         this.pageModel,
         params.dateRange,
         taskUrls,
-        taskTpcId
+        taskTpcId,
       ),
       comparisonDateRange: params.comparisonDateRange,
       comparisonDateRangeData: await getTaskAggregatedData(
@@ -321,7 +345,7 @@ export class TasksService {
         this.pageModel,
         params.comparisonDateRange,
         taskUrls,
-        taskTpcId
+        taskTpcId,
       ),
       taskSuccessByUxTest: [],
       avgTaskSuccessFromLastTest: null, // todo: better handle N/A
@@ -332,7 +356,7 @@ export class TasksService {
     };
 
     const uxTests: UxTest[] = (<UxTestDocument[]>task.ux_tests).map((test) =>
-      test.toObject()
+      test.toObject(),
     );
 
     if (uxTests && uxTests.length !== 0) {
@@ -348,7 +372,7 @@ export class TasksService {
               success_rate: uxTest.success_rate,
               total_users: uxTest.total_users,
               scenario: uxTest.scenario,
-            }
+            },
         )
         .filter((uxTest) => !!uxTest)
         .sort((a, b) => {
@@ -366,7 +390,7 @@ export class TasksService {
 
     returnData.feedbackComments = await this.feedbackModel.getComments(
       params.dateRange,
-      taskUrls
+      taskUrls,
     );
 
     await this.cacheManager.set(cacheKey, returnData);
@@ -473,11 +497,11 @@ async function getTaskAggregatedData(
   pageModel: Model<Page>,
   dateRange: string,
   pageUrls: string[],
-  calldriversTpcId: number[]
+  calldriversTpcId: number[],
 ): Promise<TaskDetailsAggregatedData> {
   const feedbackByTags = await feedbackModel.getCommentsByTag(
     dateRange,
-    pageUrls
+    pageUrls,
   );
 
   const [startDate, endDate] = dateRangeSplit(dateRange);
@@ -546,7 +570,7 @@ async function getTaskAggregatedData(
         tpc_id: calldriversTpcId,
         date: dateQuery,
       },
-      { _id: 1 }
+      { _id: 1 },
     )
     .lean()
     .exec();
@@ -599,9 +623,8 @@ async function getTaskAggregatedData(
   const calldriversEnquiry =
     await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
 
-  const callsByTopic = await calldriversModel.getCallsByTopicFromIds(
-    documentIds
-  );
+  const callsByTopic =
+    await calldriversModel.getCallsByTopicFromIds(documentIds);
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
