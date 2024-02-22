@@ -27,11 +27,17 @@
 }
 
 .p-datepicker-calendar td span:not(.p-disabled):hover,
-td:has(.calendar-item):hover:not(:has(.p-disabled)),
-td:has(.in-range):hover:not(:has(.p-disabled)),
+td:has(.calendar-item):hover:not(:has(.p-disabled)) {
+  background-color: #e0e0e0;
+}
+
 td:has(.start-point):hover:not(:has(.p-disabled)),
 td:has(.end-point):hover:not(:has(.p-disabled)) {
-  background-color: #e0e0e0;
+  background-color: #2196F3;
+}
+
+td:has(.start-point) {
+  color: #fff;
 }
 
 .p-disabled {
@@ -39,7 +45,7 @@ td:has(.end-point):hover:not(:has(.p-disabled)) {
 }
 
 td:has(.in-range) {
-  background-color: #cfe8fc;
+  background-color: #1473e61a;
 }
 
 td:has(.start-point),
@@ -52,13 +58,22 @@ td:has(.calendar-item) {
 td:has(.start-point) {
   border-top-left-radius: 0.25rem;
   border-bottom-left-radius: 0.25rem;
-  background-color: #96ccf3;
+  background-color: #2196F3;
 }
 
 td:has(.end-point) {
   border-top-right-radius: 0.25rem;
   border-bottom-right-radius: 0.25rem;
-  background-color: #96ccf3;
+  background-color: #2196F3;
+}
+
+td:has(.in-range):hover:not(:has(.p-disabled)) {
+  background-color: #1473e633;
+}
+
+span.p-highlight:has(.start-point),
+span.p-highlight:has(.end-point) {
+  color: #fff;
 }
 
 span.p-highlight:has(.start-point),
@@ -75,3 +90,6 @@ span.calendar-item:has(.in-range),
   }
 }
 
+td:has(.hovered-range) {
+  background-color: #1473e61a;
+}
