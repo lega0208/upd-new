@@ -90,3 +90,6 @@ span.calendar-item:has(.in-range),
   }
 }
 
+td:has(.hovered-range) {
+  background-color: #1473e61a;
+}
