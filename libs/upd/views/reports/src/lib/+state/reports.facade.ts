@@ -5,7 +5,7 @@ import * as ReportsSelectors from './reports.selectors';
 import { combineLatest, map } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, FR_CA } from '@dua-upd/upd/i18n';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
 
 @Injectable()

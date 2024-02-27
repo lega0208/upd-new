@@ -15,7 +15,7 @@ import {
   piped,
   uniq,
 } from 'rambdax';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';

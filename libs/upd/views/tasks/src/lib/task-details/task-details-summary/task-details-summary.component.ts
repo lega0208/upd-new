@@ -5,11 +5,11 @@ import {
   OnInit,
 } from '@angular/core';
 import {
-  type ColumnConfig,
   callVolumeObjectiveCriteria,
   feedbackKpiObjectiveCriteria,
 } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
@@ -90,7 +90,7 @@ export class TaskDetailsSummaryComponent implements OnInit {
     combineLatest([
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
-      this.visitsByPage$, 
+      this.visitsByPage$,
       this.currentLang$,
     ]).subscribe(
       ([dateRange, comparisonDateRange, data, lang]) => {

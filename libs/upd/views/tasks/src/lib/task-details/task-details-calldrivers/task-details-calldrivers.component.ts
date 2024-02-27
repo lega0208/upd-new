@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 
 @Component({

@@ -40,6 +40,7 @@
     "@angular/platform-browser": "17.2.1",
     "@angular/platform-browser-dynamic": "17.2.1",
     "@angular/router": "17.2.1",
+    "@angular/service-worker": "17.2.1",
     "@azure/identity": "^4.0.1",
     "@azure/storage-blob": "^12.17.0",
     "@googleapis/searchconsole": "^1.0.3",
@@ -113,6 +114,7 @@
     "@angular/cli": "17.2.0",
     "@angular/compiler-cli": "17.2.1",
     "@angular/language-service": "17.2.1",
+    "@angular/pwa": "^17.2.1",
     "@compodoc/compodoc": "^1.1.22",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
@@ -189,4 +191,3 @@
     "webpack-merge": "^5.8.0"
   }
 }
-

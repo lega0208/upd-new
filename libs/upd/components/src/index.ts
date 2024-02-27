@@ -9,7 +9,6 @@ export * from './lib/data-kpi-card/data-kpi-card.component';
 export * from './lib/data-table/data-table.component';
 export * from './lib/data-table-card/data-table-card.component';
 export * from './lib/data-table-styles/data-table-styles.component';
-export * from './lib/data-table-styles/types';
 export * from './lib/date-selector/date-selector.component';
 export * from './lib/date-selector/date-selector-dropdown.component';
 export * from './lib/dropdown/dropdown.component';

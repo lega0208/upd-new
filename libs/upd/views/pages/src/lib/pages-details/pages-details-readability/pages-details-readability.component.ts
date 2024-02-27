@@ -2,10 +2,10 @@ import { Component, inject } from '@angular/core';
 import { combineLatest, map, Observable } from 'rxjs';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type {
-  ColumnConfig,
   KpiObjectiveCriteria,
   KpiOptionalConfig,
 } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { formatNumber } from '@angular/common';
 

@@ -1,33 +1,31 @@
 import {
   Component,
   Input,
-  OnChanges,
-  OnInit,
-  SimpleChanges,
   ViewChild,
   EventEmitter,
   Output,
+  input,
+  computed,
+  inject,
+  effect,
 } from '@angular/core';
+import { I18nFacade } from '@dua-upd/upd/state';
 import { Table } from 'primeng/table';
-import { equals } from 'rambdax';
-import type { ColumnConfig } from '../data-table-styles/types';
-import { SelectedNode } from '../filter-table/filter-table.component';
+import type { ColumnConfig } from '@dua-upd/types-common';
+import type { SelectedNode } from '../filter-table/filter-table.component';
 
 @Component({
   selector: 'upd-data-table',
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.css'],
 })
-export class DataTableComponent<T> implements OnInit, OnChanges {
+export class DataTableComponent<T> {
   @ViewChild('dt') table!: Table;
-  @Input() data: T[] | null = [];
   @Input() displayRows = 10;
   @Input() sort = true;
   @Input() pagination = true;
   @Input() filter = true;
   @Input() filterTree = false;
-  @Input() cols: ColumnConfig[] = [];
-  @Input() searchFields: string[] = [];
   @Input() captionTitle = '';
   @Input() loading = false;
   @Input() sortField = '';
@@ -39,47 +37,43 @@ export class DataTableComponent<T> implements OnInit, OnChanges {
   @Input() placeholderText = 'dt_search_keyword';
   @Input() selectedNodes: SelectedNode[] = [];
   @Input() node: SelectedNode | null = null;
-  exportCols: ColumnConfig[] = [];
-  @Output() pageSelectionChanged = new EventEmitter<any[]>();
 
-  ngOnInit() {
-    this.exportCols = this.cols.filter((col) => !col.hideTable);
-  }
+  @Output() rowSelectionChanged = new EventEmitter<T[]>();
 
-  ngOnChanges(changes: SimpleChanges) {
-    const colChanges = changes['cols'];
+  data = input<T[] | null>(null);
+  cols = input<ColumnConfig[]>([]);
+  inputSearchFields = input<string[]>([], { alias: 'searchFields' });
 
-    if (!colChanges?.previousValue || colChanges.previousValue.length === 0) {
-      return;
-    }
+  i18n = inject(I18nFacade);
 
-    const prevHeaders = colChanges.previousValue.map(
-      (col: ColumnConfig) => col.header,
-    );
-    const currentHeaders = colChanges.currentValue.map(
-      (col: ColumnConfig) => col.header,
-    );
+  translatedData = this.i18n.toTranslatedTable<T>(this.data, this.cols);
 
-    if (!equals(prevHeaders, currentHeaders)) {
+  searchFields = computed(() =>
+    this.inputSearchFields().length
+      ? this.inputSearchFields()
+      : this.cols().map((col) => col.field),
+  );
+
+  exportCols = computed(() => this.cols().filter((col) => !col.hide));
+
+  constructor() {
+    effect(() => {
+      this.translatedData(); // trigger on lang/cols/data
       this.table?._filter();
       this.table?.clearState();
-    }
+    });
   }
 
-  get defaultSearchFields() {
-    return this.cols.map((obj) => obj.field);
-  }
-
-  selectedPages: any[] = [];
+  selectedRows: T[] = [];
 
   onSelectionChange(value = []) {
-    this.selectedPages = value;
-    this.pageSelectionChanged.emit(value);
+    this.selectedRows = value;
+    this.rowSelectionChanged.emit(value);
   }
 
   clearSelections() {
-    this.selectedPages = [];
-    this.pageSelectionChanged.emit(this.selectedPages);
+    this.selectedRows = [];
+    this.rowSelectionChanged.emit(this.selectedRows);
   }
 
   getEventValue(event: Event): string {

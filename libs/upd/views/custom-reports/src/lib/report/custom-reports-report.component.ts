@@ -10,8 +10,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import type { ReportConfig, ReportStatus } from '@dua-upd/types-common';
-import { ColumnConfig, UpdComponentsModule } from '@dua-upd/upd-components';
+import type { ColumnConfig, ReportConfig, ReportStatus } from '@dua-upd/types-common';
+import { UpdComponentsModule } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { round } from '@dua-upd/utils-common';
 import {

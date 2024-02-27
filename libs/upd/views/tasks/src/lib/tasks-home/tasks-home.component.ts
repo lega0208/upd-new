@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { map } from 'rxjs';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import type { UnwrapObservable } from '@dua-upd/utils-common';
 import { TasksHomeFacade } from './+state/tasks-home.facade';
 
@@ -25,43 +25,43 @@ export class TasksHomeComponent implements OnInit {
     {
       field: 'group',
       header: 'group',
-      hideTable: true,
+      hide: true,
+      translate: true,
     },
     {
       field: 'tasks_subgroup',
       header: 'tasks_subgroup',
-      hideTable: true,
+      hide: true,
+      translate: true,
     },
     {
       field: 'service',
       header: 'service',
-      hideTable: true,
+      hide: true,
+      translate: true,
     },
     {
       field: 'user_journey',
       header: 'user_journey',
-      hideTable: true,
+      hide: true,
+      translate: true,
     },
     {
       field: 'status',
       header: 'status',
-      hideTable: true,
+      hide: true,
+      translate: true,
     },
     {
       field: 'channel',
       header: 'channel',
-      hideTable: true,
+      hide: true,
+      translate: true,
     },
     {
       field: 'core',
       header: 'core',
-      hideTable: true,
-    },
-    {
-      field: 'task',
-      header: 'task',
-      type: 'link',
-      typeParam: '_id',
+      hide: true,
       translate: true,
     },
     // {
@@ -69,6 +69,13 @@ export class TasksHomeComponent implements OnInit {
     //   header: 'TMF Rank',
     //   pipe: 'number',
     // },
+    {
+      field: 'task',
+      header: 'task',
+      type: 'link',
+      typeParam: '_id',
+      translate: true,
+    },
     // {
     //   field: 'top_task',
     //   header:'Top task',
@@ -100,15 +107,17 @@ export class TasksHomeComponent implements OnInit {
     // {
     //   field: 'pages_mapped',
     //   header: 'Pages mapped',
+    //   pipe: 'number',
     // },
     // {
     //   field: 'projects_mapped',
     //   header: 'Projects mapped',
+    //   pipe: 'number',
     // },
-    // // { // todo: add when available
-    // //   field: 'gc_survey_participants',
-    // //   header: 'Survey'
-    // // },
+    // { // todo: add when available
+    //   field: 'gc_survey_participants',
+    //   header: 'Survey'
+    // },
     {
       field: 'program',
       header: 'Program',
@@ -128,7 +137,7 @@ export class TasksHomeComponent implements OnInit {
       field: 'tasks_subtopic',
       header: 'tasks_subtopic',
       translate: true,
-      hideTable: true,
+      hide: true,
     },
     {
       field: 'visits',

@@ -4,7 +4,7 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 import dayjs from 'dayjs';
 import type { RowInput } from 'jspdf-autotable';
 import * as FileSaver from 'file-saver';
-import type { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { DropdownOption } from '../dropdown/dropdown.component';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { PageStatus, ProjectStatus } from '@dua-upd/types-common';

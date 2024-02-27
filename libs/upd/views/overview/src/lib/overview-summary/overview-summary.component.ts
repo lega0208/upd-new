@@ -5,13 +5,13 @@ import {
   OnInit,
 } from '@angular/core';
 import {
-  type ColumnConfig,
   searchKpiObjectiveCriteria,
   uxTestsKpiObjectiveCriteria,
   feedbackKpiObjectiveCriteria,
 } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, type LocaleId } from '@dua-upd/upd/i18n';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { combineLatest } from 'rxjs';
 
@@ -106,7 +106,11 @@ export class OverviewSummaryComponent implements OnInit {
   whatWasWrongChartLegend: string[] = [];
   whatWasWrongChartApex$ = this.overviewService.whatWasWrongDataApex$;
 
-  dyfTableCols: ColumnConfig<{ name: string; currValue: string; prevValue: string }>[] = [];
+  dyfTableCols: ColumnConfig<{
+    name: string;
+    currValue: string;
+    prevValue: string;
+  }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: string }>[] = [];
   barTableCols: ColumnConfig<{
     date: string;

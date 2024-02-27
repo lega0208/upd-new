@@ -1,10 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { map } from 'rxjs';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type { PagesHomeAggregatedData } from '@dua-upd/types-common';
-import { PagesHomeFacade } from './+state/pages-home.facade';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
+import { PagesHomeFacade } from './+state/pages-home.facade';
 
 @Component({
   selector: 'upd-pages-home',

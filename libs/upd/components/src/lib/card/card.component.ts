@@ -1,6 +1,6 @@
 import { Component, inject, Input } from '@angular/core';
 import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
-import type { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '@dua-upd/types-common';
 
 @Component({
   selector: 'upd-card',

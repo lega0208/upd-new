@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import type { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '@dua-upd/types-common';
 
 @Component({
   selector: 'upd-data-table-card',
