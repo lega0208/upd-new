@@ -18,7 +18,9 @@
         "assets": ["apps/upd/src/favicon.ico", "apps/upd/src/assets"],
         "styles": ["apps/upd/src/styles.scss"],
         "scripts": [],
-        "verbose": true
+        "verbose": true,
+        "serviceWorker": true,
+        "ngswConfigPath": "apps/upd/ngsw-config.json"
       },
       "configurations": {
         "production": {
@@ -60,8 +62,10 @@
             "vendor": true
           },
           "namedChunks": true,
+          "vendorChunk": true,
           "verbose": true,
-          "buildLibsFromSource": true
+          "buildLibsFromSource": true,
+          "serviceWorker": false
         }
       },
       "defaultConfiguration": "production"
