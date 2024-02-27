@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 

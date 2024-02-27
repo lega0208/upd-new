@@ -75,6 +75,10 @@ export class I18nService {
     return this.translateService.instant(key, interpolateParams);
   }
 
+  translateLang(key: string, lang: LocaleId): string {
+    return this.translateService.store.translations[lang]?.[key] || key;
+  }
+
   // to add translations at runtime if we need to
   addTranslations(lang: LocaleId, translations: Record<string, string>) {
     this.translateService.setTranslation(lang, translations, true);

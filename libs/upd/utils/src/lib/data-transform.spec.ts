@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { lastValueFrom, take } from 'rxjs';
 import { I18nService, EN_CA, FR_CA, I18nModule } from '@dua-upd/upd/i18n';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { createColConfigWithI18n } from './data-transform';
 
 describe('data-transform', () => {

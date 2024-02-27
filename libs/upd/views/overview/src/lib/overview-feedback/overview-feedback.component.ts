@@ -1,11 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 
 @Component({
   selector: 'upd-overview-feedback',
@@ -21,7 +19,8 @@ export class OverviewFeedbackComponent implements OnInit {
   commentsPercentChange$ = this.overviewService.commentsPercentChange$;
 
   fullDateRangeLabel$ = this.overviewService.fullDateRangeLabel$;
-  fullComparisonDateRangeLabel$ = this.overviewService.fullComparisonDateRangeLabel$;
+  fullComparisonDateRangeLabel$ =
+    this.overviewService.fullComparisonDateRangeLabel$;
 
   dateRangeLabel$ = this.overviewService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
@@ -58,7 +57,11 @@ export class OverviewFeedbackComponent implements OnInit {
   langLink = 'en';
 
   ngOnInit() {
-    combineLatest([this.currentLang$, this.dateRangeLabel$, this.comparisonDateRangeLabel$]).subscribe(([lang, dateRange, comparisonDateRange]) => {
+    combineLatest([
+      this.currentLang$,
+      this.dateRangeLabel$,
+      this.comparisonDateRangeLabel$,
+    ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
 
       // const dateFormat =

@@ -1,11 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import {
-  type ColumnConfig,
-  callVolumeObjectiveCriteria,
-} from '@dua-upd/upd-components';
+import { callVolumeObjectiveCriteria } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type { LocaleId } from '@dua-upd/upd/i18n';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({

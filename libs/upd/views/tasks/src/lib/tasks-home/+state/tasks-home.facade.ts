@@ -4,9 +4,7 @@ import { combineLatest, map } from 'rxjs';
 import * as TasksHomeActions from './tasks-home.actions';
 import * as TasksHomeSelectors from './tasks-home.selectors';
 import { I18nFacade } from '@dua-upd/upd/state';
-import type { ColumnConfig } from '@dua-upd/upd-components';
-import { round, UnwrapObservable } from '@dua-upd/utils-common';
-import type { AttachmentData } from '@dua-upd/types-common';
+import { round } from '@dua-upd/utils-common';
 
 @Injectable()
 export class TasksHomeFacade {
@@ -23,7 +21,7 @@ export class TasksHomeFacade {
     map(([tasksHomeData]) => {
       return (tasksHomeData?.dateRangeData || []).map((row) => ({
         ...row,
-        task: row.title ? row.title.replace(/\s+/g, ' ') : '',
+        task: row.title?.replace(/\s+/g, ' ') || '',
         group: row.group || '',
         tasks_subgroup: row.subgroup || '',
         topic: row.topic || '',

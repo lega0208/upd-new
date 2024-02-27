@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { UnwrapObservable } from '@dua-upd/utils-common';
 import { combineLatest } from 'rxjs';
 import { ProjectsHomeFacade } from './+state/projects-home.facade';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { FR_CA } from '@dua-upd/upd/i18n';
 import type { ProjectsHomeProject } from '@dua-upd/types-common';
@@ -26,7 +27,7 @@ export class ProjectsHomeComponent implements OnInit {
   numDelayed$ = this.projectsHomeService.numDelayed$;
   completedCOPS$ = this.projectsHomeService.completedCOPS$;
 
-  columns: ColumnConfig<ProjectsHomeProject>[] = [];
+  columns: ColumnConfig<UnwrapObservable<typeof this.tableData$>>[] = [];
 
   searchFields = this.columns.map((col) => col.field);
 

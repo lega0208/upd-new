@@ -1,11 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { EN_CA, type LocaleId } from '@dua-upd/upd/i18n';
-import {
-  type ColumnConfig,
-  feedbackKpiObjectiveCriteria,
-} from '@dua-upd/upd-components';
+import { feedbackKpiObjectiveCriteria } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import type { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 

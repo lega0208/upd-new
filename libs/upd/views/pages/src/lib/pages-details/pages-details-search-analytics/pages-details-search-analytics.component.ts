@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import type { LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type { GetTableProps } from '@dua-upd/utils-common';

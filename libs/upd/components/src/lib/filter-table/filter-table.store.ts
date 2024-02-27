@@ -3,7 +3,7 @@ import { ComponentStore } from '@ngrx/component-store';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type { LocaleId } from '@dua-upd/upd/i18n';
 import type { TreeNode } from 'primeng/api';
-import type { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '@dua-upd/types-common';
 
 @Injectable()
 export class FilterTableStore<

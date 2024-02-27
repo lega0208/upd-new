@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import type { OverviewProject } from '@dua-upd/types-common';

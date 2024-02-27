@@ -31,7 +31,7 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
-import type { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { KpiObjectiveStatus } from '../data-card/data-card.component';

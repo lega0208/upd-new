@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import type { GetTableProps } from '@dua-upd/utils-common';

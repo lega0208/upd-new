@@ -6,12 +6,12 @@ import {
 } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import {
-  type ColumnConfig,
   callVolumeObjectiveCriteria,
   feedbackKpiObjectiveCriteria,
 } from '@dua-upd/upd-components';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import type { GetTableProps } from '@dua-upd/utils-common';
 import { ProjectsDetailsFacade } from '../+state/projects-details.facade';
 
@@ -107,7 +107,11 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   launchDate$ = this.projectsDetailsService.launchDate$;
 
   participantTasksCols: ColumnConfig<ParticipantTasksColTypes>[] = [];
-  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
+  dyfTableCols: ColumnConfig<{
+    name: string;
+    currValue: number;
+    prevValue: string;
+  }>[] = [];
   whatWasWrongTableCols: ColumnConfig<WhatWasWrongColTypes>[] = [];
 
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
@@ -121,7 +125,6 @@ export class ProjectDetailsSummaryComponent implements OnInit {
       this.currentLang$,
     ]).subscribe(([dateRange, comparisonDateRange, lang]) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
-
 
       this.documentsCols = [
         {

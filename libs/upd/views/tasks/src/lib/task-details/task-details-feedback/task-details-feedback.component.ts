@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import type { ColumnConfig } from '@dua-upd/upd-components';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 import { EN_CA } from '@dua-upd/upd/i18n';
@@ -117,7 +117,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
           pipe: 'number',
         },
       ];
-      
+
       this.whatWasWrongTableCols = [
         { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
         {

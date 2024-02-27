@@ -12,7 +12,7 @@ import {
   Input,
   ViewChild,
 } from '@angular/core';
-import type { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import type {

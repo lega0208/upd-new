@@ -1,6 +1,10 @@
 import type { OptionalKeyOf } from '@dua-upd/utils-common';
 
-export type ColumnConfigPipe = 'percent' | 'number' | 'date' | 'secondsToMinutes';
+export type ColumnConfigPipe =
+  | 'percent'
+  | 'number'
+  | 'date'
+  | 'secondsToMinutes';
 
 export interface ColumnConfig<T = any> {
   field: OptionalKeyOf<T>;
@@ -13,7 +17,7 @@ export interface ColumnConfig<T = any> {
   tooltip?: string;
   translate?: boolean;
   filterConfig?: FilterConfig<T>;
-  hideTable?: boolean;
+  hide?: boolean;
   headerClass?: string;
   columnClass?: string;
 }

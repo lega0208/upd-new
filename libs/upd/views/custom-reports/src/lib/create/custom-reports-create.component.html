@@ -245,7 +245,7 @@
               [searchFields]="searchFields()"
               [exports]="false"
               [checkboxes]="true"
-              (pageSelectionChanged)="selectPages($event)"
+              (rowSelectionChanged)="selectPages($event)"
               [ngClass]="'pages-home'"
             >
             </upd-data-table>
@@ -263,7 +263,7 @@
               [loading]="selectionData() === null"
               [exports]="false"
               [checkboxes]="true"
-              (pageSelectionChanged)="selectTasks($event)"
+              (rowSelectionChanged)="selectTasks($event)"
               [ngClass]="'tasks-list'"
             >
             </upd-data-table>
@@ -281,7 +281,7 @@
               [loading]="selectionData() === null"
               [exports]="false"
               [checkboxes]="true"
-              (pageSelectionChanged)="selectProjects($event)"
+              (rowSelectionChanged)="selectProjects($event)"
               [ngClass]="'projects-list'"
             >
             </upd-data-table>

@@ -1,5 +1,5 @@
 import { Component, inject, Input, OnInit } from '@angular/core';
-import type { ColumnConfig } from './types';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
@@ -91,11 +91,7 @@ export class DataTableStylesComponent implements OnInit {
           ) || ''
         );
       case 'secondsToMinutes':
-        return (
-          this.secondsToMinutesPipe.transform(
-            data
-          ) || ''
-        ) 
+        return this.secondsToMinutesPipe.transform(data) || '';
       default:
         return data;
     }

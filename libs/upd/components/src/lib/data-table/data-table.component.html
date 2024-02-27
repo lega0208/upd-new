@@ -1,7 +1,7 @@
 <p-table
   #dt
-  [columns]="cols"
-  [value]="data || []"
+  [columns]="cols()"
+  [value]="translatedData() || []"
   [rows]="displayRows"
   [rowHover]="true"
   [showCurrentPageReport]="true"
@@ -14,14 +14,12 @@
       | translate
         : { first: '{first}', last: '{last}', totalRecords: '{totalRecords}' }
   }}"
-  [globalFilterFields]="
-    searchFields.length > 0 ? searchFields : defaultSearchFields
-  "
+  [globalFilterFields]="searchFields()"
   [sortField]="sortField"
   [sortOrder]="sortOrder === 'desc' ? -1 : 1"
   dataKey="_id"
   (selectionChange)="onSelectionChange($event)"
-  [(selection)]="selectedPages"
+  [(selection)]="selectedRows"
 >
   <ng-template *ngIf="filter || captionTitle || exports" pTemplate="caption">
     <div>
@@ -43,8 +41,8 @@
         <div class="d-flex">
           <upd-filter-table
             *ngIf="filterTree"
-            [cols]="cols"
-            [data]="data || []"
+            [cols]="cols()"
+            [data]="translatedData() || []"
             [table]="table"
             (changedSelectedNodes)="updateSelectedNodes($event)"
             [removedNode]="node"
@@ -53,8 +51,8 @@
           <upd-data-table-exports
             id="data-table-{{ id }}"
             *ngIf="exports"
-            [cols]="exportCols"
-            [data]="dt.filteredValue || data || []"
+            [cols]="exportCols()"
+            [data]="dt.filteredValue || translatedData() || []"
           ></upd-data-table-exports>
         </div>
       </div>
@@ -66,117 +64,19 @@
       ></upd-filter-table-selection>
     </div>
   </ng-template>
-  <ng-template pTemplate="header" let-columns>
-    <tr>
-      <th *ngFor="let col of columns">
-        {{ col.header | translate }}
-      </th>
-    </tr>
-  </ng-template>
-  <ng-template pTemplate="body" let-rowData let-columns="columns">
-    <tr [pSelectableRow]="rowData">
-      <td *ngFor="let col of columns">
-        {{ rowData[col.field] }}
-      </td>
-    </tr>
-  </ng-template>
 
   <ng-template pTemplate="header" let-columns>
     <tr>
       <th *ngIf="checkboxes" style="min-width: 2rem; width: 2rem">&nbsp;</th>
-      <div *ngIf="sort; then thenBlock; else elseBlock"></div>
-      <ng-template #thenBlock>
+
+      @for (col of columns; track col.field) {
         <th
-          *ngFor="let col of columns"
-          [pSortableColumn]="col.field"
-          [hidden]="col.hideTable"
+          [pSortableColumn]="sort ? col.field : undefined"
+          [hidden]="col.hide"
           [ngClass]="col.headerClass || ''"
           class="{{ col.columnClass || '' }}"
         >
-          <div class="text-nowrap d-flex align-items-center">
-            <ng-container *ngIf="col.tooltip">
-              <span
-                class="p-column-title datatable-headers"
-                [class.card-tooltip]="col.tooltip"
-                [ngbPopover]="col.tooltip"
-                placement="end"
-              >
-                {{ col.header | translate }}
-              </span>
-            </ng-container>
-            <ng-container *ngIf="!col.tooltip">
-              <span class="datatable-headers">{{
-                col.header | translate
-              }}</span>
-            </ng-container>
-            <p-sortIcon [field]="col.field"></p-sortIcon>
-            <ng-template [ngIf]="col.filterConfig">
-              <!-- Boolean Filtering -->
-
-              <ng-template [ngIf]="col.filterConfig.type === 'boolean'">
-                <p-columnFilter
-                  type="boolean"
-                  [field]="col.field"
-                  display="menu"
-                  [hideOnClear]="true"
-                  [showApplyButton]="false"
-                ></p-columnFilter>
-              </ng-template>
-
-              <!-- Category/Multiselect Filtering -->
-              <ng-template
-                [ngIf]="
-                  col.filterConfig.type === 'category' ||
-                  col.filterConfig.type === 'pageStatus'
-                "
-              >
-                <p-columnFilter
-                  [field]="col.field"
-                  matchMode="in"
-                  display="menu"
-                  [showMatchModes]="false"
-                  [showOperator]="false"
-                  [showAddButton]="false"
-                  [showApplyButton]="false"
-                  [hideOnClear]="true"
-                >
-                  <ng-template
-                    pTemplate="filter"
-                    let-value
-                    let-filter="filterCallback"
-                  >
-                    <p-multiSelect
-                      [ngModel]="value"
-                      [options]="col.filterConfig.categories"
-                      optionValue="value"
-                      optionLabel="name"
-                      [placeholder]="'Options'"
-                      (onChange)="filter($event.value)"
-                      [filter]="false"
-                      [showHeader]="false"
-                    >
-                      <ng-template let-option pTemplate="item">
-                        <div class="p-multiselect-representative-option">
-                          <span [class]="'badge bg-unknown'">
-                            {{ option.name }}
-                          </span>
-                        </div>
-                      </ng-template>
-                    </p-multiSelect>
-                  </ng-template>
-                </p-columnFilter>
-              </ng-template>
-            </ng-template>
-          </div>
-        </th>
-      </ng-template>
-      <ng-template #elseBlock>
-        <th
-          *ngFor="let col of columns"
-          [hidden]="col.hideTable"
-          class="{{ col.columnClass || '' }}"
-        >
-          <ng-container *ngIf="col.tooltip">
+          <div [ngClass]="sort ? 'text-nowrap d-flex align-items-center' : ''">
             <span
               class="p-column-title datatable-headers"
               [class.card-tooltip]="col.tooltip"
@@ -185,50 +85,112 @@
             >
               {{ col.header | translate }}
             </span>
-          </ng-container>
-          <ng-container *ngIf="!col.tooltip">
-            <span class="datatable-headers">{{ col.header | translate }}</span>
-          </ng-container>
+
+            @if (sort) {
+              <p-sortIcon [field]="col.field"></p-sortIcon>
+              <ng-template [ngIf]="col.filterConfig">
+                <!-- Boolean Filtering -->
+
+                <ng-template [ngIf]="col.filterConfig.type === 'boolean'">
+                  <p-columnFilter
+                    type="boolean"
+                    [field]="col.field"
+                    display="menu"
+                    [hideOnClear]="true"
+                    [showApplyButton]="false"
+                  ></p-columnFilter>
+                </ng-template>
+
+                <!-- Category/Multiselect Filtering -->
+                <ng-template
+                  [ngIf]="
+                    col.filterConfig.type === 'category' ||
+                    col.filterConfig.type === 'pageStatus'
+                  "
+                >
+                  <p-columnFilter
+                    [field]="col.field"
+                    matchMode="in"
+                    display="menu"
+                    [showMatchModes]="false"
+                    [showOperator]="false"
+                    [showAddButton]="false"
+                    [showApplyButton]="false"
+                    [hideOnClear]="true"
+                  >
+                    <ng-template
+                      pTemplate="filter"
+                      let-value
+                      let-filter="filterCallback"
+                    >
+                      <p-multiSelect
+                        [ngModel]="value"
+                        [options]="col.filterConfig.categories"
+                        optionValue="value"
+                        optionLabel="name"
+                        [placeholder]="'Options'"
+                        (onChange)="filter($event.value)"
+                        [filter]="false"
+                        [showHeader]="false"
+                      >
+                        <ng-template let-option pTemplate="item">
+                          <div class="p-multiselect-representative-option">
+                            <span [class]="'badge bg-unknown'">
+                              {{ option.name }}
+                            </span>
+                          </div>
+                        </ng-template>
+                      </p-multiSelect>
+                    </ng-template>
+                  </p-columnFilter>
+                </ng-template>
+              </ng-template>
+            }
+          </div>
         </th>
-      </ng-template>
+      }
     </tr>
   </ng-template>
 
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr>
-      <td *ngIf="checkboxes">
-        <p-tableCheckbox [value]="rowData" class="ps-2"></p-tableCheckbox>
-      </td>
-      <td
-        *ngFor="let col of columns"
-        [ngClass]="{
-          'validation-kpi-not-met':
-            kpi && col.field === 'Validation' && rowData[col.field] < 0.8,
-          'bg-green':
-            kpi &&
-            (rowData[col.field] >= 0.8 ||
-              (col.field === 'change' && rowData[col.field] >= 0.2))
-        }"
-        class="{{ col.columnClass || '' }}"
-        [hidden]="col.hideTable"
-      >
-        <span
-          class="p-column-title datatable-headers"
-          [ngbPopover]="col.tooltip"
-          placement="end"
-          [class.card-tooltip]="col.tooltip"
-          >{{ col.header | translate }}</span
+      @if (checkboxes) {
+        <td>
+          <p-tableCheckbox [value]="rowData" class="ps-2" />
+        </td>
+      }
+      @for (col of columns; track col.field) {
+        <td
+          [ngClass]="{
+            'validation-kpi-not-met':
+              kpi && col.field === 'Validation' && rowData[col.field] < 0.8,
+            'bg-green':
+              kpi &&
+              (rowData[col.field] >= 0.8 ||
+                (col.field === 'change' && rowData[col.field] >= 0.2))
+          }"
+          class="{{ col.columnClass || '' }}"
+          [hidden]="col.hide"
         >
-        <upd-data-table-styles [config]="col" [data]="rowData">
-        </upd-data-table-styles>
-      </td>
+          <span
+            class="p-column-title datatable-headers"
+            [ngbPopover]="col.tooltip"
+            placement="end"
+            [class.card-tooltip]="col.tooltip"
+            >{{ col.header | translate }}</span
+          >
+          <upd-data-table-styles [config]="col" [data]="rowData" />
+        </td>
+      }
     </tr>
   </ng-template>
+
   <ng-template pTemplate="emptymessage">
     <tr>
       <td translate>No data found.</td>
     </tr>
   </ng-template>
+
   <ng-template *ngIf="kpi" pTemplate="footer">
     <div class="legend">
       <p class="legend_field">

@@ -23,7 +23,6 @@ import timezone from 'dayjs/plugin/timezone';
 import { ApiService } from '@dua-upd/upd/services';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import {
-  type ColumnConfig,
   DataTableComponent,
   AccordionComponent,
   CalendarComponent,
@@ -36,6 +35,7 @@ import type {
   AAMetricName,
   AAQueryDateStart,
   AAQueryDateEnd,
+  ColumnConfig,
   ReportCreateResponse,
   ReportConfig,
   ReportGranularity,

@@ -16,7 +16,7 @@ import type { TreeNode } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { TreeSelect } from 'primeng/treeselect';
 import { FilterTableStore } from './filter-table.store';
-import type { ColumnConfig } from '../data-table-styles/types';
+import type { ColumnConfig } from '@dua-upd/types-common';
 
 export interface SelectedNode {
   header: string;

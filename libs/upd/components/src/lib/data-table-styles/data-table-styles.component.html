@@ -1,6 +1,6 @@
 <!-- Utility Template for Displaying Data -->
 <ng-template #displayData let-item="item">
-  {{ config.translate ? (item.toString() || '' | translate: undefined:currentLang) : item }}
+  {{ item }}
 </ng-template>
 
 <ng-container *ngIf="config.typeParam">
