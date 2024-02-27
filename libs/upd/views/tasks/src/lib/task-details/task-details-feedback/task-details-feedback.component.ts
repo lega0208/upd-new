@@ -23,6 +23,10 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
+  // currentTotalComments$ = this.taskDetailsService.currentTotalComments$;         // dateRangeData
+  // comparisonTotalComments$ = this.taskDetailsService.comparisonTotalComments$;   // dateRangeData
+  // commentsPercentChange$ = this.taskDetailsService.commentsPercentChange$;       // dateRangeData
+
   fullDateRangeLabel$ = this.taskDetailsService.fullDateRangeLabel$;
   fullComparisonDateRangeLabel$ =
     this.taskDetailsService.fullComparisonDateRangeLabel$;
@@ -38,6 +42,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   whatWasWrongTableCols: ColumnConfig[] = [];
 
   feedbackComments$ = this.taskDetailsService.feedbackComments$;
+  feedbackTotalComments$ = this.taskDetailsService.feedbackTotalComments$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
 
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
