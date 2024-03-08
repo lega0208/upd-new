@@ -16,6 +16,7 @@ import {
   CallDriver,
   DbService,
   Feedback,
+  GcTasks,
   Page,
   PageMetrics,
   Project,
@@ -60,6 +61,8 @@ export class TasksService {
     private pageModel: Model<PageDocument>,
     @InjectModel(Reports.name, 'defaultConnection')
     private reportsModel: Model<Reports>,
+    @InjectModel(GcTasks.name, 'defaultConnection')
+    private gcTasksModel: Model<GcTasks>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -188,7 +191,7 @@ export class TasksService {
 
     const changeCallDrivers = percentChange(totalCalls, previousCallDrivers);
 
-    const tasks = await this.db.views.pageVisits.getVisitsWithTaskData(
+    const tasks = await this.db.views.pageVisits.getVisitsDyfNoWithTaskData(
       {
         start,
         end,
@@ -211,8 +214,33 @@ export class TasksService {
 
     const uxTestsDict = arrayToDictionaryMultiref(uxTests, 'tasks');
 
+    const gcTasksData = await this.gcTasksModel
+    .aggregate()
+    .match({
+      date: { $gte: start, $lte: end },
+      sampling_task: 'y',
+      able_to_complete: { $ne: 'I started this survey before I finished my visit' }
+    })
+      .group({
+        _id: { gc_task: '$gc_task' },
+        total_entries: { $sum: 1 },
+      })
+      .project({
+        _id: 0,
+        gc_task: '$_id.gc_task',
+        total_entries: 1,
+      })
+      .exec();
+
+    const gcTasksDict = arrayToDictionary(gcTasksData, 'gc_task');
+
     const task = tasks.map((task) => {
       const calls = callsByTasks[task._id.toString()] ?? 0;
+
+      const uxTestsForTask = uxTestsDict[task._id.toString()] ?? [];
+      const { avgTestSuccess, latestDate, percentChange } = getAvgSuccessFromLatestTests(uxTestsForTask);
+
+      // todo: map gc task data to task when it is available
 
       return {
         ...task,
@@ -221,12 +249,14 @@ export class TasksService {
         secure_portal: !!task.channel.find(
           (channel) => channel === 'Fully online - portal',
         ),
-        ux_testing: !!uxTestsDict[task._id.toString()]?.find(
+        ux_testing: !!uxTestsForTask?.find(
           (test) => !isNullish(test.success_rate),
         ),
-        cops: !!uxTestsDict[task._id.toString()]?.find((test) => !test.cops),
+        cops: !!uxTestsForTask?.find((test) => !test.cops),
         pages_mapped: task.pages?.length ?? 0,
         projects_mapped: task.projects?.length ?? 0,
+        latest_ux_success: avgTestSuccess
+          
         // survey: task.gc_survey_participants, // todo: add survey data when available
       };
     });
