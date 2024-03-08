@@ -375,9 +375,10 @@ export class OverviewFacade {
     map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)),
   );
 
-  fullDateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => getFullDateRangeLabel(data.dateRange, lang)),
-  );
+  fullDateRangeLabel$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(map(([data, lang]) => getFullDateRangeLabel(data.dateRange, lang)));
 
   comparisonDateRangeLabel$ = combineLatest([
     this.overviewData$,
@@ -388,8 +389,13 @@ export class OverviewFacade {
     ),
   );
 
-  fullComparisonDateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => getFullDateRangeLabel(data.comparisonDateRange || '', lang)),
+  fullComparisonDateRangeLabel$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) =>
+      getFullDateRangeLabel(data.comparisonDateRange || '', lang),
+    ),
   );
 
   satDateRangeLabel$ = combineLatest([
@@ -403,19 +409,21 @@ export class OverviewFacade {
     map(([data, lang]) => {
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
-  
+
       const currYesVal = data?.dateRangeData?.dyf_yes || 0;
       const prevYesVal = data?.comparisonDateRangeData?.dyf_yes || NaN;
       const currNoVal = data?.dateRangeData?.dyf_no || 0;
       const prevNoVal = data?.comparisonDateRangeData?.dyf_no || NaN;
-  
+
       const pieChartData = [
         { name: yes, currValue: currYesVal, prevValue: prevYesVal },
         { name: no, currValue: currNoVal, prevValue: prevNoVal },
       ];
-  
-      const filteredPieChartData = pieChartData.filter((v) => v.currValue > 0 || v.prevValue > 0);
-  
+
+      const filteredPieChartData = pieChartData.filter(
+        (v) => v.currValue > 0 || v.prevValue > 0,
+      );
+
       return filteredPieChartData.length > 0 ? filteredPieChartData : [];
     }),
   );
@@ -425,22 +433,30 @@ export class OverviewFacade {
       const dyfData: ApexAxisChartSeries = [
         {
           name: this.i18n.service.translate('yes', lang),
-          data: [data?.dateRangeData?.dyf_yes || 0, data?.comparisonDateRangeData?.dyf_yes || 0],
+          data: [
+            data?.dateRangeData?.dyf_yes || 0,
+            data?.comparisonDateRangeData?.dyf_yes || 0,
+          ],
         },
         {
           name: this.i18n.service.translate('no', lang),
-          data: [data?.dateRangeData?.dyf_no || 0, data?.comparisonDateRangeData?.dyf_no || 0],
+          data: [
+            data?.dateRangeData?.dyf_no || 0,
+            data?.comparisonDateRangeData?.dyf_no || 0,
+          ],
         },
       ];
-  
-      const isZero = dyfData.every(item => 
-        (item.data as number[]).every(value => typeof value === 'number' && value === 0)
+
+      const isZero = dyfData.every((item) =>
+        (item.data as number[]).every(
+          (value) => typeof value === 'number' && value === 0,
+        ),
       );
-      
+
       if (isZero) {
         return [];
       }
-  
+
       return dyfData;
     }),
   );
@@ -741,6 +757,87 @@ export class OverviewFacade {
     { field: 'change', header: 'comparison', pipe: 'percent' },
   ]);
 
+  gcTasksTable$ = this.overviewData$.pipe(
+    map((data) =>
+      data?.dateRangeData?.gcTasksData.map((d) => {
+        const data_reliability = evaluateDataReliability(
+          d.margin_of_error,
+        );
+        const baseData = { ...d, data_reliability };
+
+        return data_reliability === 'Insufficient data'
+          ? {
+              ...baseData,
+              able_to_complete: NaN,
+              ease: NaN,
+              satisfaction: NaN,
+              margin_of_error: NaN,
+            }
+          : baseData;
+      }),
+    ),
+  );
+
+  gcTasksTableConfig$ = createColConfigWithI18n(this.i18n.service, [
+    { field: 'gc_task', header: 'gc_task', translate: true },
+    { field: 'theme', header: 'theme', translate: true },
+    { field: 'total_entries', header: 'total-entries', pipe: 'number' },
+    {
+      field: 'able_to_complete',
+      header: 'able-to-complete',
+      translate: true,
+      pipe: 'percent',
+      pipeParam: '1.0-1',
+    },
+    {
+      field: 'ease',
+      header: 'ease',
+      translate: true,
+      pipe: 'percent',
+      pipeParam: '1.0-1',
+    },
+    {
+      field: 'satisfaction',
+      header: 'satisfaction',
+      translate: true,
+      pipe: 'percent',
+      pipeParam: '1.0-1',
+    },
+    {
+      field: 'margin_of_error',
+      header: 'margin-of-error',
+      translate: true,
+      pipe: 'percent',
+      pipeParam: '1.0-1',
+    },
+    { field: 'data_reliability', header: 'data-reliability', translate: true },
+  ]);
+
+  gcTasksCommentsTable$ = this.overviewData$.pipe(
+    map((data) =>
+      data?.dateRangeData?.gcTasksComments || [],
+    ),
+  );
+
+  gcTasksCommentsTableConfig$ = createColConfigWithI18n(this.i18n.service, [
+    { field: 'date', header: 'Date', pipe: 'date' },
+    { field: 'gc_task', header: 'Task', translate: true },
+    { field: 'gc_task_other', header: 'Other GC Task' },
+    { field: 'url', header: 'Survey Referrer' },
+    { field: 'language', header: 'Language', translate: true, hide: true },
+    { field: 'device', header: 'Device', translate: true, hide: true },
+    { field: 'screener', header: 'Screener', translate: true, hide: true },
+    { field: 'theme', header: 'Theme', translate: true, hide: true },
+    { field: 'grouping', header: 'Grouping', translate: true, hide: true },
+    { field: 'able_to_complete', header: 'Able to Complete', translate: true },
+    { field: 'ease', header: 'Ease', translate: true },
+    { field: 'satisfaction', header: 'Satisfaction', translate: true },
+    { field: 'what_would_improve', header: 'What Would Improve', translate: true, hide: true },
+    { field: 'what_would_improve_comment', header: 'Improvement Comment'  },
+    { field: 'reason_not_complete', header: 'Reason Not Complete', translate: true, hide: true },
+    { field: 'reason_not_complete_comment', header: 'Reason Not Complete Comment' },
+  ]);
+
   top5IncreasedCalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
       data.top5IncreasedCalldriverTopics.map((topicData) => ({
@@ -835,23 +932,21 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   return `${formattedStartDate}-${formattedEndDate}`;
 };
 
-const getFullDateRangeLabel = (
-  dateRange: string, lang: LocaleId,
-) => {
-    const [startDate, endDate] = dateRange.split('/');
+const getFullDateRangeLabel = (dateRange: string, lang: LocaleId) => {
+  const [startDate, endDate] = dateRange.split('/');
 
-    const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
-    const separator = lang === FR_CA ? ' au' : ' to';
+  const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
+  const separator = lang === FR_CA ? ' au' : ' to';
 
-    const formattedStartDate = dayjs
-      .utc(startDate)
-      .locale(lang)
-      .format(dateFormat);
+  const formattedStartDate = dayjs
+    .utc(startDate)
+    .locale(lang)
+    .format(dateFormat);
 
-    const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
+  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
 
-    return [`${formattedStartDate}${separator}`,`${formattedEndDate}`];
-  }
+  return [`${formattedStartDate}${separator}`, `${formattedEndDate}`];
+};
 
 type DateRangeDataIndexKey = keyof OverviewAggregatedData &
   keyof PickByType<OverviewAggregatedData, number>;
@@ -930,4 +1025,12 @@ function mapObjectArraysWithPercentChange(
 
     throw Error('Invalid data arrays in mapObjectArraysWithPercentChange');
   });
+}
+
+function evaluateDataReliability(errorMargin: number) {
+  if (errorMargin > 0 && errorMargin < 0.05)
+    return 'Low margin of error/Reliable data';
+  if (errorMargin >= 0.05 && errorMargin < 0.1)
+    return 'Higher margin of error/Use data with caution';
+  return 'Insufficient data';
 }

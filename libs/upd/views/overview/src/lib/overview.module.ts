@@ -24,6 +24,7 @@ import {
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { I18nModule } from '@dua-upd/upd/i18n';
+import { OverviewGCTasksComponent } from './overview-gc-tasks/overview-gc-tasks.component';
 
 @NgModule({
   imports: [
@@ -44,6 +45,7 @@ import { I18nModule } from '@dua-upd/upd/i18n';
     OverviewFeedbackComponent,
     OverviewCalldriversComponent,
     OverviewUxTestsComponent,
+    OverviewGCTasksComponent,
   ],
   providers: [OverviewFacade],
 })

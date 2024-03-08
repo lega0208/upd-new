@@ -12,8 +12,8 @@ export class GcTasks implements IGCTasks {
   @Prop({ type: Date, required: true, index: true })
   date: Date;
 
-  @Prop({ type: String, required: true })
-  time_stamp: string;
+  @Prop({ type: String })
+  time_stamp?: string;
 
   @Prop({ type: String, required: true, index: true })
   url: string;
@@ -68,12 +68,34 @@ export class GcTasks implements IGCTasks {
 
   @Prop({ type: String })
   sampling?: string;
+
+  @Prop({ type: String })
+  sampling_invitation?: string;
+
+  @Prop({ type: String })
+  sampling_gc?: string;
+
+  @Prop({ type: String })
+  sampling_canada?: string;
+
+  @Prop({ type: String })
+  sampling_theme?: string;
+
+  @Prop({ type: String })
+  sampling_institution?: string;
+
+  @Prop({ type: String })
+  sampling_group?: string;
+
+  @Prop({ type: String })
+  sampling_task?: string;
 }
 
 export const GcTasksSchema = SchemaFactory.createForClass(GcTasks);
 
 GcTasksSchema.index({date: 1, url: 1})
 GcTasksSchema.index({date: 1, gc_task: 1})
+GcTasksSchema.index({date: 1, sampling_task: 1, able_to_complete: 1})
 
 export function getGCTasksModel() {
   return model(GcTasks.name, GcTasksSchema);

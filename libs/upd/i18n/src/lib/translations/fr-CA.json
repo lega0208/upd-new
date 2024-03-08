@@ -1211,6 +1211,11 @@
   "Scams and frauds": "Escroqueries et fraudes",
   "Seniors": "Personnes âgées (y compris SV / SRG / RPC)",
 
+  "------GC Tasks----": "---------------------------GC Tasks TRANSLATION--------------------------------------",
+  "Insufficient data" : "Données insuffisantes",
+  "Higher margin of error/Use data with caution" : "Marge d'erreur plus élevée / Utiliser les données avec prudence",
+  "Low margin of error/Reliable data": "Faible marge d'erreur / Données fiables",
+
   "------PAGE FEEDBACK What Was Wrong categories----": "---------------------------PAGE FEEDBACK What Was Wrong categories TRANSLATION--------------------------------------",
   "I can't find the information": "Je n'ai pas trouvé les renseignements",
   "Je ne peux pas trouver l’information": "Je ne peux pas trouver l’information",

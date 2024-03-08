@@ -26,6 +26,7 @@ import {
   CustomReportsMetrics,
   type CustomReportsModel,
   type CallDriverModel,
+  GcTasks,
 } from '../';
 import {
   arrayToDictionary,
@@ -68,6 +69,7 @@ export class DbService {
     reports: this.reports,
     customReportsRegistry: this.customReportsRegistry,
     customReportsMetrics: this.customReportsMetrics,
+    gcTasks: this.gcTasks,
   } as const;
 
   readonly views = {
@@ -116,6 +118,8 @@ export class DbService {
     private customReportsRegistry: Model<CustomReportsRegistry>,
     @InjectModel(CustomReportsMetrics.name, 'defaultConnection')
     private customReportsMetrics: CustomReportsModel,
+    @InjectModel(GcTasks.name, 'defaultConnection')
+    private gcTasks: Model<GcTasks>,
     @InjectConnection('defaultConnection')
     private connection: Connection,
   ) {}
