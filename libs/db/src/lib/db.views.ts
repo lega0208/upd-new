@@ -108,7 +108,7 @@ const viewsBaseSchema = {
 
 export interface PageVisits extends DbViewType {
   // the _id in the pageVisits objects are Page references and not ids from pages_metrics
-  pageVisits: (IPage & { visits: number })[];
+  pageVisits: (IPage & { visits: number, dyf_no: number })[];
 }
 
 const COLLECTION_NAME = 'view_page_visits' as const;
@@ -141,6 +141,7 @@ export class PageVisitsView
         $project: {
           page: 1,
           visits: 1,
+          dyf_no: 1,
         },
       },
       {
@@ -148,6 +149,9 @@ export class PageVisitsView
           _id: '$page',
           visits: {
             $sum: '$visits',
+          },
+          dyf_no: {
+            $sum: '$dyf_no',
           },
         },
       },
@@ -238,7 +242,7 @@ export class PageVisitsView
       .sort((a, b) => b.visits - a.visits);
   }
 
-  async getVisitsWithTaskData(
+  async getVisitsDyfNoWithTaskData(
     dateRange: DateRange<string | Date>,
     taskModel: Model<Task>,
   ) {
@@ -256,9 +260,15 @@ export class PageVisitsView
               (page) => visitsDictionary[page._id.toString()]?.visits || 0,
             ) || [];
 
+          const dyfNo =
+            task.pages?.map(
+              (page) => visitsDictionary[page._id.toString()]?.dyf_no || 0,
+            ) || [];
+
           return {
             ...task.toObject(),
             visits: sum(pageVisits),
+            dyf_no: sum(dyfNo),
           };
         }),
       ),
@@ -271,7 +281,7 @@ export class PageVisitsView
 export const PageVisitsViewSchema = new Schema<PageVisits>(
   {
     ...viewsBaseSchema,
-    pageVisits: [{ _id: Types.ObjectId, visits: Number }],
+    pageVisits: [{ _id: Types.ObjectId, visits: Number, dyf_no: Number}],
   },
   { collection: COLLECTION_NAME },
 );

@@ -17,6 +17,7 @@ import type {
   PageDocument,
   SearchAssessmentDocument,
   AnnotationsDocument,
+  GcTasksDocument,
 } from '@dua-upd/db';
 import {
   DbService,
@@ -30,6 +31,7 @@ import {
   Page,
   SearchAssessment,
   Annotations,
+  GcTasks,
 } from '@dua-upd/db';
 import type {
   ApiParams,
@@ -117,6 +119,8 @@ export class OverallService {
     private feedbackModel: Model<FeedbackDocument>,
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessmentModel: Model<SearchAssessmentDocument>,
+    @InjectModel(GcTasks.name, 'defaultConnection')
+    private gcTasksModel: Model<GcTasksDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectModel(Annotations.name, 'defaultConnection')
     private annotationsModel: Model<AnnotationsDocument>
@@ -190,9 +194,10 @@ export class OverallService {
         this.annotationsModel,
         this.db,
         this.searchAssessmentModel,
+        this.gcTasksModel,
         this.cacheManager,
         params.dateRange,
-        satDateRange
+        satDateRange,
       ),
       comparisonDateRangeData: await getOverviewMetrics(
         this.overallModel,
@@ -203,6 +208,7 @@ export class OverallService {
         this.annotationsModel,
         this.db,
         this.searchAssessmentModel,
+        this.gcTasksModel,
         this.cacheManager,
         params.comparisonDateRange,
         satComparisonDateRange
@@ -619,6 +625,7 @@ async function getOverviewMetrics(
   annotationsModel: Model<AnnotationsDocument>,
   db: DbService,
   searchAssessmentModel: Model<SearchAssessmentDocument>,
+  gcTasksModel: Model<GcTasksDocument>,
   cacheManager: Cache,
   dateRange: string,
   satDateRange: string
@@ -888,6 +895,51 @@ async function getOverviewMetrics(
     })
     .exec();
 
+  const gcTasksComments = await gcTasksModel
+    .aggregate()
+    .match({
+      date: { $gte: start, $lte: end },
+      sampling_task: 'y',
+      able_to_complete: { $ne: 'I started this survey before I finished my visit' }
+    });
+
+  const gcTasksData = await gcTasksModel
+  .aggregate()
+  .match({
+    date: { $gte: start, $lte: end },
+    sampling_task: 'y',
+    able_to_complete: { $ne: 'I started this survey before I finished my visit' }
+  })
+    .group({
+      _id: { gc_task: '$gc_task', theme: '$theme' },
+      total_entries: { $sum: 1 },
+      satisfaction: { $avg: { $cond: [{ $in: ['$satisfaction', ['Very satisfied', 'Satisfied']] }, 1, 0] } },
+      ease: { $avg: { $cond: [{ $in: ['$ease', ['Very easy', 'Easy']] }, 1, 0] } },
+      able_to_complete: { $avg: { $cond: [{ $eq: ['$able_to_complete', 'Yes'] }, 1, 0] } },
+    })
+    .project({
+      gc_task: '$_id.gc_task',
+      theme: '$_id.theme',
+      total_entries: 1,
+      satisfaction: 1,
+      ease: 1,
+      able_to_complete: 1,
+      margin_of_error: {
+            $divide: [
+              {
+                $add: [
+                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$satisfaction', { $subtract: [1, '$satisfaction'] }] }, '$total_entries'] } }] },
+                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$ease', { $subtract: [1, '$ease'] }] }, '$total_entries'] } }] },
+                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$able_to_complete', { $subtract: [1, '$able_to_complete'] }] }, '$total_entries'] } }] },
+                ]
+              },
+              3
+            ]
+          }
+    })
+    .sort({ total_entries: -1 })
+    .project({ _id: 0 });
+
   return {
     visitsByDay,
     calldriversByDay,
@@ -900,6 +952,8 @@ async function getOverviewMetrics(
     top10GSC,
     feedbackPages,
     annotations,
+    gcTasksData,
+    gcTasksComments
   };
 }
 
