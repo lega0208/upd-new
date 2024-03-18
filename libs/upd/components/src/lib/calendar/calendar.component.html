@@ -19,10 +19,8 @@
   <ng-template pTemplate="date" let-date>
     <span
       class="calendar-item"
-      (mouseenter)="onMouseEnter(date)"
-      (mouseleave)="onMouseLeave()"
+
       [ngClass]="{
-        'hovered-range': isHoveredRangeDate(date),
         'in-range': isInRangeDate(date),
         'start-point': isStartDate(date),
         'end-point': isEndDate(date)
