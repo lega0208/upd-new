@@ -345,6 +345,7 @@ export interface IReadability extends ReadabilityScore {
 export interface IGCTasks {
   _id: Types.ObjectId;
   date: Date;
+  tasks?: Types.ObjectId[] | ITask[];
   time_stamp?: string;
   url: string;
   language: string;
