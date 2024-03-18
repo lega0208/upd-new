@@ -115,6 +115,7 @@ export class DataTableExportsComponent<T> {
               (<unknown>row[col.field as keyof T]) as Date,
               col.pipeParam ?? 'YYYY-MM-dd',
               currentLang,
+              'UTC'
             );
           } else if (col.typeParam === 'cops') {
             formattedRow[colKey] = row[col.field as keyof T] ? cops : '';
