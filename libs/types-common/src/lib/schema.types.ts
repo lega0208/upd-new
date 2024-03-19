@@ -438,3 +438,16 @@ export type AccumulatorOperator =
   | '$stdDevPop'
   | '$stdDevSamp'
   | '$sum';
+
+
+ /*
+ * GCTSS to TMF Tasks mapping  interface
+ */
+export interface IGCTasksMappings {
+  _id: Types.ObjectId;
+  airtable_id: string;
+  title: string;
+  title_fr: string;
+  tasks?: Types.ObjectId[] | ITask[];
+  date_mapped?: Date;
+}

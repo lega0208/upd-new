@@ -45,6 +45,7 @@ import {
   CustomReportsMetricsSchema,
 } from './db.schemas';
 import { PageVisitsViewSchema, PageVisitsView } from './db.views';
+import { GCTasksMappings, GCTasksMappingsSchema } from './schemas/gc-tasks-mappings.schema';
 
 export const models = {
   callDrivers: {
@@ -67,6 +68,7 @@ export const models = {
   annotations: { model: Annotations, schema: AnnotationsSchema },
   reports: { model: Reports, schema: ReportsSchema },
   gcTasks: { model: GcTasks, schema: GcTasksSchema},
+  gcTasksMappings: { model: GCTasksMappings, schema: GCTasksMappingsSchema},
   customReportsRegistry: {
     model: CustomReportsRegistry,
     schema: CustomReportsRegistrySchema,

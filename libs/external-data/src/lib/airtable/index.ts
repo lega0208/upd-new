@@ -19,6 +19,7 @@ import {
   PageListData,
   AnnotationsData,
   ReportsData,
+  GCTasksMappingsData,
 } from './types';
 
 dayjs.extend(utc);
@@ -411,6 +412,26 @@ export class AirtableClient {
         predictive_insight: squishTrim(fields['Predictive insight']),
         predictive_insight_fr: squishTrim(fields['Predictive insight FR']),
       })) as AnnotationsData[];
+  }
+
+  async getGCTasksMappings(lastUpdatedDate?: DateType): Promise<GCTasksMappingsData[]> {
+    const params = lastUpdatedDate
+      ? {
+          filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
+        }
+      : {};
+    const query = this.createQuery(bases.GCTASKSMAPPINGS, 'GCTSS->TMF');
+
+    return (await this.selectAll(query))
+      .filter(({ fields }) => Object.values(fields).some((value) => value))
+      .map(({ id, fields }) => ({
+        airtable_id: id,
+        title: squishTrim(fields['GC TSS Task']),
+        title_fr: squishTrim(fields['GC TSS Task - FR']),
+        tasks: fields['TMF Task Airtable ID']?.map(squishTrim),
+        date_mapped:
+          fields['Date mapped'] && dayjs.utc(fields['Date mapped']).toDate(),
+      })) as GCTasksMappingsData[];
   }
 
   createCalldriverQueries(dateRange: { start: DateType; end: DateType }) {
