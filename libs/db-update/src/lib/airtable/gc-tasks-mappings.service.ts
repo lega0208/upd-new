@@ -4,7 +4,6 @@ import { AirtableClient } from '@dua-upd/external-data';
 import {
   GCTasksMappings,
   GCTasksMappingsDocument,
-  GCTasksMappingsModel,
   Task,
 } from '@dua-upd/db';
 import { Model, Types, mongo } from 'mongoose';
@@ -64,7 +63,7 @@ export class GCTasksMappingsService {
 
     // Get the new mappings to include object ids
     const newGCTasksMappings = await this.gcTasksMappingsModel
-      .find()
+      .find({ tasks: { $exists: true } })
       .lean()
       .exec();
 
