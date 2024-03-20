@@ -1,9 +1,19 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AirtableClient } from '@dua-upd/external-data';
-import { GCTasksMappings, GCTasksMappingsDocument, GCTasksMappingsModel, Task } from '@dua-upd/db';
-import { Model } from 'mongoose';
-import { Retry, arrayToDictionary } from '@dua-upd/utils-common';
+import {
+  GCTasksMappings,
+  GCTasksMappingsDocument,
+  GCTasksMappingsModel,
+  Task,
+} from '@dua-upd/db';
+import { Model, Types, mongo } from 'mongoose';
+import {
+  Retry,
+  arrayToDictionary,
+  arrayToDictionaryMultiref,
+} from '@dua-upd/utils-common';
+import { omit } from 'rambdax';
 
 @Injectable()
 export class GCTasksMappingsService {
@@ -13,53 +23,72 @@ export class GCTasksMappingsService {
     @InjectModel(Task.name, 'defaultConnection')
     private taskModel: Model<Task>,
     @InjectModel(GCTasksMappings.name, 'defaultConnection')
-    private gcTasksMappingsModel: Model<GCTasksMappingsDocument>
+    private gcTasksMappingsModel: Model<GCTasksMappingsDocument>,
   ) {}
 
   @Retry(4, 1000)
   async updateGCTasksMappings() {
     this.logger.log('Updating GC Tasks Mappings...');
 
-    // GC Tasks Mappings collection
-    const gcTasksMappingsModel = await this.gcTasksMappingsModel;
-
-    // Tasks collection
-    const tasks = await this.taskModel;
-
-    // GC Tasks Mappings client
-    const gcTasksMappingsClient = this.airtableClient;
-
     // Get all the tasks airtable ids
-    const taskIds = await tasks.find({}, { airtable_id: 1 }).lean().exec();
+    const taskIds = await this.taskModel
+      .find({}, { airtable_id: 1 })
+      .lean()
+      .exec();
 
     // Create dictionary
     const taskIdsDict = arrayToDictionary(taskIds, 'airtable_id');
 
     // Replace airtable ids with the ObjectIds
-    const gcTasksMappings = (await gcTasksMappingsClient.getGCTasksMappings()).map(
-      (gcTasksMapping) => ({
-        ...gcTasksMapping,
-        tasks: gcTasksMapping.tasks?.map(
-          (id) => taskIdsDict[id]._id
-        ),
-      })
-    );
+    const gcTasksMappings = (
+      await this.airtableClient.getGCTasksMappings()
+    ).map((gcTasksMapping) => ({
+      ...gcTasksMapping,
+      tasks: gcTasksMapping.tasks?.map((id) => taskIdsDict[id]._id),
+    }));
 
     // Create a bulk write
-    const bulkWriteOps = gcTasksMappings.map((gcTasksMapping) => ({
-      updateOne: {
-        filter: { airtable_id: gcTasksMapping.airtable_id },
-        update: {
-          $set: gcTasksMapping,
+    const bulkWriteOps: mongo.AnyBulkWriteOperation<GCTasksMappings>[] =
+      gcTasksMappings.map((gcTasksMapping) => ({
+        updateOne: {
+          filter: { airtable_id: gcTasksMapping.airtable_id },
+          update: {
+            $set: gcTasksMapping,
+          },
+          upsert: true,
         },
-        upsert: true,
+      }));
+
+    // Bulk write
+    await this.gcTasksMappingsModel.bulkWrite(bulkWriteOps);
+
+    // Get the new mappings to include object ids
+    const newGCTasksMappings = await this.gcTasksMappingsModel
+      .find()
+      .lean()
+      .exec();
+
+    // Flip the mappings to get all gc tasks for each task
+    const gcTasksByTmfTask = arrayToDictionaryMultiref(
+      newGCTasksMappings,
+      'tasks',
+      true,
+    );
+
+    // Update tasks with the new mappings
+    const taskUpdateOps: mongo.AnyBulkWriteOperation<Task>[] = Object.entries(
+      gcTasksByTmfTask,
+    ).map(([taskId, gcTasks]) => ({
+      updateOne: {
+        filter: { _id: new Types.ObjectId(taskId) },
+        update: {
+          $set: { gc_tasks: gcTasks.map(omit(['tasks'])) },
+        },
       },
     }));
 
-    // Delete
-    await gcTasksMappingsModel.deleteMany({});
+    await this.taskModel.bulkWrite(taskUpdateOps, { ordered: false });
 
-    // Bulk write
-    await gcTasksMappingsModel.bulkWrite(bulkWriteOps);
+    this.logger.log('Successfully updated GC Tasks Mappings');
   }
 }

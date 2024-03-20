@@ -19,7 +19,7 @@ export class GCTasksMappings implements IGCTasksMappings {
   @Prop({ type: String, required: true })
   title_fr: string;
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }] })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }], index: true })
   tasks?: Types.ObjectId[] | Task[];
 
   @Prop({ type: Date })

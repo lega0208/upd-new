@@ -212,10 +212,7 @@ export class AirtableClient {
     })) as FieldRecordQuery[];
   }
 
-  async insertSearchAssessment(
-    data,
-    lang: Lang = 'en',
-  ) {
+  async insertSearchAssessment(data, lang: Lang = 'en') {
     return await this.insertRecords(
       bases.SEARCH_ASSESSMENT,
       `CRA - ${lang.toUpperCase()}`,
@@ -252,6 +249,7 @@ export class AirtableClient {
       .map(({ id, fields }) => ({
         airtable_id: id,
         title: squishTrim(fields['Task']),
+        title_fr: squishTrim(fields['Task FR']),
         group: squishTrim(fields['Group']),
         subgroup: squishTrim(fields['Sub-Group']),
         topic: squishTrim(fields['Topic']),
@@ -414,24 +412,27 @@ export class AirtableClient {
       })) as AnnotationsData[];
   }
 
-  async getGCTasksMappings(lastUpdatedDate?: DateType): Promise<GCTasksMappingsData[]> {
+  async getGCTasksMappings(
+    lastUpdatedDate?: DateType,
+  ): Promise<GCTasksMappingsData[]> {
     const params = lastUpdatedDate
       ? {
           filterByFormula: createLastUpdatedFilterFormula(lastUpdatedDate),
         }
       : {};
-    const query = this.createQuery(bases.GCTASKSMAPPINGS, 'GCTSS->TMF');
+
+    const query = this.createQuery(bases.GCTASKSMAPPINGS, 'GCTSS->TMF', params);
 
     return (await this.selectAll(query))
       .filter(({ fields }) => Object.values(fields).some((value) => value))
       .map(({ id, fields }) => ({
-        airtable_id: id,
+        airtable_id: id as string,
         title: squishTrim(fields['GC TSS Task']),
         title_fr: squishTrim(fields['GC TSS Task - FR']),
         tasks: fields['TMF Task Airtable ID']?.map(squishTrim),
         date_mapped:
           fields['Date mapped'] && dayjs.utc(fields['Date mapped']).toDate(),
-      })) as GCTasksMappingsData[];
+      }));
   }
 
   createCalldriverQueries(dateRange: { start: DateType; end: DateType }) {
