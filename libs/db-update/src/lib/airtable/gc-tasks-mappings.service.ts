@@ -86,6 +86,8 @@ export class GCTasksMappingsService {
       },
     }));
 
+    await this.taskModel.updateMany({}, { $unset: { gc_tasks: '' } });
+
     await this.taskModel.bulkWrite(taskUpdateOps, { ordered: false });
 
     this.logger.log('Successfully updated GC Tasks Mappings');
