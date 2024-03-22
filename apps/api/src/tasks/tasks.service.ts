@@ -215,12 +215,14 @@ export class TasksService {
     const uxTestsDict = arrayToDictionaryMultiref(uxTests, 'tasks');
 
     const gcTasksData = await this.gcTasksModel
-    .aggregate()
-    .match({
-      date: { $gte: start, $lte: end },
-      sampling_task: 'y',
-      able_to_complete: { $ne: 'I started this survey before I finished my visit' }
-    })
+      .aggregate()
+      .match({
+        date: { $gte: start, $lte: end },
+        sampling_task: 'y',
+        able_to_complete: {
+          $ne: 'I started this survey before I finished my visit',
+        },
+      })
       .group({
         _id: { gc_task: '$gc_task' },
         total_entries: { $sum: 1 },
@@ -236,16 +238,18 @@ export class TasksService {
 
     const task = tasks.map((task) => {
       const calls = callsByTasks[task._id.toString()] ?? 0;
+      const gc_survey_participants = task.gc_tasks
+        .map((gcTask) => gcTasksDict[gcTask.title]?.total_entries ?? 0)
+        .reduce((a, b) => a + b, 0);
 
       const uxTestsForTask = uxTestsDict[task._id.toString()] ?? [];
-      const { avgTestSuccess, latestDate, percentChange } = getAvgSuccessFromLatestTests(uxTestsForTask);
-
-      // todo: map gc task data to task when it is available
+      const { avgTestSuccess, latestDate, percentChange } =
+        getAvgSuccessFromLatestTests(uxTestsForTask);
 
       return {
         ...task,
         calls,
-        tmf_ranking_index: task.visits * 0.1 + calls * 0.6, // todo: + gsc_survey_participants * 0.3
+        tmf_ranking_index: task.visits * 0.1 + calls * 0.6 + gc_survey_participants * 0.3,
         secure_portal: !!task.channel.find(
           (channel) => channel === 'Fully online - portal',
         ),
@@ -255,9 +259,8 @@ export class TasksService {
         cops: !!uxTestsForTask?.find((test) => !test.cops),
         pages_mapped: task.pages?.length ?? 0,
         projects_mapped: task.projects?.length ?? 0,
-        latest_ux_success: avgTestSuccess
-          
-        // survey: task.gc_survey_participants, // todo: add survey data when available
+        latest_ux_success: avgTestSuccess,
+        survey: gc_survey_participants,
       };
     });
 
