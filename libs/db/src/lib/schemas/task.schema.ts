@@ -8,6 +8,17 @@ import { GCTasksMappingsSchema } from '../db.schemas';
 
 export type TaskDocument = Task & Document;
 
+const gcTaskMappingsTypeDef = {
+  _id: String,
+  airtable_id: String,
+  title: String,
+  title_fr: String,
+  date_mapped: {
+    type: Date,
+    optional: true,
+  },
+}
+
 @Schema()
 export class Task implements ITask {
   @Prop({ type: Types.ObjectId, required: true })
@@ -49,7 +60,7 @@ export class Task implements ITask {
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Page' }] })
   pages?: Types.ObjectId[] | Page[];
 
-  @Prop({ type: [GCTasksMappingsSchema] })
+  @Prop({ type: [gcTaskMappingsTypeDef] })
   gc_tasks?: IGCTasksMappings[];
 
   @Prop({ type: [Number] })
