@@ -1,4 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import chalk from 'chalk';
+import { existsSync } from 'fs';
+import { readFile, writeFile, mkdir } from 'fs/promises';
+import { Types, type mongo } from 'mongoose';
+import { difference, filterObject, omit, uniq } from 'rambdax';
+import { utils, writeFile as writeXlsx } from 'xlsx';
 import {
   AAItemId,
   DbService,
@@ -9,19 +15,16 @@ import {
 import { DbUpdateService, processHtml, UrlsService } from '@dua-upd/db-update';
 import { SearchAnalyticsClient, singleDatesFromDateRange } from '@dua-upd/external-data';
 import {
+  TimingUtility,
   arrayToDictionary,
   arrayToDictionaryFlat,
+  arrayToDictionaryMultiref,
   dayjs,
   logJson,
   prettyJson,
 } from '@dua-upd/utils-common';
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import { Types, type mongo } from 'mongoose';
-import { IFeedback, IUrl } from '@dua-upd/types-common';
+import { IFeedback, IReadability, IUrl } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
-import { difference, filterObject, omit, uniq } from 'rambdax';
-import { utils, writeFile as writeXlsx } from 'xlsx';
 import { RunScriptCommand } from '../run-script.command';
 import { startTimer } from './utils/misc';
 import { outputExcel, outputJson } from './utils/output';
@@ -1221,4 +1224,265 @@ export async function fixActivityMapTitles(db: DbService) {
   console.timeEnd('unsetting metrics');
 
   console.log('Done fixing bad titles. Activity map needs to be repopulated.');
+}
+
+// Finds and removes "hashes" that are essentially the same content
+// from the urls collection, readability, and blob storage
+export async function removeRedundantUrlHashes(db: DbService) {
+  const blob = (<RunScriptCommand>this).inject<BlobStorageService>(
+    BlobStorageService.name,
+  );
+
+  const blobContainer = blob.blobModels.urls;
+
+  // delete duplicate readability scores (same url/hash/score/word count)
+  const duplicateReadability = await db.collections.readability
+    .aggregate([
+      {
+        $project: {
+          date: 1,
+          url: 1,
+          hash: 1,
+          total_words: 1,
+          final_fk_score: 1,
+        },
+      },
+      {
+        $group: {
+          _id: { url: '$url', hash: '$hash' },
+          count: { $sum: 1 },
+          docs: { $push: '$$ROOT' },
+        },
+      },
+      { $match: { count: { $gt: 1 } } },
+    ])
+    .exec();
+
+  if (duplicateReadability.length) {
+    console.log(
+      `Found ${duplicateReadability.length} duplicate readability scores, deleting duplicates...`,
+    );
+
+    const compareReadabilityDocs = (a: IReadability, b: IReadability) =>
+      a.url === b.url &&
+      a.hash === b.hash &&
+      a.final_fk_score === b.final_fk_score &&
+      a.total_words === b.total_words;
+
+    for (const { docs } of duplicateReadability) {
+      const sorted = docs.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+      const allAreSame = sorted.every((doc, i) =>
+        compareReadabilityDocs(doc, sorted[i + 1] || doc),
+      );
+
+      if (!allAreSame) {
+        throw Error(
+          `Not all docs are the same for: \n${sorted[0].url} \n ${sorted[0].hash}\n cannot proceed`,
+        );
+      }
+
+      const [keep, ...rest] = sorted;
+
+      for (const doc of rest) {
+        await db.collections.readability.deleteOne({ _id: doc._id });
+      }
+    }
+
+    console.log('Successfully removed duplicate readability scores');
+  }
+
+  const readability = await db.collections.readability
+    .find({}, { date: 1, url: 1, hash: 1, final_fk_score: 1, total_words: 1 })
+    .lean()
+    .exec();
+
+  const readabilityScoresByUrl = arrayToDictionaryMultiref(readability, 'url');
+
+  const startingReadabilityCount =
+    await db.collections.readability.estimatedDocumentCount();
+
+  console.log(
+    'Estimated starting count of readability scores:',
+    startingReadabilityCount,
+  );
+
+  // to keep track of and dump state if something goes wrong
+  const pendingOps = {
+    urlHashesToRemove: [] as string[],
+    readabilityHashesToDelete: [] as string[],
+    blobHashesToDelete: [] as string[],
+
+    async dump() {
+      const dumpFile = `pendingOps_${new Date().getTime()}.json`;
+
+      console.error('Dumping pending operations to:', dumpFile);
+
+      await writeFile(
+        dumpFile,
+        prettyJson({
+          urlHashesToRemove: this.urlHashesToRemove,
+          readabilityHashesToDelete: this.readabilityHashesToDelete,
+          blobHashesToDelete: this.blobHashesToDelete,
+        }),
+      );
+    },
+
+    addPending(hashes: Set<string>) {
+      for (const hash of hashes) {
+        this.urlHashesToRemove.push(hash);
+        this.readabilityHashesToDelete.push(hash);
+        this.blobHashesToDelete.push(hash);
+      }
+    },
+
+    setUrlsProcessed(hash: string) {
+      // in case it's not done in order for whatever reason
+      if (this.urlHashesToRemove[0] === hash) {
+        this.urlHashesToRemove.shift();
+        return;
+      }
+      this.urlHashesToRemove = this.urlHashesToRemove.filter((h) => h !== hash);
+    },
+
+    setReadabilityProcessed(hash: string) {
+      if (this.readabilityHashesToDelete[0] === hash) {
+        this.readabilityHashesToDelete.shift();
+        return;
+      }
+      this.readabilityHashesToDelete = this.readabilityHashesToDelete.filter(
+        (h) => h !== hash,
+      );
+    },
+
+    setBlobProcessed(hash: string) {
+      if (this.blobHashesToDelete[0] === hash) {
+        this.blobHashesToDelete.shift();
+        return;
+      }
+      this.blobHashesToDelete = this.blobHashesToDelete.filter(
+        (h) => h !== hash,
+      );
+    },
+  };
+
+  const redundantHashes: Set<string> = new Set();
+  const hashesToKeep: Set<string> = new Set();
+  const shouldSkip = (hash: string) =>
+    redundantHashes.has(hash) || hashesToKeep.has(hash);
+
+  const urlDocs = await db.collections.urls
+    .aggregate<IUrl & { hashesCount: number }>([
+      {
+        $project: {
+          url: 1,
+          hashes: 1,
+          hashesCount: { $size: '$hashes' },
+        },
+      },
+      {
+        $match: { hashesCount: { $gt: 6 } },
+      },
+      { $sort: { hashesCount: -1 } },
+    ])
+    .exec();
+
+  console.log(`${urlDocs.length} urls with more than 6 hashes`);
+
+  // if final score and word count are the same, treat hash as redundant
+  const isSame = (a: IReadability, b: IReadability) =>
+    a.final_fk_score === b.final_fk_score && a.total_words === b.total_words;
+
+  const progress = new TimingUtility(urlDocs.length);
+
+  console.log('Finding redundant hashes...');
+
+  for (const urlDoc of urlDocs) {
+    const urlHashes = urlDoc.hashes.filter(({ hash }) => !shouldSkip(hash));
+
+    if (urlHashes.length <= 2) {
+      continue;
+    }
+
+    const readabilityScores = readabilityScoresByUrl[urlDoc.url]
+      ?.filter(({ hash }) => !shouldSkip(hash))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    if (!readabilityScores || readabilityScores.length <= 2) {
+      continue;
+    }
+
+    let runStart: IReadability | null = null;
+    let prev: IReadability | null = null;
+
+    for (const score of readabilityScores) {
+      if (!runStart || !isSame(runStart, score)) {
+        hashesToKeep.add(score.hash);
+        runStart = score;
+        prev = null;
+
+        continue;
+      }
+
+      if (!prev) {
+        prev = score;
+        continue;
+      }
+
+      redundantHashes.add(prev.hash);
+
+      prev = score;
+    }
+
+    progress.logIteration(`${redundantHashes.size} redundant hashes found |`);
+  }
+
+  console.log(`Found ${redundantHashes.size} redundant hashes`);
+
+  pendingOps.addPending(redundantHashes);
+
+  const removalProgress = new TimingUtility(redundantHashes.size);
+
+  console.log(
+    'Removing redundant hashes from urls, readability, and blob storage...',
+  );
+
+  try {
+    for (const hash of redundantHashes) {
+      await Promise.all([
+        // urls
+        db.collections.urls
+          .updateMany({ 'hashes.hash': hash }, { $pull: { hashes: { hash } } })
+          .then(() => pendingOps.setUrlsProcessed(hash)),
+
+        // readability
+        db.collections.readability
+          .deleteMany({
+            hash,
+          })
+          .then(() => pendingOps.setReadabilityProcessed(hash)),
+
+        // blobs
+        blobContainer
+          .blob(hash)
+          .delete()
+          .then(() => pendingOps.setBlobProcessed(hash)),
+      ]);
+
+      removalProgress.logIteration(`Processed: ${hash} |`);
+    }
+  } catch (e) {
+    console.error(
+      chalk.redBright('Error occurred processing redundant hashes:'),
+      chalk.red(e.stack),
+    );
+    await pendingOps.dump();
+  }
+
+  const newReadabilityCount =
+    await db.collections.readability.estimatedDocumentCount();
+
+  console.log(
+    `Readability count before: ${startingReadabilityCount} | after: ${newReadabilityCount}`,
+  );
 }

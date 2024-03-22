@@ -4,7 +4,6 @@ import { UxTest } from './ux-test.schema';
 import { Page } from './page.schema';
 import { Project } from './project.schema';
 import type { IGCTasksMappings, ITask } from '@dua-upd/types-common';
-import { GCTasksMappingsSchema } from '../db.schemas';
 
 export type TaskDocument = Task & Document;
 
