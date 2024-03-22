@@ -226,11 +226,17 @@ export class TasksService {
       .group({
         _id: { gc_task: '$gc_task' },
         total_entries: { $sum: 1 },
+        completed_entries: {
+          $sum: {
+            $cond: [{ $eq: ['$able_to_complete', 'Yes'] }, 1, 0],
+          },
+        },
       })
       .project({
         _id: 0,
         gc_task: '$_id.gc_task',
         total_entries: 1,
+        completed_entries: 1,
       })
       .exec();
 
@@ -238,9 +244,19 @@ export class TasksService {
 
     const task = tasks.map((task) => {
       const calls = callsByTasks[task._id.toString()] ?? 0;
-      const gc_survey_participants = task.gc_tasks
-        .map((gcTask) => gcTasksDict[gcTask.title]?.total_entries ?? 0)
-        .reduce((a, b) => a + b, 0);
+      const { gc_survey_participants, gc_survey_completed } =
+        task.gc_tasks.reduce(
+          (acc, gcTask) => {
+            const { total_entries = 0, completed_entries = 0 } =
+              gcTasksDict[gcTask.title] || {};
+
+            acc.gc_survey_participants += total_entries;
+            acc.gc_survey_completed += completed_entries;
+
+            return acc;
+          },
+          { gc_survey_participants: 0, gc_survey_completed: 0 },
+        );
 
       const uxTestsForTask = uxTestsDict[task._id.toString()] ?? [];
       const { avgTestSuccess, latestDate, percentChange } =
@@ -249,7 +265,8 @@ export class TasksService {
       return {
         ...task,
         calls,
-        tmf_ranking_index: task.visits * 0.1 + calls * 0.6 + gc_survey_participants * 0.3,
+        tmf_ranking_index:
+          task.visits * 0.1 + calls * 0.6 + gc_survey_participants * 0.3,
         secure_portal: !!task.channel.find(
           (channel) => channel === 'Fully online - portal',
         ),
@@ -260,7 +277,8 @@ export class TasksService {
         pages_mapped: task.pages?.length ?? 0,
         projects_mapped: task.projects?.length ?? 0,
         latest_ux_success: avgTestSuccess,
-        survey: gc_survey_participants,
+        survey: gc_survey_participants ?? 0,
+        survey_completed: gc_survey_completed / gc_survey_participants ?? 0,
       };
     });
 

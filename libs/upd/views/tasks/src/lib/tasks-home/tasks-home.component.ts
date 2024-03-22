@@ -64,11 +64,11 @@ export class TasksHomeComponent implements OnInit {
       hide: true,
       translate: true,
     },
-    // {
-    //   field: 'tmf_rank',
-    //   header: 'TMF Rank',
-    //   pipe: 'number',
-    // },
+    {
+      field: 'tmf_rank',
+      header: 'Rank',
+      pipe: 'number',
+    },
     {
       field: 'task',
       header: 'task',
@@ -89,11 +89,12 @@ export class TasksHomeComponent implements OnInit {
     //   field: 'secure_portal',
     //   header: 'Secure portal',
     // },
-    // {
-    //   field: 'portfolio',
-    //   header: 'Portfolio',
-    //   translate: true,
-    // },
+    {
+      field: 'portfolio',
+      header: 'Portfolio',
+      hide: true,
+      translate: true,
+    },
     // {
     //   field: 'ux_testing',
     //   header: 'UX testing',
@@ -114,13 +115,10 @@ export class TasksHomeComponent implements OnInit {
     //   header: 'Projects mapped',
     //   pipe: 'number',
     // },
-    // { // todo: add when available
-    //   field: 'gc_survey_participants',
-    //   header: 'Survey'
-    // },
     {
       field: 'program',
       header: 'Program',
+      hide: true,
       translate: true,
     },
     {
@@ -131,6 +129,7 @@ export class TasksHomeComponent implements OnInit {
     {
       field: 'topic',
       header: 'topic',
+      hide: true,
       translate: true,
     },
     {
@@ -150,11 +149,32 @@ export class TasksHomeComponent implements OnInit {
       pipe: 'number',
     },
     {
+      field: 'survey',
+      header: 'survey',
+      pipe: 'number',
+    },
+    {
       field: 'calls_per_100_visits',
       header: 'kpi-calls-per-100-title',
       pipe: 'number',
       pipeParam: '1.3-3',
     },
+    {
+      field: 'dyf_no_per_1000_visits',
+      header: 'kpi-feedback-per-1000-title',
+      pipe: 'number',
+      pipeParam: '1.3-3',
+    },
+    {
+      field: 'survey_completed',
+      header: 'survey_completed',
+      pipe: 'percent',
+    },
+    {
+      field: 'latest_ux_success',
+      header: 'Latest UX Testing score',
+      pipe: 'percent'
+    }
   ] as ColumnConfig<UnwrapObservable<typeof this.tasksHomeData$>>[];
 
   ngOnInit() {

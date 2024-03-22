@@ -33,6 +33,8 @@ export class TasksHomeFacade {
             : '',
         calls_per_100_visits:
           row.visits > 0 ? round((row.calls / row.visits) * 100, 3) || 0 : 0,
+        dyf_no_per_1000_visits:
+          row.visits > 0 ? round((row.dyf_no / row.visits) * 1000, 3) || 0 : 0,
       }));
     }),
   );
