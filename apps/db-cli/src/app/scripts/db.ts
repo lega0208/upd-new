@@ -13,7 +13,10 @@ import {
   Readability,
 } from '@dua-upd/db';
 import { DbUpdateService, processHtml, UrlsService } from '@dua-upd/db-update';
-import { SearchAnalyticsClient, singleDatesFromDateRange } from '@dua-upd/external-data';
+import {
+  SearchAnalyticsClient,
+  singleDatesFromDateRange,
+} from '@dua-upd/external-data';
 import {
   TimingUtility,
   arrayToDictionary,
@@ -244,10 +247,12 @@ export async function repopulateGscPageSearchTerms(db: DbService) {
 
   const bulkWriteOps = [];
 
-  const results = (await client.getPageMetrics({
-    start: sixteenMonthsAgo,
-    end: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
-  })).flat();
+  const results = (
+    await client.getPageMetrics({
+      start: sixteenMonthsAgo,
+      end: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
+    })
+  ).flat();
 
   for (const result of results) {
     bulkWriteOps.push({
@@ -1485,4 +1490,37 @@ export async function removeRedundantUrlHashes(db: DbService) {
   console.log(
     `Readability count before: ${startingReadabilityCount} | after: ${newReadabilityCount}`,
   );
+}
+
+export async function generateTaskTranslations(db: DbService) {
+  const taskTitles = await db.collections.tasks
+    .find({}, { title: 1, title_fr: 1 })
+    .lean()
+    .exec();
+
+  const translations_en = Object.fromEntries(
+    taskTitles.map(({ title }) => [title, title]),
+  );
+
+  const translations_fr = Object.fromEntries(
+    taskTitles.map(({ title, title_fr }) => [title, title_fr || title]),
+  );
+
+  const missingTranslations = Object.entries(translations_fr)
+    .filter(([key, value]) => key === value)
+    .map(([key]) => key);
+
+  const outPath = 'libs/upd/i18n/src/lib/translations/';
+
+  const enOutPath = `${outPath}tasks_en-CA.json`;
+  const frOutPath = `${outPath}tasks_fr-CA.json`;
+
+  console.log(`Writing English translations to: ${enOutPath}`);
+  await writeFile(enOutPath, prettyJson(translations_en));
+
+  console.log(`Writing French translations to: ${frOutPath}`);
+  await writeFile(frOutPath, prettyJson(translations_fr));
+
+  console.log('Missing translations:');
+  console.log(missingTranslations);
 }
