@@ -53,11 +53,10 @@ export class CalendarComponent implements OnChanges {
   @Output() dateChange = new EventEmitter<Date[] | Date>();
 
   calendarDates?: Date[];
-  hoveredDate: dayjs.Dayjs | null = null;
 
   dates: WritableSignal<Date[]> = signal([]);
 
-  minSelectableDate: Date = new Date(2020, 0, 1);
+  minSelectableDate = dayjs().subtract(3, 'year').subtract(1, 'month').startOf('month').toDate();
   maxSelectableDate = dayjs().startOf('day').subtract(1, 'day').toDate();
 
   startOfWeek = dayjs().startOf('week').toDate();
@@ -227,34 +226,5 @@ export class CalendarComponent implements OnChanges {
           date.month === endDate.month() &&
           date.year === endDate.year()
       : false;
-  }
-
-  isHoveredRangeDate(date: {
-    month: number;
-    day: number;
-    year: number;
-  }): boolean {
-    if (!this.hoveredDate || this.datePicker.value[1]) {
-      return false;
-    }
-
-    const startDate = dayjs(this.datePicker.value[0]);
-    const currentDate = dayjs(new Date(date.year, date.month, date.day));
-    return (
-      currentDate.isAfter(startDate) &&
-      currentDate.isBefore(this.hoveredDate)
-    );
-  }
-
-  onMouseEnter(date: { month: number; day: number; year: number }) {
-    if (this.datePicker.value[1]) {
-      return;
-    }
-
-    this.hoveredDate = dayjs(new Date(date.year, date.month, date.day));
-  }
-
-  onMouseLeave() {
-    this.hoveredDate = null;
   }
 }
