@@ -21,6 +21,7 @@
   "tab-uxtests": "Essais sur l'expérience utilisateur",
   "tab-details": "Détails",
   "tab-readability": "Lisibilité",
+  "tab-gctasks": "Sondage sur la réussite des tâches du GC",
   "dr-lastweek": "La semaine dernière",
   "dr-lastmonth": "Le mois dernier",
   "dr-alltime": "En tout temps",
@@ -347,6 +348,9 @@
   "Regions": "Régions",
   "Cities": "Villes",
   "Countries": "Pays",
+  "survey": "Volume de sondage",
+  "survey_completed": "Réussite de la tâche auto-déclarée (% de l'enquête)",
+  "Page status": "Statut de la page",
 
   "kpi-calls-per-100-title": "Appels pour 100 visites",
   "kpi-calls-per-100-tooltip": "Le ratio des appels reçus par l'ARC pour 100 visites des pages de l'ARC sur Canada.ca au cours de la période visée.",
