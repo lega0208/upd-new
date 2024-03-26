@@ -10,6 +10,7 @@ import type {
   PageMetricsModel,
   ProjectDocument,
   TaskDocument,
+  UrlModel,
   UxTestDocument,
 } from '@dua-upd/db';
 import {
@@ -22,6 +23,7 @@ import {
   Project,
   Reports,
   Task,
+  Url,
   UxTest,
 } from '@dua-upd/db';
 import type {
@@ -31,6 +33,7 @@ import type {
   TaskDetailsAggregatedData,
   TaskDetailsData,
   TasksHomeData,
+  VisitsByPage,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -63,6 +66,8 @@ export class TasksService {
     private reportsModel: Model<Reports>,
     @InjectModel(GcTasks.name, 'defaultConnection')
     private gcTasksModel: Model<GcTasks>,
+    @InjectModel(Url.name, 'defaultConnection')
+    private urlsModel: UrlModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -340,7 +345,7 @@ export class TasksService {
 
     if (!task) console.error(params.id);
 
-    const projects = (task.projects || []).map((project) => ({
+    const projects = (task?.projects || []).map((project) => ({
       _id: project._id,
       id: project._id,
       title: project.title,
@@ -354,14 +359,14 @@ export class TasksService {
       }),
     }));
 
-    const taskUrls = task.pages
+    const taskUrls = task?.pages
       .map((page) => 'url' in page && page.url)
       .filter((url) => !!url);
 
-    const taskTpcId = task.tpc_ids;
+    const taskTpcId = task?.tpc_ids;
 
     const returnData: TaskDetailsData = {
-      _id: task._id.toString(),
+      _id: task?._id.toString(),
       title: task.title,
       group: task.group,
       subgroup: task.subgroup,
@@ -383,6 +388,7 @@ export class TasksService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.urlsModel,
         params.dateRange,
         taskUrls,
         taskTpcId,
@@ -394,6 +400,7 @@ export class TasksService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
+        this.urlsModel,
         params.comparisonDateRange,
         taskUrls,
         taskTpcId,
@@ -546,6 +553,7 @@ async function getTaskAggregatedData(
   calldriversModel: CallDriverModel,
   feedbackModel: FeedbackModel,
   pageModel: Model<Page>,
+  urlsModel: UrlModel,
   dateRange: string,
   pageUrls: string[],
   calldriversTpcId: number[],
@@ -630,44 +638,84 @@ async function getTaskAggregatedData(
     .find({ tasks: new Types.ObjectId(taskId) })
     .lean()
     .exec();
-
   const pageLookup = arrayToDictionary(pageWithTask, '_id');
 
-  if (results[0]?.visitsByPage) {
-    const metricsMapped = results[0].visitsByPage.map((metric) => {
-      const page = pageLookup[metric._id.toString()];
-      delete pageLookup[metric._id.toString()];
+  const urlsWithPageId = await urlsModel
+    .aggregate()
+    .match({ page: { $in: pageWithTask.map((page) => page._id) } })
+    .project({
+      _id: 0,
+      page: 1,
+      is_404: 1,
+      redirect: 1,
+      pageStatus: {
+        $switch: {
+          branches: [
+            { case: { $eq: ['$is_404', true] }, then: '404' },
+            { case: { $eq: ['$redirect', ''] }, then: 'Live' },
+            {
+              case: { $eq: [{ $toBool: '$redirect' }, true] },
+              then: 'Redirected',
+            },
+          ],
+          default: 'Live',
+        },
+      },
+    })
+    .exec();
+
+  const urlsLookup = arrayToDictionary(urlsWithPageId, 'page');
+
+  const visitedPageIds = new Set();
+  const metrics =
+    results[0]?.visitsByPage.map((metric) => {
+      const pageId = metric._id.toString();
+      visitedPageIds.add(pageId);
+
+      const page = pageLookup[pageId];
+      const urls = urlsLookup[pageId];
 
       return {
         ...metric,
-        _id: metric._id.toString(),
-        title: page.title,
-        url: page.url,
+        _id: pageId,
+        title: page?.title,
+        url: page?.url,
+        is404: urls?.is_404,
+        isRedirect: !!urls?.redirect,
+        redirect: urls?.redirect,
+        pageStatus: urls?.pageStatus,
       };
-    });
+    }) || [];
 
-    const missingPages = Object.values(pageLookup).map((page) => ({
-      _id: page._id.toString(),
-      title: page.title,
-      url: page.url,
-      visits: 0,
-      dyfYes: 0,
-      dyfNo: 0,
-      fwylfCantFindInfo: 0,
-      fwylfError: 0,
-      fwylfHardToUnderstand: 0,
-      fwylfOther: 0,
-      gscTotalClicks: 0,
-      gscTotalImpressions: 0,
-      gscTotalCtr: 0,
-      gscTotalPosition: 0,
-    }));
+  const metricsWithoutVisits =
+    Object.values(pageLookup)
+      .filter((page) => !visitedPageIds.has(page._id.toString()))
+      .map((page) => {
+        const urls = urlsLookup[page._id.toString()];
 
-    results[0].visitsByPage = [
-      ...(metricsMapped || []),
-      ...(missingPages || []),
-    ].sort((a, b) => a.title.localeCompare(b.title));
-  }
+        return {
+          ...page,
+          visits: 0,
+          dyfYes: 0,
+          dyfNo: 0,
+          fwylfCantFindInfo: 0,
+          fwylfError: 0,
+          fwylfHardToUnderstand: 0,
+          fwylfOther: 0,
+          gscTotalClicks: 0,
+          gscTotalImpressions: 0,
+          gscTotalCtr: 0,
+          gscTotalPosition: 0,
+          is404: urls?.is_404,
+          isRedirect: !!urls?.redirect,
+          redirect: urls?.redirect,
+          pageStatus: urls?.pageStatus,
+        };
+      }) || [];
+
+  results[0].visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
+    (a, b) => a.title.localeCompare(b.title),
+  ) as VisitsByPage[];
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 

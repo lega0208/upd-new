@@ -11,6 +11,7 @@ import type {
   PageDocument,
   PageMetricsModel,
   ProjectDocument,
+  UrlDocument,
   UxTestDocument,
 } from '@dua-upd/db';
 import {
@@ -20,6 +21,7 @@ import {
   PageMetrics,
   Project,
   Task,
+  Url,
   UxTest,
 } from '@dua-upd/db';
 import type {
@@ -31,6 +33,7 @@ import type {
   ProjectsHomeProject,
   ProjectStatus,
   ProjectsHomeData,
+  VisitsByPage,
 } from '@dua-upd/types-common';
 import { dateRangeSplit } from '@dua-upd/utils-common/date';
 import { getLatestTest, getLatestTestData } from '@dua-upd/utils-common/data';
@@ -147,6 +150,8 @@ export class ProjectsService {
     private feedbackModel: FeedbackModel,
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
+    @InjectModel(Url.name, 'defaultConnection')
+    private urlsModel: Model<UrlDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -445,6 +450,7 @@ export class ProjectsService {
       this.calldriversModel,
       this.projectsModel,
       this.pageModel,
+      this.urlsModel,
       new Types.ObjectId(params.id),
       params.dateRange,
       projectUrls,
@@ -458,6 +464,7 @@ export class ProjectsService {
       this.calldriversModel,
       this.projectsModel,
       this.pageModel,
+      this.urlsModel,
       new Types.ObjectId(params.id),
       params.comparisonDateRange,
       projectUrls,
@@ -608,6 +615,7 @@ async function getAggregatedProjectMetrics(
   calldriversModel: CallDriverModel,
   projectModel: Model<ProjectDocument>,
   pageModel: Model<PageDocument>,
+  urlsModel: Model<UrlDocument>,
   id: Types.ObjectId,
   dateRange: string,
   projectUrls: string[],
@@ -686,41 +694,82 @@ async function getAggregatedProjectMetrics(
 
   const pageLookup = arrayToDictionary(projectPages, '_id');
 
-  if (projectMetrics?.visitsByPage) {
-    const metricsMapped = projectMetrics.visitsByPage.map((metric) => {
-      const page = pageLookup[metric._id.toString()];
-      delete pageLookup[metric._id.toString()];
+  const urlsWithPageId = await urlsModel
+    .aggregate()
+    .match({ page: { $in: projectPages.map((page) => page._id) } })
+    .project({
+      _id: 0,
+      page: 1,
+      is_404: 1,
+      redirect: 1,
+      pageStatus: {
+        $switch: {
+          branches: [
+            { case: { $eq: ['$is_404', true] }, then: '404' },
+            { case: { $eq: ['$redirect', ''] }, then: 'Live' },
+            {
+              case: { $eq: [{ $toBool: '$redirect' }, true] },
+              then: 'Redirected',
+            },
+          ],
+          default: 'Live',
+        },
+      },
+    })
+    .exec();
+
+  const urlsLookup = arrayToDictionary(urlsWithPageId, 'page');
+
+  const visitedPageIds = new Set();
+  const metrics =
+    projectMetrics.visitsByPage.map((metric) => {
+      const pageId = metric._id.toString();
+      visitedPageIds.add(pageId);
+
+      const page = pageLookup[pageId];
+      const urls = urlsLookup[pageId];
 
       return {
         ...metric,
-        _id: metric._id.toString(),
-        title: page.title,
-        url: page.url,
+        _id: pageId,
+        title: page?.title,
+        url: page?.url,
+        is404: urls?.is_404,
+        isRedirect: !!urls?.redirect,
+        redirect: urls?.redirect,
+        pageStatus: urls?.pageStatus,
       };
-    });
+    }) || [];
 
-    const missingPages = Object.values(pageLookup).map((page) => ({
-      _id: page._id.toString(),
-      title: page.title,
-      url: page.url,
-      visits: 0,
-      dyfYes: 0,
-      dyfNo: 0,
-      fwylfCantFindInfo: 0,
-      fwylfError: 0,
-      fwylfHardToUnderstand: 0,
-      fwylfOther: 0,
-      gscTotalClicks: 0,
-      gscTotalImpressions: 0,
-      gscTotalCtr: 0,
-      gscTotalPosition: 0,
-    }));
+  const metricsWithoutVisits =
+    Object.values(pageLookup)
+      .filter((page) => !visitedPageIds.has(page._id.toString()))
+      .map((page) => {
+        const urls = urlsLookup[page._id.toString()];
 
-    projectMetrics.visitsByPage = [
-      ...(metricsMapped || []),
-      ...(missingPages || []),
-    ].sort((a, b) => a.title.localeCompare(b.title));
-  }
+        return {
+          ...page,
+          visits: 0,
+          dyfYes: 0,
+          dyfNo: 0,
+          fwylfCantFindInfo: 0,
+          fwylfError: 0,
+          fwylfHardToUnderstand: 0,
+          fwylfOther: 0,
+          gscTotalClicks: 0,
+          gscTotalImpressions: 0,
+          gscTotalCtr: 0,
+          gscTotalPosition: 0,
+          is404: urls?.is_404,
+          isRedirect: !!urls?.redirect,
+          redirect: urls?.redirect,
+          pageStatus: urls?.pageStatus,
+        };
+      }) || [];
+
+  projectMetrics.visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
+    (a, b) => a.title.localeCompare(b.title),
+  ) as VisitsByPage[];
 
   const project = await projectModel
     .findById(id)
