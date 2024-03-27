@@ -10,7 +10,6 @@ import type {
   PageMetricsModel,
   ProjectDocument,
   TaskDocument,
-  UrlModel,
   UxTestDocument,
 } from '@dua-upd/db';
 import {
@@ -23,7 +22,6 @@ import {
   Project,
   Reports,
   Task,
-  Url,
   UxTest,
 } from '@dua-upd/db';
 import type {
@@ -66,8 +64,6 @@ export class TasksService {
     private reportsModel: Model<Reports>,
     @InjectModel(GcTasks.name, 'defaultConnection')
     private gcTasksModel: Model<GcTasks>,
-    @InjectModel(Url.name, 'defaultConnection')
-    private urlsModel: UrlModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -388,7 +384,6 @@ export class TasksService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
-        this.urlsModel,
         params.dateRange,
         taskUrls,
         taskTpcId,
@@ -400,7 +395,6 @@ export class TasksService {
         this.calldriversModel,
         this.feedbackModel,
         this.pageModel,
-        this.urlsModel,
         params.comparisonDateRange,
         taskUrls,
         taskTpcId,
@@ -553,7 +547,6 @@ async function getTaskAggregatedData(
   calldriversModel: CallDriverModel,
   feedbackModel: FeedbackModel,
   pageModel: Model<Page>,
-  urlsModel: UrlModel,
   dateRange: string,
   pageUrls: string[],
   calldriversTpcId: number[],

@@ -11,7 +11,6 @@ import type {
   PageDocument,
   PageMetricsModel,
   ProjectDocument,
-  UrlDocument,
   UxTestDocument,
 } from '@dua-upd/db';
 import {
@@ -21,7 +20,6 @@ import {
   PageMetrics,
   Project,
   Task,
-  Url,
   UxTest,
 } from '@dua-upd/db';
 import type {
@@ -150,8 +148,6 @@ export class ProjectsService {
     private feedbackModel: FeedbackModel,
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
-    @InjectModel(Url.name, 'defaultConnection')
-    private urlsModel: Model<UrlDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -450,7 +446,6 @@ export class ProjectsService {
       this.calldriversModel,
       this.projectsModel,
       this.pageModel,
-      this.urlsModel,
       new Types.ObjectId(params.id),
       params.dateRange,
       projectUrls,
@@ -464,7 +459,6 @@ export class ProjectsService {
       this.calldriversModel,
       this.projectsModel,
       this.pageModel,
-      this.urlsModel,
       new Types.ObjectId(params.id),
       params.comparisonDateRange,
       projectUrls,
@@ -615,7 +609,6 @@ async function getAggregatedProjectMetrics(
   calldriversModel: CallDriverModel,
   projectModel: Model<ProjectDocument>,
   pageModel: Model<PageDocument>,
-  urlsModel: Model<UrlDocument>,
   id: Types.ObjectId,
   dateRange: string,
   projectUrls: string[],
