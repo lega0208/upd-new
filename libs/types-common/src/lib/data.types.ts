@@ -423,6 +423,10 @@ export interface VisitsByPage {
   visits: number;
   dyfYes?: number;
   dyfNo?: number;
+  is404?: boolean;
+  isRedirect?: boolean;
+  redirect?: string;
+  pageStatus?: PageStatus;
 }
 
 export interface ProjectDetailsAggregatedData {
