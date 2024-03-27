@@ -640,78 +640,52 @@ async function getTaskAggregatedData(
     .exec();
   const pageLookup = arrayToDictionary(pageWithTask, '_id');
 
-  const urlsWithPageId = await urlsModel
-    .aggregate()
-    .match({ page: { $in: pageWithTask.map((page) => page._id) } })
-    .project({
-      _id: 0,
-      page: 1,
-      is_404: 1,
-      redirect: 1,
-      pageStatus: {
-        $switch: {
-          branches: [
-            { case: { $eq: ['$is_404', true] }, then: '404' },
-            { case: { $eq: ['$redirect', ''] }, then: 'Live' },
-            {
-              case: { $eq: [{ $toBool: '$redirect' }, true] },
-              then: 'Redirected',
-            },
-          ],
-          default: 'Live',
-        },
-      },
-    })
-    .exec();
-
-  const urlsLookup = arrayToDictionary(urlsWithPageId, 'page');
+  const determinePageStatus = (page) => {
+    if (page?.is_404) return '404';
+    if (page?.redirect) return 'Redirected';
+    return 'Live';
+  };
 
   const visitedPageIds = new Set();
   const metrics =
     results[0]?.visitsByPage.map((metric) => {
       const pageId = metric._id.toString();
       visitedPageIds.add(pageId);
-
       const page = pageLookup[pageId];
-      const urls = urlsLookup[pageId];
 
       return {
         ...metric,
         _id: pageId,
         title: page?.title,
         url: page?.url,
-        is404: urls?.is_404,
-        isRedirect: !!urls?.redirect,
-        redirect: urls?.redirect,
-        pageStatus: urls?.pageStatus,
+        is404: page?.is_404,
+        isRedirect: !!page?.redirect,
+        redirect: page?.redirect,
+        pageStatus: determinePageStatus(page),
       };
     }) || [];
 
   const metricsWithoutVisits =
     Object.values(pageLookup)
       .filter((page) => !visitedPageIds.has(page._id.toString()))
-      .map((page) => {
-        const urls = urlsLookup[page._id.toString()];
-
-        return {
-          ...page,
-          visits: 0,
-          dyfYes: 0,
-          dyfNo: 0,
-          fwylfCantFindInfo: 0,
-          fwylfError: 0,
-          fwylfHardToUnderstand: 0,
-          fwylfOther: 0,
-          gscTotalClicks: 0,
-          gscTotalImpressions: 0,
-          gscTotalCtr: 0,
-          gscTotalPosition: 0,
-          is404: urls?.is_404,
-          isRedirect: !!urls?.redirect,
-          redirect: urls?.redirect,
-          pageStatus: urls?.pageStatus,
-        };
-      }) || [];
+      .map((page) => ({
+        ...page,
+        visits: 0,
+        dyfYes: 0,
+        dyfNo: 0,
+        fwylfCantFindInfo: 0,
+        fwylfError: 0,
+        fwylfHardToUnderstand: 0,
+        fwylfOther: 0,
+        gscTotalClicks: 0,
+        gscTotalImpressions: 0,
+        gscTotalCtr: 0,
+        gscTotalPosition: 0,
+        is404: page?.is_404,
+        isRedirect: !!page?.redirect,
+        redirect: page?.redirect,
+        pageStatus: determinePageStatus(page),
+      })) || [];
 
   results[0].visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
     (a, b) => a.title.localeCompare(b.title),
