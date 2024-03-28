@@ -1,11 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { UnwrapObservable } from '@dua-upd/utils-common';
-import { combineLatest } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import { ProjectsHomeFacade } from './+state/projects-home.facade';
 import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { FR_CA } from '@dua-upd/upd/i18n';
-import type { ProjectsHomeProject } from '@dua-upd/types-common';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
 
 @Component({
@@ -16,6 +15,8 @@ import { createCategoryConfig } from '@dua-upd/upd/utils';
 export class ProjectsHomeComponent implements OnInit {
   private i18n = inject(I18nFacade);
   private readonly projectsHomeService = inject(ProjectsHomeFacade);
+
+  loading$ = this.projectsHomeService.loaded$.pipe(map((loaded) => !loaded));
 
   data$ = this.projectsHomeService.projectsHomeData$;
   tableData$ = this.projectsHomeService.projectsHomeTableData$;
