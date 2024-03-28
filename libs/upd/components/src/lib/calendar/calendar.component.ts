@@ -56,7 +56,8 @@ export class CalendarComponent implements OnChanges {
 
   dates: WritableSignal<Date[]> = signal([]);
 
-  minSelectableDate = dayjs().subtract(3, 'year').subtract(1, 'month').startOf('month').toDate();
+  minDate = dayjs().subtract(3, 'year').subtract(1, 'month').startOf('month').toDate();
+  minSelectableDate = this.minDate;
   maxSelectableDate = dayjs().startOf('day').subtract(1, 'day').toDate();
 
   startOfWeek = dayjs().startOf('week').toDate();
@@ -97,7 +98,7 @@ export class CalendarComponent implements OnChanges {
 
   resetSelection(): void {
     this.dates.set([]);
-    this.minSelectableDate = new Date(2020, 0, 1);
+    this.minSelectableDate = this.minDate;
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -112,7 +113,7 @@ export class CalendarComponent implements OnChanges {
     }
 
     if (this.granularity === 'week') {
-      this.minSelectableDate = new Date(2020, 0, 1);
+      this.minSelectableDate = this.minDate;
       this.disabledDays = [1, 2, 3, 4, 5, 6];
       this.maxSelectableDate = dayjs()
         .subtract(1, 'week')
@@ -131,7 +132,7 @@ export class CalendarComponent implements OnChanges {
 
   resetCalendar() {
     this.datePicker.clear();
-    this.minSelectableDate = new Date(2020, 0, 1);
+    this.minSelectableDate = this.minDate;
     this.dates.set([]);
   }
 
@@ -167,7 +168,7 @@ export class CalendarComponent implements OnChanges {
         this.disabledDays = [0, 1, 2, 3, 4, 5];
         return;
       }
-      this.minSelectableDate = new Date(2020, 0, 1);
+      this.minSelectableDate = this.minDate;
       this.disabledDays = [1, 2, 3, 4, 5, 6];
     } else if (granularity === 'month' && dates.length === 2) {
       const endOfMonth = dayjs(date).endOf('month').toDate();
