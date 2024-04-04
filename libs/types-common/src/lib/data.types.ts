@@ -1,4 +1,9 @@
-import { type FilterQuery, type ProjectionType, Types, SortOrder } from 'mongoose';
+import {
+  type FilterQuery,
+  type ProjectionType,
+  Types,
+  SortOrder,
+} from 'mongoose';
 import type {
   AttachmentData,
   CallsByTopic,
@@ -162,7 +167,7 @@ export interface OverviewAggregatedData {
   }[];
   annotations: (Omit<IAnnotations, 'event_date'> & { event_date: string })[];
   gcTasksData: gcTasksData[];
-  gcTasksComments: gcTasksComments[]
+  gcTasksComments: gcTasksComments[];
 }
 
 export interface gcTasksData {
@@ -173,7 +178,10 @@ export interface gcTasksData {
   ease: number;
   able_to_complete: number;
   margin_of_error: number;
-  data_reliability: 'Low margin of error/Reliable data' | 'Higher margin of error/Use data with caution' | 'Insufficient data';
+  data_reliability:
+    | 'Low margin of error/Reliable data'
+    | 'Higher margin of error/Use data with caution'
+    | 'Insufficient data';
 }
 
 export interface gcTasksComments {
@@ -189,8 +197,18 @@ export interface gcTasksComments {
   grouping: string;
   gc_task: string;
   gc_task_other: string;
-  satisfaction: 'Very satisfied' | 'Satisfied' | 'Neutral' | 'Dissatisfied' | 'Very dissatisfied';
-  ease: 'Very easy' | 'Easy' | 'Neither difficult nor easy' | 'Difficult' | 'Very difficult';
+  satisfaction:
+    | 'Very satisfied'
+    | 'Satisfied'
+    | 'Neutral'
+    | 'Dissatisfied'
+    | 'Very dissatisfied';
+  ease:
+    | 'Very easy'
+    | 'Easy'
+    | 'Neither difficult nor easy'
+    | 'Difficult'
+    | 'Very difficult';
   able_to_complete: 'Yes' | 'No';
   what_would_improve?: string;
   what_would_improve_comment?: string;
@@ -243,6 +261,10 @@ export interface OverviewData
   top5DecreasedCalldriverTopics: TopCalldriverTopics[];
   searchTermsEn: OverallSearchTerm[];
   searchTermsFr: OverallSearchTerm[];
+  improvedTasksKpi?: {
+    uniqueTasks: number;
+    successRates: SuccessRates;
+  };
 }
 
 export type InternalSearchTerm = {
@@ -512,9 +534,9 @@ export type CollectionKeys =
   | 'customReportsRegistry'
   | 'customReportsMetrics';
 
-  export type SortOption<T> = {
-    [P in keyof T]?: SortOrder;
-  };
+export type SortOption<T> = {
+  [P in keyof T]?: SortOrder;
+};
 
 export type DbQuery = {
   [key: string]: {
@@ -523,4 +545,10 @@ export type DbQuery = {
     project?: ProjectionType<unknown>;
     sort?: SortOption<unknown>;
   };
+};
+
+export type SuccessRates = {
+  baseline: number;
+  validation: number;
+  difference: number;
 };

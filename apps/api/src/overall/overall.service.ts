@@ -48,6 +48,7 @@ import {
   AsyncLogTiming,
   avg,
   dateRangeSplit,
+  getImprovedKpiSuccessRates,
   getLatestTestData,
 } from '@dua-upd/utils-common';
 
@@ -180,6 +181,10 @@ export class OverallService {
       .endOf('week')
       .format('YYYY-MM-DD')}`;
 
+    const uxTests = (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [];
+
+    const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests)
+
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -214,8 +219,8 @@ export class OverallService {
         satComparisonDateRange
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
-      uxTests:
-        (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [],
+      uxTests,
+      improvedTasksKpi,
       ...(await getUxData(testsSince2018)),
       top25CalldriverTopics,
       top5IncreasedCalldriverTopics,

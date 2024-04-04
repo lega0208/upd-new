@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { avg, round } from '../math';
-import { ITask, IUxTest } from '@dua-upd/types-common';
+import { ITask, IUxTest, SuccessRates } from '@dua-upd/types-common';
 import {
   Dictionary,
   filter,
@@ -327,10 +327,11 @@ export function getLatestTestData<
   };
 }
 
-export type SuccessRates = {
-  baseline: number;
-  validation: number;
-  difference: number;
+
+
+export type ProjectTestTypes = {
+  Baseline: IUxTest[];
+  Validation: IUxTest[];
 };
 
 export const getImprovedKpiSuccessRates = (
@@ -354,17 +355,6 @@ export const getImprovedKpiSuccessRates = (
     (test) =>
       !isNullish(test.success_rate) && test.test_type && test!.tasks!.length,
   );
-
-  type ProjectTestTypes = {
-    Baseline: IUxTest[];
-    Validation: IUxTest[];
-  };
-
-  type SuccessRates = {
-    baseline: number;
-    validation: number;
-    difference: number;
-  };
 
   const avgTestSuccessRates = piped(
     filteredTests,
