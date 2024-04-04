@@ -62,7 +62,7 @@
 </ng-container>
 
 <!-- Comparison with Pipe -->
-<span *ngIf="config.pipe && config.type === 'comparison'" [ngClass]="comparisonClassMap">{{ numberVal }}</span>
+<span *ngIf="config.pipe && config.type === 'comparison'" [ngClass]="comparisonClassMap(this.config.field)">{{ numberVal }}</span>
 
 <!-- Only Pipe -->
 <ng-container *ngIf="!config.type">
@@ -88,4 +88,11 @@
 <!-- Default Data Display -->
 <ng-container *ngIf="!config.type && !config.pipe && !isArray(data[config.field])">
   <ng-container [ngTemplateOutlet]="displayData" [ngTemplateOutletContext]="{item: data[config.field]}"></ng-container>
+</ng-container>
+
+<!-- Indicator -->
+<ng-container *ngIf="config.indicator">
+  <span [ngClass]="comparisonClassMap(this.config.indicator.field, this.config.indicator.upGoodDownBad)">
+    <span class="material-icons">{{ arrowMap(this.config.indicator.field) }} </span>
+  </span>
 </ng-container>

@@ -55,12 +55,30 @@ export class DataTableStylesComponent implements OnInit {
     return this.data[this.config.field] as PageStatus;
   }
 
-  get comparisonClassMap() {
-    const value = this.data[this.config.field] as number;
+  comparisonClassMap(field: string, upGoodDownBad = true) {
+    const value = this.data[field] as number;
+
+    if (upGoodDownBad) {
+      return {
+        'text-danger': value < 0,
+        'text-success': value > 0,
+      };
+    }
+
     return {
-      'text-danger': value < 0,
-      'text-success': value > 0,
+      'text-danger': value > 0,
+      'text-success': value < 0,
     };
+  }
+
+  arrowMap(field: string) {
+    const value = this.data[field] as number;
+    if (value < 0) {
+      return 'arrow_downward';
+    } else if (value > 0) {
+      return 'arrow_upward';
+    }
+    return '';
   }
 
   private applyPipe(data: number): number | string {
