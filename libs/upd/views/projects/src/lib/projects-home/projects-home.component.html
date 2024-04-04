@@ -49,5 +49,6 @@
     [displayRows]="25"
     sortField="startDate"
     [sortOrder]="'desc'"
+    [loading]="(loading$ | async) !== false"
   ></upd-data-table>
 </upd-card>

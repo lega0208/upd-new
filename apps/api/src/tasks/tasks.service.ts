@@ -40,6 +40,7 @@ import {
   getAvgSuccessFromLatestTests,
   isNullish,
   percentChange,
+  round,
 } from '@dua-upd/utils-common';
 
 @Injectable()
@@ -200,11 +201,27 @@ export class TasksService {
       this.taskModel,
     );
 
+    const previousTasks =
+      await this.db.views.pageVisits.getVisitsDyfNoWithTaskData(
+        {
+          start: comparisonStart,
+          end: comparisonEnd,
+        },
+        this.taskModel,
+      );
+
     const callsByTasks: { [key: string]: number } = {};
+    const previousCallsByTasks: { [key: string]: number } = {};
 
     for (const task of tasks as Task[]) {
       callsByTasks[task._id.toString()] = (
         await this.calldriversModel.getCallsByTpcId(dateRange, task.tpc_ids)
+      ).reduce((a, b) => a + b.calls, 0);
+      previousCallsByTasks[task._id.toString()] = (
+        await this.calldriversModel.getCallsByTpcId(
+          comparisonDateRange,
+          task.tpc_ids,
+        )
       ).reduce((a, b) => a + b.calls, 0);
     }
 
@@ -242,9 +259,36 @@ export class TasksService {
       .exec();
 
     const gcTasksDict = arrayToDictionary(gcTasksData, 'gc_task');
+    const previousTasksDict = arrayToDictionary(previousTasks, '_id');
 
     const task = tasks.map((task) => {
       const calls = callsByTasks[task._id.toString()] ?? 0;
+      const previous_calls = previousCallsByTasks[task._id.toString()] ?? 0;
+      const previous_visits =
+        previousTasksDict[task._id.toString()]?.visits ?? 0;
+      const previous_dyf_no =
+        previousTasksDict[task._id.toString()]?.dyf_no ?? 0;
+
+      const calls_per_100_visits =
+        task.visits > 0 && calls > 0
+          ? round((calls / task.visits) * 100, 3)
+          : null;
+      const dyf_no_per_1000_visits =
+        task.visits > 0 && task.dyf_no > 0
+          ? round((task.dyf_no / task.visits) * 1000, 3)
+          : null;
+
+      const calls_per_100_visits_difference =
+        task.visits > 0 && calls > 0
+          ? calls_per_100_visits -
+            round((previous_calls / previous_visits) * 100, 3)
+          : null;
+      const dyf_no_per_1000_visits_difference =
+        task.visits > 0 && task.dyf_no > 0
+          ? dyf_no_per_1000_visits -
+            round((previous_dyf_no / previous_visits) * 1000, 3)
+          : null;
+
       const { gc_survey_participants, gc_survey_completed } =
         task.gc_tasks.reduce(
           (acc, gcTask) => {
@@ -265,7 +309,10 @@ export class TasksService {
 
       return {
         ...task,
+        previous_visits,
+        previous_dyf_no,
         calls,
+        previous_calls,
         tmf_ranking_index:
           task.visits * 0.1 + calls * 0.6 + gc_survey_participants * 0.3,
         secure_portal: !!task.channel.find(
@@ -280,6 +327,10 @@ export class TasksService {
         latest_ux_success: avgTestSuccess,
         survey: gc_survey_participants ?? 0,
         survey_completed: gc_survey_completed / gc_survey_participants ?? 0,
+        calls_per_100_visits,
+        dyf_no_per_1000_visits,
+        calls_per_100_visits_difference,
+        dyf_no_per_1000_visits_difference,
       };
     });
 

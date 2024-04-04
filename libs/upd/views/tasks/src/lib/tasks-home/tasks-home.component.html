@@ -37,7 +37,16 @@
     [cols]="tasksHomeColumns"
     [filter]="true"
     [filterTree]="true"
+    [columnSelection]="true"
     [displayRows]="25"
     [loading]="(loading$ | async) !== false"
   ></upd-data-table>
 </upd-card>
+
+<upd-alert
+  [type]="'info'"
+  [selfClosing]="false"
+  [dismissible]="false"
+>
+<span [innerHTML]="'info-task-suggestion' | translate"></span>
+</upd-alert>

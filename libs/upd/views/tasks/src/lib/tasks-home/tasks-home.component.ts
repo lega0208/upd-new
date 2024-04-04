@@ -68,6 +68,7 @@ export class TasksHomeComponent implements OnInit {
       field: 'tmf_rank',
       header: 'Rank',
       pipe: 'number',
+      frozen: true,
     },
     {
       field: 'task',
@@ -75,6 +76,7 @@ export class TasksHomeComponent implements OnInit {
       type: 'link',
       typeParam: '_id',
       translate: true,
+      frozen: true,
     },
     // {
     //   field: 'top_task',
@@ -125,6 +127,7 @@ export class TasksHomeComponent implements OnInit {
       field: 'user_type',
       header: 'Audience',
       translate: true,
+      frozen: true,
     },
     {
       field: 'topic',
@@ -158,22 +161,32 @@ export class TasksHomeComponent implements OnInit {
       header: 'kpi-calls-per-100-title',
       pipe: 'number',
       pipeParam: '1.3-3',
+      indicator: {
+        field: 'calls_per_100_visits_difference',
+        upGoodDownBad: true,
+      }
     },
     {
       field: 'dyf_no_per_1000_visits',
       header: 'kpi-feedback-per-1000-title',
       pipe: 'number',
       pipeParam: '1.3-3',
+      indicator: {
+        field: 'dyf_no_per_1000_visits_difference',
+        upGoodDownBad: true,
+      }
     },
     {
       field: 'survey_completed',
       header: 'survey_completed',
       pipe: 'percent',
+      hide: true,
     },
     {
       field: 'latest_ux_success',
       header: 'Latest UX Testing score',
-      pipe: 'percent'
+      pipe: 'percent',
+      hide: true,
     }
   ] as ColumnConfig<UnwrapObservable<typeof this.tasksHomeData$>>[];
 

@@ -122,6 +122,18 @@ export class TaskDetailsSummaryComponent implements OnInit {
           },
         },
         {
+          field: 'language',
+          header: this.i18n.service.translate('Search term language', lang),
+          filterConfig: {
+            type: 'category',
+            categories: createCategoryConfig({
+              i18n: this.i18n.service,
+              data,
+              field: 'language',
+            }),
+          },
+        },
+        {
           field: 'pageStatus',
           header: 'Page status',
           type: 'label',
@@ -132,18 +144,6 @@ export class TaskDetailsSummaryComponent implements OnInit {
               i18n: this.i18n.service,
               data,
               field: 'pageStatus',
-            }),
-          },
-        },
-        {
-          field: 'language',
-          header: this.i18n.service.translate('Search term language', lang),
-          filterConfig: {
-            type: 'category',
-            categories: createCategoryConfig({
-              i18n: this.i18n.service,
-              data,
-              field: 'language',
             }),
           },
         },

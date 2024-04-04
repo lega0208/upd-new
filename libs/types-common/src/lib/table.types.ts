@@ -20,6 +20,8 @@ export interface ColumnConfig<T = any> {
   hide?: boolean;
   headerClass?: string;
   columnClass?: string;
+  frozen?: boolean;
+  indicators?: Indicators;
 }
 
 export interface typeParams {
@@ -32,4 +34,9 @@ export interface typeParams {
 export interface FilterConfig<T = any> {
   type: 'category' | 'boolean' | 'passFail' | 'pageStatus';
   categories?: { name: string; value: T[keyof T] | null }[];
+}
+
+export interface Indicators {
+  field: OptionalKeyOf<any>;
+  upGoodDownBad?: boolean;
 }
