@@ -8,6 +8,8 @@ import {
   computed,
   inject,
   effect,
+  signal,
+  WritableSignal,
 } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { Table } from 'primeng/table';
@@ -26,6 +28,7 @@ export class DataTableComponent<T> {
   @Input() pagination = true;
   @Input() filter = true;
   @Input() filterTree = false;
+  @Input() columnSelection = false;
   @Input() captionTitle = '';
   @Input() loading = false;
   @Input() sortField = '';
@@ -47,6 +50,7 @@ export class DataTableComponent<T> {
   i18n = inject(I18nFacade);
 
   translatedData = this.i18n.toTranslatedTable<T>(this.data, this.cols);
+  selectedColumns: WritableSignal<ColumnConfig[]> = signal([]);
 
   searchFields = computed(() =>
     this.inputSearchFields().length
@@ -54,13 +58,52 @@ export class DataTableComponent<T> {
       : this.cols().map((col) => col.field),
   );
 
-  exportCols = computed(() => this.cols().filter((col) => !col.hide));
+  frozenCols: WritableSignal<ColumnConfig[]> = signal([]);
+
+  allColumns = computed(() => [
+    ...this.frozenCols(),
+    ...this.selectedColumns(),
+  ]);
+
+  selectableCols = computed(() => this.cols().filter((col) => !col.frozen));
 
   constructor() {
+    effect(
+      () => {
+        this.translatedData();
+        this.table?._filter();
+        this.table?.clearState();
+
+        this.frozenCols.set(this.cols().filter((col) => col.frozen));
+
+        const selectableColumns = this.cols().filter(
+          (col) => !col.hide && !col.frozen,
+        );
+
+        if (this.columnSelection) {
+          const storageKey = `selectedColumns-${this.id}`;
+          const stored = sessionStorage.getItem(storageKey);
+          const storageSelectedColumns: ColumnConfig[] = stored
+            ? JSON.parse(stored)
+            : null;
+
+          if (storageSelectedColumns.length > 0) {
+            this.selectedColumns.set(storageSelectedColumns);
+          } else {
+            this.selectedColumns.set(selectableColumns);
+          }
+        } else {
+          this.selectedColumns.set(selectableColumns);
+        }
+      },
+      { allowSignalWrites: true },
+    );
     effect(() => {
-      this.translatedData(); // trigger on lang/cols/data
-      this.table?._filter();
-      this.table?.clearState();
+      const storageKey = `selectedColumns-${this.id}`;
+      sessionStorage.setItem(
+        storageKey,
+        JSON.stringify(this.selectedColumns()),
+      );
     });
   }
 
@@ -89,5 +132,9 @@ export class DataTableComponent<T> {
 
   removeNode(node: SelectedNode) {
     this.node = node;
+  }
+
+  selectedColumnsChanged(selectedColumns: ColumnConfig[]) {
+    this.selectedColumns.set(selectedColumns);
   }
 }

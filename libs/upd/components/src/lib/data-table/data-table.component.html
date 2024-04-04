@@ -1,6 +1,6 @@
 <p-table
   #dt
-  [columns]="cols()"
+  [columns]="allColumns()"
   [value]="translatedData() || []"
   [rows]="displayRows"
   [rowHover]="true"
@@ -39,6 +39,36 @@
           </span>
         </div>
         <div class="d-flex">
+          <p-multiSelect
+            *ngIf="columnSelection"
+            [options]="selectableCols()"
+            [ngModel]="selectedColumns()"
+            (ngModelChange)="selectedColumnsChanged($event)"
+            optionLabel="header"
+            [style]="{ 'min-width': '150px', 'max-width': '250px' }"
+          >
+            <ng-template let-columns pTemplate="selectedItems">
+              @if (selectedColumns().length <= 3) {
+                @for (col of columns; track col.field) {
+                  {{ col.header | translate }}<span *ngIf="!$last">, </span>
+                }
+              } @else {
+                {{
+                  'selected-columns'
+                    | translate: { num: selectedColumns().length }
+                }}
+              }
+
+              @if (selectedColumns().length === 0) {
+                {{ 'change-columns' | translate }}
+              }
+            </ng-template>
+
+            <ng-template let-columns pTemplate="item">
+              {{ columns.header | translate }}
+            </ng-template>
+          </p-multiSelect>
+
           <upd-filter-table
             *ngIf="filterTree"
             [cols]="cols()"
@@ -51,7 +81,7 @@
           <upd-data-table-exports
             id="data-table-{{ id }}"
             *ngIf="exports"
-            [cols]="exportCols()"
+            [cols]="allColumns()"
             [data]="dt.filteredValue || translatedData() || []"
           ></upd-data-table-exports>
         </div>
@@ -72,7 +102,6 @@
       @for (col of columns; track col.field) {
         <th
           [pSortableColumn]="sort ? col.field : undefined"
-          [hidden]="col.hide"
           [ngClass]="col.headerClass || ''"
           class="{{ col.columnClass || '' }}"
         >
@@ -98,7 +127,19 @@
                     display="menu"
                     [hideOnClear]="true"
                     [showApplyButton]="false"
-                  ></p-columnFilter>
+                  >
+                    <ng-template pTemplate="header">
+                      <div class="px-3 pt-3 pb-0">
+                        <span class="fw-bold">
+                          @if (col.field === 'cops') {
+                            {{ col.field | uppercase | translate }}
+                          } @else {
+                            {{ col.field | translate }}
+                          }
+                        </span>
+                      </div>
+                    </ng-template>
+                  </p-columnFilter>
                 </ng-template>
 
                 <!-- Category/Multiselect Filtering -->
@@ -170,7 +211,6 @@
                 (col.field === 'change' && rowData[col.field] >= 0.2))
           }"
           class="{{ col.columnClass || '' }}"
-          [hidden]="col.hide"
         >
           <span
             class="p-column-title datatable-headers"
@@ -180,6 +220,14 @@
             >{{ col.header | translate }}</span
           >
           <upd-data-table-styles [config]="col" [data]="rowData" />
+          @if (col.indicator) {
+            <span *ngIf="rowData[col.indicator.field] > 0" class="text-danger">
+              <span class="material-icons">arrow_upward</span>
+            </span>
+            <span *ngIf="rowData[col.indicator.field] < 0" class="text-success">
+              <span class="material-icons">arrow_downward</span>
+            </span>
+          }
         </td>
       }
     </tr>
