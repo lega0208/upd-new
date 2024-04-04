@@ -220,14 +220,6 @@
             >{{ col.header | translate }}</span
           >
           <upd-data-table-styles [config]="col" [data]="rowData" />
-          @if (col.indicator) {
-            <span *ngIf="rowData[col.indicator.field] > 0" class="text-danger">
-              <span class="material-icons">arrow_upward</span>
-            </span>
-            <span *ngIf="rowData[col.indicator.field] < 0" class="text-success">
-              <span class="material-icons">arrow_downward</span>
-            </span>
-          }
         </td>
       }
     </tr>

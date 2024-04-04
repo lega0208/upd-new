@@ -163,7 +163,7 @@ export class TasksHomeComponent implements OnInit {
       pipeParam: '1.3-3',
       indicator: {
         field: 'calls_per_100_visits_difference',
-        upGoodDownBad: true,
+        upGoodDownBad: false,
       }
     },
     {
@@ -173,7 +173,7 @@ export class TasksHomeComponent implements OnInit {
       pipeParam: '1.3-3',
       indicator: {
         field: 'dyf_no_per_1000_visits_difference',
-        upGoodDownBad: true,
+        upGoodDownBad: false,
       }
     },
     {

@@ -21,7 +21,7 @@ export interface ColumnConfig<T = any> {
   headerClass?: string;
   columnClass?: string;
   frozen?: boolean;
-  indicators?: Indicators;
+  indicator?: Indicator<T>;
 }
 
 export interface typeParams {
@@ -36,7 +36,7 @@ export interface FilterConfig<T = any> {
   categories?: { name: string; value: T[keyof T] | null }[];
 }
 
-export interface Indicators {
-  field: OptionalKeyOf<any>;
+export interface Indicator<T = any> {
+  field: OptionalKeyOf<T>;
   upGoodDownBad?: boolean;
 }

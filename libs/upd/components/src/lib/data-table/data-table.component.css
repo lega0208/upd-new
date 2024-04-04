@@ -13,6 +13,3 @@ td.validation-kpi-not-met + td.bg-green {
 .exportButtons {
   margin: 0 5px 5px 0;
 }
-.text-success {
-  color: #28a745 !important;
-}
