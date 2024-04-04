@@ -1,4 +1,10 @@
-import type { OptionalKeyOf } from '@dua-upd/utils-common';
+type OptionalKeyOf<T = void> = T extends void
+  ? string
+  : T extends unknown
+    ? keyof T extends string
+      ? keyof T
+      : string
+    : any;
 
 export type ColumnConfigPipe =
   | 'percent'
