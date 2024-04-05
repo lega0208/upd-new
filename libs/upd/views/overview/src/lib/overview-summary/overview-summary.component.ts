@@ -54,6 +54,8 @@ export class OverviewSummaryComponent implements OnInit {
   kpiLastAvgSuccessRate$ = this.overviewService.kpiLastAvgSuccessRate$;
   kpiTestsCompleted$ = this.overviewService.kpiTestsCompleted$;
 
+ 
+
   kpiSearchAssessment$ = this.overviewService.currentKpiSearchAssessment$;
   kpiSearchAssessmentPercentChange$ =
     this.overviewService.kpiSearchAssessmentPercentChange$;

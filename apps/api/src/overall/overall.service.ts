@@ -589,6 +589,56 @@ async function getProjects(
 
   const avgTestSuccessAvg = avg(kpiUxTestsSuccessRates, 2);
 
+
+
+const kpiUxTestsSuccessRates2 = projectsData
+   .flatMap((project) => {
+      const testsByType: { [key: string]: any[] } = {}; // Object to store tests by type
+
+      // Iterate through tests of each project and categorize them by type
+      project.uxTests.forEach(test => {
+         if (testsByType[test.test_type]) {
+            testsByType[test.test_type].push(test); 
+         } else {
+            testsByType[test.test_type] = [test];
+         }
+      });
+
+      // Filter and return tests based on the criteria
+      const filteredTests = [];
+      
+      // Include tests from projects tested once by type (Baseline, Spot Check, or Exploratory)
+      ['Baseline', 'Spot Check', 'Exploratory'].forEach(type => {
+         if (testsByType[type] && testsByType[type].length === 1) {
+            const test = testsByType[type][0];
+            const projectAlreadyCounted = filteredTests.some(t => t.test_type === type);
+            if (!projectAlreadyCounted) {
+               filteredTests.push(test);
+            }
+         }
+      });
+
+      // Include all validation tests
+      Object.values(testsByType).forEach((tests: any[]) => {
+         if (tests.length >= 2 && tests[0].test_type === 'Validation') {
+            tests.forEach(test => {
+               const projectAlreadyCounted = filteredTests.some(t => t.test_type === 'Validation');
+               if (!projectAlreadyCounted) {
+                  filteredTests.push(test);
+               }
+            });
+         }
+      });
+
+      return filteredTests;
+   })
+   .filter((test) => (test.success_rate || test.success_rate === 0))
+   .map((test) => test.success_rate);
+
+const avgTestSuccess = avg(kpiUxTestsSuccessRates2, 2);
+
+  
+
   const taskSuccessRatesRecord: Record<string, number[]> = projectsData
     .flatMap((project) => project.uxTests)
     .filter(
@@ -611,13 +661,48 @@ async function getProjects(
   // except this is actually "unique tasks tested?"
   const testsCompleted = Object.values(taskSuccessRatesRecord).length;
 
+
+  const uniqueTasksTested: Set<string> = new Set();
+
+projectsData.forEach(project => {
+    const testsByType: { [key: string]: any[] } = {};
+
+    project.uxTests.forEach(test => {
+        if (testsByType[test.test_type]) {
+            testsByType[test.test_type].push(test);
+        } else {
+            testsByType[test.test_type] = [test];
+        }
+    });
+
+    // Include tests from projects tested once by type (Baseline, Spot Check, or Exploratory)
+    ['Baseline', 'Spot Check', 'Exploratory'].forEach(type => {
+        if (testsByType[type] && testsByType[type].length === 1) {
+            uniqueTasksTested.add(testsByType[type][0].task);
+        }
+    });
+
+    // Include all validation tests
+    Object.values(testsByType).forEach((tests: any[]) => {
+        if (tests.length >= 2 && tests[0].test_type === 'Validation') {
+            tests.forEach(test => {
+                uniqueTasksTested.add(test.task);
+            });
+        }
+    });
+});
+
+const uniqueTaskTestedLatestTestKpi = uniqueTasksTested.size;
+
   return {
     ...aggregatedData,
     ...uxTest,
-    projects: projectsData,
+    projects: projectsData, 
     avgUxTest,
     avgTestSuccessAvg,
     testsCompleted,
+    uniqueTaskTestedLatestTestKpi,
+    avgTestSuccess,
   };
 }
 
@@ -1061,5 +1146,6 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
     testsConductedLastFiscal,
     testsConductedLastQuarter,
     copsTestsCompletedSince2018,
+
   };
 }

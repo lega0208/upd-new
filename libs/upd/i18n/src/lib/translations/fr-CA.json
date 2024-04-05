@@ -84,6 +84,8 @@
   "total-visits": "Nombre total de visites de toutes les tâches",
   "total-calls": "Nombre total d'appels de toutes les tâches",
   "topic": "Sujet",
+  "tpc_id": "Tpc_id",
+  "enquiry_line": "Ligne_de_renseignements",
   "sub-topic": "Sous-sujet",
   "subtopic": "Sous-sujet",
   "tasks_subtopic": "Sujet: Sous-sujet",
@@ -382,9 +384,24 @@
   "kpi-search-assessment-guidance": "<strong>Qu'est-ce que c'est?</strong> <br />Le pourcentage de termes de recherche qui ont réussi l'évaluation de recherche.<br /><br />Un terme de recherche réussit l'évaluation lorsque son URL cible figure dans les cinq premiers résultats de recherche lorsque les visiteurs recherchent ce terme. Sinon, il échoue à l'évaluation des recherches.<br /> <br />L'évaluation est effectuée chaque semaine pour les 100 premiers termes de recherche en anglais et les 100 premiers termes de recherche en français. <br /><br />L'objectif pour cet indicateur de performance clé est de 75%.<br /><br /><strong>Comment cet ICR est-il calculé?</strong> <br />A: Le nombre total de termes de recherche qui ont \"réussi\"<br />B: Le nombre total de termes de recherche<br /> <br />(A/B)*100<br /><br /><div class='d-flex justify-content-end'><a href=\"/fr/overview/searchanalytics\">Visionner plus de données analytiques de recherche</a></div>",
   "kpi-search-assessment-text": "{{passed}} / {{total}} termes de recherche passés",
   "kpi-ux-test-title": "Taux de réussite moyen des tests d'expérience utilisateur",
+  "kpi-ux-test-guidance": "<strong>Qu'est-ce que c'est?</strong>  <br />Le pourcentage du taux de réussite moyen des derniers tests sur tous les tests d'expérience utilisateur complets avec le type de test de validation.<br />L'objectif pour cet indicateur de performance clé est de 80%.<br /><br /><strong>Comment cet ICR est-il calculé?</strong>  <br />A: La somme des derniers taux de réussite des tests UX (en pourcentage) de tous les tests UX complets avec le type de test Validation<br />B: Le nombre total de tests complets effectués avec le type de test de validation<br /> <br />A/B<br /><br /><div class=\"text-end\"><a href=\"/fr/overview/uxtests\"</div>",
   "kpi-ux-test-tooltip": "Taux de réussite moyen des derniers tests sur tous les tests d'expérience utilisateur complets avec le type de test de validation",
-  "kpi-ux-test-guidance": "<strong>Qu'est-ce que c'est?</strong>  <br />Le pourcentage du taux de réussite moyen des derniers tests sur tous les tests d'expérience utilisateur complets avec le type de test de validation.<br />L'objectif pour cet indicateur de performance clé est de 80%.<br /><br /><strong>Comment cet ICR est-il calculé?</strong>  <br />A: La somme des derniers taux de réussite des tests UX (en pourcentage) de tous les tests UX complets avec le type de test Validation<br />B: Le nombre total de tests complets effectués avec le type de test de validation<br /> <br />A/B<br /><br /><div class=\"text-end\"><a href=\"/fr/overview/uxtests\">Visionner plus de données de résultats de tests de l’expérience utilisateurs</a></div>",
   "kpi-ux-test-text": "{{total}} tâches uniques testées",
+
+  "kpi-ux-test-success-all-title": "Taux de réussite moyen des tâches",
+  "kpi-ux-test-success-all-tooltip": "Taux de réussite moyen de toutes les tâches",
+  "kpi-ux-test-success-all-guidance": "<strong>Qu'est-ce que c'est?</strong>  <br />Le pourcentage de taux de réussite moyen pour toutes les tâches, en utilisant le taux de réussite le plus récent de leur dernier test UX. Remarque : Toutes les tâches n'ont pas été testées.<br />L'objectif pour cet indicateur de performance clé est de 80%.<br /><br /><strong>Comment cet ICR est-il calculé?</strong>  <br />A: La somme des taux de réussite des tâches les plus récentes testées<br />B: Nombre total de tâches testées<br /> <br />A/B<br /><br />",
+  "kpi-ux-test-success-all-text": "{{total}} tâches uniques testées",
+
+  "kpi-ux-test-improved-title": "Taux de réussite moyen sur les tâches améliorées",
+  "kpi-ux-test-improved-tooltip": "Taux de réussite moyen sur toutes les tâches améliorées",
+  "kpi-ux-test-improved-guidance": "<strong>Qu'est-ce que c'est?</strong>  <br />Le pourcentage de taux de réussite moyen pour les tâches améliorées à partir de leur dernier test de validation UX. Il mesure également l'amélioration en comparant le taux de réussite moyen des tests UX précédents (base de référence) avec les tests UX les plus récents (validation).<br />L'objectif pour cet indicateur de performance clé est de 80%.<br /><br /><strong>Comment cet ICR est-il calculé?</strong>  <br />A: La somme des taux de réussite de validation sur toutes les tâches améliorées<br />B: Nombre total de tâches testées<br /> <br />A/B<br /><br />L'amélioration est la différence entre ce taux de réussite moyen et le taux de réussite moyen de toutes les tâches améliorées par rapport à leurs tests UX de base.<br /><br />",
+  "kpi-ux-test-improved-text":  "{{total}} tâches uniques testées",
+
+  "increased": "augmenté",                
+  "decreased": "diminué",
+  "from Baseline test type": "du type de test de référence",
+
   "Total searches": "Recherches totales",
 
   "Projects in progress": "Projets UX en cours",

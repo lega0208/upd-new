@@ -106,6 +106,7 @@ export class OverviewFacade {
     map((data) => data?.dateRangeData?.topPagesVisited || []),
   );
 
+
   topPagesVisitedWithPercentChange$ = this.overviewData$.pipe(
     mapObjectArraysWithPercentChange('topPagesVisited', 'visits', 'url'),
     map((topPages) => topPages?.sort((a, b) => b.visits - a.visits)),
@@ -118,14 +119,44 @@ export class OverviewFacade {
   projects$ = this.overviewData$.pipe(
     map((data) => data?.projects?.projects || []),
   );
+
   kpiLastAvgSuccessRate$ = this.overviewData$.pipe(
     map((data) => data?.projects?.avgTestSuccessAvg || 0),
   );
+
+  kpiTotAvgSuccessRate$ = this.overviewData$.pipe(
+    map((data) => data?.projects?.avgTestSuccess || 0),
+  );
+  improvedKpi$ = this.overviewData$.pipe(
+    map((overviewData) => overviewData?.improvedTasksKpi),
+  );
+ 
+  improvedKpiUniqueTasks$ = this.improvedKpi$.pipe(
+    map((improvedKpi) => improvedKpi?.uniqueTasks || 0),
+  );
+ 
+  improvedKpiSuccessRate$ = this.improvedKpi$.pipe(
+    map((improvedKpi) => improvedKpi?.successRates || 0),
+  );
+
+  improvedKpiSuccessRateDifference$ = this.improvedKpi$.pipe(
+    map((improvedKpi) => improvedKpi?.successRates.difference || 0),
+  );
+
+  improvedKpiSuccessRateValidation$ = this.improvedKpi$.pipe(
+    map((improvedKpi) => improvedKpi?.successRates.validation || 0),
+  );
+
   kpiTestsCompleted$ = this.overviewData$.pipe(
     map((data) => data?.projects?.testsCompleted || 0),
   );
+
+  uniqueTaskTestedLatestTestKpi$ = this.overviewData$.pipe(
+    map((data) => data?.projects?.uniqueTaskTestedLatestTestKpi || 0),
+  );
+
   testTypeTranslations$ = combineLatest([
-    this.projects$,
+    this.projects$, 
     this.currentLang$,
   ]).pipe(
     mergeMap(([projects]) => {
@@ -741,6 +772,8 @@ export class OverviewFacade {
     map((data) =>
       data.top25CalldriverTopics.map((topicData) => ({
         topic: topicData.topic || '',
+        tpc_id: topicData.tpc_id || '',
+        enquiry_line: topicData.enquiry_line || '',
         subtopic: topicData.subtopic || '',
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
@@ -751,6 +784,8 @@ export class OverviewFacade {
 
   top25CalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
     { field: 'topic', header: 'topic', translate: true },
+    { field:  'tpc_id', header: 'tpc_id', translate: true},
+    { field:  'enquiry_line', header: 'enquiry_line', translate: true},
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },
@@ -912,6 +947,10 @@ export class OverviewFacade {
   ]);
 
   error$ = this.store.select(OverviewSelectors.selectOverviewError);
+  
+
+ 
+  
 
   init() {
     this.store.dispatch(OverviewActions.init());
