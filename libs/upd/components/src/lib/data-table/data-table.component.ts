@@ -95,7 +95,7 @@ export class DataTableComponent<T> {
           const stored = sessionStorage.getItem(storageKey);
           const storageSelectedColumns: ColumnConfig[] = stored
             ? JSON.parse(stored)
-            : 'null';
+            : [];
 
           if (storageSelectedColumns.length > 0) {
             this.selectedColumns.set(storageSelectedColumns);
