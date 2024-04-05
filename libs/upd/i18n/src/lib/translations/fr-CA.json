@@ -353,7 +353,7 @@
   "Self-reported success": "Succès auto-rapporté",
   "Page status": "Statut de la page",
   "info-task-suggestion": "Vous ne trouvez pas la tâche que vous recherchez?<br />Faites une <a href=\"https://airtable.com/appT2OrwxPXlBmKgQ/paghZW9SiqDYS5qDp/form\" target=\"_blank\">suggestion de tâche</a>.",
-  "change-columns": "Changer les colonnes",
+  "change-columns": "Sélectionner des colonnes",
   "selected-columns": "{{num}} colonnes sélectionnées",
   "Rank": "Rang",
 

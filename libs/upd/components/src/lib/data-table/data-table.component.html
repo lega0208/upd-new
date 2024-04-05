@@ -45,23 +45,32 @@
             [ngModel]="selectedColumns()"
             (ngModelChange)="selectedColumnsChanged($event)"
             optionLabel="header"
-            [style]="{ 'min-width': '150px', 'max-width': '250px' }"
+            [style]="{ 'min-width': '150px', 'max-width': '275px' }"
+            [placeholder]="'change-columns' | translate"
           >
             <ng-template let-columns pTemplate="selectedItems">
-              @if (selectedColumns().length <= 3) {
-                @for (col of columns; track col.field) {
-                  {{ col.header | translate }}<span *ngIf="!$last">, </span>
-                }
-              } @else {
-                {{
-                  'selected-columns'
-                    | translate: { num: selectedColumns().length }
-                }}
-              }
-
-              @if (selectedColumns().length === 0) {
+              <div
+              class="d-flex justify-content-between align-items-bottom content-end"
+              #rightPanel
+              style="
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                color: rgb(33, 37, 41);
+              "
+            >
+                <span
+                ><span class="pi pi-cog"></span>
                 {{ 'change-columns' | translate }}
-              }
+              </span
+              >&NonBreakingSpace;
+              <span
+                class="badge h-100 align-self-center text-center"
+                style="padding: 0.25em 0.32em"
+                [ngClass]="selectedColumns().length === 0 ? 'bg-unknown' : 'bg-primary'"
+                >{{ selectedColumns().length }}</span
+              >
+              </div>
             </ng-template>
 
             <ng-template let-columns pTemplate="item">

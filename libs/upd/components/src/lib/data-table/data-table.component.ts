@@ -65,8 +65,18 @@ export class DataTableComponent<T> {
     ...this.selectedColumns(),
   ]);
 
-  selectableCols = computed(() => this.cols().filter((col) => !col.frozen));
+  lang = this.i18n.currentLang;
 
+  selectableCols = computed(() =>
+    this.cols()
+      .filter((col) => !col.frozen)
+      .map((col) => ({
+        original: col,
+        translatedHeader: this.i18n.service.translate(col.header, this.lang()),
+      }))
+      .sort((a, b) => a.translatedHeader.localeCompare(b.translatedHeader))
+      .map(({ original }) => original),
+  );
   constructor() {
     effect(
       () => {
@@ -85,7 +95,7 @@ export class DataTableComponent<T> {
           const stored = sessionStorage.getItem(storageKey);
           const storageSelectedColumns: ColumnConfig[] = stored
             ? JSON.parse(stored)
-            : null;
+            : 'null';
 
           if (storageSelectedColumns.length > 0) {
             this.selectedColumns.set(storageSelectedColumns);
