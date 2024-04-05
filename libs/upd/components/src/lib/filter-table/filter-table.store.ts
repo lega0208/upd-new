@@ -41,12 +41,13 @@ export class FilterTableStore<
         if (
           !column ||
           column.pipe === 'number' ||
+          column.pipe === 'percent' ||
+          column.pipe === 'date' ||
           column.field === 'task' ||
           column.field === 'gc_task' ||
           column.field === 'what_would_improve_comment' ||
           column.field === 'reason_not_complete_comment' ||
           column.field === 'url' ||
-          column.field === 'date' ||
           column.field === 'gc_task_other'
         ) {
           continue;

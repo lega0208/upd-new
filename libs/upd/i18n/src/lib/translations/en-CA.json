@@ -354,7 +354,7 @@
   "Self-reported success": "Self-reported success",
   "Page status": "Page status",
   "info-task-suggestion": "Don't see a task you expect?<br />Make a <a href=\"https://airtable.com/appT2OrwxPXlBmKgQ/pagixjmM0eXqajwsI/form\" target=\"_blank\">Task Suggestion</a>.",
-  "change-columns": "Change columns",
+  "change-columns": "Select columns",
   "selected-columns": "{{num}} columns selected",
 
   "kpi-calls-per-100-title": "Calls per 100 visits",
