@@ -821,21 +821,21 @@ export class OverviewFacade {
 
   gcTasksCommentsTableConfig$ = createColConfigWithI18n(this.i18n.service, [
     { field: 'date', header: 'Date', pipe: 'date' },
-    { field: 'gc_task', header: 'Task', translate: true },
-    { field: 'gc_task_other', header: 'Other GC Task' },
-    { field: 'url', header: 'Survey Referrer' },
+    { field: 'gc_task', header: 'gc_task', translate: true },
+    { field: 'gc_task_other', header: 'Other GC Task', translate: true, hide: true },
+    { field: 'url', header: 'Survey Referrer', translate: true, hide: true },
     { field: 'language', header: 'Language', translate: true, hide: true },
     { field: 'device', header: 'Device', translate: true, hide: true },
     { field: 'screener', header: 'Screener', translate: true, hide: true },
     { field: 'theme', header: 'Theme', translate: true, hide: true },
-    { field: 'grouping', header: 'Grouping', translate: true, hide: true },
+    { field: 'grouping', header: 'Grouping', translate: true, hide: true, tooltip: 'tooltip-grouping' },
     { field: 'able_to_complete', header: 'Able to Complete', translate: true },
-    { field: 'ease', header: 'Ease', translate: true },
-    { field: 'satisfaction', header: 'Satisfaction', translate: true },
+    { field: 'ease', header: 'ease', translate: true },
+    { field: 'satisfaction', header: 'satisfaction', translate: true },
     { field: 'what_would_improve', header: 'What Would Improve', translate: true, hide: true },
-    { field: 'what_would_improve_comment', header: 'Improvement Comment'  },
+    { field: 'what_would_improve_comment', header: 'Improvement Comment', translate: true, tooltip: 'tooltip-improvement-comment' },
     { field: 'reason_not_complete', header: 'Reason Not Complete', translate: true, hide: true },
-    { field: 'reason_not_complete_comment', header: 'Reason Not Complete Comment' },
+    { field: 'reason_not_complete_comment', header: 'Reason Not Complete Comment', translate: true, tooltip: 'tooltip-notcomplete-comment' },
   ]);
 
   top5IncreasedCalldriverTopics$ = this.overviewData$.pipe(

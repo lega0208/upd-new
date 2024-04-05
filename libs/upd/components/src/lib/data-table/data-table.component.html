@@ -109,8 +109,8 @@
             <span
               class="p-column-title datatable-headers"
               [class.card-tooltip]="col.tooltip"
-              [ngbPopover]="col.tooltip"
-              placement="end"
+              [ngbPopover]="col.tooltip | translate"
+              placement="top"
             >
               {{ col.header | translate }}
             </span>
