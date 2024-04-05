@@ -155,6 +155,7 @@ export class TasksHomeComponent implements OnInit {
       field: 'survey',
       header: 'survey',
       pipe: 'number',
+      tooltip: 'tooltip-survey-volume',
     },
     {
       field: 'calls_per_100_visits',
@@ -178,15 +179,17 @@ export class TasksHomeComponent implements OnInit {
     },
     {
       field: 'survey_completed',
-      header: 'survey_completed',
+      header: 'Self-reported success',
       pipe: 'percent',
       hide: true,
+      tooltip: 'tooltip-self-reported-success',
     },
     {
       field: 'latest_ux_success',
-      header: 'Latest UX Testing score',
+      header: 'Latest success rate',
       pipe: 'percent',
       hide: true,
+      tooltip: 'tooltip-latest-success-rate',
     }
   ] as ColumnConfig<UnwrapObservable<typeof this.tasksHomeData$>>[];
 

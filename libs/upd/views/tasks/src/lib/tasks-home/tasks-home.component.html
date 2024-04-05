@@ -43,10 +43,12 @@
   ></upd-data-table>
 </upd-card>
 
-<upd-alert
-  [type]="'info'"
-  [selfClosing]="false"
-  [dismissible]="false"
->
-<span [innerHTML]="'info-task-suggestion' | translate"></span>
-</upd-alert>
+<div class="mt-4">
+  <upd-alert
+    [type]="'info'"
+    [selfClosing]="false"
+    [dismissible]="false"
+  >
+    <span [innerHTML]="'info-task-suggestion' | translate"></span>
+  </upd-alert>
+</div>

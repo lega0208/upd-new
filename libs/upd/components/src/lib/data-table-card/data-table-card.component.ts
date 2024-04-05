@@ -17,6 +17,7 @@ export class DataTableCardComponent<T> {
   @Input() searchFields: string[] = [];
   @Input() captionTitle = '';
   @Input() kpi = false;
+  @Input() modal = '';
   @Input() sortField = '';
   @Input() sortOrder: 'asc' | 'desc' = 'asc';
   @Input() title = '';

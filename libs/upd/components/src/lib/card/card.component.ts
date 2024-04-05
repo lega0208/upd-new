@@ -10,12 +10,15 @@ import type { ColumnConfig } from '@dua-upd/types-common';
         <div class="d-flex justify-content-between">
           <h3
             *ngIf="title !== ''"
-            [class]="'card-title pb-2 ' + titleSize"
+            [class]="'modal-icon-alignment card-title pb-2 ' + titleSize"
             [class.card-tooltip]="titleTooltip"
           >
             <span placement="top" ngbTooltip="{{ titleTooltip | translate }}">{{
               title | translate
             }}</span>
+            <span *ngIf="modal" class="modal-icon-by-title">
+              <upd-modal [modalTitle]="title" [modalContent]="modal"> </upd-modal>
+            </span>
           </h3>
 
           <upd-card-secondary-title
