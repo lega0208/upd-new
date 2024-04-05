@@ -226,6 +226,7 @@ export interface OverviewUxData {
 }
 
 export interface OverviewProject extends ProjectsHomeProject {
+  projectId: string;
   testType?: string[];
   totalUsers: number;
 }
@@ -427,8 +428,9 @@ export interface ProjectsHomeData {
   projects: ProjectsHomeProject[];
   avgTestSuccessAvg?: number;
   testsCompleted?: number;
+  uniqueTaskTestedLatestTestKpi?: number;
+  avgTestSuccess?: number;
 }
-
 export interface ReportsHomeProject extends ProjectsHomeProject {
   attachments: AttachmentData[];
 }

@@ -84,6 +84,8 @@
   "total-visits": "Total visits to all tasks",
   "total-calls": "Total calls to all tasks",
   "topic": "Topic",
+  "tpc_id": "Tpc_id",
+  "enquiry_line": "Enquiry_line",
   "sub-topic": "Sub-topic",
   "subtopic": "Sub-topic",
   "tasks_subtopic": "Topic: Sub-topic",
@@ -381,10 +383,27 @@
   "kpi-search-assessment-tooltip": "Search assessment performance of the top English and French search terms on canada.ca and their corresponding target URL.",
   "kpi-search-assessment-guidance": "<strong>What is this?</strong> <br />Percentage of search terms that passed the search assessment.<br /><br />A search term passes the assessment when its target URL is in the top 5 search results when visitors search for that term. Otherwise, it fails the search assessment.<br /> <br />The assessment is conducted weekly for the top 100 English and 100 French search terms. <br /><br />The target for this Key performance indicator is 75%.<br /><br /><strong>How is this KPI calculated?</strong> <br />A: The total number of search terms that have “passed”<br />B: The total number of search terms<br /> <br />(A/B)*100<br /><br /><br /><div class='d-flex justify-content-end'><a href=\"/en/overview/searchanalytics\">View more search analytics data</a></div>",
   "kpi-search-assessment-text": "{{passed}}/{{total}} search terms passed",
+
   "kpi-ux-test-title": "UX tests average success rate",
   "kpi-ux-test-tooltip": "Average success rate of the latest testing on all complete UX tests with Validation test type",
-  "kpi-ux-test-guidance": "<strong>What is this?</strong>  <br />The percentage of average success rate for the latest testing on all complete UX tests with Validation test type.<br />The target for this Key performance indicator is 80%.<br /><br /><strong>How is this KPI calculated?</strong>  <br />A: The sum of latest user test success rates (in percentages) of all complete UX tests with the Validation test type<br />B: The total number of complete tests performed with the Validation test type<br /> <br />A/B<br /><br /><div class='d-flex justify-content-end'><a href=\"/en/overview/uxtests/\">View more UX tests data</a></div>",
+  "kpi-ux-test-guidance": "<strong>What is this?</strong>  <br />The percentage of average success rate for the latest testing on all complete UX tests with Validation test type.<br />The target for this Key performance indicator is 80%.<br /><br /><strong>How is this KPI calculated?</strong>  <br />A: The sum of latest user test success rates (in percentages) of all complete UX tests with the Validation test type<br />B: The total number of complete tests performed with the Validation test type<br /> <br />A/B<br /><br /><div class='d-flex justify-content-end'><a href=\"/en/overview/uxtests/\"</div>",
   "kpi-ux-test-text": "{{total}} unique tasks tested",
+
+  "kpi-ux-test-success-all-title": "Average Task Success Rate",
+  "kpi-ux-test-success-all-tooltip": "Average success rate on all improved tasks",
+  "kpi-ux-test-success-all-guidance": "<strong>What is this?</strong>  <br />The percentage of average success rate for all tasks, using the latest success rate from their most recent UX test. Note: Not all tasks have been tested.<br />The target for this Key performance indicator is 80%.<br /><br /><strong>How is this KPI calculated?</strong>  <br />A: The sum of success rates of the most recent tasks tested<br />B: Total number of tasks tested<br /> <br />A/B<br /><br />",
+  "kpi-ux-test-success-all-text": "{{total}} unique tasks tested",
+
+  "kpi-ux-test-improved-title": "Average Success Rate on Improved Tasks",
+  "kpi-ux-test-improved-tooltip": "Average success rate on all improved tasks",
+  "kpi-ux-test-improved-guidance": "<strong>What is this?</strong>  <br />The percentage of average success rate for improved tasks from their latest validation UX test. It also measures improvement by comparing the average success rate of previous UX tests (baseline) with the most recent UX tests (validation).<br />The target for this Key performance indicator is 80%.<br /><br /><strong>How is this KPI calculated?</strong>  <br />A: The sum of validation success rates on all improved tasks<br />B: Total number of tasks tested<br /> <br />A/B<br /><br />Improvement is a difference of this average success rate and the average success rate of all improved tasks from their baseline UX tests.<br /><br />",
+  "kpi-ux-test-improved-text":  "{{total}} unique tasks tested",
+  "increased": "increased",
+  "decreased": "decreased",
+  "from Baseline test type": "from Baseline test type",
+  
+  
+ 
   "Total searches": "Total searches",
 
   "Projects in progress": "UX projects in progress",

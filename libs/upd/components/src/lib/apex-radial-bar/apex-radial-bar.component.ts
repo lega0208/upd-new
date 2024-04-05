@@ -84,6 +84,7 @@ export class ApexRadialBarComponent implements OnChanges {
   @Input() titleTooltip = '';
   @Input() current = 0;
   @Input() comparison = 0;
+  @Input() comparisonMode= 0;
   @Input() labels: string[] = [];
   @Input() seriesLabel = 'visits';
   @Input() kpiObjectiveCriteria = defaultKpiObjectiveCriteria;
@@ -265,7 +266,6 @@ export class ApexRadialBarComponent implements OnChanges {
             ? this.kpiObjectiveCriteria(this.current, this.comparison || 0)
             : 'none';
         colour = defaultKpiObjectiveStatusConfig[kpi].colour || '';
-
         const current = typeof this.current === 'number' ? this.current : 0;
         const comparison =
           typeof this.comparison === 'number'

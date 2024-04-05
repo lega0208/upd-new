@@ -70,6 +70,7 @@ CallDriverSchema.statics['getCallsByTopicFromIds'] = async function (
     .project({
       _id: 0,
       tpc_id: 1,
+      //enquiry_line: 1,
       topic: 1,
       subtopic: 1,
       sub_subtopic: 1,
@@ -78,6 +79,7 @@ CallDriverSchema.statics['getCallsByTopicFromIds'] = async function (
     .group({
       _id: '$tpc_id',
       topic: { $first: '$topic' },
+      //enquiry_line: { $first: '$enquiry_line' },
       subtopic: { $first: '$subtopic' },
       sub_subtopic: { $first: '$sub_subtopic' },
       calls: { $sum: '$calls' },
@@ -86,6 +88,7 @@ CallDriverSchema.statics['getCallsByTopicFromIds'] = async function (
       _id: 0,
       tpc_id: '$_id',
       topic: 1,
+      //enquiry_line: 1,
       subtopic: 1,
       sub_subtopic: 1,
       calls: 1,
@@ -155,6 +158,7 @@ CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
         .match({ date: { $gte: startDate, $lte: endDate }, ...tpcIdsQuery })
         .group({
           _id: '$tpc_id',
+          enquiry_line: { $first: '$enquiry_line' },
           topic: { $first: '$topic' },
           subtopic: { $first: '$subtopic' },
           sub_subtopic: { $first: '$sub_subtopic' },
@@ -162,6 +166,7 @@ CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
         })
         .project({
           _id: 0,
+          enquiry_line: 1,
           tpc_id: '$_id',
           topic: 1,
           subtopic: 1,

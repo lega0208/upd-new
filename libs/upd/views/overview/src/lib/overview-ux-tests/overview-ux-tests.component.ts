@@ -1,5 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import type { ColumnConfig } from '@dua-upd/types-common';
+import { uxTestsKpiObjectiveCriteria } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import type { OverviewProject } from '@dua-upd/types-common';
@@ -9,6 +15,7 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
   selector: 'upd-overview-ux-tests',
   templateUrl: './overview-ux-tests.component.html',
   styleUrls: ['./overview-ux-tests.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OverviewUxTestsComponent implements OnInit {
   private overviewService = inject(OverviewFacade);
@@ -18,15 +25,33 @@ export class OverviewUxTestsComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
+  uxTestsKpiObjectiveCriteria = uxTestsKpiObjectiveCriteria;
   uxChartData = this.overviewService.projectsList$;
 
-  testsCompleted$ = this.overviewService.uxTestsCompleted$;
   tasksTested$ = this.overviewService.uxTasksTested$;
   participantsTested$ = this.overviewService.uxParticipantsTested$;
   testsConductedLastFiscal$ = this.overviewService.uxTestsConductedLastFiscal$;
   testsConductedLastQuarter$ =
     this.overviewService.uxTestsConductedLastQuarter$;
   COPSTests$ = this.overviewService.uxCopsTestsCompleted$;
+
+  kpiUXTestsPercent$ = this.overviewService.kpiUXTestsPercent$;
+  kpiUXTestsTotal$ = this.overviewService.kpiUXTestsTotal$;
+
+  improvedKpiSuccessRate$ = this.overviewService.improvedKpiSuccessRate$;
+  improvedKpiSuccessRateDifference$ =
+    this.overviewService.improvedKpiSuccessRateDifference$;
+  improvedKpiSuccessRateValidation$ =
+    this.overviewService.improvedKpiSuccessRateValidation$;
+
+  improvedKpi$ = this.overviewService.improvedKpi$;
+  improvedKpiUniqueTasks$ = this.overviewService.improvedKpiUniqueTasks$;
+
+  kpiLastAvgSuccessRate$ = this.overviewService.kpiLastAvgSuccessRate$;
+  kpiTestsCompleted$ = this.overviewService.kpiTestsCompleted$;
+  uniqueTaskTestedLatestTestKpi$ =
+    this.overviewService.uniqueTaskTestedLatestTestKpi$;
+  kpiTotAvgSuccessRate$ = this.overviewService.kpiTotAvgSuccessRate$;
 
   uxChartCols: ColumnConfig<OverviewProject>[] = [];
 

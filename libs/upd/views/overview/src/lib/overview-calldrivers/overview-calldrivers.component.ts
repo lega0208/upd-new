@@ -35,8 +35,8 @@ export class OverviewCalldriversComponent implements OnInit {
   }>[] = [];
 
   top25CalldriverTopics$ = this.overviewService.top25CalldriverTopics$;
-  top25CalldriverTopicsConfig$ =
-    this.overviewService.top25CalldriverTopicsConfig$;
+  top25CalldriverTopicsConfig$ = 
+  this.overviewService.top25CalldriverTopicsConfig$;
 
   top5IncreasedCalldriverTopics$ =
     this.overviewService.top5IncreasedCalldriverTopics$;
