@@ -51,7 +51,7 @@
       </upd-apex-radial-bar>
     </div>
     <div class="col-lg-3 col-md-12 col-sm-12">
-      <upd-apex-radial-bar
+      <!-- <upd-apex-radial-bar
         [title]="'kpi-ux-test-title'"
         [titleTooltip]="'kpi-ux-test-tooltip'"
         [preLabel]="'Target'"
@@ -65,6 +65,42 @@
           'kpi-ux-test-text'
             | translate: { total: (kpiTestsCompleted$ | async) || 0 }
         }}
+      </upd-apex-radial-bar> -->
+        <upd-apex-radial-bar
+          class="custom-radial-bar"
+          [title]="'kpi-ux-test-improved-title'"
+          [titleTooltip]="'kpi-ux-test-improved-tooltip'"
+          [preLabel]="'Target'"
+          [valueLabel]="0.8"
+          [current]="(  improvedKpiSuccessRateValidation$ | async) || 0"
+          [kpiObjectiveCriteria]="uxTestsKpiObjectiveCriteria"
+          [keyword]="'ux'"
+          modal="{{ 'kpi-ux-test-improved-guidance' | translate }}"
+        >
+          <div>
+            {{
+              'kpi-ux-test-improved-text'
+              | translate: { total: (improvedKpiUniqueTasks$ | async) || 0 }
+            }}
+            <br> 
+            <ng-container
+            *ngIf="{
+              value: improvedKpiSuccessRateDifference$ | async
+            } as improvedKpi"
+          >
+            @if (!!improvedKpi.value || improvedKpi.value === 0) {
+              {{
+                getDiffText(improvedKpi.value) + ' from Baseline UX tests'
+                  | translate
+                    : {
+                        value:
+                          improvedKpi.value
+                          | percent: undefined : currentLangSignal()
+                      }
+              }}
+            }
+          </ng-container>
+        </div>
       </upd-apex-radial-bar>
     </div>
   </div>

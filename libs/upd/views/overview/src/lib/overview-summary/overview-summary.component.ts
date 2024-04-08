@@ -27,6 +27,8 @@ export class OverviewSummaryComponent implements OnInit {
 
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
+  currentLangSignal = this.i18n.currentLang;
+
   searchKpiObjectiveCriteria = searchKpiObjectiveCriteria;
   uxTestsKpiObjectiveCriteria = uxTestsKpiObjectiveCriteria;
   feedbackKpiObjectiveCriteria = feedbackKpiObjectiveCriteria;
@@ -54,7 +56,34 @@ export class OverviewSummaryComponent implements OnInit {
   kpiLastAvgSuccessRate$ = this.overviewService.kpiLastAvgSuccessRate$;
   kpiTestsCompleted$ = this.overviewService.kpiTestsCompleted$;
 
- 
+  improvedKpiSuccessRateDifference$ =
+  this.overviewService.improvedKpiSuccessRateDifference$;
+
+  improvedKpiSuccessRateValidation$ =
+  this.overviewService.improvedKpiSuccessRateValidation$;
+
+  improvedKpi$ = this.overviewService.improvedKpi$;
+  improvedKpiUniqueTasks$ = this.overviewService.improvedKpiUniqueTasks$;
+
+  getDiffText(diff: number): string {
+    if (diff > 0) {
+      return 'increase';
+    } else if (diff < 0) {
+      return 'decrease';
+    } else {
+      return '';
+    }
+  }
+
+  getColor(diff: number): string {
+    if (diff > 0) {
+      return '#26A69A';
+    } else if (diff < 0) {
+      return '#DF2929';
+    } else {
+      return '';
+    }
+  }
 
   kpiSearchAssessment$ = this.overviewService.currentKpiSearchAssessment$;
   kpiSearchAssessmentPercentChange$ =

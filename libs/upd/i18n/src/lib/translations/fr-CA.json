@@ -84,8 +84,8 @@
   "total-visits": "Nombre total de visites de toutes les tâches",
   "total-calls": "Nombre total d'appels de toutes les tâches",
   "topic": "Sujet",
-  "tpc_id": "Tpc_id",
-  "enquiry_line": "Ligne_de_renseignements",
+  "tpc_id": "Topic Id",
+  "enquiry_line": "Ligne de renseignements",
   "sub-topic": "Sous-sujet",
   "subtopic": "Sous-sujet",
   "tasks_subtopic": "Sujet: Sous-sujet",
@@ -398,9 +398,12 @@
   "kpi-ux-test-improved-guidance": "<strong>Qu'est-ce que c'est?</strong>  <br />Le pourcentage de taux de réussite moyen pour les tâches améliorées à partir de leur dernier test de validation UX. Il mesure également l'amélioration en comparant le taux de réussite moyen des tests UX précédents (base de référence) avec les tests UX les plus récents (validation).<br />L'objectif pour cet indicateur de performance clé est de 80%.<br /><br /><strong>Comment cet ICR est-il calculé?</strong>  <br />A: La somme des taux de réussite de validation sur toutes les tâches améliorées<br />B: Nombre total de tâches testées<br /> <br />A/B<br /><br />L'amélioration est la différence entre ce taux de réussite moyen et le taux de réussite moyen de toutes les tâches améliorées par rapport à leurs tests UX de base.<br /><br />",
   "kpi-ux-test-improved-text":  "{{total}} tâches uniques testées",
 
-  "increased": "augmenté",                
-  "decreased": "diminué",
-  "from Baseline test type": "du type de test de référence",
+  "increase": "augmenter",                
+  "decrease": "diminuer",
+  "from Baseline UX tests": "à partir des tests UX de base",
+  "increase from Baseline UX tests": "Augmentation de {{value}} par rapport aux tests UX de bases",
+  "decrease from Baseline UX tests": "Diminution de {{value}} par rapport aux tests UX de bases",
+  " from Baseline UX tests": "Amélioration de {{value}} par rapport aux tests UX de bases",
 
   "Total searches": "Recherches totales",
 

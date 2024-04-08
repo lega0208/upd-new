@@ -118,7 +118,7 @@
             <span
               class="p-column-title datatable-headers"
               [class.card-tooltip]="col.tooltip"
-              [ngbPopover]="col.tooltip | translate"
+              [ngbTooltip]="col.tooltip | translate"
               placement="top"
             >
               {{ col.header | translate }}
@@ -223,8 +223,8 @@
         >
           <span
             class="p-column-title datatable-headers"
-            [ngbPopover]="col.tooltip"
-            placement="end"
+            [ngbTooltip]="col.tooltip"
+            placement="top"
             [class.card-tooltip]="col.tooltip"
             >{{ col.header | translate }}</span
           >
