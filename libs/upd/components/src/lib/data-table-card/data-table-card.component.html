@@ -1,4 +1,4 @@
-<upd-card [title]="title" [titleTooltip]="tooltip">
+<upd-card [title]="title" [titleTooltip]="tooltip" [modal]="modal">
   <ng-container *ngIf="data.length === 0; else elseBlock">
     <p>
       <span [translate]="'nodata-available'"></span>
@@ -6,6 +6,7 @@
   </ng-container>
   <ng-template #elseBlock>
     <upd-data-table
+      [id]="id"
       [filter]="filter"
       [filterTree]="filterTree"
       [sort]="sort"

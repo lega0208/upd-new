@@ -17,11 +17,13 @@ export class DataTableCardComponent<T> {
   @Input() searchFields: string[] = [];
   @Input() captionTitle = '';
   @Input() kpi = false;
+  @Input() modal = '';
   @Input() sortField = '';
   @Input() sortOrder: 'asc' | 'desc' = 'asc';
   @Input() title = '';
   @Input() tooltip = '';
   @Input() loading = false;
+  @Input() id?: string;
 
   get defaultSearchFields() {
     return this.cols.map((obj) => obj.field);

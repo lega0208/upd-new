@@ -50,6 +50,20 @@ export class ProjectDetailsWebtrafficComponent implements OnInit {
             },
           },
           {
+            field: 'pageStatus',
+            header: 'Page status',
+            type: 'label',
+            typeParam: 'pageStatus',
+            filterConfig: {
+              type: 'pageStatus',
+              categories: createCategoryConfig({
+                i18n: this.i18n.service,
+                data,
+                field: 'pageStatus',
+              }),
+            },
+          },
+          {
             field: 'url',
             header: this.i18n.service.translate('URL', lang),
             type: 'link',

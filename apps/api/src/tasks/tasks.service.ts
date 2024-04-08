@@ -16,6 +16,7 @@ import {
   CallDriver,
   DbService,
   Feedback,
+  GcTasks,
   Page,
   PageMetrics,
   Project,
@@ -30,6 +31,7 @@ import type {
   TaskDetailsAggregatedData,
   TaskDetailsData,
   TasksHomeData,
+  VisitsByPage,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -38,6 +40,7 @@ import {
   getAvgSuccessFromLatestTests,
   isNullish,
   percentChange,
+  round,
 } from '@dua-upd/utils-common';
 
 @Injectable()
@@ -60,6 +63,8 @@ export class TasksService {
     private pageModel: Model<PageDocument>,
     @InjectModel(Reports.name, 'defaultConnection')
     private reportsModel: Model<Reports>,
+    @InjectModel(GcTasks.name, 'defaultConnection')
+    private gcTasksModel: Model<GcTasks>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -188,7 +193,7 @@ export class TasksService {
 
     const changeCallDrivers = percentChange(totalCalls, previousCallDrivers);
 
-    const tasks = await this.db.views.pageVisits.getVisitsWithTaskData(
+    const tasks = await this.db.views.pageVisits.getVisitsDyfNoWithTaskData(
       {
         start,
         end,
@@ -196,11 +201,27 @@ export class TasksService {
       this.taskModel,
     );
 
+    const previousTasks =
+      await this.db.views.pageVisits.getVisitsDyfNoWithTaskData(
+        {
+          start: comparisonStart,
+          end: comparisonEnd,
+        },
+        this.taskModel,
+      );
+
     const callsByTasks: { [key: string]: number } = {};
+    const previousCallsByTasks: { [key: string]: number } = {};
 
     for (const task of tasks as Task[]) {
       callsByTasks[task._id.toString()] = (
         await this.calldriversModel.getCallsByTpcId(dateRange, task.tpc_ids)
+      ).reduce((a, b) => a + b.calls, 0);
+      previousCallsByTasks[task._id.toString()] = (
+        await this.calldriversModel.getCallsByTpcId(
+          comparisonDateRange,
+          task.tpc_ids,
+        )
       ).reduce((a, b) => a + b.calls, 0);
     }
 
@@ -211,23 +232,105 @@ export class TasksService {
 
     const uxTestsDict = arrayToDictionaryMultiref(uxTests, 'tasks');
 
+    const gcTasksData = await this.gcTasksModel
+      .aggregate()
+      .match({
+        date: { $gte: start, $lte: end },
+        sampling_task: 'y',
+        able_to_complete: {
+          $ne: 'I started this survey before I finished my visit',
+        },
+      })
+      .group({
+        _id: { gc_task: '$gc_task' },
+        total_entries: { $sum: 1 },
+        completed_entries: {
+          $sum: {
+            $cond: [{ $eq: ['$able_to_complete', 'Yes'] }, 1, 0],
+          },
+        },
+      })
+      .project({
+        _id: 0,
+        gc_task: '$_id.gc_task',
+        total_entries: 1,
+        completed_entries: 1,
+      })
+      .exec();
+
+    const gcTasksDict = arrayToDictionary(gcTasksData, 'gc_task');
+    const previousTasksDict = arrayToDictionary(previousTasks, '_id');
+
     const task = tasks.map((task) => {
       const calls = callsByTasks[task._id.toString()] ?? 0;
+      const previous_calls = previousCallsByTasks[task._id.toString()] ?? 0;
+      const previous_visits =
+        previousTasksDict[task._id.toString()]?.visits ?? 0;
+      const previous_dyf_no =
+        previousTasksDict[task._id.toString()]?.dyf_no ?? 0;
+
+      const calls_per_100_visits =
+        task.visits > 0 && calls > 0
+          ? round((calls / task.visits) * 100, 3)
+          : null;
+      const dyf_no_per_1000_visits =
+        task.visits > 0 && task.dyf_no > 0
+          ? round((task.dyf_no / task.visits) * 1000, 3)
+          : null;
+
+      const calls_per_100_visits_difference =
+        task.visits > 0 && calls > 0
+          ? calls_per_100_visits -
+            round((previous_calls / previous_visits) * 100, 3)
+          : null;
+      const dyf_no_per_1000_visits_difference =
+        task.visits > 0 && task.dyf_no > 0
+          ? dyf_no_per_1000_visits -
+            round((previous_dyf_no / previous_visits) * 1000, 3)
+          : null;
+
+      const { gc_survey_participants, gc_survey_completed } =
+        task.gc_tasks.reduce(
+          (acc, gcTask) => {
+            const { total_entries = 0, completed_entries = 0 } =
+              gcTasksDict[gcTask.title] || {};
+
+            acc.gc_survey_participants += total_entries;
+            acc.gc_survey_completed += completed_entries;
+
+            return acc;
+          },
+          { gc_survey_participants: 0, gc_survey_completed: 0 },
+        );
+
+      const uxTestsForTask = uxTestsDict[task._id.toString()] ?? [];
+      const { avgTestSuccess, latestDate, percentChange } =
+        getAvgSuccessFromLatestTests(uxTestsForTask);
 
       return {
         ...task,
+        previous_visits,
+        previous_dyf_no,
         calls,
-        tmf_ranking_index: task.visits * 0.1 + calls * 0.6, // todo: + gsc_survey_participants * 0.3
+        previous_calls,
+        tmf_ranking_index:
+          task.visits * 0.1 + calls * 0.6 + gc_survey_participants * 0.3,
         secure_portal: !!task.channel.find(
           (channel) => channel === 'Fully online - portal',
         ),
-        ux_testing: !!uxTestsDict[task._id.toString()]?.find(
+        ux_testing: !!uxTestsForTask?.find(
           (test) => !isNullish(test.success_rate),
         ),
-        cops: !!uxTestsDict[task._id.toString()]?.find((test) => !test.cops),
+        cops: !!uxTestsForTask?.find((test) => !test.cops),
         pages_mapped: task.pages?.length ?? 0,
         projects_mapped: task.projects?.length ?? 0,
-        // survey: task.gc_survey_participants, // todo: add survey data when available
+        latest_ux_success: avgTestSuccess,
+        survey: gc_survey_participants ?? 0,
+        survey_completed: gc_survey_completed / gc_survey_participants ?? 0,
+        calls_per_100_visits,
+        dyf_no_per_1000_visits,
+        calls_per_100_visits_difference,
+        dyf_no_per_1000_visits_difference,
       };
     });
 
@@ -289,7 +392,7 @@ export class TasksService {
 
     if (!task) console.error(params.id);
 
-    const projects = (task.projects || []).map((project) => ({
+    const projects = (task?.projects || []).map((project) => ({
       _id: project._id,
       id: project._id,
       title: project.title,
@@ -303,14 +406,14 @@ export class TasksService {
       }),
     }));
 
-    const taskUrls = task.pages
+    const taskUrls = task?.pages
       .map((page) => 'url' in page && page.url)
       .filter((url) => !!url);
 
-    const taskTpcId = task.tpc_ids;
+    const taskTpcId = task?.tpc_ids;
 
     const returnData: TaskDetailsData = {
-      _id: task._id.toString(),
+      _id: task?._id.toString(),
       title: task.title,
       group: task.group,
       subgroup: task.subgroup,
@@ -579,44 +682,58 @@ async function getTaskAggregatedData(
     .find({ tasks: new Types.ObjectId(taskId) })
     .lean()
     .exec();
-
   const pageLookup = arrayToDictionary(pageWithTask, '_id');
 
-  if (results[0]?.visitsByPage) {
-    const metricsMapped = results[0].visitsByPage.map((metric) => {
-      const page = pageLookup[metric._id.toString()];
-      delete pageLookup[metric._id.toString()];
+  const determinePageStatus = (page) => {
+    if (page?.is_404) return '404';
+    if (page?.redirect) return 'Redirected';
+    return 'Live';
+  };
+
+  const visitedPageIds = new Set();
+  const metrics =
+    results[0]?.visitsByPage.map((metric) => {
+      const pageId = metric._id.toString();
+      visitedPageIds.add(pageId);
+      const page = pageLookup[pageId];
 
       return {
         ...metric,
-        _id: metric._id.toString(),
-        title: page.title,
-        url: page.url,
+        _id: pageId,
+        title: page?.title,
+        url: page?.url,
+        is404: page?.is_404,
+        isRedirect: !!page?.redirect,
+        redirect: page?.redirect,
+        pageStatus: determinePageStatus(page),
       };
-    });
+    }) || [];
 
-    const missingPages = Object.values(pageLookup).map((page) => ({
-      _id: page._id.toString(),
-      title: page.title,
-      url: page.url,
-      visits: 0,
-      dyfYes: 0,
-      dyfNo: 0,
-      fwylfCantFindInfo: 0,
-      fwylfError: 0,
-      fwylfHardToUnderstand: 0,
-      fwylfOther: 0,
-      gscTotalClicks: 0,
-      gscTotalImpressions: 0,
-      gscTotalCtr: 0,
-      gscTotalPosition: 0,
-    }));
+  const metricsWithoutVisits =
+    Object.values(pageLookup)
+      .filter((page) => !visitedPageIds.has(page._id.toString()))
+      .map((page) => ({
+        ...page,
+        visits: 0,
+        dyfYes: 0,
+        dyfNo: 0,
+        fwylfCantFindInfo: 0,
+        fwylfError: 0,
+        fwylfHardToUnderstand: 0,
+        fwylfOther: 0,
+        gscTotalClicks: 0,
+        gscTotalImpressions: 0,
+        gscTotalCtr: 0,
+        gscTotalPosition: 0,
+        is404: page?.is_404,
+        isRedirect: !!page?.redirect,
+        redirect: page?.redirect,
+        pageStatus: determinePageStatus(page),
+      })) || [];
 
-    results[0].visitsByPage = [
-      ...(metricsMapped || []),
-      ...(missingPages || []),
-    ].sort((a, b) => a.title.localeCompare(b.title));
-  }
+  results[0].visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
+    (a, b) => a.title.localeCompare(b.title),
+  ) as VisitsByPage[];
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 

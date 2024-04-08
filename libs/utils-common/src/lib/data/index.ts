@@ -1,5 +1,20 @@
 import { Types } from 'mongoose';
-import { avg } from '../math';
+import { avg, round } from '../math';
+import { ITask, IUxTest, SuccessRates } from '@dua-upd/types-common';
+import {
+  Dictionary,
+  filter,
+  flatten,
+  groupBy,
+  keys,
+  map,
+  mapObject,
+  pipe,
+  piped,
+  pluck,
+  unwind,
+} from 'rambdax';
+import { isNullish } from '../utils-common';
 
 export type DbEntity = {
   _id: Types.ObjectId;
@@ -10,23 +25,26 @@ export type DbEntity = {
  * @param uxTests
  */
 export const getLatestTest = <T extends { date?: Date; success_rate?: number }>(
-  uxTests: T[]
+  uxTests: T[],
 ) =>
-  uxTests.reduce((latestTest, test) => {
-    if (!latestTest || typeof latestTest?.date !== 'object') {
-      return test;
-    }
+  uxTests.reduce(
+    (latestTest, test) => {
+      if (!latestTest || typeof latestTest?.date !== 'object') {
+        return test;
+      }
 
-    if (!test.success_rate) {
+      if (!test.success_rate) {
+        return latestTest;
+      }
+
+      if (test.date && test.date > latestTest.date) {
+        return test;
+      }
+
       return latestTest;
-    }
-
-    if (test.date && test.date > latestTest.date) {
-      return test;
-    }
-
-    return latestTest;
-  }, null as null | T);
+    },
+    null as null | T,
+  );
 
 /**
  * Calculates the average success rate for a given array of UxTests
@@ -34,12 +52,12 @@ export const getLatestTest = <T extends { date?: Date; success_rate?: number }>(
  * @param uxTests
  */
 export function getAvgTestSuccess<T extends { success_rate?: number }>(
-  uxTests: T[]
+  uxTests: T[],
 ) {
   const testsWithSuccessRate = uxTests
     .map((test) => test.success_rate)
     .filter(
-      (successRate) => successRate !== undefined && successRate !== null
+      (successRate) => successRate !== undefined && successRate !== null,
     ) as number[];
 
   return avg(testsWithSuccessRate, 2);
@@ -50,10 +68,10 @@ export function getAvgTestSuccess<T extends { success_rate?: number }>(
  * @param uxTests Array of tests associated to a page/task/project
  */
 export function getAvgSuccessFromLastTests<
-  T extends { date?: Date; success_rate?: number; test_type?: string }
+  T extends { date?: Date; success_rate?: number; test_type?: string },
 >(uxTests: T[]) {
   const uxTestsWithSuccessRate = uxTests.filter(
-    (test) => test.success_rate ?? test.success_rate === 0
+    (test) => test.success_rate ?? test.success_rate === 0,
   );
 
   const lastTest = getLatestTest(uxTestsWithSuccessRate);
@@ -62,23 +80,26 @@ export function getAvgSuccessFromLastTests<
 
   const lastTests = lastTestDate
     ? uxTests.filter(
-        (test) => test.date && test.date.getTime() === lastTestDate.getTime()
+        (test) => test.date && test.date.getTime() === lastTestDate.getTime(),
       )
     : uxTests;
 
-  const lastTestsByType = lastTests.reduce((acc, test) => {
-    if (!test.test_type) {
+  const lastTestsByType = lastTests.reduce(
+    (acc, test) => {
+      if (!test.test_type) {
+        return acc;
+      }
+
+      if (!(test.test_type in acc)) {
+        acc[test.test_type] = [];
+      }
+
+      acc[test.test_type].push(test);
+
       return acc;
-    }
-
-    if (!(test.test_type in acc)) {
-      acc[test.test_type] = [];
-    }
-
-    acc[test.test_type].push(test);
-
-    return acc;
-  }, {} as { [key: string]: T[] });
+    },
+    {} as { [key: string]: T[] },
+  );
 
   const testTypes = Object.keys(lastTestsByType);
 
@@ -108,7 +129,7 @@ export function getAvgSuccessFromLastTests<
   const allTests =
     testTypes.reduce(
       (acc, key) => acc.concat(lastTestsByType[key]),
-      [] as T[]
+      [] as T[],
     ) || [];
 
   if (!allTests || !allTests.length) {
@@ -119,11 +140,12 @@ export function getAvgSuccessFromLastTests<
 }
 
 export function getAvgSuccessFromLatestTests<
-  T extends { date?: Date; success_rate?: number }
+  T extends { date?: Date; success_rate?: number },
 >(uxTests: T[]): TestSuccessWithPercentChange & { latestDate: Date | null } {
   const sortedTests = [...uxTests]
     .filter(
-      (test) => test.date && test.success_rate != null && test.success_rate >= 0
+      (test) =>
+        test.date && test.success_rate != null && test.success_rate >= 0,
     )
     .sort((a, b) => (b.date as Date).getTime() - (a.date as Date).getTime());
 
@@ -137,15 +159,15 @@ export function getAvgSuccessFromLatestTests<
 
   const latestDate = sortedTests[0]?.date || null;
   const secondLatestDate = sortedTests.find(
-    (test) => (test.date as Date).getTime() !== (latestDate as Date).getTime()
+    (test) => (test.date as Date).getTime() !== (latestDate as Date).getTime(),
   )?.date;
 
   const avgTestSuccess =
     getAvgTestSuccess(
       sortedTests.filter(
         (test) =>
-          (test.date as Date).getTime() === (latestDate as Date).getTime()
-      )
+          (test.date as Date).getTime() === (latestDate as Date).getTime(),
+      ),
     ) ?? null;
 
   let avgSecondLatest = null;
@@ -157,8 +179,8 @@ export function getAvgSuccessFromLatestTests<
         sortedTests.filter(
           (test) =>
             (test.date as Date).getTime() ===
-            (secondLatestDate as Date).getTime()
-        )
+            (secondLatestDate as Date).getTime(),
+        ),
       ) ?? null;
     percentChange =
       avgSecondLatest !== null
@@ -175,7 +197,7 @@ export function getAvgSuccessFromLatestTests<
 }
 
 export function groupTestsByType<
-  T extends { date?: Date; success_rate?: number; test_type?: string }
+  T extends { date?: Date; success_rate?: number; test_type?: string },
 >(uxTests: T[]) {
   return uxTests.reduce(
     (testsByType, test) => {
@@ -193,12 +215,12 @@ export function groupTestsByType<
 
       return testsByType;
     },
-    { None: [] } as { [key: string]: T[] }
+    { None: [] } as { [key: string]: T[] },
   );
 }
 
 export function getAvgTestSuccessByDate<
-  T extends { date?: Date; success_rate?: number; test_type?: string }
+  T extends { date?: Date; success_rate?: number; test_type?: string },
 >(uxTests: T[]) {
   const testsByDate: { [date: string]: T[] } = { None: [] };
 
@@ -235,10 +257,10 @@ export interface TestSuccessWithPercentChange {
 }
 
 export function getLatestTestData<
-  T extends { date?: Date; success_rate?: number; test_type?: string }
+  T extends { date?: Date; success_rate?: number; test_type?: string },
 >(uxTests: T[]): TestSuccessWithPercentChange {
   const uxTestsWithSuccessRate = uxTests.filter(
-    (test) => test.success_rate || test.success_rate === 0
+    (test) => test.success_rate || test.success_rate === 0,
   );
 
   if (!uxTestsWithSuccessRate.length) {
@@ -274,7 +296,7 @@ export function getLatestTestData<
 
         if (testsByType[previousTestType]) {
           const previousAvgTestSuccess = getAvgTestSuccess(
-            testsByType[previousTestType]
+            testsByType[previousTestType],
           );
 
           const percentChange =
@@ -304,3 +326,93 @@ export function getLatestTestData<
     total: null,
   };
 }
+
+
+
+export type ProjectTestTypes = {
+  Baseline: IUxTest[];
+  Validation: IUxTest[];
+};
+
+export const getImprovedKpiSuccessRates = (
+  uxTests: IUxTest[],
+): { uniqueTasks: number; successRates: SuccessRates } => {
+  const groupByTaskByProjectByTestType = pipe(
+    groupBy((test: IUxTest) => test!.tasks!.toString()), // group by task
+    mapObject(groupBy((test: IUxTest) => test.project.toString())), // group by project
+    // group by test type (group all non-validation test types as Baseline)
+    mapObject(
+      mapObject(
+        groupBy(({ test_type }: IUxTest) =>
+          test_type === 'Validation' ? 'Validation' : 'Baseline',
+        ),
+      ),
+    ),
+  );
+
+  // filter bad stuff
+  const filteredTests = uxTests.filter(
+    (test) =>
+      !isNullish(test.success_rate) && test.test_type && test!.tasks!.length,
+  );
+
+  const avgTestSuccessRates = piped(
+    filteredTests,
+    // for tests with multiple tasks, unwind the tasks array
+    map(unwind('tasks')),
+    flatten,
+    (tests: IUxTest[]) =>
+      groupByTaskByProjectByTestType(tests) as Dictionary<
+        Dictionary<ProjectTestTypes>
+      >,
+    // filter out projects with only 1 test type
+    mapObject(
+      filter(
+        (projectTestTypes: any, testType: any) =>
+          keys(projectTestTypes).length > 1,
+      ),
+    ),
+    // filter out tasks with no projects
+    filter((taskProjects: any, task: any) => keys(taskProjects).length > 0),
+    // get the avg success rate for each test type
+    mapObject<any>(
+      mapObject(
+        map(
+          pipe(pluck('success_rate'), (successRates: unknown[]) =>
+            avg(successRates as number[], 3),
+          ),
+        ),
+      ),
+    ),
+    // calculate the difference between Baseline and Validation
+    mapObject<any>(
+      map((testTypes: any, project: any) => ({
+        baseline: testTypes.Baseline,
+        validation: testTypes.Validation,
+        difference: round(testTypes.Validation - testTypes.Baseline, 4),
+      })),
+    ),
+
+    // get avg of baseline, validation, and difference for each task over all projects
+    mapObject((successRates: SuccessRates[]) => ({
+      baseline: avg(pluck('baseline', successRates), 4) as number,
+      validation: avg(pluck('validation', successRates), 4) as number,
+      difference: avg(pluck('difference', successRates), 4) as number,
+    })),
+  );
+
+  console.log(`number of tasks: ${keys(avgTestSuccessRates).length}`);
+
+  const successRates = Object.values(avgTestSuccessRates);
+
+  const overallAvgs = {
+    baseline: avg(pluck('baseline', successRates), 4) as number,
+    validation: avg(pluck('validation', successRates), 4) as number,
+    difference: avg(pluck('difference', successRates), 4) as number,
+  };
+
+  return {
+    uniqueTasks: keys(avgTestSuccessRates).length,
+    successRates: overallAvgs,
+  };
+};

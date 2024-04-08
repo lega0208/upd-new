@@ -31,8 +31,6 @@ export class TasksHomeFacade {
           row.user_type.length > 0
             ? row.user_type.map((userType) => userType || '')
             : '',
-        calls_per_100_visits:
-          row.visits > 0 ? round((row.calls / row.visits) * 100, 3) || 0 : 0,
       }));
     }),
   );

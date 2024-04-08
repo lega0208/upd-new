@@ -1,4 +1,9 @@
-import { type FilterQuery, type ProjectionType, Types, SortOrder } from 'mongoose';
+import {
+  type FilterQuery,
+  type ProjectionType,
+  Types,
+  SortOrder,
+} from 'mongoose';
 import type {
   AttachmentData,
   CallsByTopic,
@@ -161,6 +166,54 @@ export interface OverviewAggregatedData {
     total_searches: number;
   }[];
   annotations: (Omit<IAnnotations, 'event_date'> & { event_date: string })[];
+  gcTasksData: gcTasksData[];
+  gcTasksComments: gcTasksComments[];
+}
+
+export interface gcTasksData {
+  total_entries: number;
+  gc_task: string;
+  theme: string;
+  satisfaction: number;
+  ease: number;
+  able_to_complete: number;
+  margin_of_error: number;
+  data_reliability:
+    | 'Low margin of error/Reliable data'
+    | 'Higher margin of error/Use data with caution'
+    | 'Insufficient data';
+}
+
+export interface gcTasksComments {
+  date: string;
+  time_stamp: string;
+  url: string;
+  language: string;
+  device: string;
+  screener: boolean;
+  department: string;
+  theme: string;
+  theme_other: string;
+  grouping: string;
+  gc_task: string;
+  gc_task_other: string;
+  satisfaction:
+    | 'Very satisfied'
+    | 'Satisfied'
+    | 'Neutral'
+    | 'Dissatisfied'
+    | 'Very dissatisfied';
+  ease:
+    | 'Very easy'
+    | 'Easy'
+    | 'Neither difficult nor easy'
+    | 'Difficult'
+    | 'Very difficult';
+  able_to_complete: 'Yes' | 'No';
+  what_would_improve?: string;
+  what_would_improve_comment?: string;
+  reason_not_complete?: string;
+  reason_not_complete_comment?: string;
 }
 
 export interface OverviewUxData {
@@ -173,6 +226,7 @@ export interface OverviewUxData {
 }
 
 export interface OverviewProject extends ProjectsHomeProject {
+  projectId: string;
   testType?: string[];
   totalUsers: number;
 }
@@ -208,6 +262,10 @@ export interface OverviewData
   top5DecreasedCalldriverTopics: TopCalldriverTopics[];
   searchTermsEn: OverallSearchTerm[];
   searchTermsFr: OverallSearchTerm[];
+  improvedTasksKpi?: {
+    uniqueTasks: number;
+    successRates: SuccessRates;
+  };
 }
 
 export type InternalSearchTerm = {
@@ -249,6 +307,8 @@ export interface TasksHomeAggregatedData {
   visits: number;
   user_type: string[];
   calls: number;
+  dyf_no: number;
+  latest_ux_success: number;
   // gc_survey_participants?: number; // to be added?
 }
 
@@ -368,8 +428,9 @@ export interface ProjectsHomeData {
   projects: ProjectsHomeProject[];
   avgTestSuccessAvg?: number;
   testsCompleted?: number;
+  uniqueTaskTestedLatestTestKpi?: number;
+  avgTestSuccess?: number;
 }
-
 export interface ReportsHomeProject extends ProjectsHomeProject {
   attachments: AttachmentData[];
 }
@@ -386,6 +447,10 @@ export interface VisitsByPage {
   visits: number;
   dyfYes?: number;
   dyfNo?: number;
+  is404?: boolean;
+  isRedirect?: boolean;
+  redirect?: string;
+  pageStatus?: PageStatus;
 }
 
 export interface ProjectDetailsAggregatedData {
@@ -471,9 +536,9 @@ export type CollectionKeys =
   | 'customReportsRegistry'
   | 'customReportsMetrics';
 
-  export type SortOption<T> = {
-    [P in keyof T]?: SortOrder;
-  };
+export type SortOption<T> = {
+  [P in keyof T]?: SortOrder;
+};
 
 export type DbQuery = {
   [key: string]: {
@@ -482,4 +547,10 @@ export type DbQuery = {
     project?: ProjectionType<unknown>;
     sort?: SortOption<unknown>;
   };
+};
+
+export type SuccessRates = {
+  baseline: number;
+  validation: number;
+  difference: number;
 };

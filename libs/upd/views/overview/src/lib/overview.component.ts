@@ -52,6 +52,10 @@ export class OverviewComponent implements OnInit {
           href: 'uxtests',
           title: this.i18n.service.translate('tab-uxtests', lang),
         },
+        {
+          href: 'gctasks',
+          title: this.i18n.service.translate('tab-gctasks', lang),
+        },
       ];
     });
   }

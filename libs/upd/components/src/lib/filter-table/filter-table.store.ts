@@ -16,47 +16,59 @@ export class FilterTableStore<
   }
 
   readonly setData = this.updater(
-    (state, value: [T[], ColumnConfig<T>[]]): TreeNode[] => {
+    (state: TreeNode[], [data, cols]: [T[], ColumnConfig<T>[]]): TreeNode[] => {
       const map = new Map();
-      const cols: ColumnConfig<T>[] = value[1];
-      const data: T[] = value[0];
 
       for (const item of data) {
         for (const [key, val] of Object.entries(item)) {
           if (!map.has(key)) {
             map.set(key, new Set());
           }
+          const values = map.get(key);
           if (Array.isArray(val)) {
             for (const v of val) {
-              map.get(key).add(v);
+              values.add(v);
             }
           } else {
-            map.get(key).add(val);
+            values.add(val);
           }
         }
       }
 
       const nodes: TreeNode[] = [];
-
-      for (const [key, value] of map.entries()) {
+      for (const [key, values] of map.entries()) {
         const column = cols.find((col) => col.field === key);
-        if (!column || column.pipe === 'number' || column.field === 'task') {
+        if (
+          !column ||
+          column.pipe === 'number' ||
+          column.pipe === 'percent' ||
+          column.pipe === 'date' ||
+          column.field === 'task' ||
+          column.field === 'gc_task' ||
+          column.field === 'what_would_improve_comment' ||
+          column.field === 'reason_not_complete_comment' ||
+          column.field === 'url' ||
+          column.field === 'gc_task_other'
+        ) {
           continue;
         }
-        const header = column?.header || key;
+        const header = column.header || key;
+        const children = [];
+        for (const v of values) {
+          if (v !== '') {
+            children.push({
+              label: v,
+              data: `${key}|${v}`,
+              key: `${key}|${v}`,
+            });
+          }
+        }
+
         nodes.push({
           label: header,
           data: `${key}|${header}`,
           key: `${key}|${header}`,
-          children: Array.from(value as Set<string>)
-            .filter((v) => v !== '')
-            .map((v) => {
-              return {
-                label: v,
-                data: `${key}|${v}`,
-                key: `${key}|${v}`,
-              };
-            }),
+          children,
         });
       }
 
@@ -66,12 +78,12 @@ export class FilterTableStore<
 
   readonly setLabels = this.updater((state, lang: LocaleId): TreeNode[] => {
     const nodes = state.map((node) => {
-      const [key, label] = node.data.split('|');
+      const [, label] = node.data.split('|');
       return {
         ...node,
         label: this.i18n.service.translate(label, lang),
         children: (node.children as TreeNode[]).map((child) => {
-          const [key, label] = child.data.split('|');
+          const [, label] = child.data.split('|');
           return {
             ...child,
             label: this.i18n.service.translate(label, lang),

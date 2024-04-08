@@ -29,6 +29,7 @@ export interface IAAItemId {
  */
 export interface CallsByTopic {
   tpc_id: string;
+  enquiry_line: string;
   topic: string;
   subtopic: string;
   sub_subtopic: string;
@@ -41,6 +42,7 @@ export interface CallsByTasks {
 }
 
 export interface TopCalldriverTopics extends CallsByTopic {
+  Inquiry: string;
   change: number | 'Infinity';
 }
 
@@ -198,6 +200,7 @@ export interface ITask {
   _id: Types.ObjectId;
   airtable_id: string;
   title: string;
+  title_fr?: string;
   group: string;
   subgroup: string;
   topic: string;
@@ -345,7 +348,8 @@ export interface IReadability extends ReadabilityScore {
 export interface IGCTasks {
   _id: Types.ObjectId;
   date: Date;
-  time_stamp: string;
+  tasks?: Types.ObjectId[] | ITask[];
+  time_stamp?: string;
   url: string;
   language: string;
   device?: string;
@@ -364,6 +368,13 @@ export interface IGCTasks {
   reason_not_complete?: string;
   reason_not_complete_comment?: string;
   sampling?: string;
+  sampling_invitation?: string;
+  sampling_gc?: string;
+  sampling_canada?: string;
+  sampling_theme?: string;
+  sampling_institution?: string;
+  sampling_group?: string;
+  sampling_task?: string;
 }
 
 /*
@@ -430,3 +441,16 @@ export type AccumulatorOperator =
   | '$stdDevPop'
   | '$stdDevSamp'
   | '$sum';
+
+
+ /*
+ * GCTSS to TMF Tasks mapping  interface
+ */
+export interface IGCTasksMappings {
+  _id: Types.ObjectId;
+  airtable_id: string;
+  title: string;
+  title_fr: string;
+  tasks?: Types.ObjectId[] | ITask[];
+  date_mapped?: Date;
+}

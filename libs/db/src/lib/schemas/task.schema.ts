@@ -3,9 +3,20 @@ import { model, Document, Types } from 'mongoose';
 import { UxTest } from './ux-test.schema';
 import { Page } from './page.schema';
 import { Project } from './project.schema';
-import type { ITask } from '@dua-upd/types-common';
+import type { IGCTasksMappings, ITask } from '@dua-upd/types-common';
 
 export type TaskDocument = Task & Document;
+
+const gcTaskMappingsTypeDef = {
+  _id: String,
+  airtable_id: String,
+  title: String,
+  title_fr: String,
+  date_mapped: {
+    type: Date,
+    optional: true,
+  },
+}
 
 @Schema()
 export class Task implements ITask {
@@ -17,6 +28,9 @@ export class Task implements ITask {
 
   @Prop({ required: true, type: String })
   title = '';
+
+  @Prop({ type: String })
+  title_fr: string;
 
   @Prop({ type: String })
   group = '';
@@ -44,6 +58,9 @@ export class Task implements ITask {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Page' }] })
   pages?: Types.ObjectId[] | Page[];
+
+  @Prop({ type: [gcTaskMappingsTypeDef] })
+  gc_tasks?: IGCTasksMappings[];
 
   @Prop({ type: [Number] })
   tpc_ids: number[] = [];

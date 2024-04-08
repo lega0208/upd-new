@@ -32,6 +32,7 @@ import { ActivityMapService } from './activity-map/activity-map.service';
 import { UrlsService } from './urls/urls.service';
 import dayjs from 'dayjs';
 import { AnnotationsService } from './airtable/annotations.service';
+import { GCTasksMappingsService } from './airtable/gc-tasks-mappings.service';
 import type { DateType } from '@dua-upd/external-data';
 
 @Injectable()
@@ -47,6 +48,7 @@ export class DbUpdateService {
     private calldriversService: CalldriversService,
     private feedbackService: FeedbackService,
     private annotationsService: AnnotationsService,
+    private gcTasksMappingsService: GCTasksMappingsService,
     private overallMetricsService: OverallMetricsService,
     private pagesService: PageUpdateService,
     private pageMetricsService: PageMetricsService,
@@ -141,6 +143,11 @@ export class DbUpdateService {
           .updateAnnotations()
           .catch((err) =>
             this.logger.error(`Error updating Annotations data\n${err.stack}`),
+          ),
+        this.gcTasksMappingsService
+          .updateGCTasksMappings()
+          .catch((err) =>
+            this.logger.error(`Error updating GC Task Mappings data\n${err.stack}`),
           ),
         this.airtableService
           .updateReports()

@@ -1,4 +1,10 @@
-import type { OptionalKeyOf } from '@dua-upd/utils-common';
+type OptionalKeyOf<T = void> = T extends void
+  ? string
+  : T extends unknown
+    ? keyof T extends string
+      ? keyof T
+      : string
+    : any;
 
 export type ColumnConfigPipe =
   | 'percent'
@@ -20,6 +26,8 @@ export interface ColumnConfig<T = any> {
   hide?: boolean;
   headerClass?: string;
   columnClass?: string;
+  frozen?: boolean;
+  indicator?: Indicator<T>;
 }
 
 export interface typeParams {
@@ -32,4 +40,9 @@ export interface typeParams {
 export interface FilterConfig<T = any> {
   type: 'category' | 'boolean' | 'passFail' | 'pageStatus';
   categories?: { name: string; value: T[keyof T] | null }[];
+}
+
+export interface Indicator<T = any> {
+  field: OptionalKeyOf<T>;
+  upGoodDownBad?: boolean;
 }

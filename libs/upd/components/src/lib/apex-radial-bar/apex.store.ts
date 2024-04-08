@@ -127,6 +127,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
     };
   });
 
+
   readonly setComparison = this.updater(
     (state, value: number): ChartOptions => {
       const comparison = formatPercent(value, this.i18n.service.currentLang);
@@ -145,6 +146,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
         kpi: KpiObjectiveCriteria;
         current: number;
         comparison: number;
+      
       }>,
     ) => {
       return kpi$.pipe(
@@ -155,6 +157,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
             '';
 
           this.setComparison(comparison);
+        
         }),
       );
     },
@@ -171,6 +174,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
   readonly current$ = this.select(({ series }) => series?.flat() as number[]);
 
   readonly comparison$ = this.select(({ labels }) => labels);
+  readonly comparison1$ = this.select(({ labels }) => labels);
 
   readonly setLocale = this.updater(
     (state, value: string): ChartOptions => ({

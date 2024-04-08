@@ -1,59 +1,120 @@
 <div class="container-fluid gx-0">
   <div class="row">
     <div class="col-lg-4 col-sm-12">
-      <upd-data-card
-        [current]="testsCompleted$ | async"
-        [title]="'tests-completed-since2018'"
-      ></upd-data-card>
+      <upd-apex-radial-bar
+        [title]="'kpi-ux-test-success-all-title'"
+        [titleTooltip]="'kpi-ux-test-success-all-tooltip'"
+        [preLabel]="'Target'"
+        [valueLabel]="0.8"
+        [current]="(kpiTotAvgSuccessRate$ | async) || 0"
+        [kpiObjectiveCriteria]="uxTestsKpiObjectiveCriteria"
+        [keyword]="'ux'"
+        modal="{{ 'kpi-ux-test-success-all-guidance' | translate }}"
+      >
+        {{
+          'kpi-ux-test-success-all-text'
+            | translate
+              : { total: (uniqueTaskTestedLatestTestKpi$ | async) || 0 }
+        }}
+      </upd-apex-radial-bar>
     </div>
     <div class="col-lg-4 col-sm-12">
-      <upd-data-card
-        [current]="tasksTested$ | async"
-        [title]="'tasks-tested-since2018'"
-      ></upd-data-card>
+      <upd-apex-radial-bar
+        class="custom-radial-bar"
+        [title]="'kpi-ux-test-improved-title'"
+        [titleTooltip]="'kpi-ux-test-improved-tooltip'"
+        [preLabel]="'Target'"
+        [valueLabel]="0.8"
+        [current]="(improvedKpiSuccessRateValidation$ | async) || 0"
+        [kpiObjectiveCriteria]="uxTestsKpiObjectiveCriteria"
+        [keyword]="'ux'"
+        modal="{{ 'kpi-ux-test-improved-guidance' | translate }}"
+      >
+        <div>
+          {{
+            'kpi-ux-test-improved-text'
+              | translate: { total: (improvedKpiUniqueTasks$ | async) || 0 }
+          }}
+          <br />
+          <ng-container
+            *ngIf="{
+              value: improvedKpiSuccessRateDifference$ | async
+            } as improvedKpi"
+          >
+            @if (!!improvedKpi.value || improvedKpi.value === 0) {
+              {{
+                getDiffText(improvedKpi.value) + ' from Baseline UX tests'
+                  | translate
+                    : {
+                        value:
+                          improvedKpi.value
+                          | percent: undefined : currentLangSignal()
+                      }
+              }}
+            }
+          </ng-container>
+        </div>
+      </upd-apex-radial-bar>
     </div>
-    <div class="col-lg-4 col-sm-12">
-      <upd-data-card
-        [current]="participantsTested$ | async"
-        [title]="'participants-since2018'"
-      ></upd-data-card>
-    </div>
-  </div>
-</div>
 
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col-lg-4 col-sm-12">
-      <upd-data-card
-        [current]="testsConductedLastFiscal$ | async"
-        [title]="'tests-conducted-lastfiscal'"
-      ></upd-data-card>
+    <div class="container-fluid my-4 gx-0">
+      <div class="row">
+        <div class="col-lg-4 col-sm-12">
+          <upd-data-card
+            [current]="kpiTestsCompleted$ | async"
+            [title]="'tests-completed-since2018'"
+          ></upd-data-card>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+          <upd-data-card
+            [current]="tasksTested$ | async"
+            [title]="'tasks-tested-since2018'"
+          ></upd-data-card>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+          <upd-data-card
+            [current]="participantsTested$ | async"
+            [title]="'participants-since2018'"
+          ></upd-data-card>
+        </div>
+      </div>
     </div>
-    <div class="col-lg-4 col-sm-12">
-      <upd-data-card
-        [current]="testsConductedLastQuarter$ | async"
-        [title]="'tests-conducted-lastquarter'"
-      ></upd-data-card>
-    </div>
-    <div class="col-lg-4 col-sm-12">
-      <upd-data-card
-        [current]="COPSTests$ | async"
-        [title]="'cops-completed-since2018'"
-      ></upd-data-card>
-    </div>
-  </div>
-</div>
 
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-data-table-card
-        [data]="(uxChartData | async) || []"
-        [cols]="uxChartCols"
-        [title]="'Recent testing scores by project'"
-        [sortField]="'startDate'"
-        [sortOrder]="'desc'"
-      ></upd-data-table-card>
+    <div class="container-fluid my-4 gx-0">
+      <div class="row">
+        <div class="col-lg-4 col-sm-12">
+          <upd-data-card
+            [current]="testsConductedLastFiscal$ | async"
+            [title]="'tests-conducted-lastfiscal'"
+          ></upd-data-card>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+          <upd-data-card
+            [current]="testsConductedLastQuarter$ | async"
+            [title]="'tests-conducted-lastquarter'"
+          ></upd-data-card>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+          <upd-data-card
+            [current]="COPSTests$ | async"
+            [title]="'cops-completed-since2018'"
+          ></upd-data-card>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid my-4 gx-0">
+      <div class="row">
+        <div class="col">
+          <upd-data-table-card
+            [data]="(uxChartData | async) || []"
+            [cols]="uxChartCols"
+            [title]="'Recent testing scores by project'"
+            [sortField]="'startDate'"
+            [sortOrder]="'desc'"
+          ></upd-data-table-card>
+        </div>
+      </div>
     </div>
   </div>
 </div>

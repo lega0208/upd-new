@@ -20,6 +20,7 @@ export interface ReportsData {
 export interface TaskData {
   airtable_id: string;
   title: string;
+  title_fr?: string;
   group?: string;
   subgroup?: string;
   topic?: string;
@@ -139,4 +140,12 @@ export interface PageListData {
   title: string;
   lang?: 'en' | 'fr' | '';
   last_255: string;
+}
+
+export interface GCTasksMappingsData {
+  airtable_id: string;
+  title: string;
+  title_fr: string;
+  tasks?: string[];
+  date_mapped?: Date;
 }

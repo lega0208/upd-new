@@ -17,6 +17,7 @@ import type {
   PageDocument,
   SearchAssessmentDocument,
   AnnotationsDocument,
+  GcTasksDocument,
 } from '@dua-upd/db';
 import {
   DbService,
@@ -30,6 +31,7 @@ import {
   Page,
   SearchAssessment,
   Annotations,
+  GcTasks,
 } from '@dua-upd/db';
 import type {
   ApiParams,
@@ -46,6 +48,7 @@ import {
   AsyncLogTiming,
   avg,
   dateRangeSplit,
+  getImprovedKpiSuccessRates,
   getLatestTestData,
 } from '@dua-upd/utils-common';
 
@@ -117,6 +120,8 @@ export class OverallService {
     private feedbackModel: Model<FeedbackDocument>,
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessmentModel: Model<SearchAssessmentDocument>,
+    @InjectModel(GcTasks.name, 'defaultConnection')
+    private gcTasksModel: Model<GcTasksDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectModel(Annotations.name, 'defaultConnection')
     private annotationsModel: Model<AnnotationsDocument>
@@ -176,6 +181,10 @@ export class OverallService {
       .endOf('week')
       .format('YYYY-MM-DD')}`;
 
+    const uxTests = (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [];
+
+    const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests)
+
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -190,9 +199,10 @@ export class OverallService {
         this.annotationsModel,
         this.db,
         this.searchAssessmentModel,
+        this.gcTasksModel,
         this.cacheManager,
         params.dateRange,
-        satDateRange
+        satDateRange,
       ),
       comparisonDateRangeData: await getOverviewMetrics(
         this.overallModel,
@@ -203,13 +213,14 @@ export class OverallService {
         this.annotationsModel,
         this.db,
         this.searchAssessmentModel,
+        this.gcTasksModel,
         this.cacheManager,
         params.comparisonDateRange,
         satComparisonDateRange
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
-      uxTests:
-        (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [],
+      uxTests,
+      improvedTasksKpi,
       ...(await getUxData(testsSince2018)),
       top25CalldriverTopics,
       top5IncreasedCalldriverTopics,
@@ -578,6 +589,56 @@ async function getProjects(
 
   const avgTestSuccessAvg = avg(kpiUxTestsSuccessRates, 2);
 
+
+
+const kpiUxTestsSuccessRates2 = projectsData
+   .flatMap((project) => {
+      const testsByType: { [key: string]: any[] } = {}; // Object to store tests by type
+
+      // Iterate through tests of each project and categorize them by type
+      project.uxTests.forEach(test => {
+         if (testsByType[test.test_type]) {
+            testsByType[test.test_type].push(test); 
+         } else {
+            testsByType[test.test_type] = [test];
+         }
+      });
+
+      // Filter and return tests based on the criteria
+      const filteredTests = [];
+      
+      // Include tests from projects tested once by type (Baseline, Spot Check, or Exploratory)
+      ['Baseline', 'Spot Check', 'Exploratory'].forEach(type => {
+         if (testsByType[type] && testsByType[type].length === 1) {
+            const test = testsByType[type][0];
+            const projectAlreadyCounted = filteredTests.some(t => t.test_type === type);
+            if (!projectAlreadyCounted) {
+               filteredTests.push(test);
+            }
+         }
+      });
+
+      // Include all validation tests
+      Object.values(testsByType).forEach((tests: any[]) => {
+         if (tests.length >= 2 && tests[0].test_type === 'Validation') {
+            tests.forEach(test => {
+               const projectAlreadyCounted = filteredTests.some(t => t.test_type === 'Validation');
+               if (!projectAlreadyCounted) {
+                  filteredTests.push(test);
+               }
+            });
+         }
+      });
+
+      return filteredTests;
+   })
+   .filter((test) => (test.success_rate || test.success_rate === 0))
+   .map((test) => test.success_rate);
+
+const avgTestSuccess = avg(kpiUxTestsSuccessRates2, 2);
+
+  
+
   const taskSuccessRatesRecord: Record<string, number[]> = projectsData
     .flatMap((project) => project.uxTests)
     .filter(
@@ -600,13 +661,48 @@ async function getProjects(
   // except this is actually "unique tasks tested?"
   const testsCompleted = Object.values(taskSuccessRatesRecord).length;
 
+
+  const uniqueTasksTested: Set<string> = new Set();
+
+projectsData.forEach(project => {
+    const testsByType: { [key: string]: any[] } = {};
+
+    project.uxTests.forEach(test => {
+        if (testsByType[test.test_type]) {
+            testsByType[test.test_type].push(test);
+        } else {
+            testsByType[test.test_type] = [test];
+        }
+    });
+
+    // Include tests from projects tested once by type (Baseline, Spot Check, or Exploratory)
+    ['Baseline', 'Spot Check', 'Exploratory'].forEach(type => {
+        if (testsByType[type] && testsByType[type].length === 1) {
+            uniqueTasksTested.add(testsByType[type][0].task);
+        }
+    });
+
+    // Include all validation tests
+    Object.values(testsByType).forEach((tests: any[]) => {
+        if (tests.length >= 2 && tests[0].test_type === 'Validation') {
+            tests.forEach(test => {
+                uniqueTasksTested.add(test.task);
+            });
+        }
+    });
+});
+
+const uniqueTaskTestedLatestTestKpi = uniqueTasksTested.size;
+
   return {
     ...aggregatedData,
     ...uxTest,
-    projects: projectsData,
+    projects: projectsData, 
     avgUxTest,
     avgTestSuccessAvg,
     testsCompleted,
+    uniqueTaskTestedLatestTestKpi,
+    avgTestSuccess,
   };
 }
 
@@ -619,6 +715,7 @@ async function getOverviewMetrics(
   annotationsModel: Model<AnnotationsDocument>,
   db: DbService,
   searchAssessmentModel: Model<SearchAssessmentDocument>,
+  gcTasksModel: Model<GcTasksDocument>,
   cacheManager: Cache,
   dateRange: string,
   satDateRange: string
@@ -888,6 +985,51 @@ async function getOverviewMetrics(
     })
     .exec();
 
+  const gcTasksComments = await gcTasksModel
+    .aggregate()
+    .match({
+      date: { $gte: start, $lte: end },
+      sampling_task: 'y',
+      able_to_complete: { $ne: 'I started this survey before I finished my visit' }
+    });
+
+  const gcTasksData = await gcTasksModel
+  .aggregate()
+  .match({
+    date: { $gte: start, $lte: end },
+    sampling_task: 'y',
+    able_to_complete: { $ne: 'I started this survey before I finished my visit' }
+  })
+    .group({
+      _id: { gc_task: '$gc_task', theme: '$theme' },
+      total_entries: { $sum: 1 },
+      satisfaction: { $avg: { $cond: [{ $in: ['$satisfaction', ['Very satisfied', 'Satisfied']] }, 1, 0] } },
+      ease: { $avg: { $cond: [{ $in: ['$ease', ['Very easy', 'Easy']] }, 1, 0] } },
+      able_to_complete: { $avg: { $cond: [{ $eq: ['$able_to_complete', 'Yes'] }, 1, 0] } },
+    })
+    .project({
+      gc_task: '$_id.gc_task',
+      theme: '$_id.theme',
+      total_entries: 1,
+      satisfaction: 1,
+      ease: 1,
+      able_to_complete: 1,
+      margin_of_error: {
+            $divide: [
+              {
+                $add: [
+                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$satisfaction', { $subtract: [1, '$satisfaction'] }] }, '$total_entries'] } }] },
+                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$ease', { $subtract: [1, '$ease'] }] }, '$total_entries'] } }] },
+                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$able_to_complete', { $subtract: [1, '$able_to_complete'] }] }, '$total_entries'] } }] },
+                ]
+              },
+              3
+            ]
+          }
+    })
+    .sort({ total_entries: -1 })
+    .project({ _id: 0 });
+
   return {
     visitsByDay,
     calldriversByDay,
@@ -900,6 +1042,8 @@ async function getOverviewMetrics(
     top10GSC,
     feedbackPages,
     annotations,
+    gcTasksData,
+    gcTasksComments
   };
 }
 
@@ -1002,5 +1146,6 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
     testsConductedLastFiscal,
     testsConductedLastQuarter,
     copsTestsCompletedSince2018,
+
   };
 }

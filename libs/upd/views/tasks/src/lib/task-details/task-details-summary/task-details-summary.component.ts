@@ -71,7 +71,11 @@ export class TaskDetailsSummaryComponent implements OnInit {
     this.taskDetailsService.fullComparisonDateRangeLabel$;
 
   visitsByPageCols: ColumnConfig[] = [];
-  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
+  dyfTableCols: ColumnConfig<{
+    name: string;
+    currValue: number;
+    prevValue: string;
+  }>[] = [];
   whatWasWrongTableCols: ColumnConfig[] = [];
 
   dyfChartApex$ = this.taskDetailsService.dyfDataApex$;
@@ -92,118 +96,130 @@ export class TaskDetailsSummaryComponent implements OnInit {
       this.comparisonDateRangeLabel$,
       this.visitsByPage$,
       this.currentLang$,
-    ]).subscribe(
-      ([dateRange, comparisonDateRange, data, lang]) => {
-        this.langLink = lang === EN_CA ? 'en' : 'fr';
+    ]).subscribe(([dateRange, comparisonDateRange, data, lang]) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
 
-        this.dyfChartLegend = [
-          this.i18n.service.translate('yes', lang),
-          this.i18n.service.translate('no', lang),
-        ];
+      this.dyfChartLegend = [
+        this.i18n.service.translate('yes', lang),
+        this.i18n.service.translate('no', lang),
+      ];
 
-        this.whatWasWrongChartLegend = [
-          this.i18n.service.translate('d3-cant-find-info', lang),
-          this.i18n.service.translate('d3-other', lang),
-          this.i18n.service.translate('d3-hard-to-understand', lang),
-          this.i18n.service.translate('d3-error', lang),
-        ];
+      this.whatWasWrongChartLegend = [
+        this.i18n.service.translate('d3-cant-find-info', lang),
+        this.i18n.service.translate('d3-other', lang),
+        this.i18n.service.translate('d3-hard-to-understand', lang),
+        this.i18n.service.translate('d3-error', lang),
+      ];
 
-        this.visitsByPageCols = [
-          {
-            field: 'title',
-            header: this.i18n.service.translate('page-title', lang),
-            type: 'link',
-            typeParams: {
-              preLink: '/' + this.langLink + '/pages',
-              link: '_id',
-            },
+      this.visitsByPageCols = [
+        {
+          field: 'title',
+          header: this.i18n.service.translate('page-title', lang),
+          type: 'link',
+          typeParams: {
+            preLink: '/' + this.langLink + '/pages',
+            link: '_id',
           },
-          {
-            field: 'language',
-            header: this.i18n.service.translate('Search term language', lang),
-            filterConfig: {
-              type: 'category',
-              categories: createCategoryConfig({
-                i18n: this.i18n.service,
-                data,
-                field: 'language',
-              }),
-            },
+        },
+        {
+          field: 'language',
+          header: this.i18n.service.translate('Search term language', lang),
+          filterConfig: {
+            type: 'category',
+            categories: createCategoryConfig({
+              i18n: this.i18n.service,
+              data,
+              field: 'language',
+            }),
           },
-          {
-            field: 'url',
-            header: this.i18n.service.translate('URL', lang),
-            type: 'link',
-            typeParams: { link: 'url', external: true },
+        },
+        {
+          field: 'pageStatus',
+          header: 'Page status',
+          type: 'label',
+          typeParam: 'pageStatus',
+          filterConfig: {
+            type: 'pageStatus',
+            categories: createCategoryConfig({
+              i18n: this.i18n.service,
+              data,
+              field: 'pageStatus',
+            }),
           },
-          {
-            field: 'visits',
-            header: this.i18n.service.translate('visits', lang),
-            pipe: 'number',
-          },
-          {
-            field: 'percentChange',
-            header: this.i18n.service.translate('%-change', lang),
-            pipe: 'percent',
-            type: 'comparison',
-          },
-        ];
+        },
+        {
+          field: 'url',
+          header: this.i18n.service.translate('URL', lang),
+          type: 'link',
+          typeParams: { link: 'url', external: true },
+        },
+        {
+          field: 'visits',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
+        {
+          field: 'percentChange',
+          header: this.i18n.service.translate('%-change', lang),
+          pipe: 'percent',
+          type: 'comparison',
+        },
+      ];
 
-        this.taskSuccessByUxTestCols = [
-          {
-            field: 'title',
-            header: this.i18n.service.translate('ux-test', lang),
-            type: 'link',
-            typeParams: {
-              preLink: '/' + this.langLink + '/projects',
-              link: '_project_id',
-            },
+      this.taskSuccessByUxTestCols = [
+        {
+          field: 'title',
+          header: this.i18n.service.translate('ux-test', lang),
+          type: 'link',
+          typeParams: {
+            preLink: '/' + this.langLink + '/projects',
+            link: '_project_id',
           },
-          {
-            field: 'date',
-            header: this.i18n.service.translate('date', lang),
-            pipe: 'date',
-          },
-          {
-            field: 'test_type',
-            header: this.i18n.service.translate('test-type', lang),
-          },
-          {
-            field: 'success_rate',
-            header: this.i18n.service.translate('success-rate', lang),
-            pipe: 'percent',
-          },
-        ];
+        },
+        {
+          field: 'date',
+          header: this.i18n.service.translate('date', lang),
+          pipe: 'date',
+        },
+        {
+          field: 'test_type',
+          header: this.i18n.service.translate('test-type', lang),
+        },
+        {
+          field: 'success_rate',
+          header: this.i18n.service.translate('success-rate', lang),
+          pipe: 'percent',
+        },
+      ];
 
-        this.dyfTableCols = [
-          {
-            field: 'name',
-            header: this.i18n.service.translate('Selection', lang),
-          },
-          {
-            field: 'currValue',
-            header: dateRange,
-            pipe: 'number',
-          },
-          {
-            field: 'prevValue',
-            header: comparisonDateRange,
-            pipe: 'number',
-          },
-        ];
+      this.dyfTableCols = [
+        {
+          field: 'name',
+          header: this.i18n.service.translate('Selection', lang),
+        },
+        {
+          field: 'currValue',
+          header: dateRange,
+          pipe: 'number',
+        },
+        {
+          field: 'prevValue',
+          header: comparisonDateRange,
+          pipe: 'number',
+        },
+      ];
 
-        this.whatWasWrongTableCols = [
-          {
-            field: 'name',
-            header: this.i18n.service.translate('d3-www', lang),
-          },
-          {
-            field: 'value',
-            header: this.i18n.service.translate('visits', lang),
-            pipe: 'number',
-          },
-        ];
-      },
-    );
+      this.whatWasWrongTableCols = [
+        {
+          field: 'name',
+          header: this.i18n.service.translate('d3-www', lang),
+        },
+        {
+          field: 'value',
+          header: this.i18n.service.translate('visits', lang),
+          pipe: 'number',
+        },
+      ];
+    });
   }
 }

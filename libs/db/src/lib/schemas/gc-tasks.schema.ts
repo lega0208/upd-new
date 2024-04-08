@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Types } from 'mongoose';
-import { IGCTasks } from '@dua-upd/types-common';
+import { IGCTasks, ITask } from '@dua-upd/types-common';
 
 export type GcTasksDocument = GcTasks & Document;
 
@@ -9,11 +9,14 @@ export class GcTasks implements IGCTasks {
   @Prop({ type: Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }] })
+  tasks?: Types.ObjectId[] | ITask[];
+
   @Prop({ type: Date, required: true, index: true })
   date: Date;
 
-  @Prop({ type: String, required: true })
-  time_stamp: string;
+  @Prop({ type: String })
+  time_stamp?: string;
 
   @Prop({ type: String, required: true, index: true })
   url: string;
@@ -67,13 +70,32 @@ export class GcTasks implements IGCTasks {
   reason_not_complete_comment?: string;
 
   @Prop({ type: String })
-  sampling?: string;
+  sampling_invitation?: string;
+
+  @Prop({ type: String })
+  sampling_gc?: string;
+
+  @Prop({ type: String })
+  sampling_canada?: string;
+
+  @Prop({ type: String })
+  sampling_theme?: string;
+
+  @Prop({ type: String })
+  sampling_institution?: string;
+
+  @Prop({ type: String })
+  sampling_group?: string;
+
+  @Prop({ type: String })
+  sampling_task?: string;
 }
 
 export const GcTasksSchema = SchemaFactory.createForClass(GcTasks);
 
 GcTasksSchema.index({date: 1, url: 1})
 GcTasksSchema.index({date: 1, gc_task: 1})
+GcTasksSchema.index({date: 1, sampling_task: 1, able_to_complete: 1})
 
 export function getGCTasksModel() {
   return model(GcTasks.name, GcTasksSchema);

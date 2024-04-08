@@ -64,17 +64,19 @@ export class TasksHomeComponent implements OnInit {
       hide: true,
       translate: true,
     },
-    // {
-    //   field: 'tmf_rank',
-    //   header: 'TMF Rank',
-    //   pipe: 'number',
-    // },
+    {
+      field: 'tmf_rank',
+      header: 'Rank',
+      pipe: 'number',
+      frozen: true,
+    },
     {
       field: 'task',
       header: 'task',
       type: 'link',
       typeParam: '_id',
       translate: true,
+      frozen: true,
     },
     // {
     //   field: 'top_task',
@@ -89,11 +91,12 @@ export class TasksHomeComponent implements OnInit {
     //   field: 'secure_portal',
     //   header: 'Secure portal',
     // },
-    // {
-    //   field: 'portfolio',
-    //   header: 'Portfolio',
-    //   translate: true,
-    // },
+    {
+      field: 'portfolio',
+      header: 'Portfolio',
+      hide: true,
+      translate: true,
+    },
     // {
     //   field: 'ux_testing',
     //   header: 'UX testing',
@@ -114,23 +117,22 @@ export class TasksHomeComponent implements OnInit {
     //   header: 'Projects mapped',
     //   pipe: 'number',
     // },
-    // { // todo: add when available
-    //   field: 'gc_survey_participants',
-    //   header: 'Survey'
-    // },
     {
       field: 'program',
       header: 'Program',
+      hide: true,
       translate: true,
     },
     {
       field: 'user_type',
       header: 'Audience',
       translate: true,
+      frozen: true,
     },
     {
       field: 'topic',
       header: 'topic',
+      hide: true,
       translate: true,
     },
     {
@@ -150,11 +152,45 @@ export class TasksHomeComponent implements OnInit {
       pipe: 'number',
     },
     {
+      field: 'survey',
+      header: 'survey',
+      pipe: 'number',
+      tooltip: 'tooltip-survey-volume',
+    },
+    {
       field: 'calls_per_100_visits',
       header: 'kpi-calls-per-100-title',
       pipe: 'number',
       pipeParam: '1.3-3',
+      indicator: {
+        field: 'calls_per_100_visits_difference',
+        upGoodDownBad: false,
+      }
     },
+    {
+      field: 'dyf_no_per_1000_visits',
+      header: 'kpi-feedback-per-1000-title',
+      pipe: 'number',
+      pipeParam: '1.3-3',
+      indicator: {
+        field: 'dyf_no_per_1000_visits_difference',
+        upGoodDownBad: false,
+      }
+    },
+    {
+      field: 'survey_completed',
+      header: 'Self-reported success',
+      pipe: 'percent',
+      hide: true,
+      tooltip: 'tooltip-self-reported-success',
+    },
+    {
+      field: 'latest_ux_success',
+      header: 'Latest success rate',
+      pipe: 'percent',
+      hide: true,
+      tooltip: 'tooltip-latest-success-rate',
+    }
   ] as ColumnConfig<UnwrapObservable<typeof this.tasksHomeData$>>[];
 
   ngOnInit() {

@@ -8,6 +8,7 @@ import { OverviewSearchAnalyticsComponent } from './overview-search-analytics/ov
 import { OverviewFeedbackComponent } from './overview-feedback/overview-feedback.component';
 import { OverviewCalldriversComponent } from './overview-calldrivers/overview-calldrivers.component';
 import { OverviewUxTestsComponent } from './overview-ux-tests/overview-ux-tests.component';
+import { OverviewGCTasksComponent } from './overview-gc-tasks/overview-gc-tasks.component';
 
 const routes: Routes = [
   {
@@ -45,6 +46,11 @@ const routes: Routes = [
         component: OverviewUxTestsComponent,
         data: { title: 'Overview | UX tests' },
       },
+      {
+        path: 'gctasks',
+        component: OverviewGCTasksComponent,
+        data: { title: 'Overview | GC Tasks' },
+      }
     ],
   },
 ];

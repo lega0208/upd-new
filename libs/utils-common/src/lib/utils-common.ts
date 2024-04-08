@@ -417,7 +417,15 @@ export class TimingUtility {
       `${chalk.magenta(`Time remaining: ${timeRemaining}`)} | ${
         customMessage || ''
       }\r`;
-    console.log(message);
+
+    if (
+      iterationDuration >= 500 ||
+      (iterationDuration <= 200 && this.iterationCount % 100 === 0) ||
+      (iterationDuration > 200 && this.iterationCount % 8 === 0)
+    ) {
+      console.log(message);
+    }
+
     this.previousIterationEndTime = Date.now();
   }
 }
