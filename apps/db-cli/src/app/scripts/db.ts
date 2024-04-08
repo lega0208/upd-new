@@ -1524,3 +1524,27 @@ export async function generateTaskTranslations(db: DbService) {
   console.log('Missing translations:');
   console.log(missingTranslations);
 }
+
+export async function importGcTss() {
+  const db = (<RunScriptCommand>this).inject<DbService>(DbService);
+
+  const data = JSON.parse(await readFile('gc-tasks-tss_2021-01-14_2024-04-07.json', 'utf-8'))
+    .map((task) => ({
+      ...task,
+      _id: new Types.ObjectId(),
+      }));
+
+  let added = 0;
+
+  while (data.length) {
+    const batch = data.splice(0, 20000);
+
+    const results = await db.collections.gcTasks.insertMany(batch);
+  
+    added += results.length
+
+    console.log(`Added ${results.length} records to gcTasks`);
+  }
+
+  console.log(`Added total of ${added} records to gcTasks`);
+}
