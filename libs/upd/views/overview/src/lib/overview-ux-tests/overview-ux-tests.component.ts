@@ -10,6 +10,7 @@ import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import type { OverviewProject } from '@dua-upd/types-common';
 import { OverviewFacade } from '../+state/overview/overview.facade';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'upd-overview-ux-tests',
@@ -23,6 +24,7 @@ export class OverviewUxTestsComponent implements OnInit {
 
   currentLang!: LocaleId;
   currentLang$ = this.i18n.currentLang$;
+  currentLangSignal = this.i18n.currentLang;
   langLink = 'en';
 
   uxTestsKpiObjectiveCriteria = uxTestsKpiObjectiveCriteria;
@@ -39,11 +41,12 @@ export class OverviewUxTestsComponent implements OnInit {
   kpiUXTestsTotal$ = this.overviewService.kpiUXTestsTotal$;
 
   improvedKpiSuccessRate$ = this.overviewService.improvedKpiSuccessRate$;
-  improvedKpiSuccessRateDifference$ =
+  improvedKpiSuccessRateDifference$ = 
     this.overviewService.improvedKpiSuccessRateDifference$;
+
   improvedKpiSuccessRateValidation$ =
     this.overviewService.improvedKpiSuccessRateValidation$;
-
+    
   improvedKpi$ = this.overviewService.improvedKpi$;
   improvedKpiUniqueTasks$ = this.overviewService.improvedKpiUniqueTasks$;
 
@@ -54,6 +57,26 @@ export class OverviewUxTestsComponent implements OnInit {
   kpiTotAvgSuccessRate$ = this.overviewService.kpiTotAvgSuccessRate$;
 
   uxChartCols: ColumnConfig<OverviewProject>[] = [];
+
+  getDiffText(diff: number): string {
+    if (diff > 0) {
+      return 'increase';
+    } else if (diff < 0) {
+      return 'decrease';
+    } else {
+      return '';
+    }
+  }
+
+  getColor(diff: number): string {
+    if (diff > 0) {
+      return '#26A69A';
+    } else if (diff < 0) {
+      return '#DF2929';
+    } else {
+      return '';
+    }
+  }
 
   ngOnInit() {
     this.currentLang$.subscribe((lang) => {
