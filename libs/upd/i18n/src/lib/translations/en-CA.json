@@ -382,7 +382,7 @@
   "kpi-search-assessment-title": "Canada.ca search assessment",
   "kpi-search-assessment-tooltip": "Search assessment performance of the top English and French search terms on canada.ca and their corresponding target URL.",
   "kpi-search-assessment-guidance": "<strong>What is this?</strong> <br />Percentage of search terms that passed the search assessment.<br /><br />A search term passes the assessment when its target URL is in the top 5 search results when visitors search for that term. Otherwise, it fails the search assessment.<br /> <br />The assessment is conducted weekly for the top 100 English and 100 French search terms. <br /><br />The target for this Key performance indicator is 75%.<br /><br /><strong>How is this KPI calculated?</strong> <br />A: The total number of search terms that have “passed”<br />B: The total number of search terms<br /> <br />(A/B)*100<br /><br /><br /><div class='d-flex justify-content-end'><a href=\"/en/overview/searchanalytics\">View more search analytics data</a></div>",
-  "kpi-search-assessment-text": "{{passed}}/{{total}} search terms passed",
+  "kpi-search-assessment-text": "{{passed}}/{{total}} search terms passed as of {{date}}",
 
   "kpi-ux-test-title": "UX tests average success rate",
   "kpi-ux-test-tooltip": "Average success rate of the latest testing on all complete UX tests with Validation test type",
