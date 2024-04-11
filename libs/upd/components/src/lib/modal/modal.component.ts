@@ -1,5 +1,5 @@
-import { Component, inject, Input } from '@angular/core';
-import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
+import { Component, inject, Input, TemplateRef } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'upd-modal',
@@ -12,12 +12,14 @@ export class ModalComponent<T> {
   @Input() modalTitle = '';
   @Input() buttonTitle = '';
   @Input() modalContent = '';
+  @Input() modalSize: 'xl' | 'lg' | 'md' | 'sm' = 'md';
 
   closeResult = '';
 
-  open(content: any) {
-    this.modalService
-      .open(content, { ariaLabelledBy: 'modal-basic-title' })
+  open(content: TemplateRef<T>) {
+    this.modalService.open(content, {
+      ariaLabelledBy: 'modal-basic-title',
+      size: this.modalSize,
+    });
   }
-
 }
