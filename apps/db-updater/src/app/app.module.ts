@@ -19,7 +19,7 @@ import { DbModule } from '@dua-upd/db';
     ScheduleModule.forRoot(),
     DataIntegrityModule,
     DbUpdateModule.register(environment.production),
-    DbModule.forRoot(environment.production),
+    DbModule.forRoot(environment.production, environment.dbHost),
   ],
   providers: [UpdateService, DataIntegrityService, ConsoleLogger],
 })

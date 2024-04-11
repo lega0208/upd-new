@@ -3,7 +3,6 @@ import zstd from '@mongodb-js/zstd'; // need to import this for it to be include
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { getDbConnectionString } from './db.connection';
 import {
   AAItemId,
   AAItemIdSchema,
@@ -45,7 +44,10 @@ import {
   CustomReportsMetricsSchema,
 } from './db.schemas';
 import { PageVisitsViewSchema, PageVisitsView } from './db.views';
-import { GCTasksMappings, GCTasksMappingsSchema } from './schemas/gc-tasks-mappings.schema';
+import {
+  GCTasksMappings,
+  GCTasksMappingsSchema,
+} from './schemas/gc-tasks-mappings.schema';
 
 export const models = {
   callDrivers: {
@@ -67,8 +69,8 @@ export const models = {
   readability: { model: Readability, schema: ReadabilitySchema },
   annotations: { model: Annotations, schema: AnnotationsSchema },
   reports: { model: Reports, schema: ReportsSchema },
-  gcTasks: { model: GcTasks, schema: GcTasksSchema},
-  gcTasksMappings: { model: GCTasksMappings, schema: GCTasksMappingsSchema},
+  gcTasks: { model: GcTasks, schema: GcTasksSchema },
+  gcTasksMappings: { model: GCTasksMappings, schema: GCTasksMappingsSchema },
   customReportsRegistry: {
     model: CustomReportsRegistry,
     schema: CustomReportsRegistrySchema,
@@ -102,8 +104,13 @@ export const views = {
   exports: [MongooseModule],
 })
 export class DbModule {
-  static forRoot(production: boolean, dbName = 'upd-test') {
-    const connectionString = getDbConnectionString(production, dbName);
+  static forRoot(
+    production: boolean,
+    prodHost = 'mongodb',
+    dbName = 'upd-test',
+  ) {
+    const connectionString = `mongodb://${production ? prodHost : '127.0.0.1'}:27017/`;
+
     console.log(connectionString);
 
     return MongooseModule.forRoot(connectionString, {
