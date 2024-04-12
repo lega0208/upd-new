@@ -360,6 +360,7 @@
   "Rank": "Rang",
 
   "kpi-calls-per-100-title": "Appels pour 100 visites",
+  "kpi-calls-per-100-title-change": "Variation des appels pour 100 visites",
   "kpi-calls-per-100-tooltip": "Le ratio des appels reçus par l'ARC pour 100 visites des pages de l'ARC sur Canada.ca au cours de la période visée.",
   "kpi-calls-per-100-guidance": "<strong>Qu'est-ce que c'est?</strong><br />Le ratio d'appels reçus par l'ARC pour 100 visites des pages de l'ARC. <br />L'objectif de cet indicateur clé de rendement (ICR) est une diminution du nombre d'appels par 100 visites.<br /> <br /><strong>Comment cet ICR est-il calculé?</strong><br />A: Le nombre total d'appels reçus par l'ARC pour la période sélectionnée<br />B: Le nombre total de visites sur la page de l'ARC pour la période sélectionnée<br /> <br />(A/B)*100<br /><br /><div class='d-flex justify-content-end'><a href=\"/fr/overview/calldrivers\">Visionner plus de données sur les conducteurs d'appels</a></div>",
   "kpi-calls-per-100-tooltip-task": "Le ratio d'appels reçus par l'ARC pour 100 visites aux pages liées à cette tâche au cours de la période de référence.",
@@ -369,6 +370,7 @@
   "kpi-calls-per-100-text": "appels pour 100 visites",
   "kpi-calls-per-100-label": "appels",
   "kpi-feedback-per-1000-title": "Rétroactions négatives par 1 000 visites",
+  "kpi-feedback-per-1000-title-change": "Variation des rétroactions négatives pour 1 000 visites",
   "kpi-feedback-per-1000-tooltip": "Le ratio des réponses \"Non\" à la question \"Avez-vous trouvé ce que vous cherchiez ?\" sur les pages avec l'outil de rétroaction de la page pour 1000 visites sur le site Web de l'ARC au cours de la période de déclaration.",
   "kpi-feedback-per-1000-guidance": "<strong>Qu'est-ce que c'est?</strong><br />Le ratio de réponses \"Non\" à la question \"Avez-vous trouvé ce que vous cherchiez?\" sur les pages dotées de l'outil de rétroaction des pages pour 1000 visites sur les pages de l'ARC.<br /> <br />L'objectif de cet indicateur clé de performance (ICP) est une diminution des réponses \"non\" pour 1 000 visites des pages de l'ARC.<br /><br /><strong>Comment cet ICR est-il calculé?</strong> <br />A: Le nombre total de réponses \"Non\" à la question \"Avez-vous trouvé ce que vous cherchiez ?\" sur les pages avec l'outil de rétroaction des pages pour la période sélectionnée<br />B: Le nombre total de visites sur la page CRA pour la période sélectionnée<br /> <br />(A/B)*1 000<br /><br /><div class='d-flex justify-content-end'><a href=\"/fr/overview/pagefeedback\">Visionner plus de données sur les rétroactions</a></div>",
   "kpi-feedback-per-1000-tooltip-page": "Le ratio des réponses \"Non\" à la question \"Avez-vous trouvé ce que vous cherchiez ?\" sur cette page, si l'outil de commentaires sur la page est disponible, pour 1 000 visites sur cette page au cours de la période de référence.",

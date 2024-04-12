@@ -69,6 +69,7 @@ export class TasksHomeComponent implements OnInit {
       header: 'Rank',
       pipe: 'number',
       frozen: true,
+      width: '80px'
     },
     {
       field: 'task',
@@ -145,37 +146,60 @@ export class TasksHomeComponent implements OnInit {
       field: 'visits',
       header: 'visits',
       pipe: 'number',
+      width: "100px"
     },
     {
       field: 'calls',
       header: 'calls',
       pipe: 'number',
+      width: "100px"
     },
     {
       field: 'survey',
       header: 'survey',
       pipe: 'number',
       tooltip: 'tooltip-survey-volume',
+      width: "100px",
     },
     {
       field: 'calls_per_100_visits',
       header: 'kpi-calls-per-100-title',
       pipe: 'number',
-      pipeParam: '1.3-3',
+      pipeParam: '1.2-2',
+      width: '120px',
+    },
+    {
+      field: 'calls_percent_change',
+      header: 'kpi-calls-per-100-title-change',
+      pipe: 'percent',
+      pipeParam: '1.0-2',
       indicator: {
         field: 'calls_per_100_visits_difference',
+        pipe: 'number',
+        pipeParam: '1.0-2',
         upGoodDownBad: false,
-      }
+      },
+      width: '150px',
     },
     {
       field: 'dyf_no_per_1000_visits',
       header: 'kpi-feedback-per-1000-title',
       pipe: 'number',
-      pipeParam: '1.3-3',
+      pipeParam: '1.2-2',
+      width: '120px',
+    },
+    {
+      field: 'dyf_no_percent_change',
+      header: 'kpi-feedback-per-1000-title-change',
+      pipe: 'percent',
+      pipeParam: '1.0-2',
       indicator: {
         field: 'dyf_no_per_1000_visits_difference',
+        pipe: 'number',
+        pipeParam: '1.0-2',
         upGoodDownBad: false,
-      }
+      },
+      width: '150px',
     },
     {
       field: 'survey_completed',
