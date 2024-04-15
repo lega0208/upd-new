@@ -20,7 +20,7 @@ import { BlobStorageModule } from '@dua-upd/blob-storage';
   imports: [
     DataIntegrityModule,
     DbUpdateModule.register(environment.production),
-    DbModule.forRoot(environment.production),
+    DbModule.forRoot(environment.production, environment.dbHost),
     LoggerModule,
     BlobStorageModule,
     ReadabilityModule,
