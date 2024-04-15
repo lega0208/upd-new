@@ -21,6 +21,7 @@ import {
   I18nFacade,
 } from '@dua-upd/upd/state';
 import { environment } from '../environments/environment';
+import { SwUpdateService } from './sw-update.service';
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidebarComponent],
@@ -52,7 +53,7 @@ import { environment } from '../environments/environment';
       enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
-      registrationStrategy: 'registerWhenStable:30000'
+      registrationStrategy: 'registerWhenStable:30000',
     }),
   ],
   providers: [
@@ -61,6 +62,7 @@ import { environment } from '../environments/environment';
     I18nService,
     I18nFacade,
     { provide: APP_BASE_HREF, useValue: '/' },
+    !isDevMode() ? SwUpdateService : [],
   ],
   bootstrap: [AppComponent],
 })
