@@ -360,6 +360,7 @@
   "selected-columns": "{{num}} columns selected",
 
   "kpi-calls-per-100-title": "Calls per 100 visits",
+  "kpi-calls-per-100-title-change": "Change in calls per 100 visits",
   "kpi-calls-per-100-tooltip": "The ratio of calls received by the CRA per 100 visits to the CRA pages on Canada.ca in the reporting time period.",
   "kpi-calls-per-100-guidance": "<strong>What is this?</strong> <br />The ratio of calls the CRA receives per 100 visits to the CRA pages. <br />The target for this Key performance indicator (KPI) is a decrease in calls per 100 visits.<br /> <br /><strong>How is this KPI calculated?</strong><br />A: The total number of calls received by the CRA for the selected date range<br />B: The total number of visits to the CRA page for the selected date range<br /> <br />(A/B)*100<br /><br /><div class='d-flex justify-content-end'><a href=\"/en/overview/calldrivers\">View more call drivers data</a></div>",
   "kpi-calls-per-100-tooltip-task": "The ratio of calls received by the CRA per 100 visits to the pages related to this Task in the reporting time period.",
@@ -369,6 +370,7 @@
   "kpi-calls-per-100-text": "calls per 100 visits",
   "kpi-calls-per-100-label": "calls",
   "kpi-feedback-per-1000-title": "Negative feedback per 1,000 visits",
+  "kpi-feedback-per-1000-title-change": "Change in negative feedback per 1,000 visits",
   "kpi-feedback-per-1000-tooltip": "The ratio of \"No\" responses to \"Did you find what you were looking for?\" on pages with the Page feedback tool per 1000 visits on the CRA website in the reporting time period",
   "kpi-feedback-per-1000-guidance": "<strong>What is this?</strong> <br />The ratio of \"No\" responses to \"Did you find what you were looking for?\" on pages with the Page feedback tool per 1000 visits to the CRA pages.<br /> <br />The target for this Key performance indicator (KPI) is a decrease in “no” responses per 1000 visits to the CRA pages.<br /><br /><strong>How is this KPI calculated?</strong> <br />A: The total number of \"No\" responses to \"Did you find what you were looking for?\" on pages with the Page feedback tool for the selected date range<br />B: The total number of visits to the CRA page for the selected date range<br /> <br />(A/B)*1000<br /><br /><div class='d-flex justify-content-end'><a href=\"/en/overview/pagefeedback\">View more feedback data</a></div>",
   "kpi-feedback-per-1000-tooltip-page": "The ratio of \"No\" responses to \"Did you find what you were looking for?\" on this page, if Page feedback tool available, per 1000 visits to it in the reporting time period",
@@ -382,7 +384,7 @@
   "kpi-search-assessment-title": "Canada.ca search assessment",
   "kpi-search-assessment-tooltip": "Search assessment performance of the top English and French search terms on canada.ca and their corresponding target URL.",
   "kpi-search-assessment-guidance": "<strong>What is this?</strong> <br />Percentage of search terms that passed the search assessment.<br /><br />A search term passes the assessment when its target URL is in the top 5 search results when visitors search for that term. Otherwise, it fails the search assessment.<br /> <br />The assessment is conducted weekly for the top 100 English and 100 French search terms. <br /><br />The target for this Key performance indicator is 75%.<br /><br /><strong>How is this KPI calculated?</strong> <br />A: The total number of search terms that have “passed”<br />B: The total number of search terms<br /> <br />(A/B)*100<br /><br /><br /><div class='d-flex justify-content-end'><a href=\"/en/overview/searchanalytics\">View more search analytics data</a></div>",
-  "kpi-search-assessment-text": "{{passed}}/{{total}} search terms passed",
+  "kpi-search-assessment-text": "{{passed}}/{{total}} search terms passed as of {{date}}",
 
   "kpi-ux-test-title": "UX tests average success rate",
   "kpi-ux-test-tooltip": "Average success rate of the latest testing on all complete UX tests with Validation test type",

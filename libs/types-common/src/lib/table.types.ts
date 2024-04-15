@@ -28,6 +28,7 @@ export interface ColumnConfig<T = any> {
   columnClass?: string;
   frozen?: boolean;
   indicator?: Indicator<T>;
+  style?: number;
 }
 
 export interface typeParams {
@@ -44,5 +45,7 @@ export interface FilterConfig<T = any> {
 
 export interface Indicator<T = any> {
   field: OptionalKeyOf<T>;
+  pipe: ColumnConfigPipe;
+  pipeParam?: string;
   upGoodDownBad?: boolean;
 }

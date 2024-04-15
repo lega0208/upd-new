@@ -18,6 +18,7 @@ export class DataTableCardComponent<T> {
   @Input() captionTitle = '';
   @Input() kpi = false;
   @Input() modal = '';
+  @Input() modalSize: 'xl' | 'lg' | 'md' | 'sm' = 'md';
   @Input() sortField = '';
   @Input() sortOrder: 'asc' | 'desc' = 'asc';
   @Input() title = '';
