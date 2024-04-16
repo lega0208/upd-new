@@ -747,9 +747,11 @@ async function getTaskAggregatedData(
         pageStatus: determinePageStatus(page),
       })) || [];
 
-  results[0].visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
-    (a, b) => a.title.localeCompare(b.title),
-  ) as VisitsByPage[];
+  if (results.length > 0) {
+    results[0].visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
+      (a, b) => a.title.localeCompare(b.title),
+    ) as VisitsByPage[];
+  }
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 
