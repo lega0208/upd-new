@@ -358,6 +358,7 @@
   "info-task-suggestion": "Don't see a task you expect?<br />Make a <a href=\"https://airtable.com/appT2OrwxPXlBmKgQ/pagixjmM0eXqajwsI/form\" target=\"_blank\">Task Suggestion</a>.",
   "change-columns": "Select columns",
   "selected-columns": "{{num}} columns selected",
+  "latest_success_rate_change": "Latest success rate change",
 
   "kpi-calls-per-100-title": "Calls per 100 visits",
   "kpi-calls-per-100-title-change": "Change in calls per 100 visits",
@@ -392,7 +393,7 @@
   "kpi-ux-test-text": "{{total}} unique tasks tested",
 
   "kpi-ux-test-success-all-title": "Average Task Success Rate",
-  "kpi-ux-test-success-all-tooltip": "Average success rate on all improved tasks",
+  "kpi-ux-test-success-all-tooltip": "Average success rate of all tasks",
   "kpi-ux-test-success-all-guidance": "<strong>What is this?</strong>  <br />The percentage of average success rate for all tasks, using the latest success rate from their most recent UX test. Note: Not all tasks have been tested.<br />The target for this Key performance indicator is 80%.<br /><br /><strong>How is this KPI calculated?</strong>  <br />A: The sum of success rates of the most recent tasks tested<br />B: Total number of tasks tested<br /> <br />A/B<br /><br />",
   "kpi-ux-test-success-all-text": "{{total}} unique tasks tested",
 

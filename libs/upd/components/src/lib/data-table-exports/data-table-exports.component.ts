@@ -100,15 +100,15 @@ export class DataTableExportsComponent<T> {
 
           if (!row[col.field as keyof T]) {
             formattedRow[colKey] = '';
-          } else if (col.indicator) {
+          } else if (col.secondaryField) {
             formattedRow[colKey] = `${formatPercent(
               (<unknown>row[col.field as keyof T]) as number,
               currentLang,
-              col.pipeParam
+              col.pipeParam,
             )} (${formatNumber(
-              (<unknown>row[col.indicator.field as keyof T]) as number,
+              (<unknown>row[col.secondaryField.field as keyof T]) as number,
               currentLang,
-              col.indicator.pipeParam
+              col.secondaryField.pipeParam,
             )})` as string;
           } else if (col.pipe === 'percent') {
             formattedRow[colKey] = formatPercent(
