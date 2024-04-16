@@ -358,6 +358,7 @@
   "change-columns": "Sélectionner des colonnes",
   "selected-columns": "{{num}} colonnes sélectionnées",
   "Rank": "Rang",
+  "latest_success_rate_change": "Dernière variation du taux de réussite",
 
   "kpi-calls-per-100-title": "Appels pour 100 visites",
   "kpi-calls-per-100-title-change": "Variation des appels pour 100 visites",

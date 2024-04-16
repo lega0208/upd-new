@@ -358,6 +358,7 @@
   "info-task-suggestion": "Don't see a task you expect?<br />Make a <a href=\"https://airtable.com/appT2OrwxPXlBmKgQ/pagixjmM0eXqajwsI/form\" target=\"_blank\">Task Suggestion</a>.",
   "change-columns": "Select columns",
   "selected-columns": "{{num}} columns selected",
+  "latest_success_rate_change": "Latest success rate change",
 
   "kpi-calls-per-100-title": "Calls per 100 visits",
   "kpi-calls-per-100-title-change": "Change in calls per 100 visits",
