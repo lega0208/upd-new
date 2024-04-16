@@ -308,7 +308,7 @@ export class ApexRadialBarComponent implements OnChanges {
                 ...this.chartOptions.plotOptions?.radialBar?.dataLabels,
                 name: {
                   ...this.chartOptions.plotOptions?.radialBar?.dataLabels?.name,
-                  color: colour,
+                  color: 'black',
                 },
                 value: {
                   ...this.chartOptions.plotOptions?.radialBar?.dataLabels
