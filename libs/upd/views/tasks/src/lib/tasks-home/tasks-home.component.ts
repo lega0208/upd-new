@@ -69,7 +69,7 @@ export class TasksHomeComponent implements OnInit {
       header: 'Rank',
       pipe: 'number',
       frozen: true,
-      width: '80px'
+      width: '80px',
     },
     {
       field: 'task',
@@ -146,20 +146,20 @@ export class TasksHomeComponent implements OnInit {
       field: 'visits',
       header: 'visits',
       pipe: 'number',
-      width: "100px"
+      width: '100px',
     },
     {
       field: 'calls',
       header: 'calls',
       pipe: 'number',
-      width: "100px"
+      width: '100px',
     },
     {
       field: 'survey',
       header: 'survey',
       pipe: 'number',
       tooltip: 'tooltip-survey-volume',
-      width: "100px",
+      width: '100px',
     },
     {
       field: 'calls_per_100_visits',
@@ -173,11 +173,12 @@ export class TasksHomeComponent implements OnInit {
       header: 'kpi-calls-per-100-title-change',
       pipe: 'percent',
       pipeParam: '1.0-2',
-      indicator: {
+      upGoodDownBad: false,
+      indicator: true,
+      secondaryField: {
         field: 'calls_per_100_visits_difference',
         pipe: 'number',
         pipeParam: '1.0-2',
-        upGoodDownBad: false,
       },
       width: '150px',
     },
@@ -193,11 +194,12 @@ export class TasksHomeComponent implements OnInit {
       header: 'kpi-feedback-per-1000-title-change',
       pipe: 'percent',
       pipeParam: '1.0-2',
-      indicator: {
+      upGoodDownBad: false,
+      indicator: true,
+      secondaryField: {
         field: 'dyf_no_per_1000_visits_difference',
         pipe: 'number',
         pipeParam: '1.0-2',
-        upGoodDownBad: false,
       },
       width: '150px',
     },
@@ -214,7 +216,18 @@ export class TasksHomeComponent implements OnInit {
       pipe: 'percent',
       hide: true,
       tooltip: 'tooltip-latest-success-rate',
-    }
+      width: '100px',
+    },
+    {
+      field: 'latest_success_rate_change',
+      header: 'latest_success_rate_change',
+      pipe: 'percent',
+      pipeParam: '1.0-2',
+      upGoodDownBad: true,
+      indicator: true,
+      hide: true,
+      width: '100px',
+    },
   ] as ColumnConfig<UnwrapObservable<typeof this.tasksHomeData$>>[];
 
   ngOnInit() {
