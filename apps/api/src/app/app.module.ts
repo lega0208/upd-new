@@ -14,7 +14,7 @@ import { ReportsModule } from '../reports/reports.module';
 
 @Module({
   imports: [
-    DbModule.forRoot(environment.production),
+    DbModule.forRoot(environment.production, environment.dbHost),
     PagesModule,
     OverallModule,
     TasksModule,

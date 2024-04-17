@@ -473,13 +473,12 @@ margin: 0px 20px 0px 20px;
 }
 
 #tasks-home- .p-datatable-thead > tr > th {
-  min-width: auto !important;
   vertical-align: bottom !important; 
 }
 
-/* #tasks-home- .p-datatable-thead > tr > th > div {
+#tasks-home- .p-datatable-thead > tr > th > div {
   white-space: normal !important; 
-}  */
+} 
 
  #tasks-home- .p-datatable-thead > tr > th[ng-reflect-field="task"] {
   min-width: 200px !important;

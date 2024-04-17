@@ -45,7 +45,8 @@
             | translate
               : {
                   passed: (kpiSearchAssessmentPassed$ | async)?.passed,
-                  total: (kpiSearchAssessmentPassed$ | async)?.total
+                  total: (kpiSearchAssessmentPassed$ | async)?.total,
+                  date: satEnd,
                 }
         }}
       </upd-apex-radial-bar>

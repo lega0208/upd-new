@@ -129,6 +129,7 @@ export class OverviewSummaryComponent implements OnInit {
   comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
   dyfChartLegend: string[] = [];
   langLink = 'en';
+  satEnd = '';
   chartCols: ColumnConfig = { field: '', header: '' };
   chartData: { text: string; link: string }[] = [];
   donutChartCols: ColumnConfig = { field: '', header: '' };
@@ -179,8 +180,10 @@ export class OverviewSummaryComponent implements OnInit {
       this.currentLang$,
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
-    ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
+      this.overviewService.satDateRangeLabel$,
+    ]).subscribe(([lang, dateRange, comparisonDateRange, satDateRange]) => {
       this.langLink = lang === EN_CA ? 'en' : 'fr';
+      this.satEnd = satDateRange.split('-')[1];
 
       this.dyfChartLegend = [
         this.i18n.service.translate('yes', lang),

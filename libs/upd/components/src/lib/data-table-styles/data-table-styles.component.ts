@@ -1,6 +1,6 @@
 import { Component, inject, Input, OnInit } from '@angular/core';
 import type { ColumnConfig } from '@dua-upd/types-common';
-import { PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
+import { formatPercent, formatNumber, formatDate } from '@angular/common';
 import { PageStatus, ProjectStatus } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { SecondsToMinutesPipe } from '@dua-upd/upd/pipes';
@@ -9,12 +9,8 @@ import { SecondsToMinutesPipe } from '@dua-upd/upd/pipes';
   selector: 'upd-data-table-styles',
   templateUrl: './data-table-styles.component.html',
   styleUrls: ['./data-table-styles.component.scss'],
-  providers: [PercentPipe, DecimalPipe, DatePipe],
 })
 export class DataTableStylesComponent implements OnInit {
-  private percentPipe = inject(PercentPipe);
-  private decimalPipe = inject(DecimalPipe);
-  private datePipe = inject(DatePipe);
   private secondsToMinutesPipe = inject(SecondsToMinutesPipe);
   public i18n = inject(I18nFacade);
 
@@ -71,41 +67,40 @@ export class DataTableStylesComponent implements OnInit {
     };
   }
 
-  arrowMap(field: string) {
+  getIndicator(field: string) {
     const value = this.data[field] as number;
     if (value < 0) {
       return 'arrow_downward';
     } else if (value > 0) {
       return 'arrow_upward';
     }
+
     return '';
   }
 
-  private applyPipe(data: number): number | string {
-    switch (this.config.pipe) {
+  getValueIndicator(field: string, pipe = '', pipeParam = '', abs = true): string {
+    const value = this.data[field] as number;
+    const sign = abs && value !== 0 ? (value < 0 ? '-' : '+') : '';
+    const absValue = Math.abs(value);
+    const formattedValue = this.applyPipe(absValue, pipe, pipeParam);
+    return `${sign}${formattedValue}`;
+  }
+
+  applyPipe(data: number, pipe = '', pipeParam = ''): string | number {
+    const effectivePipe = pipe || this.config.pipe;
+    const effectivePipeParam = pipeParam || this.config.pipeParam;
+    switch (effectivePipe) {
       case 'number':
-        return (
-          this.decimalPipe.transform(
-            data,
-            this.config.pipeParam || undefined,
-            this.currentLang,
-          ) || ''
-        );
+        return formatNumber(data, this.currentLang, effectivePipeParam) || '';
       case 'percent':
-        return (
-          this.percentPipe.transform(
-            data,
-            this.config.pipeParam || undefined,
-            this.currentLang,
-          ) || ''
-        );
+        return formatPercent(data, this.currentLang, effectivePipeParam) || '';
       case 'date':
         return (
-          this.datePipe.transform(
+          formatDate(
             data,
-            this.config.pipeParam || undefined,
-            'UTC',
+            effectivePipeParam ?? 'YYYY-MM-dd',
             this.currentLang,
+            'UTC',
           ) || ''
         );
       case 'secondsToMinutes':

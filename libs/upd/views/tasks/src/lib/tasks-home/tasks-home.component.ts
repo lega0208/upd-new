@@ -69,6 +69,7 @@ export class TasksHomeComponent implements OnInit {
       header: 'Rank',
       pipe: 'number',
       frozen: true,
+      width: '80px',
     },
     {
       field: 'task',
@@ -145,37 +146,62 @@ export class TasksHomeComponent implements OnInit {
       field: 'visits',
       header: 'visits',
       pipe: 'number',
+      width: '100px',
     },
     {
       field: 'calls',
       header: 'calls',
       pipe: 'number',
+      width: '100px',
     },
     {
       field: 'survey',
       header: 'survey',
       pipe: 'number',
       tooltip: 'tooltip-survey-volume',
+      width: '100px',
     },
     {
       field: 'calls_per_100_visits',
       header: 'kpi-calls-per-100-title',
       pipe: 'number',
-      pipeParam: '1.3-3',
-      indicator: {
+      pipeParam: '1.2-2',
+      width: '120px',
+    },
+    {
+      field: 'calls_percent_change',
+      header: 'kpi-calls-per-100-title-change',
+      pipe: 'percent',
+      pipeParam: '1.0-2',
+      upGoodDownBad: false,
+      indicator: true,
+      secondaryField: {
         field: 'calls_per_100_visits_difference',
-        upGoodDownBad: false,
-      }
+        pipe: 'number',
+        pipeParam: '1.0-2',
+      },
+      width: '150px',
     },
     {
       field: 'dyf_no_per_1000_visits',
       header: 'kpi-feedback-per-1000-title',
       pipe: 'number',
-      pipeParam: '1.3-3',
-      indicator: {
+      pipeParam: '1.2-2',
+      width: '120px',
+    },
+    {
+      field: 'dyf_no_percent_change',
+      header: 'kpi-feedback-per-1000-title-change',
+      pipe: 'percent',
+      pipeParam: '1.0-2',
+      upGoodDownBad: false,
+      indicator: true,
+      secondaryField: {
         field: 'dyf_no_per_1000_visits_difference',
-        upGoodDownBad: false,
-      }
+        pipe: 'number',
+        pipeParam: '1.0-2',
+      },
+      width: '150px',
     },
     {
       field: 'survey_completed',
@@ -190,7 +216,18 @@ export class TasksHomeComponent implements OnInit {
       pipe: 'percent',
       hide: true,
       tooltip: 'tooltip-latest-success-rate',
-    }
+      width: '100px',
+    },
+    {
+      field: 'latest_success_rate_change',
+      header: 'latest_success_rate_change',
+      pipe: 'percent',
+      pipeParam: '1.0-2',
+      upGoodDownBad: true,
+      indicator: true,
+      hide: true,
+      width: '100px',
+    },
   ] as ColumnConfig<UnwrapObservable<typeof this.tasksHomeData$>>[];
 
   ngOnInit() {

@@ -230,7 +230,7 @@ export class TasksService {
       .lean()
       .exec();
 
-    const uxTestsDict = arrayToDictionaryMultiref(uxTests, 'tasks');
+    const uxTestsDict = arrayToDictionaryMultiref(uxTests, 'tasks', true);
 
     const gcTasksData = await this.gcTasksModel
       .aggregate()
@@ -289,6 +289,15 @@ export class TasksService {
             round((previous_dyf_no / previous_visits) * 1000, 3)
           : null;
 
+      const calls_percent_change = percentChange(
+        calls / task.visits,
+        previous_calls / previous_visits,
+      );
+      const dyf_no_percent_change = percentChange(
+        task.dyf_no / task.visits,
+        previous_dyf_no / previous_visits,
+      );
+
       const { gc_survey_participants, gc_survey_completed } =
         task.gc_tasks.reduce(
           (acc, gcTask) => {
@@ -304,8 +313,12 @@ export class TasksService {
         );
 
       const uxTestsForTask = uxTestsDict[task._id.toString()] ?? [];
-      const { avgTestSuccess, latestDate, percentChange } =
-        getAvgSuccessFromLatestTests(uxTestsForTask);
+
+      const {
+        avgTestSuccess,
+        latestDate,
+        percentChange: latestSuccessPercentChange,
+      } = getAvgSuccessFromLatestTests(uxTestsForTask);
 
       return {
         ...task,
@@ -331,6 +344,9 @@ export class TasksService {
         dyf_no_per_1000_visits,
         calls_per_100_visits_difference,
         dyf_no_per_1000_visits_difference,
+        calls_percent_change,
+        dyf_no_percent_change,
+        latest_success_rate_change: latestSuccessPercentChange,
       };
     });
 
@@ -731,9 +747,11 @@ async function getTaskAggregatedData(
         pageStatus: determinePageStatus(page),
       })) || [];
 
-  results[0].visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
-    (a, b) => a.title.localeCompare(b.title),
-  ) as VisitsByPage[];
+  if (results.length > 0) {
+    results[0].visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
+      (a, b) => a.title.localeCompare(b.title),
+    ) as VisitsByPage[];
+  }
 
   const documentIds = calldriverDocs.map(({ _id }) => _id);
 

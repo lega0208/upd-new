@@ -100,6 +100,16 @@ export class DataTableExportsComponent<T> {
 
           if (!row[col.field as keyof T]) {
             formattedRow[colKey] = '';
+          } else if (col.secondaryField) {
+            formattedRow[colKey] = `${formatPercent(
+              (<unknown>row[col.field as keyof T]) as number,
+              currentLang,
+              col.pipeParam,
+            )} (${formatNumber(
+              (<unknown>row[col.secondaryField.field as keyof T]) as number,
+              currentLang,
+              col.secondaryField.pipeParam,
+            )})` as string;
           } else if (col.pipe === 'percent') {
             formattedRow[colKey] = formatPercent(
               (<unknown>row[col.field as keyof T]) as number,
@@ -115,7 +125,7 @@ export class DataTableExportsComponent<T> {
               (<unknown>row[col.field as keyof T]) as Date,
               col.pipeParam ?? 'YYYY-MM-dd',
               currentLang,
-              'UTC'
+              'UTC',
             );
           } else if (col.typeParam === 'cops') {
             formattedRow[colKey] = row[col.field as keyof T] ? cops : '';

@@ -113,6 +113,7 @@
           [pSortableColumn]="sort ? col.field : undefined"
           [ngClass]="col.headerClass || ''"
           class="{{ col.columnClass || '' }}"
+          [style]="col.width ? 'min-width: ' + col.width + '; width: ' + col.width: ''"
         >
           <div [ngClass]="sort ? 'text-nowrap d-flex align-items-center' : ''">
             <span

@@ -44,7 +44,6 @@ export class FilterTableStore<
           column.pipe === 'percent' ||
           column.pipe === 'date' ||
           column.field === 'task' ||
-          column.field === 'gc_task' ||
           column.field === 'what_would_improve_comment' ||
           column.field === 'reason_not_complete_comment' ||
           column.field === 'url' ||

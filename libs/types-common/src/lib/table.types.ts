@@ -27,7 +27,10 @@ export interface ColumnConfig<T = any> {
   headerClass?: string;
   columnClass?: string;
   frozen?: boolean;
-  indicator?: Indicator<T>;
+  indicator?: boolean;
+  secondaryField?: SecondaryField<T>;
+  upGoodDownBad?: boolean;
+  width?: number;
 }
 
 export interface typeParams {
@@ -42,7 +45,8 @@ export interface FilterConfig<T = any> {
   categories?: { name: string; value: T[keyof T] | null }[];
 }
 
-export interface Indicator<T = any> {
+export interface SecondaryField<T = any> {
   field: OptionalKeyOf<T>;
-  upGoodDownBad?: boolean;
+  pipe?: ColumnConfigPipe;
+  pipeParam?: string;
 }

@@ -17,7 +17,7 @@ import type { ColumnConfig } from '@dua-upd/types-common';
               title | translate
             }}</span>
             <span *ngIf="modal" class="modal-icon-by-title">
-              <upd-modal [modalTitle]="title" [modalContent]="modal"> </upd-modal>
+              <upd-modal [modalTitle]="title" [modalContent]="modal" [modalSize]="modalSize"> </upd-modal>
             </span>
           </h3>
 
@@ -45,6 +45,7 @@ export class CardComponent {
   @Input() data: Record<string, number | string>[] = [];
   @Input() type = 'list';
   @Input() modal = '';
+  @Input() modalSize: 'xl' | 'lg' | 'md' | 'sm' = 'md';
   @Input() styleClass = '';
 
   constructor() {
