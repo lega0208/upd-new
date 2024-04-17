@@ -58,7 +58,6 @@ export class OverviewUxTestsComponent implements OnInit {
   kpiTotAvgSuccessRate$ = this.overviewService.kpiTotAvgSuccessRate$;
 
   uxChartCols: ColumnConfig<OverviewProject>[] = [];
-comparison1: any;
 
   getDiffText(diff: number): string {
     if (diff > 0) {
