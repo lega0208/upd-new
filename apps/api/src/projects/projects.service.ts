@@ -695,7 +695,7 @@ async function getAggregatedProjectMetrics(
 
   const visitedPageIds = new Set();
   const metrics =
-    projectMetrics.visitsByPage.map((metric) => {
+    projectMetrics?.visitsByPage.map((metric) => {
       const pageId = metric._id.toString();
       visitedPageIds.add(pageId);
 
@@ -735,9 +735,11 @@ async function getAggregatedProjectMetrics(
         pageStatus: determinePageStatus(page),
       })) || [];
 
-  projectMetrics.visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
-    (a, b) => a.title.localeCompare(b.title),
-  ) as VisitsByPage[];
+  if (projectMetrics) {
+    projectMetrics.visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
+      (a, b) => a.title.localeCompare(b.title),
+    ) as VisitsByPage[];
+  }
 
   const project = await projectModel
     .findById(id)
