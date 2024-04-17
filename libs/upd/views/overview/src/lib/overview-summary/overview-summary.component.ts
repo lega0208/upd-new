@@ -155,6 +155,26 @@ export class OverviewSummaryComponent implements OnInit {
   }>[] = [];
   taskSurveyCols: ColumnConfig[] = [];
 
+  getTrendIconAndColor(diff: number): { iconName: string; color: string } {
+    let iconName = '';
+    let color = '';
+   
+    if (diff > 0) {
+       iconName = 'arrow_upward'; 
+       color = '#26A69A'; 
+    } else if (diff < 0) {
+       iconName = 'arrow_downward'; 
+       color = '#DF2929'; 
+    } else {
+       iconName = ''; 
+       color = ''; 
+    }
+   
+    return { iconName, color };
+   }
+
+   
+
   ngOnInit() {
     combineLatest([
       this.currentLang$,
