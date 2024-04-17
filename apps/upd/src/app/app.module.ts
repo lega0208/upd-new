@@ -62,7 +62,7 @@ import { SwUpdateService } from './sw-update.service';
     I18nService,
     I18nFacade,
     { provide: APP_BASE_HREF, useValue: '/' },
-    !isDevMode() ? SwUpdateService : [],
+    environment.production ? SwUpdateService : [],
   ],
   bootstrap: [AppComponent],
 })
