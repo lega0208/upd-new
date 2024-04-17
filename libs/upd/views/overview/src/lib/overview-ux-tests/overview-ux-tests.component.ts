@@ -12,6 +12,7 @@ import type { OverviewProject } from '@dua-upd/types-common';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 import { of } from 'rxjs';
 
+
 @Component({
   selector: 'upd-overview-ux-tests',
   templateUrl: './overview-ux-tests.component.html',
@@ -57,26 +58,39 @@ export class OverviewUxTestsComponent implements OnInit {
   kpiTotAvgSuccessRate$ = this.overviewService.kpiTotAvgSuccessRate$;
 
   uxChartCols: ColumnConfig<OverviewProject>[] = [];
+comparison1: any;
 
   getDiffText(diff: number): string {
     if (diff > 0) {
-      return 'increase';
+       return 'increase' ; 
     } else if (diff < 0) {
-      return 'decrease';
+       return 'decrease' ; 
     } else {
-      return '';
+       return ''; 
     }
-  }
+   }
 
-  getColor(diff: number): string {
+   
+   getTrendIconAndColor(diff: number): { iconName: string; color: string } {
+    let iconName = '';
+    let color = '';
+   
     if (diff > 0) {
-      return '#26A69A';
+       iconName = 'arrow_upward'; 
+       color = '#26A69A'; 
     } else if (diff < 0) {
-      return '#DF2929';
+       iconName = 'arrow_downward'; 
+       color = '#DF2929'; 
     } else {
-      return '';
+       iconName = ''; 
+       color = ''; 
     }
-  }
+   
+    return { iconName, color };
+   }
+   
+
+  
 
   ngOnInit() {
     this.currentLang$.subscribe((lang) => {

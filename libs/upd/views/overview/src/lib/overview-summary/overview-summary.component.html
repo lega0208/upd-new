@@ -77,32 +77,32 @@
           [keyword]="'ux'"
           modal="{{ 'kpi-ux-test-improved-guidance' | translate }}"
         >
-          <div>
-            {{
-              'kpi-ux-test-improved-text'
+        <div>
+          <ng-container
+          *ngIf="{
+            value: improvedKpiSuccessRateDifference$ | async
+          } as improvedKpi"
+        >
+        <span [style.color]="getTrendIconAndColor(improvedKpi.value ?? 0).color">
+         <i class="material-icons">{{ getTrendIconAndColor(improvedKpi.value ?? 0).iconName }}</i>
+         {{ improvedKpi.value | percent: undefined : currentLangSignal() }}
+         
+
+       </span>
+       {{
+         getDiffText(improvedKpi.value ?? 0)
+           | translate
+       }}
+          <br />
+          {{
+            'kpi-ux-test-improved-text'
               | translate: { total: (improvedKpiUniqueTasks$ | async) || 0 }
-            }}
-            <br> 
-            <ng-container
-            *ngIf="{
-              value: improvedKpiSuccessRateDifference$ | async
-            } as improvedKpi"
-          >
-            @if (!!improvedKpi.value || improvedKpi.value === 0) {
-              {{
-                getDiffText(improvedKpi.value) + ' from Baseline UX tests'
-                  | translate
-                    : {
-                        value:
-                          improvedKpi.value
-                          | percent: undefined : currentLangSignal()
-                      }
-              }}
-            }
-          </ng-container>
-        </div>
+          }}
+          
+        </ng-container>
+         </div>
       </upd-apex-radial-bar>
-    </div>
+     </div>
   </div>
 </div>
 <!--
