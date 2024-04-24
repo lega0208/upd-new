@@ -749,7 +749,7 @@ async function getTaskAggregatedData(
 
   if (results.length > 0) {
     results[0].visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
-      (a, b) => a.title.localeCompare(b.title),
+      (a, b) => a.title?.localeCompare(b.title) || 1,
     ) as VisitsByPage[];
   }
 
