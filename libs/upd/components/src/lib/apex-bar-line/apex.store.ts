@@ -1,7 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { arrayToDictionary, sum } from '@dua-upd/utils-common';
+import {
+  arrayToDictionary,
+  arrayToDictionaryMultiref,
+  sum,
+} from '@dua-upd/utils-common';
 import { ComponentStore } from '@ngrx/component-store';
 import type {
   ApexAxisChartSeries,
@@ -74,7 +78,7 @@ export class ApexStore extends ComponentStore<ApexOptions> {
 
   readonly setAnnotations = this.updater(
     (state, values: { x: Date; y: number; text: string }[]): ApexOptions => {
-      const annotationsByDate = arrayToDictionary(
+      const annotationsByDate = arrayToDictionaryMultiref(
         values.map(({ x, y, text }) => ({
           x: x.toISOString(),
           y,
@@ -295,7 +299,7 @@ export type TooltipConfig = {
   series: TooltipSeriesConfig[];
   annotation?: {
     text: string;
-  };
+  }[];
   percent?: string;
 };
 
@@ -337,29 +341,24 @@ export function getTooltipHtml(
   locale: 'en-CA' | 'fr-CA',
   eventText = 'Event',
 ) {
-  const annotationHtml = annotation
-    ? `
-  <hr style="order: 98;" class="my-1" />
-  <div
-    class="apexcharts-tooltip-series-group apexcharts-active d-flex"
-    style="order: 99;"
-  >
-    <span
-      class="apexcharts-tooltip-marker annotation"
-    ></span>
-    <div
-      class="apexcharts-tooltip-text"
-      style="font-family: 'Noto Sans',sans-serif; font-size: 0.7rem"
-    >
-      <div class="apexcharts-tooltip-y-group">
-        <span class="apexcharts-tooltip-text-y-label"
-          ><strong>${eventText}:</strong> ${annotation.text}: </span
-        ><span class="apexcharts-tooltip-text-y-value">${title}</span>
+  const annotationHtml =
+    annotation && annotation.length
+      ? annotation
+          .map(
+            (ann) => `
+      <div class="apexcharts-tooltip-series-group apexcharts-active d-flex" style="order: 99;">
+        <span class="apexcharts-tooltip-marker annotation"></span>
+        <div class="apexcharts-tooltip-text" style="font-family: 'Noto Sans', sans-serif; font-size: 0.7rem">
+          <div class="apexcharts-tooltip-y-group">
+            <span class="apexcharts-tooltip-text-y-label"><strong>${eventText}:</strong> ${ann.text}: </span>
+            <span class="apexcharts-tooltip-text-y-value">${title}</span>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-  `
-    : '';
+    `,
+          )
+          .join('')
+      : '';
 
   const seriesHtml = series
     .filter(
@@ -377,6 +376,8 @@ export function getTooltipHtml(
     </div>
 
     ${seriesHtml}
+
+    <hr style="order: 98;" class="my-1" />
 
     ${annotationHtml}
   `;
