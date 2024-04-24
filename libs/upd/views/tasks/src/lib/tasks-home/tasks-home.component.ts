@@ -155,6 +155,13 @@ export class TasksHomeComponent implements OnInit {
       width: '100px',
     },
     {
+      field: 'dyf_no',
+      header: 'dyf_no',
+      pipe: 'number',
+      width: '140px',
+      hide: true,
+    },
+    {
       field: 'survey',
       header: 'survey',
       pipe: 'number',
