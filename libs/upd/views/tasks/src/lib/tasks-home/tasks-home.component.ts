@@ -225,15 +225,22 @@ export class TasksHomeComponent implements OnInit {
       tooltip: 'tooltip-latest-success-rate',
       width: '100px',
     },
+    // latest_success_rate_difference,
+    // latest_success_rate_percent_change,
     {
-      field: 'latest_success_rate_change',
+      field: 'latest_success_rate_percent_change',
       header: 'latest_success_rate_change',
       pipe: 'percent',
       pipeParam: '1.0-2',
       upGoodDownBad: true,
       indicator: true,
+      secondaryField: {
+        field: 'latest_success_rate_difference',
+        pipe: 'number',
+        pipeParam: '1.0-2',
+      },
       hide: true,
-      width: '100px',
+      width: '140px',
     },
   ] as ColumnConfig<UnwrapObservable<typeof this.tasksHomeData$>>[];
 
