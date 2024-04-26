@@ -187,7 +187,7 @@ export class TasksHomeComponent implements OnInit {
         pipe: 'number',
         pipeParam: '1.0-2',
       },
-      width: '150px',
+      width: '160px',
     },
     {
       field: 'dyf_no_per_1000_visits',
@@ -208,7 +208,7 @@ export class TasksHomeComponent implements OnInit {
         pipe: 'number',
         pipeParam: '1.0-2',
       },
-      width: '150px',
+      width: '160px',
     },
     {
       field: 'survey_completed',
@@ -238,7 +238,7 @@ export class TasksHomeComponent implements OnInit {
         pipeParam: '1.0-2',
       },
       hide: true,
-      width: '140px',
+      width: '150px',
     },
   ] as ColumnConfig<UnwrapObservable<typeof this.tasksHomeData$>>[];
 
