@@ -225,8 +225,6 @@ export class TasksHomeComponent implements OnInit {
       tooltip: 'tooltip-latest-success-rate',
       width: '100px',
     },
-    // latest_success_rate_difference,
-    // latest_success_rate_percent_change,
     {
       field: 'latest_success_rate_percent_change',
       header: 'latest_success_rate_change',
