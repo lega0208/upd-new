@@ -187,7 +187,7 @@ export class TasksHomeComponent implements OnInit {
         pipe: 'number',
         pipeParam: '1.0-2',
       },
-      width: '150px',
+      width: '160px',
     },
     {
       field: 'dyf_no_per_1000_visits',
@@ -208,7 +208,7 @@ export class TasksHomeComponent implements OnInit {
         pipe: 'number',
         pipeParam: '1.0-2',
       },
-      width: '150px',
+      width: '160px',
     },
     {
       field: 'survey_completed',
@@ -226,14 +226,19 @@ export class TasksHomeComponent implements OnInit {
       width: '100px',
     },
     {
-      field: 'latest_success_rate_change',
+      field: 'latest_success_rate_percent_change',
       header: 'latest_success_rate_change',
       pipe: 'percent',
       pipeParam: '1.0-2',
       upGoodDownBad: true,
       indicator: true,
+      secondaryField: {
+        field: 'latest_success_rate_difference',
+        pipe: 'number',
+        pipeParam: '1.0-2',
+      },
       hide: true,
-      width: '100px',
+      width: '150px',
     },
   ] as ColumnConfig<UnwrapObservable<typeof this.tasksHomeData$>>[];
 
