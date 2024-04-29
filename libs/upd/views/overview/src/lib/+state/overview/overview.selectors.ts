@@ -13,7 +13,10 @@ import {
   selectPeriodDates,
 } from '@dua-upd/upd/state';
 import { OVERVIEW_FEATURE_KEY, type OverviewState } from './overview.reducer';
-import { arrayToDictionary } from '@dua-upd/utils-common';
+import {
+  arrayToDictionary,
+  arrayToDictionaryMultiref,
+} from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
 
@@ -327,7 +330,10 @@ export const selectComboChartTable = createSelector(
   ) => {
     const visitsDict = arrayToDictionary(visits, 'date');
     const callsDict = arrayToDictionary(calls, 'date');
-    const annotationsDict = arrayToDictionary(annotations, 'event_date');
+    const annotationsDict = arrayToDictionaryMultiref(
+      annotations,
+      'event_date',
+    );
     const prevVisitsDict = arrayToDictionary(prevVisits, 'date');
     const prevCallsDict = arrayToDictionary(prevCalls, 'date');
 
@@ -338,7 +344,7 @@ export const selectComboChartTable = createSelector(
       date: dayjs.utc(currentDate).locale(lang).format(dateFormat),
       visits: visitsDict[currentDate]?.visits,
       calls: callsDict[currentDate]?.calls,
-      annotations: `${annotationsDict[currentDate]?.title || ''}`,
+      annotations: `${annotationsDict[currentDate]?.map((ann) => ann.title) || ''}`,
       prevDate: dayjs.utc(prevDate).locale(lang).format(dateFormat),
       prevVisits: prevVisitsDict[prevDate]?.visits,
       prevCalls: prevCallsDict[prevDate]?.calls,
@@ -364,9 +370,12 @@ export const selectVisitsByDayChartTable = createSelector(
     dateRangePeriod,
   ) => {
     const visitsDict = arrayToDictionary(visits, 'date');
-    const annotationsDict = arrayToDictionary(annotations, 'event_date');
+    const annotationsDict = arrayToDictionaryMultiref(
+      annotations,
+      'event_date',
+    );
     const prevVisitsDict = arrayToDictionary(prevVisits, 'date');
-    const prevAnnotationsDict = arrayToDictionary(
+    const prevAnnotationsDict = arrayToDictionaryMultiref(
       prevAnnotations,
       'event_date',
     );
@@ -377,13 +386,13 @@ export const selectVisitsByDayChartTable = createSelector(
     return [...dates].map(([prevDate, currentDate]) => ({
       date: dayjs.utc(currentDate).locale(lang).format(dateFormat),
       visits: visitsDict[currentDate]?.visits,
-      annotations: `${annotationsDict[currentDate]?.title || ''} ${
-        annotationsDict[currentDate]?.event_type || ''
+      annotations: `${annotationsDict[currentDate]?.map((ann) => ann.title) || ''} ${
+        annotationsDict[currentDate]?.map((ann) => ann.event_type) || ''
       }`,
       prevDate: dayjs.utc(prevDate).locale(lang).format(dateFormat),
       prevVisits: prevVisitsDict[prevDate]?.visits,
-      prevAnnotations: `${prevAnnotationsDict[prevDate]?.title || ''} ${
-        prevAnnotationsDict[prevDate]?.event_type || ''
+      prevAnnotations: `${prevAnnotationsDict[prevDate]?.map((ann) => ann.title) || ''} ${
+        prevAnnotationsDict[prevDate]?.map((ann) => ann.event_type) || ''
       }`,
     }));
   },

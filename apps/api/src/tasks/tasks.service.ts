@@ -317,8 +317,15 @@ export class TasksService {
       const {
         avgTestSuccess,
         latestDate,
-        percentChange: latestSuccessPercentChange,
+        percentChange: latest_success_rate,
       } = getAvgSuccessFromLatestTests(uxTestsForTask);
+
+      const latest_success_rate_percent_change = percentChange(
+        avgTestSuccess,
+        avgTestSuccess - latest_success_rate
+      )
+
+      const latest_success_rate_difference = latest_success_rate * 100;
 
       return {
         ...task,
@@ -346,7 +353,8 @@ export class TasksService {
         dyf_no_per_1000_visits_difference,
         calls_percent_change,
         dyf_no_percent_change,
-        latest_success_rate_change: latestSuccessPercentChange,
+        latest_success_rate_difference,
+        latest_success_rate_percent_change,
       };
     });
 

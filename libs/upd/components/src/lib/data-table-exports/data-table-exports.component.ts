@@ -153,7 +153,7 @@ export class DataTableExportsComponent<T> {
       const data = await this.getFormattedExportData(true);
 
       const headerRow = Object.keys(data[0]).map(
-        (header: string) => `"${header}"`,
+        (header: string) => `"${this.i18n.service.instant(header)}"`,
       );
       const dataRows = data.map((row) =>
         Object.values(row).map((cellData) => `"${cellData}"`),
@@ -192,7 +192,7 @@ export class DataTableExportsComponent<T> {
     try {
       const columnsExport = this.cols.map((obj) => ({
         dataKey: obj.field,
-        title: obj.header,
+        title: this.i18n.service.instant(obj.header),
       }));
 
       const minCellWidth =
@@ -224,8 +224,14 @@ export class DataTableExportsComponent<T> {
         // replacing the keys with the appropriate headers
 
         const exportData = await this.getFormattedExportData(true);
+        const headers = Object.keys(exportData[0]).map(
+          (header: string) => this.i18n.service.instant(header),
+        );
 
         const worksheet = utils.json_to_sheet(exportData);
+
+        utils.sheet_add_aoa(worksheet, [headers], {origin: 'A1'});
+
         const workbook = {
           Sheets: { data: worksheet },
           SheetNames: ['data'],
