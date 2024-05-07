@@ -11,6 +11,7 @@ import { environment } from '../environments/environment';
 import { DbModule } from '@dua-upd/db';
 import { InternalSearchModule } from '../internal-search/internal-search.module';
 import { ReportsModule } from '../reports/reports.module';
+import { FeedbackModule } from '@dua-upd/api/feedback';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ReportsModule } from '../reports/reports.module';
     ReportsModule,
     CustomReportsModule.register(environment.production),
     QueryModule,
+    FeedbackModule,
     BullModule.forRoot({
       connection: {
         host: environment.redisHost,

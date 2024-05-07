@@ -65,6 +65,12 @@ export function datesFromDateRange(
 export const dateRangeSplit = (dateRange: string): Date[] =>
   dateRange.split('/').map((d) => new Date(d));
 
+export const parseDateRangeString = (dateRange: string): DateRange<Date> => {
+  const [start, end] = dateRangeSplit(dateRange);
+
+  return { start, end };
+};
+
 /**
  * Utility for correcting UTC dates if they're off by 1 (for calculating what "today" is)
  *  (i.e. when "today" in UTC is actually "tomorrow" in the local timezone)

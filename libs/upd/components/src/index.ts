@@ -31,3 +31,4 @@ export * from './lib/apex-radial-bar/kpi-objectives';
 export * from './lib/filter-table/filter-table.component';
 export * from './lib/filter-table-selection/filter-table-selection.component';
 export * from './lib/did-you-know/did-you-know.component';
+export * from './lib/range-slider/range-slider.component';

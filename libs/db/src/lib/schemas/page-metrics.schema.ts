@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Model, Types, FilterQuery } from 'mongoose';
-import {
+import type {
   GscSearchTermMetrics,
   AccumulatorOperator,
   AASearchTermMetrics,

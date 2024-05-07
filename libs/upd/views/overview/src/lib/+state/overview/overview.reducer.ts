@@ -33,6 +33,10 @@ export const initialState: OverviewState = {
     uxTests: [],
     searchTermsEn: [],
     searchTermsFr: [],
+    mostRelevantCommentsAndWords: {
+      en: { comments: [], words: [] },
+      fr: { comments: [], words: [] },
+    },
   },
   loaded: false,
   loading: false,
@@ -48,7 +52,7 @@ const reducer = createReducer(
       loading: true,
       loaded: false,
       error: null,
-    })
+    }),
   ),
   on(
     OverviewActions.loadOverviewSuccess,
@@ -57,7 +61,7 @@ const reducer = createReducer(
       loading: false,
       loaded: true,
       error: null,
-    })
+    }),
   ),
   on(
     OverviewActions.loadOverviewError,
@@ -66,13 +70,26 @@ const reducer = createReducer(
       loading: false,
       loaded: true,
       error,
-    })
-  )
+    }),
+  ),
+  on(
+    OverviewActions.getMostRelevantFeedbackSuccess,
+    (state, payload): OverviewState => ({
+      ...state,
+      data: {
+        ...state.data,
+        mostRelevantCommentsAndWords: payload.data,
+      },
+      loading: false,
+      loaded: true,
+      error: null,
+    }),
+  ),
 );
 
 export function overviewReducer(
   state: OverviewState | undefined,
-  action: Action
+  action: Action,
 ) {
   return reducer(state, action);
 }

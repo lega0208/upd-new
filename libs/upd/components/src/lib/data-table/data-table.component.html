@@ -50,26 +50,27 @@
           >
             <ng-template let-columns pTemplate="selectedItems">
               <div
-              class="d-flex justify-content-between align-items-bottom content-end"
-              #rightPanel
-              style="
-                display: flex;
-                justify-content: flex-end;
-                align-items: center;
-                color: rgb(33, 37, 41);
-              "
-            >
-                <span
-                ><span class="pi pi-cog"></span>
-                {{ 'change-columns' | translate }}
-              </span
-              >&NonBreakingSpace;
-              <span
-                class="badge h-100 align-self-center text-center"
-                style="padding: 0.25em 0.32em"
-                [ngClass]="selectedColumns().length === 0 ? 'bg-unknown' : 'bg-primary'"
-                >{{ selectedColumns().length }}</span
+                class="d-flex justify-content-between align-items-bottom content-end"
+                #rightPanel
+                style="
+                  display: flex;
+                  justify-content: flex-end;
+                  align-items: center;
+                  color: rgb(33, 37, 41);
+                "
               >
+                <span
+                  ><span class="pi pi-cog"></span>
+                  {{ 'change-columns' | translate }} </span
+                >&NonBreakingSpace;
+                <span
+                  class="badge h-100 align-self-center text-center"
+                  style="padding: 0.25em 0.32em"
+                  [ngClass]="
+                    selectedColumns().length === 0 ? 'bg-unknown' : 'bg-primary'
+                  "
+                  >{{ selectedColumns().length }}</span
+                >
               </div>
             </ng-template>
 
@@ -113,9 +114,14 @@
           [pSortableColumn]="sort ? col.field : undefined"
           [ngClass]="col.headerClass || ''"
           class="{{ col.columnClass || '' }}"
-          [style]="col.width ? 'min-width: ' + col.width + '; width: ' + col.width: ''"
+          [style]="
+            col.width ? 'min-width: ' + col.width + '; width: ' + col.width : ''
+          "
         >
-          <div [ngClass]="sort ? 'text-nowrap d-flex align-items-center' : ''">
+          <div
+            [ngClass]="sort ? 'd-flex align-items-center' : ''"
+            [ngStyle]="{ 'white-space': allowHeaderWrap ? 'normal' : 'nowrap' }"
+          >
             <span
               class="p-column-title datatable-headers"
               [class.card-tooltip]="col.tooltip"

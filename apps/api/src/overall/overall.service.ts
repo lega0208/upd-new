@@ -41,7 +41,7 @@ import type {
   OverviewUxData,
   OverviewProjectData,
   OverviewProject,
-  OverallSearchTerm
+  OverallSearchTerm,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -50,7 +50,9 @@ import {
   dateRangeSplit,
   getImprovedKpiSuccessRates,
   getLatestTestData,
+  parseDateRangeString,
 } from '@dua-upd/utils-common';
+import { FeedbackService } from '@dua-upd/api/feedback';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -124,15 +126,15 @@ export class OverallService {
     private gcTasksModel: Model<GcTasksDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectModel(Annotations.name, 'defaultConnection')
-    private annotationsModel: Model<AnnotationsDocument>
+    private annotationsModel: Model<AnnotationsDocument>,
+    private feedbackService: FeedbackService,
   ) {}
 
   @AsyncLogTiming
   async getMetrics(params: ApiParams): Promise<OverviewData> {
     const cacheKey = `OverviewMetrics-${params.dateRange}`;
-    const cachedData = await this.cacheManager.store.get<OverviewData>(
-      cacheKey
-    );
+    const cachedData =
+      await this.cacheManager.store.get<OverviewData>(cacheKey);
 
     if (cachedData) {
       return cachedData;
@@ -145,7 +147,7 @@ export class OverallService {
     const topCalldriverTopics =
       await this.calldriversModel.getTopicsWithPercentChange(
         params.dateRange,
-        params.comparisonDateRange
+        params.comparisonDateRange,
       );
 
     const top25CalldriverTopics = topCalldriverTopics.slice(0, 25);
@@ -181,9 +183,8 @@ export class OverallService {
       .endOf('week')
       .format('YYYY-MM-DD')}`;
 
-    const uxTests = (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [];
-
-    const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests)
+    const uxTests =
+      (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [];
 
     const results = {
       dateRange: params.dateRange,
@@ -216,17 +217,21 @@ export class OverallService {
         this.gcTasksModel,
         this.cacheManager,
         params.comparisonDateRange,
-        satComparisonDateRange
+        satComparisonDateRange,
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
       uxTests,
-      improvedTasksKpi,
+      improvedTasksKpi: getImprovedKpiSuccessRates(uxTests),
       ...(await getUxData(testsSince2018)),
       top25CalldriverTopics,
       top5IncreasedCalldriverTopics,
       top5DecreasedCalldriverTopics,
       searchTermsEn: await this.getTopSearchTerms(params, 'en'),
       searchTermsFr: await this.getTopSearchTerms(params, 'fr'),
+      mostRelevantCommentsAndWords:
+        await this.feedbackService.getMostRelevantCommentsAndWords({
+          dateRange: parseDateRangeString(params.dateRange),
+        }),
     };
 
     await this.cacheManager.set(cacheKey, results);
@@ -236,7 +241,7 @@ export class OverallService {
 
   async getTopSearchTerms(
     { dateRange, comparisonDateRange }: ApiParams,
-    lang: 'en' | 'fr'
+    lang: 'en' | 'fr',
   ) {
     const [startDate, endDate] = dateRangeSplit(dateRange);
     const [prevStartDate, prevEndDate] = dateRangeSplit(comparisonDateRange);
@@ -328,7 +333,7 @@ export class OverallService {
       const searchesChange =
         typeof prevSearches === 'number' && prevSearches !== 0
           ? Math.round(
-              ((result.total_searches - prevSearches) / prevSearches) * 100
+              ((result.total_searches - prevSearches) / prevSearches) * 100,
             ) / 100
           : null;
 
@@ -343,7 +348,7 @@ export class OverallService {
 
 async function getProjects(
   projectModel: Model<ProjectDocument>,
-  uxTestsModel: Model<UxTestDocument>
+  uxTestsModel: Model<UxTestDocument>,
 ): Promise<OverviewProjectData> {
   const defaultData = {
     numInProgress: 0,
@@ -568,7 +573,7 @@ async function getProjects(
 
   for (const data of projectsData) {
     const { percentChange, avgTestSuccess, total } = getLatestTestData(
-      data.uxTests
+      data.uxTests,
     );
 
     data.lastAvgSuccessRate = avgTestSuccess;
@@ -583,61 +588,61 @@ async function getProjects(
     .filter(
       (test) =>
         test.test_type === 'Validation' &&
-        (test.success_rate || test.success_rate === 0)
+        (test.success_rate || test.success_rate === 0),
     )
     .map((test) => test.success_rate);
 
   const avgTestSuccessAvg = avg(kpiUxTestsSuccessRates, 2);
 
-
-
-const kpiUxTestsSuccessRates2 = projectsData
-   .flatMap((project) => {
+  const kpiUxTestsSuccessRates2 = projectsData
+    .flatMap((project) => {
       const testsByType: { [key: string]: any[] } = {}; // Object to store tests by type
 
       // Iterate through tests of each project and categorize them by type
-      project.uxTests.forEach(test => {
-         if (testsByType[test.test_type]) {
-            testsByType[test.test_type].push(test); 
-         } else {
-            testsByType[test.test_type] = [test];
-         }
+      project.uxTests.forEach((test) => {
+        if (testsByType[test.test_type]) {
+          testsByType[test.test_type].push(test);
+        } else {
+          testsByType[test.test_type] = [test];
+        }
       });
 
       // Filter and return tests based on the criteria
       const filteredTests = [];
-      
+
       // Include tests from projects tested once by type (Baseline, Spot Check, or Exploratory)
-      ['Baseline', 'Spot Check', 'Exploratory'].forEach(type => {
-         if (testsByType[type] && testsByType[type].length === 1) {
-            const test = testsByType[type][0];
-            const projectAlreadyCounted = filteredTests.some(t => t.test_type === type);
-            if (!projectAlreadyCounted) {
-               filteredTests.push(test);
-            }
-         }
+      ['Baseline', 'Spot Check', 'Exploratory'].forEach((type) => {
+        if (testsByType[type] && testsByType[type].length === 1) {
+          const test = testsByType[type][0];
+          const projectAlreadyCounted = filteredTests.some(
+            (t) => t.test_type === type,
+          );
+          if (!projectAlreadyCounted) {
+            filteredTests.push(test);
+          }
+        }
       });
 
       // Include all validation tests
       Object.values(testsByType).forEach((tests: any[]) => {
-         if (tests.length >= 2 && tests[0].test_type === 'Validation') {
-            tests.forEach(test => {
-               const projectAlreadyCounted = filteredTests.some(t => t.test_type === 'Validation');
-               if (!projectAlreadyCounted) {
-                  filteredTests.push(test);
-               }
-            });
-         }
+        if (tests.length >= 2 && tests[0].test_type === 'Validation') {
+          tests.forEach((test) => {
+            const projectAlreadyCounted = filteredTests.some(
+              (t) => t.test_type === 'Validation',
+            );
+            if (!projectAlreadyCounted) {
+              filteredTests.push(test);
+            }
+          });
+        }
       });
 
       return filteredTests;
-   })
-   .filter((test) => (test.success_rate || test.success_rate === 0))
-   .map((test) => test.success_rate);
+    })
+    .filter((test) => test.success_rate || test.success_rate === 0)
+    .map((test) => test.success_rate);
 
-const avgTestSuccess = avg(kpiUxTestsSuccessRates2, 2);
-
-  
+  const avgTestSuccess = avg(kpiUxTestsSuccessRates2, 2);
 
   const taskSuccessRatesRecord: Record<string, number[]> = projectsData
     .flatMap((project) => project.uxTests)
@@ -646,58 +651,60 @@ const avgTestSuccess = avg(kpiUxTestsSuccessRates2, 2);
         test.test_type === 'Validation' &&
         (test.success_rate || test.success_rate === 0) &&
         test.task &&
-        test.title
+        test.title,
     )
-    .reduce((acc, test) => {
-      if (!acc[test.task]) {
-        acc[test.task] = [];
-      }
+    .reduce(
+      (acc, test) => {
+        if (!acc[test.task]) {
+          acc[test.task] = [];
+        }
 
-      acc[test.task].push(test.success_rate);
+        acc[test.task].push(test.success_rate);
 
-      return acc;
-    }, {} as Record<string, number[]>);
+        return acc;
+      },
+      {} as Record<string, number[]>,
+    );
 
   // except this is actually "unique tasks tested?"
   const testsCompleted = Object.values(taskSuccessRatesRecord).length;
 
-
   const uniqueTasksTested: Set<string> = new Set();
 
-projectsData.forEach(project => {
+  projectsData.forEach((project) => {
     const testsByType: { [key: string]: any[] } = {};
 
-    project.uxTests.forEach(test => {
-        if (testsByType[test.test_type]) {
-            testsByType[test.test_type].push(test);
-        } else {
-            testsByType[test.test_type] = [test];
-        }
+    project.uxTests.forEach((test) => {
+      if (testsByType[test.test_type]) {
+        testsByType[test.test_type].push(test);
+      } else {
+        testsByType[test.test_type] = [test];
+      }
     });
 
     // Include tests from projects tested once by type (Baseline, Spot Check, or Exploratory)
-    ['Baseline', 'Spot Check', 'Exploratory'].forEach(type => {
-        if (testsByType[type] && testsByType[type].length === 1) {
-            uniqueTasksTested.add(testsByType[type][0].task);
-        }
+    ['Baseline', 'Spot Check', 'Exploratory'].forEach((type) => {
+      if (testsByType[type] && testsByType[type].length === 1) {
+        uniqueTasksTested.add(testsByType[type][0].task);
+      }
     });
 
     // Include all validation tests
     Object.values(testsByType).forEach((tests: any[]) => {
-        if (tests.length >= 2 && tests[0].test_type === 'Validation') {
-            tests.forEach(test => {
-                uniqueTasksTested.add(test.task);
-            });
-        }
+      if (tests.length >= 2 && tests[0].test_type === 'Validation') {
+        tests.forEach((test) => {
+          uniqueTasksTested.add(test.task);
+        });
+      }
     });
-});
+  });
 
-const uniqueTaskTestedLatestTestKpi = uniqueTasksTested.size;
+  const uniqueTaskTestedLatestTestKpi = uniqueTasksTested.size;
 
   return {
     ...aggregatedData,
     ...uxTest,
-    projects: projectsData, 
+    projects: projectsData,
     avgUxTest,
     avgTestSuccessAvg,
     testsCompleted,
@@ -718,7 +725,7 @@ async function getOverviewMetrics(
   gcTasksModel: Model<GcTasksDocument>,
   cacheManager: Cache,
   dateRange: string,
-  satDateRange: string
+  satDateRange: string,
 ): Promise<OverviewAggregatedData> {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
@@ -757,7 +764,7 @@ async function getOverviewMetrics(
   const dyfByDay = await overallModel
     .find(
       { date: dateQuery },
-      { _id: 0, date: 1, dyf_yes: 1, dyf_no: 1, dyf_submit: 1 }
+      { _id: 0, date: 1, dyf_yes: 1, dyf_no: 1, dyf_submit: 1 },
     )
     .sort({ date: 1 })
     .lean();
@@ -985,27 +992,41 @@ async function getOverviewMetrics(
     })
     .exec();
 
-  const gcTasksComments = await gcTasksModel
+  const gcTasksComments = await gcTasksModel.aggregate().match({
+    date: { $gte: start, $lte: end },
+    sampling_task: 'y',
+    able_to_complete: {
+      $ne: 'I started this survey before I finished my visit',
+    },
+  });
+
+  const gcTasksData = await gcTasksModel
     .aggregate()
     .match({
       date: { $gte: start, $lte: end },
       sampling_task: 'y',
-      able_to_complete: { $ne: 'I started this survey before I finished my visit' }
-    });
-
-  const gcTasksData = await gcTasksModel
-  .aggregate()
-  .match({
-    date: { $gte: start, $lte: end },
-    sampling_task: 'y',
-    able_to_complete: { $ne: 'I started this survey before I finished my visit' }
-  })
+      able_to_complete: {
+        $ne: 'I started this survey before I finished my visit',
+      },
+    })
     .group({
       _id: { gc_task: '$gc_task', theme: '$theme' },
       total_entries: { $sum: 1 },
-      satisfaction: { $avg: { $cond: [{ $in: ['$satisfaction', ['Very satisfied', 'Satisfied']] }, 1, 0] } },
-      ease: { $avg: { $cond: [{ $in: ['$ease', ['Very easy', 'Easy']] }, 1, 0] } },
-      able_to_complete: { $avg: { $cond: [{ $eq: ['$able_to_complete', 'Yes'] }, 1, 0] } },
+      satisfaction: {
+        $avg: {
+          $cond: [
+            { $in: ['$satisfaction', ['Very satisfied', 'Satisfied']] },
+            1,
+            0,
+          ],
+        },
+      },
+      ease: {
+        $avg: { $cond: [{ $in: ['$ease', ['Very easy', 'Easy']] }, 1, 0] },
+      },
+      able_to_complete: {
+        $avg: { $cond: [{ $eq: ['$able_to_complete', 'Yes'] }, 1, 0] },
+      },
     })
     .project({
       gc_task: '$_id.gc_task',
@@ -1015,17 +1036,63 @@ async function getOverviewMetrics(
       ease: 1,
       able_to_complete: 1,
       margin_of_error: {
-            $divide: [
+        $divide: [
+          {
+            $add: [
               {
-                $add: [
-                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$satisfaction', { $subtract: [1, '$satisfaction'] }] }, '$total_entries'] } }] },
-                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$ease', { $subtract: [1, '$ease'] }] }, '$total_entries'] } }] },
-                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$able_to_complete', { $subtract: [1, '$able_to_complete'] }] }, '$total_entries'] } }] },
-                ]
+                $multiply: [
+                  1.96,
+                  {
+                    $sqrt: {
+                      $divide: [
+                        {
+                          $multiply: [
+                            '$satisfaction',
+                            { $subtract: [1, '$satisfaction'] },
+                          ],
+                        },
+                        '$total_entries',
+                      ],
+                    },
+                  },
+                ],
               },
-              3
-            ]
-          }
+              {
+                $multiply: [
+                  1.96,
+                  {
+                    $sqrt: {
+                      $divide: [
+                        { $multiply: ['$ease', { $subtract: [1, '$ease'] }] },
+                        '$total_entries',
+                      ],
+                    },
+                  },
+                ],
+              },
+              {
+                $multiply: [
+                  1.96,
+                  {
+                    $sqrt: {
+                      $divide: [
+                        {
+                          $multiply: [
+                            '$able_to_complete',
+                            { $subtract: [1, '$able_to_complete'] },
+                          ],
+                        },
+                        '$total_entries',
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          3,
+        ],
+      },
     })
     .sort({ total_entries: -1 })
     .project({ _id: 0 });
@@ -1043,7 +1110,7 @@ async function getOverviewMetrics(
     feedbackPages,
     annotations,
     gcTasksData,
-    gcTasksComments
+    gcTasksComments,
   };
 }
 
@@ -1136,7 +1203,7 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
 
   const participantsTestedSince2018 = uxTestsMaxUsers.reduce(
     (total, test) => total + test.total_users,
-    0
+    0,
   );
 
   return {
@@ -1146,6 +1213,5 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
     testsConductedLastFiscal,
     testsConductedLastQuarter,
     copsTestsCompletedSince2018,
-
   };
 }

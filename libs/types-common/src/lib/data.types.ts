@@ -19,6 +19,7 @@ import type {
   IAnnotations,
   IReports,
 } from './schema.types';
+import type { MostRelevantCommentsAndWords } from './feedback.types';
 
 export type ApiParams = {
   dateRange: string;
@@ -266,6 +267,7 @@ export interface OverviewData
     uniqueTasks: number;
     successRates: SuccessRates;
   };
+  mostRelevantCommentsAndWords: MostRelevantCommentsAndWords;
 }
 
 export type InternalSearchTerm = {
@@ -377,6 +379,7 @@ export interface TaskDetailsData
   }[];
   feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
+  mostRelevantCommentsAndWords: MostRelevantCommentsAndWords;
 }
 
 export type ProjectStatus =

@@ -1,3 +1,47 @@
+<div class="d-inline-flex card p-2 flex-row align-items-center mb-4">
+  <upd-range [(value)]="normalizationStrength" label="Normalization strength" />
+  <span class="mt-1 ms-3 align-bottom">
+    <button class="btn btn-primary" (click)="recalculateMostRelevant()">Recalculate</button>
+  </span>
+</div>
+
+@if (feedbackMostRelevant()) {
+  <upd-accordion title="Most relevant words (EN)">
+    <upd-data-table
+      id="overview-feedback-most-relevant-words-en"
+      [filter]="false"
+      [sort]="true"
+      [pagination]="true"
+      [data]="mostRelevantWordsEn() || []"
+      [cols]="mostRelevantWordsColumns"
+      [title]="'Most relevant words (EN)'"
+      [columnSelection]="true"
+      [allowHeaderWrap]="true"
+    >
+    </upd-data-table>
+  </upd-accordion>
+
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <upd-card [title]="'Most relevant comments (EN)'" titleSize="h5">
+          <upd-data-table
+            id="overview-feedback-most-relevant-comments-en"
+            [filter]="true"
+            [sort]="true"
+            [pagination]="true"
+            [data]="mostRelevantCommentsEn() || []"
+            [cols]="mostRelevantCommentsColumns"
+            [columnSelection]="true"
+            [allowHeaderWrap]="true"
+          >
+          </upd-data-table>
+        </upd-card>
+      </div>
+    </div>
+  </div>
+}
+
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
@@ -19,7 +63,10 @@
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [series]="(dyfChartApex$ | async) || []"
         [yAxis]="'Date range' | translate"
-        [xAxis]="[ (fullDateRangeLabel$ | async) || [], (fullComparisonDateRangeLabel$ | async) || [] ]"
+        [xAxis]="[
+          (fullDateRangeLabel$ | async) || [],
+          (fullComparisonDateRangeLabel$ | async) || []
+        ]"
         [tableCols]="dyfTableCols"
         [table]="dyfChart$ | async"
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"
@@ -44,4 +91,3 @@
     </div>
   </div>
 </div>
-

@@ -39,9 +39,11 @@ import {
   dateRangeSplit,
   getAvgSuccessFromLatestTests,
   isNullish,
+  parseDateRangeString,
   percentChange,
   round,
 } from '@dua-upd/utils-common';
+import { FeedbackService } from '@dua-upd/api/feedback';
 
 @Injectable()
 export class TasksService {
@@ -66,6 +68,7 @@ export class TasksService {
     @InjectModel(GcTasks.name, 'defaultConnection')
     private gcTasksModel: Model<GcTasks>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private feedbackService: FeedbackService,
   ) {}
 
   async getTasksHomeData(
@@ -480,6 +483,12 @@ export class TasksService {
       dateFromLastTest: null,
       feedbackComments: [],
       searchTerms: await this.getTopSearchTerms(params),
+      mostRelevantCommentsAndWords:
+      await this.feedbackService.getMostRelevantCommentsAndWords({
+        dateRange: parseDateRangeString(params.dateRange),
+        type: 'task',
+        id: params.id,
+      }),
     };
 
     const uxTests: UxTest[] = (<UxTestDocument[]>task.ux_tests).map((test) =>

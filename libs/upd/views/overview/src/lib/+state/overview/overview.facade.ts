@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -946,14 +946,16 @@ export class OverviewFacade {
     },
   ]);
 
-  error$ = this.store.select(OverviewSelectors.selectOverviewError);
-  
+  feedbackMostRelevant = this.store.selectSignal(OverviewSelectors.selectFeedbackMostRelevant);
 
- 
-  
+  error$ = this.store.select(OverviewSelectors.selectOverviewError);  
 
   init() {
     this.store.dispatch(OverviewActions.init());
+  }
+
+  getMostRelevantFeedback(normalizationStrength: number) {
+    this.store.dispatch(OverviewActions.getMostRelevantFeedback({ normalizationStrength }));
   }
 }
 

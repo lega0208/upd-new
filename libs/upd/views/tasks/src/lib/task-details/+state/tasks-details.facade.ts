@@ -19,6 +19,7 @@ import {
   percentChange,
   type PickByType,
   type UnwrapObservable,
+  logJson,
 } from '@dua-upd/utils-common';
 import * as TasksDetailsActions from './tasks-details.actions';
 import * as TasksDetailsSelectors from './tasks-details.selectors';
@@ -834,6 +835,12 @@ export class TasksDetailsFacade {
   ]);
 
   error$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsError);
+
+  feedbackMostRelevant = this.store.selectSignal(TasksDetailsSelectors.selectFeedbackMostRelevant);
+
+  getMostRelevantFeedback(normalizationStrength: number) {
+    this.store.dispatch(TasksDetailsActions.getMostRelevantFeedback({ normalizationStrength }));
+  }
 
   /**
    * Use the initialization action to perform one

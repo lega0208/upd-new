@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, model, Types } from 'mongoose';
-import { IProject, ITask, IUxTest } from '@dua-upd/types-common';
+import type { IProject, ITask, IUxTest } from '@dua-upd/types-common';
 
 export type PageDocument = Page & Document;
 

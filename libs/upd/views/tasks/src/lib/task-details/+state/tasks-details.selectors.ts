@@ -73,6 +73,16 @@ export const selectComparisonDateRangeLabel = selectDateRangeLabel(
   selectComparisonDateRange
 );
 
+export const selectTaskId = createSelector(
+  selectTasksDetailsData,
+  (data) => data?._id
+);
+
+export const selectFeedbackMostRelevant = createSelector(
+  selectTasksDetailsData,
+  (data) => data?.mostRelevantCommentsAndWords,
+);
+
 // Visits by day
 export const selectVisitsByDay = createSelector(
   selectCurrentData,

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Model, Types } from 'mongoose';
-import { FeedbackComment, IFeedback } from '@dua-upd/types-common';
+import { Document, Model, Types, mongo } from 'mongoose';
+import { FeedbackComment, IFeedback, IPage } from '@dua-upd/types-common';
 
 export type FeedbackDocument = Feedback & Document;
 
@@ -28,6 +28,9 @@ export class Feedback implements IFeedback {
   comment = '';
 
   @Prop({ type: [String], default: undefined })
+  words?: string[];
+
+  @Prop({ type: [String], default: undefined })
   tags?: string[];
 
   @Prop({ type: String })
@@ -41,16 +44,63 @@ export class Feedback implements IFeedback {
 
   @Prop({ type: String })
   theme?: string;
+
+  @Prop({ type: Types.ObjectId, index: true })
+  page?: Types.ObjectId;
+
+  @Prop({ type: [Types.ObjectId], index: true, default: undefined })
+  tasks?: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], index: true, default: undefined })
+  projects?: Types.ObjectId[];
 }
 
 export const FeedbackSchema = SchemaFactory.createForClass(Feedback);
 
 FeedbackSchema.index({ url: 1, date: 1 });
+FeedbackSchema.index(
+  { date: 1, words: 1 },
+  { partialFilterExpression: { words: { $exists: true } } },
+);
+FeedbackSchema.index(
+  { date: 1, page: 1 },
+  { partialFilterExpression: { page: { $exists: true } } },
+);
+FeedbackSchema.index(
+  { date: 1, tasks: 1 },
+  { partialFilterExpression: { tasks: { $exists: true } } },
+);
+FeedbackSchema.index(
+  { date: 1, projects: 1 },
+  { partialFilterExpression: { projects: { $exists: true } } },
+);
+
+FeedbackSchema.statics['syncReferences'] = async function (
+  this: Model<Feedback>,
+  pages: Pick<IPage, '_id' | 'url' | 'tasks' | 'projects'>[],
+) {
+  const bulkWriteOps: mongo.AnyBulkWriteOperation<IFeedback>[] = pages.map(
+    (page) => ({
+      updateMany: {
+        filter: { url: page.url },
+        update: {
+          $set: {
+            page: page._id,
+            tasks: page.tasks,
+            projects: page.projects,
+          },
+        },
+      },
+    }),
+  );
+
+  await this.bulkWrite(bulkWriteOps, { ordered: false });
+};
 
 FeedbackSchema.statics['getCommentsByTag'] = async function (
   this: Model<Feedback>,
   dateRange: string,
-  urls: string[]
+  urls: string[],
 ) {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
@@ -67,7 +117,7 @@ FeedbackSchema.statics['getCommentsByTag'] = async function (
     .project({
       _id: 0,
       tag: {
-        $ifNull: [ '$_id', 'n/a' ]
+        $ifNull: ['$_id', 'n/a'],
       },
       numComments: 1,
     })
@@ -77,7 +127,7 @@ FeedbackSchema.statics['getCommentsByTag'] = async function (
 FeedbackSchema.statics['getComments'] = async function (
   this: Model<Feedback>,
   dateRange: string,
-  urls: string[]
+  urls: string[],
 ) {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
@@ -96,12 +146,15 @@ FeedbackSchema.statics['getComments'] = async function (
 };
 
 export interface FeedbackModel extends Model<Feedback> {
+  syncReferences: (
+    pages: Pick<IPage, '_id' | 'url' | 'tasks' | 'projects'>[],
+  ) => Promise<void>;
   getComments: (
     dateRange: string,
-    urls: string[]
+    urls: string[],
   ) => Promise<FeedbackComment[]>;
   getCommentsByTag: (
     dateRange: string,
-    urls: string[]
+    urls: string[],
   ) => Promise<{ tag: string; numComments: number }[]>;
 }

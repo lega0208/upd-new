@@ -9,11 +9,17 @@ import {
   selectRouteNestedParam,
 } from '@dua-upd/upd/state';
 import {
+  getMostRelevantFeedback,
+  getMostRelevantFeedbackSuccess,
   loadTasksDetailsError,
   loadTasksDetailsInit,
   loadTasksDetailsSuccess,
 } from './tasks-details.actions';
-import { selectTasksDetailsData } from './tasks-details.selectors';
+import {
+  selectTaskId,
+  selectTasksDetailsData,
+} from './tasks-details.selectors';
+import { MostRelevantCommentsAndWords } from '@dua-upd/types-common';
 
 @Injectable()
 export class TasksDetailsEffects {
@@ -69,6 +75,32 @@ export class TasksDetailsEffects {
     return this.actions$.pipe(
       ofType(selectDatePeriod),
       mergeMap(() => of(loadTasksDetailsInit())),
+    );
+  });
+
+  getMostRelevantFeedback$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(getMostRelevantFeedback),
+      concatLatestFrom(() => [
+        this.store.select(selectTaskId),
+        this.store.select(selectDateRanges),
+      ]),
+      mergeMap(([{ normalizationStrength }, id, { dateRange }]) =>
+        this.api
+          .get<
+            MostRelevantCommentsAndWords,
+            {
+              dateRange: string;
+              normalizationStrength: number;
+              id: string;
+              type: 'task';
+            }
+          >('/api/feedback/most-relevant', { dateRange, id, normalizationStrength, type: 'task' })
+          .pipe(
+            map((data) => getMostRelevantFeedbackSuccess({ data })),
+            catchError(() => EMPTY),
+          ),
+      ),
     );
   });
 }

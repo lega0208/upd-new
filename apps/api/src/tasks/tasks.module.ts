@@ -4,9 +4,10 @@ import { TasksService } from './tasks.service';
 import { TasksController } from './tasks.controller';
 import { DbModule, DbService } from '@dua-upd/db';
 import { hours } from '@dua-upd/utils-common';
+import { FeedbackModule } from '@dua-upd/api/feedback';
 
 @Module({
-  imports: [CacheModule.register({ ttl: hours(12) }), DbModule],
+  imports: [CacheModule.register({ ttl: hours(12) }), DbModule, FeedbackModule],
   controllers: [TasksController],
   providers: [TasksService, DbService],
 })

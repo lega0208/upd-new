@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { init, AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
+import { init, type AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
 import { sign } from 'jsonwebtoken';
 import axios, { AxiosError } from 'axios';
 import dayjs from 'dayjs';

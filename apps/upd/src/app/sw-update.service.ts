@@ -1,6 +1,7 @@
 import { ApplicationRef, Injectable } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
 import { first } from 'rxjs/operators';
+import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SwUpdateService {
@@ -8,6 +9,10 @@ export class SwUpdateService {
     private appRef: ApplicationRef,
     private updates: SwUpdate,
   ) {
+    if (!environment.production) {
+      return;
+    }
+    
     const appIsStable$ = this.appRef.isStable.pipe(
       first((isStable) => isStable === true),
     );

@@ -42,6 +42,10 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     feedbackComments: [],
     projects: [],
     searchTerms: [],
+    mostRelevantCommentsAndWords: {
+      en: { comments: [], words: [] },
+      fr: { comments: [], words: [] },
+    },
   },
   loaded: false,
   loading: false,
@@ -85,7 +89,20 @@ const reducer = createReducer(
       loading: false,
       error,
     })
-  )
+  ),
+  on(
+    TasksDetailsActions.getMostRelevantFeedbackSuccess,
+    (state, payload): TasksDetailsState => ({
+      ...state,
+      data: {
+        ...state.data,
+        mostRelevantCommentsAndWords: payload.data,
+      },
+      loading: false,
+      loaded: true,
+      error: null,
+    }),
+  ),
 );
 
 export function tasksDetailsReducer(

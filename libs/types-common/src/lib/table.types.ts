@@ -30,7 +30,7 @@ export interface ColumnConfig<T = any> {
   indicator?: boolean;
   secondaryField?: SecondaryField<T>;
   upGoodDownBad?: boolean;
-  width?: number;
+  width?: string;
 }
 
 export interface typeParams {
