@@ -13,6 +13,7 @@ import packageJson from 'package.json';
 import { PrimeNGConfig, Translation } from 'primeng/api';
 import { filter, map, mergeMap } from 'rxjs';
 import { fader } from './app.animations';
+import { SwUpdateService } from './sw-update.service';
 
 @Component({
   selector: 'upd-root',
@@ -53,7 +54,7 @@ export class AppComponent {
   updVersion = packageJson.version;
   canadaLogo = '../assets/img/canada-black-30mm.png';
 
-  constructor() {
+  constructor(private swUpdates: SwUpdateService) {
     this.i18n.init();
 
     effect(() => {

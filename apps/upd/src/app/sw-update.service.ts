@@ -4,8 +4,11 @@ import { first } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class SwUpdateService {
-  constructor(appRef: ApplicationRef, updates: SwUpdate) {
-    const appIsStable$ = appRef.isStable.pipe(
+  constructor(
+    private appRef: ApplicationRef,
+    private updates: SwUpdate,
+  ) {
+    const appIsStable$ = this.appRef.isStable.pipe(
       first((isStable) => isStable === true),
     );
 
@@ -13,7 +16,7 @@ export class SwUpdateService {
       try {
         console.log('Service worker checking for updates...');
 
-        const updateFound = await updates.checkForUpdate();
+        const updateFound = await this.updates.checkForUpdate();
 
         console.log(
           updateFound
@@ -25,7 +28,7 @@ export class SwUpdateService {
       }
     });
 
-    updates.versionUpdates.subscribe((evt) => {
+    this.updates.versionUpdates.subscribe((evt) => {
       switch (evt.type) {
         case 'VERSION_DETECTED':
           console.log(`Downloading new app version: ${evt.version.hash}`);
