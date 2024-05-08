@@ -7,9 +7,10 @@ import { FeedbackCache } from './feedback.cache';
 import {
   calculateWordScores,
   getCommentRelevanceScores as getCommentScores,
-  getMinimumScore,
+  getAvgScore,
 } from '@dua-upd/feedback';
 import type {
+  FeedbackWithScores,
   IFeedback,
   MostRelevantCommentsAndWords,
 } from '@dua-upd/types-common';
@@ -29,10 +30,11 @@ export class FeedbackService {
   ) {}
 
   async getComments(params: FeedbackParams) {
-    const cachedComments = await this.cache.get<IFeedback[]>(
-      'comments',
-      params,
-    );
+    const cachedComments = await this.cache.get<IFeedback[]>('comments', {
+      dateRange: params.dateRange,
+      type: params.type,
+      id: params.id,
+    });
 
     if (cachedComments) {
       return cachedComments;
@@ -59,12 +61,7 @@ export class FeedbackService {
     return comments;
   }
 
-  
   async getMostRelevantCommentsAndWords(params: FeedbackParams) {
-    // drop comments and words with scores below these thresholds (only dropped from display, not calculation)
-    const COMMENTS_SCORE_THRESHOLD = 0.001;
-    const WORD_SCORE_THRESHOLD = 0;
-
     const comments = await this.getComments(params);
 
     const enComments = comments.filter((comment) => comment.lang === 'EN');
@@ -91,29 +88,38 @@ export class FeedbackService {
       .map((comment) => omit(['words'], comment))
       .sort((a, b) => (b.tf_idf_normalized || 0) - (a.tf_idf_normalized || 0));
 
+    // drop comments and words with scores below these thresholds (only dropped from cache & display, not calculation)
+    const WORD_SCORE_THRESHOLD = 0;
+
+    const COMMENTS_SCORE_THRESHOLD_EN =
+      getCommentScoreThreshold(enCommentsWithScores);
+
+    const COMMENTS_SCORE_THRESHOLD_FR =
+      getCommentScoreThreshold(frCommentsWithScores);
+
     const mostRelevant: MostRelevantCommentsAndWords = {
       en: {
         comments: enCommentsWithScores.filter((comment) => {
-          const minScore = getMinimumScore(comment);
+          const avgScore = getAvgScore(comment);
 
-          return minScore && minScore >= COMMENTS_SCORE_THRESHOLD;
+          return avgScore && avgScore >= COMMENTS_SCORE_THRESHOLD_EN;
         }),
         words: enWordScores.filter((word) => {
-          const minScore = getMinimumScore(word);
+          const avgScore = getAvgScore(word);
 
-          return minScore && minScore >= WORD_SCORE_THRESHOLD;
+          return avgScore && avgScore >= WORD_SCORE_THRESHOLD;
         }),
       },
       fr: {
         comments: frCommentsWithScores.filter((comment) => {
-          const minScore = getMinimumScore(comment);
+          const avgScore = getAvgScore(comment);
 
-          return minScore && minScore >= COMMENTS_SCORE_THRESHOLD;
+          return avgScore && avgScore >= COMMENTS_SCORE_THRESHOLD_FR;
         }),
         words: frWordScores.filter((word) => {
-          const minScore = getMinimumScore(word);
+          const avgScore = getAvgScore(word);
 
-          return minScore && minScore >= WORD_SCORE_THRESHOLD;
+          return avgScore && avgScore >= WORD_SCORE_THRESHOLD;
         }),
       },
     };
@@ -170,4 +176,28 @@ function paramsToQuery(params: FeedbackParams) {
   query[`${params.type}s`] = params.id;
 
   return query;
+}
+
+function getCommentScoreThreshold(comments: FeedbackWithScores[]) {
+  if (comments.length > 300_000) {
+    return 0.5;
+  }
+
+  if (comments.length > 200_000) {
+    return 0.3;
+  }
+
+  if (comments.length > 100_000) {
+    return 0.2;
+  }
+
+  if (comments.length > 50_000) {
+    return 0.1;
+  }
+
+  if (comments.length > 20_000) {
+    return 0.01;
+  }
+
+  return 0.001;
 }

@@ -10,12 +10,14 @@ import {
 import { col, lit, Float64 } from 'nodejs-polars';
 import { toDataframe } from './utils';
 import { zip } from 'rambdax';
-import { isNullish, round } from '@dua-upd/utils-common';
+import { avg, isNullish, round } from '@dua-upd/utils-common';
 
 export function calculateWordScores(comments: IFeedback[]) {
-  const df = toDataframe(comments);
+  const filteredComments = comments.filter((comment) => comment.words?.length);
 
-  const totalComments = comments.length;
+  const df = toDataframe(filteredComments);
+
+  const totalComments = filteredComments.length;
   const totalPages = df.select(col('url').nUnique()).getColumn('url').get(0);
   const totalTerms = df
     .select(col('words').explode().count())
@@ -254,7 +256,7 @@ export function getCommentRelevanceScores(
   });
 }
 
-export function getMinimumScore<T extends FeedbackWithScores | WordRelevance>(
+export function getAvgScore<T extends FeedbackWithScores | WordRelevance>(
   comment: T,
 ) {
   const scores = Object.entries(comment)
@@ -264,5 +266,5 @@ export function getMinimumScore<T extends FeedbackWithScores | WordRelevance>(
     )
     .map(([, value]) => value);
 
-  return scores.length ? Math.min(...scores) : null;
+  return scores.length ? avg(scores) : null;
 }
