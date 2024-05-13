@@ -6,9 +6,9 @@ import type { TreeNode } from 'primeng/api';
 import type { ColumnConfig } from '@dua-upd/types-common';
 
 @Injectable()
-export class FilterTableStore<
-  T extends { [key: string]: unknown },
-> extends ComponentStore<TreeNode[]> {
+export class FilterTableStore<T extends object> extends ComponentStore<
+  TreeNode[]
+> {
   private i18n = inject(I18nFacade);
 
   constructor() {

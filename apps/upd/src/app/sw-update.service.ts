@@ -44,6 +44,9 @@ export class SwUpdateService {
             `New app version ready for use: ${evt.latestVersion.hash}`,
           );
 
+          // Clear session storage to prevent issues with old data
+          sessionStorage.clear();
+
           // Reload the page to update to the latest version.
           document.location.reload();
           break;

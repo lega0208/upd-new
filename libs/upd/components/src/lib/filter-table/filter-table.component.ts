@@ -36,9 +36,7 @@ interface SelectedItem {
   providers: [FilterTableStore],
   encapsulation: ViewEncapsulation.None,
 })
-export class FilterTableComponent<T extends { [s: string]: unknown }>
-  implements OnInit
-{
+export class FilterTableComponent<T extends object> implements OnInit {
   private i18n = inject(I18nFacade);
   private readonly filterTableStore = inject(FilterTableStore<T>);
   private filterService = inject(FilterService);
@@ -187,7 +185,7 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
       .filter((node) => node.header.includes(column))
       .map((node) => node.header.split('|')[1]);
 
-    const filterType = this.filterMode(this.data, column);
+    const filterType = this.filterMode(this.data, column as keyof T);
 
     this.table?.filter(filteredData, column, filterType);
   }
@@ -196,7 +194,7 @@ export class FilterTableComponent<T extends { [s: string]: unknown }>
     return this.selectedNodes.length;
   }
 
-  filterMode = (data: T[], column: string) => {
+  filterMode = (data: T[], column: keyof T) => {
     const columnValues = data
       .map((row) => row[column])
       .filter((value) => value || value === 0);
