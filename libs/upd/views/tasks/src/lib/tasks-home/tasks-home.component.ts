@@ -23,6 +23,27 @@ export class TasksHomeComponent implements OnInit {
 
   tasksHomeColumns = [
     {
+      field: 'tmf_rank',
+      header: 'Rank',
+      pipe: 'number',
+      frozen: true,
+      width: '80px',
+    },
+    {
+      field: 'task',
+      header: 'task',
+      type: 'link',
+      typeParam: '_id',
+      translate: true,
+      frozen: true,
+    },
+    {
+      field: 'portfolio',
+      header: 'Portfolio',
+      hide: true,
+      translate: true,
+    },
+    {
       field: 'group',
       header: 'group',
       hide: true,
@@ -61,40 +82,6 @@ export class TasksHomeComponent implements OnInit {
     {
       field: 'core',
       header: 'core',
-      hide: true,
-      translate: true,
-    },
-    {
-      field: 'tmf_rank',
-      header: 'Rank',
-      pipe: 'number',
-      frozen: true,
-      width: '80px',
-    },
-    {
-      field: 'task',
-      header: 'task',
-      type: 'link',
-      typeParam: '_id',
-      translate: true,
-      frozen: true,
-    },
-    // {
-    //   field: 'top_task',
-    //   header:'Top task',
-    // },
-    // {
-    //   field: 'status',
-    //   header: 'Status',
-    //   translate: true,
-    // },
-    // {
-    //   field: 'secure_portal',
-    //   header: 'Secure portal',
-    // },
-    {
-      field: 'portfolio',
-      header: 'Portfolio',
       hide: true,
       translate: true,
     },

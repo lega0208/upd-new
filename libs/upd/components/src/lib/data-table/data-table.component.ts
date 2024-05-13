@@ -21,14 +21,13 @@ import type { SelectedNode } from '../filter-table/filter-table.component';
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.css'],
 })
-export class DataTableComponent<T> {
+export class DataTableComponent<T extends object> {
   @ViewChild('dt') table!: Table;
   @Input() displayRows = 10;
   @Input() sort = true;
   @Input() pagination = true;
   @Input() filter = true;
   @Input() filterTree = false;
-  @Input() columnSelection = false;
   @Input() captionTitle = '';
   @Input() loading = false;
   @Input() sortField = '';
@@ -44,13 +43,17 @@ export class DataTableComponent<T> {
   @Output() rowSelectionChanged = new EventEmitter<T[]>();
 
   data = input<T[] | null>(null);
-  cols = input<ColumnConfig[]>([]);
+  cols = input<ColumnConfig<T>[]>([]);
   inputSearchFields = input<string[]>([], { alias: 'searchFields' });
+  columnSelection = input(false);
 
   i18n = inject(I18nFacade);
 
   translatedData = this.i18n.toTranslatedTable<T>(this.data, this.cols);
-  selectedColumns: WritableSignal<ColumnConfig[]> = signal([]);
+
+  selectedColumns: WritableSignal<ColumnConfig<T>[]> = signal(
+    JSON.parse(sessionStorage.getItem(`selectedColumns-${this.id}`) || '[]'),
+  );
 
   searchFields = computed(() =>
     this.inputSearchFields().length
@@ -58,12 +61,19 @@ export class DataTableComponent<T> {
       : this.cols().map((col) => col.field),
   );
 
-  frozenCols: WritableSignal<ColumnConfig[]> = signal([]);
+  displayColumns = computed(() => {
+    if (!this.selectedColumns()?.length || !this.columnSelection()) {
+      return this.cols().filter((col) => !col.hide);
+    }
 
-  allColumns = computed(() => [
-    ...this.frozenCols(),
-    ...this.selectedColumns(),
-  ]);
+    return this.cols().filter(
+      (col) =>
+        col.frozen ||
+        this.selectedColumns()
+          ?.map(({ field }) => field)
+          .includes(col.field),
+    );
+  });
 
   lang = this.i18n.currentLang;
 
@@ -78,43 +88,27 @@ export class DataTableComponent<T> {
       .map(({ original }) => original),
   );
   constructor() {
+    effect(() => {
+      this.translatedData();
+      this.table?._filter();
+      this.table?.clearState();
+    });
     effect(
       () => {
-        this.translatedData();
-        this.table?._filter();
-        this.table?.clearState();
+        const selectedColumns = this.selectedColumns();
 
-        this.frozenCols.set(this.cols().filter((col) => col.frozen));
+        const initialColumns: ColumnConfig<T>[] =
+          JSON.parse(
+            sessionStorage.getItem(`selectedColumns-${this.id}`) || '[]',
+          ) || this.cols().filter((col) => !col.hide && !col.frozen);
 
-        const selectableColumns = this.cols().filter(
-          (col) => !col.hide && !col.frozen,
-        );
-
-        if (this.columnSelection) {
-          const storageKey = `selectedColumns-${this.id}`;
-          const stored = sessionStorage.getItem(storageKey);
-          const storageSelectedColumns: ColumnConfig[] = stored
-            ? JSON.parse(stored)
-            : [];
-
-          if (storageSelectedColumns.length > 0) {
-            this.selectedColumns.set(storageSelectedColumns);
-          } else {
-            this.selectedColumns.set(selectableColumns);
-          }
-        } else {
-          this.selectedColumns.set(selectableColumns);
+        if (!selectedColumns.length && initialColumns.length) {
+          this.selectedColumns.set(initialColumns);
+          return;
         }
       },
       { allowSignalWrites: true },
     );
-    effect(() => {
-      const storageKey = `selectedColumns-${this.id}`;
-      sessionStorage.setItem(
-        storageKey,
-        JSON.stringify(this.selectedColumns()),
-      );
-    });
   }
 
   selectedRows: T[] = [];
@@ -145,6 +139,11 @@ export class DataTableComponent<T> {
   }
 
   selectedColumnsChanged(selectedColumns: ColumnConfig[]) {
+    sessionStorage.setItem(
+      `selectedColumns-${this.id}`,
+      JSON.stringify(selectedColumns),
+    );
+
     this.selectedColumns.set(selectedColumns);
   }
 }
