@@ -91,6 +91,8 @@ export class TaskDetailsSummaryComponent implements OnInit {
     successRate >= 0.8 ? 'pass' : 'fail';
 
   ngOnInit(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     combineLatest([
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
