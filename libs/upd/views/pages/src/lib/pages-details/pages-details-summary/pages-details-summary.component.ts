@@ -80,6 +80,8 @@ export class PagesDetailsSummaryComponent implements OnInit {
   topSearchTermsCols: ColumnConfig[] = [];
 
   ngOnInit() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     this.i18n.service.onLangChange(({ lang }) => {
       this.currentLang = lang as LocaleId;
     });

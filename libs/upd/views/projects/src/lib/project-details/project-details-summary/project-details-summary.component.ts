@@ -119,6 +119,8 @@ export class ProjectDetailsSummaryComponent implements OnInit {
     this.projectsDetailsService.comparisonDateRangeLabel$;
 
   ngOnInit() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     combineLatest([
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
