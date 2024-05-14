@@ -15,6 +15,10 @@ import { avg, isNullish, round } from '@dua-upd/utils-common';
 export function calculateWordScores(comments: IFeedback[]) {
   const filteredComments = comments.filter((comment) => comment.words?.length);
 
+  if (!filteredComments.length) {
+    return [] as WordRelevance[];
+  }
+
   const df = toDataframe(filteredComments);
 
   const totalComments = filteredComments.length;
