@@ -35,10 +35,6 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   currentLang$ = this.i18n.currentLang$;
   langLink = 'en';
 
-  // currentTotalComments$ = this.projectsDetailsService.currentTotalsComments$;    // future dateRangeData
-  // comparisonTotalComments$ = this.projectDetailsService.comparisonTotalComments$ // future dateRangeData
-  // commentsPercenChange$ = this.projectsDetailsService.commentsPercentChange$;    // future dateRangeData
-
   fullDateRangeLabel$ = this.projectsDetailsService.fullDateRangeLabel$;
   fullComparisonDateRangeLabel$ =
     this.projectsDetailsService.fullComparisonDateRangeLabel$;
