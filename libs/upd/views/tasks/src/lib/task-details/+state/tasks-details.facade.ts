@@ -774,7 +774,7 @@ export class TasksDetailsFacade {
     }),
   );
 
-  feedbackTotalComments$ = this.projectsDetailsData$.pipe(
+  feedbackTotalComments$ = this.tasksDetailsData$.pipe(
     map((data) => data?.feedbackComments.length || 0),
   );
 
