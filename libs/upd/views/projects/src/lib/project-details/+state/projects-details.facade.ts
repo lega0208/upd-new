@@ -875,16 +875,8 @@ export class ProjectsDetailsFacade {
   );
 
   feedbackTotalComments$ = this.projectsDetailsData$.pipe(
-    map(
-      (data) =>
-      data?.feedbackComments.reduce(
-        (totalComments, feedback) => totalComments + 1,
-        0,
-      ) || 0,
-    ),
+    map((data) => data?.feedbackComments.length || 0),
   );
-
-  // no dateRangeData, yet!
 
   dateRangeLabel$ = combineLatest([
     this.projectsDetailsData$,
