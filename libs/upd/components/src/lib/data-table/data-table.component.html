@@ -221,7 +221,7 @@
             'bg-green':
               kpi &&
               (rowData[col.field] >= 0.8 ||
-                (col.field === 'change' && rowData[col.field] >= 0.2))
+                (col.secondaryField?.field === 'change' && rowData[col.secondaryField?.field] >= 20))
           }"
           class="{{ col.columnClass || '' }}"
         >

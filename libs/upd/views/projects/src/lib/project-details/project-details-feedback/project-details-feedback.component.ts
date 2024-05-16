@@ -56,6 +56,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   whatWasWrongChartApex$ = this.projectsDetailsService.whatWasWrongDataApex$;
 
   feedbackComments$ = this.projectsDetailsService.feedbackComments$;
+  feedbackTotalComments$ = this.projectsDetailsService.feedbackTotalComments$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
 
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;

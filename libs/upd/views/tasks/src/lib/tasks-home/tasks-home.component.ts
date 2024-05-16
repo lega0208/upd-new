@@ -169,6 +169,8 @@ export class TasksHomeComponent implements OnInit {
       pipeParam: '1.0-2',
       upGoodDownBad: false,
       indicator: true,
+      useArrows: true,
+      showTextColours: true,
       secondaryField: {
         field: 'calls_per_100_visits_difference',
         pipe: 'number',
@@ -190,6 +192,8 @@ export class TasksHomeComponent implements OnInit {
       pipeParam: '1.0-2',
       upGoodDownBad: false,
       indicator: true,
+      useArrows: true,
+      showTextColours: true,
       secondaryField: {
         field: 'dyf_no_per_1000_visits_difference',
         pipe: 'number',
@@ -219,6 +223,8 @@ export class TasksHomeComponent implements OnInit {
       pipeParam: '1.0-2',
       upGoodDownBad: true,
       indicator: true,
+      useArrows: true,
+      showTextColours: true,
       secondaryField: {
         field: 'latest_success_rate_difference',
         pipe: 'number',
