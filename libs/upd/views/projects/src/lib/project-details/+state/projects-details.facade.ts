@@ -874,6 +874,10 @@ export class ProjectsDetailsFacade {
     }),
   );
 
+  feedbackTotalComments$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.feedbackComments.length || 0),
+  );
+
   dateRangeLabel$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,
