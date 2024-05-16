@@ -152,7 +152,12 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
         const middleCols = piped(
           testTypesWithSuccessRate,
           (testTypes) =>
-            difference(testTypes, ['Baseline', 'Validation', 'change']),
+            difference(testTypes, [
+              'Baseline',
+              'Validation',
+              'change',
+              'taskPercentChange',
+            ]),
           map((key: string) => ({
             field: key,
             header: this.i18n.service.translate(key, lang),
@@ -162,13 +167,34 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
 
         const endCols = piped(
           testTypesWithSuccessRate,
-          (testTypes) => intersection(testTypes, ['Validation', 'change']),
-          map((key) => ({
-            field: key,
-            header: this.i18n.service.translate(key, lang),
-            pipe: 'percent',
-          })),
+          (testTypes) => intersection(testTypes, ['Validation']),
+          map(
+            (key) =>
+              ({
+                field: key,
+                header: this.i18n.service.translate(key, lang),
+                pipe: 'percent',
+              }) as ColumnConfig,
+          ),
         );
+
+        if (testTypesWithSuccessRate.includes('change')) {
+          endCols.push({
+            field: 'taskPercentChange',
+            header: this.i18n.service.translate('change', lang),
+            pipe: 'percent',
+            pipeParam: '1.0',
+            upGoodDownBad: true,
+            indicator: true,
+            useArrows: false,
+            showTextColours: false,
+            secondaryField: {
+              field: 'change',
+              pipe: 'number',
+              pipeParam: '1.0',
+            },
+          });
+        }
 
         this.successRateCols = flatten([startCols, middleCols, endCols]);
       },

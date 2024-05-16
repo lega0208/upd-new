@@ -835,15 +835,13 @@ export class ProjectsDetailsFacade {
       return taskSuccessByUxTestKpi?.map((task) => {
         const validation = task.Validation;
         const baseline = task.Baseline;
-        const change = round(validation,2) - round(baseline,2);
-        let isChange = false;
-
-        if (change >= 0.2) isChange = true;
+        const change = (round(validation, 2) - round(baseline, 2)) * 100;
+        const taskPercentChange = percentChange(round(validation, 2), round(baseline, 2));
 
         return {
           ...task,
           change,
-          isChange,
+          taskPercentChange,
         };
       });
     }),
