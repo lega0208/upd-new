@@ -30,6 +30,8 @@ export interface ColumnConfig<T = any> {
   indicator?: boolean;
   secondaryField?: SecondaryField<T>;
   upGoodDownBad?: boolean;
+  useArrows?: boolean;
+  showTextColours?: boolean;
   width?: number;
 }
 
