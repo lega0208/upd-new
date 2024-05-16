@@ -337,7 +337,7 @@ export class ApexStore extends ComponentStore<ChartOptions> {
                 series.data.length,
             ) as { data: number[] }[] | { data: { y: number }[] }[]
         ).flatMap((series) => {
-          if (typeof series.data[0] === 'number') {
+          if (typeof series.data[0] === 'number' || series.data[0] === null) {
             return series.data as number[];
           }
 
