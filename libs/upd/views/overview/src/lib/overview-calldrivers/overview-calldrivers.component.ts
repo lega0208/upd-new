@@ -34,9 +34,8 @@ export class OverviewCalldriversComponent implements OnInit {
     prevValue: number;
   }>[] = [];
 
-  top25CalldriverTopics$ = this.overviewService.top25CalldriverTopics$;
-  top25CalldriverTopicsConfig$ = 
-  this.overviewService.top25CalldriverTopicsConfig$;
+  calldriverTopics$ = this.overviewService.calldriverTopics$;
+  calldriverTopicsConfig$ = this.overviewService.calldriverTopicsConfig$;
 
   top5IncreasedCalldriverTopics$ =
     this.overviewService.top5IncreasedCalldriverTopics$;
@@ -55,10 +54,6 @@ export class OverviewCalldriversComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
-
     combineLatest([
       this.currentLang$,
       this.dateRangeLabel$,

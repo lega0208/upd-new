@@ -257,7 +257,7 @@ export interface OverviewData
     total_users?: number;
     scenario?: string;
   }[];
-  top25CalldriverTopics: TopCalldriverTopics[];
+  calldriverTopics: TopCalldriverTopics[];
   top5IncreasedCalldriverTopics: TopCalldriverTopics[];
   top5DecreasedCalldriverTopics: TopCalldriverTopics[];
   searchTermsEn: OverallSearchTerm[];
