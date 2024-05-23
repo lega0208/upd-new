@@ -28,6 +28,7 @@ export class TaskDetailsSummaryComponent implements OnInit {
   avgTaskSuccessFromLastTest$ =
     this.taskDetailsService.avgTaskSuccessFromLastTest$;
   avgSuccessPercentChange$ = this.taskDetailsService.avgSuccessPercentChange$;
+  avgSuccessValueChange$ = this.taskDetailsService.avgSuccessValueChange$;
   dateFromLastTest$ = this.taskDetailsService.dateFromLastTest$;
 
   visits$ = this.taskDetailsService.visits$;
