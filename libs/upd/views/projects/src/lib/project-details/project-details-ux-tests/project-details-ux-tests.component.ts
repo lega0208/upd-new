@@ -49,6 +49,9 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
   avgSuccessPercentChange$ =
     this.projectsDetailsService.avgSuccessPercentChange$;
 
+    avgSuccessValueChange$ =
+    this.projectsDetailsService.avgSuccessValueChange$;
+
   dateFromLastTest$ = this.projectsDetailsService.dateFromLastTest$;
 
   projectTasks$ = this.projectsDetailsService.projectTasks$;

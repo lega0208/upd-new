@@ -18,14 +18,18 @@
           *ngIf="displayComparison && current !== 0"
           class="col-auto ml-auto"
         >
-          <span
-            [ngClass]="comparisonStyles.colourClass"
-            class="h3 text-nowrap d-flex align-items-center"
-          >
-            <span *ngIf="comparisonStyles.iconName" class="material-icons">{{
-              comparisonStyles.iconName
-            }}</span>
-            {{ comparison | localePercent }}
+          <span class="h3 text-nowrap d-flex align-items-center">
+            <span *ngIf="comparison !== 0 " [ngClass]="comparisonStyles.colourClass">
+              <span *ngIf="comparisonStyles.iconName" class="material-icons">{{
+                comparisonStyles.iconName
+              }}</span>
+              {{ comparison | localePercent }}
+            </span>
+            <span
+              *ngIf="comparisonValue !== null && comparisonValue !== undefined"
+            >
+              &nbsp;({{ comparisonValue * 100 | number: '1.0' }})</span
+            >
           </span>
         </div>
       </ng-container>
