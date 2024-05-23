@@ -140,6 +140,7 @@ export interface PageListData {
   title: string;
   lang?: 'en' | 'fr' | '';
   last_255: string;
+  section?: string;
 }
 
 export interface GCTasksMappingsData {

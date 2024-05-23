@@ -84,6 +84,10 @@ export class ProjectsDetailsFacade {
     map((data) => data?.avgSuccessPercentChange),
   );
 
+  avgSuccessValueChange$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.avgSuccessValueChange),
+  );
+
   dateFromLastTest$ = this.projectsDetailsData$.pipe(
     map((data) =>
       data?.dateFromLastTest
