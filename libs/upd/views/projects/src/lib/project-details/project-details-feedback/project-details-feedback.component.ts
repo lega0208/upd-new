@@ -57,6 +57,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
 
   feedbackComments$ = this.projectsDetailsService.feedbackComments$;
   feedbackTotalComments$ = this.projectsDetailsService.feedbackTotalComments$;
+  commentsPercentChange$ = this.projectsDetailsService.commentsPercentChange$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
 
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
