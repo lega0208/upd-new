@@ -477,6 +477,8 @@ export interface ProjectDetailsAggregatedData {
   dyfByDay: { date: string; dyf_yes: number; dyf_no: number }[];
   calldriversByDay: { date: string; calls: number }[];
   feedbackByTags: { tag: string; numComments: number }[];
+  feedbackComments: FeedbackComment[];
+  feedbackPages: { _id: string; title: string; url: string; sum: number }[];
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
   callsByTasks: CallsByTasks[];
