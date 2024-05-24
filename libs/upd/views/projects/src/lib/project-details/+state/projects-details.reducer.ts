@@ -6,7 +6,7 @@ import * as ProjectsDetailsActions from './projects-details.actions';
 export const PROJECTS_DETAILS_FEATURE_KEY = 'projectsDetails';
 
 export interface ProjectsDetailsState {
-  data: ProjectsDetailsData;
+  data: ProjectsDetailsData;  
   loaded: boolean; // has the ProjectsDetails list been loaded
   loading: boolean; // is the ProjectsDetails list currently being loaded
   error?: string | null; // last known error (if any)

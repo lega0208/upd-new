@@ -12,6 +12,7 @@ import {
   pipe,
   piped,
   pluck,
+  test,
   unwind,
 } from 'rambdax';
 import { isNullish } from '../utils-common';
@@ -333,10 +334,12 @@ export type ProjectTestTypes = {
   Baseline: IUxTest[];
   Validation: IUxTest[];
 };
-
 export const getImprovedKpiSuccessRates = (
+  topTasks: ITask[],
   uxTests: IUxTest[],
 ): { uniqueTasks: number; successRates: SuccessRates } => {
+const relevantUxTests = uxTests.filter(test => topTasks.some(task => task._id === test.tasks?.[0]));
+
   const groupByTaskByProjectByTestType = pipe(
     groupBy((test: IUxTest) => test!.tasks!.toString()), // group by task
     mapObject(groupBy((test: IUxTest) => test.project.toString())), // group by project
@@ -351,9 +354,9 @@ export const getImprovedKpiSuccessRates = (
   );
 
   // filter bad stuff
-  const filteredTests = uxTests.filter(
+  const filteredTests = relevantUxTests.filter(
     (test) =>
-      !isNullish(test.success_rate) && test.test_type && test!.tasks!.length,
+      !isNullish(test.success_rate) && test.test_type && test?.tasks?.length,
   );
 
   const avgTestSuccessRates = piped(
@@ -416,3 +419,155 @@ export const getImprovedKpiSuccessRates = (
     successRates: overallAvgs,
   };
 };
+
+
+/*export const getImprovedKpiSuccessRatesForTopTasks = () => {
+  // Select the top 50 tasks based on visits
+  const top50Tasks = topTasks.slice(0, 50);
+
+  // Adapt the rest of the function to work with top50Tasks instead of uxTests
+  const groupByTaskByProjectByTestType = pipe(
+    groupBy((task) => task.toString()), // group by task
+    mapObject(groupBy((task) => task.portfolio.toString())), // group by project
+    mapObject(
+      mapObject(
+        groupBy(({ test_type }) => test_type === 'Validation'? 'Validation' : 'Baseline'),
+      ),
+    ),
+  );
+
+  // Assuming top50Tasks is filtered to ensure it meets the criteria for being considered a "valid" task
+  const filteredTasks = top50Tasks.filter(
+    (task) => task.visits!== undefined && task.group && task.subgroup && task.portfolio,
+  );
+
+  const avgTaskSuccessRates = piped(
+    filteredTasks,
+    map(unwind('tasks')), // Assuming tasks is an array within each task object
+    flatten,
+    (tasks) => groupByTaskByProjectByTestType(tasks) as Dictionary<Dictionary<ProjectTestTypes>>,
+    mapObject(filter((projectTestTypes: any, testType: any) => keys(projectTestTypes).length > 1)),
+    filter((taskProjects: any, task: any) => keys(taskProjects).length > 0),
+    mapObject(mapObject(map(pipe(pluck('success_rate'), (successRates: number[]) => avg(successRates as number[], 3))))),
+    mapObject(map((testTypes: ProjectTestTypes) => ({
+      baseline: testTypes.Baseline,
+      validation: testTypes.Validation,
+      difference: round(testTypes.Validation - testTypes.Baseline, 4),
+    }))),
+    mapObject((successRates: SuccessRates[]) => ({
+      baseline: avg(pluck('baseline', successRates) as number[], 4),
+      validation: avg(pluck('validation', successRates) as number[], 4),
+      difference: avg(pluck('difference', successRates) as number[], 4),
+    })),
+  );
+
+  console.log(`number of tasks: ${keys(avgTaskSuccessRates).length}`);
+
+  const successRates = Object.values(avgTaskSuccessRates);
+
+
+
+
+  
+  const overallAvgs = {
+    baseline: avg(pluck('baseline', successRates), 4) as number,
+    validation: avg(pluck('validation', successRates), 4) as number,
+    difference: avg(pluck('difference', successRates), 4) as number,
+  };
+
+  return {
+    uniqueTasks: keys(avgTaskSuccessRates).length,
+    successRates: overallAvgs,
+  };
+}; 
+
+console.log(getImprovedKpiSuccessRatesForTopTasks()); */
+  
+
+/*export const getImprovedKpiSuccessRates2 = (
+  uxTests: IUxTest[],
+): { uniqueTasks: number; successRates: SuccessRates } => {
+  // Sort tasks by success rate and select the top 50
+  const top50Tasks = uxTests
+   .filter((test) => !isNullish(test.success_rate) && test.test_type && test.tasks?.length)
+   .flatMap((test) => test.tasks?.filter((task) => typeof task !== 'string' && 'success_rate' in task) ?? [])
+   .sort((a, b) => ('success_rate' in a && 'success_rate' in b) ? b.success_rate - a.success_rate : 0)
+   .slice(0, 50);
+
+  const groupByTaskByProjectByTestType = pipe(
+    groupBy((test: IUxTest) => test.tasks.toString()), // group by task
+    mapObject(groupBy((test: IUxTest) => test.project.toString())), // group by project
+    // group by test type (group all non-validation test types as Baseline)
+    mapObject(
+      mapObject(
+        groupBy(({ test_type }: IUxTest) =>
+          test_type === 'Validation'? 'Validation' : 'Baseline',
+        ),
+      ),
+    ),
+  );
+
+  // Filter out tasks that are not in the top 50
+  const filteredTests = uxTests.filter((test) =>
+    top50Tasks.some((task) => task.id === (test.tasks ?? [])[0].id)
+  );
+
+  const avgTestSuccessRates = piped(
+    filteredTests,
+    // for tests with multiple tasks, unwind the tasks array
+    map(unwind('tasks')),
+    flatten,
+    (tests: IUxTest[]) =>
+      groupByTaskByProjectByTestType(tests) as Dictionary<
+        Dictionary<ProjectTestTypes>
+      >,
+    // filter out projects with only 1 test type
+    mapObject(
+      filter(
+        (projectTestTypes: any, testType: any) =>
+          keys(projectTestTypes).length > 1,
+      ),
+    ),
+    // filter out tasks with no projects
+    filter((taskProjects: any, task: any) => keys(taskProjects).length > 0),
+    // get the avg success rate for each test type
+    mapObject<any>(
+      mapObject(
+        map(
+          pipe(pluck('success_rate'), (successRates: unknown[]) =>
+            avg(successRates as number[], 3),
+          ),
+        ),
+      ),
+    ),
+    // calculate the difference between Baseline and Validation
+    mapObject<any>(
+      map((testTypes: any, project: any) => ({
+        baseline: testTypes.Baseline,
+        validation: testTypes.Validation,
+        difference: round(testTypes.Validation - testTypes.Baseline, 4),
+      })),
+    ),
+
+    // get avg of baseline, validation, and difference for each task over all projects
+    mapObject((successRates: SuccessRates[]) => ({
+      baseline: avg(pluck('baseline', successRates), 4) as number,
+      validation: avg(pluck('validation', successRates), 4) as number,
+      difference: avg(pluck('difference', successRates), 4) as number,
+    })),
+  );
+
+  console.log(`number of tasks: ${keys(avgTestSuccessRates).length}`);
+
+  const successRates = Object.values(avgTestSuccessRates);
+
+  const overallAvgs = {
+    baseline: avg(pluck('baseline', successRates), 4) as number,
+    validation: avg(pluck('validation', successRates), 4) as number,
+    difference: avg(pluck('difference', successRates), 4) as number,
+  };
+
+  return {
+    uniqueTasks: keys(avgTestSuccessRates).length,
+    successRates: overallAvgs,
+  };*/

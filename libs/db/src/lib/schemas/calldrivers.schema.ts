@@ -33,6 +33,9 @@ export class CallDriver implements ICallDriver {
   @Prop({ type: String })
   sub_subtopic?: string;
 
+  @Prop({ type: [String] })
+  tasks?: string[];
+
   @Prop({ type: Number, index: true })
   tpc_id = 999999; // Some records don't have a tpc_id, so they will default to this value
 
@@ -70,27 +73,35 @@ CallDriverSchema.statics['getCallsByTopicFromIds'] = async function (
     .project({
       _id: 0,
       tpc_id: 1,
-      //enquiry_line: 1,
+      enquiry_line: 1,
       topic: 1,
       subtopic: 1,
       sub_subtopic: 1,
       calls: 1,
     })
+    .lookup ({
+      from: 'tasks',
+      localField: 'tpc_id',
+      foreignField: 'tpc_ids',
+      as: 'task',
+    })
     .group({
       _id: '$tpc_id',
       topic: { $first: '$topic' },
-      //enquiry_line: { $first: '$enquiry_line' },
+      enquiry_line: { $first: '$enquiry_line' },
       subtopic: { $first: '$subtopic' },
       sub_subtopic: { $first: '$sub_subtopic' },
+      tasks: { $first: '$task.title' },
       calls: { $sum: '$calls' },
     })
     .project({
       _id: 0,
       tpc_id: '$_id',
       topic: 1,
-      //enquiry_line: 1,
+      enquiry_line: 1,
       subtopic: 1,
       sub_subtopic: 1,
+      tasks:1,
       calls: 1,
     })
     .exec();
@@ -153,15 +164,26 @@ CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
 
       const tpcIdsQuery = tpcIds?.length ? { tpc_id: { $in: tpcIds } } : {};
 
-      return this.aggregate<TopCalldriverTopics>()
+      const ab = this.aggregate<TopCalldriverTopics>()
         .sort({ date: 1, tpc_id: 1 })
         .match({ date: { $gte: startDate, $lte: endDate }, ...tpcIdsQuery })
+        
+        .lookup ({
+            from: 'tasks',
+            localField: 'tpc_id',
+            foreignField: 'tpc_ids',
+            as: 'task',
+          })
+
+        .unwind('$task')
+      
         .group({
           _id: '$tpc_id',
           enquiry_line: { $first: '$enquiry_line' },
           topic: { $first: '$topic' },
           subtopic: { $first: '$subtopic' },
           sub_subtopic: { $first: '$sub_subtopic' },
+          tasks: { $first: '$tasks.title' },
           calls: { $sum: '$calls' },
         })
         .project({
@@ -171,9 +193,12 @@ CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
           topic: 1,
           subtopic: 1,
           sub_subtopic: 1,
+          tasks:1,
           calls: 1,
         })
         .exec() as Promise<TopCalldriverTopics[]>;
+        console.log(ab)
+        return ab;
     })
   );
 

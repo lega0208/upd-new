@@ -499,6 +499,8 @@ export class TasksDetailsFacade {
 
         return {
           topic: callsByTopic.topic || '',
+          tpc_id: callsByTopic.tpc_id || '',
+          enquiry_line: callsByTopic.enquiry_line || '',
           subtopic: callsByTopic.subtopic || '',
           sub_subtopic: callsByTopic.sub_subtopic || '',
           calls: callsByTopic.calls,
@@ -519,6 +521,11 @@ export class TasksDetailsFacade {
         translate: true,
       },
       {
+        field: 'tpc_id',
+        header: 'tpc_id',
+        translate: true,
+      },
+      {
         field: 'subtopic',
         header: 'sub-topic',
         translate: true,
@@ -528,6 +535,11 @@ export class TasksDetailsFacade {
         header: 'sub-subtopic',
         translate: true,
       },
+      {
+        field: 'enquiry_line', 
+        header: 'enquiry_line', 
+        translate: true
+    },
       {
         field: 'calls',
         header: 'calls',

@@ -91,6 +91,7 @@ export class ProjectsDetailsFacade {
         : data?.dateFromLastTest,
     ),
   );
+  tasks$ = this.projectsDetailsData$.pipe(map((data) => data?.tasks || []));
 
   totalCalldriver$ = this.projectsDetailsData$.pipe(
     map((data) => data?.dateRangeData?.totalCalldrivers || 0),
@@ -449,7 +450,7 @@ export class ProjectsDetailsFacade {
     }),
   );
 
-  callsByTopic$ = this.projectsDetailsData$.pipe(
+  callsByTopic$ = this.projectsDetailsData$.pipe( // callsByTopic$ gets the data from the store and maps it to the callsByTopic property of the ProjectsDetailsData object
     map((data) => {
       if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
         return null;
@@ -463,8 +464,11 @@ export class ProjectsDetailsFacade {
 
         return {
           topic: callsByTopic.topic || '',
+          tpc_id: callsByTopic.tpc_id || 0,
           subtopic: callsByTopic.subtopic || '',
+          enquiry_line: callsByTopic.enquiry_line || '',
           sub_subtopic: callsByTopic.sub_subtopic || '',
+          tasks: callsByTopic.tasks || '',
           calls: callsByTopic.calls,
           comparison: !previousCalls?.calls
             ? Infinity
@@ -488,10 +492,26 @@ export class ProjectsDetailsFacade {
         translate: true,
       },
       {
+        field: 'tpc_id',
+        header: 'tpc_id',
+        translate: true,
+      },
+      {
         field: 'sub_subtopic',
         header: 'sub-subtopic',
         translate: true,
       },
+      {
+        field: 'enquiry_line', 
+        header: 'enquiry_line', 
+        translate: true
+    },
+    {
+      field: 'tasks',
+      header: 'tasks',
+      translate: true,
+    },
+    
       {
         field: 'calls',
         header: 'calls',

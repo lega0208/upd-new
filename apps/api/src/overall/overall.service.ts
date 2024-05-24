@@ -182,8 +182,9 @@ export class OverallService {
       .format('YYYY-MM-DD')}`;
 
     const uxTests = (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [];
+    const topTasks = (await this.taskModel.find({}, { _id: 0 }).lean().exec()) || [];
 
-    const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests)
+    const improvedTasksKpi = getImprovedKpiSuccessRates(topTasks, uxTests);
 
     const results = {
       dateRange: params.dateRange,

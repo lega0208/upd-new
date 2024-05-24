@@ -28,6 +28,7 @@ export interface IAAItemId {
  * Calldriver types
  */
 export interface CallsByTopic {
+  tasks: string;
   tpc_id: string;
   enquiry_line: string;
   topic: string;
