@@ -878,6 +878,22 @@ export class ProjectsDetailsFacade {
     map((data) => data?.feedbackComments.length || 0),
   );
 
+  comparisonTotalComments$ = this.projectsDetailsData$.pipe(
+    map(
+      (data) =>
+        data?.comparisonDateRangeData?.feedbackComments.length || 0,
+    ),
+  );
+
+  commentsPercentChange$ = combineLatest([
+    this.feedbackTotalComments$,
+    this.comparisonTotalComments$,
+  ]).pipe(
+    map(([currentComments, comparisonComments]) =>
+      percentChange(currentComments, comparisonComments),
+    ),
+  );
+
   dateRangeLabel$ = combineLatest([
     this.projectsDetailsData$,
     this.currentLang$,

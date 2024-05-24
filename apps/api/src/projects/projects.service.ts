@@ -891,6 +891,12 @@ async function getAggregatedProjectMetrics(
 
   console.timeEnd('pageMetricsByTasks');
 
+  const feedbackComments = await getProjectFeedbackComments(
+    dateRange,
+    projectUrls,
+    feedbackModel,
+  );
+
   return {
     ...projectMetrics,
     calldriversEnquiry,
@@ -902,6 +908,7 @@ async function getAggregatedProjectMetrics(
     dyfByDay,
     calldriversByDay,
     pageMetricsByTasks,
+    feedbackComments,
   };
 }
 
