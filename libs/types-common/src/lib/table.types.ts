@@ -13,6 +13,7 @@ export type ColumnConfigPipe =
   | 'secondsToMinutes';
 
 export interface ColumnConfig<T = any> {
+  label?: string;
   field: OptionalKeyOf<T>;
   header: string;
   type?: 'link' | 'comparison' | 'label' | 'text';
@@ -33,6 +34,10 @@ export interface ColumnConfig<T = any> {
   useArrows?: boolean;
   showTextColours?: boolean;
   width?: number;
+}
+
+export interface GroupedColumns {
+  [key: string]: (ColumnConfig & { header: string })[];
 }
 
 export interface typeParams {

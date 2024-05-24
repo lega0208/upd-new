@@ -309,6 +309,13 @@ export class OverviewFacade {
       return kpiUxTestsSum / kpiUxTestsLength;
     }),
   );
+  
+  ParticipantsSince2018$ = combineLatest([this.projectsList$]).pipe(
+    map(([data]) => {
+      const totalParticipants = data.reduce((a, b) => a + b.totalUsers, 0);
+      return totalParticipants;
+    }),
+  );
 
   kpiUXTestsTotal$ = combineLatest([this.kpiUXTests$]).pipe(
     map(([data]) => {
@@ -317,15 +324,16 @@ export class OverviewFacade {
   );
 
   apexCallDriversChart$ = combineLatest([this.calldriversTable$]).pipe(
-    map(
-      ([data]) =>
-        data.map((d) => ({
+    map(([data]) => {
+      return data.map((d) => {
+        return {
           name: d.name,
           data: [d.currValue, d.prevValue],
-        })) as ApexAxisChartSeries,
-    ),
+        };
+      }) as ApexAxisChartSeries;
+    }),
   );
-  
+
   apexBar$ = this.store.select(selectVisitsByDayChartData);
 
   comboChartData$ = this.store.select(selectComboChartData);
@@ -709,7 +717,6 @@ export class OverviewFacade {
         }))
         .filter((v) => v.currValue > 0 || v.prevValue > 0)
         .sort((a, b) => b.currValue - a.currValue)
-        .splice(0, 25);
     }),
   );
 
@@ -776,9 +783,9 @@ export class OverviewFacade {
   );
 
   calldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
-    { field: 'topic', header: 'topic', translate: true },
-    { field: 'tpc_id', header: 'tpc_id', translate: true},
+    { field: 'tpc_id', header: 'tpc_id', translate: true},   
     { field: 'enquiry_line', header: 'enquiry_line', translate: true},
+    { field: 'topic', header: 'topic', translate: true },
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },

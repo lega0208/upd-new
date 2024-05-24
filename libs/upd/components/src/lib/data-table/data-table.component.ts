@@ -13,8 +13,9 @@ import {
 } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { Table } from 'primeng/table';
-import type { ColumnConfig } from '@dua-upd/types-common';
+import type { ColumnConfig, GroupedColumns } from '@dua-upd/types-common';
 import type { SelectedNode } from '../filter-table/filter-table.component';
+import { SelectItemGroup } from 'primeng/api';
 
 @Component({
   selector: 'upd-data-table',
@@ -77,16 +78,47 @@ export class DataTableComponent<T extends object> {
 
   lang = this.i18n.currentLang;
 
-  selectableCols = computed(() =>
-    this.cols()
-      .filter((col) => !col.frozen)
-      .map((col) => ({
-        original: col,
-        translatedHeader: this.i18n.service.translate(col.header, this.lang()),
-      }))
-      .sort((a, b) => a.translatedHeader.localeCompare(b.translatedHeader))
-      .map(({ original }) => original),
-  );
+  // selectableCols = computed(() =>
+  //   this.cols()
+  //     .filter((col) => !col.frozen)
+  //     .map((col) => ({
+  //       original: col,
+  //       translatedHeader: this.i18n.service.translate(col.header, this.lang()),
+  //     }))
+  //     .sort((a, b) => a.translatedHeader.localeCompare(b.translatedHeader))
+  //     .map(({ original }) => original),
+  // );
+//---------------------------------
+// Inside your class or component
+selectableCols = computed(() => {
+  const defaultLabel = 'Other';
+
+  // Define 'grouped' with an appropriate type
+  const grouped: GroupedColumns = this.cols()
+    .filter((col: ColumnConfig) => !col.frozen)
+    .reduce((acc: GroupedColumns, col: ColumnConfig) => {
+      const label = col.label || defaultLabel; // Use default label if none is specified
+      if (!acc[label]) {
+        acc[label] = [];
+      }
+      acc[label].push({
+        ...col,
+        header: this.i18n.service.translate(col.header, this.lang()),
+      });
+      return acc;
+    }, {} as GroupedColumns); // Initial value of the accumulator
+
+  // Convert the grouped object into an array
+  return Object.keys(grouped).map(label => ({
+    label,
+    items: grouped[label]
+  }))
+
+});
+
+
+//---------------------------------
+
   constructor() {
     effect(() => {
       this.translatedData();

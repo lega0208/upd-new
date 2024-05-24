@@ -41,6 +41,7 @@
         <div class="d-flex">
           <p-multiSelect
             *ngIf="columnSelection()"
+            [group]="true"
             [options]="selectableCols()"
             [ngModel]="selectedColumns()"
             (ngModelChange)="selectedColumnsChanged($event)"
@@ -74,8 +75,18 @@
               </div>
             </ng-template>
 
-            <ng-template let-columns pTemplate="item">
+            <!-- <ng-template let-columns pTemplate="item">
               {{ columns.header | translate }}
+            </ng-template> -->
+            <ng-template let-group pTemplate="group">
+              <div>
+                <strong>{{ group.label | translate }}</strong>
+                <!-- <ul> -->
+                  <!-- <span *ngFor="let col of group.items">
+                    <p-checkbox [value]="col" label="{{ col.translatedHeader }}"></p-checkbox>
+                  </span> -->
+                <!-- </ul> -->
+              </div>
             </ng-template>
           </p-multiSelect>
 

@@ -32,7 +32,8 @@ export class OverviewUxTestsComponent implements OnInit {
   uxChartData = this.overviewService.projectsList$;
 
   tasksTested$ = this.overviewService.uxTasksTested$;
-  participantsTested$ = this.overviewService.uxParticipantsTested$;
+  //participantsTested$ = this.overviewService.uxParticipantsTested$;
+  participantsTested$ = this.overviewService.ParticipantsSince2018$;
   testsConductedLastFiscal$ = this.overviewService.uxTestsConductedLastFiscal$;
   testsConductedLastQuarter$ =
     this.overviewService.uxTestsConductedLastQuarter$;
