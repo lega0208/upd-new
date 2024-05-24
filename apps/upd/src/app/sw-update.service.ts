@@ -1,11 +1,19 @@
 import { ApplicationRef, Injectable } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
 import { first } from 'rxjs/operators';
+import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SwUpdateService {
-  constructor(appRef: ApplicationRef, updates: SwUpdate) {
-    const appIsStable$ = appRef.isStable.pipe(
+  constructor(
+    private appRef: ApplicationRef,
+    private updates: SwUpdate,
+  ) {
+    if (!environment.production) {
+      return;
+    }
+    
+    const appIsStable$ = this.appRef.isStable.pipe(
       first((isStable) => isStable === true),
     );
 
@@ -13,7 +21,7 @@ export class SwUpdateService {
       try {
         console.log('Service worker checking for updates...');
 
-        const updateFound = await updates.checkForUpdate();
+        const updateFound = await this.updates.checkForUpdate();
 
         console.log(
           updateFound
@@ -25,7 +33,7 @@ export class SwUpdateService {
       }
     });
 
-    updates.versionUpdates.subscribe((evt) => {
+    this.updates.versionUpdates.subscribe((evt) => {
       switch (evt.type) {
         case 'VERSION_DETECTED':
           console.log(`Downloading new app version: ${evt.version.hash}`);
@@ -35,6 +43,9 @@ export class SwUpdateService {
           console.log(
             `New app version ready for use: ${evt.latestVersion.hash}`,
           );
+
+          // Clear session storage to prevent issues with old data
+          sessionStorage.clear();
 
           // Reload the page to update to the latest version.
           document.location.reload();

@@ -30,6 +30,9 @@ export class PagesList {
   @Prop({ type: String })
   last_255?: string;
 
+  @Prop({ type: String})
+  section?: string;
+
   @Prop({ type: Date }) updatedAt?: Date;
 }
 

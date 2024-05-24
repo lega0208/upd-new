@@ -1,6 +1,6 @@
 <p-table
   #dt
-  [columns]="allColumns()"
+  [columns]="displayColumns()"
   [value]="translatedData() || []"
   [rows]="displayRows"
   [rowHover]="true"
@@ -40,41 +40,43 @@
         </div>
         <div class="d-flex">
           <p-multiSelect
-            *ngIf="columnSelection"
+            *ngIf="columnSelection()"
+            [group]="groupedColumnSelection()"
             [options]="selectableCols()"
-            [ngModel]="selectedColumns()"
+            [ngModel]="selectedColumnsSynced()"
             (ngModelChange)="selectedColumnsChanged($event)"
             optionLabel="header"
             [style]="{ 'min-width': '150px', 'max-width': '275px' }"
+            scrollHeight="40dvh"
             [placeholder]="'change-columns' | translate"
           >
             <ng-template let-columns pTemplate="selectedItems">
               <div
-              class="d-flex justify-content-between align-items-bottom content-end"
-              #rightPanel
-              style="
-                display: flex;
-                justify-content: flex-end;
-                align-items: center;
-                color: rgb(33, 37, 41);
-              "
-            >
-                <span
-                ><span class="pi pi-cog"></span>
-                {{ 'change-columns' | translate }}
-              </span
-              >&NonBreakingSpace;
-              <span
-                class="badge h-100 align-self-center text-center"
-                style="padding: 0.25em 0.32em"
-                [ngClass]="selectedColumns().length === 0 ? 'bg-unknown' : 'bg-primary'"
-                >{{ selectedColumns().length }}</span
+                class="d-flex justify-content-between align-items-bottom content-end"
+                #rightPanel
+                style="
+                  display: flex;
+                  justify-content: flex-end;
+                  align-items: center;
+                  color: rgb(33, 37, 41);
+                "
               >
+                <span
+                  ><span class="pi pi-cog"></span>
+                  {{ 'change-columns' | translate }} </span
+                >&NonBreakingSpace;
+                @if (selectedColumns().length) {
+                  <span
+                    class="badge h-100 align-self-center text-center bg-primary"
+                    style="padding: 0.25em 0.32em"
+                    >{{ selectedColumns().length }}</span
+                  >
+                }
               </div>
             </ng-template>
 
-            <ng-template let-columns pTemplate="item">
-              {{ columns.header | translate }}
+            <ng-template let-group pTemplate="group">
+              <strong>{{ group.label | translate }}</strong>
             </ng-template>
           </p-multiSelect>
 
@@ -90,7 +92,7 @@
           <upd-data-table-exports
             id="data-table-{{ id }}"
             *ngIf="exports"
-            [cols]="allColumns()"
+            [cols]="displayColumns()"
             [data]="dt.filteredValue || translatedData() || []"
           ></upd-data-table-exports>
         </div>
@@ -113,7 +115,9 @@
           [pSortableColumn]="sort ? col.field : undefined"
           [ngClass]="col.headerClass || ''"
           class="{{ col.columnClass || '' }}"
-          [style]="col.width ? 'min-width: ' + col.width + '; width: ' + col.width: ''"
+          [style]="
+            col.width ? 'min-width: ' + col.width + '; width: ' + col.width : ''
+          "
         >
           <div [ngClass]="sort ? 'text-nowrap d-flex align-items-center' : ''">
             <span
@@ -218,7 +222,8 @@
             'bg-green':
               kpi &&
               (rowData[col.field] >= 0.8 ||
-                (col.field === 'change' && rowData[col.field] >= 0.2))
+                (col.secondaryField?.field === 'change' &&
+                  rowData[col.secondaryField?.field] >= 20))
           }"
           class="{{ col.columnClass || '' }}"
         >

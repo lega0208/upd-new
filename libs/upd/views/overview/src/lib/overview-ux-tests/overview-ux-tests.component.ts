@@ -10,7 +10,6 @@ import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import type { OverviewProject } from '@dua-upd/types-common';
 import { OverviewFacade } from '../+state/overview/overview.facade';
-import { of } from 'rxjs';
 
 
 @Component({
@@ -58,7 +57,6 @@ export class OverviewUxTestsComponent implements OnInit {
   kpiTotAvgSuccessRate$ = this.overviewService.kpiTotAvgSuccessRate$;
 
   uxChartCols: ColumnConfig<OverviewProject>[] = [];
-comparison1: any;
 
   getDiffText(diff: number): string {
     if (diff > 0) {

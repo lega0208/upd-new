@@ -317,8 +317,15 @@ export class TasksService {
       const {
         avgTestSuccess,
         latestDate,
-        percentChange: latestSuccessPercentChange,
+        percentChange: latest_success_rate,
       } = getAvgSuccessFromLatestTests(uxTestsForTask);
+
+      const latest_success_rate_percent_change = percentChange(
+        avgTestSuccess,
+        avgTestSuccess - latest_success_rate,
+      );
+
+      const latest_success_rate_difference = latest_success_rate * 100;
 
       return {
         ...task,
@@ -346,7 +353,8 @@ export class TasksService {
         dyf_no_per_1000_visits_difference,
         calls_percent_change,
         dyf_no_percent_change,
-        latest_success_rate_change: latestSuccessPercentChange,
+        latest_success_rate_difference,
+        latest_success_rate_percent_change,
       };
     });
 
@@ -469,6 +477,7 @@ export class TasksService {
       taskSuccessByUxTest: [],
       avgTaskSuccessFromLastTest: null, // todo: better handle N/A
       avgSuccessPercentChange: null,
+      avgSuccessValueChange: null,
       dateFromLastTest: null,
       feedbackComments: [],
       searchTerms: await this.getTopSearchTerms(params),
@@ -505,6 +514,15 @@ export class TasksService {
         latestDate: returnData.dateFromLastTest,
         percentChange: returnData.avgSuccessPercentChange,
       } = getAvgSuccessFromLatestTests(uxTests));
+
+      returnData.avgSuccessValueChange =
+        returnData.avgSuccessPercentChange;
+
+      returnData.avgSuccessPercentChange = percentChange(
+        returnData.avgTaskSuccessFromLastTest,
+        returnData.avgTaskSuccessFromLastTest -
+          returnData.avgSuccessPercentChange,
+      );
     }
 
     returnData.feedbackComments = await this.feedbackModel.getComments(
@@ -749,7 +767,7 @@ async function getTaskAggregatedData(
 
   if (results.length > 0) {
     results[0].visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
-      (a, b) => a.title.localeCompare(b.title),
+      (a, b) => a.title?.localeCompare(b.title) || 1,
     ) as VisitsByPage[];
   }
 

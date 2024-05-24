@@ -257,7 +257,7 @@ export interface OverviewData
     total_users?: number;
     scenario?: string;
   }[];
-  top25CalldriverTopics: TopCalldriverTopics[];
+  calldriverTopics: TopCalldriverTopics[];
   top5IncreasedCalldriverTopics: TopCalldriverTopics[];
   top5DecreasedCalldriverTopics: TopCalldriverTopics[];
   searchTermsEn: OverallSearchTerm[];
@@ -343,6 +343,11 @@ export interface TaskDetailsMetrics {
 export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
   visitsByPage: VisitsByPage[];
   feedbackByTags: { tag: string; numComments: number }[];
+  feedbackPages: { _id: string; title: string; url: string; sum: number}[];
+  totalFeedback: {
+    main_section: string;
+    sum: number;
+  }[];
 }
 
 export interface TaskDetailsData
@@ -361,6 +366,7 @@ export interface TaskDetailsData
   core: string[];
   avgTaskSuccessFromLastTest: number;
   avgSuccessPercentChange: number;
+  avgSuccessValueChange: number;
   dateFromLastTest: Date;
   taskSuccessByUxTest: {
     title: string;
@@ -471,6 +477,8 @@ export interface ProjectDetailsAggregatedData {
   dyfByDay: { date: string; dyf_yes: number; dyf_no: number }[];
   calldriversByDay: { date: string; calls: number }[];
   feedbackByTags: { tag: string; numComments: number }[];
+  feedbackComments: FeedbackComment[];
+  feedbackPages: { _id: string; title: string; url: string; sum: number }[];
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
   callsByTasks: CallsByTasks[];
@@ -490,6 +498,7 @@ export interface ProjectsDetailsData
   members: string | undefined;
   avgTaskSuccessFromLastTest: number | null;
   avgSuccessPercentChange: number | null;
+  avgSuccessValueChange: number | null;
   dateFromLastTest: Date;
   taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
   tasks: Pick<ITask, '_id' | 'title'>[];

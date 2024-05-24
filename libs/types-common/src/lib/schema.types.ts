@@ -44,7 +44,7 @@ export interface CallsByTasks {
 
 export interface TopCalldriverTopics extends CallsByTopic {
   Inquiry: string;
-  change: number | 'Infinity';
+  change: number | null;
 }
 
 export interface ICallDriver {

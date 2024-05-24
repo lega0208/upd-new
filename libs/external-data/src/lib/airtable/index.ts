@@ -245,7 +245,7 @@ export class AirtableClient {
     const query = this.createQuery(bases.TASKS_INVENTORY, 'Tasks', params);
 
     return (await this.selectAll(query))
-      .filter(({ fields }) => Object.values(fields).some((value) => value))
+      .filter(({ fields }) => fields['Task'])
       .map(({ id, fields }) => ({
         airtable_id: id,
         title: squishTrim(fields['Task']),
@@ -308,7 +308,7 @@ export class AirtableClient {
     );
 
     return (await this.selectAll(query))
-      .filter(({ fields }) => Object.values(fields).some((value) => value))
+      .filter(({ fields }) => fields['UX Research Project Title'])
       .map(({ id, fields }) => {
         const results = {
           airtable_id: id,
@@ -570,7 +570,7 @@ export class AirtableClient {
 
   async getTasksTopicsMap() {
     const filterByFormula = combineFormulas([
-      'NOT({Task} = "")',
+      // 'NOT({Task} = "")',
       'NOT({Task link} = "")',
       'NOT({Task link} = BLANK())',
     ]);
@@ -635,6 +635,7 @@ export class AirtableClient {
         title: squishTrim(fields['Page title'] as string),
         lang: squishTrim(fields['Language (jcr:language)']),
         last_255: url.slice(-255),
+        section: squishTrim(fields['Group responsible']),
       };
     });
   }

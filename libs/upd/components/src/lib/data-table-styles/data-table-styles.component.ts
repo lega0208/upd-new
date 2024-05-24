@@ -22,8 +22,12 @@ export class DataTableStylesComponent implements OnInit {
   numberVal: number | string = 0;
 
   ngOnInit() {
+    const data = this.data[this.config.field] as number;
+
+    if (!data) return;
+
     if (this.config.pipe) {
-      this.numberVal = this.applyPipe(this.data[this.config.field] as number);
+      this.numberVal =  this.applyPipe(data);
     }
 
     if (this.config.type === 'label') {
@@ -51,7 +55,9 @@ export class DataTableStylesComponent implements OnInit {
     return this.data[this.config.field] as PageStatus;
   }
 
-  comparisonClassMap(field: string, upGoodDownBad = true) {
+  comparisonClassMap(field: string, upGoodDownBad = true, showColour = true) {
+    if (!showColour) return;
+
     const value = this.data[field] as number;
 
     if (upGoodDownBad) {
@@ -67,8 +73,24 @@ export class DataTableStylesComponent implements OnInit {
     };
   }
 
-  getIndicator(field: string) {
+  getIndicator(field: string, arrows = true) {
     const value = this.data[field] as number;
+    if (arrows)
+      return this.getArrow(value);
+    return this.getSignedNumbers(value);
+  }
+
+  getSignedNumbers(value: number) {
+    if (value < 0) {
+      return '-';
+    } else if (value > 0) {
+      return '+';
+    }
+
+    return '';
+  }
+
+  getArrow(value: number) {
     if (value < 0) {
       return 'arrow_downward';
     } else if (value > 0) {

@@ -84,6 +84,10 @@ export class ProjectsDetailsFacade {
     map((data) => data?.avgSuccessPercentChange),
   );
 
+  avgSuccessValueChange$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.avgSuccessValueChange),
+  );
+
   dateFromLastTest$ = this.projectsDetailsData$.pipe(
     map((data) =>
       data?.dateFromLastTest
@@ -855,15 +859,13 @@ export class ProjectsDetailsFacade {
       return taskSuccessByUxTestKpi?.map((task) => {
         const validation = task.Validation;
         const baseline = task.Baseline;
-        const change = round(validation,2) - round(baseline,2);
-        let isChange = false;
-
-        if (change >= 0.2) isChange = true;
+        const change = (round(validation, 2) - round(baseline, 2)) * 100;
+        const taskPercentChange = percentChange(round(validation, 2), round(baseline, 2));
 
         return {
           ...task,
           change,
-          isChange,
+          taskPercentChange,
         };
       });
     }),
@@ -892,6 +894,26 @@ export class ProjectsDetailsFacade {
       }));
       return [...(feedbackComments || [])];
     }),
+  );
+
+  feedbackTotalComments$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.feedbackComments.length || 0),
+  );
+
+  comparisonTotalComments$ = this.projectsDetailsData$.pipe(
+    map(
+      (data) =>
+        data?.comparisonDateRangeData?.feedbackComments.length || 0,
+    ),
+  );
+
+  commentsPercentChange$ = combineLatest([
+    this.feedbackTotalComments$,
+    this.comparisonTotalComments$,
+  ]).pipe(
+    map(([currentComments, comparisonComments]) =>
+      percentChange(currentComments, comparisonComments),
+    ),
   );
 
   dateRangeLabel$ = combineLatest([

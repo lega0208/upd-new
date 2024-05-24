@@ -98,6 +98,10 @@ export class TasksDetailsFacade {
     map((data) => data.avgSuccessPercentChange),
   );
 
+  avgSuccessValueChange$ = this.tasksDetailsData$.pipe(
+    map((data) => data.avgSuccessValueChange),
+  );
+
   dateFromLastTest$ = this.tasksDetailsData$.pipe(
     map((data) =>
       data?.dateFromLastTest
@@ -784,6 +788,10 @@ export class TasksDetailsFacade {
       }));
       return [...(feedbackComments || [])];
     }),
+  );
+
+  feedbackTotalComments$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.feedbackComments.length || 0),
   );
 
   // feedbackByTagsBarChart$ = combineLatest([

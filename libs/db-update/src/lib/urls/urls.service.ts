@@ -219,6 +219,12 @@ export class UrlsService {
     const twoWeeksAgo = today().subtract(2, 'weeks').add(2, 'hours').toDate();
 
     const ignoredUrls = [
+      // Search pages seem to be blocked
+      'www.canada.ca/en/revenue-agency/search/advanced-search.html',
+      'www.canada.ca/fr/agence-revenu/rechercher/recherche-avancee.html',
+      'www.canada.ca/en/revenue-agency/search.html',
+      'www.canada.ca/fr/agence-revenu/rechercher.html',
+      // URLs below seem to have an endless redirect loop
       'www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/completing-filing-information-returns/t4a-information-payers/t4a-slip/distribute-your-t4a-slips.html',
       'www.canada.ca/fr/agence-revenu/services/impot/entreprises/sujets/retenues-paie/remplir-produire-declarations-renseignements/t4a-information-payeurs/feuillet-t4a/comment-distribuer-vos-feuillets-t4a.html',
     ];
