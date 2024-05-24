@@ -25,7 +25,7 @@ export class DataTableCardComponent<T> {
   @Input() tooltip = '';
   @Input() loading = false;
   @Input() id?: string;
-  @Input() emptyStateMessage: string | undefined;
+  @Input() emptyStateMessage?: string;
 
   get defaultSearchFields() {
     return this.cols.map((obj) => obj.field);

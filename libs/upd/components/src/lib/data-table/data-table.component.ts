@@ -13,9 +13,9 @@ import {
 } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { Table } from 'primeng/table';
-import type { ColumnConfig, GroupedColumns } from '@dua-upd/types-common';
+import type { ColumnConfig } from '@dua-upd/types-common';
 import type { SelectedNode } from '../filter-table/filter-table.component';
-import { SelectItemGroup } from 'primeng/api';
+import { toGroupedColumnSelect } from '@dua-upd/upd/utils';
 
 @Component({
   selector: 'upd-data-table',
@@ -42,19 +42,30 @@ export class DataTableComponent<T extends object> {
   @Input() node: SelectedNode | null = null;
 
   @Output() rowSelectionChanged = new EventEmitter<T[]>();
+  i18n = inject(I18nFacade);
 
   data = input<T[] | null>(null);
-  cols = input<ColumnConfig<T>[]>([]);
+  initialCols = input<ColumnConfig<T>[]>([], { alias: 'cols' });
   inputSearchFields = input<string[]>([], { alias: 'searchFields' });
   columnSelection = input(false);
+  groupedColumnSelection = input(false);
 
-  i18n = inject(I18nFacade);
+  cols = this.i18n.service.computedMap(this.initialCols, (col, translate) => ({
+    ...col,
+    header: translate(col.header),
+  }));
 
   translatedData = this.i18n.toTranslatedTable<T>(this.data, this.cols);
 
   selectedColumns: WritableSignal<ColumnConfig<T>[]> = signal(
     JSON.parse(sessionStorage.getItem(`selectedColumns-${this.id}`) || '[]'),
   );
+
+  selectedColumnsSynced = computed(() => {
+    const selectedColumnFields = this.selectedColumns().map(({ field }) => field);
+
+    return this.cols().filter((col) => selectedColumnFields.includes(col.field));
+  });
 
   searchFields = computed(() =>
     this.inputSearchFields().length
@@ -78,46 +89,17 @@ export class DataTableComponent<T extends object> {
 
   lang = this.i18n.currentLang;
 
-  // selectableCols = computed(() =>
-  //   this.cols()
-  //     .filter((col) => !col.frozen)
-  //     .map((col) => ({
-  //       original: col,
-  //       translatedHeader: this.i18n.service.translate(col.header, this.lang()),
-  //     }))
-  //     .sort((a, b) => a.translatedHeader.localeCompare(b.translatedHeader))
-  //     .map(({ original }) => original),
-  // );
-//---------------------------------
-// Inside your class or component
-selectableCols = computed(() => {
-  const defaultLabel = 'Other';
+  selectableCols = computed(() => {
+    const cols = this.cols()
+      .filter((col: ColumnConfig) => !col.frozen)
+      .sort((a: ColumnConfig, b: ColumnConfig) => a.header.localeCompare(b.header));
 
-  // Define 'grouped' with an appropriate type
-  const grouped: GroupedColumns = this.cols()
-    .filter((col: ColumnConfig) => !col.frozen)
-    .reduce((acc: GroupedColumns, col: ColumnConfig) => {
-      const label = col.label || defaultLabel; // Use default label if none is specified
-      if (!acc[label]) {
-        acc[label] = [];
-      }
-      acc[label].push({
-        ...col,
-        header: this.i18n.service.translate(col.header, this.lang()),
-      });
-      return acc;
-    }, {} as GroupedColumns); // Initial value of the accumulator
+    if (this.groupedColumnSelection()) {
+      return toGroupedColumnSelect(cols);
+    }
 
-  // Convert the grouped object into an array
-  return Object.keys(grouped).map(label => ({
-    label,
-    items: grouped[label]
-  }))
-
-});
-
-
-//---------------------------------
+    return cols;
+  });
 
   constructor() {
     effect(() => {
