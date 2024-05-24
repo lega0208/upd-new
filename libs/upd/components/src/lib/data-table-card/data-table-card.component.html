@@ -1,7 +1,7 @@
 <upd-card [title]="title" [titleTooltip]="tooltip" [modal]="modal" [modalSize]="modalSize">
   <ng-container *ngIf="data.length === 0; else elseBlock">
     <p>
-      <span [translate]="'nodata-available'"></span>
+      <span [translate]="emptyStateMessage ? emptyStateMessage : 'nodata-available'"></span>
     </p>
   </ng-container>
   <ng-template #elseBlock>
@@ -21,6 +21,7 @@
       [sortField]="sortField"
       [sortOrder]="sortOrder"
       [loading]="loading"
+      [displayRows]="displayRows"
     ></upd-data-table>
   </ng-template>
 </upd-card>
