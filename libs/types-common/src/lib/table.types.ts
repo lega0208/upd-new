@@ -13,9 +13,9 @@ export type ColumnConfigPipe =
   | 'secondsToMinutes';
 
 export interface ColumnConfig<T = any> {
-  label?: string;
   field: OptionalKeyOf<T>;
   header: string;
+  group?: string;
   type?: 'link' | 'comparison' | 'label' | 'text';
   typeParam?: string;
   typeParams?: typeParams;
@@ -36,8 +36,9 @@ export interface ColumnConfig<T = any> {
   width?: number;
 }
 
-export interface GroupedColumns {
-  [key: string]: (ColumnConfig & { header: string })[];
+export type GroupedColumns<T> = {
+  label: string;
+  items: ColumnConfig<T>[];
 }
 
 export interface typeParams {

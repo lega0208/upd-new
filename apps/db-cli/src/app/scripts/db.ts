@@ -10,10 +10,12 @@ import {
   DbService,
   Page,
   PageMetrics,
+  PagesList,
   Readability,
 } from '@dua-upd/db';
 import { DbUpdateService, processHtml, UrlsService } from '@dua-upd/db-update';
 import {
+  AirtableClient,
   SearchAnalyticsClient,
   singleDatesFromDateRange,
 } from '@dua-upd/external-data';
@@ -1547,4 +1549,42 @@ export async function importGcTss() {
   }
 
   console.log(`Added total of ${added} records to gcTasks`);
+}
+
+export async function updatePageSections() {
+  const db = (<RunScriptCommand>this).inject<DbService>(DbService);
+  const airtableClient = new AirtableClient();
+
+  console.log('Getting pages from the database and Airtable...');
+
+  const pages = await db.collections.pagesList.find({}).exec();
+  const airtableList = await airtableClient.getPagesList();
+
+  console.log(`Got ${pages.length} pages from the database`);
+  console.log(`Got ${airtableList.length} pages from Airtable`);
+
+  const atDict = arrayToDictionary(airtableList, 'url');
+
+  const pagesWriteOps: mongo.AnyBulkWriteOperation<PagesList>[]  = pages
+    .map((page) => {
+      if (atDict[page.url] && atDict[page.url].section !== page.section) {
+        return {
+          updateOne: {
+            filter: { url: page.url },
+            update: {
+              $set: { section: atDict[page.url].section },
+            },
+          },
+        };
+      }
+    })
+    .filter((page) => page);
+
+  if (pagesWriteOps.length > 0) {
+    const pageWriteResults =
+      await db.collections.pagesList.bulkWrite(pagesWriteOps);
+    console.log(`${pageWriteResults.modifiedCount} page(s) modified`);
+  } else {
+    console.log('No updates needed.');
+  }
 }

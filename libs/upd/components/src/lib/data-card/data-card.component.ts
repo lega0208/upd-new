@@ -117,6 +117,7 @@ export class DataCardComponent {
 
   @Input() current: number | null = null;
   @Input() comparison?: number | null;
+  @Input() comparisonValue?: number | null;
   @Input() title = '';
   @Input() tooltip = '';
   @Input() modalTitle = '';

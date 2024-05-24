@@ -309,13 +309,6 @@ export class OverviewFacade {
       return kpiUxTestsSum / kpiUxTestsLength;
     }),
   );
-  
-  ParticipantsSince2018$ = combineLatest([this.projectsList$]).pipe(
-    map(([data]) => {
-      const totalParticipants = data.reduce((a, b) => a + b.totalUsers, 0);
-      return totalParticipants;
-    }),
-  );
 
   kpiUXTestsTotal$ = combineLatest([this.kpiUXTests$]).pipe(
     map(([data]) => {
@@ -323,15 +316,14 @@ export class OverviewFacade {
     }),
   );
 
-  apexCallDriversChart$ = combineLatest([this.calldriversTable$]).pipe(
-    map(([data]) => {
-      return data.map((d) => {
-        return {
+  apexCallDriversChart$ = this.calldriversTable$.pipe(
+    map(
+      (data) =>
+        data.map((d) => ({
           name: d.name,
           data: [d.currValue, d.prevValue],
-        };
-      }) as ApexAxisChartSeries;
-    }),
+        })) as ApexAxisChartSeries,
+    ),
   );
 
   apexBar$ = this.store.select(selectVisitsByDayChartData);
@@ -755,8 +747,8 @@ export class OverviewFacade {
   uxTasksTested$ = this.overviewData$.pipe(
     map((data) => data.tasksTestedSince2018),
   );
-  uxParticipantsTested$ = this.overviewData$.pipe(
-    map((data) => data.participantsTestedSince2018),
+  uxParticipantsTested$ = this.projectsList$.pipe(
+    map((data) => data.reduce((a, b) => a + b.totalUsers, 0)),
   );
   uxTestsConductedLastFiscal$ = this.overviewData$.pipe(
     map((data) => data.testsConductedLastFiscal),

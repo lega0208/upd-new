@@ -35,7 +35,7 @@ import type {
 } from '@dua-upd/types-common';
 import { dateRangeSplit } from '@dua-upd/utils-common/date';
 import { getLatestTest, getLatestTestData } from '@dua-upd/utils-common/data';
-import { arrayToDictionary, AsyncLogTiming } from '@dua-upd/utils-common';
+import { arrayToDictionary, AsyncLogTiming, percentChange } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
 
@@ -424,7 +424,13 @@ export class ProjectsService {
     const dateFromLastTest: Date | null = lastTest?.date || null;
 
     console.time('getLatestTestData');
-    const { percentChange, avgTestSuccess } = getLatestTestData(uxTests);
+    const { percentChange: projectPercentChange, avgTestSuccess } = getLatestTestData(uxTests);
+
+    const last_task_success_percent_change = percentChange(
+      avgTestSuccess,
+      avgTestSuccess - projectPercentChange
+    );
+
     console.timeEnd('getLatestTestData');
 
     const tasks = populatedProjectDoc.tasks as Task[];
@@ -491,7 +497,8 @@ export class ProjectsService {
       launchDate,
       members,
       avgTaskSuccessFromLastTest: avgTestSuccess,
-      avgSuccessPercentChange: percentChange,
+      avgSuccessValueChange: projectPercentChange,
+      avgSuccessPercentChange: last_task_success_percent_change,
       dateFromLastTest,
       taskSuccessByUxTest: uxTests,
       tasks,
@@ -891,6 +898,12 @@ async function getAggregatedProjectMetrics(
 
   console.timeEnd('pageMetricsByTasks');
 
+  const feedbackComments = await getProjectFeedbackComments(
+    dateRange,
+    projectUrls,
+    feedbackModel,
+  );
+
   return {
     ...projectMetrics,
     calldriversEnquiry,
@@ -902,6 +915,7 @@ async function getAggregatedProjectMetrics(
     dyfByDay,
     calldriversByDay,
     pageMetricsByTasks,
+    feedbackComments,
   };
 }
 

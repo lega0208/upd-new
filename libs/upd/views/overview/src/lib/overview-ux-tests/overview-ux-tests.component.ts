@@ -10,7 +10,6 @@ import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import type { OverviewProject } from '@dua-upd/types-common';
 import { OverviewFacade } from '../+state/overview/overview.facade';
-import { of } from 'rxjs';
 
 
 @Component({
@@ -32,8 +31,7 @@ export class OverviewUxTestsComponent implements OnInit {
   uxChartData = this.overviewService.projectsList$;
 
   tasksTested$ = this.overviewService.uxTasksTested$;
-  //participantsTested$ = this.overviewService.uxParticipantsTested$;
-  participantsTested$ = this.overviewService.ParticipantsSince2018$;
+  participantsTested$ = this.overviewService.uxParticipantsTested$;
   testsConductedLastFiscal$ = this.overviewService.uxTestsConductedLastFiscal$;
   testsConductedLastQuarter$ =
     this.overviewService.uxTestsConductedLastQuarter$;
