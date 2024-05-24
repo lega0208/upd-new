@@ -41,8 +41,9 @@
         <div class="d-flex">
           <p-multiSelect
             *ngIf="columnSelection()"
+            [group]="groupedColumnSelection()"
             [options]="selectableCols()"
-            [ngModel]="selectedColumns()"
+            [ngModel]="selectedColumnsSynced()"
             (ngModelChange)="selectedColumnsChanged($event)"
             optionLabel="header"
             [style]="{ 'min-width': '150px', 'max-width': '275px' }"
@@ -74,8 +75,8 @@
               </div>
             </ng-template>
 
-            <ng-template let-columns pTemplate="item">
-              {{ columns.header | translate }}
+            <ng-template let-group pTemplate="group">
+              <strong>{{ group.label | translate }}</strong>
             </ng-template>
           </p-multiSelect>
 
@@ -221,7 +222,8 @@
             'bg-green':
               kpi &&
               (rowData[col.field] >= 0.8 ||
-                (col.secondaryField?.field === 'change' && rowData[col.secondaryField?.field] >= 20))
+                (col.secondaryField?.field === 'change' &&
+                  rowData[col.secondaryField?.field] >= 20))
           }"
           class="{{ col.columnClass || '' }}"
         >

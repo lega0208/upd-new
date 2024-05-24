@@ -5,13 +5,22 @@ import type { LocaleId } from './i18n.types';
 import { registerLocaleData } from '@angular/common';
 import localeEnCa from '@angular/common/locales/en-CA';
 import localeFrCa from '@angular/common/locales/fr-CA';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class I18nService {
   private translateService = inject(TranslateService);
+
+  langSignal = toSignal(
+    this.translateService.onLangChange.pipe(
+      map(({ lang }) => lang as LocaleId),
+    ),
+    {
+      initialValue: this.translateService.currentLang as LocaleId,
+    },
+  );
 
   get currentLang() {
     return this.translateService.currentLang as LocaleId;
@@ -56,6 +65,19 @@ export class I18nService {
     }
 
     return signal;
+  }
+
+  computedMap<T>(
+    input: T[] | Signal<T[]>,
+    computation: (value: T, translate: (key: string) => string) => T,
+  ): Signal<T[]> {
+    return computed<T[]>(() => {
+      this.langSignal();
+
+      const inputArray = Array.isArray(input) ? input : input();
+
+      return inputArray.map((val: T) => computation(val, this.instant.bind(this)));
+    });
   }
 
   onLangChange(callback: (event: LangChangeEvent) => void) {
