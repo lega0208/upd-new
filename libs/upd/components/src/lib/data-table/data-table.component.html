@@ -76,9 +76,7 @@
             </ng-template>
 
             <ng-template let-group pTemplate="group">
-              <div>
-                <strong>{{ group.label | translate }}</strong>
-              </div>
+              <strong>{{ group.label | translate }}</strong>
             </ng-template>
           </p-multiSelect>
 
@@ -224,7 +222,8 @@
             'bg-green':
               kpi &&
               (rowData[col.field] >= 0.8 ||
-                (col.secondaryField?.field === 'change' && rowData[col.secondaryField?.field] >= 20))
+                (col.secondaryField?.field === 'change' &&
+                  rowData[col.secondaryField?.field] >= 20))
           }"
           class="{{ col.columnClass || '' }}"
         >
