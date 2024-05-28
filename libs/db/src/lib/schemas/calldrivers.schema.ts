@@ -192,7 +192,7 @@ CallDriverSchema.statics['getTopicsWithPercentChange'] = async function (
       return {
         ...currentData,
         change: !previousData?.calls
-          ? 'Infinity'
+          ? null
           : percentChange(currentData.calls, previousData.calls),
       };
     })

@@ -10,7 +10,7 @@
         [current]="currentCallVolume$ | async"
         [comparison]="callPercentChange$ | async"
         [title]="'Call volume'"
-        [displayKpis]="true"
+        [displayKpis]="false"
         [kpiObjectiveCriteria]="callVolumeObjectiveCriteria"
         [kpiStylesConfig]="callVolumeKpiConfig"
         [comparisonMode]="'upBadDownGood'"
@@ -59,12 +59,12 @@
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [data]="(top25CalldriverTopics$ | async) || []"
-        [cols]="(top25CalldriverTopicsConfig$ | async) || []"
-        [filter]="false"
+        [data]="(calldriverTopics$ | async) || []"
+        [cols]="(calldriverTopicsConfig$ | async) || []"
+        [filter]="true"
         [pagination]="true"
-        [sort]="false"
-        [title]="'top25-call-drivers'"
+        [sort]="true"
+        [title]="'tab-calldrivers'"
       >
       </upd-data-table-card>
     </div>

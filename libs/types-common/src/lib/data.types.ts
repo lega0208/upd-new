@@ -257,7 +257,7 @@ export interface OverviewData
     total_users?: number;
     scenario?: string;
   }[];
-  top25CalldriverTopics: TopCalldriverTopics[];
+  calldriverTopics: TopCalldriverTopics[];
   top5IncreasedCalldriverTopics: TopCalldriverTopics[];
   top5DecreasedCalldriverTopics: TopCalldriverTopics[];
   searchTermsEn: OverallSearchTerm[];
@@ -367,6 +367,7 @@ export interface TaskDetailsData
   core: string[];
   avgTaskSuccessFromLastTest: number;
   avgSuccessPercentChange: number;
+  avgSuccessValueChange: number;
   dateFromLastTest: Date;
   taskSuccessByUxTest: {
     title: string;
@@ -498,6 +499,7 @@ export interface ProjectsDetailsData
   members: string | undefined;
   avgTaskSuccessFromLastTest: number | null;
   avgSuccessPercentChange: number | null;
+  avgSuccessValueChange: number | null;
   dateFromLastTest: Date;
   taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
   tasks: Pick<ITask, '_id' | 'title'>[];

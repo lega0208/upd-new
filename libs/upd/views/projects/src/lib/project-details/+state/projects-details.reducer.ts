@@ -29,6 +29,7 @@ export const projectDetailsInitialState: ProjectsDetailsState = {
     comparisonDateRange: '',
     avgTaskSuccessFromLastTest: null,
     avgSuccessPercentChange: null,
+    avgSuccessValueChange: null,
     dateFromLastTest: new Date(0),
     taskSuccessByUxTest: [],
     tasks: [],

@@ -98,6 +98,10 @@ export class TasksDetailsFacade {
     map((data) => data.avgSuccessPercentChange),
   );
 
+  avgSuccessValueChange$ = this.tasksDetailsData$.pipe(
+    map((data) => data.avgSuccessValueChange),
+  );
+
   dateFromLastTest$ = this.tasksDetailsData$.pipe(
     map((data) =>
       data?.dateFromLastTest
