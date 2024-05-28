@@ -59,46 +59,6 @@
       </upd-apex-radial-bar>
      </div>
      
-     <div class="col-lg-4 col-sm-12">
-      <upd-apex-radial-bar
-         class="custom-radial-bar"
-         [title]="'kpi-ux-test-improved-title'"
-         [titleTooltip]="'kpi-ux-test-improved-tooltip'"
-         [preLabel]="'Target'"
-         [valueLabel]="0.8"
-         [current]="(improvedKpiSuccessRateValidation$ | async) || 0"
-         [kpiObjectiveCriteria]="uxTestsKpiObjectiveCriteria"
-         [keyword]="'ux'"
-         modal="{{ 'kpi-ux-test-improved-guidance' | translate }}"
-      >
-         <div>
-
-          
-           <ng-container
-             *ngIf="{
-               value: improvedKpiSuccessRateDifference$ | async
-             } as improvedKpi"
-           >
-           <span [style.color]="getTrendIconAndColor(improvedKpi.value ?? 0).color">
-            <i class="material-icons">{{ getTrendIconAndColor(improvedKpi.value ?? 0).iconName }}</i>
-            {{ improvedKpi.value | percent: undefined : currentLangSignal() }}
-            
-
-          </span>
-          {{
-            getDiffText(improvedKpi.value ?? 0)
-              | translate
-          }}
-             <br />
-             {{
-               'kpi-ux-test-improved-text'
-                 | translate: { total: (improvedKpiUniqueTasks$ | async) || 0 }
-             }}
-             
-           </ng-container>
-         </div>
-      </upd-apex-radial-bar>
-     </div>
 
 
     <div class="container-fluid my-4 gx-0">
