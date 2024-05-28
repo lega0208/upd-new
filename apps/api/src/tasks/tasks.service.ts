@@ -437,12 +437,6 @@ export class TasksService {
 
     const taskTpcId = task?.tpc_ids;
 
-    const feedbackComments = await getTaskFeedbackComments(
-      params.dateRange,
-      taskUrls,
-      this.feedbackModel,
-    );
-
     const returnData: TaskDetailsData = {
       _id: task?._id.toString(),
       title: task.title,
