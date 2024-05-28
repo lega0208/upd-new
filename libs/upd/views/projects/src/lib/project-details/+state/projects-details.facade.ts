@@ -95,7 +95,6 @@ export class ProjectsDetailsFacade {
         : data?.dateFromLastTest,
     ),
   );
-  tasks$ = this.projectsDetailsData$.pipe(map((data) => data?.tasks || []));
 
   totalCalldriver$ = this.projectsDetailsData$.pipe(
     map((data) => data?.dateRangeData?.totalCalldrivers || 0),
@@ -290,19 +289,7 @@ export class ProjectsDetailsFacade {
     }),
   );
 
-  projectTasks$ = combineLatest([
-    this.projectsDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const tasks = data?.tasks.map((task) => ({
-        ...task,
-        title: this.i18n.service.translate(task.title, lang) || task.title,
-      }));
-
-      return [...(tasks || [])];
-    }),
-  );
+  projectTasks$ = this.projectsDetailsData$.pipe(map((data) => data?.tasks));
 
   // projectTasks$ = combineLatest([
   //   this.projectsDetailsData$,
@@ -454,37 +441,49 @@ export class ProjectsDetailsFacade {
     }),
   );
 
-  callsByTopic$ = this.projectsDetailsData$.pipe( // callsByTopic$ gets the data from the store and maps it to the callsByTopic property of the ProjectsDetailsData object
+  callsByTopic$ = this.projectsDetailsData$.pipe(
+    // callsByTopic$ gets the data from the store and maps it to the callsByTopic property of the ProjectsDetailsData object
     map((data) => {
       if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
         return null;
       }
       const comparisonData = data?.comparisonDateRangeData?.callsByTopic || [];
 
-      return (data?.dateRangeData?.callsByTopic || []).map((callsByTopic) => {
-        const previousCalls = comparisonData.find(
-          (prevTopic) => prevTopic.tpc_id === callsByTopic.tpc_id,
-        );
+      return (data?.dateRangeData?.callsByTopic || [])
+        .map((callsByTopic) => {
+          const previousCalls = comparisonData.find(
+            (prevTopic) => prevTopic.tpc_id === callsByTopic.tpc_id,
+          );
 
-        return {
-          topic: callsByTopic.topic || '',
-          tpc_id: callsByTopic.tpc_id || 0,
-          subtopic: callsByTopic.subtopic || '',
-          enquiry_line: callsByTopic.enquiry_line || '',
-          sub_subtopic: callsByTopic.sub_subtopic || '',
-          tasks: callsByTopic.tasks || '',
-          calls: callsByTopic.calls,
-          comparison: !previousCalls?.calls
-            ? Infinity
-            : percentChange(callsByTopic.calls, previousCalls.calls),
-        };
-      });
+          return {
+            topic: callsByTopic.topic || '',
+            tpc_id: callsByTopic.tpc_id || 0,
+            subtopic: callsByTopic.subtopic || '',
+            enquiry_line: callsByTopic.enquiry_line || '',
+            sub_subtopic: callsByTopic.sub_subtopic || '',
+            tasks: callsByTopic.tasks || '',
+            calls: callsByTopic.calls,
+            comparison: !previousCalls?.calls
+              ? null
+              : percentChange(callsByTopic.calls, previousCalls.calls),
+          };
+        })
+        .sort((a, b) => (b.calls ?? 0) - (a.calls ?? 0));
     }),
   );
 
   callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(
     this.i18n.service,
     [
+      {
+        field: 'tpc_id',
+        header: 'tpc_id',
+      },
+      {
+        field: 'enquiry_line',
+        header: 'enquiry_line',
+        translate: true,
+      },
       {
         field: 'topic',
         header: 'topic',
@@ -496,26 +495,16 @@ export class ProjectsDetailsFacade {
         translate: true,
       },
       {
-        field: 'tpc_id',
-        header: 'tpc_id',
-        translate: true,
-      },
-      {
         field: 'sub_subtopic',
         header: 'sub-subtopic',
         translate: true,
       },
       {
-        field: 'enquiry_line', 
-        header: 'enquiry_line', 
-        translate: true
-    },
-    {
-      field: 'tasks',
-      header: 'tasks',
-      translate: true,
-    },
-    
+        field: 'tasks',
+        header: 'tasks',
+        translate: true,
+      },
+
       {
         field: 'calls',
         header: 'calls',
@@ -1205,21 +1194,18 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   return `${formattedStartDate}-${formattedEndDate}`;
 };
 
-const getFullDateRangeLabel = (
-  dateRange: string, lang: LocaleId,
-) => {
-    const [startDate, endDate] = dateRange.split('/');
+const getFullDateRangeLabel = (dateRange: string, lang: LocaleId) => {
+  const [startDate, endDate] = dateRange.split('/');
 
-    const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
-    const separator = lang === FR_CA ? ' au' : ' to';
+  const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
+  const separator = lang === FR_CA ? ' au' : ' to';
 
-    const formattedStartDate = dayjs
-      .utc(startDate)
-      .locale(lang)
-      .format(dateFormat);
+  const formattedStartDate = dayjs
+    .utc(startDate)
+    .locale(lang)
+    .format(dateFormat);
 
-    const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
+  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
 
-    return [`${formattedStartDate}${separator}`,`${formattedEndDate}`];
-  }
-
+  return [`${formattedStartDate}${separator}`, `${formattedEndDate}`];
+};

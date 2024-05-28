@@ -180,8 +180,8 @@ export class OverallService {
       .endOf('week')
       .format('YYYY-MM-DD')}`;
 
-    const uxTests = (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [];
-    const topTasks = (await this.taskModel.find({}, { _id: 0 }).lean().exec()) || [];
+    const uxTests =
+      (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [];
 
     const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests);
 
