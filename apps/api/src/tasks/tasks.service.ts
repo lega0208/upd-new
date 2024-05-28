@@ -26,6 +26,7 @@ import {
 } from '@dua-upd/db';
 import type {
   ApiParams,
+  FeedbackComment,
   InternalSearchTerm,
   IReports,
   TaskDetailsAggregatedData,
@@ -436,6 +437,12 @@ export class TasksService {
 
     const taskTpcId = task?.tpc_ids;
 
+    const feedbackComments = await getTaskFeedbackComments(
+      params.dateRange,
+      taskUrls,
+      this.feedbackModel,
+    );
+
     const returnData: TaskDetailsData = {
       _id: task?._id.toString(),
       title: task.title,
@@ -629,6 +636,12 @@ async function getTaskAggregatedData(
   const feedbackByTags = await feedbackModel.getCommentsByTag(
     dateRange,
     pageUrls,
+  );
+
+  const feedbackComments = await getTaskFeedbackComments(
+    dateRange,
+    pageUrls,
+    feedbackModel,
   );
 
   const [startDate, endDate] = dateRangeSplit(dateRange);
@@ -831,8 +844,30 @@ async function getTaskAggregatedData(
     callsByTopic,
     totalCalldrivers,
     feedbackByTags,
+    feedbackComments,
     visitsByDay,
     dyfByDay,
     calldriversByDay,
   };
+}
+
+async function getTaskFeedbackComments(
+  dateRange: string,
+  taskUrls: string[],
+  feedbackModel: FeedbackModel,
+): Promise<FeedbackComment[]> {
+  const [startDate, endDate] = dateRangeSplit(dateRange);
+
+  return (
+    (await feedbackModel.find({
+      url: { $in: taskUrls },
+      date: { $gte: startDate, $lte: endDate },
+    })) || []
+  ).map((feedback) => ({
+    date: feedback.date,
+    url: feedback.url,
+    tag: feedback.tags?.length ? feedback.tags[0] : '',
+    whats_wrong: feedback.whats_wrong || '',
+    comment: feedback.comment,
+  }));
 }

@@ -344,6 +344,7 @@ export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
   visitsByPage: VisitsByPage[];
   feedbackByTags: { tag: string; numComments: number }[];
   feedbackPages: { _id: string; title: string; url: string; sum: number}[];
+  feedbackComments: FeedbackComment[];
   totalFeedback: {
     main_section: string;
     sum: number;

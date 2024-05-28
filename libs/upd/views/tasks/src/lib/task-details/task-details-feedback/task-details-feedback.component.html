@@ -34,6 +34,7 @@
     <div class="col">
       <upd-data-card
         [current]="feedbackTotalComments$ | async"
+        [comparison]="commentsPercentChange$ | async"
         [title]="'Total comments'"
         [tooltip]="'total # of comments'"
       ></upd-data-card>
