@@ -835,13 +835,6 @@ async function getAggregatedProjectMetrics(
     await calldriversModel.getCallsByTopicFromIds(documentIds);
   console.timeEnd('calldriversEnquiry');
 
-  console.time('callsByTasks');
-  const callsByTasks = await calldriversModel.getCallsByTaskFromIds(
-    dateRange,
-    tpcIds,
-  );
-  console.timeEnd('callsByTasks');
-
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
   const taskIds = tasks.map((task: Types.ObjectId | Task) => task._id);
@@ -910,7 +903,6 @@ async function getAggregatedProjectMetrics(
     callsByTopic,
     totalCalldrivers,
     feedbackByTags,
-    callsByTasks,
     visitsByDay,
     dyfByDay,
     calldriversByDay,

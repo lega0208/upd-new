@@ -768,6 +768,7 @@ export class OverviewFacade {
         enquiry_line: topicData.enquiry_line || '',
         subtopic: topicData.subtopic || '',
         sub_subtopic: topicData.sub_subtopic || '',
+        tasks: topicData.tasks,
         calls: topicData.calls,
         change: topicData.change,
       })),
@@ -775,11 +776,12 @@ export class OverviewFacade {
   );
 
   calldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
-    { field: 'tpc_id', header: 'tpc_id', translate: true},   
+    { field: 'tpc_id', header: 'tpc_id' },
     { field: 'enquiry_line', header: 'enquiry_line', translate: true},
     { field: 'topic', header: 'topic', translate: true },
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
+    { field: 'tasks', header: 'tasks', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },
     { field: 'change', header: 'comparison', pipe: 'percent' },
   ]);
@@ -869,6 +871,8 @@ export class OverviewFacade {
     map((data) =>
       data.top5IncreasedCalldriverTopics.map((topicData) => ({
         topic: topicData.topic || '',
+        tpc_id: topicData.tpc_id || '',
+        enquiry_line: topicData.enquiry_line || '',
         subtopic: topicData.subtopic || '',
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
@@ -880,6 +884,8 @@ export class OverviewFacade {
   top5IncreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
     this.i18n.service,
     [
+      { field: 'tpc_id', header: 'tpc_id', translate: true},   
+      { field: 'enquiry_line', header: 'enquiry_line', translate: true},
       { field: 'topic', header: 'topic', translate: true },
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
@@ -892,6 +898,8 @@ export class OverviewFacade {
     map((data) =>
       data.top5DecreasedCalldriverTopics.map((topicData) => ({
         topic: topicData.topic || '',
+        tpc_id: topicData.tpc_id || '',
+        enquiry_line: topicData.enquiry_line || '',
         subtopic: topicData.subtopic || '',
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
@@ -903,6 +911,8 @@ export class OverviewFacade {
   top5DecreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
     this.i18n.service,
     [
+      { field: 'tpc_id', header: 'tpc_id', translate: true},   
+      { field: 'enquiry_line', header: 'enquiry_line', translate: true},
       { field: 'topic', header: 'topic', translate: true },
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
