@@ -42,48 +42,56 @@ export class TasksHomeComponent implements OnInit {
       header: 'Portfolio',
       hide: true,
       translate: true,
+      group: 'categories',
     },
     {
       field: 'group',
       header: 'group',
       hide: true,
       translate: true,
+      group: 'categories',
     },
     {
       field: 'tasks_subgroup',
       header: 'tasks_subgroup',
       hide: true,
       translate: true,
+      group: 'categories',
     },
     {
       field: 'service',
       header: 'service',
       hide: true,
       translate: true,
+      group: 'categories',
     },
     {
       field: 'user_journey',
       header: 'user_journey',
       hide: true,
       translate: true,
+      group: 'categories',
     },
     {
       field: 'status',
       header: 'status',
       hide: true,
       translate: true,
+      group: 'categories',
     },
     {
       field: 'channel',
       header: 'channel',
       hide: true,
       translate: true,
+      group: 'categories',
     },
     {
       field: 'core',
       header: 'core',
       hide: true,
       translate: true,
+      group: 'categories',
     },
     // {
     //   field: 'ux_testing',
@@ -110,6 +118,7 @@ export class TasksHomeComponent implements OnInit {
       header: 'Program',
       hide: true,
       translate: true,
+      group: 'categories',
     },
     {
       field: 'user_type',
@@ -122,24 +131,28 @@ export class TasksHomeComponent implements OnInit {
       header: 'topic',
       hide: true,
       translate: true,
+      group: 'categories',
     },
     {
       field: 'tasks_subtopic',
       header: 'tasks_subtopic',
       translate: true,
       hide: true,
+      group: 'categories',
     },
     {
       field: 'visits',
       header: 'visits',
       pipe: 'number',
       width: '100px',
+      group: 'metrics',
     },
     {
       field: 'calls',
       header: 'calls',
       pipe: 'number',
       width: '100px',
+      group: 'metrics',
     },
     {
       field: 'dyf_no',
@@ -147,6 +160,7 @@ export class TasksHomeComponent implements OnInit {
       pipe: 'number',
       width: '140px',
       hide: true,
+      group: 'metrics',
     },
     {
       field: 'survey',
@@ -154,6 +168,7 @@ export class TasksHomeComponent implements OnInit {
       pipe: 'number',
       tooltip: 'tooltip-survey-volume',
       width: '100px',
+      group: 'metrics',
     },
     {
       field: 'calls_per_100_visits',
@@ -161,6 +176,7 @@ export class TasksHomeComponent implements OnInit {
       pipe: 'number',
       pipeParam: '1.2-2',
       width: '120px',
+      group: 'metrics',
     },
     {
       field: 'calls_percent_change',
@@ -169,12 +185,15 @@ export class TasksHomeComponent implements OnInit {
       pipeParam: '1.0-2',
       upGoodDownBad: false,
       indicator: true,
+      useArrows: true,
+      showTextColours: true,
       secondaryField: {
         field: 'calls_per_100_visits_difference',
         pipe: 'number',
         pipeParam: '1.0-2',
       },
       width: '160px',
+      group: 'metrics',
     },
     {
       field: 'dyf_no_per_1000_visits',
@@ -182,6 +201,7 @@ export class TasksHomeComponent implements OnInit {
       pipe: 'number',
       pipeParam: '1.2-2',
       width: '120px',
+      group: 'metrics',
     },
     {
       field: 'dyf_no_percent_change',
@@ -190,12 +210,15 @@ export class TasksHomeComponent implements OnInit {
       pipeParam: '1.0-2',
       upGoodDownBad: false,
       indicator: true,
+      useArrows: true,
+      showTextColours: true,
       secondaryField: {
         field: 'dyf_no_per_1000_visits_difference',
         pipe: 'number',
         pipeParam: '1.0-2',
       },
       width: '160px',
+      group: 'metrics',
     },
     {
       field: 'survey_completed',
@@ -203,6 +226,7 @@ export class TasksHomeComponent implements OnInit {
       pipe: 'percent',
       hide: true,
       tooltip: 'tooltip-self-reported-success',
+      group: 'metrics',
     },
     {
       field: 'latest_ux_success',
@@ -211,6 +235,7 @@ export class TasksHomeComponent implements OnInit {
       hide: true,
       tooltip: 'tooltip-latest-success-rate',
       width: '100px',
+      group: 'metrics',
     },
     {
       field: 'latest_success_rate_percent_change',
@@ -219,6 +244,8 @@ export class TasksHomeComponent implements OnInit {
       pipeParam: '1.0-2',
       upGoodDownBad: true,
       indicator: true,
+      useArrows: true,
+      showTextColours: true,
       secondaryField: {
         field: 'latest_success_rate_difference',
         pipe: 'number',
@@ -226,6 +253,7 @@ export class TasksHomeComponent implements OnInit {
       },
       hide: true,
       width: '150px',
+      group: 'metrics',
     },
   ] as ColumnConfig<UnwrapObservable<typeof this.tasksHomeData$>>[];
 

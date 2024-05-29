@@ -231,27 +231,18 @@ export class OverviewFacade {
       const comparisonDateRange =
         data?.comparisonDateRangeData?.calldriversEnquiry || [];
 
-      const dataEnquiryLine = dateRange.map((d) => {
-        let prevVal = NaN;
-        comparisonDateRange.map((cd) => {
-          if (d.enquiry_line === cd.enquiry_line) {
-            prevVal = cd.sum;
-          }
-        });
-        return {
-          name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
-          currValue: d.sum,
-          prevValue: prevVal,
-        };
-      });
+      const dataEnquiryLine = dateRange.map((d) => ({
+        name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
+        currValue: d.sum,
+        prevValue:
+          comparisonDateRange.find((cd) => d.enquiry_line === cd.enquiry_line)
+            ?.sum || null,
+      }));
 
       comparisonDateRange.map((d) => {
-        let currVal = 0;
-        dateRange.map((cd) => {
-          if (d.enquiry_line === cd.enquiry_line) {
-            currVal = cd.sum;
-          }
-        });
+        const currVal =
+          dateRange.find((cd) => d.enquiry_line === cd.enquiry_line) || 0;
+
         if (currVal === 0) {
           dataEnquiryLine.push({
             name: this.i18n.service.translate(`d3-${d.enquiry_line}`, lang),
@@ -260,7 +251,10 @@ export class OverviewFacade {
           });
         }
       });
-      return dataEnquiryLine.filter((v) => v.currValue > 0 || v.prevValue > 0);
+
+      return dataEnquiryLine.filter(
+        (v) => v.currValue > 0 || (v.prevValue || 0) > 0,
+      );
     }),
   );
 
@@ -322,15 +316,14 @@ export class OverviewFacade {
     }),
   );
 
-  apexCallDriversChart$ = combineLatest([this.calldriversTable$]).pipe(
-    map(([data]) => {
-      return data.map((d) => {
-        return {
+  apexCallDriversChart$ = this.calldriversTable$.pipe(
+    map(
+      (data) =>
+        data.map((d) => ({
           name: d.name,
           data: [d.currValue, d.prevValue],
-        };
-      }) as ApexAxisChartSeries;
-    }),
+        })) as ApexAxisChartSeries,
+    ),
   );
 
   apexBar$ = this.store.select(selectVisitsByDayChartData);
@@ -716,7 +709,6 @@ export class OverviewFacade {
         }))
         .filter((v) => v.currValue > 0 || v.prevValue > 0)
         .sort((a, b) => b.currValue - a.currValue)
-        .splice(0, 25);
     }),
   );
 
@@ -755,8 +747,8 @@ export class OverviewFacade {
   uxTasksTested$ = this.overviewData$.pipe(
     map((data) => data.tasksTestedSince2018),
   );
-  uxParticipantsTested$ = this.overviewData$.pipe(
-    map((data) => data.participantsTestedSince2018),
+  uxParticipantsTested$ = this.projectsList$.pipe(
+    map((data) => data.reduce((a, b) => a + b.totalUsers, 0)),
   );
   uxTestsConductedLastFiscal$ = this.overviewData$.pipe(
     map((data) => data.testsConductedLastFiscal),
@@ -768,26 +760,28 @@ export class OverviewFacade {
     map((data) => data.copsTestsCompletedSince2018),
   );
 
-  top25CalldriverTopics$ = this.overviewData$.pipe(
+  calldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
-      data.top25CalldriverTopics.map((topicData) => ({
+      data.calldriverTopics.map((topicData) => ({
         topic: topicData.topic || '',
         tpc_id: topicData.tpc_id || '',
         enquiry_line: topicData.enquiry_line || '',
         subtopic: topicData.subtopic || '',
         sub_subtopic: topicData.sub_subtopic || '',
+        tasks: topicData.tasks,
         calls: topicData.calls,
-        change: topicData.change === 'Infinity' ? Infinity : topicData.change,
+        change: topicData.change,
       })),
     ),
   );
 
-  top25CalldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
+  calldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
+    { field: 'tpc_id', header: 'tpc_id' },
+    { field: 'enquiry_line', header: 'enquiry_line', translate: true},
     { field: 'topic', header: 'topic', translate: true },
-    { field:  'tpc_id', header: 'tpc_id', translate: true},
-    { field:  'enquiry_line', header: 'enquiry_line', translate: true},
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
+    { field: 'tasks', header: 'tasks', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },
     { field: 'change', header: 'comparison', pipe: 'percent' },
   ]);
@@ -877,10 +871,12 @@ export class OverviewFacade {
     map((data) =>
       data.top5IncreasedCalldriverTopics.map((topicData) => ({
         topic: topicData.topic || '',
+        tpc_id: topicData.tpc_id || '',
+        enquiry_line: topicData.enquiry_line || '',
         subtopic: topicData.subtopic || '',
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
-        change: topicData.change === 'Infinity' ? Infinity : topicData.change,
+        change: topicData.change,
       })),
     ),
   );
@@ -888,6 +884,8 @@ export class OverviewFacade {
   top5IncreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
     this.i18n.service,
     [
+      { field: 'tpc_id', header: 'tpc_id', translate: true},   
+      { field: 'enquiry_line', header: 'enquiry_line', translate: true},
       { field: 'topic', header: 'topic', translate: true },
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
@@ -900,10 +898,12 @@ export class OverviewFacade {
     map((data) =>
       data.top5DecreasedCalldriverTopics.map((topicData) => ({
         topic: topicData.topic || '',
+        tpc_id: topicData.tpc_id || '',
+        enquiry_line: topicData.enquiry_line || '',
         subtopic: topicData.subtopic || '',
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
-        change: topicData.change === 'Infinity' ? Infinity : topicData.change,
+        change: topicData.change,
       })),
     ),
   );
@@ -911,6 +911,8 @@ export class OverviewFacade {
   top5DecreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
     this.i18n.service,
     [
+      { field: 'tpc_id', header: 'tpc_id', translate: true},   
+      { field: 'enquiry_line', header: 'enquiry_line', translate: true},
       { field: 'topic', header: 'topic', translate: true },
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },

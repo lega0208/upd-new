@@ -570,7 +570,7 @@ export class AirtableClient {
 
   async getTasksTopicsMap() {
     const filterByFormula = combineFormulas([
-      'NOT({Task} = "")',
+      // 'NOT({Task} = "")',
       'NOT({Task link} = "")',
       'NOT({Task link} = BLANK())',
     ]);
@@ -635,6 +635,7 @@ export class AirtableClient {
         title: squishTrim(fields['Page title'] as string),
         lang: squishTrim(fields['Language (jcr:language)']),
         last_255: url.slice(-255),
+        section: squishTrim(fields['Group responsible']),
       };
     });
   }

@@ -15,6 +15,7 @@ export type ColumnConfigPipe =
 export interface ColumnConfig<T = any> {
   field: OptionalKeyOf<T>;
   header: string;
+  group?: string;
   type?: 'link' | 'comparison' | 'label' | 'text';
   typeParam?: string;
   typeParams?: typeParams;
@@ -30,7 +31,14 @@ export interface ColumnConfig<T = any> {
   indicator?: boolean;
   secondaryField?: SecondaryField<T>;
   upGoodDownBad?: boolean;
-  width?: string;
+  useArrows?: boolean;
+  showTextColours?: boolean;
+  width?: number;
+}
+
+export type GroupedColumns<T> = {
+  label: string;
+  items: ColumnConfig<T>[];
 }
 
 export interface typeParams {

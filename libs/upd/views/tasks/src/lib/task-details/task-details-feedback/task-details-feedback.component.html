@@ -73,6 +73,18 @@
   </div>
 </div>
 
+<div class="container-fluid my-4 gx-8">
+  <div class="row">
+    <div class="col">
+      <upd-data-card
+        [current]="feedbackTotalComments$ | async"
+        [title]="'Total comments'"
+        [tooltip]="'total # of comments'"
+      ></upd-data-card>
+    </div>
+  </div>
+</div>
+
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">

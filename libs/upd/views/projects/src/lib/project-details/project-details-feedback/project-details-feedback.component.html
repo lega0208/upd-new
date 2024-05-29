@@ -32,6 +32,19 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
+      <upd-data-card
+        [current]="feedbackTotalComments$ | async"
+        [comparison]="commentsPercentChange$ | async"
+        [title]="'Total Comments'"
+        [tooltip]="'total # of comments'"
+      ></upd-data-card>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
       <upd-data-table-card
         [title]="'feedback'"
         [data]="(feedbackComments$ | async) || []"

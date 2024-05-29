@@ -28,6 +28,7 @@ export interface IAAItemId {
  * Calldriver types
  */
 export interface CallsByTopic {
+  tasks: string;
   tpc_id: string;
   enquiry_line: string;
   topic: string;
@@ -43,7 +44,7 @@ export interface CallsByTasks {
 
 export interface TopCalldriverTopics extends CallsByTopic {
   Inquiry: string;
-  change: number | 'Infinity';
+  change: number | null;
 }
 
 export interface ICallDriver {

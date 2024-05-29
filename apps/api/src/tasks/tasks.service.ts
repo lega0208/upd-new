@@ -325,8 +325,8 @@ export class TasksService {
 
       const latest_success_rate_percent_change = percentChange(
         avgTestSuccess,
-        avgTestSuccess - latest_success_rate
-      )
+        avgTestSuccess - latest_success_rate,
+      );
 
       const latest_success_rate_difference = latest_success_rate * 100;
 
@@ -480,6 +480,7 @@ export class TasksService {
       taskSuccessByUxTest: [],
       avgTaskSuccessFromLastTest: null, // todo: better handle N/A
       avgSuccessPercentChange: null,
+      avgSuccessValueChange: null,
       dateFromLastTest: null,
       feedbackComments: [],
       searchTerms: await this.getTopSearchTerms(params),
@@ -522,6 +523,15 @@ export class TasksService {
         latestDate: returnData.dateFromLastTest,
         percentChange: returnData.avgSuccessPercentChange,
       } = getAvgSuccessFromLatestTests(uxTests));
+
+      returnData.avgSuccessValueChange =
+        returnData.avgSuccessPercentChange;
+
+      returnData.avgSuccessPercentChange = percentChange(
+        returnData.avgTaskSuccessFromLastTest,
+        returnData.avgTaskSuccessFromLastTest -
+          returnData.avgSuccessPercentChange,
+      );
     }
 
     returnData.feedbackComments = await this.feedbackModel.getComments(

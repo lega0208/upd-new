@@ -71,6 +71,7 @@ export class ProjectDetailsSummaryComponent implements OnInit {
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
   avgSuccessPercentChange$ =
     this.projectsDetailsService.avgSuccessPercentChange$;
+  avgSuccessValueChange$ = this.projectsDetailsService.avgSuccessValueChange$;
   dateFromLastTest$ = this.projectsDetailsService.dateFromLastTest$;
   taskSuccessByUxTest$ = this.projectsDetailsService.taskSuccessByUxTest$;
 
@@ -106,12 +107,22 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   startDate$ = this.projectsDetailsService.startDate$;
   launchDate$ = this.projectsDetailsService.launchDate$;
 
-  participantTasksCols: ColumnConfig<ParticipantTasksColTypes>[] = [];
+  participantTasksCols: ColumnConfig<ParticipantTasksColTypes>[] = [
+    {
+      field: 'title',
+      header: 'Task list',
+      translate: true,
+      type: 'link',
+      typeParams: { preLink: '/' + this.langLink + '/tasks', link: '_id' },
+    },
+  ];
+
   dyfTableCols: ColumnConfig<{
     name: string;
     currValue: number;
     prevValue: string;
   }>[] = [];
+
   whatWasWrongTableCols: ColumnConfig<WhatWasWrongColTypes>[] = [];
 
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
@@ -120,7 +131,7 @@ export class ProjectDetailsSummaryComponent implements OnInit {
 
   ngOnInit() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
+
     combineLatest([
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
@@ -147,40 +158,6 @@ export class ProjectDetailsSummaryComponent implements OnInit {
         this.i18n.service.translate('d3-other', lang),
         this.i18n.service.translate('d3-hard-to-understand', lang),
         this.i18n.service.translate('d3-error', lang),
-      ];
-
-      this.participantTasksCols = [
-        {
-          field: 'title',
-          header: this.i18n.service.translate('Task list', lang),
-          type: 'link',
-          typeParams: { preLink: '/' + this.langLink + '/tasks', link: '_id' },
-        },
-        // {
-        //   field: 'calls',
-        //   header: this.i18n.service.translate('Calls / 100 Visits', lang),
-        //   pipe: 'number',
-        // },
-        // {
-        //   field: 'dyfNo',
-        //   header: this.i18n.service.translate(
-        //     '"No clicks" / 1,000 Visits',
-        //     lang
-        //   ),
-        //   pipe: 'number',
-        // },
-        // {
-        //   field: 'uxTest2Years',
-        //   header: this.i18n.service.translate('UX Test in Past 2 Years?', lang),
-        // },
-        // {
-        //   field: 'successRate',
-        //   header: this.i18n.service.translate(
-        //     'Latest UX Task Success Rate',
-        //     lang
-        //   ),
-        //   pipe: 'percent',
-        // },
       ];
 
       this.dyfTableCols = [

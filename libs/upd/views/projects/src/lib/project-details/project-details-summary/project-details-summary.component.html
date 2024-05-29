@@ -15,6 +15,7 @@
       <upd-data-card
         [current]="(avgTaskSuccessFromLastTest$ | async) || null"
         [comparison]="avgSuccessPercentChange$ | async"
+        [comparisonValue]="avgSuccessValueChange$ | async"
         [title]="'Average task success from last UX test'"
         [emptyMessage]="'task-not-tested'"
         [displayKpis]="true"
@@ -89,7 +90,7 @@
         [sort]="true"
         [pagination]="false"
         [filter]="false"
-        [title]="'Related tasks'"
+        [title]="'related-tasks'"
         sortField="title"
       >
       </upd-data-table-card>

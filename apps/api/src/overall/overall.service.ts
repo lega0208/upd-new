@@ -144,19 +144,19 @@ export class OverallService {
       date: { $gte: new Date('2018-01-01') },
     });
 
-    const topCalldriverTopics =
+    const calldriverTopics = (
       await this.calldriversModel.getTopicsWithPercentChange(
         params.dateRange,
         params.comparisonDateRange,
-      );
+      )
+    ).sort((a, b) => b.calls - a.calls);
 
-    const top25CalldriverTopics = topCalldriverTopics.slice(0, 25);
-
-    const top5IncreasedCalldriverTopics = topCalldriverTopics
+    const top5IncreasedCalldriverTopics = calldriverTopics
+      .filter((topic) => topic.change)
       .sort((a, b) => Number(b.change) - Number(a.change))
       .slice(0, 5);
 
-    const top5DecreasedCalldriverTopics = topCalldriverTopics
+    const top5DecreasedCalldriverTopics = calldriverTopics
       .filter((topic) => Number(topic.change) < 0)
       .sort((a, b) => Number(a.change) - Number(b.change))
       .slice(0, 5);
@@ -185,6 +185,8 @@ export class OverallService {
 
     const uxTests =
       (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [];
+
+    const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests);
 
     const results = {
       dateRange: params.dateRange,
@@ -223,7 +225,7 @@ export class OverallService {
       uxTests,
       improvedTasksKpi: getImprovedKpiSuccessRates(uxTests),
       ...(await getUxData(testsSince2018)),
-      top25CalldriverTopics,
+      calldriverTopics,
       top5IncreasedCalldriverTopics,
       top5DecreasedCalldriverTopics,
       searchTermsEn: await this.getTopSearchTerms(params, 'en'),

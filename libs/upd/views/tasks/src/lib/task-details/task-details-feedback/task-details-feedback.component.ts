@@ -38,6 +38,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   whatWasWrongTableCols: ColumnConfig[] = [];
 
   feedbackComments$ = this.taskDetailsService.feedbackComments$;
+  feedbackTotalComments$ = this.taskDetailsService.feedbackTotalComments$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
 
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;

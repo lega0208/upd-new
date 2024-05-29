@@ -10,10 +10,12 @@ import {
   DbService,
   Page,
   PageMetrics,
+  PagesList,
   Readability,
 } from '@dua-upd/db';
 import { DbUpdateService, processHtml, UrlsService } from '@dua-upd/db-update';
 import {
+  AirtableClient,
   SearchAnalyticsClient,
   singleDatesFromDateRange,
 } from '@dua-upd/external-data';
@@ -1555,10 +1557,27 @@ export async function importGcTss() {
 export async function populateFeedbackWords(db: DbService) {
   console.time('Fetching feedback from db');
   const feedback = await db.collections.feedback
-    .find({}, { lang: 1, comment: 1 })
+    .find(
+      {},
+      {
+        lang: 1,
+        comment: 1,
+        words: {
+          $cond: [
+            { $ne: [{ $type: '$words' }, 'missing'] },
+            { $size: '$words' },
+            undefined,
+          ],
+        },
+      },
+    )
     .lean()
     .exec();
   console.timeEnd('Fetching feedback from db');
+
+  const idsWithWords = feedback
+    .filter((feedback) => feedback.words?.length)
+    .map(({ _id }) => _id);
 
   console.log('Preprocessing feedback words');
   console.time('Preprocessing feedback words');
@@ -1566,6 +1585,22 @@ export async function populateFeedbackWords(db: DbService) {
     (feedback) => feedback.words?.length,
   );
   console.timeEnd('Preprocessing feedback words');
+
+  const newIdsWithWords = feedbackWithWords.map(({ _id }) => _id);
+
+  const idsNoLongerHavingWords = difference(idsWithWords, newIdsWithWords);
+
+  const wordRemoveOps: mongo.AnyBulkWriteOperation<IFeedback>[] =
+    idsNoLongerHavingWords.map((_id) => ({
+      updateOne: {
+        filter: { _id },
+        update: {
+          $unset: {
+            words: '',
+          },
+        },
+      },
+    }));
 
   const updateOps: mongo.AnyBulkWriteOperation<IFeedback>[] =
     feedbackWithWords.map(({ _id, words }) => ({
@@ -1578,6 +1613,12 @@ export async function populateFeedbackWords(db: DbService) {
         },
       },
     }));
+
+  console.log(
+    `Removing words from ${idsNoLongerHavingWords.length} comments...`,
+  );
+
+  await db.collections.feedback.bulkWrite(wordRemoveOps, { ordered: false });
 
   console.log('Adding preprocessed words to feedback...');
 
@@ -1601,4 +1642,42 @@ export async function populateFeedbackReferences(db: DbService) {
   console.timeEnd('Syncing feedback references');
 
   console.log('Successfully synced feedback references.');
+}
+
+export async function updatePageSections() {
+  const db = (<RunScriptCommand>this).inject<DbService>(DbService);
+  const airtableClient = new AirtableClient();
+
+  console.log('Getting pages from the database and Airtable...');
+
+  const pages = await db.collections.pagesList.find({}).exec();
+  const airtableList = await airtableClient.getPagesList();
+
+  console.log(`Got ${pages.length} pages from the database`);
+  console.log(`Got ${airtableList.length} pages from Airtable`);
+
+  const atDict = arrayToDictionary(airtableList, 'url');
+
+  const pagesWriteOps: mongo.AnyBulkWriteOperation<PagesList>[]  = pages
+    .map((page) => {
+      if (atDict[page.url] && atDict[page.url].section !== page.section) {
+        return {
+          updateOne: {
+            filter: { url: page.url },
+            update: {
+              $set: { section: atDict[page.url].section },
+            },
+          },
+        };
+      }
+    })
+    .filter((page) => page);
+
+  if (pagesWriteOps.length > 0) {
+    const pageWriteResults =
+      await db.collections.pagesList.bulkWrite(pagesWriteOps);
+    console.log(`${pageWriteResults.modifiedCount} page(s) modified`);
+  } else {
+    console.log('No updates needed.');
+  }
 }
