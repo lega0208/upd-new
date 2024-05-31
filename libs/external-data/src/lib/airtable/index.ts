@@ -635,7 +635,8 @@ export class AirtableClient {
         title: squishTrim(fields['Page title'] as string),
         lang: squishTrim(fields['Language (jcr:language)']),
         last_255: url.slice(-255),
-        section: squishTrim(fields['Group responsible']),
+        owners: squishTrim(fields['Group responsible']),
+        sections: squishTrim(fields['Section']),
       };
     });
   }
