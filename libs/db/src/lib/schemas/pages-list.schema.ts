@@ -30,8 +30,11 @@ export class PagesList {
   @Prop({ type: String })
   last_255?: string;
 
-  @Prop({ type: String})
-  section?: string;
+  @Prop({ type: String })
+  owners = '';
+
+  @Prop({ type: String })
+  sections = '';
 
   @Prop({ type: Date }) updatedAt?: Date;
 }

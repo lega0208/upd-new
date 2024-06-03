@@ -14,7 +14,7 @@ import { DbUpdateService } from './db-update.service';
 import { OverallMetricsService } from './overall-metrics/overall-metrics.service';
 import { AirtableService } from './airtable/airtable.service';
 import { CalldriversService } from './airtable/calldrivers.service';
-import { FeedbackService } from './airtable/feedback.service';
+import { FeedbackService } from './feedback/feedback.service';
 import { PageUpdateService } from './pages/pages.service';
 import { PageMetricsService } from './pages-metrics/page-metrics.service';
 import { PagesListService } from './pages-list/pages-list.service';
