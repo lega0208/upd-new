@@ -2,7 +2,7 @@ export * from './lib/db-update.module';
 export * from './lib/db-update.service';
 export * from './lib/airtable/airtable.service';
 export * from './lib/airtable/calldrivers.service';
-export * from './lib/airtable/feedback.service';
+export * from './lib/feedback/feedback.service';
 export * from './lib/overall-metrics/overall-metrics.service';
 export * from './lib/pages/pages.service';
 export * from './lib/pages-metrics/page-metrics.service';

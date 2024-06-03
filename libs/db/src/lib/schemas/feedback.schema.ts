@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Model, Types, mongo } from 'mongoose';
-import { FeedbackComment, IFeedback, IPage } from '@dua-upd/types-common';
+import { Document, Model, Types } from 'mongoose';
+import type { FeedbackComment, IFeedback } from '@dua-upd/types-common';
 
 export type FeedbackDocument = Feedback & Document;
 
