@@ -1660,12 +1660,12 @@ export async function updatePageSections() {
 
   const pagesWriteOps: mongo.AnyBulkWriteOperation<PagesList>[]  = pages
     .map((page) => {
-      if (atDict[page.url] && atDict[page.url].section !== page.section) {
+      if (atDict[page.url] && atDict[page.url].sections !== page.sections || atDict[page.url].owners !== page.owners) {
         return {
           updateOne: {
             filter: { url: page.url },
             update: {
-              $set: { section: atDict[page.url].section },
+              $set: { sections: atDict[page.url].sections, owners: atDict[page.url].owners },
             },
           },
         };
