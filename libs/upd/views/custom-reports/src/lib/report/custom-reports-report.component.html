@@ -107,25 +107,25 @@
       </div>
     </div>
   </div>
+</div>
 
-  <div
-    *ngIf="error()"
-    class="alert alert-danger d-inline-block mx-auto mt-5"
-    style="width: 33%"
-  >
-    <h5 class="alert-heading">Error</h5>
-    <p class="mb-0">{{ error() }}</p>
-  </div>
+<div
+  *ngIf="error()"
+  class="alert alert-danger d-inline-block mx-auto mt-5"
+  style="width: 33%"
+>
+  <h5 class="alert-heading">Error</h5>
+  <p class="mb-0">{{ error() }}</p>
+</div>
 
-  <div
-    *ngIf="data()?.length === 0"
-    class="alert alert-warning d-inline-block mx-auto mt-5 w-50"
-  >
-    <p>{{ 'No data was found' | translate }}</p>
-    <p class="mb-0">
-      {{ 'The URL may have changed' | translate }}
-    </p>
-  </div>
+<div
+  *ngIf="data()?.length === 0"
+  class="alert alert-warning d-inline-block mx-auto mt-5 w-50"
+>
+  <p>{{ 'No data was found' | translate }}</p>
+  <p class="mb-0">
+    {{ 'The URL may have changed' | translate }}
+  </p>
 </div>
 
 <div
