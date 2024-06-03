@@ -2,7 +2,7 @@ import { InjectFlowProducer, InjectQueue } from '@nestjs/bullmq';
 import { type FlowChildJob, FlowProducer, Queue } from 'bullmq';
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { combineLatest, map, Observable, startWith } from 'rxjs';
+import { combineLatest, map, Observable, shareReplay, startWith } from 'rxjs';
 import type {
   AADimensionName,
   AAMetricName,
@@ -100,6 +100,7 @@ export class CustomReportsService implements OnApplicationBootstrap {
         ...reportStatus,
         ...childJobProgress,
       })),
+      shareReplay(1),
     );
   }
 
