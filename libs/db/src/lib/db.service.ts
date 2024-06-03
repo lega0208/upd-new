@@ -28,6 +28,7 @@ import {
   type CallDriverModel,
   GcTasks,
   GCTasksMappings,
+  type FeedbackModel,
 } from '../';
 import {
   arrayToDictionary,
@@ -85,7 +86,7 @@ export class DbService {
     @InjectModel(CallDriver.name, 'defaultConnection')
     private callDrivers: CallDriverModel,
     @InjectModel(Feedback.name, 'defaultConnection')
-    private feedback: Model<Feedback>,
+    private feedback: FeedbackModel,
     @InjectModel(Overall.name, 'defaultConnection')
     private overall: Model<Overall>,
     @InjectModel(PageMetrics.name, 'defaultConnection')

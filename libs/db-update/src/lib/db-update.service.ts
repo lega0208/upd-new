@@ -1,4 +1,4 @@
-import { IOverall } from '@dua-upd/types-common';
+import type { IOverall, IPage } from '@dua-upd/types-common';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, mongo } from 'mongoose';
@@ -22,7 +22,7 @@ import {
   wait,
 } from '@dua-upd/utils-common';
 import { CalldriversService } from './airtable/calldrivers.service';
-import { FeedbackService } from './airtable/feedback.service';
+import { FeedbackService } from './feedback/feedback.service';
 import { AirtableService } from './airtable/airtable.service';
 import { OverallMetricsService } from './overall-metrics/overall-metrics.service';
 import { PageUpdateService } from './pages/pages.service';
@@ -147,7 +147,9 @@ export class DbUpdateService {
         this.gcTasksMappingsService
           .updateGCTasksMappings()
           .catch((err) =>
-            this.logger.error(`Error updating GC Task Mappings data\n${err.stack}`),
+            this.logger.error(
+              `Error updating GC Task Mappings data\n${err.stack}`,
+            ),
           ),
         this.airtableService
           .updateReports()
@@ -285,7 +287,17 @@ export class DbUpdateService {
 
   @Retry(4, 1000)
   async updateFeedback(endDate?: DateType) {
-    return this.feedbackService.updateFeedbackData(endDate);
+    await this.feedbackService.updateFeedbackData(endDate);
+
+    const pages: IPage[] = await this.db.collections.pages
+      .find({}, { url: 1, tasks: 1, projects: 1 })
+      .lean()
+      .exec();
+
+    this.logger.log('Syncing feedback references');
+    await this.db.collections.feedback.syncReferences(pages);
+
+    this.logger.log('Successfully synced feedback references.');
   }
 
   async upsertPageMetrics(pageMetrics: PageMetrics[]) {
