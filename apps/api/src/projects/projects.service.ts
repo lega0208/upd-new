@@ -479,6 +479,18 @@ export class ProjectsService {
     );
     console.timeEnd('getProjectFeedbackComments');
 
+    // clean up with endDate and startDate
+    const numPreviousComments = await this.feedbackModel.countDocuments({
+      date: {
+        $gte: new Date(params.comparisonDateRange.split('/')[0]),
+        $lte: new Date(params.comparisonDateRange.split('/')[1]),
+      },
+      url: { $in: projectUrls },
+    });
+
+    const numFeedbackCommentsPercentChange =
+      feedbackComments.length / numPreviousComments;
+
     console.time('getTopSearchTerms');
     const searchTerms = await this.getTopSearchTerms(params);
     console.timeEnd('getTopSearchTerms');
@@ -503,6 +515,7 @@ export class ProjectsService {
       taskSuccessByUxTest: uxTests,
       tasks,
       feedbackComments,
+      feedbackCommentsPercentChange: numFeedbackCommentsPercentChange,
       searchTerms,
       attachments: populatedProjectDoc.attachments.map((attachment) => {
         attachment.storage_url = attachment.storage_url?.replace(

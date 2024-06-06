@@ -505,6 +505,7 @@ export interface ProjectsDetailsData
   taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
   tasks: Pick<ITask, '_id' | 'title'>[];
   feedbackComments: FeedbackComment[];
+  feedbackCommentsPercentChange: number | null;
   searchTerms: InternalSearchTerm[];
   attachments: AttachmentData[];
 }
