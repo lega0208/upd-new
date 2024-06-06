@@ -383,6 +383,7 @@ export interface TaskDetailsData
     attachments: AttachmentData[];
   }[];
   feedbackComments: FeedbackComment[];
+  feedbackCommentsPercentChange: number | null;
   searchTerms: InternalSearchTerm[];
 }
 

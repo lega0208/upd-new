@@ -481,6 +481,7 @@ export class TasksService {
       avgSuccessValueChange: null,
       dateFromLastTest: null,
       feedbackComments: [],
+      feedbackCommentsPercentChange: null,
       searchTerms: await this.getTopSearchTerms(params),
     };
 
@@ -516,8 +517,7 @@ export class TasksService {
         percentChange: returnData.avgSuccessPercentChange,
       } = getAvgSuccessFromLatestTests(uxTests));
 
-      returnData.avgSuccessValueChange =
-        returnData.avgSuccessPercentChange;
+      returnData.avgSuccessValueChange = returnData.avgSuccessPercentChange;
 
       returnData.avgSuccessPercentChange = percentChange(
         returnData.avgTaskSuccessFromLastTest,
@@ -530,6 +530,18 @@ export class TasksService {
       params.dateRange,
       taskUrls,
     );
+
+    // clean up with endDate and startDate
+    const numPreviousComments = await this.feedbackModel.countDocuments({
+      date: {
+        $gte: new Date(params.comparisonDateRange.split('/')[0]),
+        $lte: new Date(params.comparisonDateRange.split('/')[1]),
+      },
+      url: { $in: taskUrls },
+    });
+
+    returnData.feedbackCommentsPercentChange =
+      returnData.feedbackComments.length / numPreviousComments;
 
     await this.cacheManager.set(cacheKey, returnData);
 
