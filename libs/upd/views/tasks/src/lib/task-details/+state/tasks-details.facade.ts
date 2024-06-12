@@ -794,6 +794,10 @@ export class TasksDetailsFacade {
     map((data) => data?.feedbackComments.length || 0),
   );
 
+  commentsPercentChange$ = this.tasksDetailsData$.pipe(
+    map((data) => data.feedbackCommentsPercentChange),
+  );
+
   // feedbackByTagsBarChart$ = combineLatest([
   //   this.tasksDetailsData$,
   //   this.currentLang$,

@@ -39,6 +39,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
 
   feedbackComments$ = this.taskDetailsService.feedbackComments$;
   feedbackTotalComments$ = this.taskDetailsService.feedbackTotalComments$;
+  commentsPercentChange$ = this.taskDetailsService.commentsPercentChange$;
   feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
 
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;

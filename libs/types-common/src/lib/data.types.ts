@@ -344,6 +344,7 @@ export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
   visitsByPage: VisitsByPage[];
   feedbackByTags: { tag: string; numComments: number }[];
   feedbackPages: { _id: string; title: string; url: string; sum: number}[];
+  feedbackComments: FeedbackComment[];
   totalFeedback: {
     main_section: string;
     sum: number;
@@ -382,6 +383,7 @@ export interface TaskDetailsData
     attachments: AttachmentData[];
   }[];
   feedbackComments: FeedbackComment[];
+  feedbackCommentsPercentChange: number | null;
   searchTerms: InternalSearchTerm[];
 }
 
@@ -503,6 +505,7 @@ export interface ProjectsDetailsData
   taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
   tasks: Pick<ITask, '_id' | 'title'>[];
   feedbackComments: FeedbackComment[];
+  feedbackCommentsPercentChange: number | null;
   searchTerms: InternalSearchTerm[];
   attachments: AttachmentData[];
 }

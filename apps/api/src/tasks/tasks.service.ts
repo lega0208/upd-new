@@ -26,6 +26,7 @@ import {
 } from '@dua-upd/db';
 import type {
   ApiParams,
+  FeedbackComment,
   InternalSearchTerm,
   IReports,
   TaskDetailsAggregatedData,
@@ -480,6 +481,7 @@ export class TasksService {
       avgSuccessValueChange: null,
       dateFromLastTest: null,
       feedbackComments: [],
+      feedbackCommentsPercentChange: null,
       searchTerms: await this.getTopSearchTerms(params),
     };
 
@@ -515,8 +517,7 @@ export class TasksService {
         percentChange: returnData.avgSuccessPercentChange,
       } = getAvgSuccessFromLatestTests(uxTests));
 
-      returnData.avgSuccessValueChange =
-        returnData.avgSuccessPercentChange;
+      returnData.avgSuccessValueChange = returnData.avgSuccessPercentChange;
 
       returnData.avgSuccessPercentChange = percentChange(
         returnData.avgTaskSuccessFromLastTest,
@@ -529,6 +530,19 @@ export class TasksService {
       params.dateRange,
       taskUrls,
     );
+
+    // clean up with endDate and startDate
+    const numPreviousComments = await this.feedbackModel.countDocuments({
+      date: {
+        $gte: new Date(params.comparisonDateRange.split('/')[0]),
+        $lte: new Date(params.comparisonDateRange.split('/')[1]),
+      },
+      url: { $in: taskUrls },
+    });
+
+    returnData.feedbackCommentsPercentChange = numPreviousComments
+      ? percentChange(returnData.feedbackComments.length, numPreviousComments)
+      : null;
 
     await this.cacheManager.set(cacheKey, returnData);
 
@@ -639,6 +653,12 @@ async function getTaskAggregatedData(
   const feedbackByTags = await feedbackModel.getCommentsByTag(
     dateRange,
     pageUrls,
+  );
+
+  const feedbackComments = await getTaskFeedbackComments(
+    dateRange,
+    pageUrls,
+    feedbackModel,
   );
 
   const [startDate, endDate] = dateRangeSplit(dateRange);
@@ -841,8 +861,30 @@ async function getTaskAggregatedData(
     callsByTopic,
     totalCalldrivers,
     feedbackByTags,
+    feedbackComments,
     visitsByDay,
     dyfByDay,
     calldriversByDay,
   };
+}
+
+async function getTaskFeedbackComments(
+  dateRange: string,
+  taskUrls: string[],
+  feedbackModel: FeedbackModel,
+): Promise<FeedbackComment[]> {
+  const [startDate, endDate] = dateRangeSplit(dateRange);
+
+  return (
+    (await feedbackModel.find({
+      url: { $in: taskUrls },
+      date: { $gte: startDate, $lte: endDate },
+    })) || []
+  ).map((feedback) => ({
+    date: feedback.date,
+    url: feedback.url,
+    tag: feedback.tags?.length ? feedback.tags[0] : '',
+    whats_wrong: feedback.whats_wrong || '',
+    comment: feedback.comment,
+  }));
 }

@@ -41,6 +41,7 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     dateFromLastTest: new Date(0),
     taskSuccessByUxTest: [],
     feedbackComments: [],
+    feedbackCommentsPercentChange: null,
     projects: [],
     searchTerms: [],
   },
