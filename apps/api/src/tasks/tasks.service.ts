@@ -540,8 +540,9 @@ export class TasksService {
       url: { $in: taskUrls },
     });
 
-    returnData.feedbackCommentsPercentChange =
-      returnData.feedbackComments.length / numPreviousComments;
+    returnData.feedbackCommentsPercentChange = numPreviousComments
+      ? percentChange(returnData.feedbackComments.length, numPreviousComments)
+      : null;
 
     await this.cacheManager.set(cacheKey, returnData);
 

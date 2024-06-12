@@ -479,6 +479,8 @@ export class ProjectsService {
     );
     console.timeEnd('getProjectFeedbackComments');
 
+    const numFeedbackComments = feedbackComments.length;
+
     // clean up with endDate and startDate
     const numPreviousComments = await this.feedbackModel.countDocuments({
       date: {
@@ -488,8 +490,9 @@ export class ProjectsService {
       url: { $in: projectUrls },
     });
 
-    const numFeedbackCommentsPercentChange =
-      feedbackComments.length / numPreviousComments;
+    const numFeedbackCommentsPercentChange = numPreviousComments
+      ? percentChange(feedbackComments.length, numPreviousComments)
+      : null;
 
     console.time('getTopSearchTerms');
     const searchTerms = await this.getTopSearchTerms(params);
