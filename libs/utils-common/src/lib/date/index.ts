@@ -108,7 +108,7 @@ export const dateRangeTypes = [
   'year_to_date',
 ] as const;
 
-export type DateRangeType = (typeof dateRangeTypes)[number];
+export type DateRangeType = (typeof dateRangeTypes)[number] | 'custom';
 
 export interface DateRangeConfig {
   type: DateRangeType;
@@ -245,6 +245,45 @@ export const dateRangeConfigs: readonly DateRangeConfig[] = Object.freeze([
       dayjs.utc(fromDate).subtract(52, 'weeks'),
   },
 ]);
+
+export function createCustomDateRangePeriod(
+  dateRangeString: string,
+  comparisonDateRangeString: string,
+) {
+  const [dateRangeStringStart, dateRangeStringEnd] = dateRangeString.split('/');
+  const [comparisonDateRangeStringStart, comparisonDateRangeStringEnd] =
+    comparisonDateRangeString.split('/');
+
+  const dateRange = {
+    start: dayjs.utc(dateRangeStringStart),
+    end: dayjs.utc(dateRangeStringEnd),
+  };
+
+  const comparisonDateRange = {
+    start: dayjs.utc(comparisonDateRangeStringStart),
+    end: dayjs.utc(comparisonDateRangeStringEnd),
+  };
+
+  const currentDates = datesFromDateRange(dateRange, false, true) as Date[];
+  const prevDates = datesFromDateRange(
+    comparisonDateRange,
+    false,
+    true,
+  ) as Date[];
+
+  return {
+    type: 'custom' as DateRangeType,
+    label: 'Custom',
+    dateRange,
+    comparisonDateRange,
+    dates: new Map(
+      zip(
+        prevDates.map((date) => date.toISOString()),
+        currentDates.map((date) => date.toISOString()),
+      ) as [string, string][],
+    ),
+  };
+}
 
 /**
  * From seconds to milliseconds

@@ -15,7 +15,6 @@ export const loadOverviewError = createAction(
 
 export const getMostRelevantFeedback = createAction(
   '[Overview Page] Get Most Relevant Feedback',
-  props<{ normalizationStrength: number }>(),
 );
 
 export const getMostRelevantFeedbackSuccess = createAction(

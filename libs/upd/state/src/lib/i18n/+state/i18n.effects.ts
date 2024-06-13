@@ -46,13 +46,22 @@ export class I18nEffects {
         mergeMap(([{ lang }, routeLang, queryParams]) => {
           this.i18n.use(lang);
 
+          const pendingQueryParams = Object.fromEntries([
+            ...new URLSearchParams(location.search).entries(),
+          ]);
+
+          const mergedQueryParams = {
+            ...pendingQueryParams,
+            ...queryParams,
+          };
+
           if (!routeLang || routeLang !== localeIdToLang[lang]) {
             if (!location.pathname || location.pathname === '/') {
               return of(
                 this.router.navigate([`/${localeIdToLang[lang]}/`], {
                   replaceUrl: false,
                   queryParamsHandling: 'merge',
-                  queryParams,
+                  queryParams: mergedQueryParams,
                 }),
               );
             }
@@ -68,7 +77,7 @@ export class I18nEffects {
                 {
                   replaceUrl: false,
                   queryParamsHandling: 'merge',
-                  queryParams,
+                  queryParams: mergedQueryParams,
                 },
               ),
             );
