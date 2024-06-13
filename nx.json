@@ -16,10 +16,6 @@
       "linter": "eslint",
       "unitTestRunner": "jest"
     },
-    "@nx/angular:component": {
-      "style": "scss",
-      "project": "upd-components"
-    },
     "@nx/nest:resource": {
       "project": "api",
       "type": "rest",
@@ -35,9 +31,11 @@
       "style": "css",
       "linter": "eslint",
       "unitTestRunner": "none"
+    },
+    "@nx/angular:component": {
+      "style": "css"
     }
   },
-  "defaultProject": "upd",
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
     "build": {
@@ -72,6 +70,11 @@
       "inputs": ["production", "^production"]
     },
     "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
+    "@nx/angular:ng-packagr-lite": {
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]

@@ -32,6 +32,12 @@ export class Page {
 
   @Prop({ type: Object })
   metadata?: { [prop: string]: string | Date };
+  
+  @Prop({ type: String, index: true })
+  owners?: string;
+
+  @Prop({ type: String, index: true })
+  sections?: string;
 
   @Prop({ type: Date })
   lastChecked?: Date;

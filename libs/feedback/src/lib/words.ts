@@ -75,7 +75,6 @@ const remove = [
   "\\b'|'\\b",
   '\\s-|-\\s',
   ':',
-  
   '�',
 ].join('|');
 
@@ -85,6 +84,7 @@ const cleaningPatterns: [RegExp, string][] = [
   [new RegExp(remove, 'g'), ' '],
   [/\d{5,}/g, ' '], // numbers with 5 or more digits
   [/\s+/g, ' '], // squish whitespace
+  [/([a-z])\1{2,}/gi, '$1'], // repeating characters
   ...contractionRegexesEn,
   ...acronymPatternsEn,
 ];
@@ -102,6 +102,7 @@ const spamRegexes = new RegExp(
 
 const shouldSkip = (comment: IFeedback) =>
   !comment.comment ||
+  !['en', 'fr'].includes(comment.lang.toLowerCase()) ||
   spamRegexes.test(comment.comment) ||
   !/\p{Script_Extensions=Latin}|^\s*[\d\p{Emoji_Presentation}]+\s*$/u.test(
     comment.comment,
@@ -119,6 +120,9 @@ const cleanComment = (
 
   return squishTrim(cleanComment.toLowerCase());
 };
+
+// skip words that are entirely non-alphanumeric (unless an emoji)
+const nonAlphaNumericPattern = /^[^a-z0-9\p{Emoji_Presentation}]+$/i;
 
 export function preprocessCommentWords(comments: IFeedback[]) {
   const stopwordSets = {
@@ -144,6 +148,7 @@ export function preprocessCommentWords(comments: IFeedback[]) {
       .split(' ')
       .filter(
         (word) =>
+          !nonAlphaNumericPattern.test(word) &&
           !stopwords.has(word) &&
           (word.length > 2 ||
             acronyms[lang].has(word) ||

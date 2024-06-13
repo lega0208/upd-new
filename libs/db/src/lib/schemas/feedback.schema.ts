@@ -1,6 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Model, Types, mongo } from 'mongoose';
+import { Document, FilterQuery, Model, Types, mongo } from 'mongoose';
 import type { FeedbackComment, IFeedback, IPage } from '@dua-upd/types-common';
+import {
+  arrayToDictionary,
+  dateRangeSplit,
+  percentChange,
+} from '@dua-upd/utils-common';
 
 export type FeedbackDocument = Feedback & Document;
 
@@ -145,6 +150,96 @@ FeedbackSchema.statics['getComments'] = async function (
   }));
 };
 
+FeedbackSchema.statics['getCommentsByPage'] = async function (
+  this: Model<Feedback>,
+  dateRange: string,
+  idFilter?: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
+) {
+  const [startDate, endDate] = dateRangeSplit(dateRange);
+
+  const projection = idFilter
+    ? Object.fromEntries(Object.keys(idFilter).map((key) => [key, 1]))
+    : {};
+
+  const matchFilter: FilterQuery<Feedback> = {
+    date: {
+      $gte: startDate,
+      $lte: endDate,
+    },
+    ...(idFilter || {}),
+  };
+
+  // @@@@@ doesn't include 0 comments-- fix to merge into page list
+  return this.aggregate<{
+    _id: string;
+    title: string;
+    url: string;
+    sum: number;
+  }>()
+    .project({
+      date: 1,
+      url: 1,
+      ...projection,
+    })
+    .match(matchFilter)
+    .group({
+      _id: '$url',
+      sum: { $sum: 1 },
+    })
+    .addFields({
+      url: '$_id',
+    })
+    .sort({ sum: -1 })
+    .lookup({
+      from: 'pages',
+      localField: 'url',
+      foreignField: 'url',
+      as: 'page',
+    })
+    .match({
+      page: { $ne: [] },
+    })
+    .unwind('$page')
+    .addFields({
+      _id: '$page._id',
+      title: '$page.title',
+      owners: '$page.owners',
+      section: '$page.sections',
+    })
+    .project({
+      page: 0,
+    })
+    .exec();
+};
+
+FeedbackSchema.statics['getCommentsByPageWithComparison'] = async function (
+  this: FeedbackModel,
+  dateRange: string,
+  comparisonDateRange: string,
+  idFilter?: { [type in 'tasks' | 'projects']: Types.ObjectId },
+) {
+  const [commentsByPage, comparisonCommentsByPage] = await Promise.all([
+    this.getCommentsByPage(dateRange, idFilter),
+    this.getCommentsByPage(comparisonDateRange, idFilter),
+  ]);
+
+  const comparisonCommentsDict = arrayToDictionary(
+    comparisonCommentsByPage,
+    'url',
+  );
+
+  return commentsByPage.map((page) => {
+    const numPreviousComments = comparisonCommentsDict[page.url]?.sum;
+
+    return {
+      ...page,
+      percentChange: numPreviousComments
+        ? percentChange(page.sum, numPreviousComments)
+        : null,
+    };
+  });
+};
+
 export interface FeedbackModel extends Model<Feedback> {
   syncReferences: (
     pages: Pick<IPage, '_id' | 'url' | 'tasks' | 'projects'>[],
@@ -157,4 +252,28 @@ export interface FeedbackModel extends Model<Feedback> {
     dateRange: string,
     urls: string[],
   ) => Promise<{ tag: string; numComments: number }[]>;
+  getCommentsByPage: (
+    dateRange: string,
+    idFilter?: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
+  ) => Promise<
+    {
+      _id: string;
+      title: string;
+      url: string;
+      sum: number;
+    }[]
+  >;
+  getCommentsByPageWithComparison: (
+    dateRange: string,
+    comparisonDateRange: string,
+    idFilter?: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
+  ) => Promise<
+    {
+      _id: string;
+      title: string;
+      url: string;
+      sum: number;
+      percentChange: number | null;
+    }[]
+  >;
 }

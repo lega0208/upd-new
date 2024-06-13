@@ -9,8 +9,15 @@ import type {
   ITask,
   IProject,
   IUxTest,
+  IPage,
+  metrics,
 } from '@dua-upd/types-common';
-import { DateRange } from '@dua-upd/utils-common';
+import {
+  DateRange,
+  arrayToDictionary,
+  dateRangeSplit,
+  percentChange,
+} from '@dua-upd/utils-common';
 import { Page } from './page.schema';
 import { PageMetricsTS } from './page-metrics-ts.schema';
 
@@ -476,14 +483,250 @@ export async function toTimeSeries(
     .exec();
 }
 
+export type MetricsByPage = {
+  _id: Types.ObjectId;
+  visits: number;
+  dyfYes: number;
+  dyfNo: number;
+  gscTotalClicks: number;
+  gscTotalImpressions: number;
+  gscTotalCtr: number;
+  gscTotalPosition: number;
+  feedbackToVisitsRatio: number | null;
+};
+
+export type AggregatedMetricsType = {
+  visits: number;
+  dyfYes: number;
+  dyfNo: number;
+  feedbackToVisitsRatio: number | null;
+  gscTotalClicks: number;
+  gscTotalImpressions: number;
+  gscTotalCtr: number;
+  gscTotalPosition: number;
+  visitsByPage: MetricsByPage[];
+};
+
+export type AggregatedMetricsWithPercentChange = {
+  visits: number;
+  dyfYes: number;
+  dyfNo: number;
+  visitsComparison: number;
+  dyfYesComparison: number;
+  dyfNoComparison: number;
+  gscTotalClicks: number;
+  gscTotalImpressions: number;
+  gscTotalCtr: number;
+  gscTotalPosition: number;
+  visitsPercentChange: number;
+  gscTotalClicksPercentChange: number;
+  gscTotalImpressionsPercentChange: number;
+  gscTotalCtrPercentChange: number;
+  gscTotalPositionPercentChange: number;
+  visitsByPage: {
+    _id: string;
+    visits: number;
+    dyfYes: number;
+    dyfNo: number;
+    feedbackToVisitsRatio: number | null;
+    title: string;
+    url: string;
+    lang?: string;
+    is_404?: boolean;
+    redirect?: string;
+    language: string;
+    is404: boolean;
+    isRedirect: boolean;
+    pageStatus: string;
+    gscTotalClicks: number,
+    gscTotalImpressions: number,
+    gscTotalCtr: number,
+    gscTotalPosition: number,
+    visitsPercentChange: number | null;
+    dyfNoPercentChange: number | null;
+  }[];
+};
+
+// for common data required in tasks/projects
+export async function getAggregatedMetrics(
+  this: PageMetricsModel,
+  dateRange: string,
+  idFilter: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
+): Promise<AggregatedMetricsType> {
+  const [startDate, endDate] = dateRangeSplit(dateRange);
+
+  const matchFilter: FilterQuery<PageMetrics> = {
+    date: {
+      $gte: startDate,
+      $lte: endDate,
+    },
+    ...idFilter,
+  };
+
+  const refProjection = Object.fromEntries(
+    Object.keys(idFilter).map((key) => [key, 1]),
+  );
+
+  return this.aggregate<AggregatedMetricsType>()
+    .project({
+      date: 1,
+      page: 1,
+      visits: 1,
+      dyf_yes: 1,
+      dyf_no: 1,
+      gsc_total_clicks: 1,
+      gsc_total_impressions: 1,
+      gsc_total_ctr: 1,
+      gsc_total_position: 1,
+      ...refProjection,
+    })
+    .match(matchFilter)
+    .group({
+      _id: '$page',
+      visits: { $sum: '$visits' },
+      dyfYes: { $sum: '$dyf_yes' },
+      dyfNo: { $sum: '$dyf_no' },
+      gscTotalClicks: { $sum: '$gsc_total_clicks' },
+      gscTotalImpressions: { $sum: '$gsc_total_impressions' },
+      gscTotalCtr: { $avg: '$gsc_total_ctr' },
+      gscTotalPosition: { $avg: '$gsc_total_position' },
+    })
+    .group({
+      _id: 'null',
+      visits: { $sum: '$visits' },
+      dyfYes: { $sum: '$dyfYes' },
+      dyfNo: { $sum: '$dyfNo' },
+      gscTotalClicks: { $sum: '$gscTotalClicks' },
+      gscTotalImpressions: { $sum: '$gscTotalImpressions' },
+      gscTotalCtr: { $avg: '$gscTotalCtr' },
+      gscTotalPosition: { $avg: '$gscTotalPosition' },
+      visitsByPage: {
+        $push: {
+          $mergeObjects: [
+            '$$ROOT',
+            {
+              feedbackToVisitsRatio: {
+                $cond: {
+                  if: { $eq: ['$$ROOT.visits', 0] },
+                  then: null,
+                  else: {
+                    $divide: [
+                      { $add: ['$$ROOT.dyfYes', '$$ROOT.dyfNo'] },
+                      '$$ROOT.visits',
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    })
+    .exec()
+    .then((data) => data?.[0]);
+}
+
+export async function getAggregatedMetricsWithComparison(
+  this: PageMetricsModel,
+  dateRange: string,
+  comparisonDateRange: string,
+  idFilter: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
+  pages: IPage[],
+): Promise<AggregatedMetricsWithPercentChange> {
+  const [metrics, comparisonMetrics] = await Promise.all([
+    this.getAggregatedMetrics(dateRange, idFilter),
+    this.getAggregatedMetrics(comparisonDateRange, idFilter),
+  ]);
+
+  const determinePageStatus = (page) => {
+    if (page?.is_404) return '404';
+    if (page?.redirect) return 'Redirected';
+    return 'Live';
+  };
+
+  const metricsDict = arrayToDictionary(metrics.visitsByPage, '_id');
+
+  const prevMetricsDict = arrayToDictionary(
+    comparisonMetrics.visitsByPage,
+    '_id',
+  );
+
+  const visitsByPage = pages
+    .map((page) => {
+      const metrics = metricsDict[page._id.toString()];
+      const prevMetrics = prevMetricsDict[page._id.toString()];
+
+      return {
+        ...page,
+        ...(metrics || {
+          visits: 0,
+          dyfYes: 0,
+          dyfNo: 0,
+          gscTotalClicks: 0,
+          gscTotalImpressions: 0,
+          gscTotalCtr: 0,
+          gscTotalPosition: 0,
+          feedbackToVisitsRatio: null,
+        }),
+        _id: page._id.toString(),
+        language: page.lang === 'fr' ? 'French' : 'English',
+        is404: page.is_404,
+        isRedirect: !!page.redirect,
+        pageStatus: determinePageStatus(page),
+        visitsPercentChange:
+          prevMetrics?.visits && metrics?.visits
+            ? percentChange(metrics.visits, prevMetrics.visits)
+            : null,
+        dyfNoPercentChange:
+          prevMetrics?.dyfNo && metrics?.dyfNo
+            ? percentChange(metrics.dyfNo, prevMetrics.dyfNo)
+            : null,
+      };
+    })
+    .sort((a, b) => a.title?.localeCompare(b.title) || 1);
+
+  const percentChangeIfNotNull = (value: number, comparisonValue: number) =>
+    comparisonValue ? percentChange(value, comparisonValue) : null;
+
+  return {
+    ...metrics,
+    visitsByPage,
+    visitsPercentChange: percentChangeIfNotNull(
+      metrics.visits,
+      comparisonMetrics.visits,
+    ),
+    gscTotalClicksPercentChange: percentChangeIfNotNull(
+      metrics.gscTotalClicks,
+      comparisonMetrics.gscTotalClicks,
+    ),
+    gscTotalImpressionsPercentChange: percentChangeIfNotNull(
+      metrics.gscTotalImpressions,
+      comparisonMetrics.gscTotalImpressions,
+    ),
+    gscTotalCtrPercentChange: percentChangeIfNotNull(
+      metrics.gscTotalCtr,
+      comparisonMetrics.gscTotalCtr,
+    ),
+    gscTotalPositionPercentChange: percentChangeIfNotNull(
+      metrics.gscTotalPosition,
+      comparisonMetrics.gscTotalPosition,
+    ),
+    visitsComparison: comparisonMetrics.visits || 0,
+    dyfYesComparison: comparisonMetrics.dyfYes || 0,
+    dyfNoComparison: comparisonMetrics.dyfNo || 0,
+  };
+}
+
 PageMetricsSchema.statics = {
   getAggregatedPageMetrics,
   toTimeSeries,
+  getAggregatedMetrics,
+  getAggregatedMetricsWithComparison,
 };
 
 export type PageMetricsModel = Model<PageMetrics> & {
   getAggregatedPageMetrics: typeof getAggregatedPageMetrics;
   toTimeSeries: typeof toTimeSeries;
+  getAggregatedMetrics: typeof getAggregatedMetrics;
+  getAggregatedMetricsWithComparison: typeof getAggregatedMetricsWithComparison;
 };
-
-PageMetricsSchema.static('toTimeSeries', toTimeSeries);

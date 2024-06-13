@@ -12,13 +12,19 @@ export class FeedbackController {
     @Query('type') type?: 'page' | 'task' | 'project',
     @Query('id') id?: string,
     @Query('normalizationStrength', { transform: Number })
-    normalizationStrength?: number,
+    b?: number,
+    @Query('k1', { transform: Number })
+    k1?: number,
+    @Query('ipd', { transform: Boolean })
+    ipd?: boolean
   ) {
     const params: FeedbackParams = {
       dateRange: parseDateRangeString(dateRangeString),
       type,
       id,
-      normalizationStrength,
+      b,
+      k1,
+      ipd,
     };
 
     logJson(params);

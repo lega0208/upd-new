@@ -30,7 +30,7 @@ function paramsToCacheKey(params: FeedbackParams) {
 
   const type = `:${params.type}` || '';
   const id = `:${params.id}` || '';
-  const normalizationStrength = `:norm${params.normalizationStrength}` || '';
+  const normalizationStrength = `:norm${params.b}` || '';
 
   return `${dateRange}${type}${id}${normalizationStrength}`;
 }

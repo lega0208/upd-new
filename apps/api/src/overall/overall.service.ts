@@ -12,12 +12,12 @@ import type {
   ProjectDocument,
   TaskDocument,
   UxTestDocument,
-  FeedbackDocument,
   PageMetricsModel,
   PageDocument,
   SearchAssessmentDocument,
   AnnotationsDocument,
   GcTasksDocument,
+  FeedbackModel,
 } from '@dua-upd/db';
 import {
   DbService,
@@ -51,6 +51,7 @@ import {
   getImprovedKpiSuccessRates,
   getLatestTestData,
   parseDateRangeString,
+  percentChange,
 } from '@dua-upd/utils-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 
@@ -119,7 +120,7 @@ export class OverallService {
     @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriversModel: CallDriverModel,
     @InjectModel(Feedback.name, 'defaultConnection')
-    private feedbackModel: Model<FeedbackDocument>,
+    private feedbackModel: FeedbackModel,
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessmentModel: Model<SearchAssessmentDocument>,
     @InjectModel(GcTasks.name, 'defaultConnection')
@@ -132,7 +133,8 @@ export class OverallService {
 
   @AsyncLogTiming
   async getMetrics(params: ApiParams): Promise<OverviewData> {
-    const cacheKey = `OverviewMetrics-${params.dateRange}`;
+    const cacheKey = `OverviewMetrics-${params.dateRange}-${params['ipd']}`;
+
     const cachedData =
       await this.cacheManager.store.get<OverviewData>(cacheKey);
 
@@ -188,6 +190,34 @@ export class OverallService {
 
     const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests);
 
+    const mostRelevantCommentsAndWords =
+      await this.feedbackService.getMostRelevantCommentsAndWords({
+        dateRange: parseDateRangeString(params.dateRange),
+        ipd: params.ipd as boolean,
+      });
+
+    const numComments =
+      mostRelevantCommentsAndWords.en.comments.length +
+      mostRelevantCommentsAndWords.fr.comments.length;
+
+    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
+      parseDateRangeString(params.comparisonDateRange);
+
+    const numPreviousComments = await this.feedbackModel
+      .countDocuments({
+        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+      })
+      .exec();
+
+    const numCommentsPercentChange = !params.ipd && numPreviousComments
+      ? percentChange(numComments, numPreviousComments)
+      : null;
+
+    const commentsByPage = await this.feedbackModel.getCommentsByPageWithComparison(
+      params.dateRange,
+      params.comparisonDateRange
+    );
+
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -230,10 +260,10 @@ export class OverallService {
       top5DecreasedCalldriverTopics,
       searchTermsEn: await this.getTopSearchTerms(params, 'en'),
       searchTermsFr: await this.getTopSearchTerms(params, 'fr'),
-      mostRelevantCommentsAndWords:
-        await this.feedbackService.getMostRelevantCommentsAndWords({
-          dateRange: parseDateRangeString(params.dateRange),
-        }),
+      mostRelevantCommentsAndWords,
+      numComments,
+      numCommentsPercentChange,
+      commentsByPage,
     };
 
     await this.cacheManager.set(cacheKey, results);
@@ -719,7 +749,7 @@ async function getOverviewMetrics(
   overallModel: Model<OverallDocument>,
   PageMetricsModel: PageMetricsModel,
   calldriversModel: CallDriverModel,
-  feedbackModel: Model<FeedbackDocument>,
+  feedbackModel: FeedbackModel,
   pageModel: Model<PageDocument>,
   annotationsModel: Model<AnnotationsDocument>,
   db: DbService,
@@ -829,83 +859,6 @@ async function getOverviewMetrics(
     })
     .sort({ clicks: -1 })
     .limit(10)
-    .exec();
-
-  const totalFeedback = await feedbackModel
-    .aggregate()
-    .project({
-      date: 1,
-      url: 1,
-      main_section: 1,
-    })
-    .sort({ date: 1 })
-    .match({
-      $and: [
-        {
-          date: dateQuery,
-        },
-        {
-          url: {
-            $regex:
-              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
-          },
-        },
-      ],
-    })
-    .group({
-      _id: '$main_section',
-      sum: { $sum: 1 },
-    })
-    .sort({ sum: -1 })
-    .project({
-      _id: 0,
-      main_section: '$_id',
-      sum: 1,
-    })
-    .exec();
-
-  const feedbackPages = await feedbackModel
-    .aggregate<{ _id: string; title: string; url: string; sum: number }>()
-    .project({
-      date: 1,
-      url: 1,
-    })
-    .match({
-      $and: [
-        { date: dateQuery },
-        // todo: remove url filter once there is logic in place to remove non-CRA pages from feedback collection
-        {
-          url: {
-            $regex:
-              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
-          },
-        },
-      ],
-    })
-    .group({
-      _id: '$url',
-      sum: { $sum: 1 },
-    })
-    .project({
-      _id: 0,
-      url: '$_id',
-      sum: 1,
-    })
-    .sort({ sum: -1 })
-    .lookup({
-      from: 'pages',
-      localField: 'url',
-      foreignField: 'url',
-      as: 'page',
-    })
-    .unwind('$page')
-    .addFields({
-      _id: '$page._id',
-      title: '$page.title',
-    })
-    .project({
-      page: 0,
-    })
     .exec();
 
   const aggregatedMetrics = await overallModel
@@ -1106,10 +1059,8 @@ async function getOverviewMetrics(
     calldriversEnquiry,
     searchAssessmentData,
     ...aggregatedMetrics[0],
-    totalFeedback,
     topPagesVisited,
     top10GSC,
-    feedbackPages,
     annotations,
     gcTasksData,
     gcTasksComments,
