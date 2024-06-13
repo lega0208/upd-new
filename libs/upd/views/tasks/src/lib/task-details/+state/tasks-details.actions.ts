@@ -15,7 +15,6 @@ export const loadTasksDetailsError = createAction(
 
 export const getMostRelevantFeedback = createAction(
   '[TasksDetails/API] Get Most Relevant Feedback',
-  props<{ normalizationStrength: number }>(),
 );
 
 export const getMostRelevantFeedbackSuccess = createAction(

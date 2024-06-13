@@ -659,86 +659,18 @@ export class OverviewFacade {
     }),
   );
 
-  comparisonFeedbackPagesTable$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const dateRange = data?.dateRangeData?.feedbackPages || [];
-      const comparisonDateRange =
-        data?.comparisonDateRangeData?.feedbackPages || [];
-
-      const dataFeedback = dateRange.map((d, i) => {
-        let prevVal = NaN;
-        comparisonDateRange.map((cd, i) => {
-          if (d.url === cd.url) {
-            prevVal = cd.sum;
-          }
-        });
-        return {
-          name: this.i18n.service.translate(`${d.url}`, lang),
-          currValue: d.sum,
-          prevValue: prevVal,
-          id: d._id,
-          title: d.title,
-        };
-      });
-
-      comparisonDateRange.map((d, i) => {
-        let currValue = 0;
-        dateRange.map((cd, i) => {
-          if (d.url === cd.url) {
-            currValue = cd.sum;
-          }
-        });
-        if (currValue === 0) {
-          dataFeedback.push({
-            name: this.i18n.service.translate(`${d.url}`, lang),
-            currValue: 0,
-            prevValue: d.sum,
-            id: d._id,
-            title: d.title,
-          });
-        }
-      });
-
-      return dataFeedback
-        .map((val: any, i) => ({
-          ...val,
-          percentChange: percentChange(val.currValue, val.prevValue),
-        }))
-        .filter((v) => v.currValue > 0 || v.prevValue > 0)
-        .sort((a, b) => b.currValue - a.currValue)
-    }),
-  );
+  commentsByPage$ = this.overviewData$.pipe(map((data) => data?.commentsByPage));
 
   currentTotalComments$ = this.overviewData$.pipe(
     map(
       (data) =>
-        data?.dateRangeData?.feedbackPages.reduce(
-          (totalComments, feedback) => totalComments + feedback.sum,
-          0,
-        ) || 0,
+        (data?.mostRelevantCommentsAndWords?.en?.comments?.length || 0) +
+        (data?.mostRelevantCommentsAndWords?.fr?.comments?.length || 0),
     ),
   );
 
-  comparisonTotalComments$ = this.overviewData$.pipe(
-    map(
-      (data) =>
-        data?.comparisonDateRangeData?.feedbackPages.reduce(
-          (totalComments, feedback) => totalComments + feedback.sum,
-          0,
-        ) || 0,
-    ),
-  );
-
-  commentsPercentChange$ = combineLatest([
-    this.currentTotalComments$,
-    this.comparisonTotalComments$,
-  ]).pipe(
-    map(([currentComments, comparisonComments]) =>
-      percentChange(currentComments, comparisonComments),
-    ),
+  commentsPercentChange$ = this.overviewData$.pipe(
+    map((data) => data?.numCommentsPercentChange),
   );
 
   uxTestsCompleted$ = this.overviewData$.pipe(
@@ -956,8 +888,8 @@ export class OverviewFacade {
     this.store.dispatch(OverviewActions.init());
   }
 
-  getMostRelevantFeedback(normalizationStrength: number) {
-    this.store.dispatch(OverviewActions.getMostRelevantFeedback({ normalizationStrength }));
+  getMostRelevantFeedback() {
+    this.store.dispatch(OverviewActions.getMostRelevantFeedback());
   }
 }
 

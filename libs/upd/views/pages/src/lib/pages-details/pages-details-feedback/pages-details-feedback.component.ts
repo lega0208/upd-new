@@ -1,14 +1,13 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
-import type { ColumnConfig } from '@dua-upd/types-common';
+import type {
+  ColumnConfig,
+  FeedbackWithScores,
+  WordRelevance,
+} from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
-import type { GetTableProps } from '@dua-upd/utils-common';
-
-type FeedbackCommentsColType = GetTableProps<
-  PagesDetailsFeedbackComponent,
-  'feedbackComments$'
->;
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'upd-page-details-feedback',
@@ -21,6 +20,8 @@ export class PagesDetailsFeedbackComponent implements OnInit {
 
   currentLang$ = this.i18n.currentLang$;
 
+  pageLang = toSignal(this.pageDetailsService.pageLang$);
+
   fullDateRangeLabel$ = this.pageDetailsService.fullDateRangeLabel$;
   fullComparisonDateRangeLabel$ =
     this.pageDetailsService.fullComparisonDateRangeLabel$;
@@ -28,7 +29,11 @@ export class PagesDetailsFeedbackComponent implements OnInit {
   dyfChart$ = this.pageDetailsService.dyfData$;
   whatWasWrongChart$ = this.pageDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
+  dyfTableCols: ColumnConfig<{
+    name: string;
+    currValue: number;
+    prevValue: string;
+  }>[] = [];
   whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
 
   dyfChartApex$ = this.pageDetailsService.dyfDataApex$;
@@ -37,11 +42,48 @@ export class PagesDetailsFeedbackComponent implements OnInit {
   whatWasWrongChartLegend: string[] = [];
   whatWasWrongChartApex$ = this.pageDetailsService.whatWasWrongDataApex$;
 
-  feedbackComments$ = this.pageDetailsService.feedbackComments$;
-  feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
-
   dateRangeLabel$ = this.pageDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.pageDetailsService.comparisonDateRangeLabel$;
+
+  feedbackMostRelevant = this.pageDetailsService.feedbackMostRelevant;
+  
+  numComments = this.pageDetailsService.numComments;
+  numCommentsPercentChange = this.pageDetailsService.numCommentsPercentChange;
+
+  mostRelevantComments = computed(
+    () =>
+      this.pageLang() &&
+      this.feedbackMostRelevant()[this.pageLang() as 'en' | 'fr'].comments,
+  );
+  mostRelevantWords = computed(
+    () =>
+      this.pageLang() &&
+      this.feedbackMostRelevant()[this.pageLang() as 'en' | 'fr'].words,
+  );
+
+  mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
+    { field: 'rank', header: 'Rank', width: '10px', center: true },
+    { field: 'date', header: 'Date', pipe: 'date', width: '100px' },
+    { field: 'owners', header: 'Owner', width: '10px', hide: true },
+    { field: 'sections', header: 'Section', hide: true },
+    { field: 'comment', header: 'Comment', width: '400px' },
+  ];
+
+  mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
+    { field: 'word', header: 'Word', width: '10px' },
+    {
+      field: 'word_occurrences',
+      header: 'Term occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+    {
+      field: 'comment_occurrences',
+      header: 'Comment occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+  ];
 
   ngOnInit() {
     combineLatest([
@@ -84,19 +126,6 @@ export class PagesDetailsFeedbackComponent implements OnInit {
           pipe: 'number',
         },
       ];
-
-      this.feedbackCommentsCols = [
-        {
-          field: 'date',
-          header: this.i18n.service.translate('date', lang),
-          pipe: 'date',
-        },
-        {
-          field: 'comment',
-          header: this.i18n.service.translate('comment', lang),
-        },
-      ];
-
     });
   }
 }

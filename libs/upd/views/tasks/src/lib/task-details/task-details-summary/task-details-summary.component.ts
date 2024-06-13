@@ -50,10 +50,9 @@ export class TaskDetailsSummaryComponent implements OnInit {
   currentCallVolume$ = this.taskDetailsService.currentCallVolume$;
   callPercentChange$ = this.taskDetailsService.callPercentChange$;
 
-  visitsByPage$ = this.taskDetailsService.visitsByPageWithPercentChange$;
+  visitsByPage$ = this.taskDetailsService.visitsByPage$;
 
   dyfChart$ = this.taskDetailsService.dyfData$;
-  whatWasWrongChart$ = this.taskDetailsService.whatWasWrongData$;
 
   taskSuccessByUxTest$ = this.taskDetailsService.taskSuccessByUxTest$;
   taskSuccessByUxTestCols: ColumnConfig[] = [];
@@ -85,9 +84,6 @@ export class TaskDetailsSummaryComponent implements OnInit {
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
 
-  whatWasWrongChartLegend: string[] = [];
-  whatWasWrongChartApex$ = this.taskDetailsService.whatWasWrongDataApex$;
-
   avgTaskSuccessKpiCriteria = (successRate: number) =>
     successRate >= 0.8 ? 'pass' : 'fail';
 
@@ -105,13 +101,6 @@ export class TaskDetailsSummaryComponent implements OnInit {
       this.dyfChartLegend = [
         this.i18n.service.translate('yes', lang),
         this.i18n.service.translate('no', lang),
-      ];
-
-      this.whatWasWrongChartLegend = [
-        this.i18n.service.translate('d3-cant-find-info', lang),
-        this.i18n.service.translate('d3-other', lang),
-        this.i18n.service.translate('d3-hard-to-understand', lang),
-        this.i18n.service.translate('d3-error', lang),
       ];
 
       this.visitsByPageCols = [
@@ -162,7 +151,7 @@ export class TaskDetailsSummaryComponent implements OnInit {
           pipe: 'number',
         },
         {
-          field: 'percentChange',
+          field: 'visitsPercentChange',
           header: this.i18n.service.translate('%-change', lang),
           pipe: 'percent',
           type: 'comparison',

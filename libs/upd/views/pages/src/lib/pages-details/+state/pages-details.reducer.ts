@@ -24,10 +24,15 @@ export const pagesDetailsInitialState: PagesDetailsState = {
     title: '',
     dateRange: '',
     comparisonDateRange: '',
-    feedbackComments: [],
     searchTerms: [],
     readability: [],
     activityMap: [],
+    mostRelevantCommentsAndWords: {
+      en: { comments: [], words: [] },
+      fr: { comments: [], words: [] },
+    },
+    numComments: 0,
+    numCommentsPercentChange: null,
   },
   loading: false,
   loaded: false,
@@ -36,40 +41,47 @@ export const pagesDetailsInitialState: PagesDetailsState = {
 
 const reducer = createReducer(
   pagesDetailsInitialState,
-  on(PagesDetailsActions.loadPagesDetailsInit, (state) => ({
-    ...state,
-    loading: true,
-    loaded: false,
-    start: false,
-    error: null,
-  })),
-  on(PagesDetailsActions.loadPagesDetailsSuccess, (state, { data }) =>
-    data === null
-      ? {
-          ...state,
-          loading: false,
-          loaded: true,
-          error: null,
-        }
-      : {
-          ...state,
-          data: { ...data },
-          loading: false,
-          loaded: true,
-          error: null,
-        }
+  on(
+    PagesDetailsActions.loadPagesDetailsInit,
+    (state): PagesDetailsState => ({
+      ...state,
+      loading: true,
+      loaded: false,
+      error: null,
+    }),
   ),
-  on(PagesDetailsActions.loadPagesDetailsError, (state, { error }) => ({
-    ...state,
-    loading: false,
-    loaded: true,
-    error,
-  }))
+  on(
+    PagesDetailsActions.loadPagesDetailsSuccess,
+    (state, { data }): PagesDetailsState =>
+      data === null
+        ? {
+            ...state,
+            loading: false,
+            loaded: true,
+            error: null,
+          }
+        : {
+            ...state,
+            data: { ...data },
+            loading: false,
+            loaded: true,
+            error: null,
+          },
+  ),
+  on(
+    PagesDetailsActions.loadPagesDetailsError,
+    (state, { error }): PagesDetailsState => ({
+      ...state,
+      loading: false,
+      loaded: true,
+      error,
+    }),
+  ),
 );
 
 export function pagesDetailsReducer(
   state: PagesDetailsState | undefined,
-  action: Action
+  action: Action,
 ) {
   return reducer(state, action);
 }

@@ -1,14 +1,10 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  OnInit,
-  Signal,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import type { ColumnConfig, FeedbackWithScores, WordRelevance } from '@dua-upd/types-common';
+import type {
+  ColumnConfig,
+  FeedbackWithScores,
+  WordRelevance,
+} from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
@@ -35,8 +31,8 @@ export class OverviewFeedbackComponent implements OnInit {
 
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
-  comparisonFeedbackPagesTable$ =
-    this.overviewService.comparisonFeedbackPagesTable$;
+  commentsByPage$ =
+    this.overviewService.commentsByPage$;
 
   dyfChartApex$ = this.overviewService.dyfDataApex$;
   dyfChartLegend: string[] = [];
@@ -58,13 +54,11 @@ export class OverviewFeedbackComponent implements OnInit {
 
   feedbackPagesTableCols: ColumnConfig<{
     title: string;
-    name: string;
-    currValue: number;
-    percentChange: number;
+    url: string;
+    sum: number;
+    percentChange: number | null;
   }>[] = [];
   langLink = 'en';
-
-  normalizationStrength = signal(0.5);
 
   feedbackMostRelevant = this.overviewService.feedbackMostRelevant;
 
@@ -79,34 +73,38 @@ export class OverviewFeedbackComponent implements OnInit {
   mostRelevantWordsFr = computed(() => this.feedbackMostRelevant().fr.words);
 
   mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
-    // { field: 'date', header: 'Date', pipe: 'date' },
-    // { field: 'url', header: 'URL' },
+    { field: 'rank', header: 'Rank', width: '10px', center: true },
+    { field: 'date', header: 'Date', pipe: 'date', width: '100px' },
+    { field: 'url', header: 'URL' },
+    { field: 'owners', header: 'Owner', width: '10px', hide: true },
+    { field: 'sections', header: 'Section', hide: true },
     { field: 'comment', header: 'Comment', width: '400px' },
-    { field: 'normalization_factor', header: 'Normalization factor', pipe: 'number', width: '15px' },
-    { field: 'andre_score', header: 'Word Score', pipe: 'number', width: '15px' },
-    { field: 'tf_idf', header: 'Comment score', pipe: 'number', width: '15px' },
-    { field: 'tf_idf_logscale', header: 'Comment score (log scale)', pipe: 'number', width: '15px' },
-    { field: 'tf_idf_ipf', header: 'Page score', pipe: 'number', width: '15px' },
-    { field: 'andre_score_normalized', header: 'Word Score (normalized)', pipe: 'number', width: '15px' },
-    { field: 'tf_idf_normalized', header: 'Comment score (normalized)', pipe: 'number', width: '15px' },
-    { field: 'tf_idf_logscale_normalized', header: 'Comment score (log scale, normalized)', pipe: 'number', width: '15px' },
-    { field: 'tf_idf_ipf_normalized', header: 'Page score (normalized)', pipe: 'number', width: '15px' },
   ];
 
   mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
-    { field: 'words', header: 'Word', width: '10px' },
-    { field: 'term_occurrences_total', header: 'Term occurrences', pipe: 'number', width: '10px' },
-    { field: 'comment_occurrences_total', header: 'Comment occurrences', pipe: 'number', width: '10px' },
-    { field: 'page_occurrences_total', header: 'Page occurrences', pipe: 'number', width: '10px' },
-    { field: 'andre_score', header: 'Word Score', pipe: 'number', columnClass: 'text-wrap', width: '10px' },
-    { field: 'tf_idf', header: 'Comment score', pipe: 'number', width: '10px' },
-    { field: 'tf_idf_logscale', header: 'Comment score (log scale)', pipe: 'number', width: '200px' },
-    { field: 'tf_idf_ipf', header: 'Page score', pipe: 'number', width: '20px' },
-    { field: 'tf_idf_ipf_logscale', header: 'Page score (log scale)', pipe: 'number', width: '200px' },
-  ]
+    { field: 'word', header: 'Word', width: '10px' },
+    {
+      field: 'word_occurrences',
+      header: 'Term occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+    {
+      field: 'comment_occurrences',
+      header: 'Comment occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+    // {
+    //   field: 'page_occurrences',
+    //   header: 'Page occurrences',
+    //   pipe: 'number',
+    //   width: '10px',
+    // },
+  ];
 
   recalculateMostRelevant() {
-    this.overviewService.getMostRelevantFeedback(this.normalizationStrength());
+    this.overviewService.getMostRelevantFeedback();
   }
 
   ngOnInit() {
@@ -163,13 +161,13 @@ export class OverviewFeedbackComponent implements OnInit {
       ];
       this.feedbackPagesTableCols = [
         {
-          field: 'name',
+          field: 'url',
           header: this.i18n.service.translate('page', lang),
           type: 'link',
-          typeParams: { link: 'name', external: true },
+          typeParams: { link: 'url', external: true },
         },
         {
-          field: 'currValue',
+          field: 'sum',
           header: this.i18n.service.translate('# of comments', lang),
           pipe: 'number',
           type: 'link',

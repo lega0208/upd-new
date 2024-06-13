@@ -733,19 +733,6 @@ export class PagesDetailsFacade {
     ),
   );
 
-  feedbackComments$ = combineLatest([
-    this.pagesDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const feedbackComments = data?.feedbackComments?.map((d) => ({
-        date: d.date,
-        comment: d.comment,
-      }));
-      return [...(feedbackComments || [])];
-    }),
-  );
-
   topSearchTerms$ = this.pagesDetailsData$.pipe(
     map((data) => data?.searchTerms),
   );
@@ -763,6 +750,10 @@ export class PagesDetailsFacade {
       pipeParam: '1.0-2',
     },
   ]);
+  
+  feedbackMostRelevant = this.store.selectSignal(PagesDetailsSelectors.selectFeedbackMostRelevant);
+  numComments = this.store.selectSignal(PagesDetailsSelectors.selectNumComments);
+  numCommentsPercentChange = this.store.selectSignal(PagesDetailsSelectors.selectNumCommentsPercentChange);
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
 

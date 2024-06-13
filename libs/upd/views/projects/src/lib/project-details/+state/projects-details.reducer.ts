@@ -33,9 +33,15 @@ export const projectDetailsInitialState: ProjectsDetailsState = {
     dateFromLastTest: new Date(0),
     taskSuccessByUxTest: [],
     tasks: [],
-    feedbackComments: [],
     searchTerms: [],
     attachments: [],
+    feedbackByPage: [],
+    mostRelevantCommentsAndWords: {
+      en: { comments: [], words: [] },
+      fr: { comments: [], words: [] },
+    },
+    numComments: 0,
+    numCommentsPercentChange: null,
   },
   loaded: false,
   loading: false,
@@ -53,29 +59,30 @@ const reducer = createReducer(
   on(ProjectsDetailsActions.loadProjectsDetailsSuccess, (state, { data }) =>
     data === null
       ? {
-        ...state,
-        loaded: true,
-        loading: false,
-        error: null,
-      }
+          ...state,
+          loaded: true,
+          loading: false,
+          error: null,
+        }
       : {
-        ...state,
-        data: { ...data },
-        loaded: true,
-        loading: false,
-        error: null,
-      }),
+          ...state,
+          data: { ...data },
+          loaded: true,
+          loading: false,
+          error: null,
+        },
+  ),
   on(ProjectsDetailsActions.loadProjectsDetailsError, (state, { error }) => ({
     ...state,
     loaded: true,
     loading: false,
     error,
-  }))
+  })),
 );
 
 export function projectsDetailsReducer(
   state: ProjectsDetailsState | undefined,
-  action: Action
+  action: Action,
 ) {
   return reducer(state, action);
 }

@@ -19,7 +19,7 @@ import {
   selectTaskId,
   selectTasksDetailsData,
 } from './tasks-details.selectors';
-import { MostRelevantCommentsAndWords } from '@dua-upd/types-common';
+import type { MostRelevantCommentsAndWordsByLang } from '@dua-upd/types-common';
 
 @Injectable()
 export class TasksDetailsEffects {
@@ -85,17 +85,20 @@ export class TasksDetailsEffects {
         this.store.select(selectTaskId),
         this.store.select(selectDateRanges),
       ]),
-      mergeMap(([{ normalizationStrength }, id, { dateRange }]) =>
+      mergeMap(([, id, { dateRange }]) =>
         this.api
           .get<
-            MostRelevantCommentsAndWords,
+            MostRelevantCommentsAndWordsByLang,
             {
               dateRange: string;
-              normalizationStrength: number;
               id: string;
               type: 'task';
             }
-          >('/api/feedback/most-relevant', { dateRange, id, normalizationStrength, type: 'task' })
+          >('/api/feedback/most-relevant', {
+            dateRange,
+            id,
+            type: 'task',
+          })
           .pipe(
             map((data) => getMostRelevantFeedbackSuccess({ data })),
             catchError(() => EMPTY),
