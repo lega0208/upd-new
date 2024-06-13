@@ -1,6 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import type { ColumnConfig } from '@dua-upd/types-common';
+import type {
+  ColumnConfig,
+  FeedbackWithScores,
+  WordRelevance,
+} from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import type { GetTableProps } from '@dua-upd/utils-common';
@@ -10,17 +14,10 @@ type VisitsByPageColType = GetTableProps<
   ProjectDetailsFeedbackComponent,
   'visitsByPage$'
 >;
-type DyfTableColTypes = GetTableProps<
-  ProjectDetailsFeedbackComponent,
-  'dyfChart$'
->;
+
 type WhatWasWrongColTypes = GetTableProps<
   ProjectDetailsFeedbackComponent,
   'whatWasWrongChart$'
->;
-type FeedbackCommentsColType = GetTableProps<
-  ProjectDetailsFeedbackComponent,
-  'feedbackComments$'
 >;
 
 @Component({
@@ -33,20 +30,29 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   private readonly projectsDetailsService = inject(ProjectsDetailsFacade);
 
   currentLang$ = this.i18n.currentLang$;
+
   langLink = 'en';
 
   fullDateRangeLabel$ = this.projectsDetailsService.fullDateRangeLabel$;
+
   fullComparisonDateRangeLabel$ =
     this.projectsDetailsService.fullComparisonDateRangeLabel$;
 
   visitsByPage$ =
     this.projectsDetailsService.visitsByPageFeedbackWithPercentChange$;
+
   visitsByPageCols: ColumnConfig<VisitsByPageColType>[] = [];
 
   dyfChart$ = this.projectsDetailsService.dyfData$;
+
   whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
+  dyfTableCols: ColumnConfig<{
+    name: string;
+    currValue: number;
+    prevValue: string;
+  }>[] = [];
+
   whatWasWrongTableCols: ColumnConfig<WhatWasWrongColTypes>[] = [];
 
   dyfChartApex$ = this.projectsDetailsService.dyfDataApex$;
@@ -55,14 +61,55 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
   whatWasWrongChartLegend: string[] = [];
   whatWasWrongChartApex$ = this.projectsDetailsService.whatWasWrongDataApex$;
 
-  feedbackComments$ = this.projectsDetailsService.feedbackComments$;
   feedbackTotalComments$ = this.projectsDetailsService.feedbackTotalComments$;
   commentsPercentChange$ = this.projectsDetailsService.commentsPercentChange$;
-  feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
 
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ =
     this.projectsDetailsService.comparisonDateRangeLabel$;
+
+  feedbackMostRelevant = this.projectsDetailsService.feedbackMostRelevant;
+
+  mostRelevantCommentsEn = computed(
+    () => this.feedbackMostRelevant().en.comments,
+  );
+  mostRelevantWordsEn = computed(() => this.feedbackMostRelevant().en.words);
+
+  mostRelevantCommentsFr = computed(
+    () => this.feedbackMostRelevant().fr.comments,
+  );
+  mostRelevantWordsFr = computed(() => this.feedbackMostRelevant().fr.words);
+
+  mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
+    { field: 'rank', header: 'Rank', width: '10px', center: true },
+    { field: 'date', header: 'Date', pipe: 'date', width: '100px' },
+    { field: 'url', header: 'URL' },
+    { field: 'owners', header: 'Owner', width: '10px', hide: true },
+    { field: 'sections', header: 'Section', hide: true },
+    { field: 'comment', header: 'Comment', width: '400px' },
+  ];
+
+  mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
+    { field: 'word', header: 'Word', width: '10px' },
+    {
+      field: 'word_occurrences',
+      header: 'Term occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+    {
+      field: 'comment_occurrences',
+      header: 'Comment occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+    // {
+    //   field: 'page_occurrences',
+    //   header: 'Page occurrences',
+    //   pipe: 'number',
+    //   width: '10px',
+    // },
+  ];
 
   ngOnInit() {
     combineLatest([
@@ -127,6 +174,11 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
           pipe: 'percent',
           pipeParam: '1.2',
         },
+        {
+          field: 'sum',
+          header: 'Number of comments',
+          pipe: 'number',
+        }
       ];
 
       this.dyfTableCols = [
@@ -151,19 +203,6 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
           field: 'value',
           header: this.i18n.service.translate('visits', lang),
           pipe: 'number',
-        },
-      ];
-
-      this.feedbackCommentsCols = [
-        { field: 'url', header: this.i18n.service.translate('URL', lang) },
-        {
-          field: 'date',
-          header: this.i18n.service.translate('date', lang),
-          pipe: 'date',
-        },
-        {
-          field: 'comment',
-          header: this.i18n.service.translate('comment', lang),
         },
       ];
     });

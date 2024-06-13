@@ -17,6 +17,7 @@ import {
   type PickByType,
   type UnwrapObservable,
   round,
+  arrayToDictionary,
 } from '@dua-upd/utils-common';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs/esm';
@@ -144,27 +145,46 @@ export class ProjectsDetailsFacade {
     mapPageMetricsArraysWithPercentChange('visitsByPage', 'gscTotalClicks'),
   );
 
+  feedbackByPage$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.dateRangeData?.feedbackByPage),
+  );
+  
   visitsByPageFeedbackWithPercentChange$ = this.projectsDetailsData$.pipe(
     map((data): ProjectsDetailsData => {
       if (data.dateRangeData?.visitsByPage) {
+        const feedbackByPageDict = arrayToDictionary(
+          data?.feedbackByPage,
+          '_id',
+        );
+
         // data object is immutable, so we need to make a deep copy
         // -> fastest and easiest way is to serialize/deserialize with JSON methods
         const newData = JSON.parse(JSON.stringify(data));
 
         newData.dateRangeData.visitsByPage =
           data.dateRangeData.visitsByPage.map((page) => {
+            const feedback = feedbackByPageDict[page._id] || { sum: 0 };
+            console.log(feedback)
+
             if (page.visits === 0) {
-              return page;
+              return {
+                ...page,
+                sum: feedback.sum || 0,
+              };
             }
 
             const totalFeedback = (page.dyfYes || 0) + (page.dyfNo || 0);
 
             if (totalFeedback === 0) {
-              return page;
+              return {
+                ...page,
+                sum: feedback.sum || 0,
+              };
             }
 
             return {
               ...page,
+              sum: feedback.sum || 0,
               feedbackToVisitsRatio: totalFeedback / page.visits,
             };
           });
@@ -872,37 +892,12 @@ export class ProjectsDetailsFacade {
     }),
   );
 
-  feedbackComments$ = combineLatest([
-    this.projectsDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const feedbackComments = data?.feedbackComments?.map((d) => ({
-        ...d,
-        date: d.date,
-      }));
-      return [...(feedbackComments || [])];
-    }),
-  );
-
   feedbackTotalComments$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.feedbackComments.length || 0),
+    map((data) => data?.numComments),
   );
 
-  comparisonTotalComments$ = this.projectsDetailsData$.pipe(
-    map(
-      (data) =>
-        data?.comparisonDateRangeData?.feedbackComments.length || 0,
-    ),
-  );
-
-  commentsPercentChange$ = combineLatest([
-    this.feedbackTotalComments$,
-    this.comparisonTotalComments$,
-  ]).pipe(
-    map(([currentComments, comparisonComments]) =>
-      percentChange(currentComments, comparisonComments),
-    ),
+  commentsPercentChange$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.numCommentsPercentChange),
   );
 
   dateRangeLabel$ = combineLatest([
@@ -1046,6 +1041,8 @@ export class ProjectsDetailsFacade {
         })),
     ),
   );
+  
+  feedbackMostRelevant = this.store.selectSignal(ProjectsDetailsSelectors.selectFeedbackMostRelevant);
 
   error$ = this.store.select(
     ProjectsDetailsSelectors.selectProjectsDetailsError,

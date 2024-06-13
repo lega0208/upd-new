@@ -3,11 +3,11 @@ import {
   compress as compressZstd,
   decompress as decompressZstd,
 } from '@mongodb-js/zstd';
-import {
-  compress as compressBrotli,
-  decompress as decompressBrotli,
-} from 'brotli-wasm';
+import * as brotli from 'brotli-wasm';
 import { createHash } from 'node:crypto';
+
+const compressBrotli = brotli.compress;
+const decompressBrotli = brotli.decompress;
 
 export const bytesToMbs = (bytes: number) => Math.round(bytes / 10) / 100000;
 

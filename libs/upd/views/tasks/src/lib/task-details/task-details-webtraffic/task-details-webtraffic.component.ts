@@ -17,7 +17,7 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
 
   langLink = 'en';
 
-  visitsByPage$ = this.taskDetailsService.visitsByPageWithPercentChange$;
+  visitsByPage$ = this.taskDetailsService.visitsByPage$;
 
   visits$ = this.taskDetailsService.visits$;
   visitsPercentChange$ = this.taskDetailsService.visitsPercentChange$;
@@ -76,7 +76,7 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
             pipe: 'number',
           },
           {
-            field: 'percentChange',
+            field: 'visitsPercentChange',
             header: this.i18n.service.translate('%-change', lang),
             pipe: 'percent',
             type: 'comparison',

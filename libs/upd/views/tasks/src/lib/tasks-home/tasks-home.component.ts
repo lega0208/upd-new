@@ -25,9 +25,9 @@ export class TasksHomeComponent implements OnInit {
     {
       field: 'tmf_rank',
       header: 'Rank',
-      pipe: 'number',
       frozen: true,
       width: '80px',
+      center: true,
     },
     {
       field: 'task',

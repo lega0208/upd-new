@@ -35,8 +35,11 @@ import type {
 import {
   arrayToDictionary,
   dateRangeSplit,
+  parseDateRangeString,
+  percentChange,
 } from '@dua-upd/utils-common';
 import { InternalSearchTerm } from '@dua-upd/types-common';
+import { FeedbackService } from '@dua-upd/api/feedback';
 
 @Injectable()
 export class PagesService {
@@ -57,12 +60,13 @@ export class PagesService {
     @InjectModel(Url.name, 'defaultConnection')
     private urls: UrlModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private feedbackService: FeedbackService,
   ) {}
 
   async listPages({ projection, populate }): Promise<Page[]> {
     let query = this.pageModel.find({}, projection);
     if (populate) {
-      const populateArray = populate.split(',').map(item => item.trim());
+      const populateArray = populate.split(',').map((item) => item.trim());
       query = query.populate(populateArray);
     }
 
@@ -90,7 +94,7 @@ export class PagesService {
 
     const results = await this.db.views.pageVisits.getVisitsWithPageData(
       queryDateRange,
-      this.pageModel
+      this.pageModel,
     );
 
     await this.cacheManager.set(cacheKey, results);
@@ -235,6 +239,31 @@ export class PagesService {
       .sort({ date: -1 })
       .exec();
 
+    const mostRelevantCommentsAndWords =
+      await this.feedbackService.getMostRelevantCommentsAndWords({
+        dateRange: parseDateRangeString(params.dateRange),
+        type: 'page',
+        id: params.id,
+      });
+
+    const numComments =
+      mostRelevantCommentsAndWords.en.comments.length +
+      mostRelevantCommentsAndWords.fr.comments.length;
+
+    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
+      parseDateRangeString(params.comparisonDateRange);
+
+    const numPreviousComments = await this.feedbackModel
+      .countDocuments({
+        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+      })
+      .exec();
+
+    const numCommentsPercentChange =
+      !params.ipd && numPreviousComments
+        ? percentChange(numComments, numPreviousComments)
+        : null;
+
     const results = {
       ...page,
       is404: urls.is_404,
@@ -270,12 +299,12 @@ export class PagesService {
       topSearchTermsIncrease: topIncreasedSearchTerms,
       topSearchTermsDecrease: topDecreasedSearchTerms,
       top25GSCSearchTerms: top25GSCSearchTerms,
-      feedbackComments: await this.feedbackModel.getComments(params.dateRange, [
-        page.url,
-      ]),
       searchTerms: await this.getTopSearchTerms(params),
       activityMap: await this.getActivityMapData(params),
       readability,
+      mostRelevantCommentsAndWords,
+      numComments,
+      numCommentsPercentChange,
     } as PageDetailsData;
 
     await this.cacheManager.set(cacheKey, results);

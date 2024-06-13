@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, ParseBoolPipe, Query } from '@nestjs/common';
 import { OverallService } from './overall.service';
 
 @Controller('overall')
@@ -9,7 +9,16 @@ export class OverallController {
   getMetrics(
     @Query('dateRange') dateRange: string,
     @Query('comparisonDateRange') comparisonDateRange: string,
+    @Query('ipd', ParseBoolPipe) ipd: boolean,
   ) {
-    return this.overallService.getMetrics({ dateRange, comparisonDateRange });
+    if (ipd) {
+      console.log('IPD MODE ACTIVATED 🤖');
+    }
+
+    return this.overallService.getMetrics({
+      dateRange,
+      comparisonDateRange,
+      ipd,
+    });
   }
 }

@@ -4,11 +4,11 @@ import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { dayjs, today } from '@dua-upd/utils-common';
-
 import { AirtableClient } from '@dua-upd/external-data';
 import type { DateType } from '@dua-upd/external-data';
 import { Feedback } from '@dua-upd/db';
 import type { FeedbackDocument } from '@dua-upd/db';
+import { preprocessCommentWords } from '@dua-upd/feedback';
 
 export type FeedbackApiRecord = {
   url: string;
@@ -81,6 +81,7 @@ export class FeedbackService {
     const params = {
       [startDateProperty]: start.format('YYYY-MM-DD'),
       [endDateProperty]: dayjs.utc(end).format('YYYY-MM-DD'),
+      url: '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
     };
 
     url.search = new URLSearchParams(params).toString();
@@ -111,13 +112,13 @@ export class FeedbackService {
         theme,
       }),
     );
+    
+    const feedbackWithWords = preprocessCommentWords(feedback);
 
     return await this.feedbackModel
-      .insertMany(feedback)
+      .insertMany(feedbackWithWords)
       .then(() =>
-        this.logger.log(
-          `Successfully added ${feedback.length} Feedback data`,
-        ),
+        this.logger.log(`Successfully added ${feedback.length} Feedback data`),
       )
       .catch((err) => {
         this.logger.error('Error updating feedback data');
