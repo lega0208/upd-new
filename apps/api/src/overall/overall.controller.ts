@@ -11,8 +11,10 @@ export class OverallController {
     @Query('comparisonDateRange') comparisonDateRange: string,
     @Query('ipd', ParseBoolPipe) ipd: boolean,
   ) {
-    console.log('IPD MODE ACTIVATED 🤖');
-    
+    if (ipd) {
+      console.log('IPD MODE ACTIVATED 🤖');
+    }
+
     return this.overallService.getMetrics({
       dateRange,
       comparisonDateRange,
