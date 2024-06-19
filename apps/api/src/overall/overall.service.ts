@@ -209,14 +209,25 @@ export class OverallService {
       })
       .exec();
 
-    const numCommentsPercentChange = !params.ipd && numPreviousComments
-      ? percentChange(numComments, numPreviousComments)
-      : null;
+    const numCommentsPercentChange =
+      !params.ipd && numPreviousComments
+        ? percentChange(numComments, numPreviousComments)
+        : null;
 
-    const commentsByPage = await this.feedbackModel.getCommentsByPageWithComparison(
-      params.dateRange,
-      params.comparisonDateRange
-    );
+    const commentsByPage = (
+      await this.feedbackService.getNumCommentsByPage(
+        params.dateRange,
+        params.comparisonDateRange,
+      )
+    )
+      .map(({ _id, title, url, sum, percentChange }) => ({
+        _id: _id.toString(),
+        title,
+        url,
+        sum,
+        percentChange,
+      }))
+      .sort((a, b) => (b.sum || 0) - (a.sum || 0));
 
     const results = {
       dateRange: params.dateRange,

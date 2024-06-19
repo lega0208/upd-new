@@ -317,11 +317,8 @@ export class TasksService {
 
       const uxTestsForTask = uxTestsDict[task._id.toString()] ?? [];
 
-      const {
-        avgTestSuccess,
-        latestDate,
-        percentChange: latest_success_rate,
-      } = getAvgSuccessFromLatestTests(uxTestsForTask);
+      const { avgTestSuccess, percentChange: latest_success_rate } =
+        getAvgSuccessFromLatestTests(uxTestsForTask);
 
       const latest_success_rate_percent_change = percentChange(
         avgTestSuccess,
@@ -467,12 +464,19 @@ export class TasksService {
       visitsComparison,
     } = aggregatedMetrics;
 
-    const feedbackByPage =
-      await this.feedbackModel.getCommentsByPageWithComparison(
+    const feedbackByPage = (
+      await this.feedbackService.getNumCommentsByPage(
         params.dateRange,
         params.comparisonDateRange,
         { tasks: taskId },
-      );
+      )
+    ).map(({ _id, title, url, sum, percentChange }) => ({
+      _id: _id.toString(),
+      title,
+      url,
+      sum,
+      percentChange,
+    }));
 
     const mostRelevantCommentsAndWords =
       await this.feedbackService.getMostRelevantCommentsAndWords({

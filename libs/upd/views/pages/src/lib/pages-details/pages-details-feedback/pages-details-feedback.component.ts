@@ -46,7 +46,7 @@ export class PagesDetailsFeedbackComponent implements OnInit {
   comparisonDateRangeLabel$ = this.pageDetailsService.comparisonDateRangeLabel$;
 
   feedbackMostRelevant = this.pageDetailsService.feedbackMostRelevant;
-  
+
   numComments = this.pageDetailsService.numComments;
   numCommentsPercentChange = this.pageDetailsService.numCommentsPercentChange;
 
@@ -63,7 +63,7 @@ export class PagesDetailsFeedbackComponent implements OnInit {
 
   mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
     { field: 'rank', header: 'Rank', width: '10px', center: true },
-    { field: 'date', header: 'Date', pipe: 'date', width: '100px' },
+    { field: 'date', header: 'Date', pipe: 'date', width: '50px' },
     { field: 'owners', header: 'Owner', width: '10px', hide: true },
     { field: 'sections', header: 'Section', hide: true },
     { field: 'comment', header: 'Comment', width: '400px' },

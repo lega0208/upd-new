@@ -31,8 +31,7 @@ export class OverviewFeedbackComponent implements OnInit {
 
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
-  commentsByPage$ =
-    this.overviewService.commentsByPage$;
+  commentsByPage$ = this.overviewService.commentsByPage$;
 
   dyfChartApex$ = this.overviewService.dyfDataApex$;
   dyfChartLegend: string[] = [];
@@ -173,7 +172,7 @@ export class OverviewFeedbackComponent implements OnInit {
           type: 'link',
           typeParams: {
             preLink: '/' + this.langLink + '/pages',
-            link: 'id',
+            link: '_id',
             postLink: 'pagefeedback',
           },
         },

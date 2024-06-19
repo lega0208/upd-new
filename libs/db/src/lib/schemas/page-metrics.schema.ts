@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types, FilterQuery } from 'mongoose';
+import { type Document, Types, type FilterQuery } from 'mongoose';
 import type {
   GscSearchTermMetrics,
   AccumulatorOperator,
@@ -10,16 +10,16 @@ import type {
   IProject,
   IUxTest,
   IPage,
-  metrics,
 } from '@dua-upd/types-common';
 import {
-  DateRange,
+  type DateRange,
+  ModelWithStatics,
   arrayToDictionary,
   dateRangeSplit,
   percentChange,
 } from '@dua-upd/utils-common';
-import { Page } from './page.schema';
-import { PageMetricsTS } from './page-metrics-ts.schema';
+import type { Page } from './page.schema';
+import type { PageMetricsTS } from './page-metrics-ts.schema';
 
 export type PageMetricsDocument = PageMetrics & Document;
 
@@ -305,10 +305,6 @@ PageMetricsSchema.index(
   },
 );
 
-export function getPageMetricsModel() {
-  return model(PageMetrics.name, PageMetricsSchema);
-}
-
 export type MetricsConfig<T> = {
   [key in AccumulatorOperator]?: keyof Partial<T>;
 };
@@ -538,10 +534,10 @@ export type AggregatedMetricsWithPercentChange = {
     is404: boolean;
     isRedirect: boolean;
     pageStatus: string;
-    gscTotalClicks: number,
-    gscTotalImpressions: number,
-    gscTotalCtr: number,
-    gscTotalPosition: number,
+    gscTotalClicks: number;
+    gscTotalImpressions: number;
+    gscTotalCtr: number;
+    gscTotalPosition: number;
     visitsPercentChange: number | null;
     dyfNoPercentChange: number | null;
   }[];
@@ -717,16 +713,13 @@ export async function getAggregatedMetricsWithComparison(
   };
 }
 
-PageMetricsSchema.statics = {
+const statics = {
   getAggregatedPageMetrics,
   toTimeSeries,
   getAggregatedMetrics,
   getAggregatedMetricsWithComparison,
 };
 
-export type PageMetricsModel = Model<PageMetrics> & {
-  getAggregatedPageMetrics: typeof getAggregatedPageMetrics;
-  toTimeSeries: typeof toTimeSeries;
-  getAggregatedMetrics: typeof getAggregatedMetrics;
-  getAggregatedMetricsWithComparison: typeof getAggregatedMetricsWithComparison;
-};
+PageMetricsSchema.statics = statics;
+
+export type PageMetricsModel = ModelWithStatics<PageMetrics, typeof statics>;

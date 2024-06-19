@@ -26,7 +26,6 @@ import 'dayjs/esm/locale/fr-ca';
 import utc from 'dayjs/esm/plugin/utc';
 import type {
   ApexAxisChartSeries,
-  ApexNonAxisChartSeries,
 } from 'ng-apexcharts';
 import { combineLatest, map } from 'rxjs';
 import * as ProjectsDetailsActions from './projects-details.actions';
@@ -164,7 +163,6 @@ export class ProjectsDetailsFacade {
         newData.dateRangeData.visitsByPage =
           data.dateRangeData.visitsByPage.map((page) => {
             const feedback = feedbackByPageDict[page._id] || { sum: 0 };
-            console.log(feedback)
 
             if (page.visits === 0) {
               return {
@@ -310,53 +308,6 @@ export class ProjectsDetailsFacade {
   );
 
   projectTasks$ = this.projectsDetailsData$.pipe(map((data) => data?.tasks));
-
-  // projectTasks$ = combineLatest([
-  //   this.projectsDetailsData$,
-  //   this.kpiTaskSuccessByUxTest$,
-  //   this.currentLang$,
-  // ]).pipe(
-  //   map(([data, uxTest, lang]) => {
-  //     const tasks = data?.tasks || [];
-  //     const callsByTasks = data?.dateRangeData?.callsByTasks || [];
-  //     const pageMetricsByTasks = data?.dateRangeData?.pageMetricsByTasks || [];
-
-  //     const callsByTasksDict = arrayToDictionary(callsByTasks, 'title');
-  //     const pageMetricsByTasksDict = arrayToDictionary(
-  //       pageMetricsByTasks,
-  //       'title'
-  //     );
-  //     const uxTestDict = arrayToDictionary(uxTest, 'title');
-
-  //     return tasks.map((task) => {
-  //       const { title } = task;
-  //       const { calls = 0 } = callsByTasksDict[title] || {};
-  //       const { dyfNo = 0, visits = 0 } = pageMetricsByTasksDict[title] || {};
-
-  //       const kpiNoClicks = visits !== 0 ? (dyfNo / visits) * 1000 : 0;
-  //       const kpiCallsRatio = visits !== 0 ? calls / visits : 0;
-  //       const kpiCalls = kpiCallsRatio * 100;
-
-  //       const ux = uxTestDict[title] || {};
-  //       const uxSuccess = Number(ux.success)?.toFixed(2) || 0;
-  //       const uxTest2Years = ux.latestDate;
-  //       const isWithin2Years =
-  //         uxTest2Years &&
-  //         dayjs(uxTest2Years).isAfter(dayjs().subtract(2, 'year'))
-  //           ? 'Yes'
-  //           : 'No';
-
-  //       return {
-  //         ...task,
-  //         title: this.i18n.service.translate(title, lang) || title,
-  //         calls: kpiCalls,
-  //         dyfNo: kpiNoClicks,
-  //         uxTest2Years: isWithin2Years,
-  //         successRate: uxSuccess,
-  //       };
-  //     });
-  //   })
-  // );
 
   calldriversChart$ = combineLatest([
     this.projectsDetailsData$,
@@ -563,28 +514,6 @@ export class ProjectsDetailsFacade {
     }),
   );
 
-  whatWasWrongDataApex$ = combineLatest([
-    this.projectsDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
-    map(([data, lang]) => {
-      const pieChartData = [
-        data?.dateRangeData?.fwylfCantFindInfo || 0,
-        data?.dateRangeData?.fwylfOther || 0,
-        data?.dateRangeData?.fwylfHardToUnderstand || 0,
-        data?.dateRangeData?.fwylfError || 0,
-      ] as ApexNonAxisChartSeries;
-
-      const isZero = pieChartData.every((v) => v === 0);
-      if (isZero) {
-        return [];
-      }
-
-      return pieChartData;
-    }),
-  );
-
   dyfData$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       const yes = this.i18n.service.translate('yes', lang);
@@ -603,48 +532,6 @@ export class ProjectsDetailsFacade {
       const filteredPieChartData = pieChartData.filter((v) => v.currValue > 0 || v.prevValue > 0);
   
       return filteredPieChartData.length > 0 ? filteredPieChartData : [];
-    }),
-  );
-
-  whatWasWrongData$ = combineLatest([
-    this.projectsDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    // todo: utility function for converting to SingleSeries/other chart types
-    map(([data, lang]) => {
-      const cantFindInfo = this.i18n.service.translate(
-        'd3-cant-find-info',
-        lang,
-      );
-      const otherReason = this.i18n.service.translate('d3-other', lang);
-      const hardToUnderstand = this.i18n.service.translate(
-        'd3-hard-to-understand',
-        lang,
-      );
-      const error = this.i18n.service.translate('d3-error', lang);
-
-      const pieChartData = [
-        {
-          name: cantFindInfo,
-          value: data?.dateRangeData?.fwylfCantFindInfo || 0,
-        },
-        { name: otherReason, value: data?.dateRangeData?.fwylfOther || 0 },
-        {
-          name: hardToUnderstand,
-          value: data?.dateRangeData?.fwylfHardToUnderstand || 0,
-        },
-        {
-          name: error,
-          value: data?.dateRangeData?.fwylfError || 0,
-        },
-      ];
-
-      const isZero = pieChartData.every((v) => v.value === 0);
-      if (isZero) {
-        return [];
-      }
-
-      return pieChartData;
     }),
   );
 
@@ -817,24 +704,32 @@ export class ProjectsDetailsFacade {
         const taskSuccessByUxTestKpi = task.success_rate
           ?.map((success) => {
             return {
-              test_type: success.testType,
-              success_rate: success.successRate,
+              test_type: success.testType as string,
+              success_rate: success.successRate as number,
             };
           })
-          .reduce((acc, val) => acc.concat(val), [] as any[])
-          .reduce((acc, val) => {
-            if (acc[val.test_type]) {
-              acc[val.test_type].success_rate += val.success_rate;
-              acc[val.test_type].count += 1;
-            } else {
-              acc[val.test_type] = {
-                test_type: val.test_type,
-                success_rate: val.success_rate,
-                count: 1,
+          .reduce(
+            (acc, val) => {
+              if (acc[val.test_type]) {
+                acc[val.test_type].success_rate += val.success_rate;
+                acc[val.test_type].count += 1;
+              } else {
+                acc[val.test_type] = {
+                  test_type: val.test_type,
+                  success_rate: val.success_rate,
+                  count: 1,
+                };
+              }
+              return acc;
+            },
+            {} as {
+              [testType: string]: {
+                test_type: string;
+                success_rate: number;
+                count: number;
               };
-            }
-            return acc;
-          }, {} as any);
+            },
+          );
 
         const taskSuccessByUxTestKpiAvg = Object.keys(
           taskSuccessByUxTestKpi,

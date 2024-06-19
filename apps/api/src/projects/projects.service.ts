@@ -486,13 +486,20 @@ export class ProjectsService {
     console.timeEnd('getTopSearchTerms');
 
     console.time('commentsByPage');
-    const feedbackByPage =
-      await this.feedbackModel.getCommentsByPageWithComparison(
+    const feedbackByPage = (
+      await this.feedbackService.getNumCommentsByPage(
         params.dateRange,
         params.comparisonDateRange,
         { projects: projectId },
-      );
-      console.log(feedbackByPage.length);
+      )
+    ).map(({ _id, title, url, sum, percentChange }) => ({
+      _id: _id.toString(),
+      title,
+      url,
+      sum,
+      percentChange,
+    }));
+    console.log(feedbackByPage.length);
     console.timeEnd('commentsByPage');
 
     const mostRelevantCommentsAndWords =
