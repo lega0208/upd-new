@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, type HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import type { DbQuery } from '@dua-upd/types-common';
 import type {
@@ -18,12 +18,23 @@ export interface ReturnedData<T> {
   comparisonDateRange?: T;
 }
 
+export type HttpParamsType =
+  | HttpParams
+  | {
+      [param: string]:
+        | string
+        | number
+        | boolean
+        | readonly (string | number | boolean)[];
+    }
+  | undefined;
+
 @Injectable()
 export class ApiService {
   private http = inject(HttpClient);
 
   // @StorageCache
-  private get<T>(url: string, params?: ApiParams) {
+  get<T, P extends HttpParamsType = ApiParams>(url: string, params?: P) {
     return this.http.get<T>(url, { params, responseType: 'json' });
   }
 

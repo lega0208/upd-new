@@ -33,9 +33,17 @@ import type {
   ProjectsHomeData,
   VisitsByPage,
 } from '@dua-upd/types-common';
-import { dateRangeSplit } from '@dua-upd/utils-common/date';
+import {
+  dateRangeSplit,
+  parseDateRangeString,
+} from '@dua-upd/utils-common/date';
 import { getLatestTest, getLatestTestData } from '@dua-upd/utils-common/data';
-import { arrayToDictionary, AsyncLogTiming, percentChange } from '@dua-upd/utils-common';
+import {
+  arrayToDictionary,
+  AsyncLogTiming,
+  percentChange,
+} from '@dua-upd/utils-common';
+import { FeedbackService } from '@dua-upd/api/feedback';
 
 dayjs.extend(utc);
 
@@ -149,6 +157,7 @@ export class ProjectsService {
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private feedbackService: FeedbackService,
   ) {}
 
   async getProjectsHomeData(): Promise<ProjectsHomeData> {
@@ -424,11 +433,12 @@ export class ProjectsService {
     const dateFromLastTest: Date | null = lastTest?.date || null;
 
     console.time('getLatestTestData');
-    const { percentChange: projectPercentChange, avgTestSuccess } = getLatestTestData(uxTests);
+    const { percentChange: projectPercentChange, avgTestSuccess } =
+      getLatestTestData(uxTests);
 
     const last_task_success_percent_change = percentChange(
       avgTestSuccess,
-      avgTestSuccess - projectPercentChange
+      avgTestSuccess - projectPercentChange,
     );
 
     console.timeEnd('getLatestTestData');
@@ -471,17 +481,44 @@ export class ProjectsService {
     );
     console.timeEnd('comparisonDateRangeData');
 
-    console.time('getProjectFeedbackComments');
-    const feedbackComments = await getProjectFeedbackComments(
-      params.dateRange,
-      projectUrls,
-      this.feedbackModel,
-    );
-    console.timeEnd('getProjectFeedbackComments');
-
     console.time('getTopSearchTerms');
     const searchTerms = await this.getTopSearchTerms(params);
     console.timeEnd('getTopSearchTerms');
+
+    console.time('commentsByPage');
+    const feedbackByPage =
+      await this.feedbackModel.getCommentsByPageWithComparison(
+        params.dateRange,
+        params.comparisonDateRange,
+        { projects: projectId },
+      );
+      console.log(feedbackByPage.length);
+    console.timeEnd('commentsByPage');
+
+    const mostRelevantCommentsAndWords =
+      await this.feedbackService.getMostRelevantCommentsAndWords({
+        dateRange: parseDateRangeString(params.dateRange),
+        type: 'project',
+        id: params.id,
+      });
+
+    const numComments =
+      mostRelevantCommentsAndWords.en.comments.length +
+      mostRelevantCommentsAndWords.fr.comments.length;
+
+    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
+      parseDateRangeString(params.comparisonDateRange);
+
+    const numPreviousComments = await this.feedbackModel
+      .countDocuments({
+        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+      })
+      .exec();
+
+    const numCommentsPercentChange =
+      !params.ipd && numPreviousComments
+        ? percentChange(numComments, numPreviousComments)
+        : null;
 
     const results = {
       _id: populatedProjectDoc._id.toString(),
@@ -502,7 +539,6 @@ export class ProjectsService {
       dateFromLastTest,
       taskSuccessByUxTest: uxTests,
       tasks,
-      feedbackComments,
       searchTerms,
       attachments: populatedProjectDoc.attachments.map((attachment) => {
         attachment.storage_url = attachment.storage_url?.replace(
@@ -512,6 +548,15 @@ export class ProjectsService {
 
         return attachment;
       }),
+      feedbackByPage,
+      mostRelevantCommentsAndWords:
+        await this.feedbackService.getMostRelevantCommentsAndWords({
+          dateRange: parseDateRangeString(params.dateRange),
+          type: 'project',
+          id: params.id,
+        }),
+      numComments,
+      numCommentsPercentChange,
     };
 
     await this.cacheManager.set(cacheKey, results);

@@ -117,9 +117,9 @@ export class CustomReportsReportComponent implements OnInit {
   progress = computed(() => {
     const totalJobs = this.reportStatus()?.totalChildJobs;
 
-    const completedJobs = this.reportStatus()?.completedChildJobs;
+    const completedJobs = this.reportStatus()?.completedChildJobs || 0;
 
-    if (!totalJobs || !completedJobs || totalJobs === 0) return NaN;
+    if (!totalJobs) return NaN;
 
     return round((completedJobs / totalJobs) * 100, 0);
   });

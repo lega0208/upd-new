@@ -28,11 +28,13 @@ import {
   logJson,
   prettyJson,
 } from '@dua-upd/utils-common';
-import { IFeedback, IReadability, IUrl } from '@dua-upd/types-common';
+import { IFeedback, IPage, IReadability, IUrl } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { RunScriptCommand } from '../run-script.command';
 import { startTimer } from './utils/misc';
 import { outputExcel, outputJson } from './utils/output';
+import { spawn } from 'child_process';
+import { preprocessCommentWords } from '@dua-upd/feedback';
 
 export const recalculateViews = async (
   db: DbService,
@@ -1530,11 +1532,12 @@ export async function generateTaskTranslations(db: DbService) {
 export async function importGcTss() {
   const db = (<RunScriptCommand>this).inject<DbService>(DbService);
 
-  const data = JSON.parse(await readFile('gc-tasks-tss_2021-01-14_2024-04-07.json', 'utf-8'))
-    .map((task) => ({
-      ...task,
-      _id: new Types.ObjectId(),
-      }));
+  const data = JSON.parse(
+    await readFile('gc-tasks-tss_2024-04-29_2024-05-05.json', 'utf-8'),
+  ).map((task) => ({
+    ...task,
+    _id: new Types.ObjectId(),
+  }));
 
   let added = 0;
 
@@ -1542,13 +1545,103 @@ export async function importGcTss() {
     const batch = data.splice(0, 20000);
 
     const results = await db.collections.gcTasks.insertMany(batch);
-  
-    added += results.length
+
+    added += results.length;
 
     console.log(`Added ${results.length} records to gcTasks`);
   }
 
   console.log(`Added total of ${added} records to gcTasks`);
+}
+
+export async function populateFeedbackWords(db: DbService) {
+  console.time('Fetching feedback from db');
+  const feedback = await db.collections.feedback
+    .find(
+      {},
+      {
+        lang: 1,
+        comment: 1,
+        words: {
+          $cond: [
+            { $ne: [{ $type: '$words' }, 'missing'] },
+            { $size: '$words' },
+            undefined,
+          ],
+        },
+      },
+    )
+    .lean()
+    .exec();
+  console.timeEnd('Fetching feedback from db');
+
+  const idsWithWords = feedback
+    .filter((feedback) => feedback.words?.length)
+    .map(({ _id }) => _id);
+
+  console.log('Preprocessing feedback words');
+  console.time('Preprocessing feedback words');
+  const feedbackWithWords = preprocessCommentWords(feedback).filter(
+    (feedback) => feedback.words?.length,
+  );
+  console.timeEnd('Preprocessing feedback words');
+
+  const newIdsWithWords = feedbackWithWords.map(({ _id }) => _id);
+
+  const idsNoLongerHavingWords = difference(idsWithWords, newIdsWithWords);
+
+  const wordRemoveOps: mongo.AnyBulkWriteOperation<IFeedback>[] =
+    idsNoLongerHavingWords.map((_id) => ({
+      updateOne: {
+        filter: { _id },
+        update: {
+          $unset: {
+            words: '',
+          },
+        },
+      },
+    }));
+
+  const updateOps: mongo.AnyBulkWriteOperation<IFeedback>[] =
+    feedbackWithWords.map(({ _id, words }) => ({
+      updateOne: {
+        filter: { _id },
+        update: {
+          $set: {
+            words,
+          },
+        },
+      },
+    }));
+
+  console.log(
+    `Removing words from ${idsNoLongerHavingWords.length} comments...`,
+  );
+
+  await db.collections.feedback.bulkWrite(wordRemoveOps, { ordered: false });
+
+  console.log('Adding preprocessed words to feedback...');
+
+  console.time('Updating feedback');
+  await db.collections.feedback.bulkWrite(updateOps, { ordered: false });
+  console.timeEnd('Updating feedback');
+
+  console.log('Successfully added words to feedback');
+}
+
+export async function populateFeedbackReferences(db: DbService) {
+  console.time('Fetching pages');
+  const pages: IPage[] = await db.collections.pages
+    .find({}, { url: 1, tasks: 1, projects: 1 })
+    .lean()
+    .exec();
+  console.timeEnd('Fetching pages');
+
+  console.time('Syncing feedback references');
+  await db.collections.feedback.syncReferences(pages);
+  console.timeEnd('Syncing feedback references');
+
+  console.log('Successfully synced feedback references.');
 }
 
 export async function updatePageSections() {

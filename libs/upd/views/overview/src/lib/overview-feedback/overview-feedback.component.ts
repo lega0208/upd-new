@@ -1,6 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import type { ColumnConfig } from '@dua-upd/types-common';
+import type {
+  ColumnConfig,
+  FeedbackWithScores,
+  WordRelevance,
+} from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { OverviewFacade } from '../+state/overview/overview.facade';
@@ -27,8 +31,8 @@ export class OverviewFeedbackComponent implements OnInit {
 
   dyfChart$ = this.overviewService.dyfData$;
   whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
-  comparisonFeedbackPagesTable$ =
-    this.overviewService.comparisonFeedbackPagesTable$;
+  commentsByPage$ =
+    this.overviewService.commentsByPage$;
 
   dyfChartApex$ = this.overviewService.dyfDataApex$;
   dyfChartLegend: string[] = [];
@@ -50,11 +54,58 @@ export class OverviewFeedbackComponent implements OnInit {
 
   feedbackPagesTableCols: ColumnConfig<{
     title: string;
-    name: string;
-    currValue: number;
-    percentChange: number;
+    url: string;
+    sum: number;
+    percentChange: number | null;
   }>[] = [];
   langLink = 'en';
+
+  feedbackMostRelevant = this.overviewService.feedbackMostRelevant;
+
+  mostRelevantCommentsEn = computed(
+    () => this.feedbackMostRelevant().en.comments,
+  );
+  mostRelevantWordsEn = computed(() => this.feedbackMostRelevant().en.words);
+
+  mostRelevantCommentsFr = computed(
+    () => this.feedbackMostRelevant().fr.comments,
+  );
+  mostRelevantWordsFr = computed(() => this.feedbackMostRelevant().fr.words);
+
+  mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
+    { field: 'rank', header: 'Rank', width: '10px', center: true },
+    { field: 'date', header: 'Date', pipe: 'date', width: '100px' },
+    { field: 'url', header: 'URL' },
+    { field: 'owners', header: 'Owner', width: '10px', hide: true },
+    { field: 'sections', header: 'Section', hide: true },
+    { field: 'comment', header: 'Comment', width: '400px' },
+  ];
+
+  mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
+    { field: 'word', header: 'Word', width: '10px' },
+    {
+      field: 'word_occurrences',
+      header: 'Term occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+    {
+      field: 'comment_occurrences',
+      header: 'Comment occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+    // {
+    //   field: 'page_occurrences',
+    //   header: 'Page occurrences',
+    //   pipe: 'number',
+    //   width: '10px',
+    // },
+  ];
+
+  recalculateMostRelevant() {
+    this.overviewService.getMostRelevantFeedback();
+  }
 
   ngOnInit() {
     combineLatest([
@@ -110,13 +161,13 @@ export class OverviewFeedbackComponent implements OnInit {
       ];
       this.feedbackPagesTableCols = [
         {
-          field: 'name',
+          field: 'url',
           header: this.i18n.service.translate('page', lang),
           type: 'link',
-          typeParams: { link: 'name', external: true },
+          typeParams: { link: 'url', external: true },
         },
         {
-          field: 'currValue',
+          field: 'sum',
           header: this.i18n.service.translate('# of comments', lang),
           pipe: 'number',
           type: 'link',

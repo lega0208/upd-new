@@ -11,7 +11,7 @@ import {
   selectDateRangeLabel,
   selectPeriodDates,
 } from '@dua-upd/upd/state';
-import { arrayToDictionary } from '@dua-upd/utils-common';
+import { arrayToDictionary, logJson } from '@dua-upd/utils-common';
 import { I18nModule, I18nService } from '@dua-upd/upd/i18n';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -26,57 +26,67 @@ export type DateTimeSeriesData = {
 
 // Lookup the 'TasksDetails' feature state managed by NgRx
 export const selectTasksDetailsState = createFeatureSelector<TasksDetailsState>(
-  TASKS_DETAILS_FEATURE_KEY
+  TASKS_DETAILS_FEATURE_KEY,
 );
 
 export const selectTasksDetailsLoaded = createSelector(
   selectTasksDetailsState,
-  (state: TasksDetailsState) => state.loaded
+  (state: TasksDetailsState) => state.loaded,
 );
 
 export const selectTasksDetailsLoading = createSelector(
   selectTasksDetailsState,
-  (state: TasksDetailsState) => state.loading
+  (state: TasksDetailsState) => state.loading,
 );
 
 export const selectTasksDetailsError = createSelector(
   selectTasksDetailsState,
-  (state: TasksDetailsState) => state.error
+  (state: TasksDetailsState) => state.error,
 );
 
 export const selectTasksDetailsData = createSelector(
   selectTasksDetailsState,
-  (state: TasksDetailsState) => state.data
+  (state: TasksDetailsState) => state.data,
 );
 
 export const selectTasksDetailsDataWithI18n = createSelector(
   selectTasksDetailsData,
   selectCurrentLang,
-  (data, lang) => [data, lang] as const
+  (data, lang) => [data, lang] as const,
 );
 
 // data select (current/previous)
 export const selectCurrentData = createSelector(
   selectTasksDetailsData,
-  ({ dateRangeData }) => dateRangeData
+  ({ dateRangeData }) => dateRangeData,
 );
 
 export const selectComparisonData = createSelector(
   selectTasksDetailsData,
-  ({ comparisonDateRangeData }) => comparisonDateRangeData
+  ({ comparisonDateRangeData }) => comparisonDateRangeData,
 );
 
 export const selectCurrentDateRangeLabel =
   selectDateRangeLabel(selectDateRange);
 
 export const selectComparisonDateRangeLabel = selectDateRangeLabel(
-  selectComparisonDateRange
+  selectComparisonDateRange,
+);
+
+export const selectTaskId = createSelector(
+  selectTasksDetailsData,
+  (data) => data?._id,
+);
+
+export const selectFeedbackMostRelevant = createSelector(
+  selectTasksDetailsData,
+  (data) => data?.mostRelevantCommentsAndWords,
 );
 
 // Visits by day
 export const selectVisitsByDay = createSelector(
   selectCurrentData,
-  (data) => data?.visitsByDay || []
+  (data) => data?.visitsByDay || [],
 );
 export const selectVisitsByDaySeries = createSelector(
   selectVisitsByDay,
@@ -84,12 +94,12 @@ export const selectVisitsByDaySeries = createSelector(
     visitsByDay.map(({ date, visits }) => ({
       x: date,
       y: visits,
-    }))
+    })),
 );
 
 export const selectComparisonVisitsByDay = createSelector(
   selectComparisonData,
-  (data) => data?.visitsByDay || []
+  (data) => data?.visitsByDay || [],
 );
 export const selectComparisonVisitsByDaySeries = createSelector(
   selectComparisonVisitsByDay,
@@ -100,13 +110,13 @@ export const selectComparisonVisitsByDaySeries = createSelector(
       .map(({ date, visits }) => ({
         x: dates.get(date) as string,
         y: visits,
-      }))
+      })),
 );
 
 // Calls by day
 export const selectCallsByDay = createSelector(
   selectCurrentData,
-  (data) => data?.calldriversByDay || []
+  (data) => data?.calldriversByDay || [],
 );
 export const selectCallsByDaySeries = createSelector(
   selectCallsByDay,
@@ -114,12 +124,12 @@ export const selectCallsByDaySeries = createSelector(
     callsByDay.map(({ date, calls }) => ({
       x: date,
       y: calls,
-    }))
+    })),
 );
 
 export const selectComparisonCallsByDay = createSelector(
   selectComparisonData,
-  (data) => data?.calldriversByDay || []
+  (data) => data?.calldriversByDay || [],
 );
 export const selectComparisonCallsByDaySeries = createSelector(
   selectComparisonCallsByDay,
@@ -130,7 +140,7 @@ export const selectComparisonCallsByDaySeries = createSelector(
       .map(({ date, calls }) => ({
         x: dates.get(date) as string,
         y: calls,
-      }))
+      })),
 );
 
 // Calls per 100 visits
@@ -150,7 +160,7 @@ export const selectCallsPerVisits = createSelector(
         };
       })
       .filter(({ y }) => y);
-  }
+  },
 );
 
 export const selectComparisonCallsPerVisits = createSelector(
@@ -171,7 +181,7 @@ export const selectComparisonCallsPerVisits = createSelector(
         };
       })
       .filter(({ y }) => y);
-  }
+  },
 );
 
 export const toCallsPerVisitsSeries =
@@ -190,14 +200,14 @@ export const selectCallsPerVisitsSeries = createSelector(
   selectCurrentDateRangeLabel,
   selectCallsPerVisits,
   selectDatePeriodSelection,
-  toCallsPerVisitsSeries('kpi-calls-per-100-title')
+  toCallsPerVisitsSeries('kpi-calls-per-100-title'),
 );
 
 export const selectComparisonCallsPerVisitsSeries = createSelector(
   selectComparisonDateRangeLabel,
   selectComparisonCallsPerVisits,
   selectDatePeriodSelection,
-  toCallsPerVisitsSeries('kpi-calls-per-100-title')
+  toCallsPerVisitsSeries('kpi-calls-per-100-title'),
 );
 
 export const selectCallsPerVisitsChartData = createSelector(
@@ -212,7 +222,7 @@ export const selectCallsPerVisitsChartData = createSelector(
     }
 
     return [comparison, current];
-  }
+  },
 );
 
 // Feedback to visits ratio
@@ -225,37 +235,35 @@ export const selectDyfNoPerVisitsSeries = createSelector(
     { dateRangeData, comparisonDateRangeData },
     dateRangeLabel,
     comparisonDateRangeLabel,
-    dates
+    dates,
   ) => {
-    const dyfByDay = dateRangeData?.dyfByDay || [];
-    const visitsByDay = dateRangeData?.visitsByDay || [];
-    const dyfDict = arrayToDictionary(dyfByDay, 'date');
+    const dyfByDay = dateRangeData?.dyfNoPerVisits || [];
 
-    const dyfNoPerVisitsSeries = visitsByDay.map(({ date, visits }) => ({
+    const dyfNoPerVisitsSeries = dyfByDay.map(({ date, value }) => ({
       x: date,
-      y: visits ? ((dyfDict[date]?.dyf_no || 0) / visits) * 1000 : NaN,
+      y: value ? value * 1000 : NaN,
     }));
 
-    const comparisonDyfByDay = comparisonDateRangeData?.dyfByDay || [];
+    // const comparisonDyfByDay = comparisonDateRangeData?.dyfByDay || [];
     const comparisonVisitsByDay = comparisonDateRangeData?.visitsByDay || [];
-    const comparisonDyfDict = arrayToDictionary(comparisonDyfByDay, 'date');
+    // const comparisonDyfDict = arrayToDictionary(comparisonDyfByDay, 'date');
 
     const comparisonDyfNoPerVisitsSeries = comparisonVisitsByDay
       .filter(({ date }) => dates.has(date))
-      .map(({ date, visits }) => {
+      .map(({ date, visits, dyfNo }) => {
         const currentDate = dates.get(date);
 
         return {
           x: currentDate,
           y:
             visits && currentDate
-              ? ((comparisonDyfDict[date]?.dyf_no || 0) / visits) * 1000
+              ? ((dyfNo || 0) / visits) * 1000
               : NaN,
         };
       });
 
     const isDyfNoPerVisitsEmpty = dyfNoPerVisitsSeries.every(
-      ({ y }) => y === 0 || isNaN(y)
+      ({ y }) => y === 0 || isNaN(y),
     );
     const isComparisonDyfNoPerVisitsEmpty =
       comparisonDyfNoPerVisitsSeries.every(({ y }) => y === 0 || isNaN(y));
@@ -276,5 +284,5 @@ export const selectDyfNoPerVisitsSeries = createSelector(
         data: dyfNoPerVisitsSeries,
       },
     ];
-  }
+  },
 );
