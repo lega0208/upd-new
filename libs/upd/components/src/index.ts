@@ -32,3 +32,4 @@ export * from './lib/filter-table/filter-table.component';
 export * from './lib/filter-table-selection/filter-table-selection.component';
 export * from './lib/did-you-know/did-you-know.component';
 export * from './lib/range-slider/range-slider.component';
+export * from './lib/heatmap/heatmap.component';
