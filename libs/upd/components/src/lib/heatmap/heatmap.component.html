@@ -10,7 +10,7 @@
         <section class="col-lg-4 col-md-12" [attr.aria-labelledby]="'header-' + m">
           <div class="month-container"
                [style.height.px]="55 + 50 * month.length" role="region" [attr.aria-labelledby]="'header-' + m">
-               <h2 [id]="'header-' + m" class="month-header">{{ getMonthStartDate(m) | localeDate : 'MMMM y' }}</h2>
+               <h2 [id]="'header-' + m" class="month-header">{{ getMonthStartDate(m) | date: 'MMMM y': undefined: currentLang() }}</h2>
             <div class="week-day-labels" role="presentation">
               <div *ngFor="let day of weekDays" class="day-label" aria-hidden="true">{{ day }}</div>
             </div>
@@ -20,13 +20,13 @@
                      [ngClass]="{'hidden-cell': isCellHidden(cell)}"
                      [attr.colored]="!cell.isEmpty && cell.fillColour ? 'true' : null"
                      [ngStyle]="{'background-color': cell.fillColour, 'color': cell.textColour}"
-                     [attr.aria-label]="cell.isEmpty ? null : (cell.date | localeDate: 'fullDate') + ', Value: ' + (cell.sum | localeNumber)"
+                     [attr.aria-label]="cell.isEmpty ? null : (cell.date | date: 'longDate': undefined: currentLang()) + ', Value: ' + (cell.sum | number: '1.0-0': currentLang())"
                      role="gridcell"
                      [tabindex]="!cell.isEmpty ? 0 : -1"
-                     [ngbTooltip]="!cell.isEmpty ? (cell.date | localeDate: dateParams) + ' - ' + (cell.sum | localeNumber) : ''">
+                     [ngbTooltip]="!cell.isEmpty ? (cell.date | date: 'longDate': undefined: currentLang()) + ' - ' + (cell.sum | number: '1.0-0': currentLang()) : ''">
                   <ng-container *ngIf="!cell.isEmpty">
                     <span class="day-number">{{ cell.date | date: 'd' }}</span>
-                    <span class="day-sum">{{ cell.sum | localeNumber }}</span>
+                    <span class="day-sum">{{ cell.sum | number: '1.0-0': currentLang() }}</span>
                   </ng-container>
                 </div>
               </div>
@@ -38,15 +38,15 @@
   </div>
 
   <aside class="legend" role="contentinfo">
-    <h3 class="legend-title">Legend</h3>
+    <h3 class="legend-title">{{ 'Legend' | translate }}</h3>
     <div class="legend-items" role="list">
       <ng-container *ngFor="let key of objectKeys(colorThresholds)">
         <div class="legend-item" role="listitem"
              (mouseenter)="setActiveColor(colorThresholds[key])" (mouseleave)="setActiveColor('')"
              (keydown.space)="setActiveColor(colorThresholds[key])"
-             tabindex="0" [attr.aria-label]="'Legend item for ' + key | titlecase">
+             tabindex="0" [attr.aria-label]="'Legend item for ' + key | translate">
           <div class="color-box" [style.background-color]="colorThresholds[key]"></div>
-          <div class="color-description">{{ key | titlecase }}</div>
+          <div class="color-description">{{ key | translate }}</div>
         </div>
       </ng-container>
     </div>

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, effect, inject } from '@angular/core';
+import { Component, Input, effect, inject } from '@angular/core';
 import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -43,7 +43,7 @@ export class HeatmapComponent<T> {
     lowest: '#FFF9C4',
     low: '#FFEB3B',
     medium: '#FFB74D',
-    high: '#FF7043',
+    high: '#FF8000',
     highest: '#D32F2F',
   };
   @Input() table: T[] = [];
@@ -176,13 +176,6 @@ export class HeatmapComponent<T> {
       .add(monthIndex, 'month')
       .startOf('month')
       .format('YYYY-MM-DD');
-  }
-
-  getFirstCellOfMonth(monthIndex: number): Cell | undefined {
-    const monthStart = this.getMonthStartDate(monthIndex);
-    return this.data.find(
-      (cell) => dayjs(cell.date).format('YYYY-MM-DD') === monthStart,
-    );
   }
 
   toggleActiveColor(color: string): void {

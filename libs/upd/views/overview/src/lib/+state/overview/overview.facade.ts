@@ -12,7 +12,7 @@ import type {
   OverviewAggregatedData,
   OverviewData,
 } from '@dua-upd/types-common';
-import { percentChange, type UnwrapObservable } from '@dua-upd/utils-common';
+import { percentChange, round, type UnwrapObservable } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
@@ -106,6 +106,23 @@ export class OverviewFacade {
     map((data) => data?.dateRangeData?.topPagesVisited || []),
   );
 
+  avgCommentsByDay$ = this.overviewData$.pipe(
+    map((data) => {
+      const total = data?.numComments || 0;
+      const totalDays = data?.dateRangeData?.feedbackByDay?.length || 0;
+
+      return round(total / totalDays, 0) || 0;
+    }),
+  );
+
+  avgCommentsByPage$ = this.overviewData$.pipe(
+    map((data) => {
+      const total = data?.numComments || 0;
+      const totalPages = data?.commentsByPage?.length || 0;
+      
+      return round(total / totalPages, 0) || 0;
+    }),
+  );
 
   topPagesVisitedWithPercentChange$ = this.overviewData$.pipe(
     mapObjectArraysWithPercentChange('topPagesVisited', 'visits', 'url'),
@@ -130,11 +147,11 @@ export class OverviewFacade {
   improvedKpi$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.improvedTasksKpi),
   );
- 
+
   improvedKpiUniqueTasks$ = this.improvedKpi$.pipe(
     map((improvedKpi) => improvedKpi?.uniqueTasks || 0),
   );
- 
+
   improvedKpiSuccessRate$ = this.improvedKpi$.pipe(
     map((improvedKpi) => improvedKpi?.successRates || 0),
   );
@@ -156,7 +173,7 @@ export class OverviewFacade {
   );
 
   testTypeTranslations$ = combineLatest([
-    this.projects$, 
+    this.projects$,
     this.currentLang$,
   ]).pipe(
     mergeMap(([projects]) => {
@@ -659,17 +676,15 @@ export class OverviewFacade {
     }),
   );
 
-  commentsByPage$ = this.overviewData$.pipe(map((data) => data?.commentsByPage));
+  commentsByPage$ = this.overviewData$.pipe(
+    map((data) => data?.commentsByPage),
+  );
 
-  feedbackByDay$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-  ]).pipe(
+  feedbackByDay$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       return data?.dateRangeData?.feedbackByDay || [];
-    }
-  ));
-
+    }),
+  );
 
   currentTotalComments$ = this.overviewData$.pipe(
     map(
@@ -719,7 +734,7 @@ export class OverviewFacade {
 
   calldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
     { field: 'tpc_id', header: 'tpc_id' },
-    { field: 'enquiry_line', header: 'enquiry_line', translate: true},
+    { field: 'enquiry_line', header: 'enquiry_line', translate: true },
     { field: 'topic', header: 'topic', translate: true },
     { field: 'subtopic', header: 'sub-topic', translate: true },
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
@@ -731,9 +746,7 @@ export class OverviewFacade {
   gcTasksTable$ = this.overviewData$.pipe(
     map((data) =>
       data?.dateRangeData?.gcTasksData.map((d) => {
-        const data_reliability = evaluateDataReliability(
-          d.margin_of_error,
-        );
+        const data_reliability = evaluateDataReliability(d.margin_of_error);
         const baseData = { ...d, data_reliability };
 
         return data_reliability === 'Insufficient data'
@@ -785,28 +798,57 @@ export class OverviewFacade {
   ]);
 
   gcTasksCommentsTable$ = this.overviewData$.pipe(
-    map((data) =>
-      data?.dateRangeData?.gcTasksComments || [],
-    ),
+    map((data) => data?.dateRangeData?.gcTasksComments || []),
   );
 
   gcTasksCommentsTableConfig$ = createColConfigWithI18n(this.i18n.service, [
     { field: 'date', header: 'Date', pipe: 'date' },
     { field: 'gc_task', header: 'gc_task', translate: true },
-    { field: 'gc_task_other', header: 'Other GC Task', translate: true, hide: true },
+    {
+      field: 'gc_task_other',
+      header: 'Other GC Task',
+      translate: true,
+      hide: true,
+    },
     { field: 'url', header: 'Survey Referrer', translate: true, hide: true },
     { field: 'language', header: 'Language', translate: true, hide: true },
     { field: 'device', header: 'Device', translate: true, hide: true },
     { field: 'screener', header: 'Screener', translate: true, hide: true },
     { field: 'theme', header: 'Theme', translate: true, hide: true },
-    { field: 'grouping', header: 'Grouping', translate: true, hide: true, tooltip: 'tooltip-grouping' },
+    {
+      field: 'grouping',
+      header: 'Grouping',
+      translate: true,
+      hide: true,
+      tooltip: 'tooltip-grouping',
+    },
     { field: 'able_to_complete', header: 'Able to Complete', translate: true },
     { field: 'ease', header: 'ease', translate: true },
     { field: 'satisfaction', header: 'satisfaction', translate: true },
-    { field: 'what_would_improve', header: 'What Would Improve', translate: true, hide: true },
-    { field: 'what_would_improve_comment', header: 'Improvement Comment', translate: true, tooltip: 'tooltip-improvement-comment' },
-    { field: 'reason_not_complete', header: 'Reason Not Complete', translate: true, hide: true },
-    { field: 'reason_not_complete_comment', header: 'Reason Not Complete Comment', translate: true, tooltip: 'tooltip-notcomplete-comment' },
+    {
+      field: 'what_would_improve',
+      header: 'What Would Improve',
+      translate: true,
+      hide: true,
+    },
+    {
+      field: 'what_would_improve_comment',
+      header: 'Improvement Comment',
+      translate: true,
+      tooltip: 'tooltip-improvement-comment',
+    },
+    {
+      field: 'reason_not_complete',
+      header: 'Reason Not Complete',
+      translate: true,
+      hide: true,
+    },
+    {
+      field: 'reason_not_complete_comment',
+      header: 'Reason Not Complete Comment',
+      translate: true,
+      tooltip: 'tooltip-notcomplete-comment',
+    },
   ]);
 
   top5IncreasedCalldriverTopics$ = this.overviewData$.pipe(
@@ -826,8 +868,8 @@ export class OverviewFacade {
   top5IncreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
     this.i18n.service,
     [
-      { field: 'tpc_id', header: 'tpc_id', translate: true},   
-      { field: 'enquiry_line', header: 'enquiry_line', translate: true},
+      { field: 'tpc_id', header: 'tpc_id', translate: true },
+      { field: 'enquiry_line', header: 'enquiry_line', translate: true },
       { field: 'topic', header: 'topic', translate: true },
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
@@ -853,8 +895,8 @@ export class OverviewFacade {
   top5DecreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
     this.i18n.service,
     [
-      { field: 'tpc_id', header: 'tpc_id', translate: true},   
-      { field: 'enquiry_line', header: 'enquiry_line', translate: true},
+      { field: 'tpc_id', header: 'tpc_id', translate: true },
+      { field: 'enquiry_line', header: 'enquiry_line', translate: true },
       { field: 'topic', header: 'topic', translate: true },
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
@@ -890,9 +932,11 @@ export class OverviewFacade {
     },
   ]);
 
-  feedbackMostRelevant = this.store.selectSignal(OverviewSelectors.selectFeedbackMostRelevant);
+  feedbackMostRelevant = this.store.selectSignal(
+    OverviewSelectors.selectFeedbackMostRelevant,
+  );
 
-  error$ = this.store.select(OverviewSelectors.selectOverviewError);  
+  error$ = this.store.select(OverviewSelectors.selectOverviewError);
 
   init() {
     this.store.dispatch(OverviewActions.init());

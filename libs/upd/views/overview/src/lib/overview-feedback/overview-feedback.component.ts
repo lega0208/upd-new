@@ -36,6 +36,9 @@ export class OverviewFeedbackComponent implements OnInit {
   currentTotalComments$ = this.overviewService.currentTotalComments$;
   commentsPercentChange$ = this.overviewService.commentsPercentChange$;
 
+  avgCommentsByDay$ = this.overviewService.avgCommentsByDay$;
+  avgCommentsByPage$ = this.overviewService.avgCommentsByPage$;
+
   feedbackByDay$ = this.overviewService.feedbackByDay$;
 
   fullDateRangeLabel$ = this.overviewService.fullDateRangeLabel$;
