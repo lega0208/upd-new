@@ -861,6 +861,36 @@ async function getOverviewMetrics(
     .limit(10)
     .exec();
 
+    const feedbackByDay = await feedbackModel
+    .aggregate<{ date: string; sum: number }>()
+    .project({
+      date: 1,
+      url: 1,
+    })
+    .match({
+      $and: [
+        { date: dateQuery },
+        // todo: remove url filter once there is logic in place to remove non-CRA pages from feedback collection
+        {
+          url: {
+            $regex:
+              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
+          },
+        },
+      ],
+    })
+    .group({
+      _id: '$date',
+      sum: { $sum: 1 },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      sum: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
+
   const aggregatedMetrics = await overallModel
     .aggregate<{
       visitors: number;
@@ -1064,6 +1094,7 @@ async function getOverviewMetrics(
     annotations,
     gcTasksData,
     gcTasksComments,
+    feedbackByDay
   };
 }
 

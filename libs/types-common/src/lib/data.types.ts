@@ -128,6 +128,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
     id: string;
     title: string;
   }[];
+  feedbackByDay: { date: string; sum: number }[];
   searchTerms: InternalSearchTerm[];
   readability: IReadability[];
   activityMap: ActivityMap[];
@@ -161,6 +162,7 @@ export interface OverviewAggregatedData {
   calldriversEnquiry: { enquiry_line: string; sum: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
+  feedbackByDay: { date: string; sum: number }[];
   searchAssessmentData: {
     lang: string;
     query: string;
@@ -419,6 +421,7 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     sum: number;
     percentChange: number | null;
   }[];
+  feedbackByDay: { date: string; sum: number }[];
   numComments: number;
   numCommentsPercentChange: number | null;
 }
@@ -549,6 +552,7 @@ export interface ProjectsDetailsData
     sum: number;
     percentChange: number | null;
   }[];
+  feedbackByDay: { date: string; sum: number }[];
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
   numComments: number;
   numCommentsPercentChange: number | null;

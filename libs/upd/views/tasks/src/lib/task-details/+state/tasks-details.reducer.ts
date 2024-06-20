@@ -45,6 +45,7 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     gscTotalPositionPercentChange: null,
     visitsByPage: [],
     feedbackByPage: [],
+    feedbackByDay: [],
     dateRange: '',
     comparisonDateRange: '',
     avgTaskSuccessFromLastTest: 0,

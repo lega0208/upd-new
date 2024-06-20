@@ -117,3 +117,10 @@
     </div>
   </div>
 </div>
+
+<upd-heatmap
+  [title]="'heatmap'"
+  [data]="(feedbackByDay$ | async) || []"
+  [tableCols]="feedbackByDayCols"
+  [table]="(feedbackByDay$ | async) || []"
+></upd-heatmap>

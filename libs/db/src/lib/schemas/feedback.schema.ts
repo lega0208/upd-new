@@ -150,6 +150,35 @@ FeedbackSchema.statics['getComments'] = async function (
   }));
 };
 
+FeedbackSchema.statics['getCommentsByDay'] = async function (
+  this: Model<Feedback>,
+  dateRange: string,
+  urls: string[],
+) {
+  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+  return this.aggregate<{ date: string; sum: number }>()
+    .project({
+      date: 1,
+      url: 1,
+    })
+    .match({
+      url: { $in: urls },
+      date: { $gte: startDate, $lte: endDate },
+    })
+    .group({
+      _id: '$date',
+      sum: { $sum: 1 },
+    })
+    .project({
+      _id: 0,
+      date: '$_id',
+      sum: 1,
+    })
+    .sort({ date: 1 })
+    .exec();
+};
+
 FeedbackSchema.statics['getCommentsByPage'] = async function (
   this: Model<Feedback>,
   dateRange: string,
@@ -276,4 +305,8 @@ export interface FeedbackModel extends Model<Feedback> {
       percentChange: number | null;
     }[]
   >;
+  getCommentsByDay: (
+    dateRange: string,
+    urls: string[],
+  ) => Promise<{ date: string; sum: number }[]>;
 }

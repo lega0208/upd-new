@@ -42,6 +42,22 @@ export class PagesDetailsFeedbackComponent implements OnInit {
   whatWasWrongChartLegend: string[] = [];
   whatWasWrongChartApex$ = this.pageDetailsService.whatWasWrongDataApex$;
 
+  feedbackByDay$ = this.pageDetailsService.feedbackByDay$;
+  feedbackByDayCols: ColumnConfig[] = [
+    {
+      field: 'date',
+      header: 'date',
+      pipe: 'date',
+      translate: true,
+    },
+    {
+      field: 'sum',
+      header: 'value',
+      pipe: 'number',
+      translate: true,
+    },
+  ];
+
   dateRangeLabel$ = this.pageDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.pageDetailsService.comparisonDateRangeLabel$;
 
@@ -105,27 +121,22 @@ export class PagesDetailsFeedbackComponent implements OnInit {
       this.dyfTableCols = [
         {
           field: 'name',
-          header: this.i18n.service.translate('Selection', lang),
+          header: 'Selection',
+          translate: true,
         },
         {
           field: 'currValue',
           header: dateRange,
           pipe: 'number',
+          translate: true,
         },
         {
           field: 'prevValue',
           header: comparisonDateRange,
           pipe: 'number',
+          translate: true,
         },
-      ];
-      this.whatWasWrongTableCols = [
-        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-      ];
+      ]
     });
   }
 }

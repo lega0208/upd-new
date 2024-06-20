@@ -148,6 +148,10 @@ export class ProjectsDetailsFacade {
   feedbackByPage$ = this.projectsDetailsData$.pipe(
     map((data) => data?.dateRangeData?.feedbackByPage),
   );
+
+  feedbackByDay$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.feedbackByDay),
+  );
   
   visitsByPageFeedbackWithPercentChange$ = this.projectsDetailsData$.pipe(
     map((data): ProjectsDetailsData => {

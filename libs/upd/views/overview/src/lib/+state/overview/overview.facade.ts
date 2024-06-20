@@ -661,6 +661,16 @@ export class OverviewFacade {
 
   commentsByPage$ = this.overviewData$.pipe(map((data) => data?.commentsByPage));
 
+  feedbackByDay$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) => {
+      return data?.dateRangeData?.feedbackByDay || [];
+    }
+  ));
+
+
   currentTotalComments$ = this.overviewData$.pipe(
     map(
       (data) =>
