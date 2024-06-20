@@ -30,7 +30,6 @@ import type {
   PagesHomeData,
   PagesHomeAggregatedData,
   ActivityMapMetrics,
-  PageStatus,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -299,6 +298,9 @@ export class PagesService {
       topSearchTermsIncrease: topIncreasedSearchTerms,
       topSearchTermsDecrease: topDecreasedSearchTerms,
       top25GSCSearchTerms: top25GSCSearchTerms,
+      feedbackByDay: await this.feedbackModel.getCommentsByDay(params.dateRange, [
+        page.url,
+      ]),
       searchTerms: await this.getTopSearchTerms(params),
       activityMap: await this.getActivityMapData(params),
       readability,

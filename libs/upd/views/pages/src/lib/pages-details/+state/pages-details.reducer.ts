@@ -24,6 +24,7 @@ export const pagesDetailsInitialState: PagesDetailsState = {
     title: '',
     dateRange: '',
     comparisonDateRange: '',
+    feedbackByDay: [],
     searchTerms: [],
     readability: [],
     activityMap: [],

@@ -549,6 +549,7 @@ export class ProjectsService {
         return attachment;
       }),
       feedbackByPage,
+      feedbackByDay: await this.feedbackModel.getCommentsByDay(params.dateRange, projectUrls),
       mostRelevantCommentsAndWords:
         await this.feedbackService.getMostRelevantCommentsAndWords({
           dateRange: parseDateRangeString(params.dateRange),

@@ -473,6 +473,8 @@ export class TasksService {
         params.comparisonDateRange,
         { tasks: taskId },
       );
+    
+    const feedbackByDay = await this.feedbackModel.getCommentsByDay(params.dateRange, taskUrls);
 
     const mostRelevantCommentsAndWords =
       await this.feedbackService.getMostRelevantCommentsAndWords({
@@ -564,6 +566,7 @@ export class TasksService {
       dateFromLastTest: null,
       searchTerms: await this.getTopSearchTerms(params),
       feedbackByPage,
+      feedbackByDay,
       mostRelevantCommentsAndWords,
       numComments,
       numCommentsPercentChange,
