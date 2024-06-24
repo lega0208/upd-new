@@ -553,6 +553,6 @@ margin: 0px 20px 0px 20px;
   align-items: center;
 }
 
-ol, ul[role='listbox'] {
+ol[role='listbox'], ul[role='listbox'] {
   padding-left: 0 !important;
 }
