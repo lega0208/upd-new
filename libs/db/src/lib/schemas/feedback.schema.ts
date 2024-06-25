@@ -179,7 +179,13 @@ export class Feedback implements IFeedback {
     dateRange: string,
     comparisonDateRange: string,
     idFilter?: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
-  ) {
+  ): Promise<
+    {
+      percentChange: number | null;
+      url: string;
+      sum: number;
+    }[]
+  > {
     const [commentsByPage, comparisonCommentsByPage] = await Promise.all([
       this.getCommentsByPage(dateRange, idFilter),
       this.getCommentsByPage(comparisonDateRange, idFilter),
