@@ -34,34 +34,49 @@
 </div>
 
 @if (feedbackMostRelevant()) {
-  <upd-accordion title="Most relevant words" headerClass="h6">
-    <upd-data-table
-      id="pages-feedback-most-relevant-words"
-      [filter]="true"
-      [sort]="true"
-      [pagination]="true"
-      [data]="mostRelevantWords() || []"
-      [cols]="mostRelevantWordsColumns"
-      [title]="'Most relevant words'"
-      [allowHeaderWrap]="true"
-    >
-    </upd-data-table>
-  </upd-accordion>
+  @if (mostRelevantWords() && mostRelevantWords()?.length) {
+    <upd-accordion title="Most frequent words" headerClass="h6">
+      <upd-data-table
+        id="pages-feedback-most-relevant-words"
+        [filter]="true"
+        [sort]="true"
+        [pagination]="true"
+        [data]="mostRelevantWords() || []"
+        [cols]="mostRelevantWordsColumns"
+        [title]="'Most frequent words'"
+        [allowHeaderWrap]="true"
+      >
+      </upd-data-table>
+    </upd-accordion>
+  } @else {
+    <upd-card [title]="'Most frequent words'" titleSize="h6">
+      <p>
+        <span [translate]="'nodata-available'"></span>
+      </p>
+    </upd-card>
+  }
 
   <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
         <upd-card [title]="'Most relevant comments'" titleSize="h6">
-          <upd-data-table
-            id="pages-feedback-most-relevant-comments"
-            [filter]="true"
-            [sort]="true"
-            [pagination]="true"
-            [data]="mostRelevantComments() || []"
-            [cols]="mostRelevantCommentsColumns"
-            [allowHeaderWrap]="true"
-          >
-          </upd-data-table>
+          @if (mostRelevantComments() && mostRelevantComments()?.length) {
+            <upd-data-table
+              id="pages-feedback-most-relevant-comments"
+              [filter]="true"
+              [sort]="true"
+              [pagination]="true"
+              [data]="mostRelevantComments() || []"
+              [cols]="mostRelevantCommentsColumns"
+              [columnSelection]="true"
+              [allowHeaderWrap]="true"
+            >
+            </upd-data-table>
+          } @else {
+            <p>
+              <span [translate]="'nodata-available'"></span>
+            </p>
+          }
         </upd-card>
       </div>
     </div>

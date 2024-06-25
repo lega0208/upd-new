@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import type {
   ColumnConfig,
   FeedbackWithScores,
@@ -35,10 +35,11 @@ export class TaskDetailsFeedbackComponent implements OnInit {
     currValue: number;
     prevValue: number;
   }>[] = [];
-  whatWasWrongTableCols: ColumnConfig[] = [];
 
   feedbackTotalComments$ = this.taskDetailsService.feedbackTotalComments$;
-  feedbackTotalCommentsPercentChange$ = this.taskDetailsService.feedbackTotalCommentsPercentChange$;
+
+  feedbackTotalCommentsPercentChange$ =
+    this.taskDetailsService.feedbackTotalCommentsPercentChange$;
 
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
@@ -49,7 +50,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   feedbackMostRelevant = this.taskDetailsService.feedbackMostRelevant;
 
   mostRelevantCommentsEn = computed(
-    () => this.feedbackMostRelevant().en.comments,
+    () => this.feedbackMostRelevant()?.en.comments,
   );
   mostRelevantWordsEn = computed(() => this.feedbackMostRelevant().en.words);
 
@@ -117,11 +118,23 @@ export class TaskDetailsFeedbackComponent implements OnInit {
           field: 'dyfYes',
           header: this.i18n.service.translate('yes', lang),
           pipe: 'number',
+          type: 'link',
+          typeParams: {
+            preLink: '/' + this.langLink + '/pages',
+            link: '_id',
+            postLink: 'pagefeedback',
+          },
         },
         {
           field: 'dyfNo',
           header: this.i18n.service.translate('no', lang),
           pipe: 'number',
+          type: 'link',
+          typeParams: {
+            preLink: '/' + this.langLink + '/pages',
+            link: '_id',
+            postLink: 'pagefeedback',
+          },
         },
         {
           field: 'dyfNoPercentChange',
@@ -142,7 +155,13 @@ export class TaskDetailsFeedbackComponent implements OnInit {
           header: 'Number of comments',
           pipe: 'number',
         },
+        {
+          field: 'commentsPercentChange',
+          header: 'Comparison for number of comments',
+          pipe: 'percent',
+        },
       ];
+
       this.dyfTableCols = [
         {
           field: 'name',
@@ -156,15 +175,6 @@ export class TaskDetailsFeedbackComponent implements OnInit {
         {
           field: 'prevValue',
           header: comparisonDateRange,
-          pipe: 'number',
-        },
-      ];
-
-      this.whatWasWrongTableCols = [
-        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
           pipe: 'number',
         },
       ];

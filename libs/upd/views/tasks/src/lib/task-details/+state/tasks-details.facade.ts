@@ -116,18 +116,19 @@ export class TasksDetailsFacade {
   visitsPercentChange$ = this.tasksDetailsData$.pipe(
     map((data) => data?.visitsPercentChange),
   );
-
+  
   visitsByPage$ = this.tasksDetailsData$.pipe(
     map((data) => {
       const { feedbackByPage } = data;
-      const feedbackByPageDict = arrayToDictionary(feedbackByPage, '_id');
+      const feedbackByPageDict = arrayToDictionary(feedbackByPage || [], '_id');
 
-      return data?.visitsByPage.map((visitsByPage) => {
-        const feedback = feedbackByPageDict[visitsByPage._id] || {};
+      return data?.visitsByPage?.map((visitsByPage) => {
+        const feedback = feedbackByPageDict[visitsByPage._id];
 
         return {
           ...visitsByPage,
           sum: feedback.sum || 0,
+          commentsPercentChange: feedback.percentChange || null,
         };
       });
     }),
@@ -683,7 +684,7 @@ export class TasksDetailsFacade {
   );
 
   feedbackTotalComments$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.numComments),
+    map((data) => data?.numComments || 0),
   );
   
   feedbackTotalCommentsPercentChange$ = this.tasksDetailsData$.pipe(

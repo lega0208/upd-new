@@ -149,50 +149,40 @@ export class ProjectsDetailsFacade {
   );
   
   visitsByPageFeedbackWithPercentChange$ = this.projectsDetailsData$.pipe(
-    map((data): ProjectsDetailsData => {
-      if (data.dateRangeData?.visitsByPage) {
-        const feedbackByPageDict = arrayToDictionary(
-          data?.feedbackByPage,
-          '_id',
-        );
+    map((data) => {
+      const feedbackByPageDict = arrayToDictionary(
+        data?.feedbackByPage,
+        '_id',
+      );
 
-        // data object is immutable, so we need to make a deep copy
-        // -> fastest and easiest way is to serialize/deserialize with JSON methods
-        const newData = JSON.parse(JSON.stringify(data));
+      const prevVisitsByPageDict = arrayToDictionary(data?.comparisonDateRangeData?.visitsByPage || [], '_id');
 
-        newData.dateRangeData.visitsByPage =
-          data.dateRangeData.visitsByPage.map((page) => {
-            const feedback = feedbackByPageDict[page._id] || { sum: 0 };
+      return data.dateRangeData?.visitsByPage.map((page) => {
+        const { sum, percentChange: commentsPercentChange } = feedbackByPageDict[page._id] || { sum: 0, percentChange: null };
 
-            if (page.visits === 0) {
-              return {
-                ...page,
-                sum: feedback.sum || 0,
-              };
-            }
+        const prevDyfNo = prevVisitsByPageDict[page._id]?.dyfNo || 0;
 
-            const totalFeedback = (page.dyfYes || 0) + (page.dyfNo || 0);
+        const dyfNoPercentChange = prevDyfNo ? percentChange(page.dyfNo || 0, prevDyfNo) : null;
 
-            if (totalFeedback === 0) {
-              return {
-                ...page,
-                sum: feedback.sum || 0,
-              };
-            }
+        const merged = {
+          ...page,
+          sum,
+          commentsPercentChange,
+          dyfNoPercentChange,
+        };
 
-            return {
-              ...page,
-              sum: feedback.sum || 0,
-              feedbackToVisitsRatio: totalFeedback / page.visits,
-            };
-          });
+        const totalFeedback = (page.dyfYes || 0) + (page.dyfNo || 0);
 
-        return newData;
-      }
+        if (page.visits === 0 || totalFeedback === 0) {
+          return merged;
+        }
 
-      return data;
+        return {
+          ...merged,
+          feedbackToVisitsRatio: totalFeedback / page.visits,
+        };
+      }) || [];
     }),
-    mapPageMetricsArraysWithPercentChange('visitsByPage', 'dyfNo'),
   );
 
   totalCalldriverPercentChange$ = this.projectsDetailsData$.pipe(
@@ -972,56 +962,6 @@ function mapToPercentChange(
   });
 }
 
-function mapObjectArraysWithPercentChange(
-  propName: keyof ProjectDetailsAggregatedData,
-  propPath: string,
-  sortPath?: string,
-) {
-  return map((data: ProjectsDetailsData) => {
-    if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
-      return;
-    }
-
-    const current = [...((data?.dateRangeData?.[propName] || []) as any[])];
-    const previous = [
-      ...((data?.comparisonDateRangeData?.[propName] || []) as any[]),
-    ];
-
-    const propsAreValidArrays =
-      Array.isArray(current) &&
-      Array.isArray(previous) &&
-      current.length > 0 &&
-      previous.length > 0 &&
-      current.length === previous.length;
-
-    if (propsAreValidArrays) {
-      const sortBy = (a: any, b: any) => {
-        if (sortPath && a[sortPath] instanceof Date) {
-          return a[sortPath] - b[sortPath];
-        }
-
-        if (sortPath && typeof a[sortPath] === 'string') {
-          return a[sortPath].localeCompare(b[sortPath]);
-        }
-
-        return 0;
-      };
-
-      current.sort(sortBy);
-      previous.sort(sortBy);
-
-      return current.map((val: any, i) => ({
-        ...val,
-        percentChange: percentChange(
-          val[propPath],
-          (previous as any)[i][propPath],
-        ),
-      }));
-    }
-
-    throw Error('Invalid data arrays in mapObjectArraysWithPercentChange');
-  });
-}
 function mapPageMetricsArraysWithPercentChange(
   propName: keyof ProjectDetailsAggregatedData,
   propPath: string,

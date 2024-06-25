@@ -361,16 +361,16 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
   status: string;
   channel: string[];
   core: string[];
-  visits: number;
-  visitsPercentChange: number | null;
-  gscTotalClicks: number;
-  gscTotalClicksPercentChange: number | null;
-  gscTotalImpressions: number;
-  gscTotalImpressionsPercentChange: number | null;
-  gscTotalCtr: number;
-  gscTotalCtrPercentChange: number | null;
-  gscTotalPosition: number;
-  gscTotalPositionPercentChange: number | null;
+  visits?: number;
+  visitsPercentChange?: number | null;
+  gscTotalClicks?: number;
+  gscTotalClicksPercentChange?: number | null;
+  gscTotalImpressions?: number;
+  gscTotalImpressionsPercentChange?: number | null;
+  gscTotalCtr?: number;
+  gscTotalCtrPercentChange?: number | null;
+  gscTotalPosition?: number;
+  gscTotalPositionPercentChange?: number | null;
   avgTaskSuccessFromLastTest: number;
   avgSuccessPercentChange: number;
   avgSuccessValueChange: number;
@@ -390,7 +390,7 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
   }[];
   searchTerms: InternalSearchTerm[];
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
-  visitsByPage: {
+  visitsByPage?: {
     _id: string;
     visits: number;
     dyfYes: number;
@@ -412,15 +412,15 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     gscTotalCtr: number,
     gscTotalPosition: number,
   }[];
-  feedbackByPage: {
+  feedbackByPage?: {
     _id: string;
     title: string;
     url: string;
     sum: number;
     percentChange: number | null;
   }[];
-  numComments: number;
-  numCommentsPercentChange: number | null;
+  numComments?: number;
+  numCommentsPercentChange?: number | null;
 }
 
 export type ProjectStatus =

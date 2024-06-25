@@ -455,14 +455,13 @@ export class TasksService {
       );
 
     const {
-      dyfYes,
-      dyfNo,
-      dyfNoComparison,
-      dyfYesComparison,
-      visitsByPage,
-      visits,
-      visitsComparison,
-    } = aggregatedMetrics;
+      dyfYes = 0,
+      dyfNo = 0,
+      dyfNoComparison = null,
+      dyfYesComparison = null,
+      visits = 0,
+      visitsComparison = null,
+    } = aggregatedMetrics || {};
 
     const feedbackByPage = (
       await this.feedbackService.getNumCommentsByPage(
@@ -550,16 +549,14 @@ export class TasksService {
         dyfYes: dyfYesComparison,
         dyfNo: dyfNoComparison,
       },
-      visitsByPage,
       ...omit(
         [
           'dyfYes',
           'dyfNo',
           'dyfNoComparison',
           'dyfYesComparison',
-          'visitsByPage',
         ],
-        aggregatedMetrics,
+        aggregatedMetrics || {},
       ),
       taskSuccessByUxTest: [],
       avgTaskSuccessFromLastTest: null, // todo: better handle N/A

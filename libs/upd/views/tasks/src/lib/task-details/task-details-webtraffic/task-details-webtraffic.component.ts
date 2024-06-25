@@ -43,11 +43,13 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
             header: this.i18n.service.translate('Search term language', lang),
             filterConfig: {
               type: 'category',
-              categories: createCategoryConfig({
-                i18n: this.i18n.service,
-                data,
-                field: 'language',
-              }),
+              categories: data
+                ? createCategoryConfig({
+                    i18n: this.i18n.service,
+                    data,
+                    field: 'language',
+                  })
+                : undefined,
             },
           },
           {
@@ -57,11 +59,13 @@ export class TaskDetailsWebtrafficComponent implements OnInit {
             typeParam: 'pageStatus',
             filterConfig: {
               type: 'pageStatus',
-              categories: createCategoryConfig({
-                i18n: this.i18n.service,
-                data,
-                field: 'pageStatus',
-              }),
+              categories: data
+                ? createCategoryConfig({
+                    i18n: this.i18n.service,
+                    data,
+                    field: 'pageStatus',
+                  })
+                : undefined,
             },
           },
           {

@@ -515,10 +515,10 @@ export type AggregatedMetricsWithPercentChange = {
   gscTotalCtr: number;
   gscTotalPosition: number;
   visitsPercentChange: number;
-  gscTotalClicksPercentChange: number;
-  gscTotalImpressionsPercentChange: number;
+  gscTotalClicksPercentChange: number | null;
+  gscTotalImpressionsPercentChange: number | null;
   gscTotalCtrPercentChange: number;
-  gscTotalPositionPercentChange: number;
+  gscTotalPositionPercentChange: number | null;
   visitsByPage: {
     _id: string;
     visits: number;
@@ -548,7 +548,7 @@ export async function getAggregatedMetrics(
   this: PageMetricsModel,
   dateRange: string,
   idFilter: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
-): Promise<AggregatedMetricsType> {
+): Promise<AggregatedMetricsType | null> {
   const [startDate, endDate] = dateRangeSplit(dateRange);
 
   const matchFilter: FilterQuery<PageMetrics> = {
@@ -619,7 +619,7 @@ export async function getAggregatedMetrics(
       },
     })
     .exec()
-    .then((data) => data?.[0]);
+    .then((data) => data && data?.[0]);
 }
 
 export async function getAggregatedMetricsWithComparison(
@@ -628,11 +628,15 @@ export async function getAggregatedMetricsWithComparison(
   comparisonDateRange: string,
   idFilter: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
   pages: IPage[],
-): Promise<AggregatedMetricsWithPercentChange> {
+): Promise<AggregatedMetricsWithPercentChange | null> {
   const [metrics, comparisonMetrics] = await Promise.all([
     this.getAggregatedMetrics(dateRange, idFilter),
     this.getAggregatedMetrics(comparisonDateRange, idFilter),
   ]);
+
+  if (!metrics) {
+    return null;
+  }
 
   const determinePageStatus = (page) => {
     if (page?.is_404) return '404';
@@ -640,10 +644,10 @@ export async function getAggregatedMetricsWithComparison(
     return 'Live';
   };
 
-  const metricsDict = arrayToDictionary(metrics.visitsByPage, '_id');
+  const metricsDict = arrayToDictionary(metrics.visitsByPage || [], '_id');
 
   const prevMetricsDict = arrayToDictionary(
-    comparisonMetrics.visitsByPage,
+    comparisonMetrics.visitsByPage || [],
     '_id',
   );
 
