@@ -19,14 +19,6 @@ type ParticipantTasksColTypes = GetTableProps<
   ProjectDetailsSummaryComponent,
   'participantTasks$'
 >;
-// type DyfTableColTypes = GetTableProps<
-//   ProjectDetailsSummaryComponent,
-//   'dyfChart$'
-// >;
-type WhatWasWrongColTypes = GetTableProps<
-  ProjectDetailsSummaryComponent,
-  'whatWasWrongChart$'
->;
 
 type DocumentsColTypes = GetTableProps<
   ProjectDetailsSummaryComponent,
@@ -81,13 +73,9 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   participantTasks$ = this.projectsDetailsService.projectTasks$;
 
   dyfChart$ = this.projectsDetailsService.dyfData$;
-  whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
 
   dyfChartApex$ = this.projectsDetailsService.dyfDataApex$;
   dyfChartLegend: string[] = [];
-
-  whatWasWrongChartLegend: string[] = [];
-  whatWasWrongChartApex$ = this.projectsDetailsService.whatWasWrongDataApex$;
 
   totalCalldriver$ = this.projectsDetailsService.totalCalldriver$;
   totalCalldriverPercentChange$ =
@@ -123,8 +111,6 @@ export class ProjectDetailsSummaryComponent implements OnInit {
     prevValue: string;
   }>[] = [];
 
-  whatWasWrongTableCols: ColumnConfig<WhatWasWrongColTypes>[] = [];
-
   dateRangeLabel$ = this.projectsDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ =
     this.projectsDetailsService.comparisonDateRangeLabel$;
@@ -153,13 +139,6 @@ export class ProjectDetailsSummaryComponent implements OnInit {
         this.i18n.service.translate('no', lang),
       ];
 
-      this.whatWasWrongChartLegend = [
-        this.i18n.service.translate('d3-cant-find-info', lang),
-        this.i18n.service.translate('d3-other', lang),
-        this.i18n.service.translate('d3-hard-to-understand', lang),
-        this.i18n.service.translate('d3-error', lang),
-      ];
-
       this.dyfTableCols = [
         {
           field: 'name',
@@ -173,15 +152,6 @@ export class ProjectDetailsSummaryComponent implements OnInit {
         {
           field: 'prevValue',
           header: comparisonDateRange,
-          pipe: 'number',
-        },
-      ];
-
-      this.whatWasWrongTableCols = [
-        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
           pipe: 'number',
         },
       ];

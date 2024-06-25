@@ -162,7 +162,6 @@ export interface OverviewAggregatedData {
   calldriversEnquiry: { enquiry_line: string; sum: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
-  feedbackByDay: { date: string; sum: number }[];
   searchAssessmentData: {
     lang: string;
     query: string;
@@ -284,6 +283,7 @@ export interface OverviewData
     sum: number;
     percentChange: number | null;
   }[];
+  feedbackByDay: { date: string; sum: number }[];
 }
 
 export type InternalSearchTerm = {
@@ -342,7 +342,7 @@ export interface TaskDetailsMetrics {
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
   calldriversByDay: { date: string; calls: number }[];
-  visitsByDay: { date: string; visits: number, dyfNo: number }[];
+  visitsByDay: { date: string; visits: number; dyfNo: number }[];
   dyfNoPerVisits: { date: string; value: number }[];
   totalCalldrivers: number;
   visits: number; // for calls/visits ratio
@@ -363,16 +363,16 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
   status: string;
   channel: string[];
   core: string[];
-  visits: number;
-  visitsPercentChange: number | null;
-  gscTotalClicks: number;
-  gscTotalClicksPercentChange: number | null;
-  gscTotalImpressions: number;
-  gscTotalImpressionsPercentChange: number | null;
-  gscTotalCtr: number;
-  gscTotalCtrPercentChange: number | null;
-  gscTotalPosition: number;
-  gscTotalPositionPercentChange: number | null;
+  visits?: number;
+  visitsPercentChange?: number | null;
+  gscTotalClicks?: number;
+  gscTotalClicksPercentChange?: number | null;
+  gscTotalImpressions?: number;
+  gscTotalImpressionsPercentChange?: number | null;
+  gscTotalCtr?: number;
+  gscTotalCtrPercentChange?: number | null;
+  gscTotalPosition?: number;
+  gscTotalPositionPercentChange?: number | null;
   avgTaskSuccessFromLastTest: number;
   avgSuccessPercentChange: number;
   avgSuccessValueChange: number;
@@ -392,7 +392,7 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
   }[];
   searchTerms: InternalSearchTerm[];
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
-  visitsByPage: {
+  visitsByPage?: {
     _id: string;
     visits: number;
     dyfYes: number;
@@ -409,12 +409,12 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     pageStatus: string;
     visitsPercentChange: number | null;
     dyfNoPercentChange: number | null;
-    gscTotalClicks: number,
-    gscTotalImpressions: number,
-    gscTotalCtr: number,
-    gscTotalPosition: number,
+    gscTotalClicks: number;
+    gscTotalImpressions: number;
+    gscTotalCtr: number;
+    gscTotalPosition: number;
   }[];
-  feedbackByPage: {
+  feedbackByPage?: {
     _id: string;
     title: string;
     url: string;
@@ -422,8 +422,8 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     percentChange: number | null;
   }[];
   feedbackByDay: { date: string; sum: number }[];
-  numComments: number;
-  numCommentsPercentChange: number | null;
+  numComments?: number;
+  numCommentsPercentChange?: number | null;
 }
 
 export type ProjectStatus =
@@ -524,9 +524,6 @@ export interface ProjectDetailsAggregatedData {
   callsByTopic: CallsByTopic[];
   callsByTasks: CallsByTasks[];
   totalCalldrivers: number;
-  pageMetricsByTasks: (Partial<ProjectDetailsAggregatedData> & {
-    title: string;
-  })[];
 }
 
 export interface ProjectsDetailsData

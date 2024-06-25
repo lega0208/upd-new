@@ -15,11 +15,6 @@ type VisitsByPageColType = GetTableProps<
   'visitsByPage$'
 >;
 
-type WhatWasWrongColTypes = GetTableProps<
-  ProjectDetailsFeedbackComponent,
-  'whatWasWrongChart$'
->;
-
 @Component({
   selector: 'upd-project-details-feedback',
   templateUrl: './project-details-feedback.component.html',
@@ -45,21 +40,14 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
 
   dyfChart$ = this.projectsDetailsService.dyfData$;
 
-  whatWasWrongChart$ = this.projectsDetailsService.whatWasWrongData$;
-
   dyfTableCols: ColumnConfig<{
     name: string;
     currValue: number;
     prevValue: string;
   }>[] = [];
 
-  whatWasWrongTableCols: ColumnConfig<WhatWasWrongColTypes>[] = [];
-
   dyfChartApex$ = this.projectsDetailsService.dyfDataApex$;
   dyfChartLegend: string[] = [];
-
-  whatWasWrongChartLegend: string[] = [];
-  whatWasWrongChartApex$ = this.projectsDetailsService.whatWasWrongDataApex$;
 
   feedbackTotalComments$ = this.projectsDetailsService.feedbackTotalComments$;
   commentsPercentChange$ = this.projectsDetailsService.commentsPercentChange$;
@@ -140,13 +128,6 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
         this.i18n.service.translate('no', lang),
       ];
 
-      this.whatWasWrongChartLegend = [
-        this.i18n.service.translate('d3-cant-find-info', lang),
-        this.i18n.service.translate('d3-other', lang),
-        this.i18n.service.translate('d3-hard-to-understand', lang),
-        this.i18n.service.translate('d3-error', lang),
-      ];
-
       this.visitsByPageCols = [
         {
           field: 'url',
@@ -177,7 +158,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
           },
         },
         {
-          field: 'percentChange',
+          field: 'dyfNoPercentChange',
           header: this.i18n.service.translate('comparison-for-No-answer', lang),
           pipe: 'percent',
         },
@@ -194,6 +175,11 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
           field: 'sum',
           header: 'Number of comments',
           pipe: 'number',
+        },
+        {
+          field: 'commentsPercentChange',
+          header: 'Comparison (for number of comments)',
+          pipe: 'percent',
         }
       ];
 
@@ -210,14 +196,6 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
         {
           field: 'prevValue',
           header: comparisonDateRange,
-          pipe: 'number',
-        },
-      ];
-      this.whatWasWrongTableCols = [
-        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
           pipe: 'number',
         },
       ];

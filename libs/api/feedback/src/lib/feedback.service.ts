@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Types, type FilterQuery } from 'mongoose';
+// need mongo import or TS will complain about missing types
+import { Types, type FilterQuery, type mongo } from 'mongoose';
 import { omit } from 'rambdax';
 import { DbService, Feedback } from '@dua-upd/db';
 import { arrayToDictionary, type DateRange } from '@dua-upd/utils-common';
 import { FeedbackCache } from './feedback.cache';
 import type {
-  FeedbackWithScores,
   IFeedback,
   MostRelevantCommentsAndWords,
   MostRelevantCommentsAndWordsByLang,
@@ -31,6 +31,42 @@ export class FeedbackService {
     private db: DbService,
     private cache: FeedbackCache,
   ) {}
+
+  // with percent change
+  async getNumCommentsByPage(
+    dateRange: string,
+    comparisonDateRange: string,
+    idFilter?: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
+  ) {
+    const numCommentsByPage =
+      await this.db.collections.feedback.getCommentsByPageWithComparison(
+        dateRange,
+        comparisonDateRange,
+        idFilter,
+      );
+
+    const defaultValues = {
+      sum: 0,
+      percentChange: null,
+    };
+
+    // for overview, don't merge all pages with 0 comments
+    const defaultsConfig = idFilter ? { defaultValues } : { noDefaults: true };
+
+    return this.db.collections.pages.mergePages(numCommentsByPage, {
+      dataJoinProp: 'url',
+      pagesJoinProp: 'url',
+      filter: idFilter,
+      ...defaultsConfig,
+      projection: {
+        airtable_id: 0,
+        altLangHref: 0,
+        lastChecked: 0,
+        lastModified: 0,
+        metadata: 0,
+      },
+    });
+  }
 
   async calculateRelevanceScores(
     params: RelevanceScoreParams,

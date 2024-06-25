@@ -317,11 +317,8 @@ export class TasksService {
 
       const uxTestsForTask = uxTestsDict[task._id.toString()] ?? [];
 
-      const {
-        avgTestSuccess,
-        latestDate,
-        percentChange: latest_success_rate,
-      } = getAvgSuccessFromLatestTests(uxTestsForTask);
+      const { avgTestSuccess, percentChange: latest_success_rate } =
+        getAvgSuccessFromLatestTests(uxTestsForTask);
 
       const latest_success_rate_percent_change = percentChange(
         avgTestSuccess,
@@ -443,7 +440,7 @@ export class TasksService {
 
     const pages = await this.pageModel
       .find(
-        { tasks: new Types.ObjectId(taskId) },
+        { tasks: taskId },
         { title: 1, url: 1, lang: 1, is_404: 1, redirect: 1 },
       )
       .lean()
@@ -458,23 +455,29 @@ export class TasksService {
       );
 
     const {
-      dyfYes,
-      dyfNo,
-      dyfNoComparison,
-      dyfYesComparison,
-      visitsByPage,
-      visits,
-      visitsComparison,
-    } = aggregatedMetrics;
+      dyfYes = 0,
+      dyfNo = 0,
+      dyfNoComparison = null,
+      dyfYesComparison = null,
+      visits = 0,
+      visitsComparison = null,
+    } = aggregatedMetrics || {};
 
-    const feedbackByPage =
-      await this.feedbackModel.getCommentsByPageWithComparison(
+    const feedbackByPage = (
+      await this.feedbackService.getNumCommentsByPage(
         params.dateRange,
         params.comparisonDateRange,
         { tasks: taskId },
-      );
+      )
+    ).map(({ _id, title, url, sum, percentChange }) => ({
+      _id: _id.toString(),
+      title,
+      url,
+      sum,
+      percentChange,
+    }));
     
-    const feedbackByDay = await this.feedbackModel.getCommentsByDay(params.dateRange, taskUrls);
+    const feedbackByDay = await this.feedbackModel.getCommentsByDay(params.dateRange, { tasks: taskId });
 
     const mostRelevantCommentsAndWords =
       await this.feedbackService.getMostRelevantCommentsAndWords({
@@ -548,16 +551,14 @@ export class TasksService {
         dyfYes: dyfYesComparison,
         dyfNo: dyfNoComparison,
       },
-      visitsByPage,
       ...omit(
         [
           'dyfYes',
           'dyfNo',
           'dyfNoComparison',
           'dyfYesComparison',
-          'visitsByPage',
         ],
-        aggregatedMetrics,
+        aggregatedMetrics || {},
       ),
       taskSuccessByUxTest: [],
       avgTaskSuccessFromLastTest: null, // todo: better handle N/A
@@ -604,6 +605,7 @@ export class TasksService {
         percentChange: returnData.avgSuccessPercentChange,
       } = getAvgSuccessFromLatestTests(uxTests));
 
+      returnData.avgSuccessValueChange = returnData.avgSuccessPercentChange;
       returnData.avgSuccessValueChange = returnData.avgSuccessPercentChange;
 
       returnData.avgSuccessPercentChange = percentChange(

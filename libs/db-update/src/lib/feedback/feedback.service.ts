@@ -106,7 +106,7 @@ export class FeedbackService {
       ({ problemDate, url, language, problemDetails, theme }) => ({
         _id: new Types.ObjectId(),
         date: new Date(problemDate),
-        url,
+        url: url.replace(/^https:\/\//, ''),
         lang: language.toUpperCase(),
         comment: problemDetails,
         theme,

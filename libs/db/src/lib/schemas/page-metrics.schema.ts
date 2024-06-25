@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types, FilterQuery } from 'mongoose';
+import { type Document, Types, type FilterQuery } from 'mongoose';
 import type {
   GscSearchTermMetrics,
   AccumulatorOperator,
@@ -10,16 +10,16 @@ import type {
   IProject,
   IUxTest,
   IPage,
-  metrics,
 } from '@dua-upd/types-common';
 import {
-  DateRange,
+  type DateRange,
+  ModelWithStatics,
   arrayToDictionary,
   dateRangeSplit,
   percentChange,
 } from '@dua-upd/utils-common';
-import { Page } from './page.schema';
-import { PageMetricsTS } from './page-metrics-ts.schema';
+import type { Page } from './page.schema';
+import type { PageMetricsTS } from './page-metrics-ts.schema';
 
 export type PageMetricsDocument = PageMetrics & Document;
 
@@ -305,10 +305,6 @@ PageMetricsSchema.index(
   },
 );
 
-export function getPageMetricsModel() {
-  return model(PageMetrics.name, PageMetricsSchema);
-}
-
 export type MetricsConfig<T> = {
   [key in AccumulatorOperator]?: keyof Partial<T>;
 };
@@ -519,10 +515,10 @@ export type AggregatedMetricsWithPercentChange = {
   gscTotalCtr: number;
   gscTotalPosition: number;
   visitsPercentChange: number;
-  gscTotalClicksPercentChange: number;
-  gscTotalImpressionsPercentChange: number;
+  gscTotalClicksPercentChange: number | null;
+  gscTotalImpressionsPercentChange: number | null;
   gscTotalCtrPercentChange: number;
-  gscTotalPositionPercentChange: number;
+  gscTotalPositionPercentChange: number | null;
   visitsByPage: {
     _id: string;
     visits: number;
@@ -538,10 +534,10 @@ export type AggregatedMetricsWithPercentChange = {
     is404: boolean;
     isRedirect: boolean;
     pageStatus: string;
-    gscTotalClicks: number,
-    gscTotalImpressions: number,
-    gscTotalCtr: number,
-    gscTotalPosition: number,
+    gscTotalClicks: number;
+    gscTotalImpressions: number;
+    gscTotalCtr: number;
+    gscTotalPosition: number;
     visitsPercentChange: number | null;
     dyfNoPercentChange: number | null;
   }[];
@@ -552,7 +548,7 @@ export async function getAggregatedMetrics(
   this: PageMetricsModel,
   dateRange: string,
   idFilter: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
-): Promise<AggregatedMetricsType> {
+): Promise<AggregatedMetricsType | null> {
   const [startDate, endDate] = dateRangeSplit(dateRange);
 
   const matchFilter: FilterQuery<PageMetrics> = {
@@ -623,7 +619,7 @@ export async function getAggregatedMetrics(
       },
     })
     .exec()
-    .then((data) => data?.[0]);
+    .then((data) => data && data?.[0]);
 }
 
 export async function getAggregatedMetricsWithComparison(
@@ -632,11 +628,15 @@ export async function getAggregatedMetricsWithComparison(
   comparisonDateRange: string,
   idFilter: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
   pages: IPage[],
-): Promise<AggregatedMetricsWithPercentChange> {
+): Promise<AggregatedMetricsWithPercentChange | null> {
   const [metrics, comparisonMetrics] = await Promise.all([
     this.getAggregatedMetrics(dateRange, idFilter),
     this.getAggregatedMetrics(comparisonDateRange, idFilter),
   ]);
+
+  if (!metrics) {
+    return null;
+  }
 
   const determinePageStatus = (page) => {
     if (page?.is_404) return '404';
@@ -644,10 +644,10 @@ export async function getAggregatedMetricsWithComparison(
     return 'Live';
   };
 
-  const metricsDict = arrayToDictionary(metrics.visitsByPage, '_id');
+  const metricsDict = arrayToDictionary(metrics.visitsByPage || [], '_id');
 
   const prevMetricsDict = arrayToDictionary(
-    comparisonMetrics.visitsByPage,
+    comparisonMetrics.visitsByPage || [],
     '_id',
   );
 
@@ -717,16 +717,13 @@ export async function getAggregatedMetricsWithComparison(
   };
 }
 
-PageMetricsSchema.statics = {
+const statics = {
   getAggregatedPageMetrics,
   toTimeSeries,
   getAggregatedMetrics,
   getAggregatedMetricsWithComparison,
 };
 
-export type PageMetricsModel = Model<PageMetrics> & {
-  getAggregatedPageMetrics: typeof getAggregatedPageMetrics;
-  toTimeSeries: typeof toTimeSeries;
-  getAggregatedMetrics: typeof getAggregatedMetrics;
-  getAggregatedMetricsWithComparison: typeof getAggregatedMetricsWithComparison;
-};
+PageMetricsSchema.statics = statics;
+
+export type PageMetricsModel = ModelWithStatics<PageMetrics, typeof statics>;

@@ -34,71 +34,97 @@
 </div>
 
 @if (feedbackMostRelevant()) {
-  <upd-accordion title="Most relevant words (EN)" headerClass="h6">
-    <upd-data-table
-      id="projects-feedback-most-relevant-words-en"
-      [filter]="true"
-      [sort]="true"
-      [pagination]="true"
-      [data]="mostRelevantWordsEn() || []"
-      [cols]="mostRelevantWordsColumns"
-      [title]="'Most relevant words (EN)'"
-      [columnSelection]="true"
-      [allowHeaderWrap]="true"
-    >
-    </upd-data-table>
-  </upd-accordion>
+  @if (mostRelevantWordsEn() && mostRelevantWordsEn().length) {
+    <upd-accordion title="Most frequent words (EN)" headerClass="h6">
+      <upd-data-table
+        id="projects-feedback-most-relevant-words-en"
+        [filter]="true"
+        [sort]="true"
+        [pagination]="true"
+        [data]="mostRelevantWordsEn()"
+        [cols]="mostRelevantWordsColumns"
+        [title]="'Most frequent words (EN)'"
+        [allowHeaderWrap]="true"
+      >
+      </upd-data-table>
+    </upd-accordion>
+  } @else {
+    <upd-card [title]="'Most frequent words (EN)'" titleSize="h6">
+      <p>
+        <span [translate]="'nodata-available'"></span>
+      </p>
+    </upd-card>
+  }
 
   <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
         <upd-card [title]="'Most relevant comments (EN)'" titleSize="h6">
-          <upd-data-table
-            id="projects-feedback-most-relevant-comments-en"
-            [filter]="true"
-            [sort]="true"
-            [pagination]="true"
-            [data]="mostRelevantCommentsEn() || []"
-            [cols]="mostRelevantCommentsColumns"
-            [columnSelection]="true"
-            [allowHeaderWrap]="true"
-          >
-          </upd-data-table>
+          @if (mostRelevantCommentsEn() && mostRelevantCommentsEn().length) {
+            <upd-data-table
+              id="projects-feedback-most-relevant-comments-en"
+              [filter]="true"
+              [sort]="true"
+              [pagination]="true"
+              [data]="mostRelevantCommentsEn()"
+              [cols]="mostRelevantCommentsColumns"
+              [columnSelection]="true"
+              [allowHeaderWrap]="true"
+            >
+            </upd-data-table>
+          } @else {
+            <p>
+              <span [translate]="'nodata-available'"></span>
+            </p>
+          }
         </upd-card>
       </div>
     </div>
   </div>
 
-  <upd-accordion title="Most relevant words (FR)">
-    <upd-data-table
-      id="projects-feedback-most-relevant-words-fr"
-      [filter]="true"
-      [sort]="true"
-      [pagination]="true"
-      [data]="mostRelevantWordsFr() || []"
-      [cols]="mostRelevantWordsColumns"
-      [title]="'Most relevant words (FR)'"
-      [columnSelection]="true"
-      [allowHeaderWrap]="true"
-    >
-    </upd-data-table>
-  </upd-accordion>
+  @if (mostRelevantWordsFr() && mostRelevantWordsFr().length) {
+    <upd-accordion title="Most frequent words (FR)">
+      <upd-data-table
+        id="projects-feedback-most-relevant-words-fr"
+        [filter]="true"
+        [sort]="true"
+        [pagination]="true"
+        [data]="mostRelevantWordsFr() || []"
+        [cols]="mostRelevantWordsColumns"
+        [title]="'Most frequent words (FR)'"
+        [allowHeaderWrap]="true"
+      >
+      </upd-data-table>
+    </upd-accordion>
+  } @else {
+    <upd-card [title]="'Most frequent words (FR)'" titleSize="h6">
+      <p>
+        <span [translate]="'nodata-available'"></span>
+      </p>
+    </upd-card>
+  }
 
   <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
         <upd-card [title]="'Most relevant comments (FR)'" titleSize="h6">
-          <upd-data-table
-            id="projects-feedback-most-relevant-comments-fr"
-            [filter]="true"
-            [sort]="true"
-            [pagination]="true"
-            [data]="mostRelevantCommentsFr() || []"
-            [cols]="mostRelevantCommentsColumns"
-            [columnSelection]="true"
-            [allowHeaderWrap]="true"
-          >
-          </upd-data-table>
+          @if (mostRelevantCommentsFr() && mostRelevantCommentsFr().length) {
+            <upd-data-table
+              id="projects-feedback-most-relevant-comments-fr"
+              [filter]="true"
+              [sort]="true"
+              [pagination]="true"
+              [data]="mostRelevantCommentsFr() || []"
+              [cols]="mostRelevantCommentsColumns"
+              [columnSelection]="true"
+              [allowHeaderWrap]="true"
+            >
+            </upd-data-table>
+          } @else {
+            <p>
+              <span [translate]="'nodata-available'"></span>
+            </p>
+          }
         </upd-card>
       </div>
     </div>
@@ -112,6 +138,7 @@
         [data]="(visitsByPage$ | async) || []"
         [cols]="visitsByPageCols"
         [title]="'Breakdown by Page - Did you find what you were looking for?'"
+        [allowHeaderWrap]="true"
       >
       </upd-data-table-card>
     </div>
