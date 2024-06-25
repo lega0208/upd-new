@@ -893,60 +893,6 @@ async function getAggregatedProjectMetrics(
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 
-  const taskIds = tasks.map((task: Types.ObjectId | Task) => task._id);
-
-  console.time('pageMetricsByTasks');
-
-  const pageMetricsByTasks = await pageMetricsModel
-    .aggregate<Partial<ProjectDetailsAggregatedData> & { title: string }>()
-    .match({
-      date: { $gte: startDate, $lte: endDate },
-      tasks: { $elemMatch: { $in: taskIds } },
-      projects: id,
-    })
-    .lookup({
-      from: 'tasks',
-      localField: 'tasks',
-      foreignField: '_id',
-      as: 'task',
-    })
-    .unwind('$task')
-    .match({ 'task._id': { $in: taskIds } })
-    .group({
-      _id: { taskId: '$task._id', taskTitle: '$task.title' },
-      page: { $first: '$page' },
-      visits: { $sum: '$visits' },
-      dyfYes: { $sum: '$dyf_yes' },
-      dyfNo: { $sum: '$dyf_no' },
-      fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
-      fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
-      fwylfOther: { $sum: '$fwylf_other' },
-      fwylfError: { $sum: '$fwylf_error' },
-      gscTotalClicks: { $sum: '$gsc_total_clicks' },
-      gscTotalImpressions: { $sum: '$gsc_total_impressions' },
-      gscTotalCtr: { $avg: '$gsc_total_ctr' },
-      gscTotalPosition: { $avg: '$gsc_total_position' },
-    })
-    .project({
-      _id: 0,
-      title: '$_id.taskTitle',
-      pages: 1, // add this line to include the page array in the output
-      visits: 1,
-      dyfYes: 1,
-      dyfNo: 1,
-      fwylfCantFindInfo: 1,
-      fwylfHardToUnderstand: 1,
-      fwylfOther: 1,
-      fwylfError: 1,
-      gscTotalClicks: 1,
-      gscTotalImpressions: 1,
-      gscTotalCtr: 1,
-      gscTotalPosition: 1,
-    })
-    .exec();
-
-  console.timeEnd('pageMetricsByTasks');
-
   const feedbackComments = await getProjectFeedbackComments(
     dateRange,
     projectUrls,
@@ -962,7 +908,6 @@ async function getAggregatedProjectMetrics(
     visitsByDay,
     dyfByDay,
     calldriversByDay,
-    pageMetricsByTasks,
     feedbackComments,
   };
 }
