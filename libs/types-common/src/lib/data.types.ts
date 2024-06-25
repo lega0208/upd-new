@@ -162,7 +162,6 @@ export interface OverviewAggregatedData {
   calldriversEnquiry: { enquiry_line: string; sum: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
-  feedbackByDay: { date: string; sum: number }[];
   searchAssessmentData: {
     lang: string;
     query: string;
@@ -284,6 +283,7 @@ export interface OverviewData
     sum: number;
     percentChange: number | null;
   }[];
+  feedbackByDay: { date: string; sum: number }[];
 }
 
 export type InternalSearchTerm = {

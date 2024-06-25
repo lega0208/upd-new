@@ -40,6 +40,7 @@ export const initialState: OverviewState = {
     numComments: 0,
     numCommentsPercentChange: null,
     commentsByPage: [],
+    feedbackByDay: [],
   },
   loaded: false,
   loading: false,

@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -12,7 +12,11 @@ import type {
   OverviewAggregatedData,
   OverviewData,
 } from '@dua-upd/types-common';
-import { percentChange, round, type UnwrapObservable } from '@dua-upd/utils-common';
+import {
+  percentChange,
+  round,
+  type UnwrapObservable,
+} from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
@@ -109,9 +113,9 @@ export class OverviewFacade {
   avgCommentsByDay$ = this.overviewData$.pipe(
     map((data) => {
       const total = data?.numComments || 0;
-      const totalDays = data?.dateRangeData?.feedbackByDay?.length || 0;
+      const totalDays = data?.feedbackByDay?.length || null;
 
-      return round(total / totalDays, 0) || 0;
+      return totalDays ? round(total / totalDays, 0) : null;
     }),
   );
 
@@ -119,7 +123,7 @@ export class OverviewFacade {
     map((data) => {
       const total = data?.numComments || 0;
       const totalPages = data?.commentsByPage?.length || 0;
-      
+
       return round(total / totalPages, 0) || 0;
     }),
   );
@@ -680,9 +684,9 @@ export class OverviewFacade {
     map((data) => data?.commentsByPage),
   );
 
-  feedbackByDay$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => {
-      return data?.dateRangeData?.feedbackByDay || [];
+  feedbackByDay$ = this.overviewData$.pipe(
+    map((data) => {
+      return data?.feedbackByDay || [];
     }),
   );
 
