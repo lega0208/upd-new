@@ -46,7 +46,7 @@
 </div>
 
 @if (feedbackMostRelevant()) {
-  <upd-accordion title="Most relevant words (EN)" headerClass="h6">
+  <upd-accordion title="Most frequent words (EN)" headerClass="h6">
     <upd-data-table
       id="overview-feedback-most-relevant-words-en"
       [filter]="true"
@@ -54,8 +54,7 @@
       [pagination]="true"
       [data]="mostRelevantWordsEn() || []"
       [cols]="mostRelevantWordsColumns"
-      [title]="'Most relevant words (EN)'"
-      [columnSelection]="true"
+      [title]="'Most frequent words (EN)'"
       [allowHeaderWrap]="true"
     >
     </upd-data-table>
@@ -81,7 +80,7 @@
     </div>
   </div>
 
-  <upd-accordion title="Most relevant words (FR)">
+  <upd-accordion title="Most frequent words (FR)">
     <upd-data-table
       id="overview-feedback-most-relevant-words-fr"
       [filter]="true"
@@ -89,8 +88,7 @@
       [pagination]="true"
       [data]="mostRelevantWordsFr() || []"
       [cols]="mostRelevantWordsColumns"
-      [title]="'Most relevant words (FR)'"
-      [columnSelection]="true"
+      [title]="'Most frequent words (FR)'"
       [allowHeaderWrap]="true"
     >
     </upd-data-table>

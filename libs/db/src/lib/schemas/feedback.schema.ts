@@ -205,14 +205,17 @@ export class Feedback implements IFeedback {
   static async getCommentsByDay(
     this: FeedbackModel,
     dateRange: string,
-    idFilter?: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
+    idFilter?:
+      | { page: Types.ObjectId }
+      | { tasks: Types.ObjectId }
+      | { projects: Types.ObjectId },
   ) {
     const [startDate, endDate] = dateRangeSplit(dateRange);
-    
+
     const projection = idFilter
       ? Object.fromEntries(Object.keys(idFilter).map((key) => [key, 1]))
       : {};
-      
+
     const matchFilter: FilterQuery<Feedback> = {
       date: {
         $gte: startDate,
@@ -220,12 +223,12 @@ export class Feedback implements IFeedback {
       },
       ...(idFilter || {}),
     };
-  
+
     return this.aggregate<{ date: string; sum: number }>()
       .project({
         date: 1,
         url: 1,
-        ...projection
+        ...projection,
       })
       .match(matchFilter)
       .group({

@@ -556,7 +556,10 @@ export class ProjectsService {
         return attachment;
       }),
       feedbackByPage,
-      feedbackByDay: await this.feedbackModel.getCommentsByDay(params.dateRange, projectUrls),
+      feedbackByDay: await this.feedbackModel.getCommentsByDay(
+        params.dateRange,
+        { projects: projectId },
+      ),
       mostRelevantCommentsAndWords:
         await this.feedbackService.getMostRelevantCommentsAndWords({
           dateRange: parseDateRangeString(params.dateRange),

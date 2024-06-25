@@ -173,7 +173,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
         },
         {
           field: 'commentsPercentChange',
-          header: 'Comparison for number of comments',
+          header: 'Comparison (for number of comments)',
           pipe: 'percent',
         },
       ];
