@@ -128,6 +128,7 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
     id: string;
     title: string;
   }[];
+  feedbackByDay: { date: string; sum: number }[];
   searchTerms: InternalSearchTerm[];
   readability: IReadability[];
   activityMap: ActivityMap[];
@@ -161,6 +162,7 @@ export interface OverviewAggregatedData {
   calldriversEnquiry: { enquiry_line: string; sum: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
+  feedbackByDay: { date: string; sum: number }[];
   searchAssessmentData: {
     lang: string;
     query: string;
@@ -340,7 +342,7 @@ export interface TaskDetailsMetrics {
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
   calldriversByDay: { date: string; calls: number }[];
-  visitsByDay: { date: string; visits: number, dyfNo: number }[];
+  visitsByDay: { date: string; visits: number; dyfNo: number }[];
   dyfNoPerVisits: { date: string; value: number }[];
   totalCalldrivers: number;
   visits: number; // for calls/visits ratio
@@ -407,10 +409,10 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     pageStatus: string;
     visitsPercentChange: number | null;
     dyfNoPercentChange: number | null;
-    gscTotalClicks: number,
-    gscTotalImpressions: number,
-    gscTotalCtr: number,
-    gscTotalPosition: number,
+    gscTotalClicks: number;
+    gscTotalImpressions: number;
+    gscTotalCtr: number;
+    gscTotalPosition: number;
   }[];
   feedbackByPage?: {
     _id: string;
@@ -419,6 +421,7 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     sum: number;
     percentChange: number | null;
   }[];
+  feedbackByDay: { date: string; sum: number }[];
   numComments?: number;
   numCommentsPercentChange?: number | null;
 }
@@ -549,6 +552,7 @@ export interface ProjectsDetailsData
     sum: number;
     percentChange: number | null;
   }[];
+  feedbackByDay: { date: string; sum: number }[];
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
   numComments: number;
   numCommentsPercentChange: number | null;

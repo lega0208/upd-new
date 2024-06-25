@@ -19,8 +19,27 @@ export class OverviewFeedbackComponent implements OnInit {
   private i18n = inject(I18nFacade);
   currentLang$ = this.i18n.currentLang$;
 
+  feedbackByDayCols: ColumnConfig[] = [
+    {
+      field: 'date',
+      header: 'date',
+      pipe: 'date',
+      translate: true,
+    },
+    {
+      field: 'sum',
+      header: 'value',
+      translate: true,
+    },
+  ];
+
   currentTotalComments$ = this.overviewService.currentTotalComments$;
   commentsPercentChange$ = this.overviewService.commentsPercentChange$;
+
+  avgCommentsByDay$ = this.overviewService.avgCommentsByDay$;
+  avgCommentsByPage$ = this.overviewService.avgCommentsByPage$;
+
+  feedbackByDay$ = this.overviewService.feedbackByDay$;
 
   fullDateRangeLabel$ = this.overviewService.fullDateRangeLabel$;
   fullComparisonDateRangeLabel$ =

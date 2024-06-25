@@ -58,6 +58,22 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
 
   feedbackMostRelevant = this.projectsDetailsService.feedbackMostRelevant;
 
+  feedbackByDay$ = this.projectsDetailsService.feedbackByDay$;
+  feedbackByDayCols: ColumnConfig[] = [
+    {
+      field: 'date',
+      header: 'date',
+      pipe: 'date',
+      translate: true,
+    },
+    {
+      field: 'sum',
+      header: 'value',
+      pipe: 'number',
+      translate: true,
+    },
+  ];
+
   mostRelevantCommentsEn = computed(
     () => this.feedbackMostRelevant().en.comments,
   );

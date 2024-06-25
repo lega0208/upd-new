@@ -41,6 +41,22 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   feedbackTotalCommentsPercentChange$ =
     this.taskDetailsService.feedbackTotalCommentsPercentChange$;
 
+  feedbackByDay$ = this.taskDetailsService.feedbackByDay$;
+  feedbackByDayCols: ColumnConfig[] = [
+    {
+      field: 'date',
+      header: 'date',
+      pipe: 'date',
+      translate: true,
+    },
+    {
+      field: 'sum',
+      header: 'value',
+      pipe: 'number',
+      translate: true,
+    },
+  ];
+
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
 

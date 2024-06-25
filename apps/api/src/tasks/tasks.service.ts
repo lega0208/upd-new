@@ -440,7 +440,7 @@ export class TasksService {
 
     const pages = await this.pageModel
       .find(
-        { tasks: new Types.ObjectId(taskId) },
+        { tasks: taskId },
         { title: 1, url: 1, lang: 1, is_404: 1, redirect: 1 },
       )
       .lean()
@@ -476,6 +476,8 @@ export class TasksService {
       sum,
       percentChange,
     }));
+    
+    const feedbackByDay = await this.feedbackModel.getCommentsByDay(params.dateRange, { tasks: taskId });
 
     const mostRelevantCommentsAndWords =
       await this.feedbackService.getMostRelevantCommentsAndWords({
@@ -565,6 +567,7 @@ export class TasksService {
       dateFromLastTest: null,
       searchTerms: await this.getTopSearchTerms(params),
       feedbackByPage,
+      feedbackByDay,
       mostRelevantCommentsAndWords,
       numComments,
       numCommentsPercentChange,

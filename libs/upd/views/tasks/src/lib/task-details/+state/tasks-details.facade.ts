@@ -134,6 +134,10 @@ export class TasksDetailsFacade {
     }),
   );
 
+  feedbackByDay$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.feedbackByDay),
+  );
+
   apexCallDrivers$ = this.store.select(selectCallsPerVisitsChartData);
   apexKpiFeedback$ = this.store.select(selectDyfNoPerVisitsSeries);
 

@@ -733,6 +733,10 @@ export class PagesDetailsFacade {
     ),
   );
 
+  feedbackByDay$ = this.pagesDetailsData$.pipe(
+    map((data) => data?.feedbackByDay),
+  );
+
   topSearchTerms$ = this.pagesDetailsData$.pipe(
     map((data) => data?.searchTerms),
   );
@@ -750,7 +754,7 @@ export class PagesDetailsFacade {
       pipeParam: '1.0-2',
     },
   ]);
-  
+
   feedbackMostRelevant = this.store.selectSignal(PagesDetailsSelectors.selectFeedbackMostRelevant);
   numComments = this.store.selectSignal(PagesDetailsSelectors.selectNumComments);
   numCommentsPercentChange = this.store.selectSignal(PagesDetailsSelectors.selectNumCommentsPercentChange);

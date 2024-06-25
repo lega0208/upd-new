@@ -201,6 +201,45 @@ export class Feedback implements IFeedback {
       };
     });
   }
+
+  static async getCommentsByDay(
+    this: FeedbackModel,
+    dateRange: string,
+    idFilter?: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
+  ) {
+    const [startDate, endDate] = dateRangeSplit(dateRange);
+    
+    const projection = idFilter
+      ? Object.fromEntries(Object.keys(idFilter).map((key) => [key, 1]))
+      : {};
+      
+    const matchFilter: FilterQuery<Feedback> = {
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+      ...(idFilter || {}),
+    };
+  
+    return this.aggregate<{ date: string; sum: number }>()
+      .project({
+        date: 1,
+        url: 1,
+        ...projection
+      })
+      .match(matchFilter)
+      .group({
+        _id: '$date',
+        sum: { $sum: 1 },
+      })
+      .project({
+        _id: 0,
+        date: '$_id',
+        sum: 1,
+      })
+      .sort({ date: 1 })
+      .exec();
+  }
 }
 
 export const FeedbackSchema = SchemaFactory.createForClass(Feedback);
@@ -229,6 +268,7 @@ const statics = {
   getCommentsByTag: Feedback.getCommentsByTag,
   getCommentsByPage: Feedback.getCommentsByPage,
   getCommentsByPageWithComparison: Feedback.getCommentsByPageWithComparison,
+  getCommentsByDay: Feedback.getCommentsByDay,
 };
 
 FeedbackSchema.statics = statics;
