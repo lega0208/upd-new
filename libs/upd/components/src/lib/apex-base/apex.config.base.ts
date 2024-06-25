@@ -80,6 +80,7 @@ export const createBaseConfig = (formatter: (val: number) => string) => ({
       style: {
         fontSize: '14px',
       },
+      maxWidth: 320,
       formatter,
     },
     title: {

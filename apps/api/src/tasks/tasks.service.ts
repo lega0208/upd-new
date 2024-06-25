@@ -606,6 +606,7 @@ export class TasksService {
       } = getAvgSuccessFromLatestTests(uxTests));
 
       returnData.avgSuccessValueChange = returnData.avgSuccessPercentChange;
+      returnData.avgSuccessValueChange = returnData.avgSuccessPercentChange;
 
       returnData.avgSuccessPercentChange = percentChange(
         returnData.avgTaskSuccessFromLastTest,
