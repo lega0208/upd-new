@@ -39,6 +39,11 @@ export type UnwrapObservable<T = void> = T extends void
     : U
   : T;
 
+/**
+ * For getting the inner type of a Promise
+ */
+export type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+
 export type GetTableProps<
   Class,
   Field extends keyof Class

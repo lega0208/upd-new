@@ -50,8 +50,19 @@ export class CustomReportsService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    await this.reportsQueue.obliterate();
-    await this.childJobsQueue.obliterate();
+    try {
+      await this.reportsQueue.obliterate();
+
+      try {
+        await this.childJobsQueue.obliterate();
+      } catch (err) {
+        console.error('An error occurred while obliterating child job queues:');
+        console.error((<Error>err).message);
+      }
+    } catch (err) {
+      console.error('An error occurred while obliterating report queues:');
+      console.error((<Error>err).message);
+    }
   }
 
   async getReportObservable(reportId: string, childJobIds: string[]) {
