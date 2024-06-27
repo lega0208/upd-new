@@ -1,67 +1,116 @@
 <upd-card [title]="'Heatmap'" aria-label="Heatmap Visualization">
-  @if (data.length === 0) {
+  @if (data().length === 0) {
     <p>
       <span [translate]="'nodata-available'"></span>
     </p>
   } @else {
-  <div class="container-fluid my-4 gx-0">
-    <div class="row">
-      <ng-container *ngFor="let month of calendarMonths; let m = index">
-        <section class="col-lg-4 col-md-12" [attr.aria-labelledby]="'header-' + m">
-          <div class="month-container"
-               [style.height.px]="55 + 50 * month.length" role="region" [attr.aria-labelledby]="'header-' + m">
-               <h2 [id]="'header-' + m" class="month-header">{{ getMonthStartDate(m) | date: 'MMMM y': undefined: currentLang() }}</h2>
-            <div class="week-day-labels" role="presentation">
-              <div *ngFor="let day of weekDays" class="day-label" aria-hidden="true">{{ day }}</div>
-            </div>
-            <ng-container *ngFor="let row of month; let i = index">
-              <div class="week-row" role="row">
-                <div *ngFor="let cell of row; let j = index" class="day-cell"
-                     [ngClass]="{'hidden-cell': isCellHidden(cell)}"
-                     [attr.colored]="!cell.isEmpty && cell.fillColour ? 'true' : null"
-                     [ngStyle]="{'background-color': cell.fillColour, 'color': cell.textColour}"
-                     [attr.aria-label]="cell.isEmpty ? null : (cell.date | date: 'longDate': undefined: currentLang()) + ', Value: ' + (cell.sum | number: '1.0-0': currentLang())"
-                     role="gridcell"
-                     [tabindex]="!cell.isEmpty ? 0 : -1"
-                     [ngbTooltip]="!cell.isEmpty ? (cell.date | date: 'longDate': undefined: currentLang()) + ' - ' + (cell.sum | number: '1.0-0': currentLang()) : ''">
-                  <ng-container *ngIf="!cell.isEmpty">
-                    <span class="day-number">{{ cell.date | date: 'd' }}</span>
-                    <span class="day-sum">{{ cell.sum | number: '1.0-0': currentLang() }}</span>
-                  </ng-container>
+    <div class="container-fluid my-4 gx-0">
+      <div class="row">
+        <ng-container *ngFor="let month of calendarMonths; let m = index">
+          <section
+            [ngClass]="data().length <= 7 ? 'col' : 'col-lg-4 col-md-12'"
+            [attr.aria-labelledby]="'header-' + m"
+          >
+            <div
+              class="month-container"
+              role="region"
+              [attr.aria-labelledby]="'header-' + m"
+            >
+              <h2 [id]="'header-' + m" class="month-header">
+                {{
+                  getMonthStartDate(m)
+                    | date: 'MMMM y' : undefined : currentLang()
+                }}
+              </h2>
+              <div class="week-day-labels" role="presentation">
+                <div *ngFor="let cell of month[0]; let j = index" class="day-label" aria-hidden="true">
+                  {{ cell.date | date: (data().length <= 7 ? 'd' : '') }} {{ weekDays[j] | translate }}
                 </div>
               </div>
-            </ng-container>
+              <ng-container *ngFor="let row of month; let i = index">
+                <div class="week-row" role="row">
+                  <div
+                    *ngFor="let cell of row; let j = index"
+                    class="day-cell"
+                    [ngClass]="{
+                      'bordered-cell': !cell.isEmpty
+                    }"
+                    [attr.colored]="
+                      !cell.isEmpty && cell.fillColour ? 'true' : null
+                    "
+                    [ngStyle]="{
+                      'background-color': cell.fillColour,
+                      color: cell.textColour,
+                      'border-color': cell.borderColour
+                    }"
+                    [attr.aria-label]="
+                      cell.isEmpty
+                        ? null
+                        : (cell.date
+                            | date: 'longDate' : undefined : currentLang()) +
+                          ', Value: ' +
+                          (cell.sum | number: '1.0-0' : currentLang())
+                    "
+                    role="gridcell"
+                    [tabindex]="!cell.isEmpty ? 0 : -1"
+                    [ngbTooltip]="
+                      !cell.isEmpty
+                        ? (cell.date
+                            | date: 'longDate' : undefined : currentLang()) +
+                          ':\n' +
+                          (cell.sum | number: '1.0-0' : currentLang())
+                        : ''
+                    "
+                  >
+                    <ng-container *ngIf="!cell.isEmpty">
+                      <span class="day-sum">{{
+                        cell.sum | number: '1.0-0' : currentLang()
+                      }}</span>
+                    </ng-container>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </section>
+        </ng-container>
+      </div>
+    </div>
+
+    <aside class="legend" role="contentinfo">
+      <h3 class="legend-title">{{ 'Legend' | translate }}</h3>
+      <div class="legend-items" role="list">
+        <ng-container *ngFor="let key of filterThresholdKeys()">
+          <div
+            class="legend-item"
+            role="listitem"
+            tabindex="0"
+            attr.aria-label="{{ 'Legend item for' | translate }} {{
+              key | translate
+            }}"
+          >
+            <div
+              class="color-box"
+              [ngStyle]="{
+                'background-color': colorThresholds[key].fill,
+                'border-color': colorThresholds[key].border
+              }"
+            ></div>
+            <div class="color-description">{{ key | translate }}</div>
           </div>
-        </section>
-      </ng-container>
-    </div>
-  </div>
+        </ng-container>
+      </div>
+    </aside>
 
-  <aside class="legend" role="contentinfo">
-    <h3 class="legend-title">{{ 'Legend' | translate }}</h3>
-    <div class="legend-items" role="list">
-      <ng-container *ngFor="let key of objectKeys(colorThresholds)">
-        <div class="legend-item" role="listitem"
-             (mouseenter)="setActiveColor(colorThresholds[key])" (mouseleave)="setActiveColor('')"
-             (keydown.space)="setActiveColor(colorThresholds[key])"
-             tabindex="0" [attr.aria-label]="'Legend item for ' + key | translate">
-          <div class="color-box" [style.background-color]="colorThresholds[key]"></div>
-          <div class="color-description">{{ key | translate }}</div>
-        </div>
-      </ng-container>
+    <div class="pt-3" *ngIf="table">
+      <upd-accordion>
+        <upd-data-table
+          [filter]="false"
+          [sort]="false"
+          [pagination]="false"
+          [data]="table"
+          [cols]="tableCols"
+        ></upd-data-table>
+      </upd-accordion>
     </div>
-  </aside>
-
-  <div class="pt-3" *ngIf="table">
-    <upd-accordion>
-      <upd-data-table
-        [filter]="false"
-        [sort]="false"
-        [pagination]="false"
-        [data]="table"
-        [cols]="tableCols"
-      ></upd-data-table>
-    </upd-accordion>
-  </div>
-}
+  }
 </upd-card>

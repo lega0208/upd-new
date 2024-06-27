@@ -1,29 +1,34 @@
 $font-stack: 'Noto Sans', sans-serif;
-$base-font-size: 0.8rem; // Default font size for text in cells
-$legend-font-size: 16px; // Font size for the legend title
+$base-font-size: 0.8rem;
+$legend-font-size: 16px;
 $header-height: 30px;
-$cell-size: 50px; // Width and height for day cells
-$border-color: #ddd; // Border color used throughout the component
-$text-color: #fff; // Default text color
-$highlight-color: #f0f0f0; // Hover background color for legend items
+$cell-size: 50px;
+$cell-margin: 3px;
+$text-color: #fff;
+$highlight-color: #f0f0f0;
 
 .month-container {
-  max-width: 350px;
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .month-header {
-  background-color: black;
-  color: $text-color;
+  color: #000;
   text-align: center;
   font-family: $font-stack;
-  font-size: $base-font-size;
+  font-size: 1.2rem;
   line-height: $header-height;
 }
 
-.week-day-labels, .week-row {
+.week-day-labels,
+.week-row {
   display: flex;
-  justify-content: space-around;
+}
+
+.week-day-labels {
+  justify-content: space-between;
+  width: 100%;
 }
 
 .legend-items {
@@ -32,23 +37,43 @@ $highlight-color: #f0f0f0; // Hover background color for legend items
   justify-content: center;
 }
 
-.day-label, .day-number, .day-sum {
+.day-label,
+.day-number,
+.day-sum {
   font-family: $font-stack;
   font-size: $base-font-size;
   text-align: center;
 }
 
+.day-label {
+  width: calc(100% / 7 - #{$cell-margin} * 2);
+  margin: $cell-margin;
+  justify-content: center;
+  align-items: center;
+  font-size: $base-font-size;
+  font-weight: bold;
+}
+
 .day-cell {
-  width: $cell-size;
-  height: $cell-size;
+  width: calc(100% / 7 - #{$cell-margin} * 2);
+  height: calc(#{$cell-size} - #{$cell-margin} * 2);
+  margin: $cell-margin;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  border: 1px solid $border-color;
-  &[colored='true'] {
-    box-shadow: 0 0 0 1px $border-color;
-  }
+  border-radius: 5px;
+  flex: 1 1 calc(100% / 7);
+}
+
+.bordered-cell {
+  border: 1px solid #444;
+}
+
+.day-sum {
+  font-size: clamp(0.4rem, 0.2rem + 1vw, 0.8rem);
+  width: 100%;
+  white-space: nowrap;
 }
 
 .day-number {
@@ -60,7 +85,7 @@ $highlight-color: #f0f0f0; // Hover background color for legend items
 
 .legend {
   display: flex;
-  justify-content: center; // Ensure central alignment of legend items
+  justify-content: center;
   padding: 10px;
   margin: 20px auto;
   text-align: center;
@@ -71,12 +96,12 @@ $highlight-color: #f0f0f0; // Hover background color for legend items
   font-size: $legend-font-size;
   font-weight: bold;
   margin-bottom: 10px;
-  width: 100%; // Ensure the title spans the full width
+  width: 100%;
 }
 
 .legend-item {
-  display: flex; // Use flex to align items horizontally
-  align-items: center; // Vertically center align items within each legend item
+  display: flex;
+  align-items: center;
   margin-right: 20px;
   margin-bottom: 10px;
   &:hover {
@@ -85,16 +110,14 @@ $highlight-color: #f0f0f0; // Hover background color for legend items
   }
 
   .color-box {
-    width: 20px; // Specify width
-    height: 20px; // Specify height
-    margin-right: 5px; // Space between color box and text
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    border-radius: 5px;
+    border: 0.5px solid #444;
   }
 
   .color-description {
-    display: block; // Optional, depending on layout preferences
+    display: block;
   }
-}
-
-.hidden-cell {
-  visibility: hidden; // or 'display: none;' depending on layout needs
 }

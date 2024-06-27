@@ -1,4 +1,4 @@
-import { Component, Input, effect, inject } from '@angular/core';
+import { Component, Input, effect, inject, input } from '@angular/core';
 import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -16,11 +16,13 @@ interface Cell {
   sum: number;
   fillColour?: string;
   textColour?: string;
+  borderColour?: string;
   isEmpty?: boolean;
 }
 
-interface ColorThresholds {
-  [key: string]: string;
+interface ColorThreshold {
+  fill: string;
+  border: string;
 }
 
 @Component({
@@ -32,29 +34,27 @@ export class HeatmapComponent<T> {
   private i18n = inject(I18nFacade);
   currentLang = this.i18n.currentLang;
 
-  @Input() data: Cell[] = [];
+  data = input<Cell[]>([]);
   calendarMonths: Cell[][][] = [];
-  weekDays: string[] = dayjs.weekdaysMin();
   dateParams = this.currentLang() == FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY';
   minSum = Infinity;
   maxSum = -Infinity;
   activeColor = '';
-  colorThresholds: ColorThresholds = {
-    lowest: '#FFF9C4',
-    low: '#FFEB3B',
-    medium: '#FFB74D',
-    high: '#FF8000',
-    highest: '#D32F2F',
+  colorThresholds: { [key: string]: ColorThreshold } = {
+    lowest: { fill: '#FFF9C4', border: '#E6E09B' },
+    low: { fill: '#FFEB3B', border: '#E6CC00' },
+    medium: { fill: '#FFB74D', border: '#E69A00' },
+    high: { fill: '#FF8000', border: '#CC6600' },
+    highest: { fill: '#D32F2F', border: '#B71C1C' },
   };
+  weekDays = dayjs.weekdaysMin();
   @Input() table: T[] = [];
   @Input() tableCols: ColumnConfig[] = [];
 
   constructor() {
     effect(() => {
-      this.currentLang();
-
       dayjs.locale(this.currentLang());
-      this.weekDays = dayjs.weekdaysMin();
+      this.weekDays = this.data().length <= 7 ? dayjs.weekdays() : dayjs.weekdaysMin();
     });
 
     effect(() => {
@@ -63,16 +63,39 @@ export class HeatmapComponent<T> {
   }
 
   initCalendar() {
-    if (!this.data.length) return;
+    if (!this.data().length) return;
     this.calculateMinMaxSums();
-    this.populateCalendarMonths();
+    if (this.isSingleWeek(this.data())) {
+      this.calendarMonths = [this.generateWeekCalendar(this.data())];
+    } else {
+      this.populateCalendarMonths();
+    }
+  }
+
+  isSingleWeek(data: Cell[]): boolean {
+    return data.length <= 7;
+  }
+
+  generateWeekCalendar(data: Cell[]): Cell[][] {
+    const rows: Cell[][] = [];
+    const week: Cell[] = [];
+
+    for (const cell of data) {
+      week.push(this.createCell(cell));
+    }
+
+    while (week.length < 7) {
+      week.push(this.emptyCell());
+    }
+
+    rows.push(week);
+
+    return rows;
   }
 
   populateCalendarMonths() {
-    let currentMonth = dayjs(this.data[0].date).startOf('month');
-    const endMonth = dayjs(this.data[this.data.length - 1].date).startOf(
-      'month',
-    );
+    let currentMonth = dayjs(this.data()[0].date).startOf('month');
+    const endMonth = dayjs(this.data()[this.data().length - 1].date).startOf('month');
 
     while (currentMonth.isSameOrBefore(endMonth, 'month')) {
       this.calendarMonths.push(this.generateMonthCalendar(currentMonth));
@@ -83,31 +106,31 @@ export class HeatmapComponent<T> {
   generateMonthCalendar(startOfMonth: dayjs.Dayjs): Cell[][] {
     const daysInMonth = startOfMonth.daysInMonth();
     const rows: Cell[][] = [];
-    let week: Cell[] = new Array(startOfMonth.day()).fill(null).map(() => this.emptyCell());  // Ensuring week starts from Sunday
-    
+    let week: Cell[] = new Array(startOfMonth.day()).fill(null).map(() => this.emptyCell());
+
     for (let day = 1; day <= daysInMonth; day++) {
       const currentDay = startOfMonth.add(day - 1, 'day');
-      const cell = this.data.find(d => dayjs(d.date).isSame(currentDay, 'day'));
-      
+      const cell = this.data().find(d => dayjs(d.date).isSame(currentDay, 'day'));
+
       if (cell) {
         week.push(this.createCell(cell));
       } else {
         week.push(this.emptyCell());
       }
-      
+
       if (currentDay.day() === 6) {
         rows.push(week);
         week = [];
       }
     }
-    
+
     if (week.length > 0) {
       while (week.length < 7) {
         week.push(this.emptyCell());
       }
       rows.push(week);
     }
-    
+
     return rows;
   }
 
@@ -124,10 +147,12 @@ export class HeatmapComponent<T> {
   }
 
   createCell(cell: Cell): Cell {
+    const colourThresholds = this.getColorThreshold(cell.sum);
     return {
       ...cell,
-      fillColour: this.getFillColor(cell.sum),
       textColour: this.getTextColor(cell.sum),
+      fillColour: colourThresholds.fill,
+      borderColour: colourThresholds.border,
       isEmpty: false,
     };
   }
@@ -140,13 +165,13 @@ export class HeatmapComponent<T> {
   }
 
   calculateMinMaxSums(): void {
-    this.data.forEach((cell) => {
+    for (const cell of this.data()) {
       this.minSum = Math.min(this.minSum, cell.sum);
       this.maxSum = Math.max(this.maxSum, cell.sum);
-    });
+    }
   }
 
-  getFillColor(sum: number): string {
+  getColorThreshold(sum: number) {
     const normalizedValue = (sum - this.minSum) / (this.maxSum - this.minSum);
     if (normalizedValue >= 0.8) return this.colorThresholds['highest'];
     if (normalizedValue >= 0.6) return this.colorThresholds['high'];
@@ -163,35 +188,14 @@ export class HeatmapComponent<T> {
     return { date: '', sum: 0, fillColour: '', textColour: '', isEmpty: true };
   }
 
-  objectKeys(obj: ColorThresholds): string[] {
-    return Object.keys(obj);
-  }
-
-  setActiveColor(color: string): void {
-    this.activeColor = color;
+  filterThresholdKeys(): string[] {
+    return Object.keys(this.colorThresholds);
   }
 
   getMonthStartDate(monthIndex: number): string {
-    return dayjs(this.data[0].date)
+    return dayjs(this.data()[0].date)
       .add(monthIndex, 'month')
       .startOf('month')
       .format('YYYY-MM-DD');
-  }
-
-  toggleActiveColor(color: string): void {
-    this.activeColor = this.activeColor === color ? '' : color;
-  }
-
-  hasColoredCells(month: any[]): boolean {
-    return month.some((row) =>
-      row.some(
-        (cell: { isEmpty: boolean; fillColour: string }) =>
-          !cell.isEmpty && cell.fillColour,
-      ),
-    );
-  }
-
-  isCellHidden(cell: Cell): boolean {
-    return this.activeColor !== '' && cell.fillColour !== this.activeColor;
   }
 }
