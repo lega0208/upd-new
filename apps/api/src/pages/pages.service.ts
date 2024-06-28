@@ -300,7 +300,7 @@ export class PagesService {
       top25GSCSearchTerms: top25GSCSearchTerms,
       feedbackByDay: await this.feedbackModel.getCommentsByDay(
         params.dateRange,
-        page._id,
+        { page: page._id },
       ),
       searchTerms: await this.getTopSearchTerms(params),
       activityMap: await this.getActivityMapData(params),

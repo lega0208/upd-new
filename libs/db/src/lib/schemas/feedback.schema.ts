@@ -7,6 +7,7 @@ import {
   arrayToDictionary,
   dateRangeSplit,
   percentChange,
+  datesFromDateRange,
 } from '@dua-upd/utils-common';
 
 export type FeedbackDocument = Feedback & Document;
@@ -230,24 +231,38 @@ export class Feedback implements IFeedback {
       ...(idFilter || {}),
     };
 
-    return this.aggregate<{ date: string; sum: number }>()
-      .project({
-        date: 1,
-        url: 1,
-        ...projection,
-      })
-      .match(matchFilter)
-      .group({
-        _id: '$date',
-        sum: { $sum: 1 },
-      })
-      .project({
-        _id: 0,
-        date: '$_id',
-        sum: 1,
-      })
-      .sort({ date: 1 })
-      .exec();
+    const results = (
+      await this.aggregate<{ date: string; sum: number }>()
+        .project({
+          date: 1,
+          url: 1,
+          ...projection,
+        })
+        .match(matchFilter)
+        .group({
+          _id: '$date',
+          sum: { $sum: 1 },
+        })
+        .project({
+          _id: 0,
+          date: '$_id',
+          sum: 1,
+        })
+        .sort({ date: 1 })
+        .exec()
+    ).map((result) => ({
+      date: new Date(result.date).toISOString(),
+      sum: result.sum,
+    }));
+
+    const dateDict = arrayToDictionary(results, 'date');
+
+    const dates = datesFromDateRange(dateRange, false, true) as Date[];
+
+    return dates.map((date) => ({
+      date: date.toISOString(),
+      sum: dateDict[date.toISOString()]?.sum || 0,
+    }));
   }
 }
 
