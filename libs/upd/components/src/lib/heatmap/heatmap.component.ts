@@ -64,7 +64,9 @@ export class HeatmapComponent<T> {
 
   initCalendar() {
     if (!this.data().length) return;
+    this.calendarMonths = [];
     this.calculateMinMaxSums();
+    
     if (this.isSingleWeek(this.data())) {
       this.calendarMonths = [this.generateWeekCalendar(this.data())];
     } else {
@@ -165,6 +167,9 @@ export class HeatmapComponent<T> {
   }
 
   calculateMinMaxSums(): void {
+    this.minSum = Infinity;
+    this.maxSum = -Infinity;
+
     for (const cell of this.data()) {
       this.minSum = Math.min(this.minSum, cell.sum);
       this.maxSum = Math.max(this.maxSum, cell.sum);
