@@ -686,7 +686,11 @@ export class OverviewFacade {
 
   feedbackByDay$ = this.overviewData$.pipe(
     map((data) => {
-      return data?.feedbackByDay || [];
+      const feedbackByDayData = data?.feedbackByDay || [];
+
+      return feedbackByDayData.every((v) => v.sum === 0)
+        ? []
+        : feedbackByDayData;
     }),
   );
 

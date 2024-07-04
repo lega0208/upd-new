@@ -30,10 +30,12 @@ export type DateRange<T extends AbstractDate> = {
 };
 
 export function datesFromDateRange(
-  dateRange: DateRange<Dayjs>,
+  dateRange: DateRange<Dayjs> | DateRange<Date> | string,
   format: string | false = 'YYYY-MM-DD',
   inclusive = false,
 ): Date[] | string[] {
+  dateRange =
+    typeof dateRange === 'string' ? parseDateRangeString(dateRange) : dateRange;
   const dates: Dayjs[] = [];
 
   let currentDate = dayjs.utc(dateRange.start);

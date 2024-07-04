@@ -149,7 +149,13 @@ export class ProjectsDetailsFacade {
   );
 
   feedbackByDay$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.feedbackByDay),
+    map((data) => {
+      const feedbackByDayData = data?.feedbackByDay || [];
+
+      return feedbackByDayData.every((v) => v.sum === 0)
+        ? []
+        : feedbackByDayData;
+    }),
   );
   
   visitsByPageFeedbackWithPercentChange$ = this.projectsDetailsData$.pipe(

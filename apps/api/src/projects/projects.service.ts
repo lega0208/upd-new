@@ -556,10 +556,13 @@ export class ProjectsService {
         return attachment;
       }),
       feedbackByPage,
-      feedbackByDay: await this.feedbackModel.getCommentsByDay(
+      feedbackByDay: (await this.feedbackModel.getCommentsByDay(
         params.dateRange,
         { projects: projectId },
-      ),
+      )).map(({date, sum}) => ({
+      date: date.toISOString(),
+      sum,
+    })),
       mostRelevantCommentsAndWords:
         await this.feedbackService.getMostRelevantCommentsAndWords({
           dateRange: parseDateRangeString(params.dateRange),
@@ -706,6 +709,8 @@ async function getAggregatedProjectMetrics(
         gsc_total_impressions: 1,
         gsc_total_ctr: 1,
         gsc_total_position: 1,
+        owners: 1,
+        sections: 1,
       })
       .group({
         _id: '$page',
@@ -721,6 +726,8 @@ async function getAggregatedProjectMetrics(
         gscTotalImpressions: { $sum: '$gsc_total_impressions' },
         gscTotalCtr: { $avg: '$gsc_total_ctr' },
         gscTotalPosition: { $avg: '$gsc_total_position' },
+        owners: { $first: '$owners' },
+        sections: { $first: '$sections' },
       })
       .group({
         _id: null,
@@ -738,6 +745,8 @@ async function getAggregatedProjectMetrics(
         gscTotalImpressions: { $sum: '$gscTotalImpressions' },
         gscTotalCtr: { $avg: '$gscTotalCtr' },
         gscTotalPosition: { $avg: '$gscTotalPosition' },
+        owners: { $first: '$owners' },
+        sections: { $first: '$sections' },
       })
       .exec()
   )?.[0];
@@ -773,6 +782,8 @@ async function getAggregatedProjectMetrics(
         isRedirect: !!page?.redirect,
         redirect: page?.redirect,
         pageStatus: determinePageStatus(page),
+        owners: page?.owners,
+        sections: page?.sections,
       };
     }) || [];
 
