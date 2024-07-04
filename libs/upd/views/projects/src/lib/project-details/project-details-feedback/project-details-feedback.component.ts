@@ -136,6 +136,16 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
           typeParams: { preLink: '/' + this.langLink + '/pages', link: '_id' },
         },
         {
+          field: 'owners',
+          header: this.i18n.service.translate('Area', lang),
+          hide: true,
+        },
+        {
+          field: 'sections',
+          header: this.i18n.service.translate('Section', lang),
+          hide: true,
+        },
+        {
           field: 'dyfYes',
           header: this.i18n.service.translate('yes', lang),
           pipe: 'number',

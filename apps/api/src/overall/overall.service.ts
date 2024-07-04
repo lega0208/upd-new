@@ -220,10 +220,12 @@ export class OverallService {
         params.comparisonDateRange,
       )
     )
-      .map(({ _id, title, url, sum, percentChange }) => ({
+      .map(({ _id, title, url, owners, sections, sum, percentChange }) => ({
         _id: _id.toString(),
         title,
         url,
+        owners,
+        sections,
         sum,
         percentChange,
       }))
@@ -275,9 +277,12 @@ export class OverallService {
       numComments,
       numCommentsPercentChange,
       commentsByPage,
-      feedbackByDay: await this.feedbackModel.getCommentsByDay(
+      feedbackByDay: (await this.feedbackModel.getCommentsByDay(
         params.dateRange,
-      ),
+      )).map(({date, sum}) => ({
+        date: date.toISOString(),
+        sum,
+      })),
     };
 
     await this.cacheManager.set(cacheKey, results);

@@ -231,8 +231,8 @@ export class Feedback implements IFeedback {
       ...(idFilter || {}),
     };
 
-    const results = (
-      await this.aggregate<{ date: string; sum: number }>()
+    const results =
+      await this.aggregate<{ date: Date; sum: number }>()
         .project({
           date: 1,
           url: 1,
@@ -249,19 +249,15 @@ export class Feedback implements IFeedback {
           sum: 1,
         })
         .sort({ date: 1 })
-        .exec()
-    ).map((result) => ({
-      date: new Date(result.date).toISOString(),
-      sum: result.sum,
-    }));
+        .exec();
 
     const dateDict = arrayToDictionary(results, 'date');
-
+    
     const dates = datesFromDateRange(dateRange, false, true) as Date[];
 
     return dates.map((date) => ({
-      date: date.toISOString(),
-      sum: dateDict[date.toISOString()]?.sum || 0,
+      date,
+      sum: dateDict[date.toString()]?.sum || 0,
     }));
   }
 }
