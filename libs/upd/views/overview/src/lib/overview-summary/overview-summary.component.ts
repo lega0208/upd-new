@@ -57,10 +57,10 @@ export class OverviewSummaryComponent implements OnInit {
   kpiTestsCompleted$ = this.overviewService.kpiTestsCompleted$;
 
   improvedKpiSuccessRateDifference$ =
-  this.overviewService.improvedKpiSuccessRateDifference$;
+    this.overviewService.improvedKpiSuccessRateDifference$;
 
   improvedKpiSuccessRateValidation$ =
-  this.overviewService.improvedKpiSuccessRateValidation$;
+    this.overviewService.improvedKpiSuccessRateValidation$;
 
   improvedKpi$ = this.overviewService.improvedKpi$;
   improvedKpiUniqueTasks$ = this.overviewService.improvedKpiUniqueTasks$;
@@ -118,7 +118,6 @@ export class OverviewSummaryComponent implements OnInit {
 
   dyfChart$ = this.overviewService.dyfData$;
   dyfChartApex$ = this.overviewService.dyfDataApex$;
-  whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
 
   // barChartData$ = this.overviewService.visitsByDay$;
   // calldriversChartData$ = this.overviewService.calldriversByDay$;
@@ -135,15 +134,12 @@ export class OverviewSummaryComponent implements OnInit {
   donutChartCols: ColumnConfig = { field: '', header: '' };
   donutChartData: { text: string; link: string }[] = [];
 
-  whatWasWrongChartLegend: string[] = [];
-  whatWasWrongChartApex$ = this.overviewService.whatWasWrongDataApex$;
-
   dyfTableCols: ColumnConfig<{
     name: string;
     currValue: string;
     prevValue: string;
   }>[] = [];
-  whatWasWrongTableCols: ColumnConfig<{ name: string; value: string }>[] = [];
+  
   barTableCols: ColumnConfig<{
     date: string;
     visits: string;
@@ -153,27 +149,24 @@ export class OverviewSummaryComponent implements OnInit {
     prevVisits: string;
     prevCalls: string;
   }>[] = [];
-  taskSurveyCols: ColumnConfig[] = [];
 
   getTrendIconAndColor(diff: number): { iconName: string; color: string } {
     let iconName = '';
     let color = '';
-   
-    if (diff > 0) {
-       iconName = 'arrow_upward'; 
-       color = '#26A69A'; 
-    } else if (diff < 0) {
-       iconName = 'arrow_downward'; 
-       color = '#DF2929'; 
-    } else {
-       iconName = ''; 
-       color = ''; 
-    }
-   
-    return { iconName, color };
-   }
 
-   
+    if (diff > 0) {
+      iconName = 'arrow_upward';
+      color = '#26A69A';
+    } else if (diff < 0) {
+      iconName = 'arrow_downward';
+      color = '#DF2929';
+    } else {
+      iconName = '';
+      color = '';
+    }
+
+    return { iconName, color };
+  }
 
   ngOnInit() {
     combineLatest([
@@ -190,17 +183,6 @@ export class OverviewSummaryComponent implements OnInit {
         this.i18n.service.translate('no', lang),
       ];
 
-      this.whatWasWrongChartLegend = [
-        this.i18n.service.translate('d3-cant-find-info', lang),
-        this.i18n.service.translate('d3-other', lang),
-        this.i18n.service.translate('d3-hard-to-understand', lang),
-        this.i18n.service.translate('d3-error', lang),
-      ];
-
-      this.dyfChartLegend = [
-        this.i18n.service.translate('yes', lang),
-        this.i18n.service.translate('no', lang),
-      ];
       this.dyfTableCols = [
         {
           field: 'name',
@@ -217,14 +199,7 @@ export class OverviewSummaryComponent implements OnInit {
           pipe: 'number',
         },
       ];
-      this.whatWasWrongTableCols = [
-        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-      ];
+
       this.barTableCols = [
         { field: 'date', header: this.i18n.service.translate('Dates', lang) },
         {
@@ -265,16 +240,6 @@ export class OverviewSummaryComponent implements OnInit {
             value: comparisonDateRange,
           }),
           pipe: 'number',
-        },
-      ];
-      this.taskSurveyCols = [
-        { field: 'task', header: this.i18n.service.translate('task', lang) },
-        {
-          field: 'completion',
-          header: this.i18n.service.translate(
-            'Task Success Survey Completed',
-            lang,
-          ),
         },
       ];
 

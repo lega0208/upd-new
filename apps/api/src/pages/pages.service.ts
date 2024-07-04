@@ -276,10 +276,6 @@ export class PagesService {
           date: data.date.toISOString(),
           visits: data.visits,
         })),
-        feedbackByTags: await this.feedbackModel.getCommentsByTag(
-          params.dateRange,
-          [page.url],
-        ),
         dyfByDay: await this.getDyfByDay(params.dateRange, params.id),
       },
       comparisonDateRange: params.comparisonDateRange,
@@ -289,10 +285,6 @@ export class PagesService {
           date: data.date.toISOString(),
           visits: data.visits,
         })),
-        feedbackByTags: await this.feedbackModel.getCommentsByTag(
-          params.comparisonDateRange,
-          [page.url],
-        ),
         dyfByDay: await this.getDyfByDay(params.comparisonDateRange, params.id),
       },
       topSearchTermsIncrease: topIncreasedSearchTerms,

@@ -27,20 +27,15 @@ export class PagesDetailsFeedbackComponent implements OnInit {
     this.pageDetailsService.fullComparisonDateRangeLabel$;
 
   dyfChart$ = this.pageDetailsService.dyfData$;
-  whatWasWrongChart$ = this.pageDetailsService.whatWasWrongData$;
 
   dyfTableCols: ColumnConfig<{
     name: string;
     currValue: number;
     prevValue: string;
   }>[] = [];
-  whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
 
   dyfChartApex$ = this.pageDetailsService.dyfDataApex$;
   dyfChartLegend: string[] = [];
-
-  whatWasWrongChartLegend: string[] = [];
-  whatWasWrongChartApex$ = this.pageDetailsService.whatWasWrongDataApex$;
 
   feedbackByDay$ = this.pageDetailsService.feedbackByDay$;
   feedbackByDayCols: ColumnConfig[] = [
@@ -111,13 +106,7 @@ export class PagesDetailsFeedbackComponent implements OnInit {
         this.i18n.service.translate('yes', lang),
         this.i18n.service.translate('no', lang),
       ];
-
-      this.whatWasWrongChartLegend = [
-        this.i18n.service.translate('d3-cant-find-info', lang),
-        this.i18n.service.translate('d3-other', lang),
-        this.i18n.service.translate('d3-hard-to-understand', lang),
-        this.i18n.service.translate('d3-error', lang),
-      ];
+      
       this.dyfTableCols = [
         {
           field: 'name',

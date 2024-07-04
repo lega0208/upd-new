@@ -1,7 +1,7 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { AirtableClient, DateRange } from '@dua-upd/external-data';
 import { InjectModel } from '@nestjs/mongoose';
-import { CallDriver, CallDriverDocument } from '@dua-upd/db';
+import { CallDriver, CallDriverModel, Task } from '@dua-upd/db';
 import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import chalk from 'chalk';
@@ -14,7 +14,9 @@ export class CalldriversService {
     @Inject(AirtableClient.name) private airtableClient: AirtableClient,
     private logger: ConsoleLogger,
     @InjectModel(CallDriver.name, 'defaultConnection')
-    private calldriverModel: Model<CallDriverDocument>
+    private calldriverModel: CallDriverModel,
+    @InjectModel(Task.name, 'defaultConnection')
+    private taskModel: Model<Task>,
   ) {}
 
   @Retry(4, 1000)
@@ -45,7 +47,7 @@ export class CalldriversService {
             impact: 0,
             tpc_id: 999999,
             ...calldriverData,
-          } as CallDriver)
+          }) as CallDriver,
       );
 
       if (calldriversData.length === 0) {
@@ -56,8 +58,14 @@ export class CalldriversService {
       await this.calldriverModel.insertMany(calldriversData);
 
       this.logger.log(
-        `Successfully inserted ${calldriversData.length} Calldriver documents.`
+        `Successfully inserted ${calldriversData.length} Calldriver documents.`,
       );
+
+      this.logger.log('Syncing Calldrivers references...');
+
+      await this.calldriverModel.syncTaskReferences(this.taskModel);
+
+      this.logger.log('Successfully synced Calldrivers references.');
     } catch (err) {
       console.error(chalk.redBright(err));
     }
