@@ -1,25 +1,94 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
-import { combineLatest } from 'rxjs';
+import { Component, computed, inject, Signal } from '@angular/core';
 import type {
   ColumnConfig,
   FeedbackWithScores,
+  OverviewFeedback,
   WordRelevance,
 } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { EN_CA } from '@dua-upd/upd/i18n';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Store } from '@ngrx/store';
+import { filter } from 'rxjs';
+import {
+  selectOverviewFeedbackLoading,
+  selectOverviewFeedbackError,
+  selectOverviewFeedbackData,
+} from './+state/overview-feedback.selectors';
 import { OverviewFacade } from '../+state/overview/overview.facade';
+import { round } from '@dua-upd/utils-common';
 
 @Component({
   selector: 'upd-overview-feedback',
   templateUrl: './overview-feedback.component.html',
   styleUrls: ['./overview-feedback.component.css'],
 })
-export class OverviewFeedbackComponent implements OnInit {
+export class OverviewFeedbackComponent {
   private overviewService = inject(OverviewFacade);
+  private readonly store = inject(Store);
   private i18n = inject(I18nFacade);
-  currentLang$ = this.i18n.currentLang$;
 
-  feedbackByDayCols: ColumnConfig[] = [
+  loading = this.store.selectSignal(selectOverviewFeedbackLoading);
+
+  error = this.store.selectSignal(selectOverviewFeedbackError);
+
+  data = toSignal(
+    this.store
+      .select(selectOverviewFeedbackData)
+      .pipe(filter((data) => !!data)),
+  ) as Signal<OverviewFeedback>;
+
+  commentsByPage = computed(() => this.data().commentsByPage);
+
+  feedbackByDay = computed(() => this.data().feedbackByDay);
+
+  currentTotalComments = computed(() => this.data().numComments);
+
+  commentsPercentChange = computed(() => this.data().numCommentsPercentChange);
+
+  feedbackMostRelevant = computed(
+    () => this.data().mostRelevantCommentsAndWords,
+  );
+
+  avgCommentsByDay = computed(() => {
+    const total = this.currentTotalComments();
+    const totalDays = this.feedbackByDay().length || null;
+
+    return totalDays ? round(total / totalDays, 0) : null;
+  });
+
+  avgCommentsByPage = computed(() => {
+    const total = this.currentTotalComments();
+    const totalPages = this.commentsByPage().length || 0;
+
+    return totalPages ? round(total / totalPages, 0) : 0;
+  });
+
+  fullDateRangeLabel$ = this.overviewService.fullDateRangeLabel$;
+  fullComparisonDateRangeLabel$ =
+    this.overviewService.fullComparisonDateRangeLabel$;
+
+  dateRangeLabel = toSignal(this.overviewService.dateRangeLabel$);
+  comparisonDateRangeLabel = toSignal(
+    this.overviewService.comparisonDateRangeLabel$,
+  );
+
+  dyfChart$ = this.overviewService.dyfData$;
+
+  mostRelevantCommentsEn = computed(
+    () => this.feedbackMostRelevant().en.comments,
+  );
+  mostRelevantWordsEn = computed(() => this.feedbackMostRelevant().en.words);
+
+  mostRelevantCommentsFr = computed(
+    () => this.feedbackMostRelevant().fr.comments,
+  );
+  mostRelevantWordsFr = computed(() => this.feedbackMostRelevant().fr.words);
+
+  dyfChartApex$ = this.overviewService.dyfDataApex$;
+  feedbackByDayCols: ColumnConfig<{
+    date: string;
+    sum: number;
+  }>[] = [
     {
       field: 'date',
       header: 'date',
@@ -33,62 +102,60 @@ export class OverviewFeedbackComponent implements OnInit {
     },
   ];
 
-  currentTotalComments$ = this.overviewService.currentTotalComments$;
-  commentsPercentChange$ = this.overviewService.commentsPercentChange$;
+  dyfTableCols: Signal<
+    ColumnConfig<{
+      name: string;
+      currValue: number;
+      prevValue: number;
+    }>[]
+  > = computed(() => [
+    {
+      field: 'name',
+      header: 'Selection',
+    },
+    {
+      field: 'currValue',
+      header: this.dateRangeLabel() as string,
+      pipe: 'number',
+    },
+    {
+      field: 'prevValue',
+      header: this.comparisonDateRangeLabel() as string,
+      pipe: 'number',
+    },
+  ]);
 
-  avgCommentsByDay$ = this.overviewService.avgCommentsByDay$;
-  avgCommentsByPage$ = this.overviewService.avgCommentsByPage$;
-
-  feedbackByDay$ = this.overviewService.feedbackByDay$;
-
-  fullDateRangeLabel$ = this.overviewService.fullDateRangeLabel$;
-  fullComparisonDateRangeLabel$ =
-    this.overviewService.fullComparisonDateRangeLabel$;
-
-  dateRangeLabel$ = this.overviewService.dateRangeLabel$;
-  comparisonDateRangeLabel$ = this.overviewService.comparisonDateRangeLabel$;
-
-  dyfChart$ = this.overviewService.dyfData$;
-  whatWasWrongChart$ = this.overviewService.whatWasWrongData$;
-  commentsByPage$ = this.overviewService.commentsByPage$;
-
-  dyfChartApex$ = this.overviewService.dyfDataApex$;
-  dyfChartLegend: string[] = [];
-
-  whatWasWrongChartLegend: string[] = [];
-  whatWasWrongChartApex$ = this.overviewService.whatWasWrongDataApex$;
-
-  dyfTableCols: ColumnConfig<{
-    name: string;
-    currValue: number;
-    prevValue: number;
-  }>[] = [];
-  whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
-
-  feedbackPagesTotalTableCols: ColumnConfig<{
-    currValue: number;
-    percentChange: number;
-  }>[] = [];
-
-  feedbackPagesTableCols: ColumnConfig<{
-    title: string;
-    url: string;
-    sum: number;
-    percentChange: number | null;
-  }>[] = [];
-  langLink = 'en';
-
-  feedbackMostRelevant = this.overviewService.feedbackMostRelevant;
-
-  mostRelevantCommentsEn = computed(
-    () => this.feedbackMostRelevant().en.comments,
-  );
-  mostRelevantWordsEn = computed(() => this.feedbackMostRelevant().en.words);
-
-  mostRelevantCommentsFr = computed(
-    () => this.feedbackMostRelevant().fr.comments,
-  );
-  mostRelevantWordsFr = computed(() => this.feedbackMostRelevant().fr.words);
+  feedbackPagesTableCols: Signal<
+    ColumnConfig<{
+      title: string;
+      url: string;
+      sum: number;
+      percentChange: number | null;
+    }>[]
+  > = computed(() => [
+    {
+      field: 'url',
+      header: 'page',
+      type: 'link',
+      typeParams: { link: 'url', external: true },
+    },
+    {
+      field: 'sum',
+      header: '# of comments',
+      pipe: 'number',
+      type: 'link',
+      typeParams: {
+        preLink: `/${this.i18n.currentLang().slice(0, 2)}/pages`,
+        link: '_id',
+        postLink: 'pagefeedback',
+      },
+    },
+    {
+      field: 'percentChange',
+      header: 'comparison',
+      pipe: 'percent',
+    },
+  ]);
 
   mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
     { field: 'rank', header: 'Rank', width: '10px', center: true },
@@ -123,84 +190,5 @@ export class OverviewFeedbackComponent implements OnInit {
 
   recalculateMostRelevant() {
     this.overviewService.getMostRelevantFeedback();
-  }
-
-  ngOnInit() {
-    combineLatest([
-      this.currentLang$,
-      this.dateRangeLabel$,
-      this.comparisonDateRangeLabel$,
-    ]).subscribe(([lang, dateRange, comparisonDateRange]) => {
-      this.langLink = lang === EN_CA ? 'en' : 'fr';
-
-      // const dateFormat =
-      // this.langLink === 'en' ? 'D MMM YYYY' : 'MMM D YYYY';
-
-      // this.dyfLabels = [
-      //   dayjs.utc(currentDate).locale(lang).format(dateFormat),
-      //   dayjs.utc(comparisonDate).locale(lang).format(dateFormat)
-      // ]
-
-      this.dyfChartLegend = [
-        this.i18n.service.translate('yes', lang),
-        this.i18n.service.translate('no', lang),
-      ];
-      this.dyfTableCols = [
-        {
-          field: 'name',
-          header: this.i18n.service.translate('Selection', lang),
-        },
-        {
-          field: 'currValue',
-          header: dateRange,
-          pipe: 'number',
-        },
-        {
-          field: 'prevValue',
-          header: comparisonDateRange,
-          pipe: 'number',
-        },
-      ];
-
-      this.whatWasWrongChartLegend = [
-        this.i18n.service.translate('d3-cant-find-info', lang),
-        this.i18n.service.translate('d3-other', lang),
-        this.i18n.service.translate('d3-hard-to-understand', lang),
-        this.i18n.service.translate('d3-error', lang),
-      ];
-
-      this.whatWasWrongTableCols = [
-        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-      ];
-      this.feedbackPagesTableCols = [
-        {
-          field: 'url',
-          header: this.i18n.service.translate('page', lang),
-          type: 'link',
-          typeParams: { link: 'url', external: true },
-        },
-        {
-          field: 'sum',
-          header: this.i18n.service.translate('# of comments', lang),
-          pipe: 'number',
-          type: 'link',
-          typeParams: {
-            preLink: '/' + this.langLink + '/pages',
-            link: '_id',
-            postLink: 'pagefeedback',
-          },
-        },
-        {
-          field: 'percentChange',
-          header: this.i18n.service.translate('comparison', lang),
-          pipe: 'percent',
-        },
-      ];
-    });
   }
 }

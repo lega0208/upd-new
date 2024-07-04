@@ -17,11 +17,6 @@ export const getMostRelevantFeedback = createAction(
   '[Overview Page] Get Most Relevant Feedback',
 );
 
-export const getMostRelevantFeedbackSuccess = createAction(
-  '[Overview/API] Get Most Relevant Feedback Success',
-  props<{ data: OverviewData['mostRelevantCommentsAndWords'] }>(),
-);
-
 export const getMostRelevantFeedbackError = createAction(
   '[Overview/API] Get Most Relevant Feedback Error',
   props<{ error: string }>(),

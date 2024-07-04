@@ -21,4 +21,21 @@ export class OverallController {
       ipd,
     });
   }
+
+  @Get('feedback')
+  getFeedback(
+    @Query('dateRange') dateRange: string,
+    @Query('comparisonDateRange') comparisonDateRange: string,
+    @Query('ipd', ParseBoolPipe) ipd: boolean,
+  ) {
+    if (ipd) {
+      console.log('IPD MODE ACTIVATED 🤖');
+    }
+
+    return this.overallService.getFeedback({
+      dateRange,
+      comparisonDateRange,
+      ipd,
+    });
+  }
 }

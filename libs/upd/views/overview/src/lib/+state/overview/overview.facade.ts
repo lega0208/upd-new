@@ -110,24 +110,6 @@ export class OverviewFacade {
     map((data) => data?.dateRangeData?.topPagesVisited || []),
   );
 
-  avgCommentsByDay$ = this.overviewData$.pipe(
-    map((data) => {
-      const total = data?.numComments || 0;
-      const totalDays = data?.feedbackByDay?.length || null;
-
-      return totalDays ? round(total / totalDays, 0) : null;
-    }),
-  );
-
-  avgCommentsByPage$ = this.overviewData$.pipe(
-    map((data) => {
-      const total = data?.numComments || 0;
-      const totalPages = data?.commentsByPage?.length || 0;
-
-      return round(total / totalPages, 0) || 0;
-    }),
-  );
-
   topPagesVisitedWithPercentChange$ = this.overviewData$.pipe(
     mapObjectArraysWithPercentChange('topPagesVisited', 'visits', 'url'),
     map((topPages) => topPages?.sort((a, b) => b.visits - a.visits)),
@@ -506,68 +488,6 @@ export class OverviewFacade {
     }),
   );
 
-  whatWasWrongDataApex$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const pieChartData = [
-        data?.dateRangeData?.fwylf_cant_find_info || 0,
-        data?.dateRangeData?.fwylf_other || 0,
-        data?.dateRangeData?.fwylf_hard_to_understand || 0,
-        data?.dateRangeData?.fwylf_error || 0,
-      ] as ApexNonAxisChartSeries;
-
-      const isZero = pieChartData.every((v) => v === 0);
-      if (isZero) {
-        return [];
-      }
-
-      return pieChartData;
-    }),
-  );
-
-  whatWasWrongData$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const cantFindInfo = this.i18n.service.translate(
-        'd3-cant-find-info',
-        lang,
-      );
-      const otherReason = this.i18n.service.translate('d3-other', lang);
-      const hardToUnderstand = this.i18n.service.translate(
-        'd3-hard-to-understand',
-        lang,
-      );
-      const error = this.i18n.service.translate('d3-error', lang);
-
-      const pieChartData = [
-        {
-          name: cantFindInfo,
-          value: data?.dateRangeData?.fwylf_cant_find_info || 0,
-        },
-        { name: otherReason, value: data?.dateRangeData?.fwylf_other || 0 },
-        {
-          name: hardToUnderstand,
-          value: data?.dateRangeData?.fwylf_hard_to_understand || 0,
-        },
-        {
-          name: error,
-          value: data?.dateRangeData?.fwylf_error || 0,
-        },
-      ];
-
-      const isZero = pieChartData.every((v) => v.value === 0);
-      if (isZero) {
-        return [];
-      }
-
-      return pieChartData;
-    }),
-  );
-
   searchAssessmentData$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
@@ -678,28 +598,6 @@ export class OverviewFacade {
         comparisonKpiSearchAssessment,
       );
     }),
-  );
-
-  commentsByPage$ = this.overviewData$.pipe(
-    map((data) => data?.commentsByPage),
-  );
-
-  feedbackByDay$ = this.overviewData$.pipe(
-    map((data) => {
-      return data?.feedbackByDay || [];
-    }),
-  );
-
-  currentTotalComments$ = this.overviewData$.pipe(
-    map(
-      (data) =>
-        (data?.mostRelevantCommentsAndWords?.en?.comments?.length || 0) +
-        (data?.mostRelevantCommentsAndWords?.fr?.comments?.length || 0),
-    ),
-  );
-
-  commentsPercentChange$ = this.overviewData$.pipe(
-    map((data) => data?.numCommentsPercentChange),
   );
 
   uxTestsCompleted$ = this.overviewData$.pipe(
@@ -935,10 +833,6 @@ export class OverviewFacade {
       pipeParam: '1.0-2',
     },
   ]);
-
-  feedbackMostRelevant = this.store.selectSignal(
-    OverviewSelectors.selectFeedbackMostRelevant,
-  );
 
   error$ = this.store.select(OverviewSelectors.selectOverviewError);
 

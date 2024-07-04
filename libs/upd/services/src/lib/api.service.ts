@@ -1,6 +1,6 @@
 import { HttpClient, type HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import type { DbQuery } from '@dua-upd/types-common';
+import type { DbQuery, OverviewFeedback } from '@dua-upd/types-common';
 import type {
   ApiParams,
   OverviewData,
@@ -48,6 +48,10 @@ export class ApiService {
 
   getOverviewData(params: ApiParams) {
     return this.get<OverviewData>('/api/overall', params);
+  }
+  
+  getOverviewFeedback(params: ApiParams) {
+    return this.get<OverviewFeedback>('/api/overall/feedback', params);
   }
 
   getTasksHomeData(params: ApiParams) {

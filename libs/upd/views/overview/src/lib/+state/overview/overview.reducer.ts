@@ -33,14 +33,6 @@ export const initialState: OverviewState = {
     uxTests: [],
     searchTermsEn: [],
     searchTermsFr: [],
-    mostRelevantCommentsAndWords: {
-      en: { comments: [], words: [] },
-      fr: { comments: [], words: [] },
-    },
-    numComments: 0,
-    numCommentsPercentChange: null,
-    commentsByPage: [],
-    feedbackByDay: [],
   },
   loaded: false,
   loading: false,
@@ -74,19 +66,6 @@ const reducer = createReducer(
       loading: false,
       loaded: true,
       error,
-    }),
-  ),
-  on(
-    OverviewActions.getMostRelevantFeedbackSuccess,
-    (state, payload): OverviewState => ({
-      ...state,
-      data: {
-        ...state.data,
-        mostRelevantCommentsAndWords: payload.data,
-      },
-      loading: false,
-      loaded: true,
-      error: null,
     }),
   ),
 );

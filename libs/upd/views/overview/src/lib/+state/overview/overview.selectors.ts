@@ -72,12 +72,6 @@ export const selectComparisonDateRangeLabel = selectDateRangeLabel(
  * chart/table/component-level
  */
 
-// Feedback - most relevant comments/words
-export const selectFeedbackMostRelevant = createSelector(
-  selectOverviewData,
-  (data) => data?.mostRelevantCommentsAndWords,
-);
-
 // Visits by day
 export const selectVisitsByDay = createSelector(
   selectCurrentData,
