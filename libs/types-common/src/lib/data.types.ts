@@ -106,7 +106,6 @@ export type PageDetailsMetrics = Pick<
 
 export interface PageAggregatedData extends PageDetailsMetrics {
   visitsByDay: { date: string; visits: number }[];
-  feedbackByTags: { tag: string; numComments: number }[];
   dyfByDay: {
     date: Date;
     dyf_yes: number;
@@ -273,6 +272,9 @@ export interface OverviewData
     uniqueTasks: number;
     successRates: SuccessRates;
   };
+}
+
+export type OverviewFeedback = {
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
   numComments: number;
   numCommentsPercentChange: number | null;
@@ -521,8 +523,6 @@ export interface ProjectDetailsAggregatedData {
   visitsByDay: { date: string; visits: number }[];
   dyfByDay: { date: string; dyf_yes: number; dyf_no: number }[];
   calldriversByDay: { date: string; calls: number }[];
-  feedbackByTags: { tag: string; numComments: number }[];
-  feedbackComments: FeedbackComment[];
   feedbackByPage: { _id: string; title: string; url: string; sum: number }[];
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];

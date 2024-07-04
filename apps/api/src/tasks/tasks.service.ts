@@ -93,8 +93,8 @@ export class TasksService {
             $exists: true,
           },
           date: {
-            $gte: new Date(start),
-            $lte: new Date(end),
+            $gte: start,
+            $lte: end,
           },
         })
         .project({
@@ -110,22 +110,12 @@ export class TasksService {
         })
     )?.[0]?.totalVisits;
 
-    const tpcIds = await this.db.collections.tasks
-      .find({ tpc_ids: { $not: { $size: 0 } } }, { tpc_ids: 1 })
-      .lean()
-      .exec();
-    const allIds = tpcIds.reduce(
-      (idsArray, tpcIds) => idsArray.concat(tpcIds.tpc_ids),
-      [],
-    );
-    const uniqueIds = [...new Set(allIds)];
-
     const totalCalls = (
       await this.db.collections.callDrivers
         .aggregate<{ totalCalls: number }>()
         .match({
-          tpc_id: { $in: uniqueIds },
-          date: { $gte: new Date(start), $lte: new Date(end) },
+          tasks: { $exists: true },
+          date: { $gte: start, $lte: end },
         })
         .project({
           date: 1,
@@ -152,8 +142,8 @@ export class TasksService {
             $exists: true,
           },
           date: {
-            $gte: new Date(comparisonStart),
-            $lte: new Date(comparisonEnd),
+            $gte: comparisonStart,
+            $lte: comparisonEnd,
           },
         })
         .project({
@@ -173,11 +163,8 @@ export class TasksService {
       await this.db.collections.callDrivers
         .aggregate<{ totalCalls: number }>()
         .match({
-          tpc_id: { $in: uniqueIds },
-          date: {
-            $gte: new Date(comparisonStart),
-            $lte: new Date(comparisonEnd),
-          },
+          tasks: { $exists: true },
+          date: { $gte: comparisonStart, $lte: comparisonEnd },
         })
         .project({
           date: 1,
@@ -213,20 +200,16 @@ export class TasksService {
         this.taskModel,
       );
 
-    const callsByTasks: { [key: string]: number } = {};
-    const previousCallsByTasks: { [key: string]: number } = {};
+    const callsByTask = await this.calldriversModel.getCallsByTask(dateRange);
 
-    for (const task of tasks as Task[]) {
-      callsByTasks[task._id.toString()] = (
-        await this.calldriversModel.getCallsByTpcId(dateRange, task.tpc_ids)
-      ).reduce((a, b) => a + b.calls, 0);
-      previousCallsByTasks[task._id.toString()] = (
-        await this.calldriversModel.getCallsByTpcId(
-          comparisonDateRange,
-          task.tpc_ids,
-        )
-      ).reduce((a, b) => a + b.calls, 0);
-    }
+    const previousCallsByTask =
+      await this.calldriversModel.getCallsByTask(comparisonDateRange);
+
+    const callsByTaskDict = arrayToDictionary(callsByTask, 'task');
+    const previousCallsByTaskDict = arrayToDictionary(
+      previousCallsByTask,
+      'task',
+    );
 
     const uxTests = await this.uxTestModel
       .find({ tasks: { $exists: true, $not: { $size: 0 } } })
@@ -265,12 +248,12 @@ export class TasksService {
     const previousTasksDict = arrayToDictionary(previousTasks, '_id');
 
     const task = tasks.map((task) => {
-      const calls = callsByTasks[task._id.toString()] ?? 0;
-      const previous_calls = previousCallsByTasks[task._id.toString()] ?? 0;
-      const previous_visits =
-        previousTasksDict[task._id.toString()]?.visits ?? 0;
-      const previous_dyf_no =
-        previousTasksDict[task._id.toString()]?.dyf_no ?? 0;
+      const taskId = task._id.toString();
+      const calls = callsByTaskDict[taskId]?.calls ?? 0;
+      const previous_calls = previousCallsByTaskDict[taskId]?.calls ?? 0;
+
+      const previous_visits = previousTasksDict[taskId]?.visits ?? 0;
+      const previous_dyf_no = previousTasksDict[taskId]?.dyf_no ?? 0;
 
       const calls_per_100_visits =
         task.visits > 0 && calls > 0
@@ -315,7 +298,7 @@ export class TasksService {
           { gc_survey_participants: 0, gc_survey_completed: 0 },
         );
 
-      const uxTestsForTask = uxTestsDict[task._id.toString()] ?? [];
+      const uxTestsForTask = uxTestsDict[taskId] ?? [];
 
       const { avgTestSuccess, percentChange: latest_success_rate } =
         getAvgSuccessFromLatestTests(uxTestsForTask);
@@ -730,24 +713,14 @@ async function getTaskAggregatedData(
     $lte: endDate,
   };
 
-  const calldriverDocs = await calldriversModel
-    .find(
-      {
-        tpc_id: calldriversTpcId,
-        date: dateQuery,
-      },
-      { _id: 1 },
-    )
-    .lean()
-    .exec();
+  const calldriversEnquiry = await calldriversModel.getCallsByEnquiryLine(
+    dateRange,
+    { tasks: taskId },
+  );
 
-  const documentIds = calldriverDocs.map(({ _id }) => _id);
-
-  const calldriversEnquiry =
-    await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
-
-  const callsByTopic =
-    await calldriversModel.getCallsByTopicFromIds(documentIds);
+  const callsByTopic = await calldriversModel.getCallsByTopic(dateRange, {
+    tasks: taskId,
+  });
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
 

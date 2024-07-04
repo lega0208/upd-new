@@ -76,7 +76,6 @@ export class TaskDetailsSummaryComponent implements OnInit {
     currValue: number;
     prevValue: string;
   }>[] = [];
-  whatWasWrongTableCols: ColumnConfig[] = [];
 
   dyfChartApex$ = this.taskDetailsService.dyfDataApex$;
   dyfChartLegend: string[] = [];
@@ -201,18 +200,6 @@ export class TaskDetailsSummaryComponent implements OnInit {
         {
           field: 'prevValue',
           header: comparisonDateRange,
-          pipe: 'number',
-        },
-      ];
-
-      this.whatWasWrongTableCols = [
-        {
-          field: 'name',
-          header: this.i18n.service.translate('d3-www', lang),
-        },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
           pipe: 'number',
         },
       ];

@@ -974,7 +974,7 @@ export async function importGcTss() {
   const db = (<RunScriptCommand>this).inject<DbService>(DbService);
 
   const data = JSON.parse(
-    await readFile('gc-tasks-tss_2024-06-10_2024-06-16.json', 'utf-8'),
+    await readFile('gc-tasks-tss_2024-06-24_2024-07-01.json', 'utf-8'),
   ).map((task) => ({
     ...task,
     _id: new Types.ObjectId(),
@@ -1174,4 +1174,10 @@ export async function unsetEmptySections(db: DbService) {
     { owners: '' },
     { $unset: { owners: '' } },
   );
+}
+
+export async function syncCalldriversRefs(db: DbService) {
+  console.time('syncCalldriversRefs');
+  await db.collections.callDrivers.syncTaskReferences(db.collections.tasks);
+  console.timeEnd('syncCalldriversRefs');
 }

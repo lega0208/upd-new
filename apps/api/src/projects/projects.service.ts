@@ -24,7 +24,6 @@ import {
 } from '@dua-upd/db';
 import type {
   ApiParams,
-  FeedbackComment,
   InternalSearchTerm,
   ProjectsDetailsData,
   ProjectDetailsAggregatedData,
@@ -356,10 +355,6 @@ export class ProjectsService {
       return;
     }
 
-    console.time('getUniqueProjectUrls');
-    const projectUrls = await getUniqueProjectUrls(projectDoc);
-    console.timeEnd('getUniqueProjectUrls');
-
     console.time('populate');
     const populatedProjectDoc = (await this.projectsModel
       .findById(projectId, {
@@ -464,7 +459,6 @@ export class ProjectsService {
       this.pageModel,
       new Types.ObjectId(params.id),
       params.dateRange,
-      projectUrls,
     );
     console.timeEnd('dateRangeData');
 
@@ -477,7 +471,6 @@ export class ProjectsService {
       this.pageModel,
       new Types.ObjectId(params.id),
       params.comparisonDateRange,
-      projectUrls,
     );
     console.timeEnd('comparisonDateRangeData');
 
@@ -677,16 +670,8 @@ async function getAggregatedProjectMetrics(
   pageModel: Model<PageDocument>,
   id: Types.ObjectId,
   dateRange: string,
-  projectUrls: string[],
 ): Promise<ProjectDetailsAggregatedData> {
   const [startDate, endDate] = dateRangeSplit(dateRange);
-
-  console.time('feedbackByTags');
-  const feedbackByTags = await feedbackModel.getCommentsByTag(
-    dateRange,
-    projectUrls,
-  );
-  console.timeEnd('feedbackByTags');
 
   console.time('projectMetrics');
   const projectMetrics = (
@@ -815,31 +800,9 @@ async function getAggregatedProjectMetrics(
     ) as VisitsByPage[];
   }
 
-  const project = await projectModel
-    .findById(id)
-    .populate<{ tasks: Task[] }>('tasks');
-  const tasks = project?.tasks || [];
-
-  const tpcIds = tasks
-    .filter((task: Types.ObjectId | Task) => 'tpc_ids' in task)
-    .map((task: Task) => task.tpc_ids)
-    .flat();
-
-  console.time('calldriverDocs');
-  const calldriverDocs = await calldriversModel
-    .find(
-      {
-        date: { $gte: startDate, $lte: endDate },
-        tpc_id: { $in: tpcIds },
-      },
-      { _id: 1 },
-    )
-    .lean()
-    .exec();
-  console.timeEnd('calldriverDocs');
-
   const visitsByDay = await pageMetricsModel
     .aggregate()
+    .project({ date: 1, visits: 1, projects: 1 })
     .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
     .group({
       _id: '$date',
@@ -876,7 +839,7 @@ async function getAggregatedProjectMetrics(
     .aggregate()
     .match({
       date: { $gte: startDate, $lte: endDate },
-      tpc_id: { $in: tpcIds },
+      projects: id,
     })
     .group({
       _id: '$date',
@@ -892,64 +855,26 @@ async function getAggregatedProjectMetrics(
     .sort({ date: 1 })
     .exec();
 
-  const documentIds = calldriverDocs.map(({ _id }) => _id);
-
   console.time('calldriversEnquiry');
-  const calldriversEnquiry =
-    await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
+  const calldriversEnquiry = await calldriversModel.getCallsByEnquiryLine(
+    dateRange,
+    { projects: id },
+  );
 
-  const callsByTopic =
-    await calldriversModel.getCallsByTopicFromIds(documentIds);
+  const callsByTopic = await calldriversModel.getCallsByTopic(dateRange, {
+    projects: id,
+  });
   console.timeEnd('calldriversEnquiry');
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
-
-  const feedbackComments = await getProjectFeedbackComments(
-    dateRange,
-    projectUrls,
-    feedbackModel,
-  );
 
   return {
     ...projectMetrics,
     calldriversEnquiry,
     callsByTopic,
     totalCalldrivers,
-    feedbackByTags,
     visitsByDay,
     dyfByDay,
     calldriversByDay,
-    feedbackComments,
   };
-}
-
-async function getProjectFeedbackComments(
-  dateRange: string,
-  projectUrls: string[],
-  feedbackModel: FeedbackModel,
-): Promise<FeedbackComment[]> {
-  const [startDate, endDate] = dateRangeSplit(dateRange);
-
-  return (
-    (await feedbackModel.find({
-      url: { $in: projectUrls },
-      date: { $gte: startDate, $lte: endDate },
-    })) || []
-  ).map((feedback) => ({
-    date: feedback.date,
-    url: feedback.url,
-    tag: feedback.tags?.length ? feedback.tags[0] : '',
-    whats_wrong: feedback.whats_wrong || '',
-    comment: feedback.comment,
-  }));
-}
-
-async function getUniqueProjectUrls(
-  project: ProjectDocument,
-): Promise<string[]> {
-  const projectPageUrls = ((await project.populate('pages')).pages || []).map(
-    (page) => 'url' in page && page.url,
-  );
-
-  return [...new Set(projectPageUrls)];
 }

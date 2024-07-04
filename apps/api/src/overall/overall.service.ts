@@ -42,6 +42,7 @@ import type {
   OverviewProjectData,
   OverviewProject,
   OverallSearchTerm,
+  OverviewFeedback,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -190,47 +191,6 @@ export class OverallService {
 
     const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests);
 
-    const mostRelevantCommentsAndWords =
-      await this.feedbackService.getMostRelevantCommentsAndWords({
-        dateRange: parseDateRangeString(params.dateRange),
-        ipd: params.ipd as boolean,
-      });
-
-    const numComments =
-      mostRelevantCommentsAndWords.en.comments.length +
-      mostRelevantCommentsAndWords.fr.comments.length;
-
-    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
-      parseDateRangeString(params.comparisonDateRange);
-
-    const numPreviousComments = await this.feedbackModel
-      .countDocuments({
-        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
-      })
-      .exec();
-
-    const numCommentsPercentChange =
-      !params.ipd && numPreviousComments
-        ? percentChange(numComments, numPreviousComments)
-        : null;
-
-    const commentsByPage = (
-      await this.feedbackService.getNumCommentsByPage(
-        params.dateRange,
-        params.comparisonDateRange,
-      )
-    )
-      .map(({ _id, title, url, owners, sections, sum, percentChange }) => ({
-        _id: _id.toString(),
-        title,
-        url,
-        owners,
-        sections,
-        sum,
-        percentChange,
-      }))
-      .sort((a, b) => (b.sum || 0) - (a.sum || 0));
-
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -273,21 +233,81 @@ export class OverallService {
       top5DecreasedCalldriverTopics,
       searchTermsEn: await this.getTopSearchTerms(params, 'en'),
       searchTermsFr: await this.getTopSearchTerms(params, 'fr'),
-      mostRelevantCommentsAndWords,
-      numComments,
-      numCommentsPercentChange,
-      commentsByPage,
-      feedbackByDay: (await this.feedbackModel.getCommentsByDay(
-        params.dateRange,
-      )).map(({date, sum}) => ({
-        date: date.toISOString(),
-        sum,
-      })),
     };
 
     await this.cacheManager.set(cacheKey, results);
 
     return results;
+  }
+
+  @AsyncLogTiming
+  async getFeedback(params: ApiParams): Promise<OverviewFeedback> {
+    const cacheKey = `OverviewFeedback-${params.dateRange}-${params['ipd']}`;
+
+    const cachedData =
+      await this.cacheManager.store.get<OverviewFeedback>(cacheKey);
+
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const mostRelevantCommentsAndWords =
+      await this.feedbackService.getMostRelevantCommentsAndWords({
+        dateRange: parseDateRangeString(params.dateRange),
+        ipd: params.ipd as boolean,
+      });
+
+    const numComments =
+      mostRelevantCommentsAndWords.en.comments.length +
+      mostRelevantCommentsAndWords.fr.comments.length;
+
+    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
+      parseDateRangeString(params.comparisonDateRange);
+
+    const numPreviousComments = await this.feedbackModel
+      .countDocuments({
+        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+      })
+      .exec();
+
+    const numCommentsPercentChange =
+      !params.ipd && numPreviousComments
+        ? percentChange(numComments, numPreviousComments)
+        : null;
+
+    const commentsByPage = (
+      await this.feedbackService.getNumCommentsByPage(
+        params.dateRange,
+        params.comparisonDateRange,
+      )
+    )
+      .map(({ _id, title, url, owners, sections, sum, percentChange }) => ({
+        _id: _id.toString(),
+        title,
+        url,
+        owners,
+        sections,
+        sum,
+        percentChange,
+      }))
+      .sort((a, b) => (b.sum || 0) - (a.sum || 0));
+
+    const overviewFeedback = {
+      mostRelevantCommentsAndWords,
+      numComments,
+      numCommentsPercentChange,
+      commentsByPage,
+      feedbackByDay: (
+        await this.feedbackModel.getCommentsByDay(params.dateRange)
+      ).map(({ date, sum }) => ({
+        date: date.toISOString(),
+        sum,
+      })),
+    };
+
+    await this.cacheManager.set(cacheKey, overviewFeedback);
+
+    return overviewFeedback;
   }
 
   async getTopSearchTerms(
