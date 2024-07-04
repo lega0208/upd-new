@@ -1,7 +1,7 @@
 import { ConsoleLogger, Inject, Injectable } from '@nestjs/common';
 import { AirtableClient, DateRange } from '@dua-upd/external-data';
 import { InjectModel } from '@nestjs/mongoose';
-import { CallDriver, CallDriverModel, Task } from '@dua-upd/db';
+import { CallDriver, type CallDriverModel, Task } from '@dua-upd/db';
 import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import chalk from 'chalk';
