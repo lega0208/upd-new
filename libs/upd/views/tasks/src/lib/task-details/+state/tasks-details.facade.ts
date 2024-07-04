@@ -135,7 +135,13 @@ export class TasksDetailsFacade {
   );
 
   feedbackByDay$ = this.tasksDetailsData$.pipe(
-    map((data) => data?.feedbackByDay),
+    map((data) => {
+      const feedbackByDayData = data?.feedbackByDay || [];
+
+      return feedbackByDayData.every((v) => v.sum === 0)
+        ? []
+        : feedbackByDayData;
+    }),
   );
 
   apexCallDrivers$ = this.store.select(selectCallsPerVisitsChartData);

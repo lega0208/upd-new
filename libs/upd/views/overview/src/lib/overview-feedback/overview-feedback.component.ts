@@ -129,6 +129,8 @@ export class OverviewFeedbackComponent {
     ColumnConfig<{
       title: string;
       url: string;
+      owners: string;
+      sections: string;
       sum: number;
       percentChange: number | null;
     }>[]
@@ -138,6 +140,16 @@ export class OverviewFeedbackComponent {
       header: 'page',
       type: 'link',
       typeParams: { link: 'url', external: true },
+    },
+    {
+      field: 'owners',
+      header: 'Area',
+      translate: true,
+    },
+    {
+      field: 'sections',
+      header: 'Section',
+      translate: true,
     },
     {
       field: 'sum',
@@ -161,8 +173,8 @@ export class OverviewFeedbackComponent {
     { field: 'rank', header: 'Rank', width: '10px', center: true },
     { field: 'date', header: 'Date', pipe: 'date', width: '100px' },
     { field: 'url', header: 'URL' },
-    { field: 'owners', header: 'Owner', width: '10px', hide: true },
-    { field: 'sections', header: 'Section', hide: true },
+    { field: 'owners', header: 'Area', hide: true, translate: true },
+    { field: 'sections', header: 'Section', hide: true, translate: true },
     { field: 'comment', header: 'Comment', width: '400px' },
   ];
 

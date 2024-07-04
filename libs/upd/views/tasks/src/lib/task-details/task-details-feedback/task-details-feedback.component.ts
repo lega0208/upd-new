@@ -131,6 +131,18 @@ export class TaskDetailsFeedbackComponent implements OnInit {
           typeParams: { preLink: `/${this.langLink}/pages`, link: '_id' },
         },
         {
+          field: 'owners',
+          header: this.i18n.service.translate('Area', lang),
+          hide: true,
+          translate: true,
+        },
+        {
+          field: 'sections',
+          header: this.i18n.service.translate('Section', lang),
+          hide: true,
+          translate: true,
+        },
+        {
           field: 'dyfYes',
           header: this.i18n.service.translate('yes', lang),
           pipe: 'number',

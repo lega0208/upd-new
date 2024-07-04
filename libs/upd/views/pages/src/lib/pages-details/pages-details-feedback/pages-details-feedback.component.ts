@@ -75,8 +75,8 @@ export class PagesDetailsFeedbackComponent implements OnInit {
   mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
     { field: 'rank', header: 'Rank', width: '10px', center: true },
     { field: 'date', header: 'Date', pipe: 'date', width: '50px' },
-    { field: 'owners', header: 'Owner', width: '10px', hide: true },
-    { field: 'sections', header: 'Section', hide: true },
+    { field: 'owners', header: 'Area', hide: true, translate: true },
+    { field: 'sections', header: 'Section', hide: true, translate: true },
     { field: 'comment', header: 'Comment', width: '400px' },
   ];
 

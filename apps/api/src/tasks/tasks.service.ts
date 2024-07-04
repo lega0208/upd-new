@@ -424,7 +424,7 @@ export class TasksService {
     const pages = await this.pageModel
       .find(
         { tasks: taskId },
-        { title: 1, url: 1, lang: 1, is_404: 1, redirect: 1 },
+        { title: 1, url: 1, lang: 1, is_404: 1, redirect: 1, owners: 1, sections: 1 },
       )
       .lean()
       .exec();
@@ -460,10 +460,14 @@ export class TasksService {
       percentChange,
     }));
 
-    const feedbackByDay = await this.feedbackModel.getCommentsByDay(
-      params.dateRange,
-      { tasks: taskId },
-    );
+    const feedbackByDay = (
+      await this.feedbackModel.getCommentsByDay(params.dateRange, {
+        tasks: taskId,
+      })
+    ).map(({date, sum}) => ({
+      date: date.toISOString(),
+      sum,
+    }));
 
     const mostRelevantCommentsAndWords =
       await this.feedbackService.getMostRelevantCommentsAndWords({

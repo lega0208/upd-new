@@ -610,44 +610,57 @@ export class PagesDetailsFacade {
     map(([data, lang]) => {
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
-  
+
       const currYesVal = data?.dateRangeData?.dyf_yes || 0;
       const prevYesVal = data?.comparisonDateRangeData?.dyf_yes || NaN;
       const currNoVal = data?.dateRangeData?.dyf_no || 0;
       const prevNoVal = data?.comparisonDateRangeData?.dyf_no || NaN;
-  
+
       const pieChartData = [
         { name: yes, currValue: currYesVal, prevValue: prevYesVal },
         { name: no, currValue: currNoVal, prevValue: prevNoVal },
       ];
-  
-      const filteredPieChartData = pieChartData.filter((v) => v.currValue > 0 || v.prevValue > 0);
-  
+
+      const filteredPieChartData = pieChartData.filter(
+        (v) => v.currValue > 0 || v.prevValue > 0,
+      );
+
       return filteredPieChartData.length > 0 ? filteredPieChartData : [];
     }),
   );
 
-  dyfDataApex$ = combineLatest([this.pagesDetailsData$, this.currentLang$]).pipe(
+  dyfDataApex$ = combineLatest([
+    this.pagesDetailsData$,
+    this.currentLang$,
+  ]).pipe(
     map(([data, lang]) => {
       const dyfData: ApexAxisChartSeries = [
         {
           name: this.i18n.service.translate('yes', lang),
-          data: [data?.dateRangeData?.dyf_yes || 0, data?.comparisonDateRangeData?.dyf_yes || 0],
+          data: [
+            data?.dateRangeData?.dyf_yes || 0,
+            data?.comparisonDateRangeData?.dyf_yes || 0,
+          ],
         },
         {
           name: this.i18n.service.translate('no', lang),
-          data: [data?.dateRangeData?.dyf_no || 0, data?.comparisonDateRangeData?.dyf_no || 0],
+          data: [
+            data?.dateRangeData?.dyf_no || 0,
+            data?.comparisonDateRangeData?.dyf_no || 0,
+          ],
         },
       ];
-  
-      const isZero = dyfData.every(item => 
-        (item.data as number[]).every(value => typeof value === 'number' && value === 0)
+
+      const isZero = dyfData.every((item) =>
+        (item.data as number[]).every(
+          (value) => typeof value === 'number' && value === 0,
+        ),
       );
-      
+
       if (isZero) {
         return [];
       }
-  
+
       return dyfData;
     }),
   );
@@ -670,7 +683,13 @@ export class PagesDetailsFacade {
   );
 
   feedbackByDay$ = this.pagesDetailsData$.pipe(
-    map((data) => data?.feedbackByDay),
+    map((data) => {
+      const feedbackByDayData = data?.feedbackByDay || [];
+
+      return feedbackByDayData.every((v) => v.sum === 0)
+        ? []
+        : feedbackByDayData;
+    }),
   );
 
   topSearchTerms$ = this.pagesDetailsData$.pipe(
@@ -691,9 +710,15 @@ export class PagesDetailsFacade {
     },
   ]);
 
-  feedbackMostRelevant = this.store.selectSignal(PagesDetailsSelectors.selectFeedbackMostRelevant);
-  numComments = this.store.selectSignal(PagesDetailsSelectors.selectNumComments);
-  numCommentsPercentChange = this.store.selectSignal(PagesDetailsSelectors.selectNumCommentsPercentChange);
+  feedbackMostRelevant = this.store.selectSignal(
+    PagesDetailsSelectors.selectFeedbackMostRelevant,
+  );
+  numComments = this.store.selectSignal(
+    PagesDetailsSelectors.selectNumComments,
+  );
+  numCommentsPercentChange = this.store.selectSignal(
+    PagesDetailsSelectors.selectNumCommentsPercentChange,
+  );
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
 
@@ -748,23 +773,21 @@ const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
   return `${formattedStartDate}-${formattedEndDate}`;
 };
 
-const getFullDateRangeLabel = (
-  dateRange: string, lang: LocaleId,
-) => {
-    const [startDate, endDate] = dateRange.split('/');
+const getFullDateRangeLabel = (dateRange: string, lang: LocaleId) => {
+  const [startDate, endDate] = dateRange.split('/');
 
-    const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
-    const separator = lang === FR_CA ? ' au' : ' to';
+  const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
+  const separator = lang === FR_CA ? ' au' : ' to';
 
-    const formattedStartDate = dayjs
-      .utc(startDate)
-      .locale(lang)
-      .format(dateFormat);
+  const formattedStartDate = dayjs
+    .utc(startDate)
+    .locale(lang)
+    .format(dateFormat);
 
-    const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
+  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
 
-    return [`${formattedStartDate}${separator}`,`${formattedEndDate}`];
-  }
+  return [`${formattedStartDate}${separator}`, `${formattedEndDate}`];
+};
 
 function mapObjectArraysWithPercentChange(
   propName: keyof PageAggregatedData,

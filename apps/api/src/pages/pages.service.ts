@@ -290,10 +290,13 @@ export class PagesService {
       topSearchTermsIncrease: topIncreasedSearchTerms,
       topSearchTermsDecrease: topDecreasedSearchTerms,
       top25GSCSearchTerms: top25GSCSearchTerms,
-      feedbackByDay: await this.feedbackModel.getCommentsByDay(
+      feedbackByDay: (await this.feedbackModel.getCommentsByDay(
         params.dateRange,
-        page._id,
-      ),
+        { page: page._id },
+      )).map(({date, sum}) => ({
+        date: date.toISOString(),
+        sum,
+      })),
       searchTerms: await this.getTopSearchTerms(params),
       activityMap: await this.getActivityMapData(params),
       readability,

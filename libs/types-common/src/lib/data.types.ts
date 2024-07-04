@@ -415,6 +415,8 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     gscTotalImpressions: number;
     gscTotalCtr: number;
     gscTotalPosition: number;
+    owners: string;
+    sections: string;
   }[];
   feedbackByPage?: {
     _id: string;
@@ -500,6 +502,8 @@ export interface VisitsByPage {
   isRedirect?: boolean;
   redirect?: string;
   pageStatus?: PageStatus;
+  owners?: string;
+  sections?: string;
 }
 
 export interface ProjectDetailsAggregatedData {
