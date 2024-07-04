@@ -46,7 +46,7 @@
 </div>
 
 @if (feedbackMostRelevant()) {
-  <upd-accordion title="Most frequent words (EN)" headerClass="h6">
+  <upd-card title="Most frequent words (EN)" headerClass="h6">
     <upd-data-table
       id="overview-feedback-most-relevant-words-en"
       [filter]="true"
@@ -58,7 +58,7 @@
       [allowHeaderWrap]="true"
     >
     </upd-data-table>
-  </upd-accordion>
+  </upd-card>
 
   <div class="container-fluid my-4 gx-0">
     <div class="row">
@@ -80,7 +80,7 @@
     </div>
   </div>
 
-  <upd-accordion title="Most frequent words (FR)">
+  <upd-card title="Most frequent words (FR)">
     <upd-data-table
       id="overview-feedback-most-relevant-words-fr"
       [filter]="true"
@@ -92,7 +92,7 @@
       [allowHeaderWrap]="true"
     >
     </upd-data-table>
-  </upd-accordion>
+  </upd-card>
 
   <div class="container-fluid my-4 gx-0">
     <div class="row">
@@ -120,7 +120,7 @@
     <div class="col">
       <upd-card [title]="'feedback-per-page'" titleSize="h6">
         <upd-data-table
-        id="total-feedback-per-page"
+          id="total-feedback-per-page"
           [filter]="true"
           [sort]="true"
           [pagination]="true"

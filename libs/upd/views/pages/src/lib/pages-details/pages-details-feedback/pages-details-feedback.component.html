@@ -34,8 +34,8 @@
 </div>
 
 @if (feedbackMostRelevant()) {
-  @if (mostRelevantWords() && mostRelevantWords()?.length) {
-    <upd-accordion title="Most frequent words" headerClass="h6">
+  <upd-card [title]="'Most frequent words'" titleSize="h6">
+    @if (mostRelevantWords() && mostRelevantWords()?.length) {
       <upd-data-table
         id="pages-feedback-most-relevant-words"
         [filter]="true"
@@ -47,14 +47,12 @@
         [allowHeaderWrap]="true"
       >
       </upd-data-table>
-    </upd-accordion>
-  } @else {
-    <upd-card [title]="'Most frequent words'" titleSize="h6">
+    } @else {
       <p>
         <span [translate]="'nodata-available'"></span>
       </p>
-    </upd-card>
-  }
+    }
+  </upd-card>
 
   <div class="container-fluid my-4 gx-0">
     <div class="row">
