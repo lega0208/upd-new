@@ -28,6 +28,7 @@ export interface IAAItemId {
  * Calldriver types
  */
 export interface CallsByTopic {
+  _id: string;
   tasks: string;
   tpc_id: string;
   enquiry_line: string;
@@ -199,6 +200,7 @@ export interface IPage {
  */
 export interface ITask {
   _id: Types.ObjectId;
+  taskId?: string[];
   airtable_id: string;
   title: string;
   title_fr?: string;

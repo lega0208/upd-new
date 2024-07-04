@@ -127,6 +127,7 @@ export class OverviewFacade {
   kpiTotAvgSuccessRate$ = this.overviewData$.pipe(
     map((data) => data?.projects?.avgTestSuccess || 0),
   );
+
   improvedKpi$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.improvedTasksKpi),
   );
@@ -147,6 +148,31 @@ export class OverviewFacade {
     map((improvedKpi) => improvedKpi?.successRates.validation || 0),
   );
 
+
+  improvedTopKpi$ = this.overviewData$.pipe(
+    map((overviewData) => overviewData?.improvedKpiTopSuccessRate),
+  );
+ 
+  improvedKpiTopUniqueTasks$ = this.improvedTopKpi$.pipe(
+    map((improvedTopKpi) => improvedTopKpi?.uniqueTopTasks || 0),
+  );
+ 
+  improvedKpiTopTasks$ = this.improvedTopKpi$.pipe(
+    map((improvedTopKpi) => improvedTopKpi?.allTopTasks || 0),
+  );
+ 
+  improvedKpiTopSuccessRate$ = this.improvedTopKpi$.pipe(
+    map((improvedTopKpi) => improvedTopKpi?.topSuccessRates || 0),
+  );
+
+  improvedKpiTopSuccessRateDifference$ = this.improvedTopKpi$.pipe(
+    map((improvedTopKpi) => improvedTopKpi?.topSuccessRates.difference || 0),
+  );
+
+  improvedKpiTopSuccessRateValidation$ = this.improvedTopKpi$.pipe(
+    map((improvedTopKpi) => improvedTopKpi?.topSuccessRates.validation || 0),
+  );
+
   kpiTestsCompleted$ = this.overviewData$.pipe(
     map((data) => data?.projects?.testsCompleted || 0),
   );
@@ -154,6 +180,10 @@ export class OverviewFacade {
   uniqueTaskTestedLatestTestKpi$ = this.overviewData$.pipe(
     map((data) => data?.projects?.uniqueTaskTestedLatestTestKpi || 0),
   );
+
+  totalTasks$ = this.overviewData$.pipe(
+    map((overviewData) => overviewData?.totalTasks || 0),
+  )
 
   testTypeTranslations$ = combineLatest([
     this.projects$, 

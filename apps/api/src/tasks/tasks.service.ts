@@ -462,7 +462,7 @@ export class TasksService {
         this.pageModel,
         params.dateRange,
         taskUrls,
-        taskTpcId,
+        taskTpcId
       ),
       comparisonDateRange: params.comparisonDateRange,
       comparisonDateRangeData: await getTaskAggregatedData(
@@ -473,7 +473,7 @@ export class TasksService {
         this.pageModel,
         params.comparisonDateRange,
         taskUrls,
-        taskTpcId,
+        taskTpcId
       ),
       taskSuccessByUxTest: [],
       avgTaskSuccessFromLastTest: null, // todo: better handle N/A
@@ -483,6 +483,8 @@ export class TasksService {
       feedbackComments: [],
       feedbackCommentsPercentChange: null,
       searchTerms: await this.getTopSearchTerms(params),
+      tpc_id: '',
+      enquiry_line: ''
     };
 
     const uxTests: UxTest[] = (<UxTestDocument[]>task.ux_tests).map((test) =>

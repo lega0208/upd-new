@@ -65,15 +65,7 @@ export class OverviewSummaryComponent implements OnInit {
   improvedKpi$ = this.overviewService.improvedKpi$;
   improvedKpiUniqueTasks$ = this.overviewService.improvedKpiUniqueTasks$;
 
-  getDiffText(diff: number): string {
-    if (diff > 0) {
-      return 'increase';
-    } else if (diff < 0) {
-      return 'decrease';
-    } else {
-      return '';
-    }
-  }
+  uniqueTaskTestedLatestTestKpi$ = this.overviewService.uniqueTaskTestedLatestTestKpi$;
 
   getColor(diff: number): string {
     if (diff > 0) {
