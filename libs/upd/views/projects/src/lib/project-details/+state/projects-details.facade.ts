@@ -479,28 +479,8 @@ export class ProjectsDetailsFacade {
         header: 'tpc_id',
       },
       {
-        field: 'enquiry_line',
-        header: 'enquiry_line',
-        translate: true,
-      },
-      {
         field: 'topic',
         header: 'topic',
-        translate: true,
-      },
-      {
-        field: 'tpc_id',
-        header: 'tpc_id',
-        translate: true,
-      },
-      {
-        field: 'enquiry_line',
-        header: 'enquiry_line',
-        translate: true,
-      },
-      {
-        field: 'tasks',
-        header: 'task',
         translate: true,
       },
       {
@@ -512,13 +492,17 @@ export class ProjectsDetailsFacade {
         field: 'sub_subtopic',
         header: 'sub-subtopic',
         translate: true,
+      }, 
+      {
+        field: 'enquiry_line',
+        header: 'enquiry_line',
+        translate: true,
       },
       {
         field: 'tasks',
-        header: 'tasks',
+        header: 'task',
         translate: true,
       },
-
       {
         field: 'calls',
         header: 'calls',

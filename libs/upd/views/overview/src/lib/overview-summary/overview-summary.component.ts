@@ -67,16 +67,6 @@ export class OverviewSummaryComponent implements OnInit {
 
   uniqueTaskTestedLatestTestKpi$ = this.overviewService.uniqueTaskTestedLatestTestKpi$;
 
-  getColor(diff: number): string {
-    if (diff > 0) {
-      return '#26A69A';
-    } else if (diff < 0) {
-      return '#DF2929';
-    } else {
-      return '';
-    }
-  }
-
   kpiSearchAssessment$ = this.overviewService.currentKpiSearchAssessment$;
   kpiSearchAssessmentPercentChange$ =
     this.overviewService.kpiSearchAssessmentPercentChange$;
