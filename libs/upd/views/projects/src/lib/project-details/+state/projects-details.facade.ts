@@ -455,20 +455,19 @@ export class ProjectsDetailsFacade {
             (prevTopic) => prevTopic.tpc_id === callsByTopic.tpc_id,
           );
 
-          return {
-            topic: callsByTopic.topic || '',
-            tpc_id: callsByTopic.tpc_id || 0,
-            subtopic: callsByTopic.subtopic || '',
-            enquiry_line: callsByTopic.enquiry_line || '',
-            sub_subtopic: callsByTopic.sub_subtopic || '',
-            tasks: callsByTopic.tasks || '',
-            calls: callsByTopic.calls,
-            comparison: !previousCalls?.calls
-              ? null
-              : percentChange(callsByTopic.calls, previousCalls.calls),
-          };
-        })
-        .sort((a, b) => (b.calls ?? 0) - (a.calls ?? 0));
+        return {
+          topic: callsByTopic.topic || '',
+          tpc_id: callsByTopic.tpc_id || '',
+          enquiry_line: callsByTopic.enquiry_line || '',
+          tasks: callsByTopic.tasks || [],
+          subtopic: callsByTopic.subtopic || '',
+          sub_subtopic: callsByTopic.sub_subtopic || '',
+          calls: callsByTopic.calls,
+          comparison: !previousCalls?.calls
+            ? Infinity
+            : percentChange(callsByTopic.calls, previousCalls.calls),
+        };
+      });
     }),
   );
 
@@ -478,11 +477,6 @@ export class ProjectsDetailsFacade {
       {
         field: 'tpc_id',
         header: 'tpc_id',
-      },
-      {
-        field: 'enquiry_line',
-        header: 'enquiry_line',
-        translate: true,
       },
       {
         field: 'topic',
@@ -498,13 +492,17 @@ export class ProjectsDetailsFacade {
         field: 'sub_subtopic',
         header: 'sub-subtopic',
         translate: true,
+      }, 
+      {
+        field: 'enquiry_line',
+        header: 'enquiry_line',
+        translate: true,
       },
       {
         field: 'tasks',
-        header: 'tasks',
+        header: 'task',
         translate: true,
       },
-
       {
         field: 'calls',
         header: 'calls',

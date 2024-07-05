@@ -44,6 +44,8 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     feedbackCommentsPercentChange: null,
     projects: [],
     searchTerms: [],
+    tpc_id: '',
+    enquiry_line: ''
   },
   loaded: false,
   loading: false,

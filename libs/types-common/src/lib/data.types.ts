@@ -249,6 +249,7 @@ export interface OverviewData
   extends ViewData<OverviewAggregatedData>,
     OverviewUxData {
   projects?: OverviewProjectData;
+  totalTasks?: number;
   uxTests: {
     title: string;
     date?: Date;
@@ -265,6 +266,12 @@ export interface OverviewData
   improvedTasksKpi?: {
     uniqueTasks: number;
     successRates: SuccessRates;
+  };
+  improvedKpiTopSuccessRate?: {
+    uniqueTopTasks: number;
+    allTopTasks: number;
+    topSuccessRates: TopSuccessRates;
+    
   };
 }
 
@@ -356,6 +363,8 @@ export interface TaskDetailsData
   group: string;
   subgroup: string;
   topic: string;
+  tpc_id: string,
+  enquiry_line: string,
   subtopic: string;
   sub_subtopic: string[];
   user_type: string[];
@@ -562,6 +571,12 @@ export type DbQuery = {
 };
 
 export type SuccessRates = {
+  baseline: number;
+  validation: number;
+  difference: number;
+};
+
+export type TopSuccessRates = {
   baseline: number;
   validation: number;
   difference: number;

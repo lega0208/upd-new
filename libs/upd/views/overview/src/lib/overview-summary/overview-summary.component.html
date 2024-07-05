@@ -37,7 +37,7 @@
         [kpiObjectiveCriteria]="searchKpiObjectiveCriteria"
         [postValue]="'Pass'"
         [preLabel]="'Target'"
-        [valueLabel]="0.75"
+        [valueLabel]="0.8"
         [keyword]="'search'"
         modal="{{ 'kpi-search-assessment-guidance' | translate }}"
         >{{
@@ -46,7 +46,7 @@
               : {
                   passed: (kpiSearchAssessmentPassed$ | async)?.passed,
                   total: (kpiSearchAssessmentPassed$ | async)?.total,
-                  date: satEnd,
+                  date: satEnd
                 }
         }}
       </upd-apex-radial-bar>
@@ -67,43 +67,44 @@
             | translate: { total: (kpiTestsCompleted$ | async) || 0 }
         }}
       </upd-apex-radial-bar> -->
-        <upd-apex-radial-bar
-          class="custom-radial-bar"
-          [title]="'kpi-ux-test-improved-title'"
-          [titleTooltip]="'kpi-ux-test-improved-tooltip'"
-          [preLabel]="'Target'"
-          [valueLabel]="0.8"
-          [current]="(  improvedKpiSuccessRateValidation$ | async) || 0"
-          [kpiObjectiveCriteria]="uxTestsKpiObjectiveCriteria"
-          [keyword]="'ux'"
-          modal="{{ 'kpi-ux-test-improved-guidance' | translate }}"
-        >
+      <upd-apex-radial-bar
+        class="custom-radial-bar"
+        [title]="'kpi-ux-test-improved-title'"
+        [titleTooltip]="'kpi-ux-test-improved-tooltip'"
+        [preLabel]="'Target'"
+        [valueLabel]="0.8"
+        [current]="(improvedKpiSuccessRateValidation$ | async) || 0"
+        [kpiObjectiveCriteria]="uxTestsKpiObjectiveCriteria"
+        [keyword]="'ux'"
+        modal="{{ 'kpi-ux-test-improved-guidance' | translate }}"
+      >
         <div>
           <ng-container
-          *ngIf="{
-            value: improvedKpiSuccessRateDifference$ | async
-          } as improvedKpi"
-        >
-        <span [style.color]="getTrendIconAndColor(improvedKpi.value ?? 0).color">
-         <i class="material-icons">{{ getTrendIconAndColor(improvedKpi.value ?? 0).iconName }}</i>
-         {{ improvedKpi.value | percent: undefined : currentLangSignal() }}
-         
-
-       </span>
-       {{
-         getDiffText(improvedKpi.value ?? 0)
-           | translate
-       }}
-          <br />
-          {{
-            'kpi-ux-test-improved-text'
-              | translate: { total: (improvedKpiUniqueTasks$ | async) || 0 }
-          }}
-          
-        </ng-container>
-         </div>
+            *ngIf="{
+              value: improvedKpiSuccessRateDifference$ | async
+            } as improvedKpi"
+          >
+            <span
+              [style.color]="getTrendIconAndColor(improvedKpi.value ?? 0).color"
+            >
+              <i class="material-icons">{{
+                getTrendIconAndColor(improvedKpi.value ?? 0).iconName
+              }}</i>
+              {{ improvedKpi.value | percent: undefined : currentLangSignal() }}
+            </span>
+            <br />
+            {{
+              'kpi-ux-test-improved-text'
+                | translate
+                  : {
+                      unique: (improvedKpiUniqueTasks$ | async) || 0,
+                      total: (uniqueTaskTestedLatestTestKpi$ | async) || 0
+                    }
+            }}
+          </ng-container>
+        </div>
       </upd-apex-radial-bar>
-     </div>
+    </div>
   </div>
 </div>
 <!--
@@ -278,13 +279,16 @@
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [series]="(dyfChartApex$ | async) || []"
         [yAxis]="'Date range' | translate"
-        [xAxis]="[ (fullDateRangeLabel$ | async) || [], (fullComparisonDateRangeLabel$ | async) || [] ]"
+        [xAxis]="[
+          (fullDateRangeLabel$ | async) || [],
+          (fullComparisonDateRangeLabel$ | async) || []
+        ]"
         [tableCols]="dyfTableCols"
         [table]="dyfChart$ | async"
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"
         [stacked]="{ isStacked: true, isStacked100: true, hasDataLabels: true }"
       ></upd-apex-bar>
-    <!-- <div class="col-lg-6 col-md-12 col-sm-12">
+      <!-- <div class="col-lg-6 col-md-12 col-sm-12">
       <upd-apex-donut
         [title]="'d3-www'"
         titleTooltip="{{ 'tooltip-d3-www' | translate }}"
@@ -296,5 +300,6 @@
         [table]="whatWasWrongChart$ | async"
       ></upd-apex-donut>
     </div> -->
+    </div>
   </div>
 </div>
