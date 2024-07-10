@@ -19,12 +19,21 @@ import type {
   IAnnotations,
   IReports,
 } from './schema.types';
+import type { MostRelevantCommentsAndWordsByLang } from './feedback.types';
 
-export type ApiParams = {
-  dateRange: string;
-  comparisonDateRange?: string;
-  id?: string;
-};
+export type ApiParams =
+  | ({
+      dateRange: string;
+      comparisonDateRange?: string;
+      id?: string;
+    } & {
+      [param: string]:
+        | string
+        | number
+        | boolean
+        | readonly (string | number | boolean)[];
+    })
+  | undefined;
 
 export interface ViewData<T> {
   dateRange: string;
@@ -97,7 +106,6 @@ export type PageDetailsMetrics = Pick<
 
 export interface PageAggregatedData extends PageDetailsMetrics {
   visitsByDay: { date: string; visits: number }[];
-  feedbackByTags: { tag: string; numComments: number }[];
   dyfByDay: {
     date: Date;
     dyf_yes: number;
@@ -119,10 +127,13 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
     id: string;
     title: string;
   }[];
-  feedbackComments: FeedbackComment[];
+  feedbackByDay: { date: string; sum: number }[];
   searchTerms: InternalSearchTerm[];
   readability: IReadability[];
   activityMap: ActivityMap[];
+  mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
+  numComments: number;
+  numCommentsPercentChange: number | null;
 }
 
 export interface OverviewAggregatedData {
@@ -150,11 +161,6 @@ export interface OverviewAggregatedData {
   calldriversEnquiry: { enquiry_line: string; sum: number }[];
   topPagesVisited: { url: string; visits: number }[];
   top10GSC: GscSearchTermMetrics[];
-  totalFeedback: {
-    main_section: string;
-    sum: number;
-  }[];
-  feedbackPages: { _id: string; title: string; url: string; sum: number }[];
   searchAssessmentData: {
     lang: string;
     query: string;
@@ -268,6 +274,20 @@ export interface OverviewData
   };
 }
 
+export type OverviewFeedback = {
+  mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
+  numComments: number;
+  numCommentsPercentChange: number | null;
+  commentsByPage: {
+    _id: string;
+    title: string;
+    url: string;
+    sum: number;
+    percentChange: number | null;
+  }[];
+  feedbackByDay: { date: string; sum: number }[];
+}
+
 export type InternalSearchTerm = {
   term: string;
   clicks: number;
@@ -321,37 +341,18 @@ export type TasksHomeData = ViewData<TasksHomeAggregatedData[]> & {
 };
 
 export interface TaskDetailsMetrics {
-  visits: number;
-  dyfYes: number;
-  dyfNo: number;
-  fwylfCantFindInfo: number;
-  fwylfHardToUnderstand: number;
-  fwylfOther: number;
-  fwylfError: number;
-  gscTotalClicks: number;
-  gscTotalImpressions: number;
-  gscTotalCtr: number;
-  gscTotalPosition: number;
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
   calldriversByDay: { date: string; calls: number }[];
-  visitsByDay: { date: string; visits: number }[];
-  dyfByDay: { date: string; dyf_yes: number; dyf_no: number }[];
+  visitsByDay: { date: string; visits: number; dyfNo: number }[];
+  dyfNoPerVisits: { date: string; value: number }[];
   totalCalldrivers: number;
+  visits: number; // for calls/visits ratio
+  dyfYes: number;
+  dyfNo: number;
 }
 
-export interface TaskDetailsAggregatedData extends TaskDetailsMetrics {
-  visitsByPage: VisitsByPage[];
-  feedbackByTags: { tag: string; numComments: number }[];
-  feedbackPages: { _id: string; title: string; url: string; sum: number}[];
-  totalFeedback: {
-    main_section: string;
-    sum: number;
-  }[];
-}
-
-export interface TaskDetailsData
-  extends EntityDetailsData<TaskDetailsAggregatedData> {
+export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
   group: string;
   subgroup: string;
   topic: string;
@@ -364,6 +365,16 @@ export interface TaskDetailsData
   status: string;
   channel: string[];
   core: string[];
+  visits?: number;
+  visitsPercentChange?: number | null;
+  gscTotalClicks?: number;
+  gscTotalClicksPercentChange?: number | null;
+  gscTotalImpressions?: number;
+  gscTotalImpressionsPercentChange?: number | null;
+  gscTotalCtr?: number;
+  gscTotalCtrPercentChange?: number | null;
+  gscTotalPosition?: number;
+  gscTotalPositionPercentChange?: number | null;
   avgTaskSuccessFromLastTest: number;
   avgSuccessPercentChange: number;
   avgSuccessValueChange: number;
@@ -381,8 +392,42 @@ export interface TaskDetailsData
     title: string;
     attachments: AttachmentData[];
   }[];
-  feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
+  mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
+  visitsByPage?: {
+    _id: string;
+    visits: number;
+    dyfYes: number;
+    dyfNo: number;
+    feedbackToVisitsRatio: number | null;
+    title: string;
+    url: string;
+    lang?: string;
+    is_404?: boolean;
+    redirect?: string;
+    language: string;
+    is404: boolean;
+    isRedirect: boolean;
+    pageStatus: string;
+    visitsPercentChange: number | null;
+    dyfNoPercentChange: number | null;
+    gscTotalClicks: number;
+    gscTotalImpressions: number;
+    gscTotalCtr: number;
+    gscTotalPosition: number;
+    owners: string;
+    sections: string;
+  }[];
+  feedbackByPage?: {
+    _id: string;
+    title: string;
+    url: string;
+    sum: number;
+    percentChange: number | null;
+  }[];
+  feedbackByDay: { date: string; sum: number }[];
+  numComments?: number;
+  numCommentsPercentChange?: number | null;
 }
 
 export type ProjectStatus =
@@ -457,6 +502,8 @@ export interface VisitsByPage {
   isRedirect?: boolean;
   redirect?: string;
   pageStatus?: PageStatus;
+  owners?: string;
+  sections?: string;
 }
 
 export interface ProjectDetailsAggregatedData {
@@ -476,9 +523,7 @@ export interface ProjectDetailsAggregatedData {
   visitsByDay: { date: string; visits: number }[];
   dyfByDay: { date: string; dyf_yes: number; dyf_no: number }[];
   calldriversByDay: { date: string; calls: number }[];
-  feedbackByTags: { tag: string; numComments: number }[];
-  feedbackComments: FeedbackComment[];
-  feedbackPages: { _id: string; title: string; url: string; sum: number }[];
+  feedbackByPage: { _id: string; title: string; url: string; sum: number }[];
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
   callsByTasks: CallsByTasks[];
@@ -499,9 +544,19 @@ export interface ProjectsDetailsData
   dateFromLastTest: Date;
   taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
   tasks: Pick<ITask, '_id' | 'title'>[];
-  feedbackComments: FeedbackComment[];
   searchTerms: InternalSearchTerm[];
   attachments: AttachmentData[];
+  feedbackByPage: {
+    _id: string;
+    title: string;
+    url: string;
+    sum: number;
+    percentChange: number | null;
+  }[];
+  feedbackByDay: { date: string; sum: number }[];
+  mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
+  numComments: number;
+  numCommentsPercentChange: number | null;
 }
 
 export interface TaskKpi {

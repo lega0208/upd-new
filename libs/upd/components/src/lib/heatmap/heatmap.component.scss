@@ -1,0 +1,133 @@
+$font-stack: 'Noto Sans', sans-serif;
+$base-font-size: 0.8rem;
+$legend-font-size: 16px;
+$header-height: 30px;
+$cell-size: 50px;
+$cell-margin: 3px;
+$text-color: #fff;
+$highlight-color: #f0f0f0;
+
+.month-container {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.month-header {
+  color: #000;
+  text-align: center;
+  font-family: $font-stack;
+  font-size: 1.2rem;
+  line-height: $header-height;
+}
+
+.week-day-labels,
+.week-row {
+  display: flex;
+}
+
+.week-day-labels {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.day-label,
+.day-number,
+.day-sum {
+  font-family: $font-stack;
+  font-size: $base-font-size;
+  text-align: center;
+}
+
+.day-label {
+  width: calc(100% / 7 - #{$cell-margin} * 2);
+  margin: $cell-margin;
+  justify-content: center;
+  align-items: center;
+  font-size: $base-font-size;
+  font-weight: bold;
+}
+
+.day-cell {
+  width: calc(100% / 7 - #{$cell-margin} * 2);
+  height: calc(#{$cell-size} - #{$cell-margin} * 2);
+  margin: $cell-margin;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  border-radius: 5px;
+  flex: 1 1 calc(100% / 7);
+  scale: 1;
+  transition-duration: 100ms;
+}
+
+.day-cell:hover {
+  cursor: default;
+  filter: saturate(135%);
+  scale: 1.15;
+  transition-duration: 100ms;
+  z-index: 20;
+}
+
+.bordered-cell {
+  border: 1px solid #444;
+}
+
+.day-sum {
+  font-size: clamp(0.4rem, 0.2rem + 1vw, 0.8rem);
+  width: 100%;
+  white-space: nowrap;
+}
+
+.day-number {
+  font-weight: bold;
+  position: absolute;
+  top: 2px;
+  left: 5px;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  margin: 20px auto;
+  text-align: center;
+  width: 100%;
+}
+
+.legend-title {
+  font-size: $legend-font-size;
+  font-weight: bold;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+  margin-bottom: 10px;
+  &:hover {
+    cursor: pointer;
+    background-color: $highlight-color;
+  }
+
+  .color-box {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    border-radius: 5px;
+    border: 0.5px solid #444;
+  }
+
+  .color-description {
+    display: block;
+  }
+}

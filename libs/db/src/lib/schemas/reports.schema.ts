@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, model, Types } from 'mongoose';
 
-import { AttachmentData } from '@dua-upd/types-common';
+import type { AttachmentData } from '@dua-upd/types-common';
 
 export type ReportsDocument = Reports & Document;
 

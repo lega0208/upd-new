@@ -16,12 +16,19 @@ export class OverviewEffects {
     return this.actions$.pipe(
       ofType(OverviewActions.init),
       concatLatestFrom(() => [this.store.select(selectDateRanges)]),
-      mergeMap(([, apiParams]) =>
-        this.api.getOverviewData(apiParams).pipe(
-          map((data) => OverviewActions.loadOverviewSuccess({ data })),
-          catchError(() => EMPTY),
-        ),
-      ),
+      mergeMap(([, apiParams]) => {
+        const ipd = new URLSearchParams(location.search).get('ipd') === 'true';
+
+        return this.api
+          .getOverviewData({
+            ...apiParams,
+            ipd,
+          })
+          .pipe(
+            map((data) => OverviewActions.loadOverviewSuccess({ data })),
+            catchError(() => EMPTY),
+          );
+      }),
     );
   });
 

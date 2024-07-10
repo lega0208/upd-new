@@ -39,7 +39,9 @@ export class DataTableComponent<T extends object> {
   @Input() id?: string;
   @Input() placeholderText = 'dt_search_keyword';
   @Input() selectedNodes: SelectedNode[] = [];
-  @Input() node: SelectedNode | null = null;
+  @Input() allowHeaderWrap = false;
+  
+  node: SelectedNode | null = null;
 
   @Output() rowSelectionChanged = new EventEmitter<T[]>();
   i18n = inject(I18nFacade);

@@ -12,3 +12,17 @@ export const loadTasksDetailsError = createAction(
   '[TasksDetails/API] Load TasksDetails Error',
   props<{ error: string }>()
 );
+
+export const getMostRelevantFeedback = createAction(
+  '[TasksDetails/API] Get Most Relevant Feedback',
+);
+
+export const getMostRelevantFeedbackSuccess = createAction(
+  '[TasksDetails/API] Get Most Relevant Feedback Success',
+  props<{ data: TaskDetailsData['mostRelevantCommentsAndWords'] }>(),
+);
+
+export const getMostRelevantFeedbackError = createAction(
+  '[TasksDetails/API] Get Most Relevant Feedback Error',
+  props<{ error: string }>(),
+);

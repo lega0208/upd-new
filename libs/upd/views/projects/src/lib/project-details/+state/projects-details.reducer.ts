@@ -33,9 +33,16 @@ export const projectDetailsInitialState: ProjectsDetailsState = {
     dateFromLastTest: new Date(0),
     taskSuccessByUxTest: [],
     tasks: [],
-    feedbackComments: [],
     searchTerms: [],
     attachments: [],
+    feedbackByPage: [],
+    feedbackByDay: [],
+    mostRelevantCommentsAndWords: {
+      en: { comments: [], words: [] },
+      fr: { comments: [], words: [] },
+    },
+    numComments: 0,
+    numCommentsPercentChange: null,
   },
   loaded: false,
   loading: false,
@@ -44,38 +51,47 @@ export const projectDetailsInitialState: ProjectsDetailsState = {
 
 const reducer = createReducer(
   projectDetailsInitialState,
-  on(ProjectsDetailsActions.loadProjectsDetailsInit, (state) => ({
-    ...state,
-    loaded: false,
-    loading: true,
-    error: null,
-  })),
-  on(ProjectsDetailsActions.loadProjectsDetailsSuccess, (state, { data }) =>
-    data === null
-      ? {
-        ...state,
-        loaded: true,
-        loading: false,
-        error: null,
-      }
-      : {
-        ...state,
-        data: { ...data },
-        loaded: true,
-        loading: false,
-        error: null,
-      }),
-  on(ProjectsDetailsActions.loadProjectsDetailsError, (state, { error }) => ({
-    ...state,
-    loaded: true,
-    loading: false,
-    error,
-  }))
+  on(
+    ProjectsDetailsActions.loadProjectsDetailsInit,
+    (state): ProjectsDetailsState => ({
+      ...state,
+      loaded: false,
+      loading: true,
+      error: null,
+    }),
+  ),
+  on(
+    ProjectsDetailsActions.loadProjectsDetailsSuccess,
+    (state, { data }): ProjectsDetailsState =>
+      data === null
+        ? {
+            ...state,
+            loaded: true,
+            loading: false,
+            error: null,
+          }
+        : {
+            ...state,
+            data: { ...data },
+            loaded: true,
+            loading: false,
+            error: null,
+          },
+  ),
+  on(
+    ProjectsDetailsActions.loadProjectsDetailsError,
+    (state, { error }): ProjectsDetailsState => ({
+      ...state,
+      loaded: true,
+      loading: false,
+      error,
+    }),
+  ),
 );
 
 export function projectsDetailsReducer(
   state: ProjectsDetailsState | undefined,
-  action: Action
+  action: Action,
 ) {
   return reducer(state, action);
 }

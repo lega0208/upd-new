@@ -1,15 +1,13 @@
-import { Component, inject, OnInit } from '@angular/core';
-import type { ColumnConfig } from '@dua-upd/types-common';
+import { Component, computed, inject, OnInit } from '@angular/core';
+import type {
+  ColumnConfig,
+  FeedbackWithScores,
+  WordRelevance,
+} from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 import { EN_CA } from '@dua-upd/upd/i18n';
-import type { GetTableProps } from '@dua-upd/utils-common';
 import { combineLatest } from 'rxjs';
-
-type FeedbackCommentsColType = GetTableProps<
-  TaskDetailsFeedbackComponent,
-  'feedbackComments$'
->;
 
 @Component({
   selector: 'upd-task-details-feedback',
@@ -27,19 +25,37 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   fullComparisonDateRangeLabel$ =
     this.taskDetailsService.fullComparisonDateRangeLabel$;
 
-  visitsByPage$ =
-    this.taskDetailsService.visitsByPageFeedbackWithPercentChange$;
+  visitsByPage$ = this.taskDetailsService.visitsByPage$;
   visitsByPageCols: ColumnConfig[] = [];
 
   dyfChart$ = this.taskDetailsService.dyfData$;
-  whatWasWrongChart$ = this.taskDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
-  whatWasWrongTableCols: ColumnConfig[] = [];
+  dyfTableCols: ColumnConfig<{
+    name: string;
+    currValue: number;
+    prevValue: number;
+  }>[] = [];
 
-  feedbackComments$ = this.taskDetailsService.feedbackComments$;
   feedbackTotalComments$ = this.taskDetailsService.feedbackTotalComments$;
-  feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
+
+  feedbackTotalCommentsPercentChange$ =
+    this.taskDetailsService.feedbackTotalCommentsPercentChange$;
+
+  feedbackByDay$ = this.taskDetailsService.feedbackByDay$;
+  feedbackByDayCols: ColumnConfig[] = [
+    {
+      field: 'date',
+      header: 'date',
+      pipe: 'date',
+      translate: true,
+    },
+    {
+      field: 'sum',
+      header: 'Number of comments',
+      pipe: 'number',
+      translate: true,
+    },
+  ];
 
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
@@ -47,8 +63,52 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   dyfChartApex$ = this.taskDetailsService.dyfDataApex$;
   dyfChartLegend: string[] = [];
 
-  whatWasWrongChartLegend: string[] = [];
-  whatWasWrongChartApex$ = this.taskDetailsService.whatWasWrongDataApex$;
+  feedbackMostRelevant = this.taskDetailsService.feedbackMostRelevant;
+
+  mostRelevantCommentsEn = computed(
+    () => this.feedbackMostRelevant()?.en.comments,
+  );
+  mostRelevantWordsEn = computed(() => this.feedbackMostRelevant().en.words);
+
+  mostRelevantCommentsFr = computed(
+    () => this.feedbackMostRelevant().fr.comments,
+  );
+  mostRelevantWordsFr = computed(() => this.feedbackMostRelevant().fr.words);
+
+  mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
+    { field: 'rank', header: 'Rank', width: '10px', center: true, frozen: true },
+    { field: 'date', header: 'Date', pipe: 'date', width: '100px', frozen: true },
+    { field: 'url', header: 'URL' },
+    { field: 'owners', header: 'Area', width: '10px', hide: true },
+    { field: 'sections', header: 'Section', hide: true },
+    { field: 'comment', header: 'comment', width: '400px', frozen: true },
+  ];
+
+  mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
+    { field: 'word', header: 'word', width: '10px' },
+    {
+      field: 'word_occurrences',
+      header: 'Term occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+    {
+      field: 'comment_occurrences',
+      header: 'Comment occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+    // {
+    //   field: 'page_occurrences',
+    //   header: 'Page occurrences',
+    //   pipe: 'number',
+    //   width: '10px',
+    // },
+  ];
+
+  getMostRelevantFeedback() {
+    this.taskDetailsService.getMostRelevantFeedback();
+  }
 
   ngOnInit() {
     combineLatest([
@@ -63,13 +123,6 @@ export class TaskDetailsFeedbackComponent implements OnInit {
         this.i18n.service.translate('no', lang),
       ];
 
-      this.whatWasWrongChartLegend = [
-        this.i18n.service.translate('d3-cant-find-info', lang),
-        this.i18n.service.translate('d3-other', lang),
-        this.i18n.service.translate('d3-hard-to-understand', lang),
-        this.i18n.service.translate('d3-error', lang),
-      ];
-
       this.visitsByPageCols = [
         {
           field: 'url',
@@ -78,17 +131,41 @@ export class TaskDetailsFeedbackComponent implements OnInit {
           typeParams: { preLink: `/${this.langLink}/pages`, link: '_id' },
         },
         {
+          field: 'owners',
+          header: this.i18n.service.translate('Area', lang),
+          hide: true,
+          translate: true,
+        },
+        {
+          field: 'sections',
+          header: this.i18n.service.translate('Section', lang),
+          hide: true,
+          translate: true,
+        },
+        {
           field: 'dyfYes',
           header: this.i18n.service.translate('yes', lang),
           pipe: 'number',
+          type: 'link',
+          typeParams: {
+            preLink: '/' + this.langLink + '/pages',
+            link: '_id',
+            postLink: 'pagefeedback',
+          },
         },
         {
           field: 'dyfNo',
           header: this.i18n.service.translate('no', lang),
           pipe: 'number',
+          type: 'link',
+          typeParams: {
+            preLink: '/' + this.langLink + '/pages',
+            link: '_id',
+            postLink: 'pagefeedback',
+          },
         },
         {
-          field: 'percentChange',
+          field: 'dyfNoPercentChange',
           header: this.i18n.service.translate('comparison-for-No-answer', lang),
           pipe: 'percent',
         },
@@ -101,7 +178,18 @@ export class TaskDetailsFeedbackComponent implements OnInit {
           pipe: 'percent',
           pipeParam: '1.2',
         },
+        {
+          field: 'sum',
+          header: '# of comments',
+          pipe: 'number',
+        },
+        {
+          field: 'commentsPercentChange',
+          header: 'comparison-for-comments',
+          pipe: 'percent',
+        },
       ];
+
       this.dyfTableCols = [
         {
           field: 'name',
@@ -116,28 +204,6 @@ export class TaskDetailsFeedbackComponent implements OnInit {
           field: 'prevValue',
           header: comparisonDateRange,
           pipe: 'number',
-        },
-      ];
-
-      this.whatWasWrongTableCols = [
-        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-      ];
-
-      this.feedbackCommentsCols = [
-        { field: 'url', header: this.i18n.service.translate('URL', lang) },
-        {
-          field: 'date',
-          header: this.i18n.service.translate('date', lang),
-          pipe: 'date',
-        },
-        {
-          field: 'comment',
-          header: this.i18n.service.translate('comment', lang),
         },
       ];
     });

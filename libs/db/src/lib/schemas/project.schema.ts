@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Types } from 'mongoose';
-import {
+import type {
   AttachmentData,
   IPage,
   IProject,

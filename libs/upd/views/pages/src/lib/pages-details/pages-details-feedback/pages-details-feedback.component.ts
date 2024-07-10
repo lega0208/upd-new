@@ -1,14 +1,13 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
-import type { ColumnConfig } from '@dua-upd/types-common';
+import type {
+  ColumnConfig,
+  FeedbackWithScores,
+  WordRelevance,
+} from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
-import type { GetTableProps } from '@dua-upd/utils-common';
-
-type FeedbackCommentsColType = GetTableProps<
-  PagesDetailsFeedbackComponent,
-  'feedbackComments$'
->;
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'upd-page-details-feedback',
@@ -21,27 +20,81 @@ export class PagesDetailsFeedbackComponent implements OnInit {
 
   currentLang$ = this.i18n.currentLang$;
 
+  pageLang = toSignal(this.pageDetailsService.pageLang$);
+
   fullDateRangeLabel$ = this.pageDetailsService.fullDateRangeLabel$;
   fullComparisonDateRangeLabel$ =
     this.pageDetailsService.fullComparisonDateRangeLabel$;
 
   dyfChart$ = this.pageDetailsService.dyfData$;
-  whatWasWrongChart$ = this.pageDetailsService.whatWasWrongData$;
 
-  dyfTableCols: ColumnConfig<{ name: string; currValue: number; prevValue: string }>[] = [];
-  whatWasWrongTableCols: ColumnConfig<{ name: string; value: number }>[] = [];
+  dyfTableCols: ColumnConfig<{
+    name: string;
+    currValue: number;
+    prevValue: string;
+  }>[] = [];
 
   dyfChartApex$ = this.pageDetailsService.dyfDataApex$;
   dyfChartLegend: string[] = [];
 
-  whatWasWrongChartLegend: string[] = [];
-  whatWasWrongChartApex$ = this.pageDetailsService.whatWasWrongDataApex$;
-
-  feedbackComments$ = this.pageDetailsService.feedbackComments$;
-  feedbackCommentsCols: ColumnConfig<FeedbackCommentsColType>[] = [];
+  feedbackByDay$ = this.pageDetailsService.feedbackByDay$;
+  feedbackByDayCols: ColumnConfig[] = [
+    {
+      field: 'date',
+      header: 'date',
+      pipe: 'date',
+      translate: true,
+    },
+    {
+      field: 'sum',
+      header: 'Number of comments',
+      pipe: 'number',
+      translate: true,
+    },
+  ];
 
   dateRangeLabel$ = this.pageDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.pageDetailsService.comparisonDateRangeLabel$;
+
+  feedbackMostRelevant = this.pageDetailsService.feedbackMostRelevant;
+
+  numComments = this.pageDetailsService.numComments;
+  numCommentsPercentChange = this.pageDetailsService.numCommentsPercentChange;
+
+  mostRelevantComments = computed(
+    () =>
+      this.pageLang() &&
+      this.feedbackMostRelevant()[this.pageLang() as 'en' | 'fr'].comments,
+  );
+  mostRelevantWords = computed(
+    () =>
+      this.pageLang() &&
+      this.feedbackMostRelevant()[this.pageLang() as 'en' | 'fr'].words,
+  );
+
+  mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
+    { field: 'rank', header: 'Rank', width: '10px', center: true, frozen: true },
+    { field: 'date', header: 'Date', pipe: 'date', width: '50px', frozen: true },
+    { field: 'owners', header: 'Area', width: '10px', hide: true },
+    { field: 'sections', header: 'Section', hide: true },
+    { field: 'comment', header: 'comment', width: '400px', frozen: true },
+  ];
+
+  mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
+    { field: 'word', header: 'word', width: '10px' },
+    {
+      field: 'word_occurrences',
+      header: 'Term occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+    {
+      field: 'comment_occurrences',
+      header: 'Comment occurrences',
+      pipe: 'number',
+      width: '10px',
+    },
+  ];
 
   ngOnInit() {
     combineLatest([
@@ -54,49 +107,25 @@ export class PagesDetailsFeedbackComponent implements OnInit {
         this.i18n.service.translate('no', lang),
       ];
 
-      this.whatWasWrongChartLegend = [
-        this.i18n.service.translate('d3-cant-find-info', lang),
-        this.i18n.service.translate('d3-other', lang),
-        this.i18n.service.translate('d3-hard-to-understand', lang),
-        this.i18n.service.translate('d3-error', lang),
-      ];
       this.dyfTableCols = [
         {
           field: 'name',
-          header: this.i18n.service.translate('Selection', lang),
+          header: 'Selection',
+          translate: true,
         },
         {
           field: 'currValue',
           header: dateRange,
           pipe: 'number',
+          translate: true,
         },
         {
           field: 'prevValue',
           header: comparisonDateRange,
           pipe: 'number',
+          translate: true,
         },
       ];
-      this.whatWasWrongTableCols = [
-        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-      ];
-
-      this.feedbackCommentsCols = [
-        {
-          field: 'date',
-          header: this.i18n.service.translate('date', lang),
-          pipe: 'date',
-        },
-        {
-          field: 'comment',
-          header: this.i18n.service.translate('comment', lang),
-        },
-      ];
-
     });
   }
 }

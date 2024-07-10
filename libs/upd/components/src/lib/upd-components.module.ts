@@ -60,6 +60,8 @@ import { CheckboxComponent } from './checkbox/checkbox.component';
 import { InputSwitchComponent } from './input-switch/input-switch.component';
 import { RadioComponent } from './radio/radio.component';
 import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
+import { RangeSliderComponent } from './range-slider/range-slider.component';
+import { HeatmapComponent } from './heatmap/heatmap.component';
 
 @NgModule({
   imports: [
@@ -91,6 +93,7 @@ import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
     PipesModule,
     NgApexchartsModule,
     ProgressBarModule,
+    RangeSliderComponent,
   ],
   declarations: [
     CardComponent,
@@ -124,6 +127,7 @@ import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
     InputSwitchComponent,
     RadioComponent,
     DidYouKnowComponent,
+    HeatmapComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -168,6 +172,8 @@ import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
     RadioComponent,
     ProgressBar,
     DidYouKnowComponent,
+    RangeSliderComponent,
+    HeatmapComponent,
   ],
 })
 export class UpdComponentsModule {}

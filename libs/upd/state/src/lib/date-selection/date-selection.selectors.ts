@@ -1,6 +1,7 @@
 import { createFeatureSelector, createSelector, Selector } from '@ngrx/store';
 import {
   DATE_SELECTION_FEATURE_KEY,
+  DateRangePeriod,
   DateSelectionState,
   predefinedDateRanges,
 } from './date-selection.reducer';
@@ -22,7 +23,10 @@ export const selectDatePeriodSelection = createSelector(
 
 export const selectDatePeriodSelectionWithLabel = createSelector(
   selectDatePeriodSelection,
-  (periodSelection) => predefinedDateRanges[periodSelection],
+  (periodSelection) => predefinedDateRanges[periodSelection] || {
+    type: 'custom',
+    label: 'Custom',
+  },
 );
 
 export const selectPeriodSelectionLabel = createSelector(

@@ -1,11 +1,11 @@
-import { init, AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
+import { init, type AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
 
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
 import { readFile } from 'fs/promises';
 import dayjs from 'dayjs';
 
-export { AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
+export type { AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
 
 export async function getJWT(expiryDateTime: number, customKeyPath?: string) {
   const keyPath = customKeyPath || process.env.AA_KEY_PATH || 'keys/secret.pem';

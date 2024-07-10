@@ -8,19 +8,13 @@ import type {
   MetricsConfig,
   PageDocument,
   PageMetricsModel,
-  ProjectDocument,
-  TaskDocument,
-  UrlModel,
 } from '@dua-upd/db';
 import {
   DbService,
   Feedback,
   Page,
   PageMetrics,
-  Project,
   Readability,
-  Task,
-  Url,
 } from '@dua-upd/db';
 import type {
   ApiParams,
@@ -30,13 +24,17 @@ import type {
   PagesHomeData,
   PagesHomeAggregatedData,
   ActivityMapMetrics,
-  PageStatus,
+  IProject,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
   dateRangeSplit,
+  parseDateRangeString,
+  percentChange,
 } from '@dua-upd/utils-common';
-import { InternalSearchTerm } from '@dua-upd/types-common';
+import type { InternalSearchTerm } from '@dua-upd/types-common';
+import { FeedbackService } from '@dua-upd/api/feedback';
+import { compressString, decompressString } from '@dua-upd/node-utils';
 
 @Injectable()
 export class PagesService {
@@ -48,21 +46,16 @@ export class PagesService {
     private feedbackModel: FeedbackModel,
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
-    @InjectModel(Task.name, 'defaultConnection')
-    private taskModel: Model<TaskDocument>,
-    @InjectModel(Project.name, 'defaultConnection')
-    private projectModel: Model<ProjectDocument>,
     @InjectModel(Readability.name, 'defaultConnection')
     private readabilityModel: Model<Readability>,
-    @InjectModel(Url.name, 'defaultConnection')
-    private urls: UrlModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private feedbackService: FeedbackService,
   ) {}
 
   async listPages({ projection, populate }): Promise<Page[]> {
     let query = this.pageModel.find({}, projection);
     if (populate) {
-      const populateArray = populate.split(',').map(item => item.trim());
+      const populateArray = populate.split(',').map((item) => item.trim());
       query = query.populate(populateArray);
     }
 
@@ -71,15 +64,20 @@ export class PagesService {
 
   async getPagesHomeData(dateRange: string): Promise<PagesHomeData> {
     const cacheKey = `getPagesHomeData-${dateRange}`;
-    const cachedData = (await this.cacheManager.store.get(
-      cacheKey,
-    )) as PagesHomeAggregatedData[];
+
+    const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
+      async (cachedData) =>
+        cachedData &&
+        // it's actually still a string here, but we want to avoid deserializing it
+        // and then reserializing it to send over http while still keeping our types intact
+        ((await decompressString(cachedData)) as unknown as {
+          dateRange: string;
+          dateRangeData: PagesHomeAggregatedData[];
+        }),
+    );
 
     if (cachedData) {
-      return {
-        dateRange,
-        dateRangeData: cachedData,
-      };
+      return cachedData;
     }
 
     const [startDate, endDate] = dateRangeSplit(dateRange);
@@ -90,10 +88,18 @@ export class PagesService {
 
     const results = await this.db.views.pageVisits.getVisitsWithPageData(
       queryDateRange,
-      this.pageModel
+      this.pageModel,
     );
 
-    await this.cacheManager.set(cacheKey, results);
+    await this.cacheManager.set(
+      cacheKey,
+      await compressString(
+        JSON.stringify({
+          dateRange,
+          dateRangeData: results,
+        }),
+      ),
+    );
 
     return {
       dateRange,
@@ -121,22 +127,17 @@ export class PagesService {
         url: 1,
         tasks: 1,
         projects: 1,
+        is_404: 1,
+        redirect: 1,
       })
       .populate('tasks')
       .populate('projects')
-      .lean();
+      .lean()
+      .exec();
 
-    const urls = (
-      await this.urls
-        .aggregate()
-        .match({ page: new Types.ObjectId(params.id) })
-        .project({ _id: 0, is_404: 1, redirect: 1 })
-        .exec()
-    )[0];
-
-    const projects = (page.projects || [])
+    const projects = ((page.projects || []) as IProject[])
       .map((project) => {
-        return { id: project._id, title: project.title };
+        return { id: project._id.toString(), title: project.title };
       })
       .flat();
 
@@ -235,11 +236,36 @@ export class PagesService {
       .sort({ date: -1 })
       .exec();
 
+    const mostRelevantCommentsAndWords =
+      await this.feedbackService.getMostRelevantCommentsAndWords({
+        dateRange: parseDateRangeString(params.dateRange),
+        type: 'page',
+        id: params.id,
+      });
+
+    const numComments =
+      mostRelevantCommentsAndWords.en.comments.length +
+      mostRelevantCommentsAndWords.fr.comments.length;
+
+    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
+      parseDateRangeString(params.comparisonDateRange);
+
+    const numPreviousComments = await this.feedbackModel
+      .countDocuments({
+        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+      })
+      .exec();
+
+    const numCommentsPercentChange =
+      !params.ipd && numPreviousComments
+        ? percentChange(numComments, numPreviousComments)
+        : null;
+
     const results = {
       ...page,
-      is404: urls.is_404,
-      isRedirect: !!urls.redirect,
-      redirectUrl: urls.redirect || null,
+      is404: page.is_404,
+      isRedirect: !!page.redirect,
+      redirectUrl: page.redirect || null,
       projects,
       dateRange: params.dateRange,
       dateRangeData: {
@@ -248,10 +274,6 @@ export class PagesService {
           date: data.date.toISOString(),
           visits: data.visits,
         })),
-        feedbackByTags: await this.feedbackModel.getCommentsByTag(
-          params.dateRange,
-          [page.url],
-        ),
         dyfByDay: await this.getDyfByDay(params.dateRange, params.id),
       },
       comparisonDateRange: params.comparisonDateRange,
@@ -261,21 +283,25 @@ export class PagesService {
           date: data.date.toISOString(),
           visits: data.visits,
         })),
-        feedbackByTags: await this.feedbackModel.getCommentsByTag(
-          params.comparisonDateRange,
-          [page.url],
-        ),
         dyfByDay: await this.getDyfByDay(params.comparisonDateRange, params.id),
       },
       topSearchTermsIncrease: topIncreasedSearchTerms,
       topSearchTermsDecrease: topDecreasedSearchTerms,
       top25GSCSearchTerms: top25GSCSearchTerms,
-      feedbackComments: await this.feedbackModel.getComments(params.dateRange, [
-        page.url,
-      ]),
+      feedbackByDay: (
+        await this.feedbackModel.getCommentsByDay(params.dateRange, {
+          page: page._id,
+        })
+      ).map(({ date, sum }) => ({
+        date: date.toISOString(),
+        sum,
+      })),
       searchTerms: await this.getTopSearchTerms(params),
       activityMap: await this.getActivityMapData(params),
       readability,
+      mostRelevantCommentsAndWords,
+      numComments,
+      numCommentsPercentChange,
     } as PageDetailsData;
 
     await this.cacheManager.set(cacheKey, results);

@@ -8,6 +8,8 @@
  *      an environment to extend and build on that functionality for specific use-cases
  */
 
+import type { Readable } from 'stream';
+import { cpus } from 'os';
 import {
   AppendBlobClient,
   BlobBeginCopyFromURLResponse,
@@ -246,33 +248,30 @@ export class BlobClient {
   setCompression(algorithm: CompressionAlgorithm | void): BlobClient {
     this.compression = algorithm;
 
-    if (algorithm && !this.name.endsWith(`.${algorithm}`)) {
-      const compressionExtensions: CompressionAlgorithm[] = [
-        'brotli',
-        'zstd',
-      ];
+    const compressionExtensions: CompressionAlgorithm[] = ['brotli', 'zstd'];
 
-      const extensionsRegex = new RegExp(
-        `.(${compressionExtensions.join('|')})$`,
-      );
+    const extensionsRegex = new RegExp(
+      `\\.(${compressionExtensions.join('|')})$`,
+    );
 
-      this.filename = `${this.filename.replace(
-        extensionsRegex,
-        '',
-      )}.${algorithm}`;
+    const extraExtension = algorithm ? `.${algorithm}` : '';
 
-      if (this.blobType === 'append') {
-        this.client = this.container
-          .getClient()
-          .getAppendBlobClient(`${this.path}/${this.filename}`);
-      } else {
-        this.client = this.container
-          .getClient()
-          .getBlockBlobClient(`${this.path}/${this.filename}`);
-      }
+    this.filename = `${this.filename.replace(
+      extensionsRegex,
+      '',
+    )}${extraExtension}`;
 
-      this.name = this.client.name;
+    if (this.blobType === 'append') {
+      this.client = this.container
+        .getClient()
+        .getAppendBlobClient(`${this.path}/${this.filename}`);
+    } else {
+      this.client = this.container
+        .getClient()
+        .getBlockBlobClient(`${this.path}/${this.filename}`);
     }
+
+    this.name = this.client.name;
 
     return this;
   }
@@ -450,6 +449,35 @@ export class BlobClient {
 
     console.log('Files are the same. No changes made.');
     return;
+  }
+
+  async uploadStream<T extends Readable>(stream: T, overwrite = this.overwrite) {
+    if (!(this.client instanceof BlockBlobClient)) {
+      throw Error('uploadStream() can only be called on BlockBlobClients');
+    }
+
+    const blobExists = await this.client.exists();
+
+    if (blobExists && !overwrite) {
+      throw Error(
+        `Error uploading blob: "${this.name}" already exists and overwrite = false`,
+      );
+    }
+
+    try {
+      return this.client.uploadStream(
+        stream,
+        1024 * 1024 * 4,
+        cpus().length - 1,
+        {
+          onProgress: console.log,
+        },
+      );
+    } catch (err) {
+      console.error(chalk.red('Error uploading stream to storage:'));
+      console.error((<Error>err).stack);
+      return;
+    }
   }
 
   async downloadToString(
