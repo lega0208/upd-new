@@ -33,7 +33,7 @@ interface ColorThreshold {
 export class HeatmapComponent<T> {
   private i18n = inject(I18nFacade);
   currentLang = this.i18n.currentLang;
-
+  title = input('');
   data = input<Cell[]>([]);
   calendarMonths: Cell[][][] = [];
   dateParams = this.currentLang() == FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY';

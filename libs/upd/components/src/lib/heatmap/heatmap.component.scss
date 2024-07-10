@@ -64,6 +64,16 @@ $highlight-color: #f0f0f0;
   position: relative;
   border-radius: 5px;
   flex: 1 1 calc(100% / 7);
+  scale: 1;
+  transition-duration: 100ms;
+}
+
+.day-cell:hover {
+  cursor: default;
+  filter: saturate(135%);
+  scale: 1.15;
+  transition-duration: 100ms;
+  z-index: 20;
 }
 
 .bordered-cell {
