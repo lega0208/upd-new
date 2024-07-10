@@ -55,6 +55,7 @@ import {
   percentChange,
 } from '@dua-upd/utils-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
+import { compressString, decompressString } from '@dua-upd/node-utils';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -136,8 +137,13 @@ export class OverallService {
   async getMetrics(params: ApiParams): Promise<OverviewData> {
     const cacheKey = `OverviewMetrics-${params.dateRange}-${params['ipd']}`;
 
-    const cachedData =
-      await this.cacheManager.store.get<OverviewData>(cacheKey);
+    const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
+      async (cachedData) =>
+        cachedData &&
+        // it's actually still a string here, but we want to avoid deserializing it
+        // and then reserializing it to send over http while still keeping our types intact
+        ((await decompressString(cachedData)) as unknown as OverviewData),
+    );
 
     if (cachedData) {
       return cachedData;
@@ -235,7 +241,10 @@ export class OverallService {
       searchTermsFr: await this.getTopSearchTerms(params, 'fr'),
     };
 
-    await this.cacheManager.set(cacheKey, results);
+    await this.cacheManager.set(
+      cacheKey,
+      await compressString(JSON.stringify(results)),
+    );
 
     return results;
   }
@@ -244,8 +253,13 @@ export class OverallService {
   async getFeedback(params: ApiParams): Promise<OverviewFeedback> {
     const cacheKey = `OverviewFeedback-${params.dateRange}-${params['ipd']}`;
 
-    const cachedData =
-      await this.cacheManager.store.get<OverviewFeedback>(cacheKey);
+    const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
+      async (cachedData) =>
+        cachedData &&
+        // it's actually still a string here, but we want to avoid deserializing it
+        // and then reserializing it to send over http while still keeping our types intact
+        ((await decompressString(cachedData)) as unknown as OverviewFeedback),
+    );
 
     if (cachedData) {
       return cachedData;
@@ -305,7 +319,10 @@ export class OverallService {
       })),
     };
 
-    await this.cacheManager.set(cacheKey, overviewFeedback);
+    await this.cacheManager.set(
+      cacheKey,
+      await compressString(JSON.stringify(overviewFeedback)),
+    );
 
     return overviewFeedback;
   }

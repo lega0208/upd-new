@@ -1,4 +1,4 @@
-import { Controller, Get, ParseBoolPipe, Query } from '@nestjs/common';
+import { Controller, Get, Header, ParseBoolPipe, Query } from '@nestjs/common';
 import { OverallService } from './overall.service';
 
 @Controller('overall')
@@ -6,6 +6,7 @@ export class OverallController {
   constructor(private readonly overallService: OverallService) {}
 
   @Get()
+  @Header('Content-Type', 'application/json')
   getMetrics(
     @Query('dateRange') dateRange: string,
     @Query('comparisonDateRange') comparisonDateRange: string,
@@ -23,6 +24,7 @@ export class OverallController {
   }
 
   @Get('feedback')
+  @Header('Content-Type', 'application/json')
   getFeedback(
     @Query('dateRange') dateRange: string,
     @Query('comparisonDateRange') comparisonDateRange: string,

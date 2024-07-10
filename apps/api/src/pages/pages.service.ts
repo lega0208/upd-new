@@ -8,19 +8,13 @@ import type {
   MetricsConfig,
   PageDocument,
   PageMetricsModel,
-  ProjectDocument,
-  TaskDocument,
-  UrlModel,
 } from '@dua-upd/db';
 import {
   DbService,
   Feedback,
   Page,
   PageMetrics,
-  Project,
   Readability,
-  Task,
-  Url,
 } from '@dua-upd/db';
 import type {
   ApiParams,
@@ -30,6 +24,7 @@ import type {
   PagesHomeData,
   PagesHomeAggregatedData,
   ActivityMapMetrics,
+  IProject,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -37,8 +32,9 @@ import {
   parseDateRangeString,
   percentChange,
 } from '@dua-upd/utils-common';
-import { InternalSearchTerm } from '@dua-upd/types-common';
+import type { InternalSearchTerm } from '@dua-upd/types-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
+import { compressString, decompressString } from '@dua-upd/node-utils';
 
 @Injectable()
 export class PagesService {
@@ -50,14 +46,8 @@ export class PagesService {
     private feedbackModel: FeedbackModel,
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
-    @InjectModel(Task.name, 'defaultConnection')
-    private taskModel: Model<TaskDocument>,
-    @InjectModel(Project.name, 'defaultConnection')
-    private projectModel: Model<ProjectDocument>,
     @InjectModel(Readability.name, 'defaultConnection')
     private readabilityModel: Model<Readability>,
-    @InjectModel(Url.name, 'defaultConnection')
-    private urls: UrlModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private feedbackService: FeedbackService,
   ) {}
@@ -74,15 +64,20 @@ export class PagesService {
 
   async getPagesHomeData(dateRange: string): Promise<PagesHomeData> {
     const cacheKey = `getPagesHomeData-${dateRange}`;
-    const cachedData = (await this.cacheManager.store.get(
-      cacheKey,
-    )) as PagesHomeAggregatedData[];
+
+    const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
+      async (cachedData) =>
+        cachedData &&
+        // it's actually still a string here, but we want to avoid deserializing it
+        // and then reserializing it to send over http while still keeping our types intact
+        ((await decompressString(cachedData)) as unknown as {
+          dateRange: string;
+          dateRangeData: PagesHomeAggregatedData[];
+        }),
+    );
 
     if (cachedData) {
-      return {
-        dateRange,
-        dateRangeData: cachedData,
-      };
+      return cachedData;
     }
 
     const [startDate, endDate] = dateRangeSplit(dateRange);
@@ -96,7 +91,15 @@ export class PagesService {
       this.pageModel,
     );
 
-    await this.cacheManager.set(cacheKey, results);
+    await this.cacheManager.set(
+      cacheKey,
+      await compressString(
+        JSON.stringify({
+          dateRange,
+          dateRangeData: results,
+        }),
+      ),
+    );
 
     return {
       dateRange,
@@ -124,22 +127,17 @@ export class PagesService {
         url: 1,
         tasks: 1,
         projects: 1,
+        is_404: 1,
+        redirect: 1,
       })
       .populate('tasks')
       .populate('projects')
-      .lean();
+      .lean()
+      .exec();
 
-    const urls = (
-      await this.urls
-        .aggregate()
-        .match({ page: new Types.ObjectId(params.id) })
-        .project({ _id: 0, is_404: 1, redirect: 1 })
-        .exec()
-    )[0];
-
-    const projects = (page.projects || [])
+    const projects = ((page.projects || []) as IProject[])
       .map((project) => {
-        return { id: project._id, title: project.title };
+        return { id: project._id.toString(), title: project.title };
       })
       .flat();
 
@@ -265,9 +263,9 @@ export class PagesService {
 
     const results = {
       ...page,
-      is404: urls.is_404,
-      isRedirect: !!urls.redirect,
-      redirectUrl: urls.redirect || null,
+      is404: page.is_404,
+      isRedirect: !!page.redirect,
+      redirectUrl: page.redirect || null,
       projects,
       dateRange: params.dateRange,
       dateRangeData: {
@@ -290,10 +288,11 @@ export class PagesService {
       topSearchTermsIncrease: topIncreasedSearchTerms,
       topSearchTermsDecrease: topDecreasedSearchTerms,
       top25GSCSearchTerms: top25GSCSearchTerms,
-      feedbackByDay: (await this.feedbackModel.getCommentsByDay(
-        params.dateRange,
-        { page: page._id },
-      )).map(({date, sum}) => ({
+      feedbackByDay: (
+        await this.feedbackModel.getCommentsByDay(params.dateRange, {
+          page: page._id,
+        })
+      ).map(({ date, sum }) => ({
         date: date.toISOString(),
         sum,
       })),
