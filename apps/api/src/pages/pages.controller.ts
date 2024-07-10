@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Header,
   Query
 } from '@nestjs/common';
 import { PagesService } from './pages.service';
@@ -10,6 +11,7 @@ export class PagesController {
   constructor(private readonly pagesService: PagesService) {}
 
   @Get('home')
+  @Header('Content-Type', 'application/json')
   getPagesHomeData(@Query('dateRange') dateRange: string) {
     return this.pagesService.getPagesHomeData(dateRange);
   }

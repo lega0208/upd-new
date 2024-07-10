@@ -44,6 +44,7 @@ import {
 } from '@dua-upd/utils-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import { omit } from 'rambdax';
+import { compressString, decompressString } from '@dua-upd/node-utils';
 
 @Injectable()
 export class TasksService {
@@ -76,8 +77,14 @@ export class TasksService {
     comparisonDateRange: string,
   ): Promise<TasksHomeData> {
     const cacheKey = `getTasksHomeData-${dateRange}-${comparisonDateRange}`;
-    const cachedData =
-      await this.cacheManager.store.get<TasksHomeData>(cacheKey);
+
+    const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
+      async (cachedData) =>
+        cachedData &&
+        // it's actually still a string here, but we want to avoid deserializing it
+        // and then reserializing it to send over http while still keeping our types intact
+        ((await decompressString(cachedData)) as unknown as TasksHomeData),
+    );
 
     if (cachedData) {
       return cachedData;
@@ -370,7 +377,10 @@ export class TasksService {
       reports,
     };
 
-    await this.cacheManager.set(cacheKey, results);
+    await this.cacheManager.set(
+      cacheKey,
+      await compressString(JSON.stringify(results)),
+    );
 
     return results;
   }
@@ -424,7 +434,15 @@ export class TasksService {
     const pages = await this.pageModel
       .find(
         { tasks: taskId },
-        { title: 1, url: 1, lang: 1, is_404: 1, redirect: 1, owners: 1, sections: 1 },
+        {
+          title: 1,
+          url: 1,
+          lang: 1,
+          is_404: 1,
+          redirect: 1,
+          owners: 1,
+          sections: 1,
+        },
       )
       .lean()
       .exec();
@@ -464,7 +482,7 @@ export class TasksService {
       await this.feedbackModel.getCommentsByDay(params.dateRange, {
         tasks: taskId,
       })
-    ).map(({date, sum}) => ({
+    ).map(({ date, sum }) => ({
       date: date.toISOString(),
       sum,
     }));
