@@ -95,6 +95,23 @@
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
+    <div class="col">
+      <upd-apex-bar-line
+        [title]="'d3-visits-compared-to-calls'"
+        [series]="(comboChartData$ | async) || []"
+        [table]="(barTable$ | async) || []"
+        [tableCols]="barTableCols"
+        [colours]="['#2E5EA7', '#B5C2CC', '#f37d35', '#fbbc4d']"
+        [secondaryTitleData]="chartData"
+        [secondaryTitleCols]="chartCols"
+        [annotations]="(annotationsData$ | async) || []"
+      ></upd-apex-bar-line>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
     <!-- <div class="col">
       <upd-data-card
         [current]="uniqueVisitors$ | async"

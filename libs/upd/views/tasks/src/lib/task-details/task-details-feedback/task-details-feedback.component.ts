@@ -51,7 +51,7 @@ export class TaskDetailsFeedbackComponent implements OnInit {
     },
     {
       field: 'sum',
-      header: 'value',
+      header: 'Number of comments',
       pipe: 'number',
       translate: true,
     },
@@ -79,13 +79,13 @@ export class TaskDetailsFeedbackComponent implements OnInit {
     { field: 'rank', header: 'Rank', width: '10px', center: true },
     { field: 'date', header: 'Date', pipe: 'date', width: '100px' },
     { field: 'url', header: 'URL' },
-    { field: 'owners', header: 'Owner', width: '10px', hide: true },
+    { field: 'owners', header: 'Area', width: '10px', hide: true },
     { field: 'sections', header: 'Section', hide: true },
-    { field: 'comment', header: 'Comment', width: '400px' },
+    { field: 'comment', header: 'comment', width: '400px' },
   ];
 
   mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
-    { field: 'word', header: 'Word', width: '10px' },
+    { field: 'word', header: 'word', width: '10px' },
     {
       field: 'word_occurrences',
       header: 'Term occurrences',
@@ -180,12 +180,12 @@ export class TaskDetailsFeedbackComponent implements OnInit {
         },
         {
           field: 'sum',
-          header: 'Number of comments',
+          header: '# of comments',
           pipe: 'number',
         },
         {
           field: 'commentsPercentChange',
-          header: 'Comparison (for number of comments)',
+          header: 'comparison-for-comments',
           pipe: 'percent',
         },
       ];
