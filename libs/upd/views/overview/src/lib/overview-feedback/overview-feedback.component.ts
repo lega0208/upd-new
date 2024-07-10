@@ -97,7 +97,7 @@ export class OverviewFeedbackComponent {
     },
     {
       field: 'sum',
-      header: 'value',
+      header: 'Number of comments',
       translate: true,
     },
   ];
@@ -175,11 +175,11 @@ export class OverviewFeedbackComponent {
     { field: 'url', header: 'URL' },
     { field: 'owners', header: 'Area', hide: true, translate: true },
     { field: 'sections', header: 'Section', hide: true, translate: true },
-    { field: 'comment', header: 'Comment', width: '400px' },
+    { field: 'comment', header: 'comment', width: '400px' },
   ];
 
   mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
-    { field: 'word', header: 'Word', width: '10px' },
+    { field: 'word', header: 'word', width: '10px' },
     {
       field: 'word_occurrences',
       header: 'Term occurrences',

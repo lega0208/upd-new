@@ -47,7 +47,7 @@ export class PagesDetailsFeedbackComponent implements OnInit {
     },
     {
       field: 'sum',
-      header: 'value',
+      header: 'Number of comments',
       pipe: 'number',
       translate: true,
     },
@@ -77,11 +77,11 @@ export class PagesDetailsFeedbackComponent implements OnInit {
     { field: 'date', header: 'Date', pipe: 'date', width: '50px' },
     { field: 'owners', header: 'Area', hide: true, translate: true },
     { field: 'sections', header: 'Section', hide: true, translate: true },
-    { field: 'comment', header: 'Comment', width: '400px' },
+    { field: 'comment', header: 'comment', width: '400px' },
   ];
 
   mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
-    { field: 'word', header: 'Word', width: '10px' },
+    { field: 'word', header: 'word', width: '10px' },
     {
       field: 'word_occurrences',
       header: 'Term occurrences',
@@ -106,7 +106,7 @@ export class PagesDetailsFeedbackComponent implements OnInit {
         this.i18n.service.translate('yes', lang),
         this.i18n.service.translate('no', lang),
       ];
-      
+
       this.dyfTableCols = [
         {
           field: 'name',
@@ -125,7 +125,7 @@ export class PagesDetailsFeedbackComponent implements OnInit {
           pipe: 'number',
           translate: true,
         },
-      ]
+      ];
     });
   }
 }

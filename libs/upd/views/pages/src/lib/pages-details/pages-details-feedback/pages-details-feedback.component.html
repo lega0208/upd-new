@@ -82,7 +82,7 @@
 }
 
 <upd-heatmap
-  [title]="'heatmap'"
+  title="Number of comments per day"
   [data]="(feedbackByDay$ | async) || []"
   [tableCols]="feedbackByDayCols"
   [table]="(feedbackByDay$ | async) || []"

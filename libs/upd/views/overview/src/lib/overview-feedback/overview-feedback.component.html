@@ -52,20 +52,24 @@
     </div>
   </div>
 
-@if (feedbackMostRelevant()) {
-  <upd-card title="Most frequent words (EN)" headerClass="h6">
-    <upd-data-table
-      id="overview-feedback-most-relevant-words-en"
-      [filter]="true"
-      [sort]="true"
-      [pagination]="true"
-      [data]="mostRelevantWordsEn() || []"
-      [cols]="mostRelevantWordsColumns"
-      [title]="'Most frequent words (EN)'"
-      [allowHeaderWrap]="true"
+  @if (feedbackMostRelevant()) {
+    <upd-card
+      title="Most frequent words (EN)"
+      headerClass="h6"
+      titleTooltip="most-frequent-words-en-tooltip"
     >
-    </upd-data-table>
-  </upd-card>
+      <upd-data-table
+        id="overview-feedback-most-relevant-words-en"
+        [filter]="true"
+        [sort]="true"
+        [pagination]="true"
+        [data]="mostRelevantWordsEn() || []"
+        [cols]="mostRelevantWordsColumns"
+        [title]="'Most frequent words (EN)'"
+        [allowHeaderWrap]="true"
+      >
+      </upd-data-table>
+    </upd-card>
 
     <div class="container-fluid my-4 gx-0">
       <div class="row">
@@ -87,19 +91,22 @@
       </div>
     </div>
 
-  <upd-card title="Most frequent words (FR)">
-    <upd-data-table
-      id="overview-feedback-most-relevant-words-fr"
-      [filter]="true"
-      [sort]="true"
-      [pagination]="true"
-      [data]="mostRelevantWordsFr() || []"
-      [cols]="mostRelevantWordsColumns"
-      [title]="'Most frequent words (FR)'"
-      [allowHeaderWrap]="true"
+    <upd-card
+      title="Most frequent words (FR)"
+      titleTooltip="most-frequent-words-fr-tooltip"
     >
-    </upd-data-table>
-  </upd-card>
+      <upd-data-table
+        id="overview-feedback-most-relevant-words-fr"
+        [filter]="true"
+        [sort]="true"
+        [pagination]="true"
+        [data]="mostRelevantWordsFr() || []"
+        [cols]="mostRelevantWordsColumns"
+        [title]="'Most frequent words (FR)'"
+        [allowHeaderWrap]="true"
+      >
+      </upd-data-table>
+    </upd-card>
 
     <div class="container-fluid my-4 gx-0">
       <div class="row">
@@ -125,9 +132,9 @@
   <div class="container-fluid my-4 gx-0">
     <div class="row">
       <div class="col">
-      <upd-card [title]="'feedback-per-page'" titleSize="h6">
+        <upd-card [title]="'feedback-per-page'" titleSize="h6">
           <upd-data-table
-          id="total-feedback-per-page"
+            id="total-feedback-per-page"
             [filter]="true"
             [sort]="true"
             [pagination]="true"
@@ -137,12 +144,13 @@
             [columnSelection]="true"
           >
           </upd-data-table>
-      </upd-card>
+        </upd-card>
       </div>
     </div>
   </div>
 
   <upd-heatmap
+    title="Number of comments per day"
     [data]="feedbackByDay()"
     [tableCols]="feedbackByDayCols"
     [table]="feedbackByDay()"

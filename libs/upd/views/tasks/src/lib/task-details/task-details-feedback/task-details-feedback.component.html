@@ -34,7 +34,11 @@
 </div>
 
 @if (feedbackMostRelevant()) {
-  <upd-card [title]="'Most frequent words (EN)'" titleSize="h6">
+  <upd-card
+    [title]="'Most frequent words (EN)'"
+    titleTooltip="most-frequent-words-en-tooltip"
+    titleSize="h6"
+  >
     @if (mostRelevantWordsEn() && mostRelevantWordsEn().length) {
       <upd-data-table
         id="tasks-feedback-most-relevant-words-en"
@@ -80,7 +84,11 @@
     </div>
   </div>
 
-  <upd-card [title]="'Most frequent words (FR)'" titleSize="h6">
+  <upd-card
+    [title]="'Most frequent words (FR)'"
+    titleTooltip="most-frequent-words-fr-tooltip"
+    titleSize="h6"
+  >
     @if (mostRelevantWordsFr() && mostRelevantWordsFr().length) {
       <upd-data-table
         id="tasks-feedback-most-relevant-words-fr"
@@ -148,7 +156,7 @@
 </div>
 
 <upd-heatmap
-  [title]="'heatmap'"
+  title="Number of comments per day"
   [data]="(feedbackByDay$ | async) || []"
   [tableCols]="feedbackByDayCols"
   [table]="(feedbackByDay$ | async) || []"
