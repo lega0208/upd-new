@@ -30,10 +30,12 @@ export type DateRange<T extends AbstractDate> = {
 };
 
 export function datesFromDateRange(
-  dateRange: DateRange<Dayjs>,
+  dateRange: DateRange<Dayjs> | DateRange<Date> | string,
   format: string | false = 'YYYY-MM-DD',
   inclusive = false,
 ): Date[] | string[] {
+  dateRange =
+    typeof dateRange === 'string' ? parseDateRangeString(dateRange) : dateRange;
   const dates: Dayjs[] = [];
 
   let currentDate = dayjs.utc(dateRange.start);
@@ -64,6 +66,12 @@ export function datesFromDateRange(
  */
 export const dateRangeSplit = (dateRange: string): Date[] =>
   dateRange.split('/').map((d) => new Date(d));
+
+export const parseDateRangeString = (dateRange: string): DateRange<Date> => {
+  const [start, end] = dateRangeSplit(dateRange);
+
+  return { start, end };
+};
 
 /**
  * Utility for correcting UTC dates if they're off by 1 (for calculating what "today" is)
@@ -102,7 +110,7 @@ export const dateRangeTypes = [
   'year_to_date',
 ] as const;
 
-export type DateRangeType = (typeof dateRangeTypes)[number];
+export type DateRangeType = (typeof dateRangeTypes)[number] | 'custom';
 
 export interface DateRangeConfig {
   type: DateRangeType;
@@ -239,6 +247,45 @@ export const dateRangeConfigs: readonly DateRangeConfig[] = Object.freeze([
       dayjs.utc(fromDate).subtract(52, 'weeks'),
   },
 ]);
+
+export function createCustomDateRangePeriod(
+  dateRangeString: string,
+  comparisonDateRangeString: string,
+) {
+  const [dateRangeStringStart, dateRangeStringEnd] = dateRangeString.split('/');
+  const [comparisonDateRangeStringStart, comparisonDateRangeStringEnd] =
+    comparisonDateRangeString.split('/');
+
+  const dateRange = {
+    start: dayjs.utc(dateRangeStringStart),
+    end: dayjs.utc(dateRangeStringEnd),
+  };
+
+  const comparisonDateRange = {
+    start: dayjs.utc(comparisonDateRangeStringStart),
+    end: dayjs.utc(comparisonDateRangeStringEnd),
+  };
+
+  const currentDates = datesFromDateRange(dateRange, false, true) as Date[];
+  const prevDates = datesFromDateRange(
+    comparisonDateRange,
+    false,
+    true,
+  ) as Date[];
+
+  return {
+    type: 'custom' as DateRangeType,
+    label: 'Custom',
+    dateRange,
+    comparisonDateRange,
+    dates: new Map(
+      zip(
+        prevDates.map((date) => date.toISOString()),
+        currentDates.map((date) => date.toISOString()),
+      ) as [string, string][],
+    ),
+  };
+}
 
 /**
  * From seconds to milliseconds

@@ -24,7 +24,6 @@ import {
 } from '@dua-upd/db';
 import type {
   ApiParams,
-  FeedbackComment,
   InternalSearchTerm,
   ProjectsDetailsData,
   ProjectDetailsAggregatedData,
@@ -33,9 +32,17 @@ import type {
   ProjectsHomeData,
   VisitsByPage,
 } from '@dua-upd/types-common';
-import { dateRangeSplit } from '@dua-upd/utils-common/date';
+import {
+  dateRangeSplit,
+  parseDateRangeString,
+} from '@dua-upd/utils-common/date';
 import { getLatestTest, getLatestTestData } from '@dua-upd/utils-common/data';
-import { arrayToDictionary, AsyncLogTiming, percentChange } from '@dua-upd/utils-common';
+import {
+  arrayToDictionary,
+  AsyncLogTiming,
+  percentChange,
+} from '@dua-upd/utils-common';
+import { FeedbackService } from '@dua-upd/api/feedback';
 
 dayjs.extend(utc);
 
@@ -149,6 +156,7 @@ export class ProjectsService {
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private feedbackService: FeedbackService,
   ) {}
 
   async getProjectsHomeData(): Promise<ProjectsHomeData> {
@@ -347,10 +355,6 @@ export class ProjectsService {
       return;
     }
 
-    console.time('getUniqueProjectUrls');
-    const projectUrls = await getUniqueProjectUrls(projectDoc);
-    console.timeEnd('getUniqueProjectUrls');
-
     console.time('populate');
     const populatedProjectDoc = (await this.projectsModel
       .findById(projectId, {
@@ -424,11 +428,12 @@ export class ProjectsService {
     const dateFromLastTest: Date | null = lastTest?.date || null;
 
     console.time('getLatestTestData');
-    const { percentChange: projectPercentChange, avgTestSuccess } = getLatestTestData(uxTests);
+    const { percentChange: projectPercentChange, avgTestSuccess } =
+      getLatestTestData(uxTests);
 
     const last_task_success_percent_change = percentChange(
       avgTestSuccess,
-      avgTestSuccess - projectPercentChange
+      avgTestSuccess - projectPercentChange,
     );
 
     console.timeEnd('getLatestTestData');
@@ -454,7 +459,6 @@ export class ProjectsService {
       this.pageModel,
       new Types.ObjectId(params.id),
       params.dateRange,
-      projectUrls,
     );
     console.timeEnd('dateRangeData');
 
@@ -467,36 +471,54 @@ export class ProjectsService {
       this.pageModel,
       new Types.ObjectId(params.id),
       params.comparisonDateRange,
-      projectUrls,
     );
     console.timeEnd('comparisonDateRangeData');
-
-    console.time('getProjectFeedbackComments');
-    const feedbackComments = await getProjectFeedbackComments(
-      params.dateRange,
-      projectUrls,
-      this.feedbackModel,
-    );
-    console.timeEnd('getProjectFeedbackComments');
-
-    const numFeedbackComments = feedbackComments.length;
-
-    // clean up with endDate and startDate
-    const numPreviousComments = await this.feedbackModel.countDocuments({
-      date: {
-        $gte: new Date(params.comparisonDateRange.split('/')[0]),
-        $lte: new Date(params.comparisonDateRange.split('/')[1]),
-      },
-      url: { $in: projectUrls },
-    });
-
-    const numFeedbackCommentsPercentChange = numPreviousComments
-      ? percentChange(feedbackComments.length, numPreviousComments)
-      : null;
 
     console.time('getTopSearchTerms');
     const searchTerms = await this.getTopSearchTerms(params);
     console.timeEnd('getTopSearchTerms');
+
+    console.time('commentsByPage');
+    const feedbackByPage = (
+      await this.feedbackService.getNumCommentsByPage(
+        params.dateRange,
+        params.comparisonDateRange,
+        { projects: projectId },
+      )
+    ).map(({ _id, title, url, sum, percentChange }) => ({
+      _id: _id.toString(),
+      title,
+      url,
+      sum,
+      percentChange,
+    }));
+    console.log(feedbackByPage.length);
+    console.timeEnd('commentsByPage');
+
+    const mostRelevantCommentsAndWords =
+      await this.feedbackService.getMostRelevantCommentsAndWords({
+        dateRange: parseDateRangeString(params.dateRange),
+        type: 'project',
+        id: params.id,
+      });
+
+    const numComments =
+      mostRelevantCommentsAndWords.en.comments.length +
+      mostRelevantCommentsAndWords.fr.comments.length;
+
+    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
+      parseDateRangeString(params.comparisonDateRange);
+
+    const numPreviousComments = await this.feedbackModel
+      .countDocuments({
+        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+      })
+      .exec();
+
+    const numCommentsPercentChange =
+      !params.ipd && numPreviousComments
+        ? percentChange(numComments, numPreviousComments)
+        : null;
 
     const results = {
       _id: populatedProjectDoc._id.toString(),
@@ -517,8 +539,6 @@ export class ProjectsService {
       dateFromLastTest,
       taskSuccessByUxTest: uxTests,
       tasks,
-      feedbackComments,
-      feedbackCommentsPercentChange: numFeedbackCommentsPercentChange,
       searchTerms,
       attachments: populatedProjectDoc.attachments.map((attachment) => {
         attachment.storage_url = attachment.storage_url?.replace(
@@ -528,6 +548,22 @@ export class ProjectsService {
 
         return attachment;
       }),
+      feedbackByPage,
+      feedbackByDay: (await this.feedbackModel.getCommentsByDay(
+        params.dateRange,
+        { projects: projectId },
+      )).map(({date, sum}) => ({
+      date: date.toISOString(),
+      sum,
+    })),
+      mostRelevantCommentsAndWords:
+        await this.feedbackService.getMostRelevantCommentsAndWords({
+          dateRange: parseDateRangeString(params.dateRange),
+          type: 'project',
+          id: params.id,
+        }),
+      numComments,
+      numCommentsPercentChange,
     };
 
     await this.cacheManager.set(cacheKey, results);
@@ -634,16 +670,8 @@ async function getAggregatedProjectMetrics(
   pageModel: Model<PageDocument>,
   id: Types.ObjectId,
   dateRange: string,
-  projectUrls: string[],
 ): Promise<ProjectDetailsAggregatedData> {
   const [startDate, endDate] = dateRangeSplit(dateRange);
-
-  console.time('feedbackByTags');
-  const feedbackByTags = await feedbackModel.getCommentsByTag(
-    dateRange,
-    projectUrls,
-  );
-  console.timeEnd('feedbackByTags');
 
   console.time('projectMetrics');
   const projectMetrics = (
@@ -666,6 +694,8 @@ async function getAggregatedProjectMetrics(
         gsc_total_impressions: 1,
         gsc_total_ctr: 1,
         gsc_total_position: 1,
+        owners: 1,
+        sections: 1,
       })
       .group({
         _id: '$page',
@@ -681,6 +711,8 @@ async function getAggregatedProjectMetrics(
         gscTotalImpressions: { $sum: '$gsc_total_impressions' },
         gscTotalCtr: { $avg: '$gsc_total_ctr' },
         gscTotalPosition: { $avg: '$gsc_total_position' },
+        owners: { $first: '$owners' },
+        sections: { $first: '$sections' },
       })
       .group({
         _id: null,
@@ -698,6 +730,8 @@ async function getAggregatedProjectMetrics(
         gscTotalImpressions: { $sum: '$gscTotalImpressions' },
         gscTotalCtr: { $avg: '$gscTotalCtr' },
         gscTotalPosition: { $avg: '$gscTotalPosition' },
+        owners: { $first: '$owners' },
+        sections: { $first: '$sections' },
       })
       .exec()
   )?.[0];
@@ -733,6 +767,8 @@ async function getAggregatedProjectMetrics(
         isRedirect: !!page?.redirect,
         redirect: page?.redirect,
         pageStatus: determinePageStatus(page),
+        owners: page?.owners,
+        sections: page?.sections,
       };
     }) || [];
 
@@ -764,31 +800,9 @@ async function getAggregatedProjectMetrics(
     ) as VisitsByPage[];
   }
 
-  const project = await projectModel
-    .findById(id)
-    .populate<{ tasks: Task[] }>('tasks');
-  const tasks = project?.tasks || [];
-
-  const tpcIds = tasks
-    .filter((task: Types.ObjectId | Task) => 'tpc_ids' in task)
-    .map((task: Task) => task.tpc_ids)
-    .flat();
-
-  console.time('calldriverDocs');
-  const calldriverDocs = await calldriversModel
-    .find(
-      {
-        date: { $gte: startDate, $lte: endDate },
-        tpc_id: { $in: tpcIds },
-      },
-      { _id: 1 },
-    )
-    .lean()
-    .exec();
-  console.timeEnd('calldriverDocs');
-
   const visitsByDay = await pageMetricsModel
     .aggregate()
+    .project({ date: 1, visits: 1, projects: 1 })
     .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
     .group({
       _id: '$date',
@@ -825,7 +839,7 @@ async function getAggregatedProjectMetrics(
     .aggregate()
     .match({
       date: { $gte: startDate, $lte: endDate },
-      tpc_id: { $in: tpcIds },
+      projects: id,
     })
     .group({
       _id: '$date',
@@ -841,119 +855,26 @@ async function getAggregatedProjectMetrics(
     .sort({ date: 1 })
     .exec();
 
-  const documentIds = calldriverDocs.map(({ _id }) => _id);
-
   console.time('calldriversEnquiry');
-  const calldriversEnquiry =
-    await calldriversModel.getCallsByEnquiryLineFromIds(documentIds);
+  const calldriversEnquiry = await calldriversModel.getCallsByEnquiryLine(
+    dateRange,
+    { projects: id },
+  );
 
-  const callsByTopic =
-    await calldriversModel.getCallsByTopicFromIds(documentIds);
+  const callsByTopic = await calldriversModel.getCallsByTopic(dateRange, {
+    projects: id,
+  });
   console.timeEnd('calldriversEnquiry');
 
   const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
-
-  const taskIds = tasks.map((task: Types.ObjectId | Task) => task._id);
-
-  console.time('pageMetricsByTasks');
-
-  const pageMetricsByTasks = await pageMetricsModel
-    .aggregate<Partial<ProjectDetailsAggregatedData> & { title: string }>()
-    .match({
-      date: { $gte: startDate, $lte: endDate },
-      tasks: { $elemMatch: { $in: taskIds } },
-      projects: id,
-    })
-    .lookup({
-      from: 'tasks',
-      localField: 'tasks',
-      foreignField: '_id',
-      as: 'task',
-    })
-    .unwind('$task')
-    .match({ 'task._id': { $in: taskIds } })
-    .group({
-      _id: { taskId: '$task._id', taskTitle: '$task.title' },
-      page: { $first: '$page' },
-      visits: { $sum: '$visits' },
-      dyfYes: { $sum: '$dyf_yes' },
-      dyfNo: { $sum: '$dyf_no' },
-      fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
-      fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
-      fwylfOther: { $sum: '$fwylf_other' },
-      fwylfError: { $sum: '$fwylf_error' },
-      gscTotalClicks: { $sum: '$gsc_total_clicks' },
-      gscTotalImpressions: { $sum: '$gsc_total_impressions' },
-      gscTotalCtr: { $avg: '$gsc_total_ctr' },
-      gscTotalPosition: { $avg: '$gsc_total_position' },
-    })
-    .project({
-      _id: 0,
-      title: '$_id.taskTitle',
-      pages: 1, // add this line to include the page array in the output
-      visits: 1,
-      dyfYes: 1,
-      dyfNo: 1,
-      fwylfCantFindInfo: 1,
-      fwylfHardToUnderstand: 1,
-      fwylfOther: 1,
-      fwylfError: 1,
-      gscTotalClicks: 1,
-      gscTotalImpressions: 1,
-      gscTotalCtr: 1,
-      gscTotalPosition: 1,
-    })
-    .exec();
-
-  console.timeEnd('pageMetricsByTasks');
-
-  const feedbackComments = await getProjectFeedbackComments(
-    dateRange,
-    projectUrls,
-    feedbackModel,
-  );
 
   return {
     ...projectMetrics,
     calldriversEnquiry,
     callsByTopic,
     totalCalldrivers,
-    feedbackByTags,
     visitsByDay,
     dyfByDay,
     calldriversByDay,
-    pageMetricsByTasks,
-    feedbackComments,
   };
-}
-
-async function getProjectFeedbackComments(
-  dateRange: string,
-  projectUrls: string[],
-  feedbackModel: FeedbackModel,
-): Promise<FeedbackComment[]> {
-  const [startDate, endDate] = dateRangeSplit(dateRange);
-
-  return (
-    (await feedbackModel.find({
-      url: { $in: projectUrls },
-      date: { $gte: startDate, $lte: endDate },
-    })) || []
-  ).map((feedback) => ({
-    date: feedback.date,
-    url: feedback.url,
-    tag: feedback.tags?.length ? feedback.tags[0] : '',
-    whats_wrong: feedback.whats_wrong || '',
-    comment: feedback.comment,
-  }));
-}
-
-async function getUniqueProjectUrls(
-  project: ProjectDocument,
-): Promise<string[]> {
-  const projectPageUrls = ((await project.populate('pages')).pages || []).map(
-    (page) => 'url' in page && page.url,
-  );
-
-  return [...new Set(projectPageUrls)];
 }

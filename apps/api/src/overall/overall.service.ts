@@ -12,12 +12,12 @@ import type {
   ProjectDocument,
   TaskDocument,
   UxTestDocument,
-  FeedbackDocument,
   PageMetricsModel,
   PageDocument,
   SearchAssessmentDocument,
   AnnotationsDocument,
   GcTasksDocument,
+  FeedbackModel,
 } from '@dua-upd/db';
 import {
   DbService,
@@ -42,6 +42,7 @@ import type {
   OverviewProjectData,
   OverviewProject,
   OverallSearchTerm,
+  OverviewFeedback,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -50,7 +51,11 @@ import {
   dateRangeSplit,
   getImprovedKpiSuccessRates,
   getLatestTestData,
+  parseDateRangeString,
+  percentChange,
 } from '@dua-upd/utils-common';
+import { FeedbackService } from '@dua-upd/api/feedback';
+import { compressString, decompressString } from '@dua-upd/node-utils';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -117,7 +122,7 @@ export class OverallService {
     @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriversModel: CallDriverModel,
     @InjectModel(Feedback.name, 'defaultConnection')
-    private feedbackModel: Model<FeedbackDocument>,
+    private feedbackModel: FeedbackModel,
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessmentModel: Model<SearchAssessmentDocument>,
     @InjectModel(GcTasks.name, 'defaultConnection')
@@ -125,13 +130,20 @@ export class OverallService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectModel(Annotations.name, 'defaultConnection')
     private annotationsModel: Model<AnnotationsDocument>,
+    private feedbackService: FeedbackService,
   ) {}
 
   @AsyncLogTiming
   async getMetrics(params: ApiParams): Promise<OverviewData> {
-    const cacheKey = `OverviewMetrics-${params.dateRange}`;
-    const cachedData =
-      await this.cacheManager.store.get<OverviewData>(cacheKey);
+    const cacheKey = `OverviewMetrics-${params.dateRange}-${params['ipd']}`;
+
+    const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
+      async (cachedData) =>
+        cachedData &&
+        // it's actually still a string here, but we want to avoid deserializing it
+        // and then reserializing it to send over http while still keeping our types intact
+        ((await decompressString(cachedData)) as unknown as OverviewData),
+    );
 
     if (cachedData) {
       return cachedData;
@@ -220,7 +232,7 @@ export class OverallService {
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
       uxTests,
-      improvedTasksKpi,
+      improvedTasksKpi: getImprovedKpiSuccessRates(uxTests),
       ...(await getUxData(testsSince2018)),
       calldriverTopics,
       top5IncreasedCalldriverTopics,
@@ -229,9 +241,90 @@ export class OverallService {
       searchTermsFr: await this.getTopSearchTerms(params, 'fr'),
     };
 
-    await this.cacheManager.set(cacheKey, results);
+    await this.cacheManager.set(
+      cacheKey,
+      await compressString(JSON.stringify(results)),
+    );
 
     return results;
+  }
+
+  @AsyncLogTiming
+  async getFeedback(params: ApiParams): Promise<OverviewFeedback> {
+    const cacheKey = `OverviewFeedback-${params.dateRange}-${params['ipd']}`;
+
+    const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
+      async (cachedData) =>
+        cachedData &&
+        // it's actually still a string here, but we want to avoid deserializing it
+        // and then reserializing it to send over http while still keeping our types intact
+        ((await decompressString(cachedData)) as unknown as OverviewFeedback),
+    );
+
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const mostRelevantCommentsAndWords =
+      await this.feedbackService.getMostRelevantCommentsAndWords({
+        dateRange: parseDateRangeString(params.dateRange),
+        ipd: params.ipd as boolean,
+      });
+
+    const numComments =
+      mostRelevantCommentsAndWords.en.comments.length +
+      mostRelevantCommentsAndWords.fr.comments.length;
+
+    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
+      parseDateRangeString(params.comparisonDateRange);
+
+    const numPreviousComments = await this.feedbackModel
+      .countDocuments({
+        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+      })
+      .exec();
+
+    const numCommentsPercentChange =
+      !params.ipd && numPreviousComments
+        ? percentChange(numComments, numPreviousComments)
+        : null;
+
+    const commentsByPage = (
+      await this.feedbackService.getNumCommentsByPage(
+        params.dateRange,
+        params.comparisonDateRange,
+      )
+    )
+      .map(({ _id, title, url, owners, sections, sum, percentChange }) => ({
+        _id: _id.toString(),
+        title,
+        url,
+        owners,
+        sections,
+        sum,
+        percentChange,
+      }))
+      .sort((a, b) => (b.sum || 0) - (a.sum || 0));
+
+    const overviewFeedback = {
+      mostRelevantCommentsAndWords,
+      numComments,
+      numCommentsPercentChange,
+      commentsByPage,
+      feedbackByDay: (
+        await this.feedbackModel.getCommentsByDay(params.dateRange)
+      ).map(({ date, sum }) => ({
+        date: date.toISOString(),
+        sum,
+      })),
+    };
+
+    await this.cacheManager.set(
+      cacheKey,
+      await compressString(JSON.stringify(overviewFeedback)),
+    );
+
+    return overviewFeedback;
   }
 
   async getTopSearchTerms(
@@ -712,7 +805,7 @@ async function getOverviewMetrics(
   overallModel: Model<OverallDocument>,
   PageMetricsModel: PageMetricsModel,
   calldriversModel: CallDriverModel,
-  feedbackModel: Model<FeedbackDocument>,
+  feedbackModel: FeedbackModel,
   pageModel: Model<PageDocument>,
   annotationsModel: Model<AnnotationsDocument>,
   db: DbService,
@@ -824,83 +917,6 @@ async function getOverviewMetrics(
     .limit(10)
     .exec();
 
-  const totalFeedback = await feedbackModel
-    .aggregate()
-    .project({
-      date: 1,
-      url: 1,
-      main_section: 1,
-    })
-    .sort({ date: 1 })
-    .match({
-      $and: [
-        {
-          date: dateQuery,
-        },
-        {
-          url: {
-            $regex:
-              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
-          },
-        },
-      ],
-    })
-    .group({
-      _id: '$main_section',
-      sum: { $sum: 1 },
-    })
-    .sort({ sum: -1 })
-    .project({
-      _id: 0,
-      main_section: '$_id',
-      sum: 1,
-    })
-    .exec();
-
-  const feedbackPages = await feedbackModel
-    .aggregate<{ _id: string; title: string; url: string; sum: number }>()
-    .project({
-      date: 1,
-      url: 1,
-    })
-    .match({
-      $and: [
-        { date: dateQuery },
-        // todo: remove url filter once there is logic in place to remove non-CRA pages from feedback collection
-        {
-          url: {
-            $regex:
-              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
-          },
-        },
-      ],
-    })
-    .group({
-      _id: '$url',
-      sum: { $sum: 1 },
-    })
-    .project({
-      _id: 0,
-      url: '$_id',
-      sum: 1,
-    })
-    .sort({ sum: -1 })
-    .lookup({
-      from: 'pages',
-      localField: 'url',
-      foreignField: 'url',
-      as: 'page',
-    })
-    .unwind('$page')
-    .addFields({
-      _id: '$page._id',
-      title: '$page.title',
-    })
-    .project({
-      page: 0,
-    })
-    .exec();
-
   const aggregatedMetrics = await overallModel
     .aggregate<{
       visitors: number;
@@ -1007,9 +1023,21 @@ async function getOverviewMetrics(
     .group({
       _id: { gc_task: '$gc_task', theme: '$theme' },
       total_entries: { $sum: 1 },
-      satisfaction: { $avg: { $cond: [{ $in: ['$satisfaction', ['Very satisfied', 'Satisfied']] }, 1, 0] } },
-      ease: { $avg: { $cond: [{ $in: ['$ease', ['Very easy', 'Easy']] }, 1, 0] } },
-      able_to_complete: { $avg: { $cond: [{ $eq: ['$able_to_complete', 'Yes'] }, 1, 0] } },
+      satisfaction: {
+        $avg: {
+          $cond: [
+            { $in: ['$satisfaction', ['Very satisfied', 'Satisfied']] },
+            1,
+            0,
+          ],
+        },
+      },
+      ease: {
+        $avg: { $cond: [{ $in: ['$ease', ['Very easy', 'Easy']] }, 1, 0] },
+      },
+      able_to_complete: {
+        $avg: { $cond: [{ $eq: ['$able_to_complete', 'Yes'] }, 1, 0] },
+      },
     })
     .project({
       gc_task: '$_id.gc_task',
@@ -1019,17 +1047,63 @@ async function getOverviewMetrics(
       ease: 1,
       able_to_complete: 1,
       margin_of_error: {
-            $divide: [
+        $divide: [
+          {
+            $add: [
               {
-                $add: [
-                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$satisfaction', { $subtract: [1, '$satisfaction'] }] }, '$total_entries'] } }] },
-                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$ease', { $subtract: [1, '$ease'] }] }, '$total_entries'] } }] },
-                  { $multiply: [1.96, { $sqrt: { $divide: [{ $multiply: ['$able_to_complete', { $subtract: [1, '$able_to_complete'] }] }, '$total_entries'] } }] },
-                ]
+                $multiply: [
+                  1.96,
+                  {
+                    $sqrt: {
+                      $divide: [
+                        {
+                          $multiply: [
+                            '$satisfaction',
+                            { $subtract: [1, '$satisfaction'] },
+                          ],
+                        },
+                        '$total_entries',
+                      ],
+                    },
+                  },
+                ],
               },
-              3
-            ]
-          }
+              {
+                $multiply: [
+                  1.96,
+                  {
+                    $sqrt: {
+                      $divide: [
+                        { $multiply: ['$ease', { $subtract: [1, '$ease'] }] },
+                        '$total_entries',
+                      ],
+                    },
+                  },
+                ],
+              },
+              {
+                $multiply: [
+                  1.96,
+                  {
+                    $sqrt: {
+                      $divide: [
+                        {
+                          $multiply: [
+                            '$able_to_complete',
+                            { $subtract: [1, '$able_to_complete'] },
+                          ],
+                        },
+                        '$total_entries',
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          3,
+        ],
+      },
     })
     .sort({ total_entries: -1 })
     .project({ _id: 0 });
@@ -1041,10 +1115,8 @@ async function getOverviewMetrics(
     calldriversEnquiry,
     searchAssessmentData,
     ...aggregatedMetrics[0],
-    totalFeedback,
     topPagesVisited,
     top10GSC,
-    feedbackPages,
     annotations,
     gcTasksData,
     gcTasksComments,

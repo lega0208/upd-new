@@ -20,16 +20,33 @@ export class DateSelectionEffects {
         concatLatestFrom(() =>
           this.store.select(DateSelectionSelectors.selectDateRanges),
         ),
-        map(([, { dateRange, comparisonDateRange }]) =>
+        map(([{ selection }, { dateRange, comparisonDateRange }]) => {
+          const pendingQueryParams = Object.fromEntries([
+            ...new URLSearchParams(location.search).entries(),
+          ]);
+
+          if (selection === 'custom') {
+            delete pendingQueryParams['dateRange'];
+            delete pendingQueryParams['comparisonDateRange'];
+          } else {
+            delete pendingQueryParams['customDateRange'];
+            delete pendingQueryParams['customComparisonDateRange'];
+          }
+
           this.router.navigate([], {
-            queryParams: {
-              dateRange,
-              comparisonDateRange,
-            },
-            queryParamsHandling: '',
+            queryParams:
+              selection === 'custom'
+                ? pendingQueryParams
+                : {
+                    ...pendingQueryParams,
+                    dateRange,
+                    comparisonDateRange,
+                  },
+            queryParamsHandling: selection === 'custom' ? '' : '',
             replaceUrl: false,
-          }),
-        ),
+            skipLocationChange: selection === 'custom',
+          });
+        }),
       );
     },
     { dispatch: false },

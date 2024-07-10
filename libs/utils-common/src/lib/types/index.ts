@@ -1,7 +1,7 @@
 /*
  * Type utilities
  */
-import { Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Observable } from 'rxjs';
 
 /**
@@ -23,10 +23,10 @@ export type OmitId<T> = Omit<T, '_id'>;
 export type OptionalKeyOf<T = void> = T extends void
   ? string
   : T extends unknown
-  ? keyof T extends string
-    ? keyof T
-    : string
-  : any;
+    ? keyof T extends string
+      ? keyof T
+      : string
+    : any;
 
 /**
  * For getting property keys of a type from an object array wrapped in an Observable
@@ -34,16 +34,25 @@ export type OptionalKeyOf<T = void> = T extends void
 export type UnwrapObservable<T = void> = T extends void
   ? void
   : T extends Observable<infer U>
-  ? U extends Array<infer V>
-    ? V
-    : U
-  : T;
+    ? U extends Array<infer V>
+      ? V
+      : U
+    : T;
+
+/**
+ * For getting the inner type of a Promise
+ */
+export type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
 export type GetTableProps<
   Class,
-  Field extends keyof Class
+  Field extends keyof Class,
 > = Class extends never
   ? string
   : Class extends unknown
-  ? UnwrapObservable<Class[Field]>
-  : string;
+    ? UnwrapObservable<Class[Field]>
+    : string;
+
+export type ModelWithStatics<T, Statics> = Model<T> & {
+  [key in keyof Statics]: Statics[key];
+};

@@ -28,11 +28,13 @@ import {
   logJson,
   prettyJson,
 } from '@dua-upd/utils-common';
-import { IFeedback, IReadability, IUrl } from '@dua-upd/types-common';
+import { IFeedback, IPage, IReadability, IUrl } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { RunScriptCommand } from '../run-script.command';
 import { startTimer } from './utils/misc';
 import { outputExcel, outputJson } from './utils/output';
+import { spawn } from 'child_process';
+import { preprocessCommentWords } from '@dua-upd/feedback';
 
 export const recalculateViews = async (
   db: DbService,
@@ -486,565 +488,6 @@ export async function populateAllTitles(db: DbService) {
   const bulkWriteResults = await db.collections.urls.bulkWrite(bulkWriteOps);
 
   console.log(`${bulkWriteResults.modifiedCount} documents updated`);
-}
-
-export async function exportPreMigrationPageData(db: DbService) {
-  console.time('exportPreMigrationPageData');
-  const dateRanges = {
-    lastYear: {
-      start: new Date('2022-01-01'),
-      end: new Date('2022-12-31'),
-    },
-    lastQuarter: {
-      start: new Date('2023-04-01'),
-      end: new Date('2023-06-30'),
-    },
-    lastMonth: {
-      start: new Date('2023-07-01'),
-      end: new Date('2023-07-31'),
-    },
-  };
-
-  // comment out if this part already ran and you need to run the script again
-  for (const [label, dateRange] of Object.entries(dateRanges)) {
-    console.time(`pageRefs-${label}`);
-
-    await db.validatePageMetricsRefs({
-      date: {
-        $gte: dateRange.start,
-        $lte: dateRange.end,
-      },
-    });
-
-    console.timeEnd(`pageRefs-${label}`);
-  }
-
-  const aggregations: (keyof typeof db.collections)[] = [
-    'urls',
-    'pages',
-    'tasks',
-    'projects',
-  ];
-
-  const pages = (await db.collections.pages
-    .find({}, { title: 1, url: 1, all_urls: 1, tasks: 1, projects: 1 })
-    .lean()
-    .exec()) as (Page &
-    Required<{ _id: Types.ObjectId }> & { all_urls: string[] })[];
-
-  const pagesDict = arrayToDictionary(pages, '_id');
-
-  const tasks = await db.collections.tasks
-    .find({}, { title: 1, pages: 1 })
-    .lean()
-    .exec();
-
-  const tasksDict = arrayToDictionary(tasks, '_id');
-
-  const projects = await db.collections.projects
-    .find({}, { title: 1, pages: 1 })
-    .lean()
-    .exec();
-
-  const projectsDict = arrayToDictionary(projects, '_id');
-
-  const excelWorkbook = utils.book_new();
-
-  for (const aggregation of aggregations) {
-    console.log(`Aggregation: ${aggregation}`);
-
-    const metricsRefField = ['pages', 'urls'].includes(aggregation)
-      ? aggregation.replace('s', '')
-      : aggregation;
-
-    console.log(metricsRefField);
-
-    const urlsGroup =
-      aggregation === 'urls'
-        ? {
-            page: {
-              $first: '$page',
-            },
-            tasks: {
-              $first: '$tasks',
-            },
-            projects: {
-              $first: '$projects',
-            },
-          }
-        : {};
-
-    for (const [label, dateRange] of Object.entries(dateRanges)) {
-      console.log(`Date range: ${label}`);
-
-      console.time(`${aggregation}-${label}`);
-
-      const urlsProjection =
-        aggregation === 'urls' ? { page: 1, tasks: 1, projects: 1 } : {};
-
-      const output = await db.collections.pageMetrics
-        .aggregate<{
-          _id: Types.ObjectId;
-          visits: number;
-          page?: Types.ObjectId;
-          tasks?: Types.ObjectId[];
-          projects?: Types.ObjectId[];
-        }>()
-        .project({
-          date: 1,
-          [metricsRefField]: 1,
-          visits: 1,
-          ...urlsProjection,
-        })
-        .match({
-          date: {
-            $gte: dateRange.start,
-            $lte: dateRange.end,
-          },
-          [metricsRefField === 'url' ? 'page' : metricsRefField]: {
-            $exists: true,
-          },
-        })
-        .unwind(metricsRefField)
-        .group({
-          _id: `$${metricsRefField}`,
-          visits: { $sum: '$visits' },
-          ...urlsGroup,
-        })
-        .exec()
-        .then((data) => {
-          switch (aggregation) {
-            case 'urls':
-              return data.map((metrics) => ({
-                url: metrics._id,
-                visits: metrics.visits,
-                pageId: metrics.page.toString(),
-                pageTitle: pagesDict[metrics.page.toString()].title,
-                taskIds: metrics.tasks?.map((taskId) => taskId.toString()),
-                taskTitles: metrics.tasks
-                  ?.map((taskId) => tasksDict[taskId?.toString()]?.title)
-                  .join(', '),
-                projectIds: metrics.projects?.map((projectId) =>
-                  projectId.toString(),
-                ),
-                projectTitles: metrics.projects
-                  ?.map(
-                    (projectId) => projectsDict[projectId?.toString()]?.title,
-                  )
-                  .join(', '),
-              }));
-
-            case 'pages':
-              return data.map((page) => ({
-                ...page,
-                _id: page._id.toString(),
-                title: pagesDict[page._id.toString()].title,
-                url: pagesDict[page._id.toString()].url,
-                all_urls: pagesDict[page._id.toString()].all_urls.join(', '),
-              }));
-
-            case 'tasks':
-              return data.map((task) => {
-                try {
-                  return {
-                    ...task,
-                    _id: task._id.toString(),
-                    title: tasksDict[task._id.toString()].title,
-                  };
-                } catch (err) {
-                  console.error('task:');
-                  console.error(task._id.toString());
-                  console.error();
-                  console.error(err);
-                }
-              });
-
-            case 'projects':
-              return data.map((project) => ({
-                ...project,
-                _id: project._id.toString(),
-                title: projectsDict[project._id.toString()].title,
-              }));
-          }
-        });
-
-      if (!existsSync('./pre-migration')) {
-        await mkdir('./pre-migration');
-      }
-
-      const outputPath = `./pre-migration/${aggregation}-${label}.json`;
-
-      await writeFile(outputPath, prettyJson(output), 'utf8');
-
-      const worksheet = utils.json_to_sheet(output);
-
-      const csvOutput = utils.sheet_to_csv(worksheet);
-
-      await writeFile(
-        `./pre-migration/${aggregation}-${label}.csv`,
-        csvOutput,
-        'utf8',
-      );
-
-      utils.book_append_sheet(
-        excelWorkbook,
-        worksheet,
-        `${aggregation}-${label}`,
-      );
-
-      console.timeEnd(`${aggregation}-${label}`);
-    }
-  }
-
-  writeXlsx(excelWorkbook, './pre-migration/pre-migration.xlsb', {
-    bookType: 'xlsb',
-    compression: true,
-  });
-
-  writeXlsx(excelWorkbook, './pre-migration/pre-migration.xlsx', {
-    compression: true,
-  });
-}
-
-// for handling pages with no all_urls and haven't been deduplicated because of it
-export async function handleDuplicatePages(db: DbService) {
-  console.time('handleDuplicatePages');
-  const pages = (await db.collections.pages
-    .find({ all_urls: { $exists: true } })
-    .lean()
-    .exec()) as (Page & {
-    all_urls: string[];
-  })[];
-
-  const pagesDict = arrayToDictionaryFlat(pages, 'all_urls');
-
-  const badPages = await db.collections.pages
-    .find({ all_urls: null })
-    .lean()
-    .exec();
-
-  const metricsWriteOps = [] as mongo.AnyBulkWriteOperation<PageMetrics>[];
-
-  const pagesWriteOps: mongo.AnyBulkWriteOperation<Page>[] = badPages.map(
-    (page) => {
-      const correctPage = pagesDict[page.url];
-
-      if (!correctPage) {
-        console.log('found a page with no all_urls and no duplicate:');
-        console.log(page.url);
-
-        return {
-          updateOne: {
-            filter: { _id: page._id },
-            update: {
-              $set: {
-                all_urls: [page.url],
-              },
-            },
-          },
-        };
-      }
-
-      metricsWriteOps.push({
-        updateMany: {
-          filter: { page: page._id },
-          update: {
-            $set: {
-              page: correctPage._id,
-            },
-          },
-        },
-      });
-
-      return {
-        deleteOne: {
-          filter: { _id: page._id },
-        },
-      };
-    },
-  );
-
-  if (pagesWriteOps.length) {
-    const pageWriteResults =
-      await db.collections.pages.bulkWrite(pagesWriteOps);
-
-    console.log(`${pageWriteResults.modifiedCount} pages modified`);
-    console.log(`${pageWriteResults.deletedCount} pages deleted`);
-  }
-
-  if (metricsWriteOps.length) {
-    const metricsWriteResults =
-      await db.collections.pageMetrics.bulkWrite(metricsWriteOps);
-
-    console.log(`${metricsWriteResults.modifiedCount} metrics modified`);
-  }
-
-  console.timeEnd('handleDuplicatePages');
-}
-
-export async function migratePagesToSingleUrl(db: DbService) {
-  console.time('total time');
-  console.time('migration');
-  const dbUpdateService = (<RunScriptCommand>this).inject<DbUpdateService>(
-    DbUpdateService,
-  );
-
-  await populateAllTitles.bind(<RunScriptCommand>this)(db);
-
-  await handleDuplicatePages.bind(<RunScriptCommand>this)(db);
-
-  const pages = (await db.collections.pages.find().lean().exec()) as (Page & {
-    all_urls: string[];
-  })[];
-
-  const urls = (await db.collections.urls.find().lean().exec()) as IUrl[];
-  const urlsDict = arrayToDictionary(urls, 'url');
-
-  type UrlData = {
-    title?: string;
-    altLangHref?: string;
-    redirect?: string;
-    is_404?: boolean;
-    metadata?: { [prop: string]: string | Date };
-  };
-
-  const getUrlData = (url: string): UrlData => {
-    const lang = url.match(/www\.canada\.ca\/(en|fr)\//)?.[1] as 'en' | 'fr';
-
-    const urlDoc = urlsDict[url];
-
-    const urlData = urlDoc
-      ? {
-          title: urlDoc.title,
-          altLangHref: urlDoc.langHrefs?.[lang === 'en' ? 'fr' : 'en'],
-          redirect: urlDoc.redirect,
-          is_404: urlDoc.is_404,
-          metadata: urlDoc.metadata,
-        }
-      : {};
-
-    return filterObject(Boolean, urlData);
-  };
-
-  // create new pages from all_urls
-  const pagesFromAllUrlsWriteOps: mongo.AnyBulkWriteOperation<Page>[] = [];
-
-  // update metrics refs for new pages
-  const metricsFromNewPagesWriteOps: mongo.AnyBulkWriteOperation<PageMetrics>[] =
-    [];
-
-  // update urls page refs
-  const urlsUpdateOps: mongo.AnyBulkWriteOperation<IUrl>[] = [];
-
-  // update pages w/ urls props AND
-  // unset refs + airtable_id + all_urls from pages
-  const pagesUpdateOps: mongo.AnyBulkWriteOperation<Page>[] = [];
-
-  // update readability page refs
-  const readabilityUpdateOps: mongo.AnyBulkWriteOperation<Readability>[] = [];
-
-  // update aa_item_id refs (match via url -> https:// + first 247)
-  const aaItemIdUpdateOps: mongo.AnyBulkWriteOperation<AAItemId>[] = [];
-
-  for (const page of pages) {
-    // create new pages from all_urls
-    if (page.all_urls?.length > 1) {
-      const newPages = page.all_urls
-        .filter((url) => url !== page.url)
-        .map((url) => {
-          const lang = url.match(/www\.canada\.ca\/(en|fr)\//)?.[1] as
-            | 'en'
-            | 'fr';
-
-          const urlData = getUrlData(url);
-
-          return {
-            _id: new Types.ObjectId(),
-            url,
-            ...urlData,
-            title: urlData.title || page.title,
-            lang,
-          };
-        });
-
-      for (const newPage of newPages) {
-        pagesFromAllUrlsWriteOps.push({
-          insertOne: {
-            document: newPage,
-          },
-        });
-
-        metricsFromNewPagesWriteOps.push({
-          updateMany: {
-            filter: { url: newPage.url, page: page._id },
-            update: {
-              $set: {
-                page: newPage._id,
-              },
-              $unset: {
-                tasks: '',
-                projects: '',
-                ux_tests: '',
-              },
-            },
-          },
-        });
-
-        urlsUpdateOps.push({
-          updateOne: {
-            filter: {
-              url: newPage.url,
-            },
-            update: {
-              $set: {
-                page: newPage._id,
-              },
-            },
-          },
-        });
-
-        readabilityUpdateOps.push({
-          updateMany: {
-            filter: {
-              url: newPage.url,
-            },
-            update: {
-              $set: {
-                page: newPage._id,
-              },
-            },
-          },
-        });
-
-        aaItemIdUpdateOps.push({
-          updateMany: {
-            filter: {
-              type: 'internalSearch',
-              value: `https://${newPage.url.slice(0, 247)}`,
-            },
-            update: {
-              $set: {
-                page: newPage._id,
-              },
-            },
-          },
-        });
-      }
-    }
-
-    // update pages w/ urls props AND
-    // unset airtable_id + all_urls from pages
-    const urlData = getUrlData(page.url);
-
-    const lang = page.url.match(/www\.canada\.ca\/(en|fr)\//)?.[1] as
-      | 'en'
-      | 'fr';
-
-    pagesUpdateOps.push({
-      updateOne: {
-        filter: { _id: page._id },
-        update: {
-          $set: { ...urlData, lang },
-          $unset: {
-            airtable_id: '',
-            all_urls: '',
-          },
-        },
-      },
-    });
-
-    // in theory itemIds and readability should already be fine,
-    //  but this will be nearly instant, so might as well
-    aaItemIdUpdateOps.push({
-      updateMany: {
-        filter: {
-          type: 'internalSearch',
-          value: `https://${page.url.slice(0, 247)}`,
-        },
-        update: {
-          $set: {
-            page: page._id,
-          },
-        },
-      },
-    });
-
-    readabilityUpdateOps.push({
-      updateMany: {
-        filter: {
-          url: page.url,
-        },
-        update: {
-          $set: {
-            page: page._id,
-          },
-        },
-      },
-    });
-  }
-
-  console.log('writing: pages from all_urls write ops');
-  await outputJson('pages-from-all-urls.json', pagesFromAllUrlsWriteOps);
-
-  console.log('writing: metrics from new pages write ops');
-  await outputJson('metrics-from-new-pages.json', metricsFromNewPagesWriteOps);
-
-  console.log('writing: urls update ops');
-  await outputJson('urls-update-ops.json', urlsUpdateOps);
-
-  console.log('writing: pages update ops');
-  await outputJson('pages-update-ops.json', pagesUpdateOps);
-
-  console.log('writing: readability update ops');
-  await outputJson('readability-update-ops.json', readabilityUpdateOps);
-
-  console.log('writing: aa_item_id update ops');
-  await outputJson('aa_item_id-update-ops.json', aaItemIdUpdateOps);
-
-  console.log(`bulk writing: pages from all_urls write ops`);
-  await db.collections.pages.bulkWrite(pagesFromAllUrlsWriteOps);
-
-  console.log(`bulk writing: urls update ops`);
-  await db.collections.urls.bulkWrite(urlsUpdateOps);
-
-  console.log(`bulk writing: pages update ops`);
-  await db.collections.pages.collection.bulkWrite(
-    pagesUpdateOps as mongo.AnyBulkWriteOperation[],
-  );
-
-  console.log(`bulk writing: readability update ops`);
-  await db.collections.readability.bulkWrite(readabilityUpdateOps);
-
-  console.log(`bulk writing: aa_item_id update ops`);
-  await db.collections.aaItemIds.bulkWrite(aaItemIdUpdateOps);
-
-  console.log(`bulk writing: metrics from new pages write ops`);
-
-  const totalMetricsOps = metricsFromNewPagesWriteOps.length;
-
-  while (metricsFromNewPagesWriteOps.length > 0) {
-    const opsWritten = totalMetricsOps - metricsFromNewPagesWriteOps.length;
-
-    console.log(`${opsWritten}/${totalMetricsOps} writes completed`);
-
-    const batch = metricsFromNewPagesWriteOps.splice(0, 1000);
-
-    await db.collections.pageMetrics.bulkWrite(batch);
-  }
-
-  console.log(`${totalMetricsOps}/${totalMetricsOps} writes completed`);
-
-  console.timeEnd('migration');
-
-  // run airtable updates
-  console.log('running airtable updates');
-  console.time('airtable updates');
-  await dbUpdateService.updateUxData(true);
-  console.timeEnd('airtable updates');
-
-  await dbUpdateService.recalculateViews();
-
-  console.timeEnd('total time');
 }
 
 export async function checkForDuplicatePages(db: DbService) {
@@ -1530,11 +973,12 @@ export async function generateTaskTranslations(db: DbService) {
 export async function importGcTss() {
   const db = (<RunScriptCommand>this).inject<DbService>(DbService);
 
-  const data = JSON.parse(await readFile('gc-tasks-tss_2021-01-14_2024-04-07.json', 'utf-8'))
-    .map((task) => ({
-      ...task,
-      _id: new Types.ObjectId(),
-      }));
+  const data = JSON.parse(
+    await readFile('gc-tasks-tss_2024-06-24_2024-07-01.json', 'utf-8'),
+  ).map((task) => ({
+    ...task,
+    _id: new Types.ObjectId(),
+  }));
 
   let added = 0;
 
@@ -1542,13 +986,103 @@ export async function importGcTss() {
     const batch = data.splice(0, 20000);
 
     const results = await db.collections.gcTasks.insertMany(batch);
-  
-    added += results.length
+
+    added += results.length;
 
     console.log(`Added ${results.length} records to gcTasks`);
   }
 
   console.log(`Added total of ${added} records to gcTasks`);
+}
+
+export async function populateFeedbackWords(db: DbService) {
+  console.time('Fetching feedback from db');
+  const feedback = await db.collections.feedback
+    .find(
+      {},
+      {
+        lang: 1,
+        comment: 1,
+        words: {
+          $cond: [
+            { $ne: [{ $type: '$words' }, 'missing'] },
+            { $size: '$words' },
+            undefined,
+          ],
+        },
+      },
+    )
+    .lean()
+    .exec();
+  console.timeEnd('Fetching feedback from db');
+
+  const idsWithWords = feedback
+    .filter((feedback) => feedback.words?.length)
+    .map(({ _id }) => _id);
+
+  console.log('Preprocessing feedback words');
+  console.time('Preprocessing feedback words');
+  const feedbackWithWords = preprocessCommentWords(feedback).filter(
+    (feedback) => feedback.words?.length,
+  );
+  console.timeEnd('Preprocessing feedback words');
+
+  const newIdsWithWords = feedbackWithWords.map(({ _id }) => _id);
+
+  const idsNoLongerHavingWords = difference(idsWithWords, newIdsWithWords);
+
+  const wordRemoveOps: mongo.AnyBulkWriteOperation<IFeedback>[] =
+    idsNoLongerHavingWords.map((_id) => ({
+      updateOne: {
+        filter: { _id },
+        update: {
+          $unset: {
+            words: '',
+          },
+        },
+      },
+    }));
+
+  const updateOps: mongo.AnyBulkWriteOperation<IFeedback>[] =
+    feedbackWithWords.map(({ _id, words }) => ({
+      updateOne: {
+        filter: { _id },
+        update: {
+          $set: {
+            words,
+          },
+        },
+      },
+    }));
+
+  console.log(
+    `Removing words from ${idsNoLongerHavingWords.length} comments...`,
+  );
+
+  await db.collections.feedback.bulkWrite(wordRemoveOps, { ordered: false });
+
+  console.log('Adding preprocessed words to feedback...');
+
+  console.time('Updating feedback');
+  await db.collections.feedback.bulkWrite(updateOps, { ordered: false });
+  console.timeEnd('Updating feedback');
+
+  console.log('Successfully added words to feedback');
+}
+
+export async function populateFeedbackReferences(db: DbService) {
+  console.time('Fetching pages');
+  const pages: IPage[] = await db.collections.pages
+    .find({}, { url: 1, tasks: 1, projects: 1 })
+    .lean()
+    .exec();
+  console.timeEnd('Fetching pages');
+
+  console.time('Syncing feedback references');
+  await db.collections.feedback.syncReferences(pages);
+  console.timeEnd('Syncing feedback references');
+
+  console.log('Successfully synced feedback references.');
 }
 
 export async function updatePageSections() {
@@ -1565,14 +1099,20 @@ export async function updatePageSections() {
 
   const atDict = arrayToDictionary(airtableList, 'url');
 
-  const pagesWriteOps: mongo.AnyBulkWriteOperation<PagesList>[]  = pages
+  const pagesWriteOps: mongo.AnyBulkWriteOperation<PagesList>[] = pages
     .map((page) => {
-      if (atDict[page.url] && atDict[page.url].sections !== page.sections || atDict[page.url].owners !== page.owners) {
+      if (
+        (atDict[page.url] && atDict[page.url].sections !== page.sections) ||
+        atDict[page.url].owners !== page.owners
+      ) {
         return {
           updateOne: {
             filter: { url: page.url },
             update: {
-              $set: { sections: atDict[page.url].sections, owners: atDict[page.url].owners },
+              $set: {
+                sections: atDict[page.url].sections,
+                owners: atDict[page.url].owners,
+              },
             },
           },
         };
@@ -1587,4 +1127,57 @@ export async function updatePageSections() {
   } else {
     console.log('No updates needed.');
   }
+}
+
+export async function setPageSectionsFromList(db: DbService) {
+  const pagesListWithSections = await db.collections.pagesList
+    .find(
+      {
+        $or: [{ sections: { $exists: true } }, { owners: { $exists: true } }],
+      },
+      {
+        url: 1,
+        sections: 1,
+        owners: 1,
+      },
+    )
+    .lean()
+    .exec();
+
+  const updateOps: mongo.AnyBulkWriteOperation<IPage>[] =
+    pagesListWithSections.map(({ url, sections, owners }) => ({
+      updateOne: {
+        filter: { url },
+        update: {
+          $set: {
+            sections,
+            owners,
+          },
+        },
+      },
+    }));
+
+  console.log('Updating page owners/sections...');
+
+  await db.collections.pages.bulkWrite(updateOps, { ordered: false });
+
+  console.log('Pages updated');
+}
+
+export async function unsetEmptySections(db: DbService) {
+  await db.collections.pages.updateMany(
+    { sections: '' },
+    { $unset: { sections: '' } },
+  );
+
+  await db.collections.pages.updateMany(
+    { owners: '' },
+    { $unset: { owners: '' } },
+  );
+}
+
+export async function syncCalldriversRefs(db: DbService) {
+  console.time('syncCalldriversRefs');
+  await db.collections.callDrivers.syncTaskReferences(db.collections.tasks);
+  console.timeEnd('syncCalldriversRefs');
 }

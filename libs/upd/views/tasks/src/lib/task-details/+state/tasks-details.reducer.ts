@@ -33,6 +33,19 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     status: '',
     channel: [],
     core: [],
+    visits: 0,
+    visitsPercentChange: null,
+    gscTotalClicks: 0,
+    gscTotalClicksPercentChange: null,
+    gscTotalImpressions: 0,
+    gscTotalImpressionsPercentChange: null,
+    gscTotalCtr: 0,
+    gscTotalCtrPercentChange: null,
+    gscTotalPosition: 0,
+    gscTotalPositionPercentChange: null,
+    visitsByPage: [],
+    feedbackByPage: [],
+    feedbackByDay: [],
     dateRange: '',
     comparisonDateRange: '',
     avgTaskSuccessFromLastTest: 0,
@@ -40,10 +53,14 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     avgSuccessValueChange: 0,
     dateFromLastTest: new Date(0),
     taskSuccessByUxTest: [],
-    feedbackComments: [],
-    feedbackCommentsPercentChange: null,
     projects: [],
     searchTerms: [],
+    mostRelevantCommentsAndWords: {
+      en: { comments: [], words: [] },
+      fr: { comments: [], words: [] },
+    },
+    numComments: 0,
+    numCommentsPercentChange: null,
   },
   loaded: false,
   loading: false,
@@ -59,7 +76,7 @@ const reducer = createReducer(
       loaded: false,
       loading: true,
       error: null,
-    })
+    }),
   ),
   on(
     TasksDetailsActions.loadTasksDetailsSuccess,
@@ -77,7 +94,7 @@ const reducer = createReducer(
             loaded: true,
             loading: false,
             error: null,
-          }
+          },
   ),
   on(
     TasksDetailsActions.loadTasksDetailsError,
@@ -86,13 +103,26 @@ const reducer = createReducer(
       loaded: true,
       loading: false,
       error,
-    })
-  )
+    }),
+  ),
+  on(
+    TasksDetailsActions.getMostRelevantFeedbackSuccess,
+    (state, payload): TasksDetailsState => ({
+      ...state,
+      data: {
+        ...state.data,
+        mostRelevantCommentsAndWords: payload.data,
+      },
+      loading: false,
+      loaded: true,
+      error: null,
+    }),
+  ),
 );
 
 export function tasksDetailsReducer(
   state: TasksDetailsState | undefined,
-  action: Action
+  action: Action,
 ) {
   return reducer(state, action);
 }
