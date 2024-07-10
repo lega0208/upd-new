@@ -98,6 +98,7 @@ export class OverviewFeedbackComponent {
     {
       field: 'sum',
       header: 'Number of comments',
+      pipe: 'number',
       translate: true,
     },
   ];
@@ -170,14 +171,13 @@ export class OverviewFeedbackComponent {
   ]);
 
   mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
-    { field: 'rank', header: 'Rank', width: '10px', center: true },
-    { field: 'date', header: 'Date', pipe: 'date', width: '100px' },
+    { field: 'rank', header: 'Rank', width: '10px', center: true, frozen: true },
+    { field: 'date', header: 'Date', pipe: 'date', width: '100px', frozen: true },
     { field: 'url', header: 'URL' },
-    { field: 'owners', header: 'Area', hide: true, translate: true },
-    { field: 'sections', header: 'Section', hide: true, translate: true },
-    { field: 'comment', header: 'comment', width: '400px' },
+    { field: 'owners', header: 'Area', width: '10px', hide: true },
+    { field: 'sections', header: 'Section', hide: true },
+    { field: 'comment', header: 'comment', width: '400px', frozen: true },
   ];
-
   mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
     { field: 'word', header: 'word', width: '10px' },
     {

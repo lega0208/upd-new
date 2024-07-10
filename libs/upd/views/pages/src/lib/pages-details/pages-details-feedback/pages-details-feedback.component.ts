@@ -73,11 +73,11 @@ export class PagesDetailsFeedbackComponent implements OnInit {
   );
 
   mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
-    { field: 'rank', header: 'Rank', width: '10px', center: true },
-    { field: 'date', header: 'Date', pipe: 'date', width: '50px' },
-    { field: 'owners', header: 'Area', hide: true, translate: true },
-    { field: 'sections', header: 'Section', hide: true, translate: true },
-    { field: 'comment', header: 'comment', width: '400px' },
+    { field: 'rank', header: 'Rank', width: '10px', center: true, frozen: true },
+    { field: 'date', header: 'Date', pipe: 'date', width: '50px', frozen: true },
+    { field: 'owners', header: 'Area', width: '10px', hide: true },
+    { field: 'sections', header: 'Section', hide: true },
+    { field: 'comment', header: 'comment', width: '400px', frozen: true },
   ];
 
   mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
