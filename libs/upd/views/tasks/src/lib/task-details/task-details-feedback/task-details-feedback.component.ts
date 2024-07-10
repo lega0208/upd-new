@@ -76,12 +76,12 @@ export class TaskDetailsFeedbackComponent implements OnInit {
   mostRelevantWordsFr = computed(() => this.feedbackMostRelevant().fr.words);
 
   mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
-    { field: 'rank', header: 'Rank', width: '10px', center: true },
-    { field: 'date', header: 'Date', pipe: 'date', width: '100px' },
+    { field: 'rank', header: 'Rank', width: '10px', center: true, frozen: true },
+    { field: 'date', header: 'Date', pipe: 'date', width: '100px', frozen: true },
     { field: 'url', header: 'URL' },
     { field: 'owners', header: 'Area', width: '10px', hide: true },
     { field: 'sections', header: 'Section', hide: true },
-    { field: 'comment', header: 'comment', width: '400px' },
+    { field: 'comment', header: 'comment', width: '400px', frozen: true },
   ];
 
   mostRelevantWordsColumns: ColumnConfig<WordRelevance>[] = [
