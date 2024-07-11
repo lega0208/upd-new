@@ -36,9 +36,9 @@
               <ng-container *ngFor="let row of month; let i = index">
                 <div class="week-row" role="row">
                   <ng-container *ngFor="let cell of row; let j = index">
-                    <ng-template #defaultTooltip [let-cell]="cell">
+                    <ng-template #defaultTooltip>
                       {{
-                        cell.date | date: 'longDate' : undefined : currentLang()
+                        cell.date | date: 'longDate' : 'utc' : currentLang()
                       }}
                       <hr class="my-1" />
                       {{ cell.sum | number: '1.0-0' : currentLang() }}
@@ -67,7 +67,7 @@
                         cell.isEmpty
                           ? null
                           : (cell.date
-                              | date: 'longDate' : undefined : currentLang()) +
+                              | date: 'longDate' : 'utc' : currentLang()) +
                             ', Value: ' +
                             (cell.sum | number: '1.0-0' : currentLang())
                       "
