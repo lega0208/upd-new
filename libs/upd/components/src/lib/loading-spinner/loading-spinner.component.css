@@ -88,7 +88,7 @@
   width: 20vw;
   left: 45vw;
   top: 30%;
-  z-index: 99;
+  z-index: 102;
   background-color: #fff;
   text-align: center;
   padding: 20px;
@@ -99,5 +99,5 @@
   position: fixed;
   top: 0px;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 98;
+  z-index: 101;
 }
