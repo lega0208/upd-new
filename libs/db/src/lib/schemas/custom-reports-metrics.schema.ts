@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types, Schema as MongooseSchema, Model } from 'mongoose';
 import { filter, map } from 'rambdax';
-import { isNullish, logJson } from '@dua-upd/utils-common';
+import { ModelWithStatics, isNullish, logJson } from '@dua-upd/utils-common';
 import type {
   ICustomReportsMetrics,
   ReportConfig,
@@ -94,8 +94,8 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
             startDate: defaultQuery.startDate,
           }
         : config.granularity === 'none'
-        ? noneGranularityQuery
-        : defaultQuery;
+          ? noneGranularityQuery
+          : defaultQuery;
 
     const query = {
       ...urls,
@@ -217,17 +217,18 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
 export const CustomReportsMetricsSchema =
   SchemaFactory.createForClass(CustomReportsMetrics);
 
-CustomReportsMetricsSchema.statics = {
+const statics = {
   getMetrics: CustomReportsMetrics.getMetrics,
   getReport: CustomReportsMetrics.getReport,
   createReportFormatter: CustomReportsMetrics.createReportFormatter,
 };
 
-export type CustomReportsModel = Model<CustomReportsMetrics> & {
-  getMetrics: typeof CustomReportsMetrics.getMetrics;
-  getReport: typeof CustomReportsMetrics.getReport;
-  createReportFormatter: typeof CustomReportsMetrics.createReportFormatter;
-};
+CustomReportsMetricsSchema.statics = statics;
+
+export type CustomReportsModel = ModelWithStatics<
+  CustomReportsMetrics,
+  typeof statics
+>;
 
 CustomReportsMetricsSchema.index(
   { url: 1, startDate: 1, endDate: 1, grouped: 1, granularity: 1 },

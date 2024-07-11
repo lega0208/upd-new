@@ -1,0 +1,29 @@
+{
+  "name": "feedback",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/feedback/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/feedback",
+        "main": "libs/feedback/src/index.ts",
+        "tsConfig": "libs/feedback/tsconfig.lib.json",
+        "assets": ["libs/feedback/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/feedback/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

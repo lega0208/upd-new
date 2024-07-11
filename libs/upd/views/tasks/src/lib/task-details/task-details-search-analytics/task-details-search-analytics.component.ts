@@ -27,7 +27,7 @@ export class TaskDetailsSearchAnalyticsComponent implements OnInit {
   gscTotalPositionPercentChange$ =
     this.taskDetailsService.gscTotalPositionPercentChange$;
 
-  visitsByPage$ = this.taskDetailsService.visitsByPageGSCWithPercentChange$;
+  visitsByPage$ = this.taskDetailsService.visitsByPage$;
   visitsByPageCols: ColumnConfig[] = [];
 
   topSearchTerms$ = this.taskDetailsService.topSearchTerms$;

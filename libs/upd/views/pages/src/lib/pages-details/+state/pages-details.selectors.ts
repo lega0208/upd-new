@@ -64,7 +64,23 @@ export const selectReadabilityData = createSelector(
 
 export const selectPageLang = createSelector(
   selectPagesDetailsData,
-  ({ url }) => /canada\.ca\/(en|fr)/i.exec(url)?.[1] || 'en'
+  ({ url }) => /canada\.ca\/(en|fr)/i.exec(url)?.[1] || null
+);
+
+export const selectNumComments = createSelector(
+  selectPagesDetailsData,
+  (data) => data?.numComments,
+);
+
+export const selectNumCommentsPercentChange = createSelector(
+  selectPagesDetailsData,
+  (data) => data?.numCommentsPercentChange,
+);
+
+// Feedback - most relevant comments/words
+export const selectFeedbackMostRelevant = createSelector(
+  selectPagesDetailsData,
+  (data) => data?.mostRelevantCommentsAndWords,
 );
 
 /*

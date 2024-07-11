@@ -26,6 +26,7 @@ export class DataTableCardComponent<T> {
   @Input() loading = false;
   @Input() id?: string;
   @Input() emptyStateMessage?: string;
+  @Input() allowHeaderWrap = false;
 
   get defaultSearchFields() {
     return this.cols.map((obj) => obj.field);

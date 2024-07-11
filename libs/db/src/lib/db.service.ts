@@ -29,6 +29,7 @@ import {
   GcTasks,
   GCTasksMappings,
   type FeedbackModel,
+  type PageModel,
 } from '../';
 import {
   arrayToDictionary,
@@ -94,7 +95,7 @@ export class DbService {
     @InjectModel(PageMetricsTS.name, 'defaultConnection')
     private pageMetricsTS: Model<PageMetricsTS>,
     @InjectModel(Page.name, 'defaultConnection')
-    private pages: Model<Page>,
+    private pages: PageModel,
     @InjectModel(PagesList.name, 'defaultConnection')
     private pagesList: Model<PagesList>,
     @InjectModel(Task.name, 'defaultConnection')

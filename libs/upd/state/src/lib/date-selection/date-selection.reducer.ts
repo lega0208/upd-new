@@ -7,6 +7,7 @@ import {
   DateRangeConfig,
   dateRangeConfigs,
   datesFromDateRange,
+  createCustomDateRangePeriod,
 } from '@dua-upd/utils-common';
 
 import * as DateSelectionActions from './date-selection.actions';
@@ -37,7 +38,7 @@ export const predefinedDateRanges = Object.fromEntries(
   dateRangeConfigs.map((config) => [
     config.type,
     createPredefinedDateRange(config),
-  ])
+  ]),
 );
 
 const initialPeriodSelection = predefinedDateRanges['week'];
@@ -46,37 +47,42 @@ export const initialState: DateSelectionState = {
   periodSelection: initialPeriodSelection.type,
   dateRange: toDateRangeString(initialPeriodSelection.dateRange),
   comparisonDateRange: toDateRangeString(
-    initialPeriodSelection.comparisonDateRange
+    initialPeriodSelection.comparisonDateRange,
   ),
 };
 
 const reducer = createReducer(
-  initialState,
+  initialStateFromQueryParams(),
   on(
     DateSelectionActions.selectDatePeriod,
-    (state, { selection }): DateSelectionState => {
-      const selectedPeriod = predefinedDateRanges[selection];
+    (state, period): DateSelectionState => {
+      if (period.selection === state.periodSelection) {
+        return state;
+      }
+
+      const selectedPeriod = predefinedDateRanges[period.selection];
 
       return {
-        periodSelection: selection,
-        dateRange: toDateRangeString(selectedPeriod.dateRange),
-        comparisonDateRange: toDateRangeString(
-          selectedPeriod.comparisonDateRange
-        ),
+        periodSelection: period.selection,
+        dateRange:
+          period.customDateRange || toDateRangeString(selectedPeriod.dateRange),
+        comparisonDateRange:
+          period.customComparisonDateRange ||
+          toDateRangeString(selectedPeriod.comparisonDateRange),
       };
-    }
-  )
+    },
+  ),
 );
 
 export function dateSelectionReducer(
   state: DateSelectionState | undefined,
-  action: Action
+  action: Action,
 ) {
   return reducer(state, action);
 }
 
 export function createPredefinedDateRange(
-  config: DateRangeConfig
+  config: DateRangeConfig,
 ): DateRangePeriod {
   const dateRange = config.getDateRange();
 
@@ -89,7 +95,7 @@ export function createPredefinedDateRange(
 
   const prevDaysBetween = comparisonDateRange.end.diff(
     comparisonDateRange.start,
-    'days'
+    'days',
   );
 
   if (daysBetween !== prevDaysBetween) {
@@ -100,14 +106,14 @@ export function createPredefinedDateRange(
   const prevDates = datesFromDateRange(
     comparisonDateRange,
     false,
-    true
+    true,
   ) as Date[];
 
   const dates = new Map(
     zip(
       prevDates.map((date) => date.toISOString()),
-      currentDates.map((date) => date.toISOString())
-    ) as [string, string][]
+      currentDates.map((date) => date.toISOString()),
+    ) as [string, string][],
   );
 
   return {
@@ -121,6 +127,54 @@ export function createPredefinedDateRange(
 
 export function toDateRangeString(dateRange: DateRange<Dayjs>) {
   return `${dateRange.start.format('YYYY-MM-DD')}/${dateRange.end.format(
-    'YYYY-MM-DD'
+    'YYYY-MM-DD',
   )}`;
+}
+
+export function initialStateFromQueryParams(): DateSelectionState {
+  const queryParams = Object.fromEntries(
+    [...new URLSearchParams(location.search).entries()].filter(([key]) =>
+      [
+        'dateRange',
+        'comparisonDateRange',
+        'customDateRange',
+        'customComparisonDateRange',
+      ].includes(key),
+    ),
+  );
+
+  if (queryParams['customDateRange'] && queryParams['customComparisonDateRange']) {
+    // if custom date range -> add to predefinedDateRanges
+
+    const customDateRangePeriod = createCustomDateRangePeriod(queryParams['customDateRange'], queryParams['customComparisonDateRange']);
+
+    predefinedDateRanges['custom'] = customDateRangePeriod;
+
+    return {
+      periodSelection: 'custom',
+      dateRange: queryParams['customDateRange'],
+      comparisonDateRange: queryParams['customComparisonDateRange'],
+    };
+  }
+
+  const dateRange = queryParams['dateRange'];
+  const comparisonDateRange = queryParams['comparisonDateRange'];
+
+  const matchingPeriod = Object.values(predefinedDateRanges).find(
+    (period) =>
+      toDateRangeString(period.dateRange) === dateRange &&
+      toDateRangeString(period.comparisonDateRange) === comparisonDateRange,
+  );
+
+  if (matchingPeriod) {
+    return {
+      periodSelection: matchingPeriod.type,
+      dateRange: toDateRangeString(matchingPeriod.dateRange),
+      comparisonDateRange: toDateRangeString(
+        matchingPeriod.comparisonDateRange,
+      ),
+    };
+  }
+
+  return initialState;
 }

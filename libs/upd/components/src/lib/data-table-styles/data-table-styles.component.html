@@ -1,6 +1,7 @@
 <!-- Utility Template for Displaying Data -->
 <ng-template #displayData let-item="item">
-  {{ item }}
+  <span class="d-block text-center me-3" *ngIf="config.center">{{ item }}</span>
+  <ng-container *ngIf="config.center !== true">{{ item }}</ng-container>
 </ng-template>
 
 <ng-container *ngIf="config.typeParam">
@@ -168,5 +169,4 @@
   </span>
   <ng-container *ngIf="data[config.secondaryField.field]">
   ({{ getValueIndicator(config.secondaryField.field, config.secondaryField.pipe, config.secondaryField.pipeParam) }})
-</ng-container>
 </ng-container>

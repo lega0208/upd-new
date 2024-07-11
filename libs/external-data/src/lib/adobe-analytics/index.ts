@@ -9,7 +9,7 @@ import {
   AsyncLogTiming,
 } from '@dua-upd/utils-common';
 import type { AASearchTermMetrics } from '@dua-upd/types-common';
-import { AnalyticsCoreAPI, getAAClient } from './client';
+import { type AnalyticsCoreAPI, getAAClient } from './client';
 import {
   createActivityMapQuery,
   createCXTasksQuery,

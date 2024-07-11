@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import {
+import type {
   GscSearchTermMetrics,
   AASearchTermMetrics,
 } from '@dua-upd/types-common';

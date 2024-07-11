@@ -106,7 +106,10 @@
         titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
         [series]="(dyfChartApex$ | async) || []"
         [yAxis]="'Date range' | translate"
-        [xAxis]="[ (fullDateRangeLabel$ | async) || [], (fullComparisonDateRangeLabel$ | async) || [] ]"
+        [xAxis]="[
+          (fullDateRangeLabel$ | async) || [],
+          (fullComparisonDateRangeLabel$ | async) || []
+        ]"
         [tableCols]="dyfTableCols"
         [table]="dyfChart$ | async"
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"

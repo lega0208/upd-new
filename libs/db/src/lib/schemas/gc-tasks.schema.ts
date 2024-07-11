@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { model, Document, Types } from 'mongoose';
-import { IGCTasks, ITask } from '@dua-upd/types-common';
+import type { IGCTasks, ITask } from '@dua-upd/types-common';
 
 export type GcTasksDocument = GcTasks & Document;
 
