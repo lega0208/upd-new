@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 import isBetween from 'dayjs/plugin/isBetween';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import utc from 'dayjs/plugin/utc';
 import { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { FR_CA } from '@dua-upd/upd/i18n';
@@ -10,6 +11,7 @@ import { FR_CA } from '@dua-upd/upd/i18n';
 dayjs.extend(localeData);
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrBefore);
+dayjs.extend(utc);
 
 interface Cell {
   date: string;
@@ -96,8 +98,8 @@ export class HeatmapComponent<T> {
   }
 
   populateCalendarMonths() {
-    let currentMonth = dayjs(this.data()[0].date).startOf('month');
-    const endMonth = dayjs(this.data()[this.data().length - 1].date).startOf('month');
+    let currentMonth = dayjs.utc(this.data()[0].date).startOf('month');
+    const endMonth = dayjs.utc(this.data()[this.data().length - 1].date).startOf('month');
 
     while (currentMonth.isSameOrBefore(endMonth, 'month')) {
       this.calendarMonths.push(this.generateMonthCalendar(currentMonth));
@@ -112,7 +114,7 @@ export class HeatmapComponent<T> {
 
     for (let day = 1; day <= daysInMonth; day++) {
       const currentDay = startOfMonth.add(day - 1, 'day');
-      const cell = this.data().find(d => dayjs(d.date).isSame(currentDay, 'day'));
+      const cell = this.data().find(d => dayjs.utc(d.date).isSame(currentDay, 'day'));
 
       if (cell) {
         week.push(this.createCell(cell));
@@ -198,7 +200,7 @@ export class HeatmapComponent<T> {
   }
 
   getMonthStartDate(monthIndex: number): string {
-    return dayjs(this.data()[0].date)
+    return dayjs.utc(this.data()[0].date)
       .add(monthIndex, 'month')
       .startOf('month')
       .format('YYYY-MM-DD');
