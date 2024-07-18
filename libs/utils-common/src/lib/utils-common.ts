@@ -358,6 +358,7 @@ export function chunkMap<T, ReturnT>(
   mapFunc: (val: T[]) => ReturnT,
   chunkSize: number,
 ): ReturnT[] {
+  array = array.slice();
   const chunks = [];
 
   while (array.length) {
