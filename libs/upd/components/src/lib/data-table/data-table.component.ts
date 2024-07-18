@@ -16,6 +16,7 @@ import { Table } from 'primeng/table';
 import type { ColumnConfig } from '@dua-upd/types-common';
 import type { SelectedNode } from '../filter-table/filter-table.component';
 import { toGroupedColumnSelect } from '@dua-upd/upd/utils';
+import { SortEvent } from 'primeng/api';
 
 @Component({
   selector: 'upd-data-table',
@@ -40,7 +41,7 @@ export class DataTableComponent<T extends object> {
   @Input() placeholderText = 'dt_search_keyword';
   @Input() selectedNodes: SelectedNode[] = [];
   @Input() allowHeaderWrap = false;
-  
+
   node: SelectedNode | null = null;
 
   @Output() rowSelectionChanged = new EventEmitter<T[]>();
@@ -64,9 +65,13 @@ export class DataTableComponent<T extends object> {
   );
 
   selectedColumnsSynced = computed(() => {
-    const selectedColumnFields = this.selectedColumns().map(({ field }) => field);
+    const selectedColumnFields = this.selectedColumns().map(
+      ({ field }) => field,
+    );
 
-    return this.cols().filter((col) => selectedColumnFields.includes(col.field));
+    return this.cols().filter((col) =>
+      selectedColumnFields.includes(col.field),
+    );
   });
 
   searchFields = computed(() =>
@@ -91,10 +96,14 @@ export class DataTableComponent<T extends object> {
 
   lang = this.i18n.currentLang;
 
+  isSorted: boolean | null = null;
+
   selectableCols = computed(() => {
     const cols = this.cols()
       .filter((col: ColumnConfig) => !col.frozen)
-      .sort((a: ColumnConfig, b: ColumnConfig) => a.header.localeCompare(b.header));
+      .sort((a: ColumnConfig, b: ColumnConfig) =>
+        a.header.localeCompare(b.header),
+      );
 
     if (this.groupedColumnSelection()) {
       return toGroupedColumnSelect(cols);
@@ -161,5 +170,29 @@ export class DataTableComponent<T extends object> {
     );
 
     this.selectedColumns.set(selectedColumns);
+  }
+
+  customSort(event: SortEvent) {
+    event.data?.sort((a, b) => {
+      a = a[event.field as keyof typeof a];
+      b = b[event.field as keyof typeof b];
+      const order = event.order === 1 ? 1 : -1;
+
+      let result = 0;
+
+      if ((a == null && b != null) || (a === '' && b !== '')) {
+        result = order === 1 ? 1 : -1;
+      } else if ((a != null && b == null) || (a !== '' && b === '')) {
+        result = order === 1 ? -1 : 1;
+      } else if ((a == null && b == null) || (a === '' && b === '')) {
+        result = 0;
+      } else if (typeof a === 'string' && typeof b === 'string') {
+        result = a.localeCompare(b);
+      } else {
+        result = a < b ? -1 : a > b ? 1 : 0;
+      }
+
+      return order * result;
+    });
   }
 }
