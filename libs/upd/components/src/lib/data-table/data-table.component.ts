@@ -17,6 +17,7 @@ import type { ColumnConfig } from '@dua-upd/types-common';
 import type { SelectedNode } from '../filter-table/filter-table.component';
 import { toGroupedColumnSelect } from '@dua-upd/upd/utils';
 import { SortEvent } from 'primeng/api';
+import { isNullish } from '@dua-upd/utils-common';
 
 @Component({
   selector: 'upd-data-table',
@@ -176,23 +177,24 @@ export class DataTableComponent<T extends object> {
     event.data?.sort((a, b) => {
       a = a[event.field as keyof typeof a];
       b = b[event.field as keyof typeof b];
+
       const order = event.order === 1 ? 1 : -1;
 
-      let result = 0;
-
-      if ((a == null && b != null) || (a === '' && b !== '')) {
-        result = order === 1 ? 1 : -1;
-      } else if ((a != null && b == null) || (a !== '' && b === '')) {
-        result = order === 1 ? -1 : 1;
-      } else if ((a == null && b == null) || (a === '' && b === '')) {
-        result = 0;
-      } else if (typeof a === 'string' && typeof b === 'string') {
-        result = a.localeCompare(b);
-      } else {
-        result = a < b ? -1 : a > b ? 1 : 0;
+      // if a is nullish, it goes to the end
+      if (isNullish(a) || a === '') {
+        return 1;
       }
 
-      return order * result;
+      // if b is nullish, it goes to the end
+      if (isNullish(b) || b === '') {
+        return -1;
+      }
+
+      if (typeof a === 'string') {
+        return a.localeCompare(b) * order;
+      }
+
+      return (a - b) * order;
     });
   }
 }
