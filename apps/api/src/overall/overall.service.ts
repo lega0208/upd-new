@@ -283,7 +283,6 @@ export class OverallService {
     );
 
     console.timeEnd('getTaskRankings');
-    console.log(improvedKpiTopSuccessRate);
 
     const totalTasks = await this.taskModel.countDocuments().exec();
 

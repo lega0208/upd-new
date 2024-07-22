@@ -401,8 +401,6 @@ export const getImprovedKpiSuccessRates = (
     })),
   );
 
-  console.log(`number of tasks: ${keys(avgTestSuccessRates).length}`);
-
   const successRates = Object.values(avgTestSuccessRates);
 
   const overallAvgs = {
@@ -489,8 +487,6 @@ export const getImprovedKpiTopSuccessRates = (
     })),
   );
 
-  console.log(`number of tasks: ${keys(avgTestTopSuccessRates).length}`);
-
   const topSuccessRates = Object.values(avgTestTopSuccessRates);
 
   const top50Tasks = {
@@ -526,8 +522,6 @@ export const getImprovedKpiTopSuccessRates = (
       validation: avg(pluck('validation', topSuccessRates), 4) as number,
     })),
   );
-
-  console.log(`number of tasks: ${keys(avgTestAllTopSuccessRates).length}`);
 
   return {
     uniqueTopTasks: keys(avgTestTopSuccessRates).length,
