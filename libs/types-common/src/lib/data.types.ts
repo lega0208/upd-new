@@ -276,7 +276,7 @@ export interface OverviewData
   improvedKpiTopSuccessRate?: {
     uniqueTopTasks: number;
     allTopTasks: number;
-    topSuccessRates: TopSuccessRates;
+    topSuccessRates: SuccessRates;
     
   };
 }
