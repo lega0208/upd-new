@@ -116,7 +116,7 @@ export class TasksDetailsFacade {
   visitsPercentChange$ = this.tasksDetailsData$.pipe(
     map((data) => data?.visitsPercentChange),
   );
-  
+
   visitsByPage$ = this.tasksDetailsData$.pipe(
     map((data) => {
       const { feedbackByPage } = data;
@@ -696,7 +696,7 @@ export class TasksDetailsFacade {
   feedbackTotalComments$ = this.tasksDetailsData$.pipe(
     map((data) => data?.numComments || 0),
   );
-  
+
   feedbackTotalCommentsPercentChange$ = this.tasksDetailsData$.pipe(
     map((data) => data?.numCommentsPercentChange),
   );

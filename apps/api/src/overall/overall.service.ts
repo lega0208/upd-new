@@ -199,7 +199,10 @@ export class OverallService {
 
     const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests);
 
-    const lastQuarterStart = dayjs.utc().subtract(1, 'quarter').startOf('quarter');
+    const lastQuarterStart = dayjs
+      .utc()
+      .subtract(1, 'quarter')
+      .startOf('quarter');
     const lastQuarterEnd = lastQuarterStart.endOf('quarter');
 
     console.time('getTaskRankings');
