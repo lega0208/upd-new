@@ -78,6 +78,7 @@ export interface IFeedback {
   date: Date;
   lang: string;
   comment: string;
+  words?: string[];
   tags?: string[];
   status?: string;
   whats_wrong?: string;

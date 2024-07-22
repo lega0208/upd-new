@@ -97,12 +97,15 @@ export class DataTableExportsComponent<T> {
       this.cols.reduce(
         (formattedRow, col) => {
           const colKey = replaceKeysWithHeaders ? col.header : col.field;
+          const cellValue = row[col.field as keyof T];
 
-          if (!row[col.field as keyof T]) {
+          if (!cellValue) {
             formattedRow[colKey] = '';
+          } else if (Array.isArray(cellValue)) {
+            formattedRow[colKey] = cellValue.join(', ');
           } else if (col.secondaryField) {
             formattedRow[colKey] = `${formatPercent(
-              (<unknown>row[col.field as keyof T]) as number,
+              (<unknown>cellValue) as number,
               currentLang,
               col.pipeParam,
             )} (${formatNumber(
@@ -112,33 +115,30 @@ export class DataTableExportsComponent<T> {
             )})` as string;
           } else if (col.pipe === 'percent') {
             formattedRow[colKey] = formatPercent(
-              (<unknown>row[col.field as keyof T]) as number,
+              (<unknown>cellValue) as number,
               currentLang,
             );
           } else if (col.pipe === 'number') {
             formattedRow[colKey] = formatNumber(
-              (<unknown>row[col.field as keyof T]) as number,
+              (<unknown>cellValue) as number,
               currentLang,
             );
           } else if (col.pipe === 'date') {
             formattedRow[colKey] = formatDate(
-              (<unknown>row[col.field as keyof T]) as Date,
+              (<unknown>cellValue) as Date,
               col.pipeParam ?? 'YYYY-MM-dd',
               currentLang,
               'UTC',
             );
           } else if (col.typeParam === 'cops') {
-            formattedRow[colKey] = row[col.field as keyof T] ? cops : '';
+            formattedRow[colKey] = cellValue ? cops : '';
           } else if (col.filterConfig?.type === 'pageStatus') {
-            formattedRow[colKey] =
-              pageStatuses[(<unknown>row[col.field as keyof T]) as string];
+            formattedRow[colKey] = pageStatuses[(<unknown>cellValue) as string];
           } else if (col.type === 'label') {
             formattedRow[colKey] =
-              projectStatuses[(<unknown>row[col.field as keyof T]) as string];
+              projectStatuses[(<unknown>cellValue) as string];
           } else {
-            formattedRow[colKey] = (<unknown>(
-              row[col.field as keyof T]
-            )) as string;
+            formattedRow[colKey] = (<unknown>cellValue) as string;
           }
 
           return formattedRow;
@@ -224,13 +224,13 @@ export class DataTableExportsComponent<T> {
         // replacing the keys with the appropriate headers
 
         const exportData = await this.getFormattedExportData(true);
-        const headers = Object.keys(exportData[0]).map(
-          (header: string) => this.i18n.service.instant(header),
+        const headers = Object.keys(exportData[0]).map((header: string) =>
+          this.i18n.service.instant(header),
         );
 
         const worksheet = utils.json_to_sheet(exportData);
 
-        utils.sheet_add_aoa(worksheet, [headers], {origin: 'A1'});
+        utils.sheet_add_aoa(worksheet, [headers], { origin: 'A1' });
 
         const workbook = {
           Sheets: { data: worksheet },

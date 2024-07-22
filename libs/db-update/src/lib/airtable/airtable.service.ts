@@ -21,7 +21,7 @@ import {
   UxTestData,
 } from '@dua-upd/external-data';
 import { BlobLogger } from '@dua-upd/logger';
-import {
+import type {
   AttachmentData,
   IPage,
   IProject,

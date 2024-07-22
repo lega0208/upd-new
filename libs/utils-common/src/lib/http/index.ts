@@ -1,5 +1,6 @@
 import { LoggerService } from '@nestjs/common';
 import * as cheerio from 'cheerio/lib/slim';
+import chalk from 'chalk';
 import {
   batchAwait,
   Retry,
@@ -8,6 +9,7 @@ import {
   TimingUtility,
 } from '../utils-common';
 import { RateLimitUtils } from './utils';
+import { UnwrapPromise } from '../types';
 
 export type HttpClientOptions = {
   rateLimitDelay?: number;
@@ -91,7 +93,7 @@ export class HttpClient {
 
       const rawTitle = (titleRegex.exec(body) || [''])[0].replace(
         canadaDotCaRegex,
-        ''
+        '',
       );
 
       const title = squishTrim(cheerio.load(rawTitle)('title').text());
@@ -129,13 +131,13 @@ export class HttpClient {
           };
 
           this.logger.warn(
-            JSON.stringify({ ...utilsStats, ...otherStats }, null, 2)
+            JSON.stringify({ ...utilsStats, ...otherStats }, null, 2),
           );
 
           this.logger.warn(
             `Resetting stats and increasing delay to ${
               this.delayContainer.delay + 10
-            }ms...`
+            }ms...`,
           );
 
           this.rateLimitStats && this.rateLimitUtils.reset();
@@ -162,7 +164,7 @@ export class HttpClient {
   async getAll<T>(
     urls: string[],
     callback: (data: HttpClientResponse) => T = (data) => data as T,
-    logProgress = false
+    logProgress = false,
   ) {
     const progressTimer = new TimingUtility(urls.length);
 
@@ -197,7 +199,57 @@ export class HttpClient {
       urls,
       batchFunc,
       this.batchSize,
-      this.delayContainer
+      this.delayContainer,
     );
   }
 }
+
+export const withRetry = <
+  T extends <U>(
+    ...args: Parameters<T>
+  ) => Promise<UnwrapPromise<ReturnType<T>>>,
+>(
+  fn: T,
+  retries: number,
+  delay: number,
+) => {
+  return <U>(...args: Parameters<T>): Promise<UnwrapPromise<ReturnType<T>>> =>
+    new Promise((resolve, reject) => {
+      let delayMultiplier = 1;
+
+      const attempt = (retries: number, delay: number) => {
+        fn<U>(...args).then(
+          (result) => {
+            resolve(result);
+          },
+          (err) => {
+            console.error(
+              chalk.red(
+                `Error below occurred in ${fn.name}, retrying (${
+                  retries - 1
+                } attempts left)`,
+              ),
+            );
+            console.error(chalk.red(err.message));
+
+            if (retries > 0) {
+              delayMultiplier++;
+
+              setTimeout(() => {
+                attempt(retries - 1, delay);
+              }, delay * delayMultiplier);
+            } else {
+              console.error(
+                chalk.red(`All retry attempts for ${fn.name} failed:`),
+              );
+              console.error(chalk.red(err.stack));
+
+              reject(err);
+            }
+          },
+        );
+      };
+
+      attempt(retries, delay);
+    });
+};

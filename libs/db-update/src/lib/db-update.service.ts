@@ -123,6 +123,8 @@ export class DbUpdateService {
         ),
       ]);
 
+      await this.addSectionsFromPagesList();
+
       await this.updateFeedback().catch((err) =>
         this.logger.error(`Error updating Feedback data\n${err.stack}`),
       );
@@ -409,6 +411,42 @@ export class DbUpdateService {
 
   async repopulateFeedback() {
     return await this.feedbackService.repopulateFeedback();
+  }
+
+  async addSectionsFromPagesList() {
+    this.logger.log('Adding sections from Published Pages list...');
+
+    try {
+      const pagesList = await this.pagesListModel
+        .find({
+          $or: [{ sections: { $exists: true } }, { owners: { $exists: true } }],
+        })
+        .lean()
+        .exec();
+
+      const bulkWriteOps: mongo.AnyBulkWriteOperation<Page>[] = pagesList.map(
+        (page) => ({
+          updateOne: {
+            filter: {
+              url: page.url,
+            },
+            update: {
+              $set: {
+                sections: page.sections,
+                owners: page.owners,
+              },
+            },
+          },
+        }),
+      );
+
+      return await this.pageModel.bulkWrite(bulkWriteOps, { ordered: false });
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while adding sections from Published Pages list:',
+      );
+      this.logger.error(error.stack);
+    }
   }
 
   async recalculateViews(logToBlobs = false) {

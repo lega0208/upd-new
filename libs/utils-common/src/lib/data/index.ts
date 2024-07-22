@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { avg, round } from '../math';
-import { ITask, IUxTest, SuccessRates, TopSuccessRates } from '@dua-upd/types-common';
+import { ITask, IUxTest, SuccessRates } from '@dua-upd/types-common';
 import {
   Dictionary,
   filter,
@@ -401,8 +401,6 @@ export const getImprovedKpiSuccessRates = (
     })),
   );
 
-  console.log(`number of tasks: ${keys(avgTestSuccessRates).length}`);
-
   const successRates = Object.values(avgTestSuccessRates);
 
   const overallAvgs = {
@@ -421,7 +419,7 @@ export const getImprovedKpiSuccessRates = (
 export const getImprovedKpiTopSuccessRates = (
   topTaskIds: string[],
   uxTests: IUxTest[],
-): { uniqueTopTasks: number; allTopTasks: number; topSuccessRates: TopSuccessRates } => {
+): { uniqueTopTasks: number; allTopTasks: number; topSuccessRates: SuccessRates } => {
   const groupByTaskByProjectByTestType = pipe(
     groupBy((test: IUxTest) => test!.tasks!.toString()), // group by task
     mapObject(groupBy((test: IUxTest) => test.project.toString())), // group by project
@@ -482,14 +480,12 @@ export const getImprovedKpiTopSuccessRates = (
       })),
     ),
     // get avg of baseline, validation, and difference for each task over all projects
-    mapObject((topSuccessRates: TopSuccessRates[]) => ({
+    mapObject((topSuccessRates: SuccessRates[]) => ({
       baseline: avg(pluck('baseline', topSuccessRates), 4) as number,
       validation: avg(pluck('validation', topSuccessRates), 4) as number,
       difference: avg(pluck('difference', topSuccessRates), 4) as number,
     })),
   );
-
-  console.log(`number of tasks: ${keys(avgTestTopSuccessRates).length}`);
 
   const topSuccessRates = Object.values(avgTestTopSuccessRates);
 
@@ -521,13 +517,11 @@ export const getImprovedKpiTopSuccessRates = (
       ),
     ),
     // get avg of baseline, validation for each task over all projects
-    mapObject((topSuccessRates: TopSuccessRates[]) => ({
+    mapObject((topSuccessRates: SuccessRates[]) => ({
       baseline: avg(pluck('baseline', topSuccessRates), 4) as number,
       validation: avg(pluck('validation', topSuccessRates), 4) as number,
     })),
   );
-
-  console.log(`number of tasks: ${keys(avgTestAllTopSuccessRates).length}`);
 
   return {
     uniqueTopTasks: keys(avgTestTopSuccessRates).length,

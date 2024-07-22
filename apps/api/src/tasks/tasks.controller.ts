@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Header, Query } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 
 @Controller('tasks')
@@ -6,6 +6,7 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get('home')
+  @Header('Content-Type', 'application/json')
   getTasksHomeData(@Query('dateRange') dateRange: string, @Query('comparisonDateRange') comparisonDateRange: string) {
     return this.tasksService.getTasksHomeData(dateRange, comparisonDateRange);
   }
