@@ -477,13 +477,13 @@ export class TasksDetailsFacade {
     this.i18n.service,
     [
       {
-        field: 'topic',
-        header: 'topic',
+        field: 'tpc_id',
+        header: 'tpc_id',
         translate: true,
       },
       {
-        field: 'tpc_id',
-        header: 'tpc_id',
+        field: 'topic',
+        header: 'topic',
         translate: true,
       },
       {

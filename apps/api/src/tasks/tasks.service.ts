@@ -574,6 +574,8 @@ export class TasksService {
       mostRelevantCommentsAndWords,
       numComments,
       numCommentsPercentChange,
+      tpc_id: '',
+      enquiry_line: ''
     };
 
     const uxTests: UxTest[] = (<UxTestDocument[]>task.ux_tests).map((test) =>
