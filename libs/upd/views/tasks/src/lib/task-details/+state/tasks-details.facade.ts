@@ -671,27 +671,61 @@ export class TasksDetailsFacade {
     }),
   );
 
+
+  
+
   totalParticipants$ = this.tasksDetailsData$.pipe(
     map((data) => {
-      const uxTests = data?.taskSuccessByUxTest;
-
-      const maxTotalUsersByTitle = uxTests.reduce<Record<string, number>>(
+      const uxTests = data?.taskSuccessByUxTest || [];
+  
+      // Initialize accumulators for validation and non-validation tests
+      const maxTotalUsersByValidation = uxTests.reduce<Record<string, number>>(
         (acc, test) => {
-          acc[test.title] = Math.max(
-            acc[test.title] || 0,
-            test.total_users || 0,
-          );
+          if (test.test_type === 'Validation') {
+            acc[test.title] = Math.max(
+              acc[test.title] || 0,
+              test.total_users || 0,
+            );
+          }
           return acc;
         },
         {},
       );
-
-      return Object.values(maxTotalUsersByTitle).reduce(
+  
+      const maxTotalUsersByNonValidation = uxTests.reduce<Record<string, number>>(
+        (acc, test) => {
+          if (test.test_type !== 'Validation') {
+            acc[test.title] = Math.max(
+              acc[test.title] || 0,
+              test.total_users || 0,
+            );
+          }
+          return acc;
+        },
+        {},
+      );
+  
+      // Log the maxTotalUsersByTitle for debugging
+      console.log('maxTotalUsersByValidation:', maxTotalUsersByValidation);
+      console.log('maxTotalUsersByNonValidation:', maxTotalUsersByNonValidation);
+  
+      // Calculate and sum the total users for both categories
+      const validationSum = Object.values(maxTotalUsersByValidation).reduce(
         (sum, val) => sum + val,
         0,
       );
+  
+      const nonValidationSum = Object.values(maxTotalUsersByNonValidation).reduce(
+        (sum, val) => sum + val,
+        0,
+      );
+  
+      // Return the combined sum of both accumulators
+      return validationSum + nonValidationSum;
     }),
   );
+  
+  
 
   feedbackTotalComments$ = this.tasksDetailsData$.pipe(
     map((data) => data?.numComments || 0),
