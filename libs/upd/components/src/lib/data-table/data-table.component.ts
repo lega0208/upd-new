@@ -16,6 +16,8 @@ import { Table } from 'primeng/table';
 import type { ColumnConfig } from '@dua-upd/types-common';
 import type { SelectedNode } from '../filter-table/filter-table.component';
 import { toGroupedColumnSelect } from '@dua-upd/upd/utils';
+import { SortEvent } from 'primeng/api';
+import { isNullish } from '@dua-upd/utils-common';
 
 @Component({
   selector: 'upd-data-table',
@@ -40,7 +42,7 @@ export class DataTableComponent<T extends object> {
   @Input() placeholderText = 'dt_search_keyword';
   @Input() selectedNodes: SelectedNode[] = [];
   @Input() allowHeaderWrap = false;
-  
+
   node: SelectedNode | null = null;
 
   @Output() rowSelectionChanged = new EventEmitter<T[]>();
@@ -64,9 +66,13 @@ export class DataTableComponent<T extends object> {
   );
 
   selectedColumnsSynced = computed(() => {
-    const selectedColumnFields = this.selectedColumns().map(({ field }) => field);
+    const selectedColumnFields = this.selectedColumns().map(
+      ({ field }) => field,
+    );
 
-    return this.cols().filter((col) => selectedColumnFields.includes(col.field));
+    return this.cols().filter((col) =>
+      selectedColumnFields.includes(col.field),
+    );
   });
 
   searchFields = computed(() =>
@@ -91,10 +97,14 @@ export class DataTableComponent<T extends object> {
 
   lang = this.i18n.currentLang;
 
+  isSorted: boolean | null = null;
+
   selectableCols = computed(() => {
     const cols = this.cols()
       .filter((col: ColumnConfig) => !col.frozen)
-      .sort((a: ColumnConfig, b: ColumnConfig) => a.header.localeCompare(b.header));
+      .sort((a: ColumnConfig, b: ColumnConfig) =>
+        a.header.localeCompare(b.header),
+      );
 
     if (this.groupedColumnSelection()) {
       return toGroupedColumnSelect(cols);
@@ -161,5 +171,30 @@ export class DataTableComponent<T extends object> {
     );
 
     this.selectedColumns.set(selectedColumns);
+  }
+
+  customSort(event: SortEvent) {
+    event.data?.sort((a, b) => {
+      a = a[event.field as keyof typeof a];
+      b = b[event.field as keyof typeof b];
+
+      const order = event.order === 1 ? 1 : -1;
+
+      // if a is nullish, it goes to the end
+      if (isNullish(a) || a === '') {
+        return 1;
+      }
+
+      // if b is nullish, it goes to the end
+      if (isNullish(b) || b === '') {
+        return -1;
+      }
+
+      if (typeof a === 'string') {
+        return a.localeCompare(b) * order;
+      }
+
+      return (a - b) * order;
+    });
   }
 }

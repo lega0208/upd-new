@@ -116,6 +116,8 @@ export class ApexStore extends ComponentStore<ChartOptions> {
           ...state.chart,
           stacked: value?.isStacked,
           stackType: value?.isStacked100 ? '100%' : undefined,
+          // update for more than 2 series
+          height: 175
         },
         dataLabels: {
           enabled: value?.hasDataLabels,
@@ -138,7 +140,17 @@ export class ApexStore extends ComponentStore<ChartOptions> {
                 ? `${val}%`
                 : `${val} %`;
             },
+            show: false,
           },
+          crosshairs: {
+            show: false,
+          },
+          axisTicks: {
+            show: false
+          },
+          axisBorder: {
+            show: false
+          }
         },
         yaxis: {
           ...state.yaxis,
