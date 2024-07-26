@@ -775,16 +775,32 @@ export class ProjectsDetailsFacade {
     }),
   );
 
+
   totalParticipants$ = this.projectsDetailsData$.pipe(
     map((data) => {
+
       const uxTests = data?.taskSuccessByUxTest;
 
-      if (!uxTests || !uxTests.length) {
-        return 0;
+      const maxUsersByType: Record<string, number> = {};
+
+      for (const { test_type, total_users = 0 } of uxTests) {
+        if (test_type) {
+          maxUsersByType[test_type] = Math.max(
+            maxUsersByType[test_type] || 0,
+            total_users,
+          );
+        }
       }
 
-      return Math.max(...uxTests.map((test) => test.total_users || 0));
-    }),
+      const totalUsers = Object.values(maxUsersByType).reduce(
+        (accumulator, value) =>
+          accumulator + value,
+            0,
+      );
+      return totalUsers;
+    
+        },
+      )
   );
 
   feedbackTotalComments$ = this.projectsDetailsData$.pipe(

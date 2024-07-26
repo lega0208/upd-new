@@ -671,27 +671,53 @@ export class TasksDetailsFacade {
     }),
   );
 
+
+  
+
   totalParticipants$ = this.tasksDetailsData$.pipe(
     map((data) => {
-      const uxTests = data?.taskSuccessByUxTest;
-
-      const maxTotalUsersByTitle = uxTests.reduce<Record<string, number>>(
+      const uxTests = data?.taskSuccessByUxTest || [];
+  
+      const maxTotalUsersByValidation = uxTests.reduce<Record<string, number>>(
         (acc, test) => {
-          acc[test.title] = Math.max(
-            acc[test.title] || 0,
-            test.total_users || 0,
-          );
+          if (test.test_type === 'Validation') {
+            acc[test.title] = Math.max(
+              acc[test.title] || 0,
+              test.total_users || 0,
+            );
+          }
           return acc;
         },
         {},
       );
-
-      return Object.values(maxTotalUsersByTitle).reduce(
+  
+      const maxTotalUsersByNonValidation = uxTests.reduce<Record<string, number>>(
+        (acc, test) => {
+          if (test.test_type !== 'Validation') {
+            acc[test.title] = Math.max(
+              acc[test.title] || 0,
+              test.total_users || 0,
+            );
+          }
+          return acc;
+        },
+        {},
+      );
+      const validationSum = Object.values(maxTotalUsersByValidation).reduce(
         (sum, val) => sum + val,
         0,
       );
+  
+      const nonValidationSum = Object.values(maxTotalUsersByNonValidation).reduce(
+        (sum, val) => sum + val,
+        0,
+      );
+  
+      return validationSum + nonValidationSum;
     }),
   );
+  
+  
 
   feedbackTotalComments$ = this.tasksDetailsData$.pipe(
     map((data) => data?.numComments || 0),
