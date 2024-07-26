@@ -800,7 +800,6 @@ export class ProjectsDetailsFacade {
       return totalUsers;
     
         },
-        // {} as Record<string, number>,
       )
   );
 

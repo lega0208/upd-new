@@ -678,7 +678,6 @@ export class TasksDetailsFacade {
     map((data) => {
       const uxTests = data?.taskSuccessByUxTest || [];
   
-      // Initialize accumulators for validation and non-validation tests
       const maxTotalUsersByValidation = uxTests.reduce<Record<string, number>>(
         (acc, test) => {
           if (test.test_type === 'Validation') {
@@ -704,12 +703,6 @@ export class TasksDetailsFacade {
         },
         {},
       );
-  
-      // Log the maxTotalUsersByTitle for debugging
-      console.log('maxTotalUsersByValidation:', maxTotalUsersByValidation);
-      console.log('maxTotalUsersByNonValidation:', maxTotalUsersByNonValidation);
-  
-      // Calculate and sum the total users for both categories
       const validationSum = Object.values(maxTotalUsersByValidation).reduce(
         (sum, val) => sum + val,
         0,
@@ -720,7 +713,6 @@ export class TasksDetailsFacade {
         0,
       );
   
-      // Return the combined sum of both accumulators
       return validationSum + nonValidationSum;
     }),
   );
