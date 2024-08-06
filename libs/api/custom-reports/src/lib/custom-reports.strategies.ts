@@ -105,9 +105,11 @@ export function decomposeConfig(config: ReportConfig<Date>) {
   const chunkedUrls = chunkMap(urls, (url) => url, 50);
 
   const queries = dateRanges.flatMap((dateRange) =>
-    !grouped && breakdownDimension
-      ? urls.map((url) => toQueryConfig(dateRange, [url]))
-      : chunkedUrls.map((url) => toQueryConfig(dateRange, url)),
+    grouped
+      ? [toQueryConfig(dateRange, urls)]
+      : breakdownDimension
+        ? urls.map((url) => toQueryConfig(dateRange, [url]))
+        : chunkedUrls.map((urlChunk) => toQueryConfig(dateRange, urlChunk)),
   );
 
   return queries.map((query) => ({
