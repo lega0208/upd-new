@@ -109,7 +109,7 @@ export function decomposeConfig(config: ReportConfig<Date>) {
       ? [toQueryConfig(dateRange, urls)]
       : breakdownDimension
         ? urls.map((url) => toQueryConfig(dateRange, [url]))
-        : chunkedUrls.map((urlChunk) => toQueryConfig(dateRange, urlChunk)),
+        : chunkedUrls.map((url) => toQueryConfig(dateRange, url)),
   );
 
   return queries.map((query) => ({
