@@ -23,6 +23,7 @@ import {
 } from '@dua-upd/utils-common';
 import { CalldriversService } from './airtable/calldrivers.service';
 import { FeedbackService } from './feedback/feedback.service';
+import { GcTaskService } from './gc-task/gc-task.service';
 import { AirtableService } from './airtable/airtable.service';
 import { OverallMetricsService } from './overall-metrics/overall-metrics.service';
 import { PageUpdateService } from './pages/pages.service';
@@ -48,6 +49,7 @@ export class DbUpdateService {
     private calldriversService: CalldriversService,
     private feedbackService: FeedbackService,
     private annotationsService: AnnotationsService,
+    private gcTaskService: GcTaskService,
     private gcTasksMappingsService: GCTasksMappingsService,
     private overallMetricsService: OverallMetricsService,
     private pagesService: PageUpdateService,
@@ -127,6 +129,10 @@ export class DbUpdateService {
 
       await this.updateFeedback().catch((err) =>
         this.logger.error(`Error updating Feedback data\n${err.stack}`),
+      );
+
+      await this.gcTaskService.updateGcTaskData().catch((err) =>
+        this.logger.error(`Error updating GC Task data\n${err.stack}`),
       );
 
       await Promise.allSettled([

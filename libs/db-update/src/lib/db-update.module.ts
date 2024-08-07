@@ -23,6 +23,7 @@ import { ActivityMapService } from './activity-map/activity-map.service';
 import { UrlsService } from './urls/urls.service';
 import { ReadabilityService } from './readability/readability.service';
 import { AnnotationsService } from './airtable/annotations.service';
+import { GcTaskService } from './gc-task/gc-task.service';
 import { GCTasksMappingsService } from './airtable/gc-tasks-mappings.service';
 
 const date = dayjs().format('YYYY-MM-DD');
@@ -68,6 +69,7 @@ export class DbUpdateModule {
         SearchAssessmentService,
         UrlsService,
         AnnotationsService,
+        GcTaskService,
         GCTasksMappingsService,
         {
           provide: AirtableClient.name,
@@ -98,6 +100,7 @@ export class DbUpdateModule {
         SearchAssessmentService,
         UrlsService,
         AnnotationsService,
+        GcTaskService,
         GCTasksMappingsService,
       ],
     };
