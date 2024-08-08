@@ -48,6 +48,9 @@ import {
   GCTasksMappings,
   GCTasksMappingsSchema,
 } from './schemas/gc-tasks-mappings.schema';
+import { PagesView, PagesViewSchema } from './views/pages-view.schema';
+import { TasksView, TasksViewSchema } from './views/tasks-view.schema';
+import { FeedbackViewRegistration } from './views/feedback-view.schema';
 
 export const models = {
   callDrivers: {
@@ -83,6 +86,8 @@ export const models = {
 
 export const views = {
   pageVisits: { model: PageVisitsView, schema: PageVisitsViewSchema },
+  pagesView: { model: PagesView, schema: PagesViewSchema },
+  tasksView: { model: TasksView, schema: TasksViewSchema },
 } as const;
 
 @Module({
@@ -96,6 +101,7 @@ export const views = {
           name: collection.model.name,
           schema: collection.schema,
         })),
+        FeedbackViewRegistration,
       ],
       'defaultConnection',
     ),
@@ -110,6 +116,7 @@ export class DbModule {
     dbName = 'upd-test',
   ) {
     const connectionString = `mongodb://${production ? prodHost : '127.0.0.1'}:27017/`;
+    // const connectionString = `mongodb://${production ? prodHost : '40.69.101.235'}:27017/`;
 
     console.log(connectionString);
 
