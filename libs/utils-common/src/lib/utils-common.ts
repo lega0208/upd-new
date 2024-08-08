@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { mongo, MongooseBulkWriteOptions } from 'mongoose';
 
 // Utility function for to help with rate-limiting within async functions
 export function wait(ms: number): Promise<void> {
@@ -338,14 +339,57 @@ export async function batchAwait<T, U>(
     const currentDelay = typeof delay === 'number' ? delay : delay.delay;
 
     if (promises.length !== 0 && promises.length % batchSize === 0) {
-      await Promise.all([...promises, wait(currentDelay)]);
-    } else {
-      await wait(currentDelay);
+      await Promise.all(
+        currentDelay ? [...promises, wait(currentDelay)] : promises,
+      );
+      continue;
     }
+
+    currentDelay && (await wait(currentDelay));
   }
 
   return Promise.all(promises);
 }
+
+type InsertFunc<T> = (ops: T[]) => Promise<void>;
+
+/**
+ * Creates a queue that will perform queued updates when it reaches maxQueueSize
+ * @param maxQueueSize
+ * @param insertFunc
+ */
+export const createUpdateQueue = <T>(
+  maxQueueSize: number,
+  insertFunc: InsertFunc<T>,
+) => {
+  const queue: T[] = [];
+
+  const flush = async () => {
+    const ops = queue.splice(0, queue.length);
+
+    try {
+      if (ops.length > 0) {
+        await insertFunc(ops);
+      }
+    } catch (err) {
+      console.error('Error occurred in createUpdateQueue flush:', err);
+      logJson(ops);
+    }
+  };
+
+  const add = async (ops: T) => {
+    if (queue.length >= maxQueueSize) {
+      await flush();
+    }
+
+    queue.push(ops);
+  };
+
+  return {
+    add,
+    flush,
+  };
+};
 
 /**
  * Maps over chunks of an array rather than individual items
@@ -525,14 +569,24 @@ export const collapseStrings = (strings: string[]) => [
   ...new Set(strings.map((s) => s.replace(/\s+/g, ' ').trim())),
 ];
 
-class Mutex {
+/**
+ * A simple mutex implementation for controlling access to shared resources
+ */
+export class Mutex {
   private queue: (() => void)[] = [];
   private locked = false;
+
+  // Measure the total time spent waiting for the mutex to unlock
+  private totalLockTime = 0;
+
+  private currentLockStart = Date.now();
 
   async lock() {
     if (this.locked) {
       return new Promise<void>((resolve) => {
         this.queue.push(resolve);
+      }).then(() => {
+        this.currentLockStart = Date.now();
       });
     }
 
@@ -543,6 +597,9 @@ class Mutex {
     const resolve = this.queue.shift();
 
     if (resolve) {
+      const lockDuration = Date.now() - this.currentLockStart;
+      this.totalLockTime += lockDuration;
+
       resolve();
 
       return;
@@ -550,16 +607,41 @@ class Mutex {
 
     this.locked = false;
   }
+
+  logTotalLockTime() {
+    console.log(`Total mutex time locked: ${this.totalLockTime}ms`);
+  }
 }
 
-export function withMutex<T extends object>(obj: T, unlockDelay = 0): T {
+export type MutexOptions<T> = {
+  unlockDelay?: number;
+  methodList?: (keyof T)[];
+};
+
+/**
+ * Wraps an object or class instance with a mutex to control access to shared resources
+ *
+ * @param obj The object or class instance to wrap with a mutex
+ * @param options.unlockDelay The delay in milliseconds to wait before unlocking the mutex
+ * @param options.methodList The list of methods that require mutex locking
+ * @returns
+ */
+export function withMutex<T extends object>(
+  obj: T,
+  options?: MutexOptions<T>,
+): T {
   const mutex = new Mutex();
+  const unlockDelay = options?.unlockDelay || 0;
+  const methodList = options?.methodList;
 
   return new Proxy(obj, {
     get(target, propKey, receiver) {
       const origMethod = Reflect.get(target, propKey, receiver);
 
-      if (typeof origMethod === 'function') {
+      if (
+        typeof origMethod === 'function' &&
+        (!methodList || methodList.includes(propKey as keyof T))
+      ) {
         return async (...args: unknown[]) => {
           await mutex.lock();
 
