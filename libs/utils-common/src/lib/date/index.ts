@@ -10,6 +10,7 @@ import isBetween from 'dayjs/plugin/isBetween';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
 import { partial, zip } from 'rambdax';
+import type { AbstractDate, DateRange } from '@dua-upd/types-common';
 
 _dayjs.extend(utc);
 _dayjs.extend(quarterOfYear);
@@ -21,13 +22,6 @@ export const dayjs = _dayjs;
 export type Dayjs = _Dayjs;
 export type OpUnitType = _OpUnitType;
 export type QUnitType = _QUnitType;
-
-export type AbstractDate = string | Date | Dayjs;
-
-export type DateRange<T extends AbstractDate> = {
-  start: T;
-  end: T;
-};
 
 export function datesFromDateRange(
   dateRange: DateRange<Dayjs> | DateRange<Date> | string,
