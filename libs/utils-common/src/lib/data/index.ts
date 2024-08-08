@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
-import { avg, round } from '../math';
-import { ITask, IUxTest, SuccessRates } from '@dua-upd/types-common';
+import { avg, percentChange, round } from '../math';
+import { IUxTest, SuccessRates } from '@dua-upd/types-common';
 import {
   Dictionary,
   filter,
@@ -18,6 +18,56 @@ import { isNullish } from '../utils-common';
 
 export type DbEntity = {
   _id: Types.ObjectId;
+};
+
+// Taken from https://github.com/sindresorhus/type-fest/blob/main/source/simplify.d.ts
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
+
+/**
+ * Takes an object and calculates the percent change for each property
+ * that is present in both the data and comparisonData objects.
+ *
+ * @param props The properties to calculate percent change for
+ * @param data The data object to add percent change to
+ * @param comparisonData The data object to compare against
+ * @returns The data object with percent change properties added
+ */
+export const getSelectedPercentChange = <
+  T extends Record<string | number | symbol, any>,
+>(
+  props: (keyof T)[] extends (string | number)[] ? (keyof T)[] : never,
+  data: T,
+  comparisonData: T,
+  options?: { round?: number },
+) => {
+  type PercentChangeProp = `${(typeof props)[number]}PercentChange`;
+
+  const percentChangeResults = {} as Record<PercentChangeProp, number | null>;
+
+  for (const prop of props) {
+    const percentChangeProp: PercentChangeProp = `${prop}PercentChange`;
+
+    const value = data[prop];
+    const comparisonValue = comparisonData[prop];
+
+    if (!value || !comparisonValue) {
+      percentChangeResults[percentChangeProp] = null;
+      continue;
+    }
+
+    const percentChangeValue = percentChange(value, comparisonValue);
+
+    percentChangeResults[percentChangeProp] = round(
+      percentChangeValue,
+      options?.round || 5,
+    );
+  }
+
+  return {
+    ...data,
+    ...percentChangeResults,
+  };
 };
 
 /**
@@ -326,8 +376,6 @@ export function getLatestTestData<
     total: null,
   };
 }
-
-
 
 export type ProjectTestTypes = {
   Baseline: IUxTest[];
