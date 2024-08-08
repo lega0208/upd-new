@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 // need mongo import or TS will complain about missing types
-import { Types, type FilterQuery, type mongo } from 'mongoose';
+import { Types, type FilterQuery } from 'mongoose';
 import { omit } from 'rambdax';
 import { DbService, Feedback } from '@dua-upd/db';
-import { arrayToDictionary, type DateRange } from '@dua-upd/utils-common';
+import { arrayToDictionary } from '@dua-upd/utils-common';
+import type { DateRange } from '@dua-upd/types-common';
 import { FeedbackCache } from './feedback.cache';
 import type {
   IFeedback,
@@ -104,7 +105,6 @@ export class FeedbackService {
       : wordResultsAggregation;
 
     const wordsResults = await wordResultsIntermediate
-      .match(wordsFilterQuery)
       .group({
         _id: null,
         avgWords: { $avg: { $size: '$words' } },

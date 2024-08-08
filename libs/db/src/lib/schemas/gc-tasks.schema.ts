@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Types } from 'mongoose';
-import type { IGCTasks, ITask } from '@dua-upd/types-common';
+import { model, type Document, Types } from 'mongoose';
+import type { DateRange, IGCTasks, ITask } from '@dua-upd/types-common';
+import { dateRangeSplit } from '@dua-upd/utils-common/date';
+import { ModelWithStatics } from '@dua-upd/utils-common/types';
 
 export type GcTasksDocument = GcTasks & Document;
 
@@ -89,13 +91,60 @@ export class GcTasks implements IGCTasks {
 
   @Prop({ type: String })
   sampling_task?: string;
+
+  static getTotalEntries(
+    this: GcTasksModel,
+    dateRange: string | DateRange<Date>,
+  ) {
+    const [startDate, endDate] =
+      typeof dateRange === 'string'
+        ? dateRangeSplit(dateRange)
+        : [dateRange.start, dateRange.end];
+
+    return this.aggregate<{
+      gc_task: string;
+      total_entries: number;
+      completed_entries: number;
+    }>()
+      .match({
+        date: { $gte: startDate, $lte: endDate },
+        sampling_task: 'y',
+        able_to_complete: {
+          $ne: 'I started this survey before I finished my visit',
+        },
+      })
+      .group({
+        _id: { gc_task: '$gc_task' },
+        total_entries: { $sum: 1 },
+        completed_entries: {
+          $sum: {
+            $cond: [{ $eq: ['$able_to_complete', 'Yes'] }, 1, 0],
+          },
+        },
+      })
+      .project({
+        _id: 0,
+        gc_task: '$_id.gc_task',
+        total_entries: 1,
+        completed_entries: 1,
+      })
+      .exec();
+  }
 }
 
 export const GcTasksSchema = SchemaFactory.createForClass(GcTasks);
 
-GcTasksSchema.index({date: 1, url: 1})
-GcTasksSchema.index({date: 1, gc_task: 1})
-GcTasksSchema.index({date: 1, sampling_task: 1, able_to_complete: 1})
+GcTasksSchema.index({ date: 1, url: 1 });
+GcTasksSchema.index({ date: 1, gc_task: 1 });
+GcTasksSchema.index({ date: 1, sampling_task: 1, able_to_complete: 1 });
+
+const statics = {
+  getTotalEntries: GcTasks.getTotalEntries,
+};
+
+GcTasksSchema.statics = statics;
+
+export type GcTasksModel = ModelWithStatics<GcTasks, typeof statics>;
 
 export function getGCTasksModel() {
   return model(GcTasks.name, GcTasksSchema);
