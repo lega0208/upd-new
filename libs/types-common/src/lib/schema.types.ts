@@ -1,4 +1,6 @@
 import { Types } from 'mongoose';
+import type { DateRange } from './date.types';
+import type { PageStatus } from './data.types';
 
 /*
  * AA itemId types
@@ -29,7 +31,7 @@ export interface IAAItemId {
  */
 export interface CallsByTopic {
   tasks: string;
-  tpc_id: string;
+  tpc_id: number;
   enquiry_line: string;
   topic: string;
   subtopic: string;
@@ -105,7 +107,6 @@ export interface AASearchTermMetrics {
 
 export interface IMetrics {
   _id: Types.ObjectId;
-  date: Date;
   dyf_submit: number;
   dyf_yes: number;
   dyf_no: number;
@@ -166,14 +167,31 @@ export interface IMetrics {
 }
 
 export interface IOverall extends IMetrics {
+  date: Date;
   aa_searchterms_en?: AASearchTermMetrics[];
   aa_searchterms_fr?: AASearchTermMetrics[];
 }
 
 export interface IPageMetrics extends IMetrics {
+  date: Date;
   url: string;
   aa_searchterms?: AASearchTermMetrics[];
   page?: Types.ObjectId | IPage;
+  tasks?: Types.ObjectId[] | ITask[];
+  projects?: Types.ObjectId[] | IProject[];
+  ux_tests?: Types.ObjectId[] | IUxTest[];
+}
+
+export interface IPageView extends IMetrics {
+  dateRange: DateRange<Date>;
+  page: IPage;
+  pageStatus: PageStatus;
+  numComments: number;
+  aa_searchterms?: AASearchTermMetrics[];
+  activity_map?: ActivityMapMetrics[];
+  tasks?: Types.ObjectId[];
+  projects?: Types.ObjectId[];
+  lastUpdated: Date;
 }
 
 /*
@@ -190,10 +208,44 @@ export interface IPage {
   is_404?: boolean;
   lastChecked?: Date;
   lastModified?: Date;
+  owners?: string;
+  sections?: string;
   tasks?: Types.ObjectId[] | ITask[];
   projects?: Types.ObjectId[] | IProject[];
   ux_tests?: Types.ObjectId[] | IUxTest[];
 }
+
+export interface IFeedbackView {
+  _id: Types.ObjectId;
+  docType: 'word' | 'comment';
+  refType: 'task' | 'project';
+  refId: Types.ObjectId;
+  dateRange: DateRange<Date>;
+  lang: 'en' | 'fr';
+}
+
+export interface IFeedbackViewWord extends IFeedbackView {
+  word: string;
+  word_occurrences: number;
+  comment_occurrences: number;
+  term_frequency: number;
+  comment_frequency: number;
+  inverse_doc_frequency: number;
+}
+
+export interface IFeedbackViewComment extends IFeedbackView {
+  url: string;
+  date: Date;
+  comment: string;
+  owners?: string;
+  sections?: string;
+  rank?: number;
+  commentScore?: number;
+}
+
+export type IFeedbackViewType = IFeedbackView &
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  (IFeedbackViewWord | IFeedbackViewComment);
 
 /*
  * Task interface
@@ -212,7 +264,6 @@ export interface ITask {
   ux_tests?: Types.ObjectId[] | IUxTest[];
   projects?: Types.ObjectId[] | IProject[];
   pages?: Types.ObjectId[] | IPage[];
-  date?: string;
   tpc_ids: number[];
   program?: string;
   service?: string;
@@ -221,6 +272,56 @@ export interface ITask {
   channel?: string[];
   core?: string[];
   portfolio?: string;
+}
+
+export interface ITaskView {
+  _id: Types.ObjectId;
+  dateRange: DateRange<Date>;
+  task: ITask;
+  totalCalls: number;
+  calldriversEnquiry: { enquiry_line: string; calls: number }[];
+  callsByTopic: CallsByTopic[];
+  callsPerVisits: number;
+  dyfNo: number;
+  dyfNoPerVisits: number;
+  dyfYes: number;
+  visits: number;
+  gscTotalClicks: number;
+  gscTotalImpressions: number;
+  gscTotalCtr: number;
+  gscTotalPosition: number;
+  tmf_ranking_index: number;
+  cops: boolean;
+  numComments: number;
+  aa_searchterms?: AASearchTermMetrics[];
+  metricsByDay: {
+    date: string;
+    calls: number;
+    callsPerVisit: number;
+    dyfNo: number;
+    dyfNoPerVisits: number;
+    dyfYes: number;
+    numComments: number;
+    commentsPerVisits: number;
+    visits: number;
+  }[];
+  pages: Pick<
+    IPageView,
+    | '_id'
+    | 'page'
+    | 'pageStatus'
+    | 'visits'
+    | 'dyf_yes'
+    | 'dyf_no'
+    | 'numComments'
+    | 'gsc_total_clicks'
+    | 'gsc_total_impressions'
+    | 'gsc_total_ctr'
+    | 'gsc_total_position'
+  >[];
+  ux_tests?: IUxTest[];
+  projects?: IProject[];
+  lastUpdated: Date;
 }
 
 /*
@@ -444,9 +545,8 @@ export type AccumulatorOperator =
   | '$stdDevSamp'
   | '$sum';
 
-
- /*
- * GCTSS to TMF Tasks mapping  interface
+/*
+ * GCTSS to TMF Tasks mapping interface
  */
 export interface IGCTasksMappings {
   _id: Types.ObjectId;
