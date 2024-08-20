@@ -38,8 +38,8 @@ export class UrlsService {
   private readonly http = new HttpClient({
     logger: this.logger,
     rateLimitStats: this.rateLimitStats,
-    rateLimitDelay: 88,
-    batchSize: 12,
+    rateLimitDelay: 101,
+    batchSize: 10,
   });
 
   constructor(
