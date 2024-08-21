@@ -52,6 +52,13 @@ export class CalldriversService {
 
       if (calldriversData.length === 0) {
         this.logger.log('Calldrivers already up-to-date.');
+
+        this.logger.log('Syncing Calldrivers references...');
+
+        await this.calldriverModel.syncTaskReferences(this.taskModel);
+
+        this.logger.log('Successfully synced Calldrivers references.');
+
         return;
       }
 
