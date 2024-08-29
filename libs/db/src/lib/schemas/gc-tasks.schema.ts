@@ -35,7 +35,7 @@ export class GcTasks implements IGCTasks {
   @Prop({ type: String, required: true })
   department: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   theme: string;
 
   @Prop({ type: String })
