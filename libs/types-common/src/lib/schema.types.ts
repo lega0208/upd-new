@@ -30,6 +30,7 @@ export interface IAAItemId {
  * Calldriver types
  */
 export interface CallsByTopic {
+  _id: string;
   tasks: string;
   tpc_id: number;
   enquiry_line: string;
@@ -252,6 +253,7 @@ export type IFeedbackViewType = IFeedbackView &
  */
 export interface ITask {
   _id: Types.ObjectId;
+  taskId?: string[];
   airtable_id: string;
   title: string;
   title_fr?: string;

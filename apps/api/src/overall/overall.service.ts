@@ -43,6 +43,7 @@ import type {
   OverviewProject,
   OverallSearchTerm,
   OverviewFeedback,
+  ITask,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -50,6 +51,7 @@ import {
   avg,
   dateRangeSplit,
   getImprovedKpiSuccessRates,
+  getImprovedKpiTopSuccessRates,
   getLatestTestData,
   parseDateRangeString,
   percentChange,
@@ -197,6 +199,96 @@ export class OverallService {
 
     const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests);
 
+    const lastQuarterStart = dayjs
+      .utc()
+      .subtract(1, 'quarter')
+      .startOf('quarter');
+    const lastQuarterEnd = lastQuarterStart.endOf('quarter');
+
+    console.time('getTaskRankings');
+    const topTasksDateRange = {
+      start: lastQuarterStart.toDate(),
+      end: lastQuarterEnd.toDate(),
+    };
+
+    const tasks = await this.db.views.pageVisits.getVisitsDyfNoWithTaskData(
+      topTasksDateRange,
+      this.db.collections.tasks,
+    );
+
+    const callsByTasks: { [key: string]: number } = {};
+
+    const dateRangeString = `${topTasksDateRange.start.toISOString().slice(0, 10)}/${topTasksDateRange.end.toISOString().slice(0, 10)}`;
+
+    for (const task of tasks as ITask[]) {
+      callsByTasks[task._id.toString()] = (
+        await this.db.collections.callDrivers.getCallsByTpcId(
+          dateRangeString,
+          task.tpc_ids,
+        )
+      ).reduce((a, b) => a + b.calls, 0);
+    }
+
+    const gcTasksData2 = await this.db.collections.gcTasks
+      .aggregate<{ gc_task: string; total_entries: number }>()
+      .match({
+        date: { $gte: topTasksDateRange.start, $lte: topTasksDateRange.end },
+        sampling_task: 'y',
+        able_to_complete: {
+          $ne: 'I started this survey before I finished my visit',
+        },
+      })
+      .group({
+        _id: '$gc_task',
+        total_entries: { $sum: 1 },
+      })
+      .project({
+        _id: 0,
+        gc_task: '$_id',
+        total_entries: 1,
+      })
+      .exec();
+
+    const gcTasksDict = arrayToDictionary(gcTasksData2, 'gc_task');
+
+    const tasksWithRankingScore = tasks.map((task) => {
+      const calls = callsByTasks[task._id.toString()] ?? 0;
+
+      const gc_survey_participants = task.gc_tasks.reduce((acc, gcTask) => {
+        const total_entries = gcTasksDict[gcTask.title]?.total_entries || 0;
+
+        return acc + total_entries;
+      }, 0);
+
+      return {
+        ...task,
+        tmf_ranking_index:
+          task.visits * 0.1 + calls * 0.6 + gc_survey_participants * 0.3,
+      };
+    });
+
+    tasksWithRankingScore.sort(
+      (a, b) => b.tmf_ranking_index - a.tmf_ranking_index,
+    );
+
+    const tasksWithRanking = tasksWithRankingScore.map((task, i) => ({
+      ...task,
+      tmf_rank: i + 1,
+    }));
+
+    const topTasksIds = tasksWithRanking
+      .slice(0, 50)
+      .map(({ _id }) => _id.toString());
+
+    const improvedKpiTopSuccessRate = getImprovedKpiTopSuccessRates(
+      topTasksIds,
+      uxTests,
+    );
+
+    console.timeEnd('getTaskRankings');
+
+    const totalTasks = await this.taskModel.countDocuments().exec();
+
     const results = {
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -233,12 +325,14 @@ export class OverallService {
       projects: await getProjects(this.projectModel, this.uxTestModel),
       uxTests,
       improvedTasksKpi: getImprovedKpiSuccessRates(uxTests),
+      improvedKpiTopSuccessRate,
       ...(await getUxData(testsSince2018)),
       calldriverTopics,
       top5IncreasedCalldriverTopics,
       top5DecreasedCalldriverTopics,
       searchTermsEn: await this.getTopSearchTerms(params, 'en'),
       searchTermsFr: await this.getTopSearchTerms(params, 'fr'),
+      totalTasks,
     };
 
     await this.cacheManager.set(

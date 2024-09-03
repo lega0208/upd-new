@@ -39,7 +39,7 @@
         [kpiObjectiveCriteria]="searchKpiObjectiveCriteria"
         [postValue]="'Pass'"
         [preLabel]="'Target'"
-        [valueLabel]="0.75"
+        [valueLabel]="0.8"
         [keyword]="'search'"
         modal="{{ 'kpi-search-assessment-guidance' | translate }}"
         >{{
@@ -80,11 +80,14 @@
               }}</i>
               {{ improvedKpi.value | percent: undefined : currentLangSignal() }}
             </span>
-            {{ getDiffText(improvedKpi.value ?? 0) | translate }}
             <br />
             {{
               'kpi-ux-test-improved-text'
-                | translate: { total: (improvedKpiUniqueTasks$ | async) || 0 }
+                | translate
+                  : {
+                      unique: (improvedKpiUniqueTasks$ | async) || 0,
+                      total: (uniqueTaskTestedLatestTestKpi$ | async) || 0
+                    }
             }}
           </ng-container>
         </div>
@@ -187,6 +190,6 @@
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"
         [stacked]="{ isStacked: true, isStacked100: true, hasDataLabels: true }"
       ></upd-apex-bar>
-    </div>
+      </div>
   </div>
 </div>
