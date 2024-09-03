@@ -928,7 +928,7 @@ function mapObjectArraysWithPercentChange(
     if (propsAreValidArrays) {
       const sortBy = (a: any, b: any) => {
         if (sortPath && a[sortPath] instanceof Date) {
-          return a[sortPath] - b[sortPath];
+          return a[sortPath].getTime() - b[sortPath].getTime();
         }
 
         if (sortPath && typeof a[sortPath] === 'string') {

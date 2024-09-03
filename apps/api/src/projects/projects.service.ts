@@ -5,11 +5,12 @@ import { Model, Types } from 'mongoose';
 import { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import type {
-  CallDriverModel,
-  FeedbackModel,
+import {
+  type CallDriverModel,
+  DbService,
+  type FeedbackModel,
   PageDocument,
-  PageMetricsModel,
+  type PageMetricsModel,
   ProjectDocument,
   UxTestDocument,
 } from '@dua-upd/db';
@@ -30,15 +31,18 @@ import type {
   ProjectsHomeProject,
   ProjectStatus,
   ProjectsHomeData,
-  VisitsByPage,
+  DateRange,
 } from '@dua-upd/types-common';
 import {
   dateRangeSplit,
   parseDateRangeString,
 } from '@dua-upd/utils-common/date';
-import { getLatestTest, getLatestTestData } from '@dua-upd/utils-common/data';
 import {
-  arrayToDictionary,
+  getArraySelectedPercentChange,
+  getLatestTest,
+  getLatestTestData,
+} from '@dua-upd/utils-common/data';
+import {
   AsyncLogTiming,
   percentChange,
 } from '@dua-upd/utils-common';
@@ -143,6 +147,8 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
 @Injectable()
 export class ProjectsService {
   constructor(
+    @Inject(DbService)
+    private db: DbService,
     @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriversModel: CallDriverModel,
     @InjectModel(PageMetrics.name, 'defaultConnection')
@@ -451,31 +457,25 @@ export class ProjectsService {
     const members = uxTests.find((uxTest) => uxTest.project_lead)?.project_lead;
 
     console.time('dateRangeData');
-    const dateRangeData = await getAggregatedProjectMetrics(
-      this.pageMetricsModel,
-      this.feedbackModel,
-      this.calldriversModel,
-      this.projectsModel,
-      this.pageModel,
-      new Types.ObjectId(params.id),
+    const dateRangeData = await this.getAggregatedMetrics(
+      projectId,
       params.dateRange,
     );
     console.timeEnd('dateRangeData');
 
     console.time('comparisonDateRangeData');
-    const comparisonDateRangeData = await getAggregatedProjectMetrics(
-      this.pageMetricsModel,
-      this.feedbackModel,
-      this.calldriversModel,
-      this.projectsModel,
-      this.pageModel,
-      new Types.ObjectId(params.id),
+    const comparisonDateRangeData = await this.getAggregatedMetrics(
+      projectId,
       params.comparisonDateRange,
     );
     console.timeEnd('comparisonDateRangeData');
 
     console.time('getTopSearchTerms');
-    const searchTerms = await this.getTopSearchTerms(params);
+    const searchTerms = await this.getTopSearchTerms(
+      params.dateRange,
+      params.comparisonDateRange,
+      projectId,
+    );
     console.timeEnd('getTopSearchTerms');
 
     console.time('commentsByPage');
@@ -485,13 +485,15 @@ export class ProjectsService {
         params.comparisonDateRange,
         { projects: projectId },
       )
-    ).map(({ _id, title, url, sum, percentChange }) => ({
-      _id: _id.toString(),
-      title,
-      url,
-      sum,
-      percentChange,
-    }));
+    )
+      .map(({ _id, title, url, sum, percentChange }) => ({
+        _id: _id.toString(),
+        title,
+        url,
+        sum,
+        percentChange,
+      }))
+      .sort((a, b) => b.sum - a.sum);
     console.log(feedbackByPage.length);
     console.timeEnd('commentsByPage');
 
@@ -515,10 +517,9 @@ export class ProjectsService {
       })
       .exec();
 
-    const numCommentsPercentChange =
-      !params.ipd && numPreviousComments
-        ? percentChange(numComments, numPreviousComments)
-        : null;
+    const numCommentsPercentChange = numPreviousComments
+      ? percentChange(numComments, numPreviousComments)
+      : null;
 
     const results = {
       _id: populatedProjectDoc._id.toString(),
@@ -549,13 +550,14 @@ export class ProjectsService {
         return attachment;
       }),
       feedbackByPage,
-      feedbackByDay: (await this.feedbackModel.getCommentsByDay(
-        params.dateRange,
-        { projects: projectId },
-      )).map(({date, sum}) => ({
-      date: date.toISOString(),
-      sum,
-    })),
+      feedbackByDay: (
+        await this.feedbackModel.getCommentsByDay(params.dateRange, {
+          projects: projectId,
+        })
+      ).map(({ date, sum }) => ({
+        date: date.toISOString(),
+        sum,
+      })),
       mostRelevantCommentsAndWords:
         await this.feedbackService.getMostRelevantCommentsAndWords({
           dateRange: parseDateRangeString(params.dateRange),
@@ -571,27 +573,194 @@ export class ProjectsService {
     return results;
   }
 
-  async getTopSearchTerms({ dateRange, comparisonDateRange, id }: ApiParams) {
-    const [startDate, endDate] = dateRangeSplit(dateRange);
-    const [prevStartDate, prevEndDate] = dateRangeSplit(comparisonDateRange);
+  async getAggregatedMetrics(
+    id: Types.ObjectId,
+    dateRange: string,
+  ): Promise<ProjectDetailsAggregatedData> {
+    const [start, end] = dateRangeSplit(dateRange);
 
-    const results =
-      (await this.pageMetricsModel
-        .aggregate<InternalSearchTerm>()
-        .project({ date: 1, aa_searchterms: 1, projects: 1 })
-        .match({
-          date: {
-            $gte: startDate,
-            $lte: endDate,
-          },
-          projects: new Types.ObjectId(id),
+    const projectMetrics = await this.db.views.pages
+      .aggregate<
+        Omit<
+          ProjectDetailsAggregatedData,
+          | 'visitsByDay'
+          | 'dyfByDay'
+          | 'calldriversByDay'
+          | 'feedbackByPage'
+          | 'calldriversEnquiry'
+          | 'callsByTopic'
+          | 'callsByTasks'
+          | 'totalCalldrivers'
+        >
+      >({
+        dateRange: { start, end },
+        projects: id,
+        'projects.0': { $exists: true },
+      })
+      .group({
+        _id: '$page._id',
+        page: { $first: '$page' },
+        pageStatus: { $first: '$pageStatus' },
+        visits: { $sum: '$visits' },
+        dyfYes: { $sum: '$dyf_yes' },
+        dyfNo: { $sum: '$dyf_no' },
+        gscTotalClicks: { $sum: '$gsc_total_clicks' },
+        gscTotalImpressions: { $sum: '$gsc_total_impressions' },
+        gscTotalCtr: { $avg: '$gsc_total_ctr' },
+        gscTotalPosition: { $avg: '$gsc_total_position' },
+      })
+      .addFields({
+        url: '$page.url',
+        title: '$page.title',
+        page: '$page._id',
+        redirect: '$page.redirect',
+        owners: '$page.owners',
+        sections: '$page.sections',
+      })
+      .sort({ title: 1 })
+      .group({
+        _id: null,
+        visitsByPage: {
+          $push: '$$ROOT',
+        },
+        visits: { $sum: '$visits' },
+        dyfYes: { $sum: '$dyfYes' },
+        dyfNo: { $sum: '$dyfNo' },
+        gscTotalClicks: { $sum: '$gscTotalClicks' },
+        gscTotalImpressions: { $sum: '$gscTotalImpressions' },
+        gscTotalCtr: { $avg: '$gscTotalCtr' },
+        gscTotalPosition: { $avg: '$gscTotalPosition' },
+        owners: { $first: '$owners' },
+        sections: { $first: '$sections' },
+      })
+      .exec()
+      .then((data) => data?.[0]);
+
+    const metricsByDay = await this.pageMetricsModel
+      .aggregate<{
+        date: string;
+        visits: number;
+        dyf_yes: number;
+        dyf_no: number;
+        dyf_submit: number;
+      }>()
+      .match({
+        date: { $gte: start, $lte: end },
+        projects: id,
+        'projects.0': { $exists: true },
+      })
+      .group({
+        _id: '$date',
+        visits: { $sum: '$visits' },
+        dyf_yes: { $sum: '$dyf_yes' },
+        dyf_no: { $sum: '$dyf_no' },
+        dyf_submit: { $sum: '$dyf_submit' },
+      })
+      .project({
+        _id: 0,
+        date: '$_id',
+        visits: 1,
+        dyf_yes: 1,
+        dyf_no: 1,
+        dyf_submit: 1,
+      })
+      .sort({ date: 1 })
+      .exec()
+      .then((data) => data || []);
+
+    const visitsByDay = metricsByDay.map(({ date, visits }) => ({
+      date,
+      visits,
+    }));
+
+    const dyfByDay = metricsByDay.map(
+      ({ date, dyf_yes, dyf_no, dyf_submit }) => ({
+        date,
+        dyf_yes,
+        dyf_no,
+        dyf_submit,
+      }),
+    );
+
+    const calldriversByDay = await this.calldriversModel
+      .aggregate<{ date: string; calls: number }>()
+      .match({
+        date: { $gte: start, $lte: end },
+        projects: id,
+      })
+      .group({
+        _id: '$date',
+        calls: {
+          $sum: '$calls',
+        },
+      })
+      .project({
+        _id: 0,
+        date: '$_id',
+        calls: 1,
+      })
+      .sort({ date: 1 })
+      .exec();
+
+    const calldriversEnquiry =
+      await this.calldriversModel.getCallsByEnquiryLine(dateRange, {
+        projects: id,
+      });
+
+    const callsByTopic = await this.calldriversModel.getCallsByTopic(
+      dateRange,
+      {
+        projects: id,
+      },
+    );
+
+    const totalCalldrivers = calldriversEnquiry.reduce(
+      (a, b) => a + b.calls,
+      0,
+    );
+
+    return {
+      ...projectMetrics,
+      calldriversEnquiry,
+      callsByTopic,
+      totalCalldrivers,
+      visitsByDay,
+      dyfByDay,
+      calldriversByDay,
+    };
+  }
+
+  async getTopSearchTerms(
+    dateRange: string,
+    comparisonDateRange: string,
+    id: Types.ObjectId,
+  ): Promise<InternalSearchTerm[]> {
+    const [start, end] = dateRangeSplit(dateRange);
+    const [prevStart, prevEnd] = dateRangeSplit(comparisonDateRange);
+
+    const searchTermsPipeline = (
+      dateRange: DateRange<Date>,
+      termsToFind?: string[],
+    ) => {
+      const pipelineBase = this.db.views.pages
+        .aggregate<InternalSearchTerm>({
+          dateRange,
+          projects: id,
+          'projects.0': { $exists: true },
         })
+        .project({ dateRange: 1, aa_searchterms: 1, projects: 1 })
         .unwind('$aa_searchterms')
         .addFields({
           'aa_searchterms.term': {
             $toLower: '$aa_searchterms.term',
           },
-        })
+        });
+
+      const pipeline = termsToFind
+        ? pipelineBase.match({ 'aa_searchterms.term': { $in: termsToFind } })
+        : pipelineBase;
+
+      return pipeline
         .group({
           _id: '$aa_searchterms.term',
           clicks: {
@@ -601,8 +770,6 @@ export class ProjectsService {
             $avg: '$aa_searchterms.position',
           },
         })
-        .sort({ clicks: -1 })
-        .limit(10)
         .project({
           _id: 0,
           term: '$_id',
@@ -610,271 +777,28 @@ export class ProjectsService {
           position: {
             $round: ['$position', 2],
           },
-        })
-        .exec()) || [];
+        });
+    };
 
-    const prevResults =
-      (await this.pageMetricsModel
-        .aggregate<Pick<InternalSearchTerm, 'term' | 'clicks'>>()
-        .project({ date: 1, aa_searchterms: 1, projects: 1 })
-        .match({
-          date: { $gte: prevStartDate, $lte: prevEndDate },
-          projects: new Types.ObjectId(id),
-        })
-        .unwind('$aa_searchterms')
-        .addFields({
-          'aa_searchterms.term': {
-            $toLower: '$aa_searchterms.term',
-          },
-        })
-        .match({
-          'aa_searchterms.term': {
-            $in: results.map(({ term }) => term),
-          },
-        })
-        .group({
-          _id: '$aa_searchterms.term',
-          clicks: {
-            $sum: '$aa_searchterms.clicks',
-          },
-        })
-        .project({
-          _id: 0,
-          term: '$_id',
-          clicks: 1,
-        })
-        .exec()) || [];
-
-    const prevResultsDict = arrayToDictionary(prevResults, 'term');
-
-    return results.map((result) => {
-      const prevClicks = prevResultsDict[result.term]?.clicks;
-      const clicksChange =
-        typeof prevClicks === 'number' && prevClicks !== 0
-          ? Math.round(((result.clicks - prevClicks) / prevClicks) * 100) / 100
-          : null;
-
-      return {
-        ...result,
-        clicksChange,
-      };
-    });
-  }
-}
-
-async function getAggregatedProjectMetrics(
-  pageMetricsModel: PageMetricsModel,
-  feedbackModel: FeedbackModel,
-  calldriversModel: CallDriverModel,
-  projectModel: Model<ProjectDocument>,
-  pageModel: Model<PageDocument>,
-  id: Types.ObjectId,
-  dateRange: string,
-): Promise<ProjectDetailsAggregatedData> {
-  const [startDate, endDate] = dateRangeSplit(dateRange);
-
-  console.time('projectMetrics');
-  const projectMetrics = (
-    await pageMetricsModel
-      .aggregate<ProjectDetailsAggregatedData>()
-      .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
-      .project({
-        date: 1,
-        url: 1,
-        page: 1,
-        projects: 1,
-        visits: 1,
-        dyf_yes: 1,
-        dyf_no: 1,
-        fwylf_cant_find_info: 1,
-        fwylf_hard_to_understand: 1,
-        fwylf_other: 1,
-        fwylf_error: 1,
-        gsc_total_clicks: 1,
-        gsc_total_impressions: 1,
-        gsc_total_ctr: 1,
-        gsc_total_position: 1,
-        owners: 1,
-        sections: 1,
-      })
-      .group({
-        _id: '$page',
-        page: { $first: '$page' },
-        visits: { $sum: '$visits' },
-        dyfYes: { $sum: '$dyf_yes' },
-        dyfNo: { $sum: '$dyf_no' },
-        fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
-        fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
-        fwylfOther: { $sum: '$fwylf_other' },
-        fwylfError: { $sum: '$fwylf_error' },
-        gscTotalClicks: { $sum: '$gsc_total_clicks' },
-        gscTotalImpressions: { $sum: '$gsc_total_impressions' },
-        gscTotalCtr: { $avg: '$gsc_total_ctr' },
-        gscTotalPosition: { $avg: '$gsc_total_position' },
-        owners: { $first: '$owners' },
-        sections: { $first: '$sections' },
-      })
-      .group({
-        _id: null,
-        visitsByPage: {
-          $push: '$$ROOT',
-        },
-        visits: { $sum: '$visits' },
-        dyfYes: { $sum: '$dyfYes' },
-        dyfNo: { $sum: '$dyfNo' },
-        fwylfCantFindInfo: { $sum: '$fwylfCantFindInfo' },
-        fwylfHardToUnderstand: { $sum: '$fwylfHardToUnderstand' },
-        fwylfOther: { $sum: '$fwylfOther' },
-        fwylfError: { $sum: '$fwylfError' },
-        gscTotalClicks: { $sum: '$gscTotalClicks' },
-        gscTotalImpressions: { $sum: '$gscTotalImpressions' },
-        gscTotalCtr: { $avg: '$gscTotalCtr' },
-        gscTotalPosition: { $avg: '$gscTotalPosition' },
-        owners: { $first: '$owners' },
-        sections: { $first: '$sections' },
-      })
+    const results = await searchTermsPipeline({ start, end })
+      .sort({ clicks: -1 })
+      .limit(10)
       .exec()
-  )?.[0];
-  console.timeEnd('projectMetrics');
+      .then((searchTerms) => searchTerms || []);
 
-  const projectPages = await pageModel
-    .find({ projects: new Types.ObjectId(id) })
-    .lean()
-    .exec();
+    const prevResults = await searchTermsPipeline(
+      { start: prevStart, end: prevEnd },
+      results.map((term) => term.term),
+    )
+      .exec()
+      .then((searchTerms) => searchTerms || []);
 
-  const pageLookup = arrayToDictionary(projectPages, '_id');
-
-  const determinePageStatus = (page) => {
-    if (page?.is_404) return '404';
-    if (page?.redirect) return 'Redirected';
-    return 'Live';
-  };
-
-  const visitedPageIds = new Set();
-  const metrics =
-    projectMetrics?.visitsByPage.map((metric) => {
-      const pageId = metric._id.toString();
-      visitedPageIds.add(pageId);
-
-      const page = pageLookup[pageId];
-
-      return {
-        ...metric,
-        _id: pageId,
-        title: page?.title,
-        url: page?.url,
-        is404: page?.is_404,
-        isRedirect: !!page?.redirect,
-        redirect: page?.redirect,
-        pageStatus: determinePageStatus(page),
-        owners: page?.owners,
-        sections: page?.sections,
-      };
-    }) || [];
-
-  const metricsWithoutVisits =
-    Object.values(pageLookup)
-      .filter((page) => !visitedPageIds.has(page._id.toString()))
-      .map((page) => ({
-        ...page,
-        visits: 0,
-        dyfYes: 0,
-        dyfNo: 0,
-        fwylfCantFindInfo: 0,
-        fwylfError: 0,
-        fwylfHardToUnderstand: 0,
-        fwylfOther: 0,
-        gscTotalClicks: 0,
-        gscTotalImpressions: 0,
-        gscTotalCtr: 0,
-        gscTotalPosition: 0,
-        is404: page?.is_404,
-        isRedirect: !!page?.redirect,
-        redirect: page?.redirect,
-        pageStatus: determinePageStatus(page),
-      })) || [];
-
-  if (projectMetrics) {
-    projectMetrics.visitsByPage = [...metrics, ...metricsWithoutVisits]?.sort(
-      (a, b) => a.title.localeCompare(b.title),
-    ) as VisitsByPage[];
+    return getArraySelectedPercentChange(
+      ['clicks'],
+      'term',
+      results,
+      prevResults,
+      { round: 2, suffix: 'Change' },
+    );
   }
-
-  const visitsByDay = await pageMetricsModel
-    .aggregate()
-    .project({ date: 1, visits: 1, projects: 1 })
-    .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
-    .group({
-      _id: '$date',
-      visits: { $sum: '$visits' },
-    })
-    .project({
-      _id: 0,
-      date: '$_id',
-      visits: 1,
-    })
-    .sort({ date: 1 })
-    .exec();
-
-  const dyfByDay = await pageMetricsModel
-    .aggregate()
-    .match({ date: { $gte: startDate, $lte: endDate }, projects: id })
-    .group({
-      _id: '$date',
-      dyf_yes: { $sum: '$dyf_yes' },
-      dyf_no: { $sum: '$dyf_no' },
-      dyf_submit: { $sum: '$dyf_submit' },
-    })
-    .project({
-      _id: 0,
-      date: '$_id',
-      dyf_yes: 1,
-      dyf_no: 1,
-      dyf_submit: 1,
-    })
-    .sort({ date: 1 })
-    .exec();
-
-  const calldriversByDay = await calldriversModel
-    .aggregate()
-    .match({
-      date: { $gte: startDate, $lte: endDate },
-      projects: id,
-    })
-    .group({
-      _id: '$date',
-      calls: {
-        $sum: '$calls',
-      },
-    })
-    .project({
-      _id: 0,
-      date: '$_id',
-      calls: 1,
-    })
-    .sort({ date: 1 })
-    .exec();
-
-  console.time('calldriversEnquiry');
-  const calldriversEnquiry = await calldriversModel.getCallsByEnquiryLine(
-    dateRange,
-    { projects: id },
-  );
-
-  const callsByTopic = await calldriversModel.getCallsByTopic(dateRange, {
-    projects: id,
-  });
-  console.timeEnd('calldriversEnquiry');
-
-  const totalCalldrivers = calldriversEnquiry.reduce((a, b) => a + b.calls, 0);
-
-  return {
-    ...projectMetrics,
-    calldriversEnquiry,
-    callsByTopic,
-    totalCalldrivers,
-    visitsByDay,
-    dyfByDay,
-    calldriversByDay,
-  };
 }

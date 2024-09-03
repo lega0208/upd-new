@@ -146,10 +146,6 @@ export interface OverviewAggregatedData {
   dyf_yes: number;
   dyf_no: number;
   dyf_submit: number;
-  fwylf_error: number;
-  fwylf_hard_to_understand: number;
-  fwylf_other: number;
-  fwylf_cant_find_info: number;
   visitsByDay: { date: string; visits: number }[];
   calldriversByDay: { date: string; calls: number }[];
   dyfByDay: {
@@ -286,7 +282,7 @@ export type OverviewFeedback = {
     percentChange: number | null;
   }[];
   feedbackByDay: { date: string; sum: number }[];
-}
+};
 
 export type InternalSearchTerm = {
   term: string;
@@ -329,7 +325,16 @@ export interface TasksHomeAggregatedData {
   calls: number;
   dyf_no: number;
   latest_ux_success: number;
-  // gc_survey_participants?: number; // to be added?
+  survey: number;
+  survey_completed: number;
+  calls_per_100_visits: number;
+  dyf_no_per_1000_visits: number;
+  calls_per_100_visits_difference: number;
+  dyf_no_per_1000_visits_difference: number;
+  calls_percent_change: number | null;
+  dyf_no_percent_change: number | null;
+  latest_success_rate_difference: number | null;
+  latest_success_rate_percent_change: number | null;
 }
 
 export type TasksHomeData = ViewData<TasksHomeAggregatedData[]> & {
@@ -342,12 +347,8 @@ export type TasksHomeData = ViewData<TasksHomeAggregatedData[]> & {
 
 export interface TaskDetailsMetrics {
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
-  callsByTopic: CallsByTopic[];
-  calldriversByDay: { date: string; calls: number }[];
-  visitsByDay: { date: string; visits: number; dyfNo: number }[];
-  dyfNoPerVisits: { date: string; value: number }[];
-  totalCalldrivers: number;
-  visits: number; // for calls/visits ratio
+  callsPer100VisitsByDay: { date: string; calls: number }[];
+  dyfNoPer1000VisitsByDay: { date: string; dyfNo: number }[];
   dyfYes: number;
   dyfNo: number;
 }
@@ -367,6 +368,14 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
   core: string[];
   visits?: number;
   visitsPercentChange?: number | null;
+  totalCalls?: number;
+  totalCallsPercentChange?: number | null;
+  callsPer100Visits?: number;
+  callsPer100VisitsPercentChange?: number | null;
+  callsPer100VisitsDifference?: number | null;
+  dyfNoPer1000Visits?: number;
+  dyfNoPer1000VisitsPercentChange?: number | null;
+  dyfNoPer1000VisitsDifference?: number | null;
   gscTotalClicks?: number;
   gscTotalClicksPercentChange?: number | null;
   gscTotalImpressions?: number;
@@ -392,6 +401,7 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     title: string;
     attachments: AttachmentData[];
   }[];
+  callsByTopic: (CallsByTopic & { callsPercentChange?: number | null })[];
   searchTerms: InternalSearchTerm[];
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
   visitsByPage?: {
@@ -403,11 +413,7 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     title: string;
     url: string;
     lang?: string;
-    is_404?: boolean;
-    redirect?: string;
     language: string;
-    is404: boolean;
-    isRedirect: boolean;
     pageStatus: string;
     visitsPercentChange: number | null;
     dyfNoPercentChange: number | null;
@@ -417,15 +423,10 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     gscTotalPosition: number;
     owners: string;
     sections: string;
+    numComments: number;
+    numCommentsPercentChange: number | null;
   }[];
-  feedbackByPage?: {
-    _id: string;
-    title: string;
-    url: string;
-    sum: number;
-    percentChange: number | null;
-  }[];
-  feedbackByDay: { date: string; sum: number }[];
+  feedbackByDay: { date: string; numComments: number }[];
   numComments?: number;
   numCommentsPercentChange?: number | null;
 }
@@ -510,10 +511,6 @@ export interface ProjectDetailsAggregatedData {
   visits: number;
   dyfYes: number;
   dyfNo: number;
-  fwylfCantFindInfo: number;
-  fwylfHardToUnderstand: number;
-  fwylfOther: number;
-  fwylfError: number;
   gscTotalClicks: number;
   gscTotalImpressions: number;
   gscTotalCtr: number;
@@ -523,10 +520,8 @@ export interface ProjectDetailsAggregatedData {
   visitsByDay: { date: string; visits: number }[];
   dyfByDay: { date: string; dyf_yes: number; dyf_no: number }[];
   calldriversByDay: { date: string; calls: number }[];
-  feedbackByPage: { _id: string; title: string; url: string; sum: number }[];
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
-  callsByTasks: CallsByTasks[];
   totalCalldrivers: number;
 }
 
