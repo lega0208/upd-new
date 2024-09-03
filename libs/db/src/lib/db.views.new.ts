@@ -136,19 +136,16 @@ export abstract class DbViewNew<
             }
 
             if (Array.isArray(writeOps)) {
-              for (const op of writeOps) {
-                bulkWriteQueue.add(op);
-              }
-              return;
+              return Promise.all(writeOps.map((op) => bulkWriteQueue.add(op)));
             }
 
-            bulkWriteQueue.add(writeOps);
+            return bulkWriteQueue.add(writeOps);
           } catch (e) {
             console.error(
-              `An error occurred while refreshing the following document in ${this.name}:` +
-                `${baseDoc}`,
+              `An error occurred while refreshing the following document in ${this.name}:`,
             );
-            // console.error(e.stack);
+
+            console.error(JSON.stringify(baseDoc, null, 2));
             console.error(e);
           }
         },
@@ -315,4 +312,10 @@ export abstract class DbViewNew<
   async clearAll(): Promise<mongo.DeleteResult> {
     return this._model.deleteMany({}).exec();
   }
+
+  /**
+   * Method to delete all documents where the original source no longer exists
+   * @returns mongo.DeleteResult
+   */
+  abstract clearNonExisting(): Promise<mongo.DeleteResult | null>;
 }

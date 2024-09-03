@@ -79,13 +79,13 @@ export class TasksView implements ITaskView {
   callsByTopic: CallsByTopic[];
 
   @Prop({ type: Number })
-  callsPerVisits: number | null;
+  callsPerVisit: number | null;
 
   @Prop({ type: Number })
   dyfNo: number;
 
   @Prop({ type: Number })
-  dyfNoPerVisits: number | null;
+  dyfNoPerVisit: number | null;
 
   @Prop({ type: Number })
   dyfYes: number;
@@ -124,7 +124,11 @@ export class TasksView implements ITaskView {
     type: [{ term: String, clicks: Number, position: Number }],
     _id: false,
   })
-  aa_searchterms?: AASearchTermMetrics[];
+  aa_searchterms?: {
+    term: string;
+    clicks: number;
+    position: number;
+  }[];
 
   @Prop({
     type: [
@@ -146,10 +150,10 @@ export class TasksView implements ITaskView {
         calls: Number,
         callsPerVisit: Number,
         dyfNo: Number,
-        dyfNoPerVisits: Number,
+        dyfNoPerVisit: Number,
         dyfYes: Number,
         numComments: Number,
-        commentsPerVisits: Number,
+        commentsPerVisit: Number,
         visits: Number,
       },
     ],
@@ -160,10 +164,10 @@ export class TasksView implements ITaskView {
     calls: number;
     callsPerVisit: number | null;
     dyfNo: number;
-    dyfNoPerVisits: number | null;
+    dyfNoPerVisit: number | null;
     dyfYes: number;
     numComments: number;
-    commentsPerVisits: number | null;
+    commentsPerVisit: number | null;
     visits: number;
   }[];
 
@@ -175,6 +179,7 @@ export class TasksView implements ITaskView {
           _id: Types.ObjectId,
           url: String,
           title: String,
+          lang: String,
           redirect: String,
           owners: String,
           sections: String,

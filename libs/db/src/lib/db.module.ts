@@ -50,7 +50,6 @@ import {
 } from './schemas/gc-tasks-mappings.schema';
 import { PagesView, PagesViewSchema } from './views/pages-view.schema';
 import { TasksView, TasksViewSchema } from './views/tasks-view.schema';
-import { FeedbackViewRegistration } from './views/feedback-view.schema';
 
 export const models = {
   callDrivers: {
@@ -101,7 +100,6 @@ export const views = {
           name: collection.model.name,
           schema: collection.schema,
         })),
-        FeedbackViewRegistration,
       ],
       'defaultConnection',
     ),

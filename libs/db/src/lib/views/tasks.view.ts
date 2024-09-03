@@ -6,9 +6,10 @@ import {
   Types,
   type FilterQuery,
 } from 'mongoose';
-import { omit, pick } from 'rambdax';
+import { difference, omit, pick } from 'rambdax';
 import type { TasksView, TasksViewSchema } from './tasks-view.schema';
 import type {
+  AttachmentData,
   DateRange,
   GscSearchTermMetrics,
   InternalSearchTerm,
@@ -20,12 +21,17 @@ import type {
 import {
   arrayToDictionary,
   arrayToDictionaryMultiref,
+  getArraySelectedAbsoluteChange,
+  getArraySelectedPercentChange,
+  getSelectedAbsoluteChange,
   getSelectedPercentChange,
+  isNullish,
   sum,
 } from '@dua-upd/utils-common';
 import { DbService } from '../db.service';
 import { DbViewNew, type ViewConfig } from '../db.views.new';
 import { topLevelMetricsGrouping } from './metrics';
+import { TaskMetricsStore } from './metrics.store';
 
 export type TasksViewConfig = ViewConfig<typeof TasksViewSchema>;
 
@@ -67,11 +73,27 @@ export class TasksViewService extends DbViewNew<
     'projects',
   ];
 
+  /**
+   * Because metricsByDay takes the longest time to calculate, but also happens to be the most
+   * re-usable data, we can take advantage of that by loading it up-front and using it across refreshes.
+   *
+   * Note that the store must be manually loaded and cleared. It will be automatically used when data is present.
+   */
+  private readonly metricsByDayStore = new TaskMetricsStore(this.db);
+
   constructor(
     private db: DbService,
     config: TasksViewConfig,
   ) {
     super(config);
+  }
+
+  async loadStoreData() {
+    await this.metricsByDayStore.loadData();
+  }
+
+  async clearStoreData() {
+    this.metricsByDayStore.clearData();
   }
 
   async prepareRefreshContext(
@@ -137,7 +159,6 @@ export class TasksViewService extends DbViewNew<
   }
 
   async refresh(task: BaseDoc, { dateRange }: RefreshContext) {
-    console.log('task: ' + task._id);
     const dateFilter = {
       date: { $gte: dateRange.start, $lte: dateRange.end },
     };
@@ -150,8 +171,8 @@ export class TasksViewService extends DbViewNew<
       metricsByDay,
       calldriversEnquiry,
       callsByTopic,
-      mostRelevantCommentsAndWords,
       pages,
+      numComments,
     ] = await Promise.all([
       this.getTopLevelTaskMetrics({
         tasks: task._id,
@@ -171,11 +192,6 @@ export class TasksViewService extends DbViewNew<
       }),
       this.db.collections.callDrivers.getCallsByTopic(dateRange, {
         tasks: task._id,
-      }),
-      this.db.collections.feedback.getMostRelevantCommentsAndWords({
-        dateRange,
-        type: 'task',
-        id: task._id.toString(),
       }),
       this.db.views.pages
         .find(
@@ -209,6 +225,10 @@ export class TasksViewService extends DbViewNew<
               ),
             ) || [],
         ),
+      this.db.collections.feedback.countDocuments({
+        ...dateFilter,
+        tasks: task._id,
+      }),
     ]);
 
     const tmf_ranking_index =
@@ -235,19 +255,16 @@ export class TasksViewService extends DbViewNew<
       callsByTopic,
       tmf_ranking_index,
       cops: !!task.ux_tests?.find((test) => test.cops),
-      gc_survey_participants: task.gc_survey_participants,
-      gc_survey_completed: task.gc_survey_completed,
-      mostRelevantCommentsAndWords,
-      numComments:
-        mostRelevantCommentsAndWords.en.comments.length +
-        mostRelevantCommentsAndWords.fr.comments.length,
+      numComments,
+      survey: task.gc_survey_participants,
+      survey_completed: task.gc_survey_completed,
       pages,
       projects: task.projects.map((project) =>
         omit(['pages', 'tasks', 'ux_tests'], project),
       ),
       ux_tests: task.ux_tests.map((uxTest) => omit(['pages', 'tasks'], uxTest)),
       lastUpdated: new Date(),
-    };
+    } satisfies Omit<ITaskView, '_id' | 'dateRange'>;
 
     return {
       updateOne: {
@@ -293,7 +310,7 @@ export class TasksViewService extends DbViewNew<
       dyfNo: pageMetrics.dyf_no,
       dyfYes: pageMetrics.dyf_yes,
       visits: pageMetrics.visits,
-      dyfNoPerVisits: pageMetrics.visits
+      dyfNoPerVisit: pageMetrics.visits
         ? pageMetrics.dyf_no / pageMetrics.visits
         : null,
       gscTotalClicks: pageMetrics.gsc_total_clicks,
@@ -322,14 +339,14 @@ export class TasksViewService extends DbViewNew<
           .exec()
       )?.[0]?.calls || 0;
 
-    const callsPerVisits = pageMetrics.visits
+    const callsPerVisit = pageMetrics.visits
       ? totalCalls / pageMetrics.visits
       : null;
 
     return {
       ...pageMetricsCamelCase,
       totalCalls,
-      callsPerVisits,
+      callsPerVisit,
     };
   }
 
@@ -340,10 +357,11 @@ export class TasksViewService extends DbViewNew<
     return (
       (await this.db.views.pages
         .aggregate<InternalSearchTerm>(filter)
-        .project({ dateRange: 1, aa_searchterms: 1, tasks: 1 })
         .unwind('$aa_searchterms')
         .group({
-          _id: '$aa_searchterms.term',
+          _id: {
+            $toLower: '$aa_searchterms.term',
+          },
           clicks: {
             $sum: '$aa_searchterms.clicks',
           },
@@ -372,11 +390,6 @@ export class TasksViewService extends DbViewNew<
     return (
       (await this.db.views.pages
         .aggregate<GscSearchTermMetrics>(filter)
-        .project({
-          dateRange: 1,
-          gsc_searchterms: 1,
-          tasks: 1,
-        })
         .unwind('$gsc_searchterms')
         .group({
           _id: '$gsc_searchterms.term',
@@ -434,11 +447,6 @@ export class TasksViewService extends DbViewNew<
         // calldrivers by day (dictionary)
         this.db.collections.callDrivers
           .aggregate<{ date: Date; calls: number }>()
-          .project({
-            date: 1,
-            calls: 1,
-            tpc_id: 1,
-          })
           .match(filter)
           .group({
             _id: '$date',
@@ -463,58 +471,61 @@ export class TasksViewService extends DbViewNew<
             ),
           ),
         // page metrics by day (dictionary)
-        this.db.collections.pageMetrics
-          .aggregate<{
-            date: Date;
-            visits: number;
-            dyfNo: number;
-            dyfNoPerVisits: number | null;
-            dyfYes: number;
-          }>()
-          .project({
-            date: 1,
-            visits: 1,
-            dyf_no: 1,
-            dyf_yes: 1,
-            tasks: 1,
-          })
-          .match(filter)
-          .group({
-            _id: '$date',
-            visits: { $sum: '$visits' },
-            dyf_no: { $sum: '$dyf_no' },
-            dyf_yes: { $sum: '$dyf_yes' },
-          })
-          .project({
-            _id: 0,
-            date: '$_id',
-            visits: 1,
-            dyfNo: '$dyf_no',
-            dyfNoPerVisits: {
-              $cond: [
-                // todo: this needs to convert all nullish cases?
-                { $eq: ['$visits', 0] },
-                null,
-                { $divide: ['$dyf_no', '$visits'] },
-              ],
-            },
-            dyfYes: '$dyf_yes',
-          })
-          .exec()
-          .then((pageMetrics) =>
-            arrayToDictionary(
-              pageMetrics?.map(
-                ({ date, visits, dyfNo, dyfNoPerVisits, dyfYes }) => ({
-                  date: date.toISOString(),
-                  visits,
-                  dyfNo,
-                  dyfNoPerVisits,
-                  dyfYes,
-                }),
-              ) || [],
-              'date',
-            ),
+        (this.metricsByDayStore.isLoaded &&
+        this.metricsByDayStore.has(filter.tasks, {
+          start: filter.date.$gte,
+          end: filter.date.$lte,
+        })
+          ? Promise.resolve(
+              this.metricsByDayStore.getMetricsByDay(filter.tasks, {
+                start: filter.date.$gte,
+                end: filter.date.$lte,
+              }),
+            )
+          : this.db.collections.pageMetrics
+              .aggregate<{
+                date: Date;
+                visits: number;
+                dyfNo: number;
+                dyfNoPerVisit: number | null;
+                dyfYes: number;
+              }>()
+              .match(filter)
+              .group({
+                _id: '$date',
+                visits: { $sum: '$visits' },
+                dyf_no: { $sum: '$dyf_no' },
+                dyf_yes: { $sum: '$dyf_yes' },
+              })
+              .project({
+                _id: 0,
+                date: '$_id',
+                visits: 1,
+                dyfNo: '$dyf_no',
+                dyfNoPerVisit: {
+                  $cond: [
+                    { $eq: ['$visits', 0] },
+                    null,
+                    { $divide: ['$dyf_no', '$visits'] },
+                  ],
+                },
+                dyfYes: '$dyf_yes',
+              })
+              .exec()
+        ).then((pageMetrics) =>
+          arrayToDictionary(
+            pageMetrics?.map(
+              ({ date, visits, dyfNo, dyfNoPerVisit, dyfYes }) => ({
+                date: date.toISOString(),
+                visits,
+                dyfNo,
+                dyfNoPerVisit,
+                dyfYes,
+              }),
+            ) || [],
+            'date',
           ),
+        ),
       ]);
 
     // iterate over feedback because it already makes sure to include all days
@@ -527,16 +538,15 @@ export class TasksViewService extends DbViewNew<
         date: feedback.date,
         visits: 0,
         dyfNo: 0,
-        dyfNoPerVisits: null,
+        dyfNoPerVisit: null,
         dyfYes: 0,
       };
 
-      // should these be pre-calculated for "per 100/1000 visits"?
       const callsPerVisit = pageMetrics.visits
         ? calldrivers.calls / pageMetrics.visits
         : null;
 
-      const commentsPerVisits = pageMetrics.visits
+      const commentsPerVisit = pageMetrics.visits
         ? feedback.numComments / pageMetrics.visits
         : null;
 
@@ -545,7 +555,7 @@ export class TasksViewService extends DbViewNew<
         ...calldrivers,
         ...pageMetrics,
         callsPerVisit,
-        commentsPerVisits,
+        commentsPerVisit,
       };
     });
   }
@@ -600,37 +610,415 @@ export class TasksViewService extends DbViewNew<
       );
   }
 
-  async findOneDateRangeWithComparisons(
+  async getTaskMetricsWithComparisons(
     taskId: Types.ObjectId,
     dateRange: DateRange<Date>,
     comparisonDateRange: DateRange<Date>,
   ) {
-    const [taskData, comparisonData] = await Promise.all([
-      this.findOne({ 'task._id': taskId, dateRange }),
-      this.findOne({ 'task._id': taskId, dateRange: comparisonDateRange }),
+    type MetricsType = Omit<TasksView, '_id' | 'task' | 'projects'> & {
+      _id: string;
+      callsPer100Visits: number;
+      dyfNoPer1000Visits: number;
+      title: string;
+      group: string;
+      subgroup: string;
+      topic: string;
+      subtopic: string;
+      sub_subtopic: string[];
+      user_type: string[];
+      program: string;
+      service: string;
+      user_journey: string[];
+      status: string;
+      channel: string[];
+      core: string[];
+      projects: {
+        id: string;
+        title: string;
+        attachments: AttachmentData[];
+      }[];
+    };
+
+    const getMetrics = (dateRange: DateRange<Date>) =>
+      this.aggregate<MetricsType>({ 'task._id': taskId, dateRange }).addFields({
+        _id: {
+          $toString: '$task._id',
+        },
+        callsPer100Visits: {
+          $cond: {
+            if: { $eq: ['$callsPerVisit', null] },
+            then: null,
+            else: {
+              $multiply: ['$callsPerVisit', 100],
+            },
+          },
+        },
+        dyfNoPer1000Visits: {
+          $cond: {
+            if: { $eq: ['$dyfNoPerVisit', null] },
+            then: null,
+            else: {
+              $multiply: ['$dyfNoPerVisit', 1000],
+            },
+          },
+        },
+        title: '$task.title',
+        group: '$task.group',
+        subgroup: '$task.subgroup',
+        topic: '$task.topic',
+        subtopic: '$task.subtopic',
+        sub_subtopic: '$task.sub_subtopic',
+        user_type: '$task.user_type',
+        program: '$task.program',
+        service: '$task.service',
+        user_journey: '$task.user_journey',
+        status: '$task.status',
+        channel: '$task.channel',
+        core: '$task.core',
+        projects: {
+          $map: {
+            input: '$projects',
+            as: 'project',
+            in: {
+              _id: '$$project._id',
+              title: '$$project.title',
+              attachments: {
+                $map: {
+                  input: '$$project.attachments',
+                  as: 'attachment',
+                  in: {
+                    _id: '$$attachment._id',
+                    url: '$$attachment.url',
+                    filename: '$$attachment.filename',
+                    size: '$$attachment.size',
+                    storage_url: {
+                      $replaceOne: {
+                        input: '$$attachment.storage_url',
+                        find: 'https://',
+                        replacement: '',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+    const [metrics, previousMetrics] = await Promise.all([
+      getMetrics(dateRange)
+        .exec()
+        .then((results) => results?.[0]),
+      getMetrics(comparisonDateRange)
+        .exec()
+        .then((results) => results?.[0]),
     ]);
 
-    // @@@@ will need to either modify function with option to add absolute change, or create a new function
-    const taskDataWithComparisons = getSelectedPercentChange(
-      comparisonProps,
-      taskData,
-      comparisonData,
+    if (!metrics) {
+      throw Error(
+        `Task metrics for task \`${taskId.toString()}\` not found for date range:\n` +
+          `start: ${dateRange.start.toISOString()}\n` +
+          `end: ${dateRange.end.toISOString()}`,
+      );
+    }
+
+    const percentChangeProps = [
+      'visits',
+      'gscTotalClicks',
+      'gscTotalImpressions',
+      'gscTotalCtr',
+      'gscTotalPosition',
+      'totalCalls',
+      'callsPer100Visits',
+      'dyfNoPer1000Visits',
+      'numComments',
+    ] satisfies (keyof MetricsType)[];
+
+    const metricsWithPercentChange = getSelectedPercentChange(
+      percentChangeProps,
+      metrics,
+      previousMetrics,
     );
 
-    return taskDataWithComparisons;
+    const differenceProps = [
+      'callsPer100Visits',
+      'dyfNoPer1000Visits',
+    ] satisfies (keyof MetricsType)[];
+
+    const metricsWithComparisons = getSelectedAbsoluteChange(
+      differenceProps,
+      metricsWithPercentChange,
+      previousMetrics,
+      {
+        round: 4,
+        suffix: 'Difference',
+      },
+    );
+
+    const reformatPages = (pages: MetricsType['pages']) =>
+      pages
+        .map(
+          ({
+            visits = 0,
+            dyf_yes = 0,
+            dyf_no = 0,
+            numComments = 0,
+            page: { _id, title, url, lang, owners, sections },
+            pageStatus,
+            gsc_total_clicks = 0,
+            gsc_total_impressions = 0,
+            gsc_total_ctr,
+            gsc_total_position,
+          }) => ({
+            _id: _id.toString(),
+            visits,
+            dyfYes: dyf_yes,
+            dyfNo: dyf_no,
+            feedbackToVisitsRatio: visits ? (numComments / visits) * 100 : null,
+            title,
+            url,
+            lang,
+            language: lang, // why both lang and language?
+            pageStatus,
+            gscTotalClicks: gsc_total_clicks,
+            gscTotalImpressions: gsc_total_impressions,
+            gscTotalCtr: gsc_total_ctr,
+            gscTotalPosition: gsc_total_position,
+            owners,
+            sections,
+            numComments,
+          }),
+        )
+        .sort((a, b) => a.title.localeCompare(b.title));
+
+    const metricsByPageComparisonProps = [
+      'visits',
+      'dyfNo',
+      'numComments',
+    ] satisfies (keyof ReturnType<typeof reformatPages>[number])[];
+
+    // for charts, get values for both date ranges
+    const dateRangeData = {
+      calldriversEnquiry: metricsWithComparisons.calldriversEnquiry,
+      callsPer100VisitsByDay: metricsWithComparisons.metricsByDay.map(
+        ({ date, callsPerVisit }) => ({
+          date,
+          calls: callsPerVisit && callsPerVisit * 100,
+        }),
+      ),
+      dyfNo: metricsWithComparisons.dyfNo,
+      dyfNoPer1000VisitsByDay: metricsWithComparisons.metricsByDay.map(
+        ({ date, dyfNoPerVisit }) => ({
+          date,
+          dyfNo: dyfNoPerVisit && dyfNoPerVisit * 1000,
+        }),
+      ),
+      dyfYes: metricsWithComparisons.dyfYes,
+    };
+
+    const comparisonDateRangeData = {
+      calldriversEnquiry: previousMetrics.calldriversEnquiry,
+      callsPer100VisitsByDay: previousMetrics.metricsByDay.map(
+        ({ date, callsPerVisit }) => ({
+          date,
+          calls: callsPerVisit && callsPerVisit * 100,
+        }),
+      ),
+      dyfNo: previousMetrics.dyfNo,
+      dyfNoPer1000VisitsByDay: previousMetrics.metricsByDay.map(
+        ({ date, dyfNoPerVisit }) => ({
+          date,
+          dyfNo: dyfNoPerVisit && dyfNoPerVisit * 1000,
+        }),
+      ),
+      dyfYes: previousMetrics.dyfYes,
+    };
+
+    return {
+      ...metricsWithComparisons,
+      dateRangeData,
+      comparisonDateRangeData,
+      callsByTopic: getArraySelectedPercentChange(
+        ['calls'],
+        'tpc_id',
+        metricsWithPercentChange.callsByTopic,
+        previousMetrics.callsByTopic,
+      ),
+      feedbackByDay: metricsWithPercentChange.metricsByDay.map(
+        ({ date, numComments }) => ({
+          date,
+          numComments,
+        }),
+      ),
+      searchTerms: getArraySelectedPercentChange(
+        ['clicks'],
+        'term',
+        metricsWithPercentChange.aa_searchterms,
+        previousMetrics.aa_searchterms,
+        { round: 2, suffix: 'Change' },
+      ).slice(0, 25),
+      // this isn't only visits, but this matches the current property name used in the rest of the code
+      visitsByPage: getArraySelectedPercentChange(
+        metricsByPageComparisonProps,
+        '_id',
+        reformatPages(metricsWithPercentChange.pages),
+        reformatPages(previousMetrics.pages),
+      ),
+    };
+  }
+
+  async getAllWithComparisons(
+    dateRange: DateRange<Date>,
+    comparisonDateRange: DateRange<Date>,
+  ) {
+    type ProjectedTasks = {
+      _id: Types.ObjectId;
+      title: string;
+      tmf_ranking_index: number;
+      cops: boolean;
+      group: string;
+      subgroup: string;
+      topic: string;
+      subtopic: string;
+      sub_subtopic: string[];
+      program: string;
+      service: string;
+      user_journey: string[];
+      status: string;
+      core: string[];
+      channel: string[];
+      portfolio: string;
+      user_type: string[];
+      calls: number;
+      calls_per_100_visits: number;
+      dyf_no: number;
+      dyf_no_per_1000_visits: number;
+      survey: number;
+      survey_completed: number;
+      visits: number;
+      ux_tests: TasksView['ux_tests'];
+    };
+
+    const projection: ProjectionType<TasksView> = {
+      _id: '$task._id',
+      title: '$task.title',
+      tmf_ranking_index: 1,
+      cops: 1,
+      group: '$task.group',
+      subgroup: '$task.subgroup',
+      topic: '$task.topic',
+      subtopic: '$task.subtopic',
+      sub_subtopic: '$task.sub_subtopic',
+      program: '$task.program',
+      service: '$task.service',
+      user_journey: '$task.user_journey',
+      status: '$task.status',
+      core: '$task.core',
+      channel: '$task.channel',
+      portfolio: '$task.portfolio',
+      user_type: '$task.user_type',
+      calls: '$totalCalls',
+      calls_per_100_visits: {
+        $cond: {
+          if: { $eq: ['$callsPerVisit', null] },
+          then: null,
+          else: {
+            $multiply: ['$callsPerVisit', 100],
+          },
+        },
+      },
+      dyf_no: '$dyfNo',
+      dyf_no_per_1000_visits: {
+        $multiply: ['$dyfNoPerVisit', 1000],
+      },
+      survey: 1,
+      survey_completed: {
+        $cond: {
+          if: { $eq: ['$survey', 0] },
+          then: null,
+          else: {
+            $round: [
+              {
+                $divide: ['$survey_completed', '$survey'],
+              },
+              4,
+            ],
+          },
+        },
+      },
+      visits: 1,
+      ux_tests: 1,
+    };
+
+    const [data, comparisonData] = await Promise.all([
+      (
+        this.find({ dateRange }, projection) as unknown as Promise<
+          ProjectedTasks[]
+        >
+      ).then((results) =>
+        results
+          .sort((a, b) => b.tmf_ranking_index - a.tmf_ranking_index)
+          .map((task, i) => ({
+            ...task,
+            tmf_rank: i + 1,
+            top_task: i < 50,
+            secure_portal: !!task.channel.find(
+              (channel) => channel === 'Fully online - portal',
+            ),
+            ux_testing: !!task.ux_tests?.find(
+              (test) => !isNullish(test.success_rate),
+            ),
+          })),
+      ),
+      this.find(
+        { dateRange: comparisonDateRange },
+        projection,
+      ) as unknown as Promise<ProjectedTasks[]>,
+    ]);
+
+    const comparisonProps = [
+      'calls',
+      'dyf_no',
+      'calls_per_100_visits',
+      'dyf_no_per_1000_visits',
+    ] satisfies (keyof ProjectedTasks)[];
+
+    const dataWithPercentChange = getArraySelectedPercentChange(
+      comparisonProps,
+      '_id',
+      data,
+      comparisonData,
+      { suffix: '_percent_change', round: 5 },
+    );
+
+    return getArraySelectedAbsoluteChange(
+      ['calls_per_100_visits', 'dyf_no_per_1000_visits'],
+      '_id',
+      dataWithPercentChange,
+      // Need to cast it to the same type to get the correct type for the return value
+      comparisonData as typeof dataWithPercentChange,
+      { suffix: '_difference' },
+    );
+  }
+
+  async clearNonExisting() {
+    const taskIds = await this.db.collections.tasks
+      .distinct<Types.ObjectId>('_id')
+      .then((ids) => ids.map((id) => id.toString()));
+
+    const viewTaskIds = await this._model
+      .distinct<Types.ObjectId>('task._id')
+      .then((ids) => ids.map((id) => id.toString()));
+
+    const nonExistingIds = difference(viewTaskIds, taskIds);
+
+    if (!nonExistingIds.length) {
+      return null;
+    }
+
+    return this._model.deleteMany({
+      'task._id': { $in: nonExistingIds },
+    });
   }
 }
-
-const comparisonProps = [
-  'dyfNo',
-  'dyfYes',
-  'visits',
-  'gscTotalClicks',
-  'gscTotalImpressions',
-  'gscTotalCtr',
-  'gscTotalPosition',
-  'totalCalls',
-  'callsPerVisits',
-  'dyfNoPerVisits',
-  // more...?
-] satisfies (keyof TasksView)[];

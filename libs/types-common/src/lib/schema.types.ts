@@ -281,15 +281,18 @@ export interface ITaskView {
   totalCalls: number;
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
-  callsPerVisits: number;
+  callsPerVisit: number;
   dyfNo: number;
-  dyfNoPerVisits: number;
+  dyfNoPerVisit: number;
   dyfYes: number;
   visits: number;
+  gsc_searchterms?: GscSearchTermMetrics[];
   gscTotalClicks: number;
   gscTotalImpressions: number;
   gscTotalCtr: number;
   gscTotalPosition: number;
+  survey: number;
+  survey_completed: number;
   tmf_ranking_index: number;
   cops: boolean;
   numComments: number;
@@ -299,10 +302,10 @@ export interface ITaskView {
     calls: number;
     callsPerVisit: number;
     dyfNo: number;
-    dyfNoPerVisits: number;
+    dyfNoPerVisit: number;
     dyfYes: number;
     numComments: number;
-    commentsPerVisits: number;
+    commentsPerVisit: number;
     visits: number;
   }[];
   pages: Pick<

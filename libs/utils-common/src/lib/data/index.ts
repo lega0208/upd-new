@@ -1,8 +1,8 @@
 import { Types } from 'mongoose';
 import { avg, percentChange, round } from '../math';
-import { IUxTest, SuccessRates } from '@dua-upd/types-common';
+import type { IUxTest, SuccessRates } from '@dua-upd/types-common';
 import {
-  Dictionary,
+  type Dictionary,
   filter,
   flatten,
   groupBy,
@@ -14,7 +14,7 @@ import {
   pluck,
   unwind,
 } from 'rambdax';
-import { isNullish } from '../utils-common';
+import { arrayToDictionary, isNullish } from '../utils-common';
 
 export type DbEntity = {
   _id: Types.ObjectId;
@@ -25,7 +25,7 @@ export type DbEntity = {
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 /**
- * Takes an object and calculates the percent change for each property
+ * Takes two objects and calculates the percent change for each property
  * that is present in both the data and comparisonData objects.
  *
  * @param props The properties to calculate percent change for
@@ -34,40 +34,184 @@ export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
  * @returns The data object with percent change properties added
  */
 export const getSelectedPercentChange = <
-  T extends Record<string | number | symbol, any>,
+  T extends Record<string, any>,
+  const Props extends readonly (keyof T)[],
+  const Suffix extends string = 'PercentChange',
 >(
-  props: (keyof T)[] extends (string | number)[] ? (keyof T)[] : never,
+  props: Props extends readonly (string | number)[] ? Props : never,
   data: T,
   comparisonData: T,
-  options?: { round?: number },
+  options: { round?: number; suffix: Suffix } = {
+    suffix: 'PercentChange' as Suffix,
+  } as const,
 ) => {
-  type PercentChangeProp = `${(typeof props)[number]}PercentChange`;
+  const suffix: Suffix = (options.suffix || 'PercentChange') as Suffix;
 
-  const percentChangeResults = {} as Record<PercentChangeProp, number | null>;
+  const percentChangeResults = Object.fromEntries(
+    props.map((prop) => {
+      const percentChangeProp = `${prop}${suffix}`;
 
-  for (const prop of props) {
-    const percentChangeProp: PercentChangeProp = `${prop}PercentChange`;
+      const value = data[prop];
+      const comparisonValue = comparisonData[prop];
 
-    const value = data[prop];
-    const comparisonValue = comparisonData[prop];
+      if (!value || !comparisonValue) {
+        return [percentChangeProp, null];
+      }
 
-    if (!value || !comparisonValue) {
-      percentChangeResults[percentChangeProp] = null;
-      continue;
-    }
+      const percentChangeValue = percentChange(value, comparisonValue);
 
-    const percentChangeValue = percentChange(value, comparisonValue);
-
-    percentChangeResults[percentChangeProp] = round(
-      percentChangeValue,
-      options?.round || 5,
-    );
-  }
+      return [
+        percentChangeProp,
+        round(percentChangeValue, options?.round || 5),
+      ];
+    }),
+  ) as {
+    [Prop in Props[number] as `${string & Prop}${Suffix}`]: number | null;
+  };
 
   return {
     ...data,
     ...percentChangeResults,
   };
+};
+
+/**
+ * Similar to {@link getSelectedPercentChange} but for arrays of objects
+ *
+ * Takes two arrays of objects and calculates the percent change for each property
+ * that is present in both the data and comparisonData arrays, finding the appropriate
+ * comparison element using the specified key.
+ *
+ * @param props The properties to calculate percent change for
+ * @param joinKey The key to join the data and comparisonData arrays on
+ * @param data The array of data object to add percent change to
+ * @param comparisonData The array of data object to compare against
+ * @returns The data object with percent change properties added
+ * @example
+ * const data = [{ id: 1, value: 10 }, { id: 2, value: 20 }];
+ * const comparisonData = [{ id: 1, value: 5 }, { id: 2, value: 10 }];
+ * const props = ['value'];
+ * const joinKey = 'id';
+ * const result = getArraySelectedPercentChange(props, joinKey, data, comparisonData);
+ * // result = [{ id: 1, value: 10, valuePercentChange: 100 }, { id: 2, value: 20, valuePercentChange: 100 }]
+ */
+export const getArraySelectedPercentChange = <
+  T extends Record<string, any>,
+  const Props extends readonly (keyof T)[],
+  const Suffix extends string = 'PercentChange',
+>(
+  props: Props extends readonly (string | number)[] ? Props : never,
+  joinKey: keyof T & string,
+  data: T[],
+  comparisonData: T[],
+  options: { round?: number; suffix: Suffix } = {
+    suffix: 'PercentChange' as Suffix,
+  } as const,
+) => {
+  const comparisonDict = arrayToDictionary(comparisonData, joinKey);
+
+  return data.map((dataObj) => {
+    const comparisonObj = comparisonDict[dataObj[joinKey]];
+
+    if (!comparisonObj) {
+      const emptyComparison = Object.fromEntries(
+        props.map((prop) => [prop, null]),
+      ) as T;
+
+      return getSelectedPercentChange(props, dataObj, emptyComparison, options);
+    }
+
+    return getSelectedPercentChange(props, dataObj, comparisonObj, options);
+  });
+};
+
+/**
+ * Takes two objects and calculates the absolute change (i.e. difference) for each property
+ * that is present in both the data and comparisonData objects.
+ *
+ * @param props The properties to calculate the change for
+ * @param data The data object to add the results to
+ * @param comparisonData The data object to compare against
+ * @returns The data object with absolute change properties added
+ */
+export const getSelectedAbsoluteChange = <
+  T extends Record<string, any>,
+  const Props extends readonly (keyof T)[],
+  const Suffix extends string = 'Difference',
+>(
+  props: Props extends readonly string[] ? Props : never,
+  data: T,
+  comparisonData: T,
+  options: { round?: number; suffix: Suffix } = {
+    suffix: 'Difference' as Suffix,
+  } as const,
+) => {
+  const suffix = (options.suffix || 'Difference') as Suffix;
+
+  const absoluteChangeResults = Object.fromEntries(
+    props.map((prop) => [
+      `${prop}${suffix}`,
+      round(
+        (data[prop] || 0) - (comparisonData[prop] || 0),
+        options?.round || 5,
+      ),
+    ]),
+  ) as {
+    [Prop in Props[number] as `${string & Prop}${Suffix}`]: number | null;
+  };
+
+  return {
+    ...data,
+    ...absoluteChangeResults,
+  };
+};
+
+/**
+ * Similar to {@link getSelectedAbsoluteChange} but for arrays of objects
+ *
+ * Takes two arrays of objects and calculates the absolute change (i.e. difference) for each property
+ * that is present in both the data and comparisonData arrays, finding the appropriate
+ * comparison element using the specified key.
+ *
+ * @param props The properties to calculate the change for
+ * @param joinKey The key to join the data and comparisonData arrays on
+ * @param data The array of data object to add the change to
+ * @param comparisonData The array of data object to compare against
+ * @returns The data object with absolute change properties added
+ */
+export const getArraySelectedAbsoluteChange = <
+  T extends Record<string, any>,
+  const Props extends readonly (keyof T)[],
+  const Suffix extends string = 'Difference',
+>(
+  props: Props extends readonly string[] ? Props : never,
+  joinKey: keyof T & string,
+  data: T[],
+  comparisonData: T[],
+  options: { round?: number; suffix: Suffix } = {
+    suffix: 'Difference' as Suffix,
+  } as const,
+) => {
+  const comparisonDict = arrayToDictionary(comparisonData, joinKey);
+
+  return data.map((dataObj) => {
+    const comparisonObj = comparisonDict[dataObj[joinKey]];
+
+    if (!comparisonObj) {
+      const emptyComparison = Object.fromEntries(
+        props.map((prop) => [prop, null]),
+      ) as T;
+
+      return getSelectedAbsoluteChange(
+        props,
+        dataObj,
+        emptyComparison,
+        options,
+      );
+    }
+
+    return getSelectedAbsoluteChange(props, dataObj, comparisonObj, options);
+  });
 };
 
 /**
@@ -189,6 +333,73 @@ export function getAvgSuccessFromLastTests<
   return getAvgTestSuccess(allTests);
 }
 
+export function getLatestTaskSuccessRate(
+  uxTests: { date?: Date; success_rate?: number }[],
+) {
+  const sortedTests = [...uxTests]
+    .filter(
+      (test) =>
+        test.date && test.success_rate != null && test.success_rate >= 0,
+    )
+    .sort(
+      (a, b) => (b.date as Date).getTime() - (a.date as Date).getTime(),
+    ) as { date: Date; success_rate: number }[];
+
+  if (!sortedTests.length)
+    return {
+      avgTestSuccess: null,
+      latestDate: null,
+      percentChange: null,
+      valueChange: null,
+      total: 0,
+    };
+
+  const latestDate = sortedTests[0].date as Date;
+  const secondLatestDate = sortedTests.find(
+    (test) => (test.date as Date).getTime() !== latestDate.getTime(),
+  )?.date;
+
+  const avgLatestSuccess = avg(
+    sortedTests
+      .filter(({ date }) => date.getTime() === latestDate.getTime())
+      .map(({ success_rate }) => success_rate),
+    2,
+  ) as number;
+
+  const avgPreviousSuccess = secondLatestDate
+    ? avg(
+        sortedTests
+          .filter(({ date }) => date.getTime() === secondLatestDate.getTime())
+          .map(({ success_rate }) => success_rate),
+        2,
+      )
+    : null;
+
+  if (avgPreviousSuccess === null) {
+    return {
+      avgTestSuccess: avgLatestSuccess,
+      latestDate,
+      percentChange: null,
+      valueChange: null,
+      total: sortedTests.length,
+    };
+  }
+
+  const successPercentChange = round(
+    percentChange(avgLatestSuccess, avgPreviousSuccess),
+    4,
+  );
+  const successValueChange = round(avgLatestSuccess - avgPreviousSuccess, 4);
+
+  return {
+    avgTestSuccess: avgLatestSuccess,
+    latestDate,
+    percentChange: successPercentChange,
+    valueChange: successValueChange,
+    total: sortedTests.length,
+  };
+}
+
 export function getAvgSuccessFromLatestTests<
   T extends { date?: Date; success_rate?: number },
 >(uxTests: T[]): TestSuccessWithPercentChange & { latestDate: Date | null } {
@@ -199,7 +410,7 @@ export function getAvgSuccessFromLatestTests<
     )
     .sort((a, b) => (b.date as Date).getTime() - (a.date as Date).getTime());
 
-  if (sortedTests.length < 1)
+  if (!sortedTests.length)
     return {
       avgTestSuccess: null,
       latestDate: null,
@@ -207,16 +418,15 @@ export function getAvgSuccessFromLatestTests<
       total: 0,
     };
 
-  const latestDate = sortedTests[0]?.date || null;
+  const latestDate = sortedTests[0].date as Date;
   const secondLatestDate = sortedTests.find(
-    (test) => (test.date as Date).getTime() !== (latestDate as Date).getTime(),
+    (test) => (test.date as Date).getTime() !== latestDate.getTime(),
   )?.date;
 
   const avgTestSuccess =
     getAvgTestSuccess(
       sortedTests.filter(
-        (test) =>
-          (test.date as Date).getTime() === (latestDate as Date).getTime(),
+        (test) => (test.date as Date).getTime() === latestDate.getTime(),
       ),
     ) ?? null;
 

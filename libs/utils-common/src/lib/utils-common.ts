@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { mongo, MongooseBulkWriteOptions } from 'mongoose';
 
 // Utility function for to help with rate-limiting within async functions
 export function wait(ms: number): Promise<void> {
@@ -576,17 +575,10 @@ export class Mutex {
   private queue: (() => void)[] = [];
   private locked = false;
 
-  // Measure the total time spent waiting for the mutex to unlock
-  private totalLockTime = 0;
-
-  private currentLockStart = Date.now();
-
   async lock() {
     if (this.locked) {
       return new Promise<void>((resolve) => {
         this.queue.push(resolve);
-      }).then(() => {
-        this.currentLockStart = Date.now();
       });
     }
 
@@ -597,19 +589,12 @@ export class Mutex {
     const resolve = this.queue.shift();
 
     if (resolve) {
-      const lockDuration = Date.now() - this.currentLockStart;
-      this.totalLockTime += lockDuration;
-
       resolve();
 
       return;
     }
 
     this.locked = false;
-  }
-
-  logTotalLockTime() {
-    console.log(`Total mutex time locked: ${this.totalLockTime}ms`);
   }
 }
 

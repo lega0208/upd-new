@@ -1,4 +1,4 @@
-import type { IOverall, IPage } from '@dua-upd/types-common';
+import type { DateRange, IOverall, IPage } from '@dua-upd/types-common';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, mongo } from 'mongoose';
@@ -17,8 +17,7 @@ import { BlobLogger } from '@dua-upd/logger';
 import {
   AsyncLogTiming,
   Retry,
-  dateRangeConfigs,
-  prettyJson,
+  getDateRangesWithComparison,
   wait,
 } from '@dua-upd/utils-common';
 import { CalldriversService } from './airtable/calldrivers.service';
@@ -100,7 +99,10 @@ export class DbUpdateService {
     this.logger.log('Activity map successfully updated.');
   }
 
-  async updateAll(logToBlobs = false) {
+  async updateAll(
+    logToBlobs = false,
+    options?: { skipAirtableUpdates: boolean },
+  ) {
     if (logToBlobs) {
       this.setBlobLogTargets();
     }
@@ -120,9 +122,11 @@ export class DbUpdateService {
           .catch((err) =>
             this.logger.error(`Error updating overall metrics\n${err.stack}`),
           ),
-        this.updateUxData().catch((err) =>
-          this.logger.error(`Error updating UX data\n${err.stack}`),
-        ),
+        options?.skipAirtableUpdates
+          ? Promise.resolve()
+          : this.updateUxData().catch((err) =>
+              this.logger.error(`Error updating UX data\n${err.stack}`),
+            ),
       ]);
 
       await this.addSectionsFromPagesList();
@@ -131,9 +135,11 @@ export class DbUpdateService {
         this.logger.error(`Error updating Feedback data\n${err.stack}`),
       );
 
-      await this.gcTaskService.updateGcTaskData().catch((err) =>
-        this.logger.error(`Error updating GC Task data\n${err.stack}`),
-      );
+      await this.gcTaskService
+        .updateGcTaskData()
+        .catch((err) =>
+          this.logger.error(`Error updating GC Task data\n${err.stack}`),
+        );
 
       await Promise.allSettled([
         this.calldriversService
@@ -195,6 +201,8 @@ export class DbUpdateService {
       await this.urlsService
         .updateUrls()
         .catch((err) => this.logger.error(err.stack));
+
+      this.logger.resetContext();
 
       this.logger.log('Database updates completed.');
     } catch (error) {
@@ -455,54 +463,44 @@ export class DbUpdateService {
     }
   }
 
+  @AsyncLogTiming
   async recalculateViews(logToBlobs = false) {
     if (logToBlobs) {
       this.setBlobLogTargets();
     }
 
-    const dateRanges = dateRangeConfigs
-      .map((config) => {
-        const dateRange = config.getDateRange();
-        const comparisonDateRange = {
-          start: config.getComparisonDate(dateRange.start),
-          end: config.getComparisonDate(dateRange.end),
-        };
-
-        return [
-          {
-            start: dateRange.start.format('YYYY-MM-DD'),
-            end: dateRange.end.format('YYYY-MM-DD'),
-          },
-          {
-            start: comparisonDateRange.start.format('YYYY-MM-DD'),
-            end: comparisonDateRange.end.format('YYYY-MM-DD'),
-          },
-        ];
-      })
-      .flat();
-
-    const pageVisits = this.db.views.pageVisits;
+    const dateRangesWithComparison = getDateRangesWithComparison({
+      asDate: true,
+    }) as DateRange<Date>[];
 
     try {
-      for (const dateRange of dateRanges) {
+      this.logger.info('Loading data for tasks metrics store');
+
+      await this.db.views.tasks.loadStoreData();
+
+      this.logger.info('Data loaded for tasks metrics store');
+
+      for (const dateRange of dateRangesWithComparison) {
         this.logger.info(
-          'Recalculating page visits view for dateRange: ',
-          JSON.stringify(dateRange, null, 2),
+          `Recalculating pages view for dateRange: ${JSON.stringify(dateRange, null, 2)}`,
         );
 
-        const result = await pageVisits.getOrUpdate(dateRange, true);
+        await this.db.views.pages.performRefresh({
+          dateRange,
+        });
 
-        if (!result?.pageVisits?.length) {
-          this.logger.error(
-            'Recalculation failed or contains no results for dateRange: ' +
-              prettyJson(dateRange),
-          );
+        this.logger.info(
+          `Recalculating tasks view for dateRange: ${JSON.stringify(dateRange, null, 2)}`,
+        );
 
-          continue;
-        }
+        await this.db.views.tasks.performRefresh({
+          dateRange,
+        });
 
-        this.logger.info('Date range successfully recalculated.');
+        this.logger.info('Date range successfully recalculated.\n');
       }
+
+      this.db.views.tasks.clearStoreData();
     } catch (err) {
       this.logger.error(err.stack);
     }

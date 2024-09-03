@@ -26,6 +26,7 @@ export class PagesView extends MetricsCommon implements IPageView {
       _id: Types.ObjectId,
       url: String,
       title: String,
+      lang: String,
       redirect: String,
       owners: String,
       sections: String,
@@ -44,7 +45,11 @@ export class PagesView extends MetricsCommon implements IPageView {
     type: [{ term: String, clicks: Number, position: Number }],
     _id: false,
   })
-  aa_searchterms?: AASearchTermMetrics[];
+  aa_searchterms?: {
+    term: string;
+    clicks: number;
+    position: number;
+  }[];
 
   @Prop({
     type: [
@@ -75,6 +80,14 @@ PagesViewSchema.index({ dateRange: 1, projects: 1 });
 PagesViewSchema.index({ dateRange: 1, 'page._id': 1, lastUpdated: 1 });
 PagesViewSchema.index({ dateRange: 1, tasks: 1, lastUpdated: 1 });
 PagesViewSchema.index({ dateRange: 1, projects: 1, lastUpdated: 1 });
+PagesViewSchema.index(
+  { dateRange: 1, tasks: -1 },
+  { partialFilterExpression: { 'tasks.0': { $exists: true } } },
+);
+PagesViewSchema.index(
+  { dateRange: 1, projects: -1 },
+  { partialFilterExpression: { 'projects.0': { $exists: true } } },
+);
 
 const statics = {};
 

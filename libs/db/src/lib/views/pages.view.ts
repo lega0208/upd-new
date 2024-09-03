@@ -6,7 +6,7 @@ import {
   type QueryOptions,
   Types,
 } from 'mongoose';
-import { pick } from 'rambdax';
+import { difference, pick } from 'rambdax';
 import type {
   ActivityMapMetrics,
   DateRange,
@@ -73,22 +73,6 @@ export class PagesViewService extends DbViewNew<
     'projects',
   ];
 
-  refreshCounts = {
-    add(id: Types.ObjectId) {
-      const idString = id.toString();
-      if (!this[idString]) {
-        this[idString] = 0;
-      }
-      this[idString]++;
-
-      if (this[idString] > 1) {
-        console.warn(
-          chalk.yellow(`${idString} refreshed ${this[idString]} times`),
-        );
-      }
-    },
-  };
-
   constructor(
     private db: DbService,
     config: PagesViewConfig,
@@ -143,6 +127,7 @@ export class PagesViewService extends DbViewNew<
         .find(pageIdFilter, {
           url: 1,
           title: 1,
+          lang: 1,
           is_404: 1,
           redirect: 1,
           sections: 1,
@@ -157,6 +142,7 @@ export class PagesViewService extends DbViewNew<
             _id: page._id,
             title: page.title,
             url: page.url,
+            lang: page.lang,
             pageStatus: (page.is_404
               ? '404'
               : page.redirect
@@ -208,20 +194,23 @@ export class PagesViewService extends DbViewNew<
       tasks,
       projects,
     } = page;
-    console.log('page: ' + _id);
-    this.refreshCounts.add(_id);
 
     const dateFilter = {
       $gte: dateRange.start as Date,
       $lte: dateRange.end as Date,
     };
-    const [topLevelMetrics, aa_searchterms, gsc_searchterms, activity_map] =
-      await Promise.all([
-        this.getTopLevelPageMetrics({ page: _id, date: dateFilter }),
-        this.getPageAASearchterms({ page: _id, date: dateFilter }),
-        this.getPageGSCSearchterms({ page: _id, date: dateFilter }),
-        this.getPageActivityMap({ page: _id, date: dateFilter }),
-      ]);
+
+    // Doing a single query first to prime the db cache for the other queries
+    const topLevelMetrics = await this.getTopLevelPageMetrics({
+      page: _id,
+      date: dateFilter,
+    });
+
+    const [aa_searchterms, gsc_searchterms, activity_map] = await Promise.all([
+      this.getPageAASearchterms({ page: _id, date: dateFilter }),
+      this.getPageGSCSearchterms({ page: _id, date: dateFilter }),
+      this.getPageActivityMap({ page: _id, date: dateFilter }),
+    ]);
 
     const insertDoc = {
       page: {
@@ -262,26 +251,20 @@ export class PagesViewService extends DbViewNew<
     page: Types.ObjectId;
     date: { $gte: Date; $lte: Date };
   }): Promise<Record<keyof typeof topLevelMetricsGrouping, number>> {
-    return (
-      (
-        await this.db.collections.pageMetrics
-          .aggregate()
-          .project({
-            aa_searchterms: 0,
-            activity_map: 0,
-            gsc_searchterms: 0,
-          })
-          .match(filter)
-          .group({
-            _id: null,
-            ...topLevelMetricsGrouping,
-          })
-          .project({
-            _id: 0,
-          })
-          .exec()
-      )?.[0] || {}
-    );
+    return await this.db.collections.pageMetrics
+      .aggregate()
+      .allowDiskUse(false)
+      .match(filter)
+      .group({
+        _id: null,
+        ...topLevelMetricsGrouping,
+      })
+      .project({
+        _id: 0,
+      })
+      .exec()
+      .then((res) => res?.[0] || {});
+      
   }
 
   private async getPageAASearchterms(filter: {
@@ -291,16 +274,17 @@ export class PagesViewService extends DbViewNew<
     return (
       (await this.db.collections.pageMetrics
         .aggregate<InternalSearchTerm>()
-        .project({ date: 1, aa_searchterms: 1, page: 1 })
+        .allowDiskUse(false)
         .match(filter)
+        .project({
+          date: 1,
+          aa_searchterms: 1,
+        })
         .unwind('$aa_searchterms')
-        .addFields({
-          'aa_searchterms.term': {
+        .group({
+          _id: {
             $toLower: '$aa_searchterms.term',
           },
-        })
-        .group({
-          _id: '$aa_searchterms.term',
           clicks: {
             $sum: '$aa_searchterms.clicks',
           },
@@ -309,7 +293,7 @@ export class PagesViewService extends DbViewNew<
           },
         })
         .sort({ clicks: -1 })
-        .limit(100)
+        .limit(200)
         .project({
           _id: 0,
           term: '$_id',
@@ -329,22 +313,17 @@ export class PagesViewService extends DbViewNew<
     return (
       (await this.db.collections.pageMetrics
         .aggregate<GscSearchTermMetrics>()
+        .allowDiskUse(false)
+        .match(filter)
         .project({
           date: 1,
-          gsc_searchterms: {
-            $slice: ['$gsc_searchterms', 200],
-          },
-          page: 1,
+          gsc_searchterms: 1,
         })
-        .match(filter)
         .unwind('$gsc_searchterms')
-        .addFields({
-          'gsc_searchterms.term': {
+        .group({
+          _id: {
             $toLower: '$gsc_searchterms.term',
           },
-        })
-        .group({
-          _id: '$gsc_searchterms.term',
           clicks: {
             $sum: '$gsc_searchterms.clicks',
           },
@@ -359,7 +338,7 @@ export class PagesViewService extends DbViewNew<
           },
         })
         .sort({ clicks: -1 })
-        .limit(100)
+        .limit(200)
         .project({
           _id: 0,
           term: '$_id',
@@ -383,14 +362,14 @@ export class PagesViewService extends DbViewNew<
     return (
       (await this.db.collections.pageMetrics
         .aggregate<ActivityMapMetrics>()
+        .allowDiskUse(false)
+        .match({
+          ...filter,
+        })
         .project({
           date: 1,
-          activity_map: {
-            $slice: ['$activity_map', 200],
-          },
-          page: 1,
+          activity_map: 1,
         })
-        .match(filter)
         .unwind('$activity_map')
         .group({
           _id: '$activity_map.link',
@@ -398,8 +377,8 @@ export class PagesViewService extends DbViewNew<
             $sum: '$activity_map.clicks',
           },
         })
-        .limit(100)
         .sort({ clicks: -1 })
+        .limit(100)
         .project({
           _id: 0,
           link: '$_id',
@@ -431,5 +410,33 @@ export class PagesViewService extends DbViewNew<
     options?: AggregateOptions,
   ) {
     return super.aggregate<T>(filter, options);
+  }
+
+  async getTopVisitedPages(dateRange: DateRange<Date>, limit: number) {
+    return this.find(
+      { dateRange },
+      { url: '$page.url', visits: 1 },
+      { sort: { visits: -1 }, limit },
+    ) as unknown as Promise<{ url: string; visits: number }[]>;
+  }
+
+  async clearNonExisting() {
+    const pageIds = await this.db.collections.pages
+      .distinct<Types.ObjectId>('_id')
+      .then((ids) => ids.map((id) => id.toString()));
+
+    const viewPageIds = await this._model
+      .distinct<Types.ObjectId>('task._id')
+      .then((ids) => ids.map((id) => id.toString()));
+
+    const nonExistingIds = difference(viewPageIds, pageIds);
+
+    if (!nonExistingIds.length) {
+      return null;
+    }
+
+    return this._model.deleteMany({
+      'page._id': { $in: nonExistingIds },
+    });
   }
 }
