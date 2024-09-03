@@ -253,7 +253,6 @@ export type IFeedbackViewType = IFeedbackView &
  */
 export interface ITask {
   _id: Types.ObjectId;
-  taskId?: string[];
   airtable_id: string;
   title: string;
   title_fr?: string;

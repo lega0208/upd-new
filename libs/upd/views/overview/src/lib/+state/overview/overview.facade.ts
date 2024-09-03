@@ -14,7 +14,6 @@ import type {
 } from '@dua-upd/types-common';
 import {
   percentChange,
-  round,
   type UnwrapObservable,
 } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
@@ -28,7 +27,6 @@ import {
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 import type {
   ApexAxisChartSeries,
-  ApexNonAxisChartSeries,
 } from 'ng-apexcharts';
 import {
   selectCallsPerVisitsChartData,

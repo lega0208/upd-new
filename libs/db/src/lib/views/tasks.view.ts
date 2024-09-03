@@ -584,11 +584,10 @@ export class TasksViewService extends DbViewNew<
     return super.aggregate<T>(filter, options);
   }
 
-  async getTop50Tasks(dateRange: { start: Date; end: Date }) {
+  async getTop50TaskIds(dateRange: { start: Date; end: Date }) {
     return await this._model
       .aggregate<{
-        task: ITask;
-        ux_tests?: Omit<IUxTest, 'pages' | 'tasks' | 'projects'>[];
+        _id: Types.ObjectId;
       }>()
       .match({
         dateRange,
@@ -598,16 +597,10 @@ export class TasksViewService extends DbViewNew<
       })
       .limit(50)
       .project({
-        task: 1,
-        ux_tests: 1,
+        _id: '$task._id',
       })
       .exec()
-      .then((tasks) =>
-        tasks.map((task) => ({
-          ...task.task,
-          ux_tests: task.ux_tests,
-        })),
-      );
+      .then((results) => results.map(({ _id }) => _id.toString()));
   }
 
   async getTaskMetricsWithComparisons(

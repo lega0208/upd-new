@@ -441,7 +441,7 @@ export class ProjectsDetailsFacade {
           sub_subtopic: callsByTopic.sub_subtopic || '',
           calls: callsByTopic.calls,
           comparison: !previousCalls?.calls
-            ? Infinity
+            ? null
             : percentChange(callsByTopic.calls, previousCalls.calls),
         };
       });

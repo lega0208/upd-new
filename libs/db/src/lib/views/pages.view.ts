@@ -21,7 +21,6 @@ import { PagesView, PagesViewSchema } from './pages-view.schema';
 import { DbService } from '../db.service';
 import { topLevelMetricsGrouping } from './metrics';
 import { arrayToDictionary, prettyJson } from '@dua-upd/utils-common';
-import chalk from 'chalk';
 
 export type PagesViewConfig = ViewConfig<typeof PagesViewSchema>;
 
@@ -264,7 +263,6 @@ export class PagesViewService extends DbViewNew<
       })
       .exec()
       .then((res) => res?.[0] || {});
-      
   }
 
   private async getPageAASearchterms(filter: {

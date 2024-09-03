@@ -7,8 +7,6 @@ import {
 import type {
   AttachmentData,
   CallsByTopic,
-  CallsByTasks,
-  FeedbackComment,
   GscSearchTermMetrics,
   TopCalldriverTopics,
   IPage,
@@ -273,7 +271,6 @@ export interface OverviewData
     uniqueTopTasks: number;
     allTopTasks: number;
     topSuccessRates: SuccessRates;
-    
   };
 }
 
@@ -364,8 +361,6 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
   group: string;
   subgroup: string;
   topic: string;
-  tpc_id: string,
-  enquiry_line: string,
   subtopic: string;
   sub_subtopic: string[];
   user_type: string[];

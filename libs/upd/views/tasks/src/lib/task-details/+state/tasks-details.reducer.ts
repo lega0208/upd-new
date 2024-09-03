@@ -54,8 +54,6 @@ export const tasksDetailsInitialState: TasksDetailsState = {
     taskSuccessByUxTest: [],
     projects: [],
     searchTerms: [],
-    tpc_id: '',
-    enquiry_line: '',
     mostRelevantCommentsAndWords: {
       en: { comments: [], words: [] },
       fr: { comments: [], words: [] },
