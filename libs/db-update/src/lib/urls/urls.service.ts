@@ -206,7 +206,7 @@ export class UrlsService {
 
     if (!this.production) {
       await this.updateCollectionFromBlobStorage();
-      await this.readability.updateCollectionFromBlobStorage();
+      // await this.readability.updateCollectionFromBlobStorage();
 
       return;
     }

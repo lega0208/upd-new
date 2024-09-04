@@ -179,12 +179,12 @@ export class TaskDetailsFeedbackComponent implements OnInit {
           pipeParam: '1.2',
         },
         {
-          field: 'sum',
+          field: 'numComments',
           header: '# of comments',
           pipe: 'number',
         },
         {
-          field: 'commentsPercentChange',
+          field: 'numCommentsPercentChange',
           header: 'comparison-for-comments',
           pipe: 'percent',
         },

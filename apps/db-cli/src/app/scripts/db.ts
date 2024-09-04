@@ -1103,7 +1103,7 @@ export async function updatePageSections() {
     .map((page) => {
       if (
         (atDict[page.url] && atDict[page.url].sections !== page.sections) ||
-        atDict[page.url].owners !== page.owners
+        atDict[page.url]?.owners !== page.owners
       ) {
         return {
           updateOne: {
