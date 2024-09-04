@@ -24,9 +24,7 @@ import dayjs from 'dayjs/esm';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 import utc from 'dayjs/esm/plugin/utc';
-import type {
-  ApexAxisChartSeries,
-} from 'ng-apexcharts';
+import type { ApexAxisChartSeries } from 'ng-apexcharts';
 import { combineLatest, map } from 'rxjs';
 import * as ProjectsDetailsActions from './projects-details.actions';
 import * as ProjectsDetailsSelectors from './projects-details.selectors';
@@ -144,10 +142,6 @@ export class ProjectsDetailsFacade {
     mapPageMetricsArraysWithPercentChange('visitsByPage', 'gscTotalClicks'),
   );
 
-  feedbackByPage$ = this.projectsDetailsData$.pipe(
-    map((data) => data?.dateRangeData?.feedbackByPage),
-  );
-
   feedbackByDay$ = this.projectsDetailsData$.pipe(
     map((data) => {
       const feedbackByDayData = data?.feedbackByDay || [];
@@ -157,41 +151,53 @@ export class ProjectsDetailsFacade {
         : feedbackByDayData;
     }),
   );
-  
+
   visitsByPageFeedbackWithPercentChange$ = this.projectsDetailsData$.pipe(
     map((data) => {
-      const feedbackByPageDict = arrayToDictionary(
-        data?.feedbackByPage,
+      const feedbackByPageDict = arrayToDictionary(data?.feedbackByPage, '_id');
+
+      const prevVisitsByPageDict = arrayToDictionary(
+        data?.comparisonDateRangeData?.visitsByPage || [],
         '_id',
       );
 
-      const prevVisitsByPageDict = arrayToDictionary(data?.comparisonDateRangeData?.visitsByPage || [], '_id');
+      return (
+        data.dateRangeData?.visitsByPage
+          .map((page) => {
+            const { sum, percentChange: commentsPercentChange } =
+              feedbackByPageDict[page._id] || { sum: 0, percentChange: null };
 
-      return data.dateRangeData?.visitsByPage.map((page) => {
-        const { sum, percentChange: commentsPercentChange } = feedbackByPageDict[page._id] || { sum: 0, percentChange: null };
+            const prevDyfNo = prevVisitsByPageDict[page._id]?.dyfNo || 0;
 
-        const prevDyfNo = prevVisitsByPageDict[page._id]?.dyfNo || 0;
+            const dyfNoPercentChange = prevDyfNo
+              ? percentChange(page.dyfNo || 0, prevDyfNo)
+              : null;
 
-        const dyfNoPercentChange = prevDyfNo ? percentChange(page.dyfNo || 0, prevDyfNo) : null;
+            const merged = {
+              ...page,
+              sum,
+              commentsPercentChange,
+              dyfNoPercentChange,
+            };
 
-        const merged = {
-          ...page,
-          sum,
-          commentsPercentChange,
-          dyfNoPercentChange,
-        };
+            const totalFeedback = (page.dyfYes || 0) + (page.dyfNo || 0);
 
-        const totalFeedback = (page.dyfYes || 0) + (page.dyfNo || 0);
+            if (page.visits === 0 || totalFeedback === 0) {
+              return merged;
+            }
 
-        if (page.visits === 0 || totalFeedback === 0) {
-          return merged;
-        }
-
-        return {
-          ...merged,
-          feedbackToVisitsRatio: totalFeedback / page.visits,
-        };
-      }) || [];
+            return {
+              ...merged,
+              feedbackToVisitsRatio: totalFeedback / page.visits,
+            };
+          })
+          .sort(
+            (a, b) =>
+              (b.dyfYes || 0) +
+              (b.dyfNo || 0) -
+              ((a.dyfYes || 0) + (a.dyfNo || 0)),
+          ) || []
+      );
     }),
   );
 
@@ -426,20 +432,19 @@ export class ProjectsDetailsFacade {
             (prevTopic) => prevTopic.tpc_id === callsByTopic.tpc_id,
           );
 
-          return {
-            topic: callsByTopic.topic || '',
-            tpc_id: callsByTopic.tpc_id || 0,
-            subtopic: callsByTopic.subtopic || '',
-            enquiry_line: callsByTopic.enquiry_line || '',
-            sub_subtopic: callsByTopic.sub_subtopic || '',
-            tasks: callsByTopic.tasks || '',
-            calls: callsByTopic.calls,
-            comparison: !previousCalls?.calls
-              ? null
-              : percentChange(callsByTopic.calls, previousCalls.calls),
-          };
-        })
-        .sort((a, b) => (b.calls ?? 0) - (a.calls ?? 0));
+        return {
+          topic: callsByTopic.topic || '',
+          tpc_id: callsByTopic.tpc_id || '',
+          enquiry_line: callsByTopic.enquiry_line || '',
+          tasks: callsByTopic.tasks || [],
+          subtopic: callsByTopic.subtopic || '',
+          sub_subtopic: callsByTopic.sub_subtopic || '',
+          calls: callsByTopic.calls,
+          comparison: !previousCalls?.calls
+            ? null
+            : percentChange(callsByTopic.calls, previousCalls.calls),
+        };
+      });
     }),
   );
 
@@ -449,11 +454,6 @@ export class ProjectsDetailsFacade {
       {
         field: 'tpc_id',
         header: 'tpc_id',
-      },
-      {
-        field: 'enquiry_line',
-        header: 'enquiry_line',
-        translate: true,
       },
       {
         field: 'topic',
@@ -469,13 +469,17 @@ export class ProjectsDetailsFacade {
         field: 'sub_subtopic',
         header: 'sub-subtopic',
         translate: true,
+      }, 
+      {
+        field: 'enquiry_line',
+        header: 'enquiry_line',
+        translate: true,
       },
       {
         field: 'tasks',
-        header: 'tasks',
+        header: 'task',
         translate: true,
       },
-
       {
         field: 'calls',
         header: 'calls',
@@ -489,27 +493,38 @@ export class ProjectsDetailsFacade {
     ],
   );
 
-  dyfDataApex$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
+  dyfDataApex$ = combineLatest([
+    this.projectsDetailsData$,
+    this.currentLang$,
+  ]).pipe(
     map(([data, lang]) => {
       const dyfData: ApexAxisChartSeries = [
         {
           name: this.i18n.service.translate('yes', lang),
-          data: [data?.dateRangeData?.dyfYes || 0, data?.comparisonDateRangeData?.dyfYes || 0],
+          data: [
+            data?.dateRangeData?.dyfYes || 0,
+            data?.comparisonDateRangeData?.dyfYes || 0,
+          ],
         },
         {
           name: this.i18n.service.translate('no', lang),
-          data: [data?.dateRangeData?.dyfNo || 0, data?.comparisonDateRangeData?.dyfNo || 0],
+          data: [
+            data?.dateRangeData?.dyfNo || 0,
+            data?.comparisonDateRangeData?.dyfNo || 0,
+          ],
         },
       ];
-  
-      const isZero = dyfData.every(item => 
-        (item.data as number[]).every(value => typeof value === 'number' && value === 0)
+
+      const isZero = dyfData.every((item) =>
+        (item.data as number[]).every(
+          (value) => typeof value === 'number' && value === 0,
+        ),
       );
-      
+
       if (isZero) {
         return [];
       }
-  
+
       return dyfData;
     }),
   );
@@ -518,19 +533,21 @@ export class ProjectsDetailsFacade {
     map(([data, lang]) => {
       const yes = this.i18n.service.translate('yes', lang);
       const no = this.i18n.service.translate('no', lang);
-  
+
       const currYesVal = data?.dateRangeData?.dyfYes || 0;
       const prevYesVal = data?.comparisonDateRangeData?.dyfYes || NaN;
       const currNoVal = data?.dateRangeData?.dyfNo || 0;
       const prevNoVal = data?.comparisonDateRangeData?.dyfNo || NaN;
-  
+
       const pieChartData = [
         { name: yes, currValue: currYesVal, prevValue: prevYesVal },
         { name: no, currValue: currNoVal, prevValue: prevNoVal },
       ];
-  
-      const filteredPieChartData = pieChartData.filter((v) => v.currValue > 0 || v.prevValue > 0);
-  
+
+      const filteredPieChartData = pieChartData.filter(
+        (v) => v.currValue > 0 || v.prevValue > 0,
+      );
+
       return filteredPieChartData.length > 0 ? filteredPieChartData : [];
     }),
   );
@@ -675,7 +692,7 @@ export class ProjectsDetailsFacade {
         .filter((v, i, a) => a.indexOf(v) === i);
 
       // create an array of success_rate for each test_type and task combination
-      const taskSuccess = tasks?.map((task, i) => {
+      const taskSuccess = tasks?.map((task) => {
         const successRate = uxTests?.map((uxTest) => {
           const taskSuccessRate = uxTest?.tasks
             ?.split('; ')
@@ -764,7 +781,10 @@ export class ProjectsDetailsFacade {
         const validation = task.Validation;
         const baseline = task.Baseline;
         const change = (round(validation, 2) - round(baseline, 2)) * 100;
-        const taskPercentChange = percentChange(round(validation, 2), round(baseline, 2));
+        const taskPercentChange = percentChange(
+          round(validation, 2),
+          round(baseline, 2),
+        );
 
         return {
           ...task,
@@ -775,10 +795,8 @@ export class ProjectsDetailsFacade {
     }),
   );
 
-
   totalParticipants$ = this.projectsDetailsData$.pipe(
     map((data) => {
-
       const uxTests = data?.taskSuccessByUxTest;
 
       const maxUsersByType: Record<string, number> = {};
@@ -793,14 +811,11 @@ export class ProjectsDetailsFacade {
       }
 
       const totalUsers = Object.values(maxUsersByType).reduce(
-        (accumulator, value) =>
-          accumulator + value,
-            0,
+        (accumulator, value) => accumulator + value,
+        0,
       );
       return totalUsers;
-    
-        },
-      )
+    }),
   );
 
   feedbackTotalComments$ = this.projectsDetailsData$.pipe(
@@ -859,7 +874,7 @@ export class ProjectsDetailsFacade {
         .filter((v, i, a) => a.indexOf(v) === i);
 
       return tasks
-        ?.map((task, i) => {
+        ?.map((task) => {
           const successRate = taskSuccessByUxData
             ?.map((uxTest) => {
               const taskSuccessRate = uxTest?.tasks
@@ -908,12 +923,11 @@ export class ProjectsDetailsFacade {
   );
 
   documents$ = this.projectsDetailsData$.pipe(
-    map(
-      (data) =>
-        data?.attachments.map((attachment) => ({
-          url: attachment.storage_url,
-          filename: attachment.filename,
-        })),
+    map((data) =>
+      data?.attachments.map((attachment) => ({
+        url: attachment.storage_url,
+        filename: attachment.filename,
+      })),
     ),
   );
 
@@ -952,8 +966,10 @@ export class ProjectsDetailsFacade {
         })),
     ),
   );
-  
-  feedbackMostRelevant = this.store.selectSignal(ProjectsDetailsSelectors.selectFeedbackMostRelevant);
+
+  feedbackMostRelevant = this.store.selectSignal(
+    ProjectsDetailsSelectors.selectFeedbackMostRelevant,
+  );
 
   error$ = this.store.select(
     ProjectsDetailsSelectors.selectProjectsDetailsError,

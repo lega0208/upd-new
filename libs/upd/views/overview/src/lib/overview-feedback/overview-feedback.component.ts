@@ -128,10 +128,11 @@ export class OverviewFeedbackComponent {
 
   feedbackPagesTableCols: Signal<
     ColumnConfig<{
+      _id: string;
       title: string;
       url: string;
-      owners: string;
-      sections: string;
+      owners?: string;
+      sections?: string;
       sum: number;
       percentChange: number | null;
     }>[]

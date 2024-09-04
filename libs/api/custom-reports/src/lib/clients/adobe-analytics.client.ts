@@ -73,7 +73,7 @@ class AAClient {
 }
 
 const createAAClient = (authParams?: AuthParams) =>
-  withMutex(new AAClient(authParams), 510);
+  withMutex(new AAClient(authParams), { unlockDelay: 510 });
 
 // use pool to invisibly intersperse requests between clients
 // can make this generic to any client type and add settings like concurrency, rate limiting, etc.
