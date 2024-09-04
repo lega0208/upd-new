@@ -284,6 +284,8 @@ export type OverviewFeedback = {
     url: string;
     sum: number;
     percentChange: number | null;
+    owners?: string;
+    sections?: string;
   }[];
   feedbackByDay: { date: string; sum: number }[];
 };
