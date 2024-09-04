@@ -7,10 +7,7 @@ import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
 import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
-import type {
-  AttachmentData,
-  TaskDetailsData,
-} from '@dua-upd/types-common';
+import type { AttachmentData, TaskDetailsData } from '@dua-upd/types-common';
 import {
   type GetTableProps,
   type KeysOfType,
@@ -109,8 +106,19 @@ export class TasksDetailsFacade {
     map((data) => data?.visitsPercentChange),
   );
 
-  visitsByPage$ = this.tasksDetailsData$.pipe(
-    map(({ visitsByPage }) => visitsByPage),
+  visitsByPage$ = combineLatest([
+    this.tasksDetailsData$,
+    this.i18n.currentLang$,
+  ]).pipe(
+    map(([{ visitsByPage }, currentLang]) =>
+      visitsByPage?.map((pageMetrics) => ({
+        ...pageMetrics,
+        language: this.i18n.service.translate(
+          pageMetrics.language,
+          currentLang,
+        ),
+      })),
+    ),
   );
 
   feedbackByDay$ = this.tasksDetailsData$.pipe(

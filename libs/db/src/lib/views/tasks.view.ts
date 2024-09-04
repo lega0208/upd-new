@@ -772,7 +772,7 @@ export class TasksViewService extends DbViewNew<
             title,
             url,
             lang,
-            language: lang, // why both lang and language?
+            language: lang && lang === 'en' ? 'English' : 'French',
             pageStatus,
             gscTotalClicks: gsc_total_clicks,
             gscTotalImpressions: gsc_total_impressions,
