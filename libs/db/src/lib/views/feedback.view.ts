@@ -293,4 +293,8 @@ export class FeedbackViewService extends DbViewNew<
       },
     };
   }
+
+  async clearNonExisting(): Promise<mongo.DeleteResult | null> {
+    return null;    
+  }
 }
