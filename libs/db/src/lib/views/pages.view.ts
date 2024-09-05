@@ -32,6 +32,7 @@ type BaseDoc = {
   _id: Types.ObjectId;
   title: string;
   url: string;
+  lang: 'en' | 'fr';
   pageStatus: PageStatus;
   redirect: string;
   owners?: string;
@@ -186,6 +187,7 @@ export class PagesViewService extends DbViewNew<
       _id,
       title,
       url,
+      lang,
       pageStatus,
       redirect,
       owners,
@@ -216,6 +218,7 @@ export class PagesViewService extends DbViewNew<
         _id,
         title,
         url,
+        lang,
         redirect,
         owners,
         sections,
