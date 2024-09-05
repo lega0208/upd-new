@@ -177,24 +177,21 @@ export class CustomReportsCreateComponent {
   @ViewChild('calendar') calendarComponent!: CalendarComponent;
 
   titleCol = this.i18n.service.translationSignal('Title', (title) => ({
-    field: 'title',
+    field: 'title' as const,
     header: title(),
     translate: true,
   }));
 
   urlCol = this.i18n.service.translationSignal('URL', (url) => ({
-    field: 'url',
+    field: 'url' as const,
     header: url(),
   }));
 
-  columns: Signal<ColumnConfig<PageSelectionData['pages']>[]> = computed(() => [
-    this.titleCol(),
-    this.urlCol(),
-  ]);
+  columns: Signal<ColumnConfig<{ _id: string; url: string; title: string }>[]> =
+    computed(() => [this.titleCol(), this.urlCol()]);
 
-  taskColumns: Signal<ColumnConfig<PageSelectionData['tasks']>[]> = computed(
-    () => [this.titleCol()],
-  );
+  taskColumns: Signal<ColumnConfig<{ title: string; pages: string[] }>[]> =
+    computed(() => [this.titleCol()]);
 
   searchFields = computed(() => this.columns().map((col) => col.field));
 
@@ -295,14 +292,38 @@ export class CustomReportsCreateComponent {
 
   reportDimensions = [
     { label: 'None', value: '', description: 'tooltip-none-rb' },
-    { label: 'Device type', value: 'device_type', description: 'tooltip-device-rb' },
+    {
+      label: 'Device type',
+      value: 'device_type',
+      description: 'tooltip-device-rb',
+    },
     { label: 'Regions', value: 'region', description: 'tooltip-regions-rb' },
     { label: 'Cities', value: 'city', description: 'tooltip-cities-rb' },
-    { label: 'Countries', value: 'country', description: 'tooltip-countries-rb' },
-    { label: 'Referrer', value: 'referrer', description: 'tooltip-referrer-rb' },
-    { label: 'Referrer type', value: 'referrer_type', description: 'tooltip-referrertype-rb' },
-    { label: 'Previous page', value: 'prev_page', description: 'tooltip-prevpage-rb' },
-    { label: 'Time spent', value: 'time_spent', description: 'tooltip-timespent-rb' },
+    {
+      label: 'Countries',
+      value: 'country',
+      description: 'tooltip-countries-rb',
+    },
+    {
+      label: 'Referrer',
+      value: 'referrer',
+      description: 'tooltip-referrer-rb',
+    },
+    {
+      label: 'Referrer type',
+      value: 'referrer_type',
+      description: 'tooltip-referrertype-rb',
+    },
+    {
+      label: 'Previous page',
+      value: 'prev_page',
+      description: 'tooltip-prevpage-rb',
+    },
+    {
+      label: 'Time spent',
+      value: 'time_spent',
+      description: 'tooltip-timespent-rb',
+    },
   ];
 
   constructor() {

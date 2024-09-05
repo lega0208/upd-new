@@ -25,7 +25,7 @@
         [current]="(callPerVisits$ | async) || 0"
         [comparison]="(apexCallPercentChange$ | async) || 0"
         [keyword]="'calls'"
-        [scale]="100"
+        [scale]="1"
         [difference]="(apexCallDifference$ | async) || 0"
         modal=" {{ 'kpi-calls-per-100-guidance-task' | translate }}"
       ></upd-apex-spark-line>
@@ -37,7 +37,7 @@
         [series]="(apexKpiFeedback$ | async) || []"
         [current]="(currentKpiFeedback$ | async) || 0"
         [comparison]="(kpiFeedbackPercentChange$ | async) || 0"
-        [scale]="1000"
+        [scale]="1"
         [kpiObjectiveCriteria]="feedbackKpiObjectiveCriteria"
         [difference]="(kpiFeedbackDifference$ | async) || 0"
         modal=" {{ 'kpi-feedback-per-1000-guidance-task' | translate }} "

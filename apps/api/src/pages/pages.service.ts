@@ -25,6 +25,7 @@ import type {
   PagesHomeAggregatedData,
   ActivityMapMetrics,
   IProject,
+  PageStatus,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -86,10 +87,25 @@ export class PagesService {
       end: endDate,
     };
 
-    const results = await this.db.views.pageVisits.getVisitsWithPageData(
-      queryDateRange,
-      this.pageModel,
-    );
+    const results = (await this.db.views.pages.find(
+      { dateRange: queryDateRange },
+      {
+        _id: '$page._id',
+        title: '$page.title',
+        url: '$page.url',
+        pageStatus: 1,
+        visits: 1,
+      },
+      {
+        sort: { visits: -1 },
+      },
+    )) as unknown as {
+      _id: Types.ObjectId;
+      title: string;
+      url: string;
+      pageStatus: PageStatus;
+      visits: number;
+    }[];
 
     await this.cacheManager.set(
       cacheKey,

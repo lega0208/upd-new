@@ -28,16 +28,30 @@ import {
   type CallDriverModel,
   GcTasks,
   GCTasksMappings,
+  type GcTasksModel,
   type FeedbackModel,
   type PageModel,
 } from '../';
 import {
   arrayToDictionary,
   AsyncLogTiming,
+  hours,
   logJson,
   prettyJson,
 } from '@dua-upd/utils-common';
 import { PageVisits, PageVisitsView } from './db.views';
+import {
+  PagesView,
+  type PagesViewModel,
+  PagesViewSchema,
+} from './views/pages-view.schema';
+import { PagesViewService } from './views/pages.view';
+import { TasksViewService } from './views/tasks.view';
+import {
+  TasksView,
+  type TasksViewModel,
+  TasksViewSchema,
+} from './views/tasks-view.schema';
 
 /**
  * This service is primarily for accessing all collection models from the same place
@@ -81,6 +95,22 @@ export class DbService {
       this.pageVisits,
       this.collections.pageMetrics,
     ),
+    pages: new PagesViewService(this, {
+      name: 'PagesView',
+      model: this.pagesViewModel,
+      schema: PagesViewSchema,
+      maxAge: hours(Number(process.env.DB_VIEWS_MAXAGE) || 120),
+      refreshBatchSize: 50,
+      bulkWriteOptions: { noResponse: true },
+    }),
+    tasks: new TasksViewService(this, {
+      name: 'TasksView',
+      model: this.tasksViewModel,
+      schema: TasksViewSchema,
+      maxAge: hours(Number(process.env.DB_VIEWS_MAXAGE) || 120),
+      refreshBatchSize: 10,
+      bulkWriteOptions: { noResponse: true },
+    }),
   } as const;
 
   constructor(
@@ -114,6 +144,10 @@ export class DbService {
     private annotations: Model<Annotations>,
     @InjectModel(PageVisitsView.name, 'defaultConnection')
     private pageVisits: Model<PageVisits>,
+    @InjectModel(PagesView.name, 'defaultConnection')
+    private pagesViewModel: PagesViewModel,
+    @InjectModel(TasksView.name, 'defaultConnection')
+    private tasksViewModel: TasksViewModel,
     @InjectModel(Url.name, 'defaultConnection')
     private urls: UrlModel,
     @InjectModel(Reports.name, 'defaultConnection')
@@ -123,7 +157,7 @@ export class DbService {
     @InjectModel(CustomReportsMetrics.name, 'defaultConnection')
     private customReportsMetrics: CustomReportsModel,
     @InjectModel(GcTasks.name, 'defaultConnection')
-    private gcTasks: Model<GcTasks>,
+    private gcTasks: GcTasksModel,
     @InjectModel(GCTasksMappings.name, 'defaultConnection')
     private gcTasksMappings: Model<GCTasksMappings>,
     @InjectConnection('defaultConnection')

@@ -4,6 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/upd/src",
   "prefix": "upd",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/angular:browser-esbuild",
@@ -91,7 +92,8 @@
         "buildTarget": "upd:build:production",
         "configFile": "apps/upd/vite.config.mts",
         "watch": true
-      }
+      },
+      "dependsOn": ["build"]
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
@@ -122,6 +124,5 @@
         }
       }
     }
-  },
-  "tags": []
+  }
 }
