@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import type {
-  AASearchTermMetrics,
   CallsByTopic,
   DateRange,
   GscSearchTermMetrics,
