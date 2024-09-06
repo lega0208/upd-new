@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import type {
-  AASearchTermMetrics,
   ActivityMapMetrics,
   DateRange,
   IPage,
@@ -74,6 +73,7 @@ export class PagesView extends MetricsCommon implements IPageView {
 
 export const PagesViewSchema = SchemaFactory.createForClass(PagesView);
 
+PagesViewSchema.index({ 'page._id': 1 });
 PagesViewSchema.index({ dateRange: 1, 'page._id': 1 }, { unique: true });
 PagesViewSchema.index({ dateRange: 1, tasks: 1 });
 PagesViewSchema.index({ dateRange: 1, projects: 1 });
