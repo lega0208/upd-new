@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { difference, pick, zip } from 'rambdax';
+import { pick } from 'rambdax';
 import { batchAwait, createUpdateQueue, days } from '@dua-upd/utils-common';
 import type {
   AggregateOptions,
