@@ -474,6 +474,19 @@ export class DbUpdateService {
     }) as DateRange<Date>[];
 
     try {
+      this.logger.info('Clearing unneeded data');
+
+      const deletedPages = await this.db.views.pages.clearUnusedDateRanges(
+        dateRangesWithComparison,
+      );
+      const deletedTasks = await this.db.views.tasks.clearUnusedDateRanges(
+        dateRangesWithComparison,
+      );
+
+      this.logger.info(
+        `Deleted ${deletedPages} PageView documents and ${deletedTasks} TasksView documents`,
+      );
+
       this.logger.info('Loading data for tasks metrics store');
 
       await this.db.views.tasks.loadStoreData();
