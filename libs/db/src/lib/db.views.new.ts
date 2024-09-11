@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { pick } from 'rambdax';
+import { difference, pick, zip } from 'rambdax';
 import { batchAwait, createUpdateQueue, days } from '@dua-upd/utils-common';
 import type {
   AggregateOptions,
@@ -318,4 +318,44 @@ export abstract class DbViewNew<
    * @returns mongo.DeleteResult
    */
   abstract clearNonExisting(): Promise<mongo.DeleteResult | null>;
+
+  /**
+   * Method to delete all documents where the dateRange is not in the provided list
+   * @param dateRanges The list of dateRanges to keep
+   * @returns The number of documents deleted
+   */
+  async clearUnusedDateRanges(dateRanges: DateRange<Date>[]) {
+    const dbDateRanges = await this._model
+      .distinct<DateRange<Date>>('dateRange')
+      .exec();
+
+    const dateRangeStrings = dateRanges.map((dateRange) =>
+      JSON.stringify(dateRange),
+    );
+
+    const dateRangesToDelete = dbDateRanges
+      .map((dateRange) =>
+        dateRangeStrings.includes(JSON.stringify(dateRange)) ? null : dateRange,
+      )
+      .filter((dateRange) => dateRange !== null);
+
+    if (!dateRangesToDelete.length) {
+      return 0;
+    }
+
+    const deletionDateRangeStrings = dateRangesToDelete.map(
+      ({ start, end }) =>
+        `${start.toISOString().slice(0, 10)}/${end.toISOString().slice(0, 10)}`,
+    );
+
+    console.log(`Deleting date ranges: ${deletionDateRangeStrings}`);
+
+    return await Promise.all(
+      dateRangesToDelete.map((dateRange) =>
+        this._model.deleteMany({ dateRange }),
+      ),
+    ).then((results) =>
+      results.reduce((acc, { deletedCount }) => acc + deletedCount, 0),
+    );
+  }
 }
