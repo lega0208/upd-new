@@ -626,7 +626,7 @@ export class TasksViewService extends DbViewNew<
       channel: string[];
       core: string[];
       projects: {
-        id: string;
+        _id: string;
         title: string;
         attachments: AttachmentData[];
       }[];
