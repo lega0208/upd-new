@@ -180,9 +180,9 @@ export class TasksDetailsFacade {
   projects$ = combineLatest([this.tasksDetailsData$, this.currentLang$]).pipe(
     map(([data, lang]) => {
       return (
-        data?.projects?.map((d) => ({
-          id: d.id,
-          title: this.i18n.service.translate(d.title, lang),
+        data?.projects?.map(({ _id, title }) => ({
+          _id,
+          title: this.i18n.service.translate(title, lang),
         })) || []
       );
     }),
