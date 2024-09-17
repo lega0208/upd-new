@@ -403,7 +403,7 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     scenario: string;
   }[];
   projects: {
-    id: string;
+    _id: string;
     title: string;
     attachments: AttachmentData[];
   }[];
