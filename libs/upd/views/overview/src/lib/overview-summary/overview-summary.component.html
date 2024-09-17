@@ -108,6 +108,7 @@
         [secondaryTitleData]="chartData"
         [secondaryTitleCols]="chartCols"
         [annotations]="(annotationsData$ | async) || []"
+        [allowHeaderWrap]="true"
       ></upd-apex-bar-line>
     </div>
   </div>
@@ -187,6 +188,7 @@
         ]"
         [tableCols]="dyfTableCols"
         [table]="dyfChart$ | async"
+        [allowHeaderWrap]="true"
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"
         [stacked]="{ isStacked: true, isStacked100: true, hasDataLabels: true }"
       ></upd-apex-bar>

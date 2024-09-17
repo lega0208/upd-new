@@ -373,6 +373,8 @@
   "French": "Français",
   "Date range": "Plage de dates",
   "URLs added to report": "URL ajoutées au rapport ({{count}})",
+  "MMM D YYYY": "D MMM YYYY",
+  "MMM D": "D MMM",
   "to": "au",
   "None": "Aucun",
   "Devices": "Appareils",

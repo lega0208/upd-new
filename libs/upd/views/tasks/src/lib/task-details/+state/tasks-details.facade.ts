@@ -208,28 +208,28 @@ export class TasksDetailsFacade {
   dateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
-  ]).pipe(map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)));
+  ]).pipe(map(([data, lang]) => this.getDateRangeLabel(data.dateRange, lang) as string));
 
   comparisonDateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) =>
-      getWeeklyDatesLabel(data.comparisonDateRange || '', lang),
+      this.getDateRangeLabel(data.comparisonDateRange || '', lang) as string,
     ),
   );
 
   fullDateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
-  ]).pipe(map(([data, lang]) => getFullDateRangeLabel(data.dateRange, lang)));
+  ]).pipe(map(([data, lang]) => this.getDateRangeLabel(data.dateRange, lang, 'MMM D YYYY', 'to', true) as string[]));
 
   fullComparisonDateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) =>
-      getFullDateRangeLabel(data.comparisonDateRange || '', lang),
+      this.getDateRangeLabel(data.comparisonDateRange || '', lang , 'MMM D YYYY', 'to', true) as string[],
     ),
   );
 
@@ -238,8 +238,8 @@ export class TasksDetailsFacade {
     this.currentLang$,
   ]).pipe(
     map(([data, lang]) => {
-      const dateRangeLabel = getWeeklyDatesLabel(data.dateRange || '', lang);
-      const comparisonDateRangeLabel = getWeeklyDatesLabel(
+      const dateRangeLabel = this.getDateRangeLabel(data.dateRange || '', lang);
+      const comparisonDateRangeLabel = this.getDateRangeLabel(
         data.comparisonDateRange || '',
         lang,
       );
@@ -583,7 +583,8 @@ export class TasksDetailsFacade {
           : d.test_type,
         date: d.date,
         total_users: totalSum,
-      }));
+        scenario: d.scenario
+      }))
       return [...(taskSuccessByUxTest || [])];
     }),
   );
@@ -655,6 +656,30 @@ export class TasksDetailsFacade {
     },
   ]);
 
+  getDateRangeLabel(
+    dateRange: string,
+    lang: LocaleId,
+    dateFormat = 'MMM D YYYY',
+    separator = '-',
+    breakLine = false,
+  ) {
+    const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+    dateFormat = this.i18n.service.translate(dateFormat, lang);
+    separator = this.i18n.service.translate(separator, lang);
+
+    const formattedStartDate = dayjs
+      .utc(startDate)
+      .locale(lang)
+      .format(dateFormat);
+    const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
+
+    //breakLine exists for apexcharts labels
+    return breakLine
+      ? [`${formattedStartDate} ${separator}`, `${formattedEndDate}`]
+      : `${formattedStartDate} ${separator} ${formattedEndDate}`;
+  }
+
   error$ = this.store.select(TasksDetailsSelectors.selectTasksDetailsError);
 
   feedbackMostRelevant = this.store.selectSignal(
@@ -685,36 +710,3 @@ export class TasksDetailsFacade {
       );
   }
 }
-
-const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
-  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
-
-  const dateFormat = lang === FR_CA ? 'D MMM' : 'MMM D';
-
-  const formattedStartDate = dayjs(startDate)
-    .utc(false)
-    .locale(lang)
-    .format(dateFormat);
-  const formattedEndDate = dayjs(endDate)
-    .utc(false)
-    .locale(lang)
-    .format(dateFormat);
-
-  return `${formattedStartDate}-${formattedEndDate}`;
-};
-
-const getFullDateRangeLabel = (dateRange: string, lang: LocaleId) => {
-  const [startDate, endDate] = dateRange.split('/');
-
-  const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
-  const separator = lang === FR_CA ? ' au' : ' to';
-
-  const formattedStartDate = dayjs
-    .utc(startDate)
-    .locale(lang)
-    .format(dateFormat);
-
-  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
-
-  return [`${formattedStartDate}${separator}`, `${formattedEndDate}`];
-};

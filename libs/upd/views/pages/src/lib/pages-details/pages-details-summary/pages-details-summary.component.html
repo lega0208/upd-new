@@ -11,7 +11,7 @@
 
     <div class="col-lg-4 col-md-12 col-sm-12">
       <upd-data-card
-        [current]="visits$ | async"
+        [current]="visits()"
         [comparison]="visitsPercentChange$ | async"
         [title]="'visits'"
         [tooltip]="'tooltip-visits'"
@@ -53,6 +53,7 @@
         [table]="barTable$ | async"
         [yAxis]="'visits' | translate"
         [tableCols]="barTableCols"
+        [allowHeaderWrap]="true"
       ></upd-apex-bar>
     </div>
   </div>
