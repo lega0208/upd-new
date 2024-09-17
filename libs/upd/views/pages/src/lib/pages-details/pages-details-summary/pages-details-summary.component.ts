@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { EN_CA, type LocaleId } from '@dua-upd/upd/i18n';
 import { feedbackKpiObjectiveCriteria } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
@@ -32,6 +33,8 @@ export class PagesDetailsSummaryComponent implements OnInit {
   data$ = this.pageDetailsService.pagesDetailsData$;
   error$ = this.pageDetailsService.error$;
 
+  visits = toSignal(this.pageDetailsService.visits$) as () => number;
+
   apexKpiFeedback$ = this.pageDetailsService.apexKpiFeedback$;
 
   currentKpiFeedback$ = this.pageDetailsService.currentKpiFeedback$;
@@ -39,12 +42,9 @@ export class PagesDetailsSummaryComponent implements OnInit {
   feedbackKpiObjectiveCriteria = feedbackKpiObjectiveCriteria;
   kpiFeedbackDifference$ = this.pageDetailsService.kpiFeedbackDifference$;
 
-  url$ = this.pageDetailsService.pageUrl$;
-
   visitors$ = this.pageDetailsService.visitors$;
   visitorsPercentChange$ = this.pageDetailsService.visitorsPercentChange$;
 
-  visits$ = this.pageDetailsService.visits$;
   visitsPercentChange$ = this.pageDetailsService.visitsPercentChange$;
 
   pageViews$ = this.pageDetailsService.pageViews$;
@@ -81,7 +81,7 @@ export class PagesDetailsSummaryComponent implements OnInit {
 
   ngOnInit() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
+
     this.i18n.service.onLangChange(({ lang }) => {
       this.currentLang = lang as LocaleId;
     });
