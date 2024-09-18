@@ -12,10 +12,7 @@ import type {
   OverviewAggregatedData,
   OverviewData,
 } from '@dua-upd/types-common';
-import {
-  percentChange,
-  type UnwrapObservable,
-} from '@dua-upd/utils-common';
+import { percentChange, type UnwrapObservable } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
@@ -25,9 +22,7 @@ import {
   selectUrl,
 } from '@dua-upd/upd/state';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
-import type {
-  ApexAxisChartSeries,
-} from 'ng-apexcharts';
+import type { ApexAxisChartSeries } from 'ng-apexcharts';
 import {
   selectCallsPerVisitsChartData,
   selectComboChartData,
@@ -149,19 +144,18 @@ export class OverviewFacade {
     map((improvedKpi) => improvedKpi?.successRates.validation || 0),
   );
 
-
   improvedTopKpi$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.improvedKpiTopSuccessRate),
   );
- 
+
   improvedKpiTopUniqueTasks$ = this.improvedTopKpi$.pipe(
     map((improvedTopKpi) => improvedTopKpi?.uniqueTopTasks || 0),
   );
- 
+
   improvedKpiTopTasks$ = this.improvedTopKpi$.pipe(
     map((improvedTopKpi) => improvedTopKpi?.allTopTasks || 0),
   );
- 
+
   improvedKpiTopSuccessRate$ = this.improvedTopKpi$.pipe(
     map((improvedTopKpi) => improvedTopKpi?.topSuccessRates || 0),
   );
@@ -184,7 +178,7 @@ export class OverviewFacade {
 
   totalTasks$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.totalTasks || 0),
-  )
+  );
 
   testTypeTranslations$ = combineLatest([
     this.projects$,
@@ -427,20 +421,35 @@ export class OverviewFacade {
   tableMerge$ = this.store.select(selectComboChartTable);
 
   dateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)),
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(data.dateRange, lang) as string,
+    ),
   );
 
   fullDateRangeLabel$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
-  ]).pipe(map(([data, lang]) => getFullDateRangeLabel(data.dateRange, lang)));
+  ]).pipe(
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(
+          data.dateRange,
+          lang,
+          'MMM D YYYY',
+          'to',
+          true,
+        ) as string[],
+    ),
+  );
 
   comparisonDateRangeLabel$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) =>
-      getWeeklyDatesLabel(data.comparisonDateRange || '', lang),
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(data.comparisonDateRange || '', lang) as string,
     ),
   );
 
@@ -448,8 +457,15 @@ export class OverviewFacade {
     this.overviewData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) =>
-      getFullDateRangeLabel(data.comparisonDateRange || '', lang),
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(
+          data.comparisonDateRange || '',
+          lang,
+          'MMM D YYYY',
+          'to',
+          true,
+        ) as string[],
     ),
   );
 
@@ -457,7 +473,10 @@ export class OverviewFacade {
     this.overviewData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) => getWeeklyDatesLabel(data.satDateRange || '', lang)),
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(data.satDateRange || '', lang) as string,
+    ),
   );
 
   dyfData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
@@ -871,37 +890,31 @@ export class OverviewFacade {
   getMostRelevantFeedback() {
     this.store.dispatch(OverviewActions.getMostRelevantFeedback());
   }
+
+  getDateRangeLabel(
+    dateRange: string,
+    lang: LocaleId,
+    dateFormat = 'MMM D YYYY',
+    separator = '-',
+    breakLine = false,
+  ) {
+    const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+    dateFormat = this.i18n.service.translate(dateFormat, lang);
+    separator = this.i18n.service.translate(separator, lang);
+
+    const formattedStartDate = dayjs
+      .utc(startDate)
+      .locale(lang)
+      .format(dateFormat);
+    const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
+
+    //breakLine exists for apexcharts labels
+    return breakLine
+      ? [`${formattedStartDate} ${separator}`, `${formattedEndDate}`]
+      : `${formattedStartDate} ${separator} ${formattedEndDate}`;
+  }
 }
-
-const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
-  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
-
-  const dateFormat = lang === FR_CA ? 'D MMM' : 'MMM D';
-
-  const formattedStartDate = dayjs
-    .utc(startDate)
-    .locale(lang)
-    .format(dateFormat);
-  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
-
-  return `${formattedStartDate}-${formattedEndDate}`;
-};
-
-const getFullDateRangeLabel = (dateRange: string, lang: LocaleId) => {
-  const [startDate, endDate] = dateRange.split('/');
-
-  const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
-  const separator = lang === FR_CA ? ' au' : ' to';
-
-  const formattedStartDate = dayjs
-    .utc(startDate)
-    .locale(lang)
-    .format(dateFormat);
-
-  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
-
-  return [`${formattedStartDate}${separator}`, `${formattedEndDate}`];
-};
 
 type DateRangeDataIndexKey = keyof OverviewAggregatedData &
   keyof PickByType<OverviewAggregatedData, number>;

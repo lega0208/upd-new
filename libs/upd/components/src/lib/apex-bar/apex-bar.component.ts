@@ -30,6 +30,7 @@ export class ApexBarComponent implements OnInit {
   @Input() table: any;
   @Input() tableCols: ColumnConfig[] = [];
   @Input() tableExport = true;
+  @Input() allowHeaderWrap = false;
 
   @Input() set showPercent(value: {
     isPercent: boolean;

@@ -181,6 +181,10 @@ export class TaskDetailsSummaryComponent implements OnInit {
           header: this.i18n.service.translate('test-type', lang),
         },
         {
+          field: 'scenario',
+          header: this.i18n.service.translate('Scenario', lang),
+        },
+        {
           field: 'success_rate',
           header: this.i18n.service.translate('success-rate', lang),
           pipe: 'percent',
