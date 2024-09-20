@@ -60,7 +60,7 @@
     <div class="col">
       <upd-data-table-card
         [data]="(calldriverTopics$ | async) || []"
-        [cols]="(calldriverTopicsConfig$ | async) || []"
+        [cols]="calldriverTopicsCols"
         [filter]="true"
         [pagination]="true"
         [sort]="true"
