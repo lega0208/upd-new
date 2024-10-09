@@ -486,7 +486,7 @@ export class ProjectsDetailsFacade {
       },
       {
         field: 'comparison',
-        header: 'comparison',
+        header: 'change',
         pipe: 'percent',
       },
     ],
@@ -962,7 +962,7 @@ export class ProjectsDetailsFacade {
   >(this.i18n.service, [
     { field: 'term', header: 'search-term' },
     { field: 'clicks', header: 'clicks', pipe: 'number' },
-    { field: 'clicksChange', header: 'comparison-for-clicks', pipe: 'percent' },
+    { field: 'clicksChange', header: 'change-for-clicks', pipe: 'percent' },
     {
       field: 'position',
       header: 'position',
