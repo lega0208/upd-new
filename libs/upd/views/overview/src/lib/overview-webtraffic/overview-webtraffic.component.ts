@@ -68,7 +68,7 @@ export class OverviewWebtrafficComponent implements OnInit {
         },
         {
           field: 'percentChange',
-          header: this.i18n.service.translate('comparison', lang),
+          header: this.i18n.service.translate('change', lang),
           pipe: 'percent',
         },
       ];
