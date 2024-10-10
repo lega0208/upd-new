@@ -77,7 +77,7 @@ export class DataTableExportsComponent<T> {
       'Delayed',
       'Paused',
       'Exploratory',
-      'Being monitored',
+      'Monitoring',
       'In Progress',
       'Needs review',
       'Planning',

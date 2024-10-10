@@ -42,10 +42,7 @@ import {
   getLatestTest,
   getLatestTestData,
 } from '@dua-upd/utils-common/data';
-import {
-  AsyncLogTiming,
-  percentChange,
-} from '@dua-upd/utils-common';
+import { AsyncLogTiming, percentChange } from '@dua-upd/utils-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 
 dayjs.extend(utc);
@@ -96,9 +93,9 @@ const projectStatusSwitchExpression = {
       },
       {
         case: {
-          $in: ['Being monitored', '$statuses'],
+          $in: ['Monitoring', '$statuses'],
         },
-        then: 'Being monitored',
+        then: 'Monitoring',
       },
       {
         case: {
@@ -133,8 +130,8 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
       return 'Planning';
     case statuses.some((status) => status === 'Exploratory'):
       return 'Exploratory';
-    case statuses.some((status) => status === 'Being monitored'):
-      return 'Being monitored';
+    case statuses.some((status) => status === 'Monitoring'):
+      return 'Monitoring';
     case statuses.some((status) => status === 'Needs review'):
       return 'Needs review';
     case statuses.some((status) => status === 'Paused'):
