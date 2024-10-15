@@ -5,6 +5,7 @@
   [rows]="displayRows"
   [rowHover]="true"
   [showCurrentPageReport]="true"
+  [customSort]="true"
   [rowsPerPageOptions]="[5, 10, 25, 50, 100]"
   [loading]="loading"
   styleClass="p-datatable-striped p-datatable-sm border"
@@ -19,6 +20,7 @@
   [sortOrder]="sortOrder === 'desc' ? -1 : 1"
   dataKey="_id"
   (selectionChange)="onSelectionChange($event)"
+  (sortFunction)="customSort($event)"
   [(selection)]="selectedRows"
 >
   <ng-template *ngIf="filter || captionTitle || exports" pTemplate="caption">
@@ -119,7 +121,10 @@
             col.width ? 'min-width: ' + col.width + '; width: ' + col.width : ''
           "
         >
-          <div [ngClass]="sort ? 'text-nowrap d-flex align-items-center' : ''">
+          <div
+            [ngClass]="sort ? 'd-flex align-items-center' : ''"
+            [ngStyle]="{ 'white-space': allowHeaderWrap ? 'normal' : 'nowrap' }"
+          >
             <span
               class="p-column-title datatable-headers"
               [class.card-tooltip]="col.tooltip"

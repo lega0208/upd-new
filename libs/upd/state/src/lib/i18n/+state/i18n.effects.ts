@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
+import { createEffect, Actions, ofType } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 import { EMPTY, mergeMap, of } from 'rxjs';
 import { I18nService, type LocaleId } from '@dua-upd/upd/i18n';
 import * as I18nActions from './i18n.actions';
@@ -46,13 +47,22 @@ export class I18nEffects {
         mergeMap(([{ lang }, routeLang, queryParams]) => {
           this.i18n.use(lang);
 
+          const pendingQueryParams = Object.fromEntries([
+            ...new URLSearchParams(location.search).entries(),
+          ]);
+
+          const mergedQueryParams = {
+            ...pendingQueryParams,
+            ...queryParams,
+          };
+
           if (!routeLang || routeLang !== localeIdToLang[lang]) {
             if (!location.pathname || location.pathname === '/') {
               return of(
                 this.router.navigate([`/${localeIdToLang[lang]}/`], {
                   replaceUrl: false,
                   queryParamsHandling: 'merge',
-                  queryParams,
+                  queryParams: mergedQueryParams,
                 }),
               );
             }
@@ -68,7 +78,7 @@ export class I18nEffects {
                 {
                   replaceUrl: false,
                   queryParamsHandling: 'merge',
-                  queryParams,
+                  queryParams: mergedQueryParams,
                 },
               ),
             );

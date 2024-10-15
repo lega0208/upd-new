@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.3
-FROM node:18-alpine3.17 as builder
-WORKDIR builder
+FROM node:22.8-alpine3.20 as builder
+WORKDIR /builder
 VOLUME ["/builder"]
 COPY ["package.json", "package-lock.json", "./"]
 RUN --mount=type=cache,target=/home/node/.npm npm ci
@@ -12,11 +12,11 @@ RUN npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --prod -
 RUN npx nx daemon --stop
 RUN rm -r /builder/node_modules && rm -r /builder/tmp
 
-FROM alpine:latest as apps
-WORKDIR apps
+FROM alpine:3.20 as apps
+WORKDIR /apps
 COPY --from=builder /builder/dist/apps/ .
 
-FROM node:18-alpine3.17 as node_base
+FROM node:22.8-alpine3.20 as node_base
 RUN apk update && apk add tzdata
 ENV TZ=America/Toronto
 
@@ -57,10 +57,6 @@ FROM node_base as db-updater-dev
 RUN echo -e '#!/bin/sh\nnode db-cli/main.js "$@"' >> /bin/db-cli && chmod +x /bin/db-cli
 COPY --from=db-updater-dev-base . .
 COPY dist/apps/db-updater/ .
-#RUN apk update && \
-#    apk upgrade && \
-#    apk add bash && \
-#    apk add nano
 CMD ["node", "main.js"]
 
 FROM nginx:alpine as nginx

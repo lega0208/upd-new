@@ -1,5 +1,5 @@
-import { PageData, TaskData, UxTestData } from '@dua-upd/external-data';
-import { IPage, IProject, ITask, IUxTest } from '@dua-upd/types-common';
+import type { PageData, TaskData, UxTestData } from '@dua-upd/external-data';
+import type { IPage, IProject, ITask, IUxTest } from '@dua-upd/types-common';
 
 export type UxApiDataType = TaskData | UxTestData | PageData;
 export interface UxApiData {

@@ -1,7 +1,4 @@
 {
-  "affected": {
-    "defaultBase": "main"
-  },
   "cli": {
     "packageManager": "npm"
   },
@@ -15,10 +12,6 @@
     "@nx/angular:library": {
       "linter": "eslint",
       "unitTestRunner": "jest"
-    },
-    "@nx/angular:component": {
-      "style": "scss",
-      "project": "upd-components"
     },
     "@nx/nest:resource": {
       "project": "api",
@@ -35,9 +28,11 @@
       "style": "css",
       "linter": "eslint",
       "unitTestRunner": "none"
+    },
+    "@nx/angular:component": {
+      "style": "css"
     }
   },
-  "defaultProject": "upd",
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
     "build": {
@@ -65,6 +60,21 @@
     "@nx/eslint:lint": {
       "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
       "cache": true
+    },
+    "@nx/js:swc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
+    "@nx/angular:ng-packagr-lite": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "namedInputs": {
@@ -82,5 +92,6 @@
       "!{projectRoot}/src/test-setup.[jt]s"
     ]
   },
-  "nxCloudAccessToken": "NWZiNDZlNGMtMDhjYS00NTBlLTg0YWMtY2EwMTlmYzk2MTJjfHJlYWQ="
+  "nxCloudAccessToken": "NWZiNDZlNGMtMDhjYS00NTBlLTg0YWMtY2EwMTlmYzk2MTJjfHJlYWQ=",
+  "defaultBase": "main"
 }

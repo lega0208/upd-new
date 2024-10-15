@@ -36,6 +36,8 @@ export const actionSanitizer = (action: Action) => {
               gcTasksComments: '<<OVERVIEW_GC_TASK_COMMENTS>>',
               feedbackPages: '<<OVERVIEW_FEEDBACK_PAGES>>',
             },
+            mostRelevantCommentsAndWords:
+              '<<MOST_RELEVANT_COMMENTS_AND_WORDS>>',
           },
         }
       : action;
@@ -71,6 +73,8 @@ export const stateSanitizer = (state: State) => {
                 feedbackPages: '<<OVERVIEW_FEEDBACK_PAGES>>',
                 gcTasksComments: '<<OVERVIEW_GC_TASK_COMMENTS>>',
               },
+              mostRelevantCommentsAndWords:
+                '<<MOST_RELEVANT_COMMENTS_AND_WORDS>>',
             },
           },
         }

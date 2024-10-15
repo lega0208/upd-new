@@ -12,12 +12,12 @@ import type {
   ProjectDocument,
   TaskDocument,
   UxTestDocument,
-  FeedbackDocument,
   PageMetricsModel,
   PageDocument,
   SearchAssessmentDocument,
   AnnotationsDocument,
-  GcTasksDocument,
+  FeedbackModel,
+  GcTasksModel,
 } from '@dua-upd/db';
 import {
   DbService,
@@ -42,7 +42,7 @@ import type {
   OverviewProjectData,
   OverviewProject,
   OverallSearchTerm,
-  ITask,
+  OverviewFeedback,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -52,7 +52,12 @@ import {
   getImprovedKpiSuccessRates,
   getImprovedKpiTopSuccessRates,
   getLatestTestData,
+  getStructuredDateRangesWithComparison,
+  parseDateRangeString,
+  percentChange,
 } from '@dua-upd/utils-common';
+import { FeedbackService } from '@dua-upd/api/feedback';
+import { compressString, decompressString } from '@dua-upd/node-utils';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
@@ -119,21 +124,28 @@ export class OverallService {
     @InjectModel(CallDriver.name, 'defaultConnection')
     private calldriversModel: CallDriverModel,
     @InjectModel(Feedback.name, 'defaultConnection')
-    private feedbackModel: Model<FeedbackDocument>,
+    private feedbackModel: FeedbackModel,
     @InjectModel(SearchAssessment.name, 'defaultConnection')
     private searchAssessmentModel: Model<SearchAssessmentDocument>,
     @InjectModel(GcTasks.name, 'defaultConnection')
-    private gcTasksModel: Model<GcTasksDocument>,
+    private gcTasksModel: GcTasksModel,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectModel(Annotations.name, 'defaultConnection')
     private annotationsModel: Model<AnnotationsDocument>,
+    private feedbackService: FeedbackService,
   ) {}
 
   @AsyncLogTiming
   async getMetrics(params: ApiParams): Promise<OverviewData> {
-    const cacheKey = `OverviewMetrics-${params.dateRange}`;
-    const cachedData =
-      await this.cacheManager.store.get<OverviewData>(cacheKey);
+    const cacheKey = `OverviewMetrics-${params.dateRange}-${params['ipd']}`;
+
+    const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
+      async (cachedData) =>
+        cachedData &&
+        // it's actually still a string here, but we want to avoid deserializing it
+        // and then reserializing it to send over http while still keeping our types intact
+        ((await decompressString(cachedData)) as unknown as OverviewData),
+    );
 
     if (cachedData) {
       return cachedData;
@@ -185,15 +197,12 @@ export class OverallService {
     const uxTests =
       (await this.uxTestModel.find({}, { _id: 0 }).lean().exec()) || [];
 
-    const improvedTasksKpi = getImprovedKpiSuccessRates(uxTests);
+    const lastQuarter =
+      getStructuredDateRangesWithComparison().quarter.dateRange;
 
-    const lastQuarterStart = dayjs.utc().subtract(1, 'quarter').startOf('quarter');
-    const lastQuarterEnd = lastQuarterStart.endOf('quarter');
-
-    console.time('getTaskRankings');
     const topTasksDateRange = {
-      start: lastQuarterStart.toDate(),
-      end: lastQuarterEnd.toDate(),
+      start: lastQuarter.start.toDate(),
+      end: lastQuarter.end.toDate(),
     };
 
     const tasks = await this.db.views.pageVisits.getVisitsDyfNoWithTaskData(
@@ -205,16 +214,16 @@ export class OverallService {
 
     const dateRangeString = `${topTasksDateRange.start.toISOString().slice(0, 10)}/${topTasksDateRange.end.toISOString().slice(0, 10)}`;
 
-    for (const task of tasks as ITask[]) {
+    for (const task of tasks as ITask[]) {  
       callsByTasks[task._id.toString()] = (
         await this.db.collections.callDrivers.getCallsByTpcId(
           dateRangeString,
-          task.tpc_ids,
+          task.tpc_ids, 
         )
       ).reduce((a, b) => a + b.calls, 0);
     }
 
-    const gcTasksData = await this.db.collections.gcTasks
+    const gcTasksData2 = await this.db.collections.gcTasks
       .aggregate<{ gc_task: string; total_entries: number }>()
       .match({
         date: { $gte: topTasksDateRange.start, $lte: topTasksDateRange.end },
@@ -234,7 +243,7 @@ export class OverallService {
       })
       .exec();
 
-    const gcTasksDict = arrayToDictionary(gcTasksData, 'gc_task');
+    const gcTasksDict = arrayToDictionary(gcTasksData2, 'gc_task');
 
     const tasksWithRankingScore = tasks.map((task) => {
       const calls = callsByTasks[task._id.toString()] ?? 0;
@@ -266,12 +275,9 @@ export class OverallService {
       .map(({ _id }) => _id.toString());
 
     const improvedKpiTopSuccessRate = getImprovedKpiTopSuccessRates(
-      topTasksIds,
+      topTaskIds,
       uxTests,
     );
-
-    // console.timeEnd('getTaskRankings');
-    // console.log(improvedKpiTopSuccessRate);
 
     const totalTasks = await this.taskModel.countDocuments().exec();
 
@@ -310,7 +316,7 @@ export class OverallService {
       ),
       projects: await getProjects(this.projectModel, this.uxTestModel),
       uxTests,
-      improvedTasksKpi,
+      improvedTasksKpi: getImprovedKpiSuccessRates(uxTests),
       improvedKpiTopSuccessRate,
       ...(await getUxData(testsSince2018)),
       calldriverTopics,
@@ -321,9 +327,90 @@ export class OverallService {
       totalTasks,
     };
 
-    await this.cacheManager.set(cacheKey, results);
+    await this.cacheManager.set(
+      cacheKey,
+      await compressString(JSON.stringify(results)),
+    );
 
     return results;
+  }
+
+  @AsyncLogTiming
+  async getFeedback(params: ApiParams): Promise<OverviewFeedback> {
+    const cacheKey = `OverviewFeedback-${params.dateRange}-${params['ipd']}`;
+
+    const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
+      async (cachedData) =>
+        cachedData &&
+        // it's actually still a string here, but we want to avoid deserializing it
+        // and then reserializing it to send over http while still keeping our types intact
+        ((await decompressString(cachedData)) as unknown as OverviewFeedback),
+    );
+
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const mostRelevantCommentsAndWords =
+      await this.feedbackService.getMostRelevantCommentsAndWords({
+        dateRange: parseDateRangeString(params.dateRange),
+        ipd: params.ipd as boolean,
+      });
+
+    const numComments =
+      mostRelevantCommentsAndWords.en.comments.length +
+      mostRelevantCommentsAndWords.fr.comments.length;
+
+    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
+      parseDateRangeString(params.comparisonDateRange);
+
+    const numPreviousComments = await this.feedbackModel
+      .countDocuments({
+        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+      })
+      .exec();
+
+    const numCommentsPercentChange =
+      !params.ipd && numPreviousComments
+        ? percentChange(numComments, numPreviousComments)
+        : null;
+
+    const commentsByPage = (
+      await this.feedbackService.getNumCommentsByPage(
+        params.dateRange,
+        params.comparisonDateRange,
+      )
+    )
+      .map(({ _id, title, url, owners, sections, sum, percentChange }) => ({
+        _id: _id.toString(),
+        title,
+        url,
+        owners,
+        sections,
+        sum,
+        percentChange,
+      }))
+      .sort((a, b) => (b.sum || 0) - (a.sum || 0));
+
+    const overviewFeedback = {
+      mostRelevantCommentsAndWords,
+      numComments,
+      numCommentsPercentChange,
+      commentsByPage,
+      feedbackByDay: (
+        await this.feedbackModel.getCommentsByDay(params.dateRange)
+      ).map(({ date, sum }) => ({
+        date: date.toISOString(),
+        sum,
+      })),
+    };
+
+    await this.cacheManager.set(
+      cacheKey,
+      await compressString(JSON.stringify(overviewFeedback)),
+    );
+
+    return overviewFeedback;
   }
 
   async getTopSearchTerms(
@@ -804,385 +891,196 @@ async function getOverviewMetrics(
   overallModel: Model<OverallDocument>,
   PageMetricsModel: PageMetricsModel,
   calldriversModel: CallDriverModel,
-  feedbackModel: Model<FeedbackDocument>,
+  feedbackModel: FeedbackModel,
   pageModel: Model<PageDocument>,
   annotationsModel: Model<AnnotationsDocument>,
   db: DbService,
   searchAssessmentModel: Model<SearchAssessmentDocument>,
-  gcTasksModel: Model<GcTasksDocument>,
+  gcTasksModel: GcTasksModel,
   cacheManager: Cache,
   dateRange: string,
   satDateRange: string,
 ): Promise<OverviewAggregatedData> {
   const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-  const dateQuery: FilterQuery<Date> = {};
-
-  dateQuery.$gte = new Date(startDate);
-  dateQuery.$lte = new Date(endDate);
+  const dateQuery: FilterQuery<Date> = {
+    $gte: startDate,
+    $lte: endDate,
+  };
 
   const [satStartDate, satEndDate] = satDateRange
     .split('/')
     .map((d) => new Date(d));
 
-  const satDateQuery: FilterQuery<Date> = {};
+  const satDateQuery: FilterQuery<Date> = {
+    $gte: satStartDate,
+    $lte: satEndDate,
+  };
 
-  satDateQuery.$gte = new Date(satStartDate);
-  satDateQuery.$lte = new Date(satEndDate);
-
-  const annotations = (
-    await annotationsModel.find({ event_date: dateQuery }).lean().exec()
-  ).map((item) => ({
-    ...item,
-    event_date: item.event_date.toISOString(),
-  }));
-
-  const visitsByDay = (
-    await overallModel
+  // Perform queries in parallel
+  const [
+    annotations,
+    visitsByDay,
+    dyfByDay,
+    calldriversByDay,
+    calldriversEnquiry,
+    topPagesVisited,
+    top10GSC,
+    aggregatedMetrics,
+    searchAssessmentData,
+    gcTasksComments,
+    gcTasksData,
+  ] = await Promise.all([
+    // annotations
+    annotationsModel
+      .find({ event_date: dateQuery })
+      .lean()
+      .exec()
+      .then((annotations) =>
+        annotations.map((item) => ({
+          ...item,
+          event_date: item.event_date.toISOString(),
+        })),
+      ),
+    // visitsByDay
+    overallModel
       .find({ date: dateQuery }, { _id: 0, date: 1, visits: 1 })
       .sort({ date: 1 })
       .lean()
       .exec()
-  ).map((visits) => ({
-    ...visits,
-    date: visits.date.toISOString(),
-  }));
-
-  const dyfByDay = await overallModel
-    .find(
-      { date: dateQuery },
-      { _id: 0, date: 1, dyf_yes: 1, dyf_no: 1, dyf_submit: 1 },
-    )
-    .sort({ date: 1 })
-    .lean();
-
-  const calldriversByDay = await calldriversModel
-    .aggregate()
-    .match({ date: dateQuery })
-    .group({
-      _id: '$date',
-      calls: {
-        $sum: '$calls',
-      },
-    })
-    .project({
-      _id: 0,
-      date: '$_id',
-      calls: 1,
-    })
-    .sort({ date: 1 })
-    .exec();
-
-  const calldriversEnquiry = await calldriversModel
-    .aggregate()
-    .project({
-      date: 1,
-      enquiry_line: 1,
-      calls: 1,
-    })
-    .match({ date: dateQuery })
-    .group({
-      _id: '$enquiry_line',
-      sum: { $sum: '$calls' },
-    })
-    .sort({ sum: -1 })
-    .project({
-      _id: 0,
-      enquiry_line: '$_id',
-      sum: 1,
-    })
-    .exec();
-
-  const [start, end] = dateRangeSplit(dateRange);
-
-  const topPagesVisited = (
-    await db.views.pageVisits.getVisitsWithPageData({ start, end }, pageModel)
-  ).slice(0, 10);
-
-  const top10GSC = await overallModel
-    .aggregate()
-    .project({ date: 1, gsc_searchterms: 1 })
-    .sort({ date: 1 })
-    .match({ date: dateQuery })
-    .unwind('$gsc_searchterms')
-    .group({
-      _id: '$gsc_searchterms.term',
-      clicks: { $sum: '$gsc_searchterms.clicks' },
-      impressions: { $sum: '$gsc_searchterms.impressions' },
-      ctr: { $avg: '$gsc_searchterms.ctr' },
-      position: { $avg: '$gsc_searchterms.position' },
-    })
-    .sort({ clicks: -1 })
-    .limit(10)
-    .exec();
-
-  const totalFeedback = await feedbackModel
-    .aggregate()
-    .project({
-      date: 1,
-      url: 1,
-      main_section: 1,
-    })
-    .sort({ date: 1 })
-    .match({
-      $and: [
-        {
-          date: dateQuery,
-        },
-        {
-          url: {
-            $regex:
-              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
-          },
-        },
-      ],
-    })
-    .group({
-      _id: '$main_section',
-      sum: { $sum: 1 },
-    })
-    .sort({ sum: -1 })
-    .project({
-      _id: 0,
-      main_section: '$_id',
-      sum: 1,
-    })
-    .exec();
-
-  const feedbackPages = await feedbackModel
-    .aggregate<{ _id: string; title: string; url: string; sum: number }>()
-    .project({
-      date: 1,
-      url: 1,
-    })
-    .match({
-      $and: [
+      .then((visits) =>
+        visits.map((visit) => ({
+          ...visit,
+          date: visit.date.toISOString(),
+        })),
+      ),
+    // dyfByDay
+    overallModel
+      .find(
         { date: dateQuery },
-        // todo: remove url filter once there is logic in place to remove non-CRA pages from feedback collection
-        {
-          url: {
-            $regex:
-              '/en/revenue-agency|/fr/agence-revenu|/en/services/taxes|/fr/services/impots',
-          },
+        { _id: 0, date: 1, dyf_yes: 1, dyf_no: 1, dyf_submit: 1 },
+      )
+      .sort({ date: 1 })
+      .lean()
+      .exec(),
+    // calldriversByDay
+    calldriversModel
+      .aggregate()
+      .match({ date: dateQuery })
+      .group({
+        _id: '$date',
+        calls: {
+          $sum: '$calls',
         },
-      ],
-    })
-    .group({
-      _id: '$url',
-      sum: { $sum: 1 },
-    })
-    .project({
-      _id: 0,
-      url: '$_id',
-      sum: 1,
-    })
-    .sort({ sum: -1 })
-    .lookup({
-      from: 'pages',
-      localField: 'url',
-      foreignField: 'url',
-      as: 'page',
-    })
-    .unwind('$page')
-    .addFields({
-      _id: '$page._id',
-      title: '$page.title',
-    })
-    .project({
-      page: 0,
-    })
-    .exec();
-
-  const aggregatedMetrics = await overallModel
-    .aggregate<{
-      visitors: number;
-      visits: number;
-      pageViews: number;
-      impressions: number;
-      ctr: number;
-      position: number;
-      dyf_yes: number;
-      dyf_no: number;
-      dyf_submit: number;
-      fwylf_error: number;
-      fwylf_hard_to_understand: number;
-      fwylf_other: number;
-      fwylf_cant_find_info: number;
-    }>()
-    .match({
+      })
+      .project({
+        _id: 0,
+        date: '$_id',
+        calls: 1,
+      })
+      .sort({ date: 1 })
+      .exec(),
+    // calldriversEnquiry
+    calldriversModel
+      .aggregate()
+      .project({
+        date: 1,
+        enquiry_line: 1,
+        calls: 1,
+      })
+      .match({ date: dateQuery })
+      .group({
+        _id: '$enquiry_line',
+        sum: { $sum: '$calls' },
+      })
+      .sort({ sum: -1 })
+      .project({
+        _id: 0,
+        enquiry_line: '$_id',
+        sum: 1,
+      })
+      .exec(),
+    // topPagesVisited
+    db.views.pages.getTopVisitedPages({ start: startDate, end: endDate }, 10),
+    // top10GSC
+    overallModel
+      .aggregate()
+      .project({
+        date: 1,
+        gsc_searchterms: { $slice: ['$gsc_searchterms', 300] },
+      })
+      .match({ date: dateQuery })
+      .unwind('$gsc_searchterms')
+      .group({
+        _id: '$gsc_searchterms.term',
+        clicks: { $sum: '$gsc_searchterms.clicks' },
+        impressions: { $sum: '$gsc_searchterms.impressions' },
+        ctr: { $avg: '$gsc_searchterms.ctr' },
+        position: { $avg: '$gsc_searchterms.position' },
+      })
+      .sort({ clicks: -1 })
+      .limit(10)
+      .exec(),
+    // aggregatedMetrics
+    overallModel
+      .aggregate()
+      .match({ date: dateQuery })
+      .group({
+        _id: null,
+        visitors: { $sum: '$visitors' },
+        visits: { $sum: '$visits' },
+        pageViews: { $sum: '$views' },
+        impressions: { $sum: '$gsc_total_impressions' },
+        ctr: { $avg: '$gsc_total_ctr' },
+        position: { $avg: '$gsc_total_position' },
+        dyf_yes: { $sum: '$dyf_yes' },
+        dyf_no: { $sum: '$dyf_no' },
+        dyf_submit: { $sum: '$dyf_submit' },
+      })
+      .project({ _id: 0 })
+      .exec(),
+    // searchAssessmentData
+    searchAssessmentModel
+      .aggregate()
+      .match({ date: satDateQuery })
+      // don't group by query if there is a value in en or fr
+      .group({
+        _id: {
+          query: '$query',
+          lang: '$lang',
+        },
+        total_clicks: { $sum: '$total_clicks' },
+        target_clicks: { $sum: '$target_clicks' },
+        total_searches: { $sum: '$total_searches' },
+        expected_position: { $avg: '$expected_position' },
+        position: { $avg: '$expected_position' },
+        doc: { $push: '$$ROOT' },
+      })
+      .replaceRoot({
+        $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
+      })
+      .project({
+        query: '$_id.query',
+        lang: '$_id.lang',
+        _id: 0,
+        total_clicks: 1,
+        target_clicks: 1,
+        total_searches: 1,
+        position: 1,
+        expected_result: 1,
+      })
+      .exec(),
+    // gcTasksComments
+    gcTasksModel.aggregate().match({
       date: dateQuery,
-    })
-    .project({
-      visitors: 1,
-      visits: 1,
-      views: 1,
-      gsc_total_impressions: 1,
-      gsc_total_ctr: 1,
-      gsc_total_position: 1,
-      dyf_yes: 1,
-      dyf_no: 1,
-      dyf_submit: 1,
-      fwylf_error: 1,
-      fwylf_hard_to_understand: 1,
-      fwylf_other: 1,
-      fwylf_cant_find_info: 1,
-    })
-    .group({
-      _id: null,
-      visitors: { $sum: '$visitors' },
-      visits: { $sum: '$visits' },
-      pageViews: { $sum: '$views' },
-      impressions: { $sum: '$gsc_total_impressions' },
-      ctr: { $avg: '$gsc_total_ctr' },
-      position: { $avg: '$gsc_total_position' },
-      dyf_yes: { $sum: '$dyf_yes' },
-      dyf_no: { $sum: '$dyf_no' },
-      dyf_submit: { $sum: '$dyf_submit' },
-      fwylf_error: { $sum: '$fwylf_error' },
-      fwylf_hard_to_understand: { $sum: '$fwylf_hard_to_understand' },
-      fwylf_other: { $sum: '$fwylf_other' },
-      fwylf_cant_find_info: { $sum: '$fwylf_cant_find_info' },
-    })
-    .project({ _id: 0 })
-    .exec();
-
-  // get search assessment data, but don't merge query if there is value in en or fr
-
-  const searchAssessmentData = await searchAssessmentModel
-    .aggregate()
-    .match({ date: satDateQuery })
-    // don't group by query if there is a value in en or fr
-    .group({
-      _id: {
-        query: '$query',
-        lang: '$lang',
-      },
-      total_clicks: { $sum: '$total_clicks' },
-      target_clicks: { $sum: '$target_clicks' },
-      total_searches: { $sum: '$total_searches' },
-      expected_position: { $avg: '$expected_position' },
-      position: { $avg: '$expected_position' },
-      doc: { $push: '$$ROOT' },
-    })
-    .replaceRoot({
-      $mergeObjects: [{ $first: '$doc' }, '$$ROOT'],
-    })
-    .project({
-      query: '$_id.query',
-      lang: '$_id.lang',
-      _id: 0,
-      total_clicks: 1,
-      target_clicks: 1,
-      total_searches: 1,
-      position: 1,
-      expected_result: 1,
-    })
-    .exec();
-
-  const gcTasksComments = await gcTasksModel.aggregate().match({
-    date: { $gte: start, $lte: end },
-    sampling_task: 'y',
-    able_to_complete: {
-      $ne: 'I started this survey before I finished my visit',
-    },
-  });
-
-  const gcTasksData = await gcTasksModel
-    .aggregate()
-    .match({
-      date: { $gte: start, $lte: end },
       sampling_task: 'y',
       able_to_complete: {
-        $ne: 'I started this survey before I finished my visit',
+        $in: ['Yes', 'No'],
       },
-    })
-    .group({
-      _id: { gc_task: '$gc_task', theme: '$theme' },
-      total_entries: { $sum: 1 },
-      satisfaction: {
-        $avg: {
-          $cond: [
-            { $in: ['$satisfaction', ['Very satisfied', 'Satisfied']] },
-            1,
-            0,
-          ],
-        },
-      },
-      ease: {
-        $avg: { $cond: [{ $in: ['$ease', ['Very easy', 'Easy']] }, 1, 0] },
-      },
-      able_to_complete: {
-        $avg: { $cond: [{ $eq: ['$able_to_complete', 'Yes'] }, 1, 0] },
-      },
-    })
-    .project({
-      gc_task: '$_id.gc_task',
-      theme: '$_id.theme',
-      total_entries: 1,
-      satisfaction: 1,
-      ease: 1,
-      able_to_complete: 1,
-      margin_of_error: {
-        $divide: [
-          {
-            $add: [
-              {
-                $multiply: [
-                  1.96,
-                  {
-                    $sqrt: {
-                      $divide: [
-                        {
-                          $multiply: [
-                            '$satisfaction',
-                            { $subtract: [1, '$satisfaction'] },
-                          ],
-                        },
-                        '$total_entries',
-                      ],
-                    },
-                  },
-                ],
-              },
-              {
-                $multiply: [
-                  1.96,
-                  {
-                    $sqrt: {
-                      $divide: [
-                        { $multiply: ['$ease', { $subtract: [1, '$ease'] }] },
-                        '$total_entries',
-                      ],
-                    },
-                  },
-                ],
-              },
-              {
-                $multiply: [
-                  1.96,
-                  {
-                    $sqrt: {
-                      $divide: [
-                        {
-                          $multiply: [
-                            '$able_to_complete',
-                            { $subtract: [1, '$able_to_complete'] },
-                          ],
-                        },
-                        '$total_entries',
-                      ],
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-          3,
-        ],
-      },
-    })
-    .sort({ total_entries: -1 })
-    .project({ _id: 0 });
+    }),
+    // gcTasksData
+    gcTasksModel.getGcTaskData(dateRange),
+  ]);
 
   return {
     visitsByDay,
@@ -1191,10 +1089,8 @@ async function getOverviewMetrics(
     calldriversEnquiry,
     searchAssessmentData,
     ...aggregatedMetrics[0],
-    totalFeedback,
     topPagesVisited,
     top10GSC,
-    feedbackPages,
     annotations,
     gcTasksData,
     gcTasksComments,

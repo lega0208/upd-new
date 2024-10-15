@@ -1,41 +1,10 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-    <div class="col-lg-12 col-md-12 col-sm-12">
-      <upd-apex-bar
-        [title]="'d3-dyfwywlf'"
-        titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
-        [series]="(dyfChartApex$ | async) || []"
-        [yAxis]="'Date range' | translate"
-        [xAxis]="[ (fullDateRangeLabel$ | async) || [], (fullComparisonDateRangeLabel$ | async) || [] ]"
-        [tableCols]="dyfTableCols"
-        [table]="dyfChart$ | async"
-        [horizontal]="{ isHorizontal: true, colorDistributed: false }"
-        [stacked]="{ isStacked: true, isStacked100: true, hasDataLabels: true }"
-      ></upd-apex-bar>
-    </div>
-  </div>
-</div>
-
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-data-table-card
-        [data]="(visitsByPage$ | async) || []"
-        [cols]="visitsByPageCols"
-        [title]="'Breakdown by Page - Did you find what you were looking for?'"
-      >
-      </upd-data-table-card>
-    </div>
-  </div>
-</div>
-
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
     <div class="col">
       <upd-data-card
         [current]="feedbackTotalComments$ | async"
         [comparison]="commentsPercentChange$ | async"
-        [title]="'Total Comments'"
+        [title]="'total # of comments'"
         [tooltip]="'total # of comments'"
       ></upd-data-card>
     </div>
@@ -44,12 +13,151 @@
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-    <div class="col">
-      <upd-data-table-card
-        [title]="'feedback'"
-        [data]="(feedbackComments$ | async) || []"
-        [cols]="feedbackCommentsCols"
-      ></upd-data-table-card>
+    <div class="col-lg-12 col-md-12 col-sm-12">
+      <upd-apex-bar
+        [title]="'d3-dyfwywlf'"
+        titleTooltip="{{ 'tooltip-d3-dyfwywlf' | translate }}"
+        [series]="(dyfChartApex$ | async) || []"
+        [yAxis]="'Date range' | translate"
+        [xAxis]="[
+          (fullDateRangeLabel$ | async) || [],
+          (fullComparisonDateRangeLabel$ | async) || []
+        ]"
+        [tableCols]="dyfTableCols"
+        [table]="dyfChart$ | async"
+        [tableExport]="false"
+        [horizontal]="{ isHorizontal: true, colorDistributed: false }"
+        [stacked]="{ isStacked: true, isStacked100: true, hasDataLabels: true }"
+      ></upd-apex-bar>
     </div>
   </div>
 </div>
+
+@if (feedbackMostRelevant()) {
+  <upd-card
+    [title]="'Most frequent words (EN)'"
+    titleTooltip="most-frequent-words-en-tooltip"
+    titleSize="h6"
+  >
+    @if (mostRelevantWordsEn() && mostRelevantWordsEn().length) {
+      <upd-data-table
+        id="projects-feedback-most-relevant-words-en"
+        [filter]="true"
+        [sort]="true"
+        [pagination]="true"
+        [data]="mostRelevantWordsEn()"
+        [cols]="mostRelevantWordsColumns"
+        [title]="'Most frequent words (EN)'"
+        [allowHeaderWrap]="true"
+      >
+      </upd-data-table>
+    } @else {
+      <p>
+        <span [translate]="'nodata-available'"></span>
+      </p>
+    }
+  </upd-card>
+
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <upd-card [title]="'Most relevant comments (EN)'" titleSize="h6">
+          @if (mostRelevantCommentsEn() && mostRelevantCommentsEn().length) {
+            <upd-data-table
+              id="projects-feedback-most-relevant-comments-en"
+              [filter]="true"
+              [sort]="true"
+              [pagination]="true"
+              [data]="mostRelevantCommentsEn()"
+              [cols]="mostRelevantCommentsColumns"
+              [columnSelection]="true"
+              [allowHeaderWrap]="true"
+            >
+            </upd-data-table>
+          } @else {
+            <p>
+              <span [translate]="'nodata-available'"></span>
+            </p>
+          }
+        </upd-card>
+      </div>
+    </div>
+  </div>
+
+  <upd-card
+    [title]="'Most frequent words (FR)'"
+    titleTooltip="most-frequent-words-fr-tooltip"
+    titleSize="h6"
+  >
+    @if (mostRelevantWordsFr() && mostRelevantWordsFr().length) {
+      <upd-data-table
+        id="projects-feedback-most-relevant-words-fr"
+        [filter]="true"
+        [sort]="true"
+        [pagination]="true"
+        [data]="mostRelevantWordsFr() || []"
+        [cols]="mostRelevantWordsColumns"
+        [title]="'Most frequent words (FR)'"
+        [allowHeaderWrap]="true"
+      >
+      </upd-data-table>
+    } @else {
+      <p>
+        <span [translate]="'nodata-available'"></span>
+      </p>
+    }
+  </upd-card>
+
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col">
+        <upd-card [title]="'Most relevant comments (FR)'" titleSize="h6">
+          @if (mostRelevantCommentsFr() && mostRelevantCommentsFr().length) {
+            <upd-data-table
+              id="projects-feedback-most-relevant-comments-fr"
+              [filter]="true"
+              [sort]="true"
+              [pagination]="true"
+              [data]="mostRelevantCommentsFr() || []"
+              [cols]="mostRelevantCommentsColumns"
+              [columnSelection]="true"
+              [allowHeaderWrap]="true"
+            >
+            </upd-data-table>
+          } @else {
+            <p>
+              <span [translate]="'nodata-available'"></span>
+            </p>
+          }
+        </upd-card>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-card
+        [title]="'Breakdown by Page - Did you find what you were looking for?'"
+        [titleSize]="'h6'"
+      >
+        <upd-data-table
+          id="breakdown-by-page-dyfwylf"
+          [data]="(visitsByPage$ | async) || []"
+          [cols]="visitsByPageCols"
+          [columnSelection]="true"
+          [allowHeaderWrap]="true"
+        >
+        </upd-data-table
+      ></upd-card>
+    </div>
+  </div>
+</div>
+
+<upd-heatmap
+  title="Number of comments per day"
+  [data]="(feedbackByDay$ | async) || []"
+  [tableCols]="feedbackByDayCols"
+  [table]="(feedbackByDay$ | async) || []"
+></upd-heatmap>

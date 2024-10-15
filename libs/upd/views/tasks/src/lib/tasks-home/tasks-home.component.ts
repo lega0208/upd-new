@@ -25,9 +25,9 @@ export class TasksHomeComponent implements OnInit {
     {
       field: 'tmf_rank',
       header: 'Rank',
-      pipe: 'number',
       frozen: true,
       width: '80px',
+      center: true,
     },
     {
       field: 'task',
@@ -179,7 +179,7 @@ export class TasksHomeComponent implements OnInit {
       group: 'metrics',
     },
     {
-      field: 'calls_percent_change',
+      field: 'calls_per_100_visits_percent_change',
       header: 'kpi-calls-per-100-title-change',
       pipe: 'percent',
       pipeParam: '1.0-2',
@@ -204,7 +204,7 @@ export class TasksHomeComponent implements OnInit {
       group: 'metrics',
     },
     {
-      field: 'dyf_no_percent_change',
+      field: 'dyf_no_per_1000_visits_percent_change',
       header: 'kpi-feedback-per-1000-title-change',
       pipe: 'percent',
       pipeParam: '1.0-2',

@@ -1,5 +1,5 @@
 import type { AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
-import { days, withMutex } from '@dua-upd/utils-common';
+import { days, withMutex, withRetry } from '@dua-upd/utils-common';
 import type {
   AAMaybeResponse,
   AAResponseBody,
@@ -49,7 +49,9 @@ class AAClient {
       this.tokenExpiry = this.authParams.expiryDateTime;
     }
 
-    this.client = await getAAClient(this.authParams);
+    const getAAClientWithRetry = withRetry(getAAClient, 3, 1000);
+
+    this.client = await getAAClientWithRetry(this.authParams);
 
     return this.client;
   }
@@ -71,7 +73,7 @@ class AAClient {
 }
 
 const createAAClient = (authParams?: AuthParams) =>
-  withMutex(new AAClient(authParams), 510);
+  withMutex(new AAClient(authParams), { unlockDelay: 510 });
 
 // use pool to invisibly intersperse requests between clients
 // can make this generic to any client type and add settings like concurrency, rate limiting, etc.

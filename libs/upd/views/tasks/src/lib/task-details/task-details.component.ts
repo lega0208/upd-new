@@ -68,7 +68,7 @@ export class TaskDetailsComponent implements OnInit {
         type: 'link',
         typeParams: {
           preLink: '/' + this.langLink + '/projects',
-          link: 'id',
+          link: '_id',
         },
       } as ColumnConfig;
 

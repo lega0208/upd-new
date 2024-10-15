@@ -20,7 +20,6 @@
  */
 
 import { UrlsService } from '@dua-upd/db-update';
-import { Types } from 'mongoose';
 import { DbService } from '@dua-upd/db';
 import { logJson } from '@dua-upd/utils-common';
 import { RunScriptCommand } from '../../run-script.command';
@@ -33,6 +32,14 @@ import {
   decompressString,
 } from '@dua-upd/node-utils';
 import { startTimer } from '../utils/misc';
+import {
+  AdobeAnalyticsClient,
+  createPageMetricsQuery,
+} from '@dua-upd/external-data';
+import {
+  AdobeAnalyticsClient as AdobeAnalyticsClientNew,
+  createQuery,
+} from '@dua-upd/api/custom-reports';
 
 /*
  * Simplest example, finds one document in pages_metrics and logs it
@@ -126,7 +133,7 @@ export const findDuplicatedPageTitles = async (db: DbService) => {
  */
 
 export const findDuplicatedFirst255FromPublishedPages = async (
-  db: DbService
+  db: DbService,
 ) => {
   const results = await db.collections.pagesList
     // The type params for the 'aggregate' call are to set the type
@@ -337,7 +344,7 @@ export const getTopSearchTermPages = async (db: DbService) => {
   console.timeEnd('searchTermsWithUrlPositions');
 
   console.log(
-    `Found results for ${searchTermsWithUrlPositions.length} searchterms`
+    `Found results for ${searchTermsWithUrlPositions.length} searchterms`,
   );
 
   const searchTermsWithTopUrls = searchTermsWithUrlPositions.map(
@@ -349,20 +356,20 @@ export const getTopSearchTermPages = async (db: DbService) => {
         url: sorted[0]?.url,
         position: sorted[0]?.position,
       };
-    }
+    },
   );
 
   logJson(searchTermsWithTopUrls);
 
   const searchTermsWithMatches = searchTermsWithUrlPositions.map(
-    ({ term }) => term
+    ({ term }) => term,
   );
 
   console.log('Search terms with no matches:');
   logJson(
     topSearchTermsResults.filter(
-      (results) => !searchTermsWithMatches.includes(results._id)
-    )
+      (results) => !searchTermsWithMatches.includes(results._id),
+    ),
   );
 };
 
@@ -379,7 +386,7 @@ export const benchCompression = async () => {
     if (algo === 'brotli' && originalSize > 16_777_216) {
       console.log(
         `File too big: ${originalSizeMB}MB\n` +
-          `Brotli compression only supports files up to 16MB\n`
+          `Brotli compression only supports files up to 16MB\n`,
       );
 
       continue;
@@ -427,4 +434,53 @@ export async function injectServiceExample() {
   const pageData = await urlsService.getPageData(url);
 
   logJson(pageData);
+}
+
+/*
+ * Example of fetching data with AA client (old)
+ */
+export async function testAAClient() {
+  const client = new AdobeAnalyticsClient();
+
+  const query = createPageMetricsQuery(
+    {
+      start: '2024-01-01T00:00:00.000',
+      end: '2024-01-01T23:59:59.999',
+    },
+    {
+      settings: {
+        limit: 2,
+        page: 0,
+      },
+    },
+  );
+
+  const results = await client.executeQuery(query);
+
+  logJson(results);
+}
+
+/*
+ * Example of fetching data with AA client (new - used in custom reports)
+ */
+export async function testAAClientNew() {
+  const client = new AdobeAnalyticsClientNew();
+
+  await client.init();
+
+  const results = await client.execute(
+    createQuery({
+      urls: [
+        'www.canada.ca/en/revenue-agency/services/e-services/cra-login-services.html',
+      ],
+      dimensionName: 'url_last_255',
+      metricNames: ['visits'],
+      dateRange: {
+        start: '2024-01-01T00:00:00.000',
+        end: '2024-01-01T23:59:59.999',
+      },
+    }),
+  );
+
+  logJson(results);
 }

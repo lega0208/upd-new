@@ -12,6 +12,7 @@ import type {
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
+  chunkMap,
   dateRangeToGranularity,
 } from '@dua-upd/utils-common';
 import type { ReportDataPoint } from './custom-reports.service';
@@ -101,10 +102,14 @@ export function decomposeConfig(config: ReportConfig<Date>) {
       urls,
     }) as AAQueryConfig;
 
+  const chunkedUrls = chunkMap(urls, (url) => url, 50);
+
   const queries = dateRanges.flatMap((dateRange) =>
-    !grouped && breakdownDimension
-      ? urls.map((url) => toQueryConfig(dateRange, [url]))
-      : [toQueryConfig(dateRange, urls)],
+    grouped
+      ? [toQueryConfig(dateRange, urls)]
+      : breakdownDimension
+        ? urls.map((url) => toQueryConfig(dateRange, [url]))
+        : chunkedUrls.map((url) => toQueryConfig(dateRange, url)),
   );
 
   return queries.map((query) => ({

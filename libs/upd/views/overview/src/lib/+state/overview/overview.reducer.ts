@@ -48,7 +48,7 @@ const reducer = createReducer(
       loading: true,
       loaded: false,
       error: null,
-    })
+    }),
   ),
   on(
     OverviewActions.loadOverviewSuccess,
@@ -57,7 +57,7 @@ const reducer = createReducer(
       loading: false,
       loaded: true,
       error: null,
-    })
+    }),
   ),
   on(
     OverviewActions.loadOverviewError,
@@ -66,13 +66,13 @@ const reducer = createReducer(
       loading: false,
       loaded: true,
       error,
-    })
-  )
+    }),
+  ),
 );
 
 export function overviewReducer(
   state: OverviewState | undefined,
-  action: Action
+  action: Action,
 ) {
   return reducer(state, action);
 }

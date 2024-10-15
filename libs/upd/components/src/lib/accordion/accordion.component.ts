@@ -1,16 +1,16 @@
-import { Component, Input, AfterViewInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'upd-accordion',
   template: `
-    <div ngbAccordion [class]="flash">
+    <div ngbAccordion [class]="flash" [ngClass]="styleClass">
       <div ngbAccordionItem [collapsed]="!expanded">
-        <h2 ngbAccordionHeader>
+        <h2 ngbAccordionHeader [ngClass]="headerClass">
           <button ngbAccordionButton>{{ title | translate }}</button>
         </h2>
 
         <div ngbAccordionCollapse>
-          <div ngbAccordionBody>
+          <div ngbAccordionBody class="p-2">
             <ng-template>
               <ng-content></ng-content>
             </ng-template>
@@ -25,6 +25,7 @@ export class AccordionComponent {
   @Input() title = 'view-data-table';
   @Input() styleClass = '';
   @Input() expanded = false;
+  @Input() headerClass?: string | string[];
 
   flash = '';
 

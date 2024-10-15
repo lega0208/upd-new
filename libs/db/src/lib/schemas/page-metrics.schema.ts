@@ -1,212 +1,35 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Document, Model, Types, FilterQuery } from 'mongoose';
-import {
-  GscSearchTermMetrics,
-  AccumulatorOperator,
+import { type Document, Types, type FilterQuery } from 'mongoose';
+import type {
   AASearchTermMetrics,
-  IPageMetrics,
+  AccumulatorOperator,
   ActivityMapMetrics,
-  ITask,
+  DateRange,
+  IPage,
+  IPageMetrics,
   IProject,
+  ITask,
   IUxTest,
 } from '@dua-upd/types-common';
-import { DateRange } from '@dua-upd/utils-common';
-import { Page } from './page.schema';
-import { PageMetricsTS } from './page-metrics-ts.schema';
+import {
+  ModelWithStatics,
+  arrayToDictionary,
+  dateRangeSplit,
+  percentChange,
+} from '@dua-upd/utils-common';
+import type { Page } from './page.schema';
+import type { PageMetricsTS } from './page-metrics-ts.schema';
+import { MetricsCommon } from './metrics-common.schema';
 
 export type PageMetricsDocument = PageMetrics & Document;
 
 @Schema({ collection: 'pages_metrics' })
-export class PageMetrics implements IPageMetrics {
-  @Prop({ type: Types.ObjectId, required: true })
-  _id: Types.ObjectId = new Types.ObjectId();
-
-  @Prop({ required: true, type: String, index: true })
-  url = '';
-
+export class PageMetrics extends MetricsCommon implements IPageMetrics {
   @Prop({ required: true, type: Date, index: true })
   date = new Date(0);
 
-  @Prop({ type: Number })
-  dyf_submit = 0;
-
-  @Prop({ type: Number })
-  dyf_yes = 0;
-
-  @Prop({ type: Number })
-  dyf_no = 0;
-
-  @Prop({ type: Number })
-  views = 0;
-
-  @Prop({ type: Number })
-  visits = 0;
-
-  @Prop({ type: Number })
-  visitors = 0;
-
-  @Prop({ type: Number })
-  average_time_spent = 0;
-
-  @Prop({ type: Number })
-  bouncerate = 0;
-
-  @Prop({ type: Number })
-  rap_initiated = 0;
-
-  @Prop({ type: Number })
-  rap_completed = 0;
-
-  @Prop({ type: Number })
-  nav_menu_initiated = 0;
-
-  @Prop({ type: Number })
-  rap_cant_find = 0;
-
-  @Prop({ type: Number })
-  rap_login_error = 0;
-
-  @Prop({ type: Number })
-  rap_other = 0;
-
-  @Prop({ type: Number })
-  rap_sin = 0;
-
-  @Prop({ type: Number })
-  rap_info_missing = 0;
-
-  @Prop({ type: Number })
-  rap_securekey = 0;
-
-  @Prop({ type: Number })
-  rap_other_login = 0;
-
-  @Prop({ type: Number })
-  rap_gc_key = 0;
-
-  @Prop({ type: Number })
-  rap_info_wrong = 0;
-
-  @Prop({ type: Number })
-  rap_spelling = 0;
-
-  @Prop({ type: Number })
-  rap_access_code = 0;
-
-  @Prop({ type: Number })
-  rap_link_not_working = 0;
-
-  @Prop({ type: Number })
-  rap_404 = 0;
-
-  @Prop({ type: Number })
-  rap_blank_form = 0;
-
-  @Prop({ type: Number })
-  fwylf_cant_find_info = 0;
-
-  @Prop({ type: Number })
-  fwylf_other = 0;
-
-  @Prop({ type: Number })
-  fwylf_hard_to_understand = 0;
-
-  @Prop({ type: Number })
-  fwylf_error = 0;
-
-  @Prop({ type: Number })
-  visits_geo_ab = 0;
-
-  @Prop({ type: Number })
-  visits_geo_bc = 0;
-
-  @Prop({ type: Number })
-  visits_geo_mb = 0;
-
-  @Prop({ type: Number })
-  visits_geo_nb = 0;
-
-  @Prop({ type: Number })
-  visits_geo_nl = 0;
-
-  @Prop({ type: Number })
-  visits_geo_ns = 0;
-
-  @Prop({ type: Number })
-  visits_geo_nt = 0;
-
-  @Prop({ type: Number })
-  visits_geo_nu = 0;
-
-  @Prop({ type: Number })
-  visits_geo_on = 0;
-
-  @Prop({ type: Number })
-  visits_geo_outside_canada = 0;
-
-  @Prop({ type: Number })
-  visits_geo_pe = 0;
-
-  @Prop({ type: Number })
-  visits_geo_qc = 0;
-
-  @Prop({ type: Number })
-  visits_geo_sk = 0;
-
-  @Prop({ type: Number })
-  visits_geo_us = 0;
-
-  @Prop({ type: Number })
-  visits_geo_yt = 0;
-
-  @Prop({ type: Number })
-  visits_referrer_other = 0;
-
-  @Prop({ type: Number })
-  visits_referrer_searchengine = 0;
-
-  @Prop({ type: Number })
-  visits_referrer_social = 0;
-
-  @Prop({ type: Number })
-  visits_referrer_typed_bookmarked = 0;
-
-  @Prop({ type: Number })
-  visits_device_other = 0;
-
-  @Prop({ type: Number })
-  visits_device_desktop = 0;
-
-  @Prop({ type: Number })
-  visits_device_mobile = 0;
-
-  @Prop({ type: Number })
-  visits_device_tablet = 0;
-
-  @Prop({ type: Number })
-  gsc_total_clicks = 0;
-
-  @Prop({ type: Number })
-  gsc_total_ctr = 0;
-
-  @Prop({ type: Number })
-  gsc_total_impressions = 0;
-
-  @Prop({ type: Number })
-  gsc_total_position = 0;
-
-  @Prop({
-    type: [
-      {
-        clicks: Number,
-        ctr: Number,
-        impressions: Number,
-        position: Number,
-        term: String,
-      },
-    ],
-  })
-  gsc_searchterms: GscSearchTermMetrics[] = [];
+  @Prop({ required: true, type: String, index: true })
+  url = '';
 
   @Prop({ type: [{ term: String, clicks: Number, position: Number }] })
   aa_searchterms?: AASearchTermMetrics[];
@@ -241,6 +64,16 @@ PageMetricsSchema.index(
   { date: 1, page: 1 },
   { background: true, partialFilterExpression: { page: { $exists: true } } },
 );
+
+PageMetricsSchema.index(
+  { date: 1, tasks: 1 },
+  {
+    name: 'date_1_tasks_exists',
+    background: true,
+    partialFilterExpression: { 'tasks.0': { $exists: true } },
+  },
+);
+
 PageMetricsSchema.index(
   { date: 1, projects: 1 },
   {
@@ -297,10 +130,6 @@ PageMetricsSchema.index(
     },
   },
 );
-
-export function getPageMetricsModel() {
-  return model(PageMetrics.name, PageMetricsSchema);
-}
 
 export type MetricsConfig<T> = {
   [key in AccumulatorOperator]?: keyof Partial<T>;
@@ -476,14 +305,251 @@ export async function toTimeSeries(
     .exec();
 }
 
-PageMetricsSchema.statics = {
+export type MetricsByPage = {
+  _id: Types.ObjectId;
+  visits: number;
+  dyfYes: number;
+  dyfNo: number;
+  gscTotalClicks: number;
+  gscTotalImpressions: number;
+  gscTotalCtr: number;
+  gscTotalPosition: number;
+  feedbackToVisitsRatio: number | null;
+};
+
+export type AggregatedMetricsType = {
+  visits: number;
+  dyfYes: number;
+  dyfNo: number;
+  feedbackToVisitsRatio: number | null;
+  gscTotalClicks: number;
+  gscTotalImpressions: number;
+  gscTotalCtr: number;
+  gscTotalPosition: number;
+  visitsByPage: MetricsByPage[];
+};
+
+export type AggregatedMetricsWithPercentChange = {
+  visits: number;
+  dyfYes: number;
+  dyfNo: number;
+  visitsComparison: number;
+  dyfYesComparison: number;
+  dyfNoComparison: number;
+  gscTotalClicks: number;
+  gscTotalImpressions: number;
+  gscTotalCtr: number;
+  gscTotalPosition: number;
+  visitsPercentChange: number;
+  gscTotalClicksPercentChange: number | null;
+  gscTotalImpressionsPercentChange: number | null;
+  gscTotalCtrPercentChange: number;
+  gscTotalPositionPercentChange: number | null;
+  visitsByPage: {
+    _id: string;
+    visits: number;
+    dyfYes: number;
+    dyfNo: number;
+    feedbackToVisitsRatio: number | null;
+    title: string;
+    url: string;
+    lang?: string;
+    is_404?: boolean;
+    redirect?: string;
+    language: string;
+    is404: boolean;
+    isRedirect: boolean;
+    pageStatus: string;
+    gscTotalClicks: number;
+    gscTotalImpressions: number;
+    gscTotalCtr: number;
+    gscTotalPosition: number;
+    visitsPercentChange: number | null;
+    dyfNoPercentChange: number | null;
+  }[];
+};
+
+// for common data required in tasks/projects
+export async function getAggregatedMetrics(
+  this: PageMetricsModel,
+  dateRange: string,
+  idFilter: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
+): Promise<AggregatedMetricsType | null> {
+  const [startDate, endDate] = dateRangeSplit(dateRange);
+
+  const matchFilter: FilterQuery<PageMetrics> = {
+    date: {
+      $gte: startDate,
+      $lte: endDate,
+    },
+    ...idFilter,
+  };
+
+  const refProjection = Object.fromEntries(
+    Object.keys(idFilter).map((key) => [key, 1]),
+  );
+
+  return this.aggregate<AggregatedMetricsType>()
+    .project({
+      date: 1,
+      page: 1,
+      visits: 1,
+      dyf_yes: 1,
+      dyf_no: 1,
+      gsc_total_clicks: 1,
+      gsc_total_impressions: 1,
+      gsc_total_ctr: 1,
+      gsc_total_position: 1,
+      ...refProjection,
+    })
+    .match(matchFilter)
+    .group({
+      _id: '$page',
+      visits: { $sum: '$visits' },
+      dyfYes: { $sum: '$dyf_yes' },
+      dyfNo: { $sum: '$dyf_no' },
+      gscTotalClicks: { $sum: '$gsc_total_clicks' },
+      gscTotalImpressions: { $sum: '$gsc_total_impressions' },
+      gscTotalCtr: { $avg: '$gsc_total_ctr' },
+      gscTotalPosition: { $avg: '$gsc_total_position' },
+    })
+    .group({
+      _id: 'null',
+      visits: { $sum: '$visits' },
+      dyfYes: { $sum: '$dyfYes' },
+      dyfNo: { $sum: '$dyfNo' },
+      gscTotalClicks: { $sum: '$gscTotalClicks' },
+      gscTotalImpressions: { $sum: '$gscTotalImpressions' },
+      gscTotalCtr: { $avg: '$gscTotalCtr' },
+      gscTotalPosition: { $avg: '$gscTotalPosition' },
+      visitsByPage: {
+        $push: {
+          $mergeObjects: [
+            '$$ROOT',
+            {
+              feedbackToVisitsRatio: {
+                $cond: {
+                  if: { $eq: ['$$ROOT.visits', 0] },
+                  then: null,
+                  else: {
+                    $divide: [
+                      { $add: ['$$ROOT.dyfYes', '$$ROOT.dyfNo'] },
+                      '$$ROOT.visits',
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    })
+    .exec()
+    .then((data) => data && data?.[0]);
+}
+
+export async function getAggregatedMetricsWithComparison(
+  this: PageMetricsModel,
+  dateRange: string,
+  comparisonDateRange: string,
+  idFilter: { tasks: Types.ObjectId } | { projects: Types.ObjectId },
+  pages: IPage[],
+): Promise<AggregatedMetricsWithPercentChange | null> {
+  const [metrics, comparisonMetrics] = await Promise.all([
+    this.getAggregatedMetrics(dateRange, idFilter),
+    this.getAggregatedMetrics(comparisonDateRange, idFilter),
+  ]);
+
+  if (!metrics) {
+    return null;
+  }
+
+  const determinePageStatus = (page) => {
+    if (page?.is_404) return '404';
+    if (page?.redirect) return 'Redirected';
+    return 'Live';
+  };
+
+  const metricsDict = arrayToDictionary(metrics.visitsByPage || [], '_id');
+
+  const prevMetricsDict = arrayToDictionary(
+    comparisonMetrics.visitsByPage || [],
+    '_id',
+  );
+
+  const visitsByPage = pages
+    .map((page) => {
+      const metrics = metricsDict[page._id.toString()];
+      const prevMetrics = prevMetricsDict[page._id.toString()];
+
+      return {
+        ...page,
+        ...(metrics || {
+          visits: 0,
+          dyfYes: 0,
+          dyfNo: 0,
+          gscTotalClicks: 0,
+          gscTotalImpressions: 0,
+          gscTotalCtr: 0,
+          gscTotalPosition: 0,
+          feedbackToVisitsRatio: null,
+        }),
+        _id: page._id.toString(),
+        language: page.lang === 'fr' ? 'French' : 'English',
+        is404: page.is_404,
+        isRedirect: !!page.redirect,
+        pageStatus: determinePageStatus(page),
+        visitsPercentChange:
+          prevMetrics?.visits && metrics?.visits
+            ? percentChange(metrics.visits, prevMetrics.visits)
+            : null,
+        dyfNoPercentChange:
+          prevMetrics?.dyfNo && metrics?.dyfNo
+            ? percentChange(metrics.dyfNo, prevMetrics.dyfNo)
+            : null,
+      };
+    })
+    .sort((a, b) => a.title?.localeCompare(b.title) || 1);
+
+  const percentChangeIfNotNull = (value: number, comparisonValue: number) =>
+    comparisonValue ? percentChange(value, comparisonValue) : null;
+
+  return {
+    ...metrics,
+    visitsByPage,
+    visitsPercentChange: percentChangeIfNotNull(
+      metrics.visits,
+      comparisonMetrics.visits,
+    ),
+    gscTotalClicksPercentChange: percentChangeIfNotNull(
+      metrics.gscTotalClicks,
+      comparisonMetrics.gscTotalClicks,
+    ),
+    gscTotalImpressionsPercentChange: percentChangeIfNotNull(
+      metrics.gscTotalImpressions,
+      comparisonMetrics.gscTotalImpressions,
+    ),
+    gscTotalCtrPercentChange: percentChangeIfNotNull(
+      metrics.gscTotalCtr,
+      comparisonMetrics.gscTotalCtr,
+    ),
+    gscTotalPositionPercentChange: percentChangeIfNotNull(
+      metrics.gscTotalPosition,
+      comparisonMetrics.gscTotalPosition,
+    ),
+    visitsComparison: comparisonMetrics.visits || 0,
+    dyfYesComparison: comparisonMetrics.dyfYes || 0,
+    dyfNoComparison: comparisonMetrics.dyfNo || 0,
+  };
+}
+
+const statics = {
   getAggregatedPageMetrics,
   toTimeSeries,
+  getAggregatedMetrics,
+  getAggregatedMetricsWithComparison,
 };
 
-export type PageMetricsModel = Model<PageMetrics> & {
-  getAggregatedPageMetrics: typeof getAggregatedPageMetrics;
-  toTimeSeries: typeof toTimeSeries;
-};
+PageMetricsSchema.statics = statics;
 
-PageMetricsSchema.static('toTimeSeries', toTimeSeries);
+export type PageMetricsModel = ModelWithStatics<PageMetrics, typeof statics>;

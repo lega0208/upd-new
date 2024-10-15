@@ -50,10 +50,9 @@ export class TaskDetailsSummaryComponent implements OnInit {
   currentCallVolume$ = this.taskDetailsService.currentCallVolume$;
   callPercentChange$ = this.taskDetailsService.callPercentChange$;
 
-  visitsByPage$ = this.taskDetailsService.visitsByPageWithPercentChange$;
+  visitsByPage$ = this.taskDetailsService.visitsByPage$;
 
   dyfChart$ = this.taskDetailsService.dyfData$;
-  whatWasWrongChart$ = this.taskDetailsService.whatWasWrongData$;
 
   taskSuccessByUxTest$ = this.taskDetailsService.taskSuccessByUxTest$;
   taskSuccessByUxTestCols: ColumnConfig[] = [];
@@ -77,7 +76,6 @@ export class TaskDetailsSummaryComponent implements OnInit {
     currValue: number;
     prevValue: string;
   }>[] = [];
-  whatWasWrongTableCols: ColumnConfig[] = [];
 
   dyfChartApex$ = this.taskDetailsService.dyfDataApex$;
   dyfChartLegend: string[] = [];
@@ -85,15 +83,12 @@ export class TaskDetailsSummaryComponent implements OnInit {
   dateRangeLabel$ = this.taskDetailsService.dateRangeLabel$;
   comparisonDateRangeLabel$ = this.taskDetailsService.comparisonDateRangeLabel$;
 
-  whatWasWrongChartLegend: string[] = [];
-  whatWasWrongChartApex$ = this.taskDetailsService.whatWasWrongDataApex$;
-
   avgTaskSuccessKpiCriteria = (successRate: number) =>
     successRate >= 0.8 ? 'pass' : 'fail';
 
   ngOnInit(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
+
     combineLatest([
       this.dateRangeLabel$,
       this.comparisonDateRangeLabel$,
@@ -105,13 +100,6 @@ export class TaskDetailsSummaryComponent implements OnInit {
       this.dyfChartLegend = [
         this.i18n.service.translate('yes', lang),
         this.i18n.service.translate('no', lang),
-      ];
-
-      this.whatWasWrongChartLegend = [
-        this.i18n.service.translate('d3-cant-find-info', lang),
-        this.i18n.service.translate('d3-other', lang),
-        this.i18n.service.translate('d3-hard-to-understand', lang),
-        this.i18n.service.translate('d3-error', lang),
       ];
 
       this.visitsByPageCols = [
@@ -129,11 +117,13 @@ export class TaskDetailsSummaryComponent implements OnInit {
           header: this.i18n.service.translate('Search term language', lang),
           filterConfig: {
             type: 'category',
-            categories: createCategoryConfig({
-              i18n: this.i18n.service,
-              data,
-              field: 'language',
-            }),
+            categories: data
+              ? createCategoryConfig({
+                  i18n: this.i18n.service,
+                  data,
+                  field: 'language',
+                })
+              : undefined,
           },
         },
         {
@@ -143,11 +133,13 @@ export class TaskDetailsSummaryComponent implements OnInit {
           typeParam: 'pageStatus',
           filterConfig: {
             type: 'pageStatus',
-            categories: createCategoryConfig({
-              i18n: this.i18n.service,
-              data,
-              field: 'pageStatus',
-            }),
+            categories: data
+              ? createCategoryConfig({
+                  i18n: this.i18n.service,
+                  data,
+                  field: 'pageStatus',
+                })
+              : undefined,
           },
         },
         {
@@ -162,8 +154,8 @@ export class TaskDetailsSummaryComponent implements OnInit {
           pipe: 'number',
         },
         {
-          field: 'percentChange',
-          header: this.i18n.service.translate('%-change', lang),
+          field: 'visitsPercentChange',
+          header: this.i18n.service.translate('change', lang),
           pipe: 'percent',
           type: 'comparison',
         },
@@ -189,6 +181,10 @@ export class TaskDetailsSummaryComponent implements OnInit {
           header: this.i18n.service.translate('test-type', lang),
         },
         {
+          field: 'scenario',
+          header: this.i18n.service.translate('Scenario', lang),
+        },
+        {
           field: 'success_rate',
           header: this.i18n.service.translate('success-rate', lang),
           pipe: 'percent',
@@ -208,18 +204,6 @@ export class TaskDetailsSummaryComponent implements OnInit {
         {
           field: 'prevValue',
           header: comparisonDateRange,
-          pipe: 'number',
-        },
-      ];
-
-      this.whatWasWrongTableCols = [
-        {
-          field: 'name',
-          header: this.i18n.service.translate('d3-www', lang),
-        },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
           pipe: 'number',
         },
       ];

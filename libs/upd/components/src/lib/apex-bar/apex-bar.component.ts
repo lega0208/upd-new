@@ -29,6 +29,8 @@ export class ApexBarComponent implements OnInit {
   @Input() titleTooltip = '';
   @Input() table: any;
   @Input() tableCols: ColumnConfig[] = [];
+  @Input() tableExport = true;
+  @Input() allowHeaderWrap = false;
   @Input() emptyMessage?: string;
 
   @Input() set showPercent(value: {

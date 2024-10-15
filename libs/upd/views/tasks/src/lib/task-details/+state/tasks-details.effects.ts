@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { createEffect, Actions, ofType, concatLatestFrom } from '@ngrx/effects';
+import { createEffect, Actions, ofType } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 import { catchError, EMPTY, mergeMap, map, of, filter } from 'rxjs';
 import { ApiService } from '@dua-upd/upd/services';
 import {
@@ -9,11 +10,17 @@ import {
   selectRouteNestedParam,
 } from '@dua-upd/upd/state';
 import {
+  getMostRelevantFeedback,
+  getMostRelevantFeedbackSuccess,
   loadTasksDetailsError,
   loadTasksDetailsInit,
   loadTasksDetailsSuccess,
 } from './tasks-details.actions';
-import { selectTasksDetailsData } from './tasks-details.selectors';
+import {
+  selectTaskId,
+  selectTasksDetailsData,
+} from './tasks-details.selectors';
+import type { MostRelevantCommentsAndWordsByLang } from '@dua-upd/types-common';
 
 @Injectable()
 export class TasksDetailsEffects {
@@ -69,6 +76,35 @@ export class TasksDetailsEffects {
     return this.actions$.pipe(
       ofType(selectDatePeriod),
       mergeMap(() => of(loadTasksDetailsInit())),
+    );
+  });
+
+  getMostRelevantFeedback$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(getMostRelevantFeedback),
+      concatLatestFrom(() => [
+        this.store.select(selectTaskId),
+        this.store.select(selectDateRanges),
+      ]),
+      mergeMap(([, id, { dateRange }]) =>
+        this.api
+          .get<
+            MostRelevantCommentsAndWordsByLang,
+            {
+              dateRange: string;
+              id: string;
+              type: 'task';
+            }
+          >('/api/feedback/most-relevant', {
+            dateRange,
+            id,
+            type: 'task',
+          })
+          .pipe(
+            map((data) => getMostRelevantFeedbackSuccess({ data })),
+            catchError(() => EMPTY),
+          ),
+      ),
     );
   });
 }

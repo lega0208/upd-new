@@ -14,6 +14,7 @@
         modal=" {{ 'kpi-calls-per-100-guidance' | translate }}"
       ></upd-apex-spark-line>
     </div>
+
     <div class="col-lg-3 col-md-12 col-sm-12">
       <upd-apex-spark-line
         [title]="'kpi-feedback-per-1000-title'"
@@ -29,6 +30,7 @@
       ></upd-apex-spark-line>
       <!-- pass text and kpiFEedbackPercentChange$ to upd-apex-radial-bar component-->
     </div>
+
     <div class="col-lg-3 col-md-12 col-sm-12">
       <upd-apex-radial-bar
         [title]="'kpi-search-assessment-title'"
@@ -52,22 +54,8 @@
         }}
       </upd-apex-radial-bar>
     </div>
+
     <div class="col-lg-3 col-md-12 col-sm-12">
-      <!-- <upd-apex-radial-bar
-        [title]="'kpi-ux-test-title'"
-        [titleTooltip]="'kpi-ux-test-tooltip'"
-        [preLabel]="'Target'"
-        [valueLabel]="0.8"
-        [current]="(kpiLastAvgSuccessRate$ | async) || 0"
-        [kpiObjectiveCriteria]="uxTestsKpiObjectiveCriteria"
-        [keyword]="'ux'"
-        modal="{{ 'kpi-ux-test-guidance' | translate }}"
-      >
-        {{
-          'kpi-ux-test-text'
-            | translate: { total: (kpiTestsCompleted$ | async) || 0 }
-        }}
-      </upd-apex-radial-bar> -->
       <upd-apex-radial-bar
         class="custom-radial-bar"
         [title]="'kpi-ux-test-improved-title'"
@@ -108,39 +96,7 @@
     </div>
   </div>
 </div>
-<!--
-    <div class="col-lg-3 col-md-12 col-sm-12">
-      <upd-apex-charts
-        [title]="'Negative comments to visits'"
-        [titleTooltip]="'Negative comments to visits tooltip'"
-        [type]="'radialBar'"
-        [data]="apexRadial$"
-        [labels]="['+ 2%']"
-        >150 negative comments : 125K visits</upd-apex-charts
-      >
-    </div>
-    <div class="col-lg-3 col-md-12 col-sm-12">
-      <upd-apex-charts
-        [title]="'Clicks compared to impressions'"
-        [titleTooltip]="'Clicks compared to impressions'"
-        [type]="'radialBar'"
-        [data]="apexRadial$"
-        [labels]="['- 0.3%']"
-        >11M clicks : 87.5M impressions</upd-apex-charts
-      >
-    </div>
-    <div class="col-lg-3 col-md-12 col-sm-12">
-      <upd-apex-charts
-        [title]="'Clicks compared to impressions'"
-        [titleTooltip]="'Clicks compared to impressions'"
-        [type]="'radialBar'"
-        [data]="apexRadial$"
-        [labels]="['- 0.3%']"
-        >11M clicks : 87.5M impressions</upd-apex-charts
-      >
-    </div>
-  </div>
-</div> -->
+
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
@@ -153,47 +109,11 @@
         [secondaryTitleData]="chartData"
         [secondaryTitleCols]="chartCols"
         [annotations]="(annotationsData$ | async) || []"
+        [allowHeaderWrap]="true"
       ></upd-apex-bar-line>
     </div>
   </div>
 </div>
-
-<!-- <div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-<upd-charts2
-[title]="'Visits compared to call volume'"
-[data]="dyfChartApex$"
-[type]="'donut'"
-[labels]="dyfChartLegend"
-[table]="barTable$ | async"
-[tableCols]="barTableCols"
-></upd-charts2>
-</div>
-</div>
-</div> -->
-
-<!-- <div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-charts
-        [type]="'combo-bar-line'"
-        [title]="'d3-visits-compared-to-calls'"
-        [displayLegend]="'below'"
-        [showRightYAxisLabel]="true"
-        [curveType]="'Monotone X'"
-        [barChart]="(barChartData$ | async) || []"
-        [lineChart]="(calldriversChartData$ | async) || []"
-        [chartMerge]="(chartMerge$ | async) || []"
-        [table]="barTable$ | async"
-        [convertToLine]="(isChartDataOver31Days$ | async) || false"
-        [tableCols]="barTableCols"
-        [secondaryTitleData]="chartData"
-        [secondaryTitleCols]="chartCols"
-      ></upd-charts>
-    </div>
-  </div>
-</div> -->
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
@@ -255,23 +175,6 @@
   </div>
 </div>
 
-<!-- <div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <upd-data-table-card
-        [filter]="false"
-        [sort]="false"
-        [pagination]="false"
-        [data]="taskSurvey"
-        [cols]="taskSurveyCols"
-        [title]="'top10-tasks-GC'"
-        [tooltip]="'tooltip-top10-tasks-GC'"
-      >
-      </upd-data-table-card>
-    </div>
-  </div>
-</div> -->
-
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col-lg-12 col-md-12 col-sm-12">
@@ -286,21 +189,10 @@
         ]"
         [tableCols]="dyfTableCols"
         [table]="dyfChart$ | async"
+        [allowHeaderWrap]="true"
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"
         [stacked]="{ isStacked: true, isStacked100: true, hasDataLabels: true }"
       ></upd-apex-bar>
-      <!-- <div class="col-lg-6 col-md-12 col-sm-12">
-      <upd-apex-donut
-        [title]="'d3-www'"
-        titleTooltip="{{ 'tooltip-d3-www' | translate }}"
-        [series]="(whatWasWrongChartApex$ | async) || []"
-        [labels]="whatWasWrongChartLegend"
-        [secondaryTitleData]="donutChartData"
-        [secondaryTitleCols]="donutChartCols"
-        [tableCols]="whatWasWrongTableCols"
-        [table]="whatWasWrongChart$ | async"
-      ></upd-apex-donut>
-    </div> -->
-    </div>
+      </div>
   </div>
 </div>

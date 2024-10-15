@@ -1,6 +1,6 @@
 <div class="container-fluid gx-0">
   <div class="row">
-    <div class="col-lg-4 col-sm-12">
+    <div class="col-lg-4 col-sm-12 ps-0">
       <upd-apex-radial-bar
         [title]="'kpi-ux-test-success-all-title'"
         [titleTooltip]="'kpi-ux-test-success-all-tooltip'"
@@ -104,31 +104,30 @@
         </div>
       </upd-apex-radial-bar>
     </div>
+  </div>
 
-    <div class="container-fluid my-4 gx-0">
-      <div class="row">
-        <div class="col-lg-4 col-sm-12">
-          <upd-data-card
-            [current]="kpiTestsCompleted$ | async"
-            [title]="'tests-completed-since2018'"
-          ></upd-data-card>
-        </div>
-        <div class="col-lg-4 col-sm-12">
-          <upd-data-card
-            [current]="tasksTested$ | async"
-            [title]="'tasks-tested-since2018'"
-          ></upd-data-card>
-        </div>
-        <div class="col-lg-4 col-sm-12">
-          <upd-data-card
-            [current]="participantsTested$ | async"
-            [title]="'participants-since2018'"
-          ></upd-data-card>
-        </div>
-      </div>
+  <div class="row my-4">
+    <div class="col-lg-4 col-sm-12 ps-0">
+      <upd-data-card
+        [current]="kpiTestsCompleted$ | async"
+        [title]="'tests-completed-since2018'"
+      ></upd-data-card>
     </div>
+    <div class="col-lg-4 col-sm-12">
+      <upd-data-card
+        [current]="tasksTested$ | async"
+        [title]="'tasks-tested-since2018'"
+      ></upd-data-card>
+    </div>
+    <div class="col-lg-4 col-sm-12 pe-0">
+      <upd-data-card
+        [current]="participantsTested$ | async"
+        [title]="'participants-since2018'"
+      ></upd-data-card>
+    </div>
+  </div>
 
-    <!-- <div class="container-fluid my-4 gx-0">
+  <!-- <div class="container-fluid my-4 gx-0">
       <div class="row">
         <div class="col-lg-4 col-sm-12">
           <upd-data-card
@@ -151,17 +150,16 @@
       </div>
     </div> -->
 
-    <div class="container-fluid my-4 gx-0">
-      <div class="row">
-        <div class="col">
-          <upd-data-table-card
-            [data]="(uxChartData | async) || []"
-            [cols]="uxChartCols"
-            [title]="'UX tests by project'"
-            [sortField]="'startDate'"
-            [sortOrder]="'desc'"
-          ></upd-data-table-card>
-        </div>
+  <div class="container-fluid my-4 gx-0">
+    <div class="row">
+      <div class="col px-0">
+        <upd-data-table-card
+          [data]="(uxChartData | async) || []"
+          [cols]="uxChartCols"
+          [title]="'UX tests by project'"
+          [sortField]="'startDate'"
+          [sortOrder]="'desc'"
+        ></upd-data-table-card>
       </div>
     </div>
   </div>

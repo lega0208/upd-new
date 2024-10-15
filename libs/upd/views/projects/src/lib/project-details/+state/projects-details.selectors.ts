@@ -64,6 +64,12 @@ export const selectComparisonDateRangeLabel = selectDateRangeLabel(
   selectComparisonDateRange
 );
 
+// Feedback - most relevant comments/words
+export const selectFeedbackMostRelevant = createSelector(
+  selectProjectsDetailsData,
+  (data) => data?.mostRelevantCommentsAndWords,
+);
+
 // Visits by day
 export const selectVisitsByDay = createSelector(
   selectCurrentData,

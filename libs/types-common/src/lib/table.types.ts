@@ -33,7 +33,8 @@ export interface ColumnConfig<T = any> {
   upGoodDownBad?: boolean;
   useArrows?: boolean;
   showTextColours?: boolean;
-  width?: number;
+  width?: string;
+  center?: boolean;
 }
 
 export type GroupedColumns<T> = {

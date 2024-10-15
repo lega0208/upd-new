@@ -23,10 +23,7 @@ import {
   selectUrl,
 } from '@dua-upd/upd/state';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
-import type {
-  ApexAxisChartSeries,
-  ApexNonAxisChartSeries,
-} from 'ng-apexcharts';
+import type { ApexAxisChartSeries } from 'ng-apexcharts';
 import {
   selectCallsPerVisitsChartData,
   selectComboChartData,
@@ -107,7 +104,6 @@ export class OverviewFacade {
     map((data) => data?.dateRangeData?.topPagesVisited || []),
   );
 
-
   topPagesVisitedWithPercentChange$ = this.overviewData$.pipe(
     mapObjectArraysWithPercentChange('topPagesVisited', 'visits', 'url'),
     map((topPages) => topPages?.sort((a, b) => b.visits - a.visits)),
@@ -132,11 +128,11 @@ export class OverviewFacade {
   improvedKpi$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.improvedTasksKpi),
   );
- 
+
   improvedKpiUniqueTasks$ = this.improvedKpi$.pipe(
     map((improvedKpi) => improvedKpi?.uniqueTasks || 0),
   );
- 
+
   improvedKpiSuccessRate$ = this.improvedKpi$.pipe(
     map((improvedKpi) => improvedKpi?.successRates || 0),
   );
@@ -149,19 +145,18 @@ export class OverviewFacade {
     map((improvedKpi) => improvedKpi?.successRates.validation || 0),
   );
 
-
   improvedTopKpi$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.improvedKpiTopSuccessRate),
   );
- 
+
   improvedKpiTopUniqueTasks$ = this.improvedTopKpi$.pipe(
     map((improvedTopKpi) => improvedTopKpi?.uniqueTopTasks || 0),
   );
- 
+
   improvedKpiTopTasks$ = this.improvedTopKpi$.pipe(
     map((improvedTopKpi) => improvedTopKpi?.allTopTasks || 0),
   );
- 
+
   improvedKpiTopSuccessRate$ = this.improvedTopKpi$.pipe(
     map((improvedTopKpi) => improvedTopKpi?.topSuccessRates || 0),
   );
@@ -184,10 +179,10 @@ export class OverviewFacade {
 
   totalTasks$ = this.overviewData$.pipe(
     map((overviewData) => overviewData?.totalTasks || 0),
-  )
+  );
 
   testTypeTranslations$ = combineLatest([
-    this.projects$, 
+    this.projects$,
     this.currentLang$,
   ]).pipe(
     mergeMap(([projects]) => {
@@ -427,20 +422,34 @@ export class OverviewFacade {
   tableMerge$ = this.store.select(selectComboChartTable);
 
   dateRangeLabel$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
-    map(([data, lang]) => getWeeklyDatesLabel(data.dateRange, lang)),
+    map(
+      ([data, lang]) => this.getDateRangeLabel(data.dateRange, lang) as string,
+    ),
   );
 
   fullDateRangeLabel$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
-  ]).pipe(map(([data, lang]) => getFullDateRangeLabel(data.dateRange, lang)));
+  ]).pipe(
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(
+          data.dateRange,
+          lang,
+          'MMM D YYYY',
+          'to',
+          true,
+        ) as string[],
+    ),
+  );
 
   comparisonDateRangeLabel$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) =>
-      getWeeklyDatesLabel(data.comparisonDateRange || '', lang),
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(data.comparisonDateRange || '', lang) as string,
     ),
   );
 
@@ -448,8 +457,15 @@ export class OverviewFacade {
     this.overviewData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) =>
-      getFullDateRangeLabel(data.comparisonDateRange || '', lang),
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(
+          data.comparisonDateRange || '',
+          lang,
+          'MMM D YYYY',
+          'to',
+          true,
+        ) as string[],
     ),
   );
 
@@ -457,7 +473,10 @@ export class OverviewFacade {
     this.overviewData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) => getWeeklyDatesLabel(data.satDateRange || '', lang)),
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(data.satDateRange || '', lang) as string,
+    ),
   );
 
   dyfData$ = combineLatest([this.overviewData$, this.currentLang$]).pipe(
@@ -513,68 +532,6 @@ export class OverviewFacade {
       }
 
       return dyfData;
-    }),
-  );
-
-  whatWasWrongDataApex$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const pieChartData = [
-        data?.dateRangeData?.fwylf_cant_find_info || 0,
-        data?.dateRangeData?.fwylf_other || 0,
-        data?.dateRangeData?.fwylf_hard_to_understand || 0,
-        data?.dateRangeData?.fwylf_error || 0,
-      ] as ApexNonAxisChartSeries;
-
-      const isZero = pieChartData.every((v) => v === 0);
-      if (isZero) {
-        return [];
-      }
-
-      return pieChartData;
-    }),
-  );
-
-  whatWasWrongData$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const cantFindInfo = this.i18n.service.translate(
-        'd3-cant-find-info',
-        lang,
-      );
-      const otherReason = this.i18n.service.translate('d3-other', lang);
-      const hardToUnderstand = this.i18n.service.translate(
-        'd3-hard-to-understand',
-        lang,
-      );
-      const error = this.i18n.service.translate('d3-error', lang);
-
-      const pieChartData = [
-        {
-          name: cantFindInfo,
-          value: data?.dateRangeData?.fwylf_cant_find_info || 0,
-        },
-        { name: otherReason, value: data?.dateRangeData?.fwylf_other || 0 },
-        {
-          name: hardToUnderstand,
-          value: data?.dateRangeData?.fwylf_hard_to_understand || 0,
-        },
-        {
-          name: error,
-          value: data?.dateRangeData?.fwylf_error || 0,
-        },
-      ];
-
-      const isZero = pieChartData.every((v) => v.value === 0);
-      if (isZero) {
-        return [];
-      }
-
-      return pieChartData;
     }),
   );
 
@@ -690,88 +647,6 @@ export class OverviewFacade {
     }),
   );
 
-  comparisonFeedbackPagesTable$ = combineLatest([
-    this.overviewData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const dateRange = data?.dateRangeData?.feedbackPages || [];
-      const comparisonDateRange =
-        data?.comparisonDateRangeData?.feedbackPages || [];
-
-      const dataFeedback = dateRange.map((d, i) => {
-        let prevVal = NaN;
-        comparisonDateRange.map((cd, i) => {
-          if (d.url === cd.url) {
-            prevVal = cd.sum;
-          }
-        });
-        return {
-          name: this.i18n.service.translate(`${d.url}`, lang),
-          currValue: d.sum,
-          prevValue: prevVal,
-          id: d._id,
-          title: d.title,
-        };
-      });
-
-      comparisonDateRange.map((d, i) => {
-        let currValue = 0;
-        dateRange.map((cd, i) => {
-          if (d.url === cd.url) {
-            currValue = cd.sum;
-          }
-        });
-        if (currValue === 0) {
-          dataFeedback.push({
-            name: this.i18n.service.translate(`${d.url}`, lang),
-            currValue: 0,
-            prevValue: d.sum,
-            id: d._id,
-            title: d.title,
-          });
-        }
-      });
-
-      return dataFeedback
-        .map((val: any, i) => ({
-          ...val,
-          percentChange: percentChange(val.currValue, val.prevValue),
-        }))
-        .filter((v) => v.currValue > 0 || v.prevValue > 0)
-        .sort((a, b) => b.currValue - a.currValue)
-    }),
-  );
-
-  currentTotalComments$ = this.overviewData$.pipe(
-    map(
-      (data) =>
-        data?.dateRangeData?.feedbackPages.reduce(
-          (totalComments, feedback) => totalComments + feedback.sum,
-          0,
-        ) || 0,
-    ),
-  );
-
-  comparisonTotalComments$ = this.overviewData$.pipe(
-    map(
-      (data) =>
-        data?.comparisonDateRangeData?.feedbackPages.reduce(
-          (totalComments, feedback) => totalComments + feedback.sum,
-          0,
-        ) || 0,
-    ),
-  );
-
-  commentsPercentChange$ = combineLatest([
-    this.currentTotalComments$,
-    this.comparisonTotalComments$,
-  ]).pipe(
-    map(([currentComments, comparisonComments]) =>
-      percentChange(currentComments, comparisonComments),
-    ),
-  );
-
   uxTestsCompleted$ = this.overviewData$.pipe(
     map((data) => data.testsCompletedSince2018),
   );
@@ -791,12 +666,17 @@ export class OverviewFacade {
     map((data) => data.copsTestsCompletedSince2018),
   );
 
-  calldriverTopics$ = this.overviewData$.pipe(
-    map((data) =>
+  calldriverTopics$ = combineLatest([
+    this.overviewData$,
+    this.currentLang$,
+  ]).pipe(
+    map(([data, lang]) =>
       data.calldriverTopics.map((topicData) => ({
         topic: topicData.topic || '',
         tpc_id: topicData.tpc_id || '',
-        enquiry_line: topicData.enquiry_line || '',
+        enquiry_line:
+          this.i18n.service.translate(`d3-${topicData.enquiry_line}`, lang) ||
+          '',
         subtopic: topicData.subtopic || '',
         sub_subtopic: topicData.sub_subtopic || '',
         tasks: topicData.tasks,
@@ -1036,7 +916,7 @@ export class OverviewFacade {
     { field: 'total_searches', header: 'Total searches', pipe: 'number' },
     {
       field: 'searchesChange',
-      header: 'comparison-for-searches',
+      header: 'change-for-searches',
       pipe: 'percent',
     },
     { field: 'clicks', header: 'clicks', pipe: 'number' },
@@ -1050,45 +930,39 @@ export class OverviewFacade {
   ]);
 
   error$ = this.store.select(OverviewSelectors.selectOverviewError);
-  
-
- 
-  
 
   init() {
     this.store.dispatch(OverviewActions.init());
   }
+
+  getMostRelevantFeedback() {
+    this.store.dispatch(OverviewActions.getMostRelevantFeedback());
+  }
+
+  getDateRangeLabel(
+    dateRange: string,
+    lang: LocaleId,
+    dateFormat = 'MMM D YYYY',
+    separator = '-',
+    breakLine = false,
+  ) {
+    const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
+
+    dateFormat = this.i18n.service.translate(dateFormat, lang);
+    separator = this.i18n.service.translate(separator, lang);
+
+    const formattedStartDate = dayjs
+      .utc(startDate)
+      .locale(lang)
+      .format(dateFormat);
+    const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
+
+    //breakLine exists for apexcharts labels
+    return breakLine
+      ? [`${formattedStartDate} ${separator}`, `${formattedEndDate}`]
+      : `${formattedStartDate} ${separator} ${formattedEndDate}`;
+  }
 }
-
-const getWeeklyDatesLabel = (dateRange: string, lang: LocaleId) => {
-  const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
-
-  const dateFormat = lang === FR_CA ? 'D MMM' : 'MMM D';
-
-  const formattedStartDate = dayjs
-    .utc(startDate)
-    .locale(lang)
-    .format(dateFormat);
-  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
-
-  return `${formattedStartDate}-${formattedEndDate}`;
-};
-
-const getFullDateRangeLabel = (dateRange: string, lang: LocaleId) => {
-  const [startDate, endDate] = dateRange.split('/');
-
-  const dateFormat = lang === FR_CA ? 'D MMM YYYY' : 'MMM D YYYY';
-  const separator = lang === FR_CA ? ' au' : ' to';
-
-  const formattedStartDate = dayjs
-    .utc(startDate)
-    .locale(lang)
-    .format(dateFormat);
-
-  const formattedEndDate = dayjs.utc(endDate).locale(lang).format(dateFormat);
-
-  return [`${formattedStartDate}${separator}`, `${formattedEndDate}`];
-};
 
 type DateRangeDataIndexKey = keyof OverviewAggregatedData &
   keyof PickByType<OverviewAggregatedData, number>;
@@ -1143,7 +1017,7 @@ function mapObjectArraysWithPercentChange(
     if (propsAreValidArrays) {
       const sortBy = (a: any, b: any) => {
         if (sortPath && a[sortPath] instanceof Date) {
-          return a[sortPath] - b[sortPath];
+          return a[sortPath].getTime() - b[sortPath].getTime();
         }
 
         if (sortPath && typeof a[sortPath] === 'string') {

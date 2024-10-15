@@ -38,8 +38,8 @@ export class UrlsService {
   private readonly http = new HttpClient({
     logger: this.logger,
     rateLimitStats: this.rateLimitStats,
-    rateLimitDelay: 88,
-    batchSize: 12,
+    rateLimitDelay: 101,
+    batchSize: 10,
   });
 
   constructor(
@@ -206,7 +206,7 @@ export class UrlsService {
 
     if (!this.production) {
       await this.updateCollectionFromBlobStorage();
-      await this.readability.updateCollectionFromBlobStorage();
+      // await this.readability.updateCollectionFromBlobStorage();
 
       return;
     }
@@ -216,7 +216,7 @@ export class UrlsService {
     this.logger.info('Checking Urls collection to see what URLs to update.');
 
     const threeDaysAgo = today().subtract(3, 'days').add(2, 'hours').toDate();
-    const twoWeeksAgo = today().subtract(2, 'weeks').add(2, 'hours').toDate();
+    const fourDaysAgo = today().subtract(4, 'days').add(2, 'hours').toDate();
 
     const ignoredUrls = [
       // Search pages seem to be blocked
@@ -250,7 +250,7 @@ export class UrlsService {
               },
               {
                 is_404: true,
-                last_checked: { $lt: twoWeeksAgo },
+                last_checked: { $lt: fourDaysAgo },
               },
             ],
           };
@@ -1036,7 +1036,13 @@ type ProcessedHtml = {
 };
 
 export const processHtml = (html: string): ProcessedHtml => {
-  const $ = cheerio.load(html, {}, false);
+  const $ = cheerio.load(
+    // remove part of dynamically generated attribute to avoid generating
+    // a different hash for the same content
+    html.replaceAll(/"details-elements-\d+"/g, '"details-elements-"'),
+    {},
+    false,
+  );
   $('script, meta[property="fb:pages"]').remove();
 
   const body = $('main').html() || '';
