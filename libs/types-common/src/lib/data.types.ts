@@ -366,6 +366,7 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
   subtopic: string;
   sub_subtopic: string[];
   user_type: string[];
+  tpc_ids: number[];
   program: string;
   service: string;
   user_journey: string[];
