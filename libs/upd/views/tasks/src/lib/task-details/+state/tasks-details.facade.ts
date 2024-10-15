@@ -12,6 +12,7 @@ import type {
   TaskDetailsAggregatedData,
   TaskDetailsData,
   VisitsByPage,
+  ColumnConfig,
 } from '@dua-upd/types-common';
 import {
   type GetTableProps,
@@ -186,7 +187,15 @@ export class TasksDetailsFacade {
   totalCalldriver$ = this.tasksDetailsData$.pipe(
     map((data) => data?.dateRangeData?.totalCalldrivers || 0),
   );
-
+  // calldriversEnquiry$ = this.tasksDetailsData$.pipe(
+  //   map((data) => data?.dateRangeData?.calldriversEnquiry || 0),
+  // );
+  // CallsByTasks$ = this.tasksDetailsData$.pipe(
+  //   map((data) => data?.dateRangeData?.callsByTasks || 0),
+  // );
+  // totalCalls$ = this.tasksDetailsData$.pipe(
+  //   map((data) => data?.dateRangeData?.totalCalls || 0),
+  // );
   comparisonTotalCalldriver$ = this.tasksDetailsData$.pipe(
     map((data) => data?.comparisonDateRangeData?.totalCalldrivers || 0),
   );
@@ -519,9 +528,10 @@ export class TasksDetailsFacade {
           subtopic: callsByTopic.subtopic || '',
           sub_subtopic: callsByTopic.sub_subtopic || '',
           calls: callsByTopic.calls,
-          comparison: !previousCalls?.calls
+          change: !previousCalls?.calls
             ? Infinity
             : percentChange(callsByTopic.calls, previousCalls.calls),
+          difference: callsByTopic.calls - (previousCalls?.calls || 0),
         };
       });
     }),
@@ -561,12 +571,21 @@ export class TasksDetailsFacade {
         pipe: 'number',
       },
       {
-        field: 'comparison',
-        header: 'comparison',
+        field: 'change',
+        header: 'change',
         pipe: 'percent',
+        pipeParam: '1.0-2',
+        upGoodDownBad: true,
+        indicator: true,
+        useArrows: true,
+        showTextColours: true,
+        secondaryField: {
+          field: 'difference',
+          pipe: 'number',
+        },
+        width: '160px',
       },
-    ],
-  );
+    ] as ColumnConfig<UnwrapObservable<typeof this.callsByTopic$>>[]);
 
   currentCallVolume$ = this.tasksDetailsData$.pipe(
     map(

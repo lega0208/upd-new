@@ -46,6 +46,7 @@ export interface CallsByTasks {
 export interface TopCalldriverTopics extends CallsByTopic {
   Inquiry: string;
   change: number | null;
+  difference: number | null;
 }
 
 export interface ICallDriver {

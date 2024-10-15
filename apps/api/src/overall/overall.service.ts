@@ -214,7 +214,7 @@ export class OverallService {
       ).reduce((a, b) => a + b.calls, 0);
     }
 
-    const gcTasksData2 = await this.db.collections.gcTasks
+    const gcTasksData = await this.db.collections.gcTasks
       .aggregate<{ gc_task: string; total_entries: number }>()
       .match({
         date: { $gte: topTasksDateRange.start, $lte: topTasksDateRange.end },
@@ -234,7 +234,7 @@ export class OverallService {
       })
       .exec();
 
-    const gcTasksDict = arrayToDictionary(gcTasksData2, 'gc_task');
+    const gcTasksDict = arrayToDictionary(gcTasksData, 'gc_task');
 
     const tasksWithRankingScore = tasks.map((task) => {
       const calls = callsByTasks[task._id.toString()] ?? 0;
@@ -270,8 +270,8 @@ export class OverallService {
       uxTests,
     );
 
-    console.timeEnd('getTaskRankings');
-    console.log(improvedKpiTopSuccessRate);
+    // console.timeEnd('getTaskRankings');
+    // console.log(improvedKpiTopSuccessRate);
 
     const totalTasks = await this.taskModel.countDocuments().exec();
 

@@ -16,6 +16,7 @@
         [yAxis]="'Number of calls' | translate"
         [table]="calldriversTable$ | async"
         [tableCols]="calldriversCols"
+        [emptyMessage]="'nodata-available' | translate"
       ></upd-apex-bar>
     </div>
   </div>
@@ -35,3 +36,4 @@
     </div>
   </div>
 </div>
+<!-- {{callsByTopicConfig$ | async | json}} -->

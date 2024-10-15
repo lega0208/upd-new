@@ -99,8 +99,8 @@ export class ProjectDetailsSummaryComponent implements OnInit {
     fail: { message: 'kpi-not-met-volume' },
   };
 
-  memberList$ = this.projectsDetailsService.members$;
-  memberListCols: ColumnConfig[] = [];
+  // memberList$ = this.projectsDetailsService.members$;
+  // memberListCols: ColumnConfig[] = [];
 
   description$ = this.projectsDetailsService.description$;
 
@@ -186,16 +186,6 @@ export class ProjectDetailsSummaryComponent implements OnInit {
         },
       ];
 
-      this.memberListCols = [
-        {
-          field: 'name',
-          header: this.i18n.service.translate('Name', lang),
-        },
-        {
-          field: 'role',
-          header: this.i18n.service.translate('Role', lang),
-        },
-      ];
     });
   }
 }

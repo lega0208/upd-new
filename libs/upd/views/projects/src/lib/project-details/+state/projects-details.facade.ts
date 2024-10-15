@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import type {
   CalldriversTableRow,
+  ColumnConfig,
   ProjectDetailsAggregatedData,
   ProjectsDetailsData,
   TaskKpi,
@@ -8,7 +9,10 @@ import type {
 } from '@dua-upd/types-common';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade, selectUrl } from '@dua-upd/upd/state';
-import { createColConfigWithI18n } from '@dua-upd/upd/utils';
+import {
+  createCategoryConfig,
+  createColConfigWithI18n,
+} from '@dua-upd/upd/utils';
 
 import {
   avg,
@@ -463,17 +467,20 @@ export class ProjectsDetailsFacade {
           subtopic: callsByTopic.subtopic || '',
           sub_subtopic: callsByTopic.sub_subtopic || '',
           calls: callsByTopic.calls,
-          comparison: !previousCalls?.calls
+          change: !previousCalls?.calls
             ? Infinity
             : percentChange(callsByTopic.calls, previousCalls.calls),
+          difference: callsByTopic.calls - (previousCalls?.calls || 0),
         };
       });
     }),
   );
 
-  callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(
-    this.i18n.service,
-    [
+  callsByTopicConfig$ = combineLatest([
+    this.callsByTopic$,
+  ]).pipe(
+    map(([data]) => {
+    return [
       {
         field: 'tpc_id',
         header: 'tpc_id',
@@ -500,20 +507,40 @@ export class ProjectsDetailsFacade {
       },
       {
         field: 'tasks',
-        header: 'task',
+        header: 'Task',
         translate: true,
+        filterConfig: {
+          type: 'category',
+          categories: data ? createCategoryConfig({
+            i18n: this.i18n.service,
+            data,
+            field: 'tasks',
+          }) : [],
+        },
       },
+
       {
         field: 'calls',
         header: 'calls',
         pipe: 'number',
       },
       {
-        field: 'comparison',
-        header: 'comparison',
+        field: 'change',
+        header: 'change',
         pipe: 'percent',
+        pipeParam: '1.0-2',
+        upGoodDownBad: true,
+        indicator: true,
+        useArrows: true,
+        showTextColours: true,
+        secondaryField: {
+          field: 'difference',
+          pipe: 'number',
+        },
+        width: '160px',
       },
-    ],
+    ] as ColumnConfig<UnwrapObservable<typeof this.callsByTopic$>>[]
+  }),
   );
 
   dyfDataApex$ = combineLatest([this.projectsDetailsData$, this.currentLang$]).pipe(
@@ -1021,18 +1048,7 @@ export class ProjectsDetailsFacade {
   launchDate$ = this.projectsDetailsData$.pipe(
     map(({ launchDate }) => launchDate),
   );
-  members$ = this.projectsDetailsData$.pipe(
-    map(({ members }) =>
-      (members || '')
-        .split(', ')
-        .filter((member) => member)
-        .map((member) => ({
-          name: member,
-          role: 'Project lead',
-        })),
-    ),
-  );
-
+ 
   error$ = this.store.select(
     ProjectsDetailsSelectors.selectProjectsDetailsError,
   );

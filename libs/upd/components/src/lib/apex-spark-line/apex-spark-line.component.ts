@@ -59,6 +59,7 @@ export class ApexSparkLineComponent {
   @Input() series: ApexAxisChartSeries = [];
   @Input() scale = 100;
   @Input() difference = 0;
+  @Input() emptyMessage = '';
   type: ChartType = 'line';
 
   get hasData() {

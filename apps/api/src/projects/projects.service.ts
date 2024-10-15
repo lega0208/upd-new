@@ -510,7 +510,7 @@ export class ProjectsService {
       description,
       startDate,
       launchDate,
-      members,
+      // members,
       avgTaskSuccessFromLastTest: avgTestSuccess,
       avgSuccessValueChange: projectPercentChange,
       avgSuccessPercentChange: last_task_success_percent_change,

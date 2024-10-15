@@ -16,6 +16,7 @@
         [yAxis]="'Number of calls' | translate"
         [table]="calldriversTable$ | async"
         [tableCols]="calldriversCols"
+        [emptyMessage]="((totalCalldriver$ | async) || 0) === 0 ? ('nocall-drivers-mapped' | translate) : ('nodata-available' | translate)"
       ></upd-apex-bar>
     </div>
   </div>
@@ -30,6 +31,7 @@
         [filter]="true"
         [pagination]="true"
         [title]="'tab-calldrivers'"
+        [emptyStateMessage]="((callsByTopic$ | async)?.length || 0) === 0? ('nocall-drivers-mapped' | translate) : ('nodata-available' | translate)"
       >
       </upd-data-table-card>
     </div>

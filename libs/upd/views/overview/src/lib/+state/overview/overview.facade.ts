@@ -9,6 +9,7 @@ import 'dayjs/locale/fr-ca';
 import { combineLatest, debounceTime, map, mergeMap, of } from 'rxjs';
 import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
 import type {
+  ColumnConfig,
   OverviewAggregatedData,
   OverviewData,
 } from '@dua-upd/types-common';
@@ -801,6 +802,7 @@ export class OverviewFacade {
         tasks: topicData.tasks,
         calls: topicData.calls,
         change: topicData.change,
+        difference: topicData.difference,
       })),
     ),
   );
@@ -813,15 +815,27 @@ export class OverviewFacade {
     { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
     { field: 'tasks', header: 'tasks', translate: true },
     { field: 'calls', header: 'calls', pipe: 'number' },
-    { field: 'change', header: 'comparison', pipe: 'percent' },
-  ]);
+    {
+      field: 'change',
+      header: 'change',
+      pipe: 'percent',
+      pipeParam: '1.0-2',
+      upGoodDownBad: true,
+      indicator: true,
+      useArrows: true,
+      showTextColours: true,
+      secondaryField: {
+        field: 'difference',
+        pipe: 'number',
+      },
+      width: '160px',
+    },
+  ] as ColumnConfig<UnwrapObservable<typeof this.calldriverTopics$>>[]);
 
   gcTasksTable$ = this.overviewData$.pipe(
     map((data) =>
       data?.dateRangeData?.gcTasksData.map((d) => {
-        const data_reliability = evaluateDataReliability(
-          d.margin_of_error,
-        );
+        const data_reliability = evaluateDataReliability(d.margin_of_error);
         const baseData = { ...d, data_reliability };
 
         return data_reliability === 'Insufficient data'
@@ -873,28 +887,57 @@ export class OverviewFacade {
   ]);
 
   gcTasksCommentsTable$ = this.overviewData$.pipe(
-    map((data) =>
-      data?.dateRangeData?.gcTasksComments || [],
-    ),
+    map((data) => data?.dateRangeData?.gcTasksComments || []),
   );
 
   gcTasksCommentsTableConfig$ = createColConfigWithI18n(this.i18n.service, [
     { field: 'date', header: 'Date', pipe: 'date' },
     { field: 'gc_task', header: 'gc_task', translate: true },
-    { field: 'gc_task_other', header: 'Other GC Task', translate: true, hide: true },
+    {
+      field: 'gc_task_other',
+      header: 'Other GC Task',
+      translate: true,
+      hide: true,
+    },
     { field: 'url', header: 'Survey Referrer', translate: true, hide: true },
     { field: 'language', header: 'Language', translate: true, hide: true },
     { field: 'device', header: 'Device', translate: true, hide: true },
     { field: 'screener', header: 'Screener', translate: true, hide: true },
     { field: 'theme', header: 'Theme', translate: true, hide: true },
-    { field: 'grouping', header: 'Grouping', translate: true, hide: true, tooltip: 'tooltip-grouping' },
+    {
+      field: 'grouping',
+      header: 'Grouping',
+      translate: true,
+      hide: true,
+      tooltip: 'tooltip-grouping',
+    },
     { field: 'able_to_complete', header: 'Able to Complete', translate: true },
     { field: 'ease', header: 'ease', translate: true },
     { field: 'satisfaction', header: 'satisfaction', translate: true },
-    { field: 'what_would_improve', header: 'What Would Improve', translate: true, hide: true },
-    { field: 'what_would_improve_comment', header: 'Improvement Comment', translate: true, tooltip: 'tooltip-improvement-comment' },
-    { field: 'reason_not_complete', header: 'Reason Not Complete', translate: true, hide: true },
-    { field: 'reason_not_complete_comment', header: 'Reason Not Complete Comment', translate: true, tooltip: 'tooltip-notcomplete-comment' },
+    {
+      field: 'what_would_improve',
+      header: 'What Would Improve',
+      translate: true,
+      hide: true,
+    },
+    {
+      field: 'what_would_improve_comment',
+      header: 'Improvement Comment',
+      translate: true,
+      tooltip: 'tooltip-improvement-comment',
+    },
+    {
+      field: 'reason_not_complete',
+      header: 'Reason Not Complete',
+      translate: true,
+      hide: true,
+    },
+    {
+      field: 'reason_not_complete_comment',
+      header: 'Reason Not Complete Comment',
+      translate: true,
+      tooltip: 'tooltip-notcomplete-comment',
+    },
   ]);
 
   top5IncreasedCalldriverTopics$ = this.overviewData$.pipe(
@@ -907,6 +950,7 @@ export class OverviewFacade {
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
         change: topicData.change,
+        difference: topicData.difference,
       })),
     ),
   );
@@ -914,16 +958,29 @@ export class OverviewFacade {
   top5IncreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
     this.i18n.service,
     [
-      { field: 'tpc_id', header: 'tpc_id', translate: true},   
-      { field: 'enquiry_line', header: 'enquiry_line', translate: true},
+      { field: 'tpc_id', header: 'tpc_id', translate: true },
+      { field: 'enquiry_line', header: 'enquiry_line', translate: true },
       { field: 'topic', header: 'topic', translate: true },
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
       { field: 'calls', header: 'calls', pipe: 'number' },
-      { field: 'change', header: 'comparison', pipe: 'percent' },
-    ],
-  );
-
+      {
+        field: 'change',
+        header: 'change',
+        pipe: 'percent',
+        pipeParam: '1.0-2',
+        upGoodDownBad: true,
+        indicator: true,
+        useArrows: true,
+        showTextColours: true,
+        secondaryField: {
+          field: 'difference',
+          pipe: 'number',
+        },
+        width: '160px',
+      },
+    ] as ColumnConfig<UnwrapObservable<typeof this.top5IncreasedCalldriverTopics$>>[]);
+  
   top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
       data.top5DecreasedCalldriverTopics.map((topicData) => ({
@@ -934,6 +991,7 @@ export class OverviewFacade {
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
         change: topicData.change,
+        difference: topicData.difference,
       })),
     ),
   );
@@ -941,15 +999,28 @@ export class OverviewFacade {
   top5DecreasedCalldriverTopicsConfig$ = createColConfigWithI18n(
     this.i18n.service,
     [
-      { field: 'tpc_id', header: 'tpc_id', translate: true},   
-      { field: 'enquiry_line', header: 'enquiry_line', translate: true},
+      { field: 'tpc_id', header: 'tpc_id', translate: true },
+      { field: 'enquiry_line', header: 'enquiry_line', translate: true },
       { field: 'topic', header: 'topic', translate: true },
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
       { field: 'calls', header: 'calls', pipe: 'number' },
-      { field: 'change', header: 'comparison', pipe: 'percent' },
-    ],
-  );
+      {
+        field: 'change',
+        header: 'change',
+        pipe: 'percent',
+        pipeParam: '1.0-2',
+        upGoodDownBad: true,
+        indicator: true,
+        useArrows: true,
+        showTextColours: true,
+        secondaryField: {
+          field: 'difference',
+          pipe: 'number',
+        },
+        width: '160px',
+      },
+    ] as ColumnConfig<UnwrapObservable<typeof this.top5DecreasedCalldriverTopics$>>[]);
 
   top20SearchTermsEn$ = this.overviewData$.pipe(
     map((data) => data?.searchTermsEn),

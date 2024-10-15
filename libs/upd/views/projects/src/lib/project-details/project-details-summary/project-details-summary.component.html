@@ -38,6 +38,7 @@
         [keyword]="'calls'"
         [scale]="100"
         [difference]="(apexCallDifference$ | async) || 0"
+        [emptyMessage]="'nodata-available' | translate"
         modal=" {{ 'kpi-calls-per-100-guidance-project' | translate }}"
       ></upd-apex-spark-line>
     </div>
@@ -51,6 +52,7 @@
         [scale]="1000"
         [kpiObjectiveCriteria]="feedbackKpiObjectiveCriteria"
         [difference]="(kpiFeedbackDifference$ | async) || 0"
+        [emptyMessage]="('nodata-available' | translate)"
         modal=" {{ 'kpi-feedback-per-1000-guidance-project' | translate }} "
         [keyword]="'feedback'"
       ></upd-apex-spark-line>
@@ -64,6 +66,7 @@
       <upd-data-card
         [current]="visits$ | async"
         [comparison]="visitsPercentChange$ | async"
+        [emptyMessage]="('nodata-available' | translate)"
         [title]="'Total visits from all pages'"
       ></upd-data-card>
     </div>
@@ -75,6 +78,7 @@
         [displayKpis]="false"
         [kpiObjectiveCriteria]="callVolumeObjectiveCriteria"
         [kpiStylesConfig]="callVolumeKpiConfig"
+        [emptyMessage]="('nodata-available' | translate)"
         [comparisonMode]="'upBadDownGood'"
       ></upd-data-card>
     </div>
@@ -109,6 +113,7 @@
         [xAxis]="[ (fullDateRangeLabel$ | async) || [], (fullComparisonDateRangeLabel$ | async) || [] ]"
         [tableCols]="dyfTableCols"
         [table]="dyfChart$ | async"
+        [emptyMessage]="('nodata-available' | translate)"
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"
         [stacked]="{ isStacked: true, isStacked100: true, hasDataLabels: true }"
       ></upd-apex-bar>
@@ -116,29 +121,6 @@
   </div>
 </div>
 
-<div class="container-fluid my-4 gx-0">
-  <div class="row">
-    <div class="col">
-      <ng-container *ngIf="memberList$ | async as members">
-        <upd-data-table-card
-          *ngIf="members.length; else noMembers"
-          [data]="(memberList$ | async) || []"
-          [cols]="memberListCols"
-          [sort]="false"
-          [filter]="false"
-          [pagination]="false"
-          [title]="'Members' | translate"
-        >
-        </upd-data-table-card>
-      </ng-container>
-      <ng-template #noMembers>
-        <upd-card [title]="'Members'">
-          <p>{{ 'Members list not available' | translate }}.</p>
-        </upd-card>
-      </ng-template>
-    </div>
-  </div>
-</div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">

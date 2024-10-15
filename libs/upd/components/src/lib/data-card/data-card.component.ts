@@ -124,7 +124,7 @@ export class DataCardComponent {
   @Input() modal = '';
   @Input() pipe: 'percent' | 'number' | 'template' = 'number';
   @Input() pipeParams?: string | string[];
-  @Input() emptyMessage = 'nodata-available';
+  @Input() emptyMessage = '';
 
   @Input() comparisonMode: 'upGoodDownBad' | 'upBadDownGood' = 'upGoodDownBad';
   @Input() displayComparison = true;
