@@ -27,7 +27,7 @@
         [keyword]="'calls'"
         [scale]="1"
         [difference]="(apexCallDifference$ | async) || 0"
-        [emptyMessage]="((taskSuccessByUxTest$ | async)?.length === 0) ? ('nocall-drivers-mapped' | translate) : ('nodata-available' | translate)"
+        [emptyMessage]="(callsEmptyMessages$ | async) || '' | translate"
         modal=" {{ 'kpi-calls-per-100-guidance-task' | translate }}"
       ></upd-apex-spark-line>
     </div>
@@ -68,7 +68,7 @@
         [displayKpis]="false"
         [kpiObjectiveCriteria]="callVolumeObjectiveCriteria"
         [kpiStylesConfig]="callVolumeKpiConfig"
-        [emptyMessage]="getEmptyMessage() | translate"
+        [emptyMessage]="(callsEmptyMessages$ | async) || '' | translate"
         comparisonMode="upBadDownGood"
       ></upd-data-card>
     </div>
@@ -114,6 +114,7 @@
         [cols]="taskSuccessByUxTestCols"
         [pagination]="false"
         [title]="'Task success by UX test'"
+        [emptyStateMessage]="'task-not-tested'"
       >
       </upd-data-table-card>
     </div>

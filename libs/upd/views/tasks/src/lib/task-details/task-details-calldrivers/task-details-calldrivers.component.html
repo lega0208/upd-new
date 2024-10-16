@@ -7,16 +7,16 @@
   <div class="row">
     <div class="col">
       <upd-apex-bar
-        [title]="'d3-tcbel'"
+        [title]="'d3-tcbil'"
         [series]="(apexCalldriversChart$ | async) || []"
         [xAxis]="[
           (dateRangeLabel$ | async) || '',
-          (comparisonDateRangeLabel$ | async) || '',
+          (comparisonDateRangeLabel$ | async) || ''
         ]"
         [yAxis]="'Number of calls' | translate"
         [table]="calldriversTable$ | async"
         [tableCols]="calldriversCols"
-        [emptyMessage]="((totalCalldriver$ | async) || 0) === 0 ? ('nocall-drivers-mapped' | translate) : ('nodata-available' | translate)"
+        [emptyMessage]="(callsEmptyMessages$ | async) || '' | translate"
       ></upd-apex-bar>
     </div>
   </div>
@@ -31,7 +31,7 @@
         [filter]="true"
         [pagination]="true"
         [title]="'tab-calldrivers'"
-        [emptyStateMessage]="((callsByTopic$ | async)?.length || 0) === 0? ('nocall-drivers-mapped' | translate) : ('nodata-available' | translate)"
+        [emptyStateMessage]="(callsEmptyMessages$ | async) || '' | translate"
       >
       </upd-data-table-card>
     </div>

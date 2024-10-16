@@ -43,6 +43,7 @@ import type {
   OverviewProject,
   OverallSearchTerm,
   OverviewFeedback,
+  ITask,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -275,7 +276,7 @@ export class OverallService {
       .map(({ _id }) => _id.toString());
 
     const improvedKpiTopSuccessRate = getImprovedKpiTopSuccessRates(
-      topTaskIds,
+      topTasksIds,
       uxTests,
     );
 

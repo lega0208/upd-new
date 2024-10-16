@@ -95,7 +95,7 @@
         [pagination]="false"
         [filter]="false"
         [title]="'Documents'"
-        [emptyStateMessage]="(taskSuccessData$ | async)?.length === 0 ? ('task-not-tested' | translate) : ('nodata-available' | translate)"
+        [emptyStateMessage]="(taskSuccessChart$ | async)?.length === 0 ? ('task-not-tested' | translate) : ('nodata-available' | translate)"
       ></upd-data-table-card>
     </div>
   </div>

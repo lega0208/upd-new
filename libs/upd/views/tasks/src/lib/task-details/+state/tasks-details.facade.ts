@@ -7,7 +7,7 @@ import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
 import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
-import type { AttachmentData, TaskDetailsData   ColumnConfig,
+import type { AttachmentData, TaskDetailsData,   ColumnConfig,
 } from '@dua-upd/types-common';
 import {
   type GetTableProps,
@@ -423,6 +423,9 @@ export class TasksDetailsFacade {
 
   callsByTopic$ = this.tasksDetailsData$.pipe(
     map((data) => data?.callsByTopic),
+  );
+  hasTopicIds$ = this.tasksDetailsData$.pipe(
+    map((data) => (data?.tpc_ids.length > 0))
   );
 
   callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(

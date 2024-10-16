@@ -539,7 +539,7 @@ export interface ProjectsDetailsData
   description?: string;
   startDate: string | undefined;
   launchDate: string | undefined;
-  members: string | undefined;
+  // members: string | undefined;
   avgTaskSuccessFromLastTest: number | null;
   avgSuccessPercentChange: number | null;
   avgSuccessValueChange: number | null;

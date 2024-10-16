@@ -156,25 +156,16 @@ export class ProjectDetailsSummaryComponent implements OnInit {
         },
       ];
 
-      this.whatWasWrongTableCols = [
-        { field: 'name', header: this.i18n.service.translate('d3-www', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-      ];
-
-      this.memberListCols = [
-        {
-          field: 'name',
-          header: this.i18n.service.translate('Name', lang),
-        },
-        {
-          field: 'role',
-          header: this.i18n.service.translate('Role', lang),
-        },
-      ];
+      // this.memberListCols = [
+      //   {
+      //     field: 'name',
+      //     header: this.i18n.service.translate('Name', lang),
+      //   },
+      //   {
+      //     field: 'role',
+      //     header: this.i18n.service.translate('Role', lang),
+      //   },
+      // ];
     });
   }
 }

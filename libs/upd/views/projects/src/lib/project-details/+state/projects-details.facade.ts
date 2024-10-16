@@ -9,10 +9,7 @@ import type {
 } from '@dua-upd/types-common';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade, selectUrl } from '@dua-upd/upd/state';
-import {
-  createCategoryConfig,
-  createColConfigWithI18n,
-} from '@dua-upd/upd/utils';
+import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 
 import {
   avg,
@@ -452,11 +449,9 @@ export class ProjectsDetailsFacade {
     }),
   );
 
-  callsByTopicConfig$ = combineLatest([
-    this.callsByTopic$,
-  ]).pipe(
-    map(([data]) => {
-    return [
+  callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(
+    this.i18n.service,
+    [
       {
         field: 'tpc_id',
         header: 'tpc_id',
@@ -485,16 +480,7 @@ export class ProjectsDetailsFacade {
         field: 'tasks',
         header: 'Task',
         translate: true,
-        filterConfig: {
-          type: 'category',
-          categories: data ? createCategoryConfig({
-            i18n: this.i18n.service,
-            data,
-            field: 'tasks',
-          }) : [],
-        },
-      },
-
+        }, 
       {
         field: 'calls',
         header: 'calls',
@@ -516,7 +502,6 @@ export class ProjectsDetailsFacade {
         width: '160px',
       },
     ] as ColumnConfig<UnwrapObservable<typeof this.callsByTopic$>>[]
-  }),
   );
 
   dyfDataApex$ = combineLatest([
