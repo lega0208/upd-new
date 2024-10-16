@@ -1,4 +1,4 @@
-import { AdobeAnalyticsQueryBuilder } from '@dua-upd/external-data';
+import { AdobeAnalyticsQueryBuilder } from '@dua-upd/node-utils';
 import { defaultQuerySettings } from '@dua-upd/types-common';
 import type { AAQueryConfig } from '@dua-upd/types-common';
 import { dimension, metricsConfig } from './adobe-analytics.config';
