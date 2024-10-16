@@ -442,7 +442,7 @@ export type ProjectStatus =
   | 'Planning'
   | 'In Progress'
   | 'Exploratory'
-  | 'Being monitored'
+  | 'Monitoring'
   | 'Needs review'
   | 'Complete'
   | 'Paused'
