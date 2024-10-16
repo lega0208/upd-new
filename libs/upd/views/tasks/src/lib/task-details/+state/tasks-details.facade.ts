@@ -208,28 +208,51 @@ export class TasksDetailsFacade {
   dateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
-  ]).pipe(map(([data, lang]) => this.getDateRangeLabel(data.dateRange, lang) as string));
+  ]).pipe(
+    map(
+      ([data, lang]) => this.getDateRangeLabel(data.dateRange, lang) as string,
+    ),
+  );
 
   comparisonDateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) =>
-      this.getDateRangeLabel(data.comparisonDateRange || '', lang) as string,
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(data.comparisonDateRange || '', lang) as string,
     ),
   );
 
   fullDateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
-  ]).pipe(map(([data, lang]) => this.getDateRangeLabel(data.dateRange, lang, 'MMM D YYYY', 'to', true) as string[]));
+  ]).pipe(
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(
+          data.dateRange,
+          lang,
+          'MMM D YYYY',
+          'to',
+          true,
+        ) as string[],
+    ),
+  );
 
   fullComparisonDateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) =>
-      this.getDateRangeLabel(data.comparisonDateRange || '', lang , 'MMM D YYYY', 'to', true) as string[],
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(
+          data.comparisonDateRange || '',
+          lang,
+          'MMM D YYYY',
+          'to',
+          true,
+        ) as string[],
     ),
   );
 
@@ -436,7 +459,7 @@ export class TasksDetailsFacade {
       },
       {
         field: 'callsPercentChange',
-        header: 'comparison',
+        header: 'change',
         pipe: 'percent',
       },
     ],
@@ -583,8 +606,8 @@ export class TasksDetailsFacade {
           : d.test_type,
         date: d.date,
         total_users: totalSum,
-        scenario: d.scenario
-      }))
+        scenario: d.scenario,
+      }));
       return [...(taskSuccessByUxTest || [])];
     }),
   );
@@ -647,7 +670,7 @@ export class TasksDetailsFacade {
   >(this.i18n.service, [
     { field: 'term', header: 'search-term' },
     { field: 'clicks', header: 'clicks', pipe: 'number' },
-    { field: 'clicksChange', header: 'comparison-for-clicks', pipe: 'percent' },
+    { field: 'clicksChange', header: 'change-for-clicks', pipe: 'percent' },
     {
       field: 'position',
       header: 'position',

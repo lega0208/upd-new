@@ -166,14 +166,26 @@ export class OverviewFeedbackComponent {
     },
     {
       field: 'percentChange',
-      header: 'comparison',
+      header: 'change',
       pipe: 'percent',
     },
   ]);
 
   mostRelevantCommentsColumns: ColumnConfig<FeedbackWithScores>[] = [
-    { field: 'rank', header: 'Rank', width: '10px', center: true, frozen: true },
-    { field: 'date', header: 'Date', pipe: 'date', width: '100px', frozen: true },
+    {
+      field: 'rank',
+      header: 'Rank',
+      width: '10px',
+      center: true,
+      frozen: true,
+    },
+    {
+      field: 'date',
+      header: 'Date',
+      pipe: 'date',
+      width: '100px',
+      frozen: true,
+    },
     { field: 'url', header: 'URL' },
     { field: 'owners', header: 'Area', width: '10px', hide: true },
     { field: 'sections', header: 'Section', hide: true },

@@ -816,7 +816,7 @@ export class OverviewFacade {
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
       { field: 'calls', header: 'calls', pipe: 'number' },
-      { field: 'change', header: 'comparison', pipe: 'percent' },
+      { field: 'change', header: 'change', pipe: 'percent' },
     ],
   );
 
@@ -843,7 +843,7 @@ export class OverviewFacade {
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
       { field: 'calls', header: 'calls', pipe: 'number' },
-      { field: 'change', header: 'comparison', pipe: 'percent' },
+      { field: 'change', header: 'change', pipe: 'percent' },
     ],
   );
 
@@ -861,7 +861,7 @@ export class OverviewFacade {
     { field: 'total_searches', header: 'Total searches', pipe: 'number' },
     {
       field: 'searchesChange',
-      header: 'comparison-for-searches',
+      header: 'change-for-searches',
       pipe: 'percent',
     },
     { field: 'clicks', header: 'clicks', pipe: 'number' },
