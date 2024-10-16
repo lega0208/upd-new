@@ -498,13 +498,13 @@ export class DbUpdateService {
       this.logger.info('Data loaded for tasks metrics store');
 
       for (const dateRange of dateRangesWithComparison) {
-        // this.logger.info(
-        //   `Recalculating pages view for dateRange: ${JSON.stringify(dateRange, null, 2)}`,
-        // );
+        this.logger.info(
+          `Recalculating pages view for dateRange: ${JSON.stringify(dateRange, null, 2)}`,
+        );
 
-        // await this.db.views.pages.performRefresh({
-        //   dateRange,
-        // });
+        await this.db.views.pages.performRefresh({
+          dateRange,
+        });
 
         this.logger.info(
           `Recalculating tasks view for dateRange: ${JSON.stringify(dateRange, null, 2)}`,
