@@ -1,7 +1,9 @@
-import { init, type AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
+import { type AnalyticsCoreAPI, init } from '@adobe/aio-lib-analytics';
 import axios, { AxiosError } from 'axios';
 import dayjs from 'dayjs';
-import type { AuthParams } from '@dua-upd/node-utils';
+import type { AuthParams } from './adobe-analytics.types';
+
+export { AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
 
 export const defaultAuthParams = (): AuthParams => {
   const authParams = {
@@ -66,8 +68,12 @@ export async function getAuthToken(params: AuthParams) {
 }
 
 export async function getAAClient(
-  authParams: AuthParams,
+  authParams?: AuthParams,
 ): Promise<AnalyticsCoreAPI> {
+  if (!authParams) {
+    return getDefaultAAClient();
+  }
+
   if (!authParams.expiryDateTime) {
     authParams.expiryDateTime = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
   }
@@ -85,4 +91,6 @@ export async function getAAClient(
   return await init(authParams.companyId, authParams.clientId, token);
 }
 
-export const getDefaultAAClient = () => getAAClient(defaultAuthParams());
+export function getDefaultAAClient() {
+  return getAAClient(defaultAuthParams());
+}

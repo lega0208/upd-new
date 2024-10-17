@@ -33,7 +33,7 @@ import {
 } from '@dua-upd/node-utils';
 import { RegisteredBlobModel } from './storage.service';
 
-const connectionString = process.env['AZURE_STORAGE_CONNECTION_STRING'];
+const getConnectionString = () => process.env['AZURE_STORAGE_CONNECTION_STRING'];
 
 export type BlobType = 'block' | 'append';
 
@@ -46,6 +46,8 @@ export class StorageClient {
   private readonly baseClient: BlobServiceClient;
 
   constructor() {
+    const connectionString = getConnectionString();
+    
     if (!connectionString) {
       throw Error('Azure Storage Connection string not found.');
     }

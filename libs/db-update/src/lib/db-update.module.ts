@@ -1,6 +1,5 @@
-import { ConsoleLogger, Module } from '@nestjs/common';
+import { ConsoleLogger, DynamicModule, Module } from '@nestjs/common';
 import { CacheModule } from '@nestjs/cache-manager';
-import { ConfigModule } from '@nestjs/config';
 import dayjs from 'dayjs';
 import { BlobStorageModule } from '@dua-upd/blob-storage';
 import { LoggerModule } from '@dua-upd/logger';
@@ -31,15 +30,11 @@ const month = dayjs().format('YYYY-MM');
 
 @Module({})
 export class DbUpdateModule {
-  static register(production = false) {
+  static register(production = false): DynamicModule {
     return {
       module: DbUpdateModule,
       imports: [
         CacheModule.register({ ttl: 12 * 60 * 60 }),
-        ConfigModule.forRoot({
-          isGlobal: true,
-          envFilePath: process.env.DOTENV_CONFIG_PATH || '.env',
-        }),
         DbModule,
         ExternalDataModule,
         BlobStorageModule,
@@ -73,7 +68,7 @@ export class DbUpdateModule {
         GCTasksMappingsService,
         {
           provide: AirtableClient.name,
-          useValue: new AirtableClient(),
+          useFactory: () => new AirtableClient(),
         },
         {
           provide: 'ENV',
