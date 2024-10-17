@@ -1,12 +1,15 @@
 import type { AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
 import { days, withMutex, withRetry } from '@dua-upd/utils-common';
 import type {
+  AuthParams,
   AAMaybeResponse,
   AAResponseBody,
   AdobeAnalyticsReportQuery,
-} from '@dua-upd/external-data';
-import type { AuthParams } from '@dua-upd/types-common';
-import { getAAClient, getDefaultAuthParams } from './adobe-analytics.api';
+} from '@dua-upd/node-utils';
+import {
+  defaultAuthParams,
+  getAAClient,
+} from '@dua-upd/node-utils';
 
 class AAClient {
   private client!: AnalyticsCoreAPI;
@@ -38,8 +41,7 @@ class AAClient {
   }
 
   async initClient(authParams?: AuthParams) {
-    this.authParams =
-      authParams || this.authParams || (await getDefaultAuthParams());
+    this.authParams = authParams || this.authParams || defaultAuthParams();
 
     if (!this.authParams.expiryDateTime) {
       this.authParams.expiryDateTime = Math.floor(
