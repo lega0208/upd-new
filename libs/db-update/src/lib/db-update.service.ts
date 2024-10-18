@@ -1,4 +1,9 @@
-import type { DateRange, IOverall, IPage } from '@dua-upd/types-common';
+import type {
+  AbstractDate,
+  DateRange,
+  IOverall,
+  IPage,
+} from '@dua-upd/types-common';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, mongo } from 'mongoose';
@@ -33,7 +38,6 @@ import { UrlsService } from './urls/urls.service';
 import dayjs from 'dayjs';
 import { AnnotationsService } from './airtable/annotations.service';
 import { GCTasksMappingsService } from './airtable/gc-tasks-mappings.service';
-import type { DateType } from '@dua-upd/external-data';
 
 @Injectable()
 export class DbUpdateService {
@@ -297,12 +301,12 @@ export class DbUpdateService {
     return this.airtableService.updateUxData(forceVerifyMetricsRefs);
   }
 
-  async updateCalldrivers(endDate?: DateType) {
+  async updateCalldrivers(endDate?: AbstractDate) {
     return this.calldriversService.updateCalldrivers(endDate);
   }
 
   @Retry(4, 1000)
-  async updateFeedback(endDate?: DateType) {
+  async updateFeedback(endDate?: AbstractDate) {
     await this.feedbackService.updateFeedbackData(endDate);
 
     const pages: IPage[] = await this.db.collections.pages

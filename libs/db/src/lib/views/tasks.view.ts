@@ -619,6 +619,7 @@ export class TasksViewService extends DbViewNew<
       subtopic: string;
       sub_subtopic: string[];
       user_type: string[];
+      tpc_ids: number[];
       program: string;
       service: string;
       user_journey: string[];
@@ -662,6 +663,7 @@ export class TasksViewService extends DbViewNew<
         subtopic: '$task.subtopic',
         sub_subtopic: '$task.sub_subtopic',
         user_type: '$task.user_type',
+        tpc_ids: '$task.tpc_ids',
         program: '$task.program',
         service: '$task.service',
         user_journey: '$task.user_journey',
