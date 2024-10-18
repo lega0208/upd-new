@@ -26,13 +26,13 @@ const localStorageSyncReducer = (
 export const environment = {
   production: false,
   envImports: [
-    // StoreDevtoolsModule.instrument({
-    //   actionSanitizer,
-    //   stateSanitizer,
-    // }),
+    StoreDevtoolsModule.instrument({
+      actionSanitizer,
+      stateSanitizer,
+    }),
   ],
   metaReducers: [
-    // localStorageSyncReducer
+    localStorageSyncReducer
   ],
 };
 

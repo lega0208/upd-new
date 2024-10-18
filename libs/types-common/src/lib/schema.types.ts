@@ -45,6 +45,12 @@ export interface CallsByTasks {
   calls: number;
 }
 
+export interface avgTaskSuccessFromLastTest{
+  title: string;
+  taskId: Types.ObjectId;
+  avgTaskSuccessFromLastTest: number;  
+}
+
 export interface TopCalldriverTopics extends CallsByTopic {
   Inquiry: string;
   change: number | null;
