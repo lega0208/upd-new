@@ -21,7 +21,13 @@ dayjs.extend(utc);
 export class AdobeAnalyticsQueryBuilder {
   private readonly query: AdobeAnalyticsReportQuery;
 
-  constructor(rsid: string = process.env.AW_REPORTSUITE_ID) {
+  constructor(rsid: string = process.env.AW_REPORTSUITE_ID || '') {
+    if (!rsid) {
+      throw new Error(
+        'Expected AW_REPORTSUITE_ID environment variable to be set: No report suite ID provided',
+      );
+    }
+
     this.query = {
       rsid,
       dimension: 'variables/evar22',
@@ -61,7 +67,7 @@ export class AdobeAnalyticsQueryBuilder {
         const idPrefix = multiFilter ? `${key}-` : '';
 
         for (const filter of metric.filters) {
-          for (const itemId of filter.itemIds) {
+          for (const itemId of filter.itemIds || []) {
             this.query.metricContainer.metrics.push({
               id: metric.id,
               columnId: `${idPrefix}${itemId}`,
@@ -149,13 +155,19 @@ export class AdobeAnalyticsQueryBuilder {
   }
 
   public addGlobalFilters(filters: ReportFilter[]) {
-    this.query.globalFilters = [...this.query.globalFilters, ...filters];
+    this.query.globalFilters = [
+      ...(this.query.globalFilters || []),
+      ...filters,
+    ];
 
     return this;
   }
 
   public prependGlobalFilters(filters: ReportFilter[]) {
-    this.query.globalFilters = [...filters, ...this.query.globalFilters];
+    this.query.globalFilters = [
+      ...filters,
+      ...(this.query.globalFilters || []),
+    ];
 
     return this;
   }
