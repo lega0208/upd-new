@@ -30,6 +30,12 @@ export class Project implements IProject {
   @Prop({ type: String })
   description?: string;
 
+  @Prop({ type: Date, index: true })
+  date?: Date;
+
+  @Prop({ type: Number })
+  success_rate?: number;
+
   @Prop({
     type: [
       {

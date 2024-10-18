@@ -414,6 +414,7 @@ export class TasksDetailsFacade {
         header: 'topic',
         translate: true,
       },
+      
       {
         field: 'subtopic',
         header: 'sub-topic',

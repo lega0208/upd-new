@@ -11,6 +11,7 @@ import {
   type FeedbackModel,
   PageDocument,
   type PageMetricsModel,
+  TaskDocument,
   ProjectDocument,
   UxTestDocument,
 } from '@dua-upd/db';
@@ -39,13 +40,12 @@ import {
 } from '@dua-upd/utils-common/date';
 import {
   getArraySelectedPercentChange,
+  getAvgSuccessFromLatestTests,
+  getLatestTaskSuccessRate,
   getLatestTest,
   getLatestTestData,
 } from '@dua-upd/utils-common/data';
-import {
-  AsyncLogTiming,
-  percentChange,
-} from '@dua-upd/utils-common';
+import { AsyncLogTiming, percentChange } from '@dua-upd/utils-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 
 dayjs.extend(utc);
@@ -153,6 +153,8 @@ export class ProjectsService {
     private calldriversModel: CallDriverModel,
     @InjectModel(PageMetrics.name, 'defaultConnection')
     private pageMetricsModel: PageMetricsModel,
+    @InjectModel(Task.name, 'defaultConnection')
+    private tasksModel: Model<TaskDocument>,
     @InjectModel(Project.name, 'defaultConnection')
     private projectsModel: Model<ProjectDocument>,
     @InjectModel(UxTest.name, 'defaultConnection')
@@ -164,6 +166,7 @@ export class ProjectsService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private feedbackService: FeedbackService,
   ) {}
+  
 
   async getProjectsHomeData(): Promise<ProjectsHomeData> {
     const cacheKey = `getProjectsHomeData`;
@@ -579,6 +582,11 @@ export class ProjectsService {
   ): Promise<ProjectDetailsAggregatedData> {
     const [start, end] = dateRangeSplit(dateRange);
 
+    const project = await this.projectsModel
+      .findById(id)
+      .populate<{ tasks: Task[] }>('tasks');
+    const tasks = project?.tasks || [];
+
     const projectMetrics = await this.db.views.pages
       .aggregate<
         Omit<
@@ -714,10 +722,100 @@ export class ProjectsService {
       },
     );
 
+    const tpcIds = tasks
+      .filter((task: Types.ObjectId | Task) => 'tpc_ids' in task)
+      .map((task: Task) => task.tpc_ids)
+      .flat();
+
+    const callsByTasks = await this.calldriversModel.getCallsByTaskFromIds(
+      dateRange,
+      tpcIds,
+    );
+
+
+
     const totalCalldrivers = calldriversEnquiry.reduce(
       (a, b) => a + b.calls,
       0,
     );
+
+    const taskIds = tasks.map((tasks: Types.ObjectId | Task) => tasks._id);
+
+
+
+const uxTestsByTask = await Promise.all(
+  tasks.map(async (task: Task) => {
+    const uxTestsForTask = await this.uxTestsModel.find({ tasks: task._id }).exec();
+        return { task, uxTests: uxTestsForTask };
+  })
+);
+
+const avgTaskSuccessForEachTask = uxTestsByTask.map(({ task, uxTests }) => {
+  const formattedUxTests = uxTests.map((uxTest) => ({
+    date: uxTest.date,
+    success_rate: uxTest.success_rate,
+  }));
+
+  const { avgTestSuccess: avgTaskSuccessFromLastTest } = getLatestTaskSuccessRate(formattedUxTests);
+
+
+  return { taskId: task._id, title: task.title, avgTaskSuccessFromLastTest };
+});
+
+
+
+    console.time('pageMetricsByTasks');
+
+    const pageMetricsByTasks = await this.pageMetricsModel
+      .aggregate<Partial<ProjectDetailsAggregatedData> & { title: string }>()
+      .match({
+        date: { $gte: start, $lte: end },
+        tasks: { $elemMatch: { $in: taskIds } },
+        projects: id,
+      })
+      .lookup({
+        from: 'tasks',
+        localField: 'tasks',
+        foreignField: '_id',
+        as: 'task',
+      })
+      .unwind('$task')
+      .match({ 'task._id': { $in: taskIds } })
+      .group({
+        _id: { taskId: '$task._id', taskTitle: '$task.title' },
+        page: { $first: '$page' },
+        visits: { $sum: '$visits' },
+        dyfYes: { $sum: '$dyf_yes' },
+        dyfNo: { $sum: '$dyf_no' },
+        fwylfCantFindInfo: { $sum: '$fwylf_cant_find_info' },
+        fwylfHardToUnderstand: { $sum: '$fwylf_hard_to_understand' },
+        fwylfOther: { $sum: '$fwylf_other' },
+        fwylfError: { $sum: '$fwylf_error' },
+        gscTotalClicks: { $sum: '$gsc_total_clicks' },
+        gscTotalImpressions: { $sum: '$gsc_total_impressions' },
+        gscTotalCtr: { $avg: '$gsc_total_ctr' },
+        gscTotalPosition: { $avg: '$gsc_total_position' },
+      })
+      .project({
+        _id: 0,
+        title: '$_id.taskTitle',
+        pages: 1, // add this line to include the page array in the output
+        visits: 1,
+        dyfYes: 1,
+        dyfNo: 1,
+        fwylfCantFindInfo: 1,
+        fwylfHardToUnderstand: 1,
+        fwylfOther: 1,
+        fwylfError: 1,
+        gscTotalClicks: 1,
+        gscTotalImpressions: 1,
+        gscTotalCtr: 1,
+        gscTotalPosition: 1,
+      })
+      .exec();
+
+
+    console.timeEnd('pageMetricsByTasks');
 
     return {
       ...projectMetrics,
@@ -727,6 +825,9 @@ export class ProjectsService {
       visitsByDay,
       dyfByDay,
       calldriversByDay,
+      pageMetricsByTasks,
+      callsByTasks,
+      avgTaskSuccessForEachTask,
     };
   }
 

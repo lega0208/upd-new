@@ -137,6 +137,7 @@ export const selectCallsPerVisits = createSelector(
   (callsByDay, visitsByDay) => {
     const callsByDateDict = arrayToDictionary(callsByDay, 'date');
 
+
     return visitsByDay
       .map(({ date, visits }) => {
         const calls = callsByDateDict[date]?.calls;
@@ -146,9 +147,10 @@ export const selectCallsPerVisits = createSelector(
           y: calls ? (calls / visits) * 100 : 0,
         };
       })
-      .filter(({ y }) => y);
+      .filter(({ y }) => y);  // allow valid 0 values
   }
 );
+
 
 export const selectComparisonCallsPerVisits = createSelector(
   selectComparisonCallsByDay,

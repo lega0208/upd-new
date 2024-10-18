@@ -295,6 +295,7 @@ export class TasksService {
         return 0;
       });
 
+
     const taskSuccessByUxTest = uxTests;
 
 
@@ -304,6 +305,7 @@ export class TasksService {
       percentChange: avgSuccessPercentChange,
       valueChange: avgSuccessValueChange,
     } = getLatestTaskSuccessRate(uxTests);
+
 
     const returnData = {
       ...omit(['ux_tests'], taskData),
@@ -322,4 +324,3 @@ export class TasksService {
     return returnData;
   }
 }
-

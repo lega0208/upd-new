@@ -207,8 +207,12 @@ export class ProjectsDetailsFacade {
 
   callPerVisits$ = combineLatest([this.totalCalldriver$, this.visits$]).pipe(
     map(([currentCalls, visits]) => {
+
       return currentCalls / visits;
+
+
     }),
+    
   );
 
   callComparisonPerVisits$ = combineLatest([
@@ -312,8 +316,60 @@ export class ProjectsDetailsFacade {
       });
     }),
   );
+  
 
-  projectTasks$ = this.projectsDetailsData$.pipe(map((data) => data?.tasks));
+  // projectTasks$ = this.projectsDetailsData$.pipe(map((data) => data?.tasks));
+
+  projectTasks$ = combineLatest([
+    this.projectsDetailsData$,      
+    this.kpiTaskSuccessByUxTest$,   
+    this.currentLang$,              
+  ]).pipe(
+    map(([data, uxTest, lang]) => {
+      const tasks = data?.tasks || [];
+      const callsByTasks = data?.dateRangeData?.callsByTasks || [];
+      const pageMetricsByTasks = data?.dateRangeData?.pageMetricsByTasks || [];
+  
+      const avgTaskSuccessFromLastTest = data?.dateRangeData?.avgTaskSuccessForEachTask || [];
+  
+      const callsByTasksDict = arrayToDictionary(callsByTasks, 'title');
+      const pageMetricsByTasksDict = arrayToDictionary(pageMetricsByTasks, 'title');
+      const TaskSuccessByUxTestDict = arrayToDictionary(avgTaskSuccessFromLastTest, 'title');
+      const uxTestDict = arrayToDictionary(uxTest, 'title');
+
+  
+      return tasks.map((task) => {
+        const { title } = task;
+        const { calls = 0 } = callsByTasksDict[title] || {};
+        const { dyfNo = 0, visits = 0 } = pageMetricsByTasksDict[title] || {};
+        const { avgTaskSuccessFromLastTest = 0 } = TaskSuccessByUxTestDict[title] || {};
+
+  
+        const kpiNoClicks = visits !== 0 ? (dyfNo / visits) * 1000 : 0;
+        const kpiCallsRatio = visits !== 0 ? calls / visits : 0;
+        const kpiCalls = kpiCallsRatio * 100;
+        const avgTaskSuccessFromLastTests = avgTaskSuccessFromLastTest;
+
+        const ux = uxTestDict[title] || {};
+
+      const uxTest2Years = ux.latestDate;
+      const isWithin2Years =
+        uxTest2Years && dayjs(uxTest2Years).isAfter(dayjs().subtract(2, 'year'))
+          ? 'Yes'
+          : 'No';
+
+        return {
+          ...task,
+          title: this.i18n.service.translate(title, lang) || title,
+          calls: kpiCalls,
+          dyfNo: kpiNoClicks,
+          uxTest2Years: isWithin2Years,
+          avgTaskSuccess: avgTaskSuccessFromLastTests,
+        };
+      });
+    }),
+  );
+  
 
   calldriversChart$ = combineLatest([
     this.projectsDetailsData$,
@@ -419,7 +475,6 @@ export class ProjectsDetailsFacade {
   );
 
   callsByTopic$ = this.projectsDetailsData$.pipe(
-    // callsByTopic$ gets the data from the store and maps it to the callsByTopic property of the ProjectsDetailsData object
     map((data) => {
       if (!data?.dateRangeData || !data?.comparisonDateRangeData) {
         return null;
@@ -684,13 +739,11 @@ export class ProjectsDetailsFacade {
         return [];
       }
 
-      // get unique tasks from all ux tests and create an array including the avg success rate by task
       const tasks = uxTests
         ?.map((uxTest) => uxTest?.tasks?.split('; '))
         .reduce((acc, val) => acc.concat(val), [])
         .filter((v, i, a) => a.indexOf(v) === i);
 
-      // create an array of success_rate for each test_type and task combination
       const taskSuccess = tasks?.map((task) => {
         const successRate = uxTests?.map((uxTest) => {
           const taskSuccessRate = uxTest?.tasks
@@ -775,7 +828,6 @@ export class ProjectsDetailsFacade {
         } as TaskKpi;
       });
 
-      // divide baseline by validation to get the change in success rate
       return taskSuccessByUxTestKpi?.map((task) => {
         const validation = task.Validation;
         const baseline = task.Baseline;
