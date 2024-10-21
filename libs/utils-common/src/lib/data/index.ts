@@ -335,17 +335,20 @@ export function getAvgSuccessFromLastTests<
 
 export function getLatestTaskSuccessRate(
   uxTests: { date?: Date; success_rate?: number }[],
+  
 ) {
   const sortedTests = [...uxTests]
     .filter(
       (test) =>
         test.date && test.success_rate != null && test.success_rate >= 0,
+      
     )
     .sort(
       (a, b) => (b.date as Date).getTime() - (a.date as Date).getTime(),
     ) as { date: Date; success_rate: number }[];
-
+  
   if (!sortedTests.length)
+
     return {
       avgTestSuccess: null,
       latestDate: null,
@@ -516,7 +519,7 @@ export interface TestSuccessWithPercentChange {
   total: number | null;
 }
 
-export function getLatestTestData<
+export function getLatestTestData<    
   T extends { date?: Date; success_rate?: number; test_type?: string },
 >(uxTests: T[]): TestSuccessWithPercentChange {
   const uxTestsWithSuccessRate = uxTests.filter(
@@ -585,7 +588,7 @@ export function getLatestTestData<
     percentChange: null,
     total: null,
   };
-}
+} 
 
 export type ProjectTestTypes = {
   Baseline: IUxTest[];
