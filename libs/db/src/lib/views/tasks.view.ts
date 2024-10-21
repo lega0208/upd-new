@@ -561,12 +561,12 @@ export class TasksViewService extends DbViewNew<
   }
 
   // overriding inherited methods for cleaner types
-  override find(
+  override find<T = TasksView>(
     filter?: FilterQuery<TasksView>,
     projection: ProjectionType<TasksView> = {},
     options: QueryOptions<TasksView> = {},
-  ): Promise<TasksView[]> {
-    return super.find(filter, projection, options);
+  ): Promise<T[]> {
+    return super.find(filter, projection, options) as Promise<T[]>;
   }
 
   override findOne(

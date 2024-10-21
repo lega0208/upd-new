@@ -103,6 +103,28 @@ export class ProjectDetailsSummaryComponent implements OnInit {
       type: 'link',
       typeParams: { preLink: '/' + this.langLink + '/tasks', link: '_id' },
     },
+    {
+      field: 'callsPer100Visits',
+      header: 'Calls / 100 Visits',
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
+    {
+      field: 'dyfNoPer1000Visits',
+      header: '"No clicks" / 1,000 Visits',
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
+    {
+      field: 'uxTestInLastTwoYears',
+      header: 'UX Test in Past 2 Years?',
+      translate: true,
+    },
+    {
+      field: 'latestSuccessRate',
+      header: 'Latest UX Task Success Rate',
+      pipe: 'percent',
+    },
   ];
 
   dyfTableCols: ColumnConfig<{
