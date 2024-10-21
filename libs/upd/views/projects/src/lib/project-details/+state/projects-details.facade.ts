@@ -7,7 +7,7 @@ import type {
   VisitsByPage,
 } from '@dua-upd/types-common';
 import { FR_CA, LocaleId } from '@dua-upd/upd/i18n';
-import { I18nFacade, selectUrl } from '@dua-upd/upd/state';
+import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
 import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 
 import {
@@ -18,6 +18,8 @@ import {
   type UnwrapObservable,
   round,
   arrayToDictionary,
+  isNullish,
+  arrayToDictionaryMultiref,
 } from '@dua-upd/utils-common';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs/esm';
@@ -59,9 +61,7 @@ export class ProjectsDetailsFacade {
 
   currentLang$ = this.i18n.currentLang$;
 
-  currentRoute$ = this.store
-    .select(selectUrl)
-    .pipe(map((url) => url.replace(/\?.+$/, '')));
+  currentRoute$ = this.store.select(selectRoute);
 
   title$ = this.projectsDetailsData$.pipe(
     map((data) => data?.title.replace(/\s+/g, ' ')),
@@ -207,12 +207,8 @@ export class ProjectsDetailsFacade {
 
   callPerVisits$ = combineLatest([this.totalCalldriver$, this.visits$]).pipe(
     map(([currentCalls, visits]) => {
-
       return currentCalls / visits;
-
-
     }),
-    
   );
 
   callComparisonPerVisits$ = combineLatest([
@@ -272,104 +268,9 @@ export class ProjectsDetailsFacade {
     this.comparisonKpiFeedback$,
   ]).pipe(map(([currentKpi, comparisonKpi]) => currentKpi - comparisonKpi));
 
-  // this isn't used apparently?
-  kpiTaskSuccessByUxTest$ = combineLatest([
-    this.projectsDetailsData$,
-    this.currentLang$,
-  ]).pipe(
-    map(([data, lang]) => {
-      const uxTests = data?.taskSuccessByUxTest.filter(
-        (uxTest) => uxTest.success_rate != null,
-      );
-
-      const tasksWithSuccessRate = uxTests
-        ?.map((uxTest) => uxTest.tasks.split('; ') || [])
-        .flat();
-      const tasks = data?.tasks.filter((task) =>
-        tasksWithSuccessRate.includes(task.title),
-      );
-
-      return tasks.map((task) => {
-        const relevantTests = uxTests.filter(
-          (uxTest) =>
-            uxTest.tasks.split('; ').includes(task.title) &&
-            uxTest.success_rate != null,
-        );
-
-        const latestDate = relevantTests.reduce((latest, test) => {
-          return dayjs(latest.date).isAfter(dayjs(test.date)) ? latest : test;
-        }).date;
-
-        const latestDateSuccessRates = relevantTests
-          .filter(
-            (uxTest) =>
-              uxTest.date === latestDate &&
-              (uxTest.success_rate || uxTest.success_rate === 0),
-          )
-          .map((uxTest) => uxTest.success_rate) as number[];
-
-        return {
-          title: this.i18n.service.translate(task.title, lang),
-          success: avg(latestDateSuccessRates, 2),
-          latestDate,
-        };
-      });
-    }),
+  projectTasks$ = this.projectsDetailsData$.pipe(
+    map((data) => data?.taskMetrics || []),
   );
-  
-
-  // projectTasks$ = this.projectsDetailsData$.pipe(map((data) => data?.tasks));
-
-  projectTasks$ = combineLatest([
-    this.projectsDetailsData$,      
-    this.kpiTaskSuccessByUxTest$,   
-    this.currentLang$,              
-  ]).pipe(
-    map(([data, uxTest, lang]) => {
-      const tasks = data?.tasks || [];
-      const callsByTasks = data?.dateRangeData?.callsByTasks || [];
-      const pageMetricsByTasks = data?.dateRangeData?.pageMetricsByTasks || [];
-  
-      const avgTaskSuccessFromLastTest = data?.dateRangeData?.avgTaskSuccessForEachTask || [];
-  
-      const callsByTasksDict = arrayToDictionary(callsByTasks, 'title');
-      const pageMetricsByTasksDict = arrayToDictionary(pageMetricsByTasks, 'title');
-      const TaskSuccessByUxTestDict = arrayToDictionary(avgTaskSuccessFromLastTest, 'title');
-      const uxTestDict = arrayToDictionary(uxTest, 'title');
-
-  
-      return tasks.map((task) => {
-        const { title } = task;
-        const { calls = 0 } = callsByTasksDict[title] || {};
-        const { dyfNo = 0, visits = 0 } = pageMetricsByTasksDict[title] || {};
-        const { avgTaskSuccessFromLastTest = 0 } = TaskSuccessByUxTestDict[title] || {};
-
-  
-        const kpiNoClicks = visits !== 0 ? (dyfNo / visits) * 1000 : 0;
-        const kpiCallsRatio = visits !== 0 ? calls / visits : 0;
-        const kpiCalls = kpiCallsRatio * 100;
-        const avgTaskSuccessFromLastTests = avgTaskSuccessFromLastTest;
-
-        const ux = uxTestDict[title] || {};
-
-      const uxTest2Years = ux.latestDate;
-      const isWithin2Years =
-        uxTest2Years && dayjs(uxTest2Years).isAfter(dayjs().subtract(2, 'year'))
-          ? 'Yes'
-          : 'No';
-
-        return {
-          ...task,
-          title: this.i18n.service.translate(title, lang) || title,
-          calls: kpiCalls,
-          dyfNo: kpiNoClicks,
-          uxTest2Years: isWithin2Years,
-          avgTaskSuccess: avgTaskSuccessFromLastTests,
-        };
-      });
-    }),
-  );
-  
 
   calldriversChart$ = combineLatest([
     this.projectsDetailsData$,
@@ -683,47 +584,43 @@ export class ProjectsDetailsFacade {
         ?.map((uxTest) => uxTest.tasks.split('; ') || [])
         .flat();
 
-      const tasks = data?.tasks.filter(({ title }) =>
-        tasksWithSuccessRate.includes(title),
-      );
-
-      const categories = tasks.map((task) => task.title);
+      const taskTitles = data?.taskMetrics
+        .filter(({ title }) => tasksWithSuccessRate.includes(title))
+        .map((task) => task.title);
 
       const uniqueTestTypes = [
         ...new Set(uxTests.map((item) => item.test_type)),
       ];
 
-      const series = uniqueTestTypes.map((testType) => {
-        const data = categories.map((category) => {
-          const tasks = uxTests.filter(
-            (task) =>
-              task.tasks.split('; ').includes(category) &&
-              task.test_type === testType &&
-              task.success_rate !== null &&
-              task.success_rate !== undefined,
-          );
-          const taskSuccessRates = tasks.map(
-            (task) => task.success_rate,
-          ) as number[];
-          const totalSuccessRates = taskSuccessRates.reduce(
-            (acc, val) => acc + val,
-            0,
-          );
-          return tasks.length > 0 ? totalSuccessRates / tasks.length : null;
-        }) as number[];
+      const validTests = uxTests
+        .filter((uxTest) => !isNullish(uxTest.success_rate))
+        .map((uxTest) => ({ ...uxTest, _tasks: uxTest.tasks.split('; ') }));
 
-        const name = testType
-          ? this.i18n.service.translate(testType as string, lang)
-          : testType;
+      const validTestsByTask = arrayToDictionaryMultiref(
+        validTests,
+        '_tasks',
+        true,
+      );
 
-        return { name, data };
-      });
+      const taskSuccessRatesByTestType = uniqueTestTypes.map((testType) => ({
+        name: this.i18n.service.translate(testType as string, lang),
+        // `data` is an array of avg success rate by task
+        data: taskTitles.map((taskTitle) => {
+          const taskSuccessRates =
+            validTestsByTask[taskTitle]
+              ?.filter((uxTest) => uxTest.test_type === testType)
+              .map((uxTest) => uxTest.success_rate || 0) || [];
 
-      const xaxis = categories.map((category) => {
-        return this.i18n.service.translate(category, lang);
-      });
+          return avg(taskSuccessRates);
+        }),
+      }));
 
-      return { series, xaxis };
+      return {
+        series: taskSuccessRatesByTestType,
+        xaxis: taskTitles.map((task) =>
+          this.i18n.service.translate(task, lang),
+        ),
+      };
     }),
   );
 

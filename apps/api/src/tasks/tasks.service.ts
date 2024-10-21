@@ -295,9 +295,7 @@ export class TasksService {
         return 0;
       });
 
-
     const taskSuccessByUxTest = uxTests;
-
 
     const {
       avgTestSuccess: avgTaskSuccessFromLastTest,
@@ -305,7 +303,6 @@ export class TasksService {
       percentChange: avgSuccessPercentChange,
       valueChange: avgSuccessValueChange,
     } = getLatestTaskSuccessRate(uxTests);
-
 
     const returnData = {
       ...omit(['ux_tests'], taskData),
@@ -317,7 +314,7 @@ export class TasksService {
       avgSuccessValueChange,
       dateFromLastTest,
       mostRelevantCommentsAndWords,
-    }
+    };
 
     await this.cacheManager.set(cacheKey, returnData);
 

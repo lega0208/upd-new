@@ -1,4 +1,4 @@
-import { createFeatureSelector, createSelector, select } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 import {
   PROJECTS_DETAILS_FEATURE_KEY,
   ProjectsDetailsState,
@@ -137,7 +137,6 @@ export const selectCallsPerVisits = createSelector(
   (callsByDay, visitsByDay) => {
     const callsByDateDict = arrayToDictionary(callsByDay, 'date');
 
-
     return visitsByDay
       .map(({ date, visits }) => {
         const calls = callsByDateDict[date]?.calls;
@@ -150,7 +149,6 @@ export const selectCallsPerVisits = createSelector(
       .filter(({ y }) => y);  // allow valid 0 values
   }
 );
-
 
 export const selectComparisonCallsPerVisits = createSelector(
   selectComparisonCallsByDay,

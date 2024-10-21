@@ -104,26 +104,25 @@ export class ProjectDetailsSummaryComponent implements OnInit {
       typeParams: { preLink: '/' + this.langLink + '/tasks', link: '_id' },
     },
     {
-      field: 'calls',
+      field: 'callsPer100Visits',
       header: 'Calls / 100 Visits',
       pipe: 'number',
-      translate: true,
+      pipeParam: '1.0-2',
     },
     {
-      field: 'dyfNo',
+      field: 'dyfNoPer1000Visits',
       header: '"No clicks" / 1,000 Visits',
-      translate: true,
       pipe: 'number',
+      pipeParam: '1.0-2',
     },
     {
-      field: 'uxTest2Years',
+      field: 'uxTestInLastTwoYears',
       header: 'UX Test in Past 2 Years?',
       translate: true,
     },
     {
-      field: 'avgTaskSuccess',
+      field: 'latestSuccessRate',
       header: 'Latest UX Task Success Rate',
-      translate: true,
       pipe: 'percent',
     },
   ];

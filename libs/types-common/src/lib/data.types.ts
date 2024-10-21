@@ -16,8 +16,6 @@ import type {
   IReadability,
   IAnnotations,
   IReports,
-  CallsByTasks,
-  avgTaskSuccessFromLastTest,
 } from './schema.types';
 import type { MostRelevantCommentsAndWordsByLang } from './feedback.types';
 
@@ -532,13 +530,6 @@ export interface ProjectDetailsAggregatedData {
   calldriversEnquiry: { enquiry_line: string; calls: number }[];
   callsByTopic: CallsByTopic[];
   totalCalldrivers: number;
-  pageMetricsByTasks: (Partial<ProjectDetailsAggregatedData> & {
-    title: string;
-  })[];
-  callsByTasks: CallsByTasks[];
-  avgTaskSuccessForEachTask: avgTaskSuccessFromLastTest[];
-  ux_tests?: Omit<IUxTest, 'pages' | 'tasks' | 'projects'>[];
-
 }
 
 export interface ProjectsDetailsData
@@ -554,7 +545,14 @@ export interface ProjectsDetailsData
   avgSuccessValueChange: number | null;
   dateFromLastTest: Date;
   taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
-  tasks: Pick<ITask, '_id' | 'title'>[];
+  taskMetrics: {
+    _id: string;
+    title: string;
+    callsPer100Visits: number;
+    dyfNoPer1000Visits: number;
+    uxTestInLastTwoYears: boolean;
+    latestSuccessRate: number;
+  }[];
   searchTerms: InternalSearchTerm[];
   attachments: AttachmentData[];
   feedbackByPage: {
