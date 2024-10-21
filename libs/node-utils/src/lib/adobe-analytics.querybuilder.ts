@@ -22,12 +22,6 @@ export class AdobeAnalyticsQueryBuilder {
   private readonly query: AdobeAnalyticsReportQuery;
 
   constructor(rsid: string = process.env.AW_REPORTSUITE_ID || '') {
-    if (!rsid) {
-      throw new Error(
-        'Expected AW_REPORTSUITE_ID environment variable to be set: No report suite ID provided',
-      );
-    }
-
     this.query = {
       rsid,
       dimension: 'variables/evar22',
