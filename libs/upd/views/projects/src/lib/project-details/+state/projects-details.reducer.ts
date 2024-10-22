@@ -32,7 +32,7 @@ export const projectDetailsInitialState: ProjectsDetailsState = {
     avgSuccessValueChange: null,
     dateFromLastTest: new Date(0),
     taskSuccessByUxTest: [],
-    tasks: [],
+    taskMetrics: [],
     searchTerms: [],
     attachments: [],
     feedbackByPage: [],

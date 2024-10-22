@@ -545,7 +545,14 @@ export interface ProjectsDetailsData
   avgSuccessValueChange: number | null;
   dateFromLastTest: Date;
   taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
-  tasks: Pick<ITask, '_id' | 'title'>[];
+  taskMetrics: {
+    _id: string;
+    title: string;
+    callsPer100Visits: number;
+    dyfNoPer1000Visits: number;
+    uxTestInLastTwoYears: boolean;
+    latestSuccessRate: number;
+  }[];
   searchTerms: InternalSearchTerm[];
   attachments: AttachmentData[];
   feedbackByPage: {
