@@ -46,6 +46,10 @@ export class ApiService {
     return this.get<PageDetailsData>('/api/pages/details', params);
   }
 
+  getPageFlow(params: ApiParams) {
+    return this.get('/api/pages/flow', params);
+  }
+
   getOverviewData(params: ApiParams) {
     return this.get<OverviewData>('/api/overall', params);
   }
