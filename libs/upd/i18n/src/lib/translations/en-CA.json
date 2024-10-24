@@ -20,6 +20,7 @@
   "tab-calldrivers": "Call drivers",
   "tab-uxtests": "UX tests",
   "tab-details": "Details",
+  "tab-flow": "Flow",
   "tab-readability": "Readability",
   "tab-gctasks": "GC Task Success Survey",
   "dr-lastweek": "Last week",
@@ -221,6 +222,7 @@
   "tooltip-original-flesch-kincaid-score": "The score without considering headings and list items as separate sentences",
   "tooltip-improving-web-readability": "Best practices to improve web readability",
 
+  "Keywords": "Keywords",
   "dt_search_keyword": "Search Keyword",
   "dt_search_keyword_url": "Search by keyword or URL",
   "government_of_canada": "Government of Canada",
@@ -1146,6 +1148,7 @@
   "Pages | Web traffic": "UPD | Pages | Web traffic",
   "Pages | Search analytics": "UPD | Pages | Search analytics",
   "Pages | Page feedback": "UPD | Pages | Page feedback",
+  "Pages | Flow": "UPD | Pages | Flow",
   "Pages | Readability": "UPD | Pages | Readability",
   "Projects | Home": "UPD | UX projects | Home",
   "Projects | Summary": "UPD | UX projects | Summary",

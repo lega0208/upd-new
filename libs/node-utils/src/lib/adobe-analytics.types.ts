@@ -165,9 +165,13 @@ export type AAResponseBody = unknown & {
   reportId: string;
   columns: AAColumnsMetadata;
   rows: AAResultsRow[];
-  summaryData?: Record<string, unknown>;
+  summaryData?: AASummaryData;
 };
 
+export interface AASummaryData {
+  filteredTotals: number[];
+  totals: number[];
+}
 export interface AAErrorResponseBody extends AABaseError {
   errorDetails: unknown;
   rootCauseService: string;

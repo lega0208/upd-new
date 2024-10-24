@@ -10,6 +10,7 @@ import { PagesDetailsSummaryComponent } from './pages-details/pages-details-summ
 import { PagesDetailsWebtrafficComponent } from './pages-details/pages-details-webtraffic/pages-details-webtraffic.component';
 import { PagesDetailsSearchAnalyticsComponent } from './pages-details/pages-details-search-analytics/pages-details-search-analytics.component';
 import { PagesDetailsFeedbackComponent } from './pages-details/pages-details-feedback/pages-details-feedback.component';
+import { PagesDetailsFlowComponent } from './pages-details/pages-details-flow/pages-details-flow.component';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import {
@@ -52,6 +53,7 @@ import { PipesModule } from '@dua-upd/upd/pipes';
     PagesDetailsWebtrafficComponent,
     PagesDetailsSearchAnalyticsComponent,
     PagesDetailsFeedbackComponent,
+    PagesDetailsFlowComponent,
     PagesDetailsReadabilityComponent,
   ],
   providers: [PagesHomeFacade, PagesDetailsFacade, ApiService],
