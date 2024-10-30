@@ -471,6 +471,9 @@ export class ProjectsService {
     console.timeEnd('getTopSearchTerms');
 
     console.time('commentsByPage');
+
+    const taskMetrics = await this.getTaskMetrics(projectId, params.dateRange);
+
     const feedbackByPage = (
       await this.feedbackService.getNumCommentsByPage(
         params.dateRange,
@@ -478,10 +481,18 @@ export class ProjectsService {
         { projects: projectId },
       )
     )
-      .map(({ _id, title, url, sum, percentChange }) => ({
+      .map(({ _id, title, url, tasks, sum, percentChange }) => ({
         _id: _id.toString(),
         title,
         url,
+        tasks: tasks
+          .map((taskId) => {
+            const task = taskMetrics.find(
+              (t) => t._id.toString() === taskId.toString(),
+            );
+            return task?.title;
+          })
+          .join('; '),
         sum,
         percentChange,
       }))

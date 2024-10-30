@@ -559,6 +559,7 @@ export interface ProjectsDetailsData
     _id: string;
     title: string;
     url: string;
+    tasks: string;
     sum: number;
     percentChange: number | null;
   }[];

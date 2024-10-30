@@ -5,6 +5,7 @@ import type {
   DateRange,
   IFeedback,
   IPage,
+  ITask,
   MostRelevantCommentsAndWordsByLang,
   WordRelevance,
 } from '@dua-upd/types-common';
@@ -64,7 +65,7 @@ export class Feedback implements IFeedback {
   page?: Types.ObjectId;
 
   @Prop({ type: [Types.ObjectId], index: true, default: undefined })
-  tasks?: Types.ObjectId[];
+  tasks?: Types.ObjectId[] | ITask[];
 
   @Prop({ type: [Types.ObjectId], index: true, default: undefined })
   projects?: Types.ObjectId[];
@@ -80,7 +81,7 @@ export class Feedback implements IFeedback {
           update: {
             $set: {
               page: page._id,
-              tasks: page.tasks,
+              // tasks: page.tasks,
               projects: page.projects,
             },
           },

@@ -1,9 +1,12 @@
-import type { IFeedback } from './schema.types';
+import { Type } from '@nestjs/common';
+import type { IFeedback, ITask } from './schema.types';
+import { Types } from 'mongoose';
 
 export type FeedbackWithScores = IFeedback & {
   rank?: number;
   commentScore?: number;
   // pageScore?: number; // not using page score for now
+  tasks?: Types.ObjectId[] | ITask[];
   owners?: string;
   sections?: string;
 };

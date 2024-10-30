@@ -78,6 +78,7 @@ export interface IFeedback {
   unique_id?: Types.ObjectId;
   url: string;
   date: Date;
+  tasks?: Types.ObjectId[] | ITask[];
   lang: string;
   comment: string;
   words?: string[];

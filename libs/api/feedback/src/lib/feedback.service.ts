@@ -135,23 +135,35 @@ export class FeedbackService {
     const commentsAggregation = this.db.collections.feedback
       .aggregate<IFeedback>()
       .project({ tags: 0, __v: 0, airtable_id: 0, unique_id: 0 })
-      .match(filterQuery);
+      .match(filterQuery)
+      .lookup({
+        from: 'pages',
+        localField: 'url',
+        foreignField: 'url',
+        as: 'page',
+      })
+      .unwind('$page')
+      .addFields({
+        sections: '$page.sections',
+        tasks: '$page.tasks',
+        owners: '$page.owners',
+      })
+      .lookup({
+        from: 'tasks',
+        localField: 'tasks',
+        foreignField: '_id',
+        as: 'tasks',
+      })
+      .addFields({
+        tasks: {
+          $map: { input: '$tasks', as: 'task', in: '$$task.title' },
+        },
+      });
 
     const comments = await (
       params.ipd
         ? commentsAggregation
-            .lookup({
-              from: 'pages',
-              localField: 'url',
-              foreignField: 'url',
-              as: 'page',
-            })
-            .unwind('$page')
             .match({ 'page.owners': /ipd/i })
-            .addFields({
-              sections: '$page.sections',
-              owners: '$page.owners',
-            })
             .project({ page: 0 })
         : commentsAggregation
     ).exec();
@@ -232,7 +244,11 @@ export class FeedbackService {
     const pagesWithSections = await this.db.collections.pages
       .find({
         ...omit(['date', 'lang'], filterQuery),
-        $or: [{ sections: { $exists: true } }, { owners: { $exists: true } }],
+        $or: [
+          { sections: { $exists: true } },
+          { owners: { $exists: true } },
+          { tasks: { $exists: true } },
+        ],
       })
       .lean()
       .exec();
