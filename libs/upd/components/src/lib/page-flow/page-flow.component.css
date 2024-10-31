@@ -1,220 +1,196 @@
+/* ===============================
+    Global Styles & Utilities
+================================ */
 a:not(.btn) {
   color: inherit !important;
   text-decoration: underline !important;
   cursor: pointer;
 }
 
-.arrow {
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 10px solid #000;
-  margin: 0 auto;
-  position: relative;
+.badge:empty {
+  display: inherit;
 }
 
-.inline-block {
-    display: inline-block; 
+.badge-empty {
+  background: #d5d7d9;
+  height: 1.25rem;
+}
+
+.title {
+  min-height: 3rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  color: white;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===============================
+    Flow Container & Flow Items
+================================ */
+.flow-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 20px;
+  justify-content: center;
 }
 
 .flow-item {
-    margin: 15px 0;
-    padding: 10px 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.5s ease; /* Smooth transition */
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-    position: relative; /* Necessary for positioning */
-}
-
-.flow-item.move-to-next {
-    transform: translateX(300px); /* Move to the right (towards next pages) */
-}
-
-.flow-item.move-to-prev {
-    transform: translateX(-300px); /* Move to the left (towards previous pages) */
-}
-
-/* Entries badge on the left
-.flow-item .entries-badge {
-  position: absolute;
-  top: 50%;
-  left: -20px;
-  transform: translateY(-50%);
-  background-color: #28a745;
-  color: white;
-  padding: 5px 10px;
-  padding-top: 80px;
-  border-radius: 3px;
-  font-size: 14px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-} */
-
-.flow-item .entries-badge {
-  position: absolute;
-  left: -20px;
-  bottom: 0;
-  background: linear-gradient(to bottom, #28a745 80%, #ffffff 95%, #ffffff 100%);
-  color: white;
-  width: 20px;
-  height: calc(100% + 30px);
-  padding-top: 10px;
-  border-radius: 0 15px;
-  font-size: 13px;
-  writing-mode: tb-rl;
-  transform: rotate(-180deg);
   display: flex;
-  align-items: center;
-}
-
-.flow-item .exits-badge {
-  position: absolute;
-  right: -20px;
-  top: 0;
-  background: linear-gradient(to bottom, #dc3545 80%, #ffffff 95%, #ffffff 100%);
-  color: white;
-  width: 20px;
-  height: calc(100% + 30px);
-  padding-top: 10px;
-  border-radius: 0 15px;
-  font-size: 13px;
-  writing-mode: vertical-rl;
-  display: flex;
-  align-items: center;
-}
-
-.flow-item.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease; /* Fading effect */
+  padding: 0px 15px;
+  width: 225px;
+  height: 160px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: white;
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.2s,
+    background-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .flow-item:hover {
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-    background: linear-gradient(to bottom, #f0f0f0, #e9e9e9);
-    scale: 1.02;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(to bottom, #f0f0f0, #e9e9e9);
+  scale: 1.02;
 }
 
 .flow-item:active {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transform: scale(0.98);
-    background: linear-gradient(to bottom, #e9e9e9, #e0e0e0);
-    border-color: #aaa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: scale(0.98);
+  background: linear-gradient(to bottom, #e9e9e9, #e0e0e0);
+  border-color: #aaa;
 }
 
-.flow-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.flow-item:hover::before {
-    opacity: 0.5;
-}
-
-.flow-item:active::before {
-    opacity: 0.1;
-}
-
-.flow-item:not(.previous-flow-item):not(.next-flow-item) {
-    background: linear-gradient(to bottom, #ffffff, #f0f0f0); 
-}
-
-.flow-item.inactive {
-  border: 2px dashed #ccc; /* Dashed black border */
-  padding: 30px; /* Adjust padding to control gap */
-  box-sizing: border-box; /* Ensures the border stays within the size */
-  text-align: center; /* Center the text horizontally */
-  font-weight: 500;
-  height: 100px; /* Increase the height of the flow item */
-  display: flex; /* Enables flexbox layout */
-  justify-content: center; /* Centers text horizontally */
-  align-items: center; /* Centers text vertically */
-}
-
-.previous-flow-item {
-    background: linear-gradient(to bottom, #fff8e1, #fff8dc);
-    margin: 10px;
-}
-
+/* ===============================
+    Specialized Flow Item Variants
+================================ */
 .selected-previous-flow-item {
-  background: #fffae6 !important;
-}
-
-.previous-flow-item:hover {
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-    background: linear-gradient(to bottom, #fff7d4, #fff8dc); 
-}
-
-.previous-flow-item:active {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
-    transform: scale(0.98); 
-    background: linear-gradient(to bottom, #fff2c0, #fff8dc);
-    border-color: #aaa; 
-}
-
-.next-flow-item {
-    background: linear-gradient(to bottom, #e6f3ff, #d0e7ff); 
-    margin: 10px;
+  background-color: #fffae6 !important;
 }
 
 .selected-next-flow-item {
-  background: #e7f2fd !important;
+  background-color: #e7f2fd !important;
 }
 
-/* Hover effect for .next-flow-item */
-.next-flow-item:hover {
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Slightly larger shadow on hover */
-    background: linear-gradient(to bottom, #dcefff, #d0e7ff); /* Less pronounced gradient on hover */
-}
-
-/* Active (pressed) effect for .next-flow-item */
-.next-flow-item:active {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Shadow to give pressed effect */
-    transform: scale(0.98); /* Slightly shrink the element for pressed effect */
-    background: linear-gradient(to bottom, #c8e0ff, #d0e7ff); /* Subtle darker gradient for pressed effect */
-    border-color: #aaa; /* Darker border to indicate press */
-}
-
-/* Styles to make .current-flow look static and distinct */
-.flow-item.current-flow {
-    cursor: default; /* Prevents clicking on the current flow */
-    box-shadow: none; /* No shadow to indicate it's static */
-    transform: none; /* No transform for static appearance */
-    scale: 1; /* No scaling for static appearance */
-}
-
-.flow-item.focal-url {
+.focal-url {
   border: 2px solid #000;
 }
 
-.flow-item .item-data {
-  display: block;
-  margin-top: 5px;
+.inactive {
+  border: 2px dashed #ccc;
+  padding: 30px;
+  box-sizing: border-box;
+  text-align: center;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.previous-flow-item,
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+/* ===============================
+    Previous & Next Flow Items
+================================ */
+.previous-flow-item {
+  background: linear-gradient(to bottom, #fff8e1, #fff8dc);
+}
+
+.previous-flow-item {
+  background: linear-gradient(to bottom, #fff8e1, #fff8dc);
+}
+
+.previous-flow-item:hover {
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(to bottom, #fff7d4, #fff8dc);
+}
+
+.previous-flow-item:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: scale(0.98);
+  background: linear-gradient(to bottom, #fff2c0, #fff8dc);
+  border-color: #aaa;
+}
+
 .next-flow-item {
+  background: linear-gradient(to bottom, #e6f3ff, #d0e7ff);
+}
+
+.next-flow-item:hover {
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(to bottom, #dcefff, #d0e7ff);
+}
+
+.next-flow-item:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: scale(0.98);
+  background: linear-gradient(to bottom, #c8e0ff, #d0e7ff);
+  border-color: #aaa;
+}
+
+.flow-item-selectable {
+  width: auto;
+  min-height: 45px;
+  height: auto;
   margin-bottom: 10px;
 }
 
-.previous-flow-item a,
-.next-flow-item a {
-  text-decoration: none;
-  color: #007bff;
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
 }
 
-.previous-flow-item a:hover,
-.next-flow-item a:hover {
-  text-decoration: underline;
+/* ===============================
+    Current Flow, Hover Effects
+================================ */
+.current-flow {
+  cursor: default;
+  box-shadow: none;
+  transform: none;
+  scale: 1;
 }
 
 .focal-url.previous-flow-item.next-flow-item {
@@ -236,48 +212,7 @@ a:not(.btn) {
 }
 
 @media (max-width: 991px) {
-    .flow-arrow {
-        display: none;
-    }
-}
-
-/* Grey overlay when loading */
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4); /* Greyish transparent background */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10; /* Ensure it's above other content */
-  color: white;
-}
-
-/* Rotating circle for loading */
-.loading-spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid white;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin-right: 10px; /* Space between spinner and text */
-}
-
-.flow-wrapper {
-  margin-top: 10px;
-  border: 2px solid #000;
-}
-
-/* Keyframes for the spinner animation */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+  .flow-arrow {
+    display: none;
   }
 }
