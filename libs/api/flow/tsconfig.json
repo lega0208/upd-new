@@ -9,8 +9,8 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "files": [],
-  "include": [],
+  "include": ["libs/api/custom-reports/src/**/*.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"],
   "references": [
     {
       "path": "./tsconfig.lib.json"
