@@ -59,14 +59,18 @@ export class PageFlowComponent {
     ...this.nextPages(),
   ]);
 
+  totalPages = computed(
+    () => this.previousPages().length + this.nextPages().length,
+  );
+
   currentFlowCols: ColumnConfig[] = [
     { field: 'sequence', header: 'Sequence' },
     { field: 'title', header: 'Title' },
     { field: 'url', header: 'URL' },
-    { field: 'visits', header: 'Visits' },
-    { field: 'entries', header: 'Entries' },
-    { field: 'exits', header: 'Exits' },
-    { field: 'rank', header: 'Rank' },
+    { field: 'visits', header: 'Visits', pipe: 'number' },
+    { field: 'entries', header: 'Entries', pipe: 'number' },
+    { field: 'exits', header: 'Exits', pipe: 'number' },
+    { field: 'rank', header: 'Rank', pipe: 'number' },
   ];
 
   isLoadingNext = false;
@@ -93,7 +97,10 @@ export class PageFlowComponent {
             ) {
               this.currentFlow.set(parsedStorageData);
 
-              this.focusPage.set(parsedStorageData.focusPage);
+              this.focusPage.set({
+                ...parsedStorageData.focusPage,
+                sequence: 'Focus',
+              });
               this.previousOptions.set(parsedStorageData.previousOptions);
               this.nextOptions.set(parsedStorageData.nextOptions);
               this.previousPages.set(parsedStorageData.previousPages);
@@ -118,7 +125,7 @@ export class PageFlowComponent {
           );
 
           if (JSON.stringify(focusPage) !== JSON.stringify(results[0])) {
-            this.focusPage.set(results[0]);
+            this.focusPage.set({ ...results[0], sequence: 'Focus' });
           }
 
           this.currentFlow.set({
@@ -126,7 +133,7 @@ export class PageFlowComponent {
             nextOptions: currentFlow?.nextOptions ?? [],
             previousPages: currentFlow?.previousPages ?? [],
             nextPages: currentFlow?.nextPages ?? [],
-            focusPage: results[0],
+            focusPage: { ...results[0], sequence: 'Focus' },
           });
 
           sessionStorage.setItem(
@@ -198,7 +205,6 @@ export class PageFlowComponent {
     const isPrevious = direction === 'previous';
     const pages = isPrevious ? this.previousPages() : this.nextPages();
 
-    // Check if an item and rank are provided (this indicates a node is clicked)
     if (item && rank) {
       const newPage = { ...item, rank, sequence: pages.length + 1 };
 
@@ -206,7 +212,6 @@ export class PageFlowComponent {
       const nodeClass = isPrevious ? '.previous-flow-item' : '.next-flow-item';
       const flowItems = document.querySelectorAll(nodeClass);
 
-      // Apply movement class to the clicked node (based on the index or rank)
       if (flowItems[rank - 1]) {
         const selectedNode = flowItems[rank - 1] as HTMLElement;
 
