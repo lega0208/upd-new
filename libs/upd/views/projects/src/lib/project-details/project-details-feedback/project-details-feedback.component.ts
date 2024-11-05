@@ -98,11 +98,11 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
       pipe: 'date',
       width: '100px',
       frozen: true,
-    },    
+    },
     { field: 'url', header: 'URL' },
     { field: 'owners', header: 'Area', width: '10px', hide: true },
     { field: 'sections', header: 'Section', hide: true },
-    { field:'tasks', header: 'Task' },
+    { field: 'tasks', header: 'Task' },
     { field: 'comment', header: 'comment', width: '400px', frozen: true },
   ];
 

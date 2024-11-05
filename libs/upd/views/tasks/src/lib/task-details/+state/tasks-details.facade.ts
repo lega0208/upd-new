@@ -6,7 +6,7 @@ import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
-import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
+import type { LocaleId } from '@dua-upd/upd/i18n';
 import type { AttachmentData, TaskDetailsData } from '@dua-upd/types-common';
 import {
   type GetTableProps,
@@ -452,7 +452,6 @@ export class TasksDetailsFacade {
         header: 'sub-subtopic',
         translate: true,
       },
-
       {
         field: 'calls',
         header: 'calls',

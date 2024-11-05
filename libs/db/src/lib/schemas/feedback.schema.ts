@@ -3,9 +3,10 @@ import type { Document, FilterQuery, Model, mongo } from 'mongoose';
 import { Types } from 'mongoose';
 import type {
   DateRange,
+  FeedbackBase,
+  FeedbackWithScores,
   IFeedback,
   IPage,
-  ITask,
   MostRelevantCommentsAndWordsByLang,
   WordRelevance,
 } from '@dua-upd/types-common';
@@ -65,7 +66,7 @@ export class Feedback implements IFeedback {
   page?: Types.ObjectId;
 
   @Prop({ type: [Types.ObjectId], index: true, default: undefined })
-  tasks?: Types.ObjectId[] | ITask[];
+  tasks?: Types.ObjectId[];
 
   @Prop({ type: [Types.ObjectId], index: true, default: undefined })
   projects?: Types.ObjectId[];
@@ -81,8 +82,8 @@ export class Feedback implements IFeedback {
           update: {
             $set: {
               page: page._id,
-              // tasks: page.tasks,
-              projects: page.projects,
+              tasks: page.tasks as Types.ObjectId[],
+              projects: page.projects as Types.ObjectId[],
             },
           },
         },
@@ -459,9 +460,33 @@ export class Feedback implements IFeedback {
 
     const wordScoresMap = arrayToDictionary(wordScores, 'word');
 
-    const comments = await this.aggregate<IFeedback>()
+    const comments = await this.aggregate<FeedbackBase>()
       .project({ tags: 0, __v: 0, airtable_id: 0, unique_id: 0 })
       .match(query)
+      .lookup({
+        from: 'pages',
+        localField: 'url',
+        foreignField: 'url',
+        as: 'page',
+      })
+      .unwind('$page')
+      .addFields({
+        sections: '$page.sections',
+        tasks: '$page.tasks',
+        owners: '$page.owners',
+      })
+      .lookup({
+        from: 'tasks',
+        localField: 'tasks',
+        foreignField: '_id',
+        as: 'tasks',
+      })
+      .addFields({
+        tasks: {
+          $map: { input: '$tasks', as: 'task', in: '$$task.title' },
+        },
+      })
+      .project({ page: 0 })
       .exec();
 
     const calculateBM25 = (words: string[]) => {
@@ -502,10 +527,7 @@ export class Feedback implements IFeedback {
             : {
                 ...omit(['words'], comment),
                 ...calculateBM25(comment.words),
-              }) as IFeedback & {
-            commentScore?: number;
-            rank?: number;
-          },
+              }) as FeedbackWithScores,
       )
       .sort((a, b) =>
         a.commentScore ? (b.commentScore || 0) - a.commentScore : 1,
