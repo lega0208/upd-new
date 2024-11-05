@@ -1,11 +1,15 @@
 import type { IFeedback } from './schema.types';
 
-export type FeedbackWithScores = IFeedback & {
+export type FeedbackBase = Omit<IFeedback, 'tasks' | 'projects'> & {
+  tasks?: string;
+  owners?: string;
+  sections?: string;
+};
+
+export type FeedbackWithScores = FeedbackBase & {
   rank?: number;
   commentScore?: number;
   // pageScore?: number; // not using page score for now
-  owners?: string;
-  sections?: string;
 };
 
 export type WordRelevance = {

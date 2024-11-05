@@ -102,6 +102,7 @@ export class ProjectDetailsFeedbackComponent implements OnInit {
     { field: 'url', header: 'URL' },
     { field: 'owners', header: 'Area', width: '10px', hide: true },
     { field: 'sections', header: 'Section', hide: true },
+    { field: 'tasks', header: 'Task' },
     { field: 'comment', header: 'comment', width: '400px', frozen: true },
   ];
 
