@@ -126,7 +126,7 @@ export class DataTableExportsComponent<T> {
           } else if (col.pipe === 'date') {
             formattedRow[colKey] = formatDate(
               (<unknown>cellValue) as Date,
-              col.pipeParam ?? 'YYYY-MM-dd',
+              col.pipeParam ?? 'yyyy-MM-dd',
               currentLang,
               'UTC',
             );

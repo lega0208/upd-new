@@ -19,7 +19,5 @@ export class PagesDetailsFlowComponent {
   error$ = this.pageDetailsService.error$;
 
   url = toSignal(this.pageDetailsService.pageUrl$) as () => string;
-  rawDateRange = toSignal(this.pageDetailsService.rawDateRange$) as () => { start: string; end: string };
-  visits = toSignal(this.pageDetailsService.visits$) as () => number;
-  title = toSignal(this.pageDetailsService.pageTitle$) as () => string;
+  rawDateRange = toSignal(this.pageDetailsService.rawDateRange$) as () => { start: string; end: string }
 }
