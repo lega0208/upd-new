@@ -71,7 +71,7 @@ export class ProjectsHomeComponent implements OnInit {
             field: 'startDate',
             header: this.i18n.service.translate('Start date', lang),
             pipe: 'date',
-            pipeParam: lang === FR_CA ? 'd MMM YYYY' : 'MMM dd, YYYY',
+            pipeParam: lang === FR_CA ? 'd MMM yyyy' : 'MMM dd, yyyy',
           },
           {
             field: 'launchDate',
