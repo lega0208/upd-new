@@ -29,8 +29,9 @@ export class PageFlowComponent {
 
   url = input<string>('');
   dateRange = input<{ start: string; end: string }>();
-  visits = input<number>(0);
   title = input<string>('');
+  modal = input<string>('');
+  modalSize = input<'xl' | 'lg' | 'md' | 'sm'>('lg');
 
   previousOptions: WritableSignal<PageFlowData[]> = signal([]);
   nextOptions: WritableSignal<PageFlowData[]> = signal([]);

@@ -126,6 +126,14 @@ a:not(.btn) {
   align-items: center;
 }
 
+.inactive:hover, .inactive:active {
+  background: inherit;
+  border: 2px dashed #ccc;
+  box-shadow: none;
+  transform: none;
+  scale: 1;
+}
+
 .hidden {
   opacity: 0;
   pointer-events: none;

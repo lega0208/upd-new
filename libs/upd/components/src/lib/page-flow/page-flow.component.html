@@ -1,5 +1,5 @@
 <ng-template #itemTemplate let-page="page">
-  <div class="d-flex flex-column h-100 w-100">
+  <div class="d-flex flex-column h-100 w-100 pointer">
     <div class="title mt-1">
       <div>{{ page?.title || page.url }}</div>
     </div>
@@ -11,16 +11,20 @@
       }
     </div>
 
-    <div class="d-flex justify-content-start align-items-center gap-2 mt-3">
+    <div class="d-flex justify-content-between align-items-center gap-2 mt-3">
       @if (page === focusPage()) {
+        <!-- Center the Focus badge -->
         <span class="badge bg-dark">Focus</span>
       } @else if (page.rank && page.entries) {
+        <!-- Left-align the Rank badge with entries -->
         <span class="badge bg-warning text-dark">Rank {{ page.rank }}</span>
       } @else if (page.rank && page.exits) {
+        <!-- Right-align the Rank badge with exits -->
         <span class="badge" style="background: #1976d2"
           >Rank {{ page.rank }}</span
         >
       } @else {
+        <!-- Default case for Rank with a placeholder -->
         <div class="badge badge-empty">Rank ?</div>
       }
     </div>
@@ -29,19 +33,19 @@
       class="d-flex justify-content-between align-items-center gap-2 mt-auto mb-2"
     >
       @if (page.entries) {
-        <span class="badge bg-success w-50" aria-describedby="entriesTooltip"
+        <span class="badge bg-success w-100" aria-describedby="entriesTooltip"
           >Entries: {{ page?.entries / page?.visits | percent: '1.0-1' }}</span
         >
-      } @else {
-        <div class="badge badge-empty w-50"></div>
       }
 
       @if (page.exits) {
-        <span class="badge bg-danger w-50" aria-describedby="exitsTooltip"
+        <span class="badge bg-danger w-100" aria-describedby="exitsTooltip"
           >Exits: {{ page?.exits / page?.visits | percent: '1.0-1' }}</span
         >
-      } @else {
-        <div class="badge badge-empty w-50"></div>
+      }
+
+      @if (!page.entries && !page.exits) {
+        <span class="badge badge-empty w-100"></span>
       }
     </div>
   </div>
@@ -84,7 +88,7 @@
 </ng-template>
 
 <div class="container-fluid my-4 gx-0">
-  <upd-card [title]="'Traffic flow'">
+  <upd-card [title]="title()" [modal]="modal()" [modalSize]="modalSize()">
     <!-- <upd-arrow-connect
       [visible]="!isLoadingPrevious"
       [update]="!isLoadingNext"
@@ -116,7 +120,7 @@
               class="flow-item current-flow inactive selected-previous-flow-item"
               tabindex="0"
             >
-              Select previous page
+              Select previous page listed below
             </div>
 
             <div class="material-icons">chevron_right</div>
@@ -126,35 +130,47 @@
           @for (page of selectedFlow(); track page.url) {
             <ng-template #tooltip>
               @if (page?.title) {
-                <strong>{{ page.title }}</strong> <br />
+                <strong class="my-1">{{ page.title }}</strong> <br />
               }
-              {{ page.url }} <br />
-              <span class="item-data"
-                ><strong>{{ page.visits | number }}</strong> ({{
-                  page.visits / focusPage().visits | percent: '1.0-1'
-                }})</span
-              >
-              <br />
+              {{ page.url }}
+              <span class="d-block mt-2 my-1">
+                @if (page === focusPage()) {
+                  <strong>{{ page.visits | number }} total visits</strong>
+                } @else {
+                  <strong>{{ page.visits | number }} visits </strong> ({{
+                    page.visits / focusPage().visits | percent: '1.0-1'
+                  }})
+                }
+              </span>
               @if (page === focusPage()) {
-                <strong>Rank:</strong> Focus <br />
+                <span class="my-1 d-block"><strong>Rank:</strong> Focus </span>
               }
               @if (page.rank) {
-                <strong>Rank:</strong> {{ page.rank }} <br />
+                <span class="my-1 d-block"
+                  ><strong>Rank:</strong> {{ page.rank }}</span
+                >
               }
               @if (page.entries) {
-                <strong>Entries:</strong> {{ page.entries | number }} ({{
-                  page.entries / page.visits | percent: '1.0-1'
-                }}) <br />
+                <span class="my-1 d-block">
+                  <strong>Entries:</strong>
+                  {{ page.entries | number }} ({{
+                    page.entries / page.visits | percent: '1.0-1'
+                  }})
+                </span>
               }
               @if (page.exits) {
-                <strong>Exits:</strong> {{ page.exits | number }} ({{
-                  page.exits / page.visits | percent: '1.0-1'
-                }})
+                <span class="my-1 d-block">
+                  <strong>Exits:</strong>
+                  {{ page.exits | number }} ({{
+                    page.exits / page.visits | percent: '1.0-1'
+                  }})
+                </span>
               }
             </ng-template>
             <div
-              class="flow-item current-flow"
+              class="flow-item current-flow flow-tooltip"
               [ngbTooltip]="tooltip"
+              [tooltipClass]="'flow-tooltip'"
               placement="top"
               [ngClass]="{ 'focal-url': page === focusPage() }"
               tabindex="0"
@@ -178,7 +194,7 @@
               class="flow-item current-flow selected-next-flow-item inactive"
               tabindex="0"
             >
-              Select next page
+              Select next page listed below
             </div>
           }
         </div>
@@ -197,7 +213,7 @@
               class="card-tooltip me-2"
               [ngbTooltip]="topPreviousTooltip"
               aria-describedby="topPreviousTooltip"
-              >Previous top pages</strong
+              >Previous top pages visited</strong
             >
 
             @if (isLoadingPrevious || previousPages().length === 0) {
@@ -266,7 +282,7 @@
                 } @else {
                   <div
                     #sourcePreviousFlow
-                    class="flow-item previous-flow-item flow-item-selectable d-flex justify-content-between align-items-center"
+                    class="flow-item previous-flow-item flow-item-selectable d-flex justify-content-between align-items-center pointer"
                     [ngClass]="{ 'prev-first-item': $first }"
                     [ngbTooltip]="tooltip"
                     placement="left top"
@@ -298,7 +314,7 @@
               }
             </div>
             <div
-              class="flow-item flow-item-selectable"
+              class="flow-item flow-item-selectable pointer"
               *ngIf="!(previousOptions().length % 5)"
               (click)="pageClick('previous', previousOptions().length + 5)"
               (keydown)="
@@ -338,7 +354,7 @@
               class="card-tooltip me-2"
               [ngbTooltip]="topNextTooltip"
               aria-describedby="topNextTooltip"
-              >Next top pages</strong
+              >Next top pages visited</strong
             >
             @if (isLoadingNext || nextPages().length === 0) {
               <button
@@ -408,7 +424,7 @@
                 } @else {
                   <div
                     #targetNextFlow
-                    class="flow-item next-flow-item flow-item-selectable d-flex justify-content-between align-items-center"
+                    class="flow-item next-flow-item flow-item-selectable d-flex justify-content-between align-items-center pointer"
                     [ngClass]="{ 'next-first-item': $first }"
                     [ngbTooltip]="tooltip"
                     placement="right top"
@@ -442,7 +458,7 @@
               }
             </div>
             <div
-              class="flow-item flow-item-selectable"
+              class="flow-item flow-item-selectable pointer"
               *ngIf="!(nextOptions().length % 5)"
               (click)="pageClick('next', nextOptions().length + 5)"
               (keydown)="
