@@ -119,7 +119,7 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
   }
 
   switch (true) {
-    case statuses.every((status) => status === 'Complete'):
+    case statuses.some((status) => status === 'Complete'):
       return 'Complete';
     case statuses.some((status) => status === 'Delayed'):
       return 'Delayed';
