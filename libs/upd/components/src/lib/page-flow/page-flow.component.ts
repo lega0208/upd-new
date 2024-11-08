@@ -240,6 +240,44 @@ export class PageFlowComponent {
     this.getPageFlowData(direction, limit, urls); // Fetch the updated page flow data
   }
 
+  flowClick(item: PageFlowData) {
+    const previousPages = this.previousPages();
+    const nextPages = this.nextPages();
+    const focusPage = this.focusPage();
+    const url = this.url();
+
+    const previousIndex = previousPages.indexOf(item);
+    const nextIndex = nextPages.indexOf(item);
+    const isFocusPage = focusPage === item;
+
+    if (previousIndex !== -1 && nextIndex !== -1 && isFocusPage) return;
+
+    if (previousIndex !== -1) {
+      const updatedPreviousPages = previousPages.slice(previousIndex);
+      this.previousPages.set(updatedPreviousPages);
+      this.getPageFlowData('previous', 5, [
+        ...updatedPreviousPages.map((page) => page.url),
+        url,
+      ]);
+    } else if (nextIndex !== -1) {
+      const updatedNextPages = nextPages.slice(0, nextIndex + 1);
+      this.nextPages.set(updatedNextPages);
+      this.getPageFlowData('next', 5, [
+        url,
+        ...updatedNextPages.map((page) => page.url),
+      ]);
+    } else if (isFocusPage) {
+      this.previousPages.set([]);
+      this.nextPages.set([]);
+      if (previousPages.length > 0) {
+        this.getPageFlowData('previous');
+      }
+      if (nextPages.length > 0) {
+        this.getPageFlowData('next');
+      }
+    }
+  }
+
   updateEntriesOrExits(
     pageOptions: PageFlowData[],
     updateType: 'entries' | 'exits',
