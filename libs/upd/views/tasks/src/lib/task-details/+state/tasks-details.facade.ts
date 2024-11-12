@@ -437,11 +437,15 @@ export class TasksDetailsFacade {
         translate: true,
       },
       {
+        field: 'enquiry_line',
+        header: 'enquiry_line',
+        translate: true,
+      },
+      {
         field: 'topic',
         header: 'topic',
         translate: true,
       },
-      
       {
         field: 'subtopic',
         header: 'sub-topic',
@@ -450,11 +454,6 @@ export class TasksDetailsFacade {
       {
         field: 'sub_subtopic',
         header: 'sub-subtopic',
-        translate: true,
-      },
-      {
-        field: 'enquiry_line',
-        header: 'enquiry_line',
         translate: true,
       },
       {

@@ -413,6 +413,11 @@ export class ProjectsDetailsFacade {
         header: 'tpc_id',
       },
       {
+        field: 'enquiry_line',
+        header: 'enquiry_line',
+        translate: true,
+      },
+      {
         field: 'topic',
         header: 'topic',
         translate: true,
@@ -425,11 +430,6 @@ export class ProjectsDetailsFacade {
       {
         field: 'sub_subtopic',
         header: 'sub-subtopic',
-        translate: true,
-      },
-      {
-        field: 'enquiry_line',
-        header: 'enquiry_line',
         translate: true,
       },
       {

@@ -486,7 +486,6 @@ export class ProjectsService {
         percentChange,
       }))
       .sort((a, b) => b.sum - a.sum);
-    console.log(feedbackByPage.length);
     console.timeEnd('commentsByPage');
 
     const mostRelevantCommentsAndWords =

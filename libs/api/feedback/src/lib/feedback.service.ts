@@ -4,7 +4,7 @@ import { Types, type FilterQuery } from 'mongoose';
 import { omit } from 'rambdax';
 import { DbService, Feedback } from '@dua-upd/db';
 import { arrayToDictionary } from '@dua-upd/utils-common';
-import type { DateRange } from '@dua-upd/types-common';
+import type { DateRange, FeedbackBase, FeedbackWithScores } from '@dua-upd/types-common';
 import { FeedbackCache } from './feedback.cache';
 import type {
   IFeedback,
@@ -133,25 +133,37 @@ export class FeedbackService {
     const wordScoresMap = arrayToDictionary(wordScores, 'word');
 
     const commentsAggregation = this.db.collections.feedback
-      .aggregate<IFeedback>()
+      .aggregate<FeedbackBase>()
       .project({ tags: 0, __v: 0, airtable_id: 0, unique_id: 0 })
-      .match(filterQuery);
+      .match(filterQuery)
+      .lookup({
+        from: 'pages',
+        localField: 'url',
+        foreignField: 'url',
+        as: 'page',
+      })
+      .unwind('$page')
+      .addFields({
+        sections: '$page.sections',
+        tasks: '$page.tasks',
+        owners: '$page.owners',
+      })
+      .lookup({
+        from: 'tasks',
+        localField: 'tasks',
+        foreignField: '_id',
+        as: 'tasks',
+      })
+      .addFields({
+        tasks: {
+          $map: { input: '$tasks', as: 'task', in: '$$task.title' },
+        },
+      });
 
     const comments = await (
       params.ipd
         ? commentsAggregation
-            .lookup({
-              from: 'pages',
-              localField: 'url',
-              foreignField: 'url',
-              as: 'page',
-            })
-            .unwind('$page')
             .match({ 'page.owners': /ipd/i })
-            .addFields({
-              sections: '$page.sections',
-              owners: '$page.owners',
-            })
             .project({ page: 0 })
         : commentsAggregation
     ).exec();
@@ -198,11 +210,7 @@ export class FeedbackService {
       return { commentScore };
     };
 
-    const commentsWithScores: (IFeedback & {
-      commentScore?: number;
-      pageScore?: number;
-      rank?: number;
-    })[] = comments.map((comment) => {
+    const commentsWithScores: FeedbackWithScores[] = comments.map((comment) => {
       if (!comment.words?.length) {
         return comment;
       }
@@ -219,45 +227,11 @@ export class FeedbackService {
       a.commentScore ? (b.commentScore || 0) - a.commentScore : 1,
     );
 
-    if (params.ipd) {
-      return {
-        comments: commentsWithScores.map((comment, i) => ({
-          ...comment,
-          rank: comment.commentScore ? i + 1 : undefined,
-        })),
-        words: wordScores,
-      };
-    }
-
-    const pagesWithSections = await this.db.collections.pages
-      .find({
-        ...omit(['date', 'lang'], filterQuery),
-        $or: [{ sections: { $exists: true } }, { owners: { $exists: true } }],
-      })
-      .lean()
-      .exec();
-
-    const pagesMap = arrayToDictionary(pagesWithSections, 'url');
-
-    const commentsWithScoresAndSections = commentsWithScores.map(
-      (comment, i) => {
-        const page = pagesMap[comment.url];
-
-        if (!page) {
-          return { ...comment, rank: comment.commentScore ? i + 1 : undefined };
-        }
-
-        return {
-          ...comment,
-          rank: comment.commentScore ? i + 1 : undefined,
-          sections: page.sections,
-          owners: page.owners,
-        };
-      },
-    );
-
     return {
-      comments: commentsWithScoresAndSections,
+      comments: commentsWithScores.map((comment, i) => ({
+        ...comment,
+        rank: comment.commentScore ? i + 1 : undefined,
+      })),
       words: wordScores,
     };
   }
