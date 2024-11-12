@@ -830,15 +830,23 @@ export class TasksViewService extends DbViewNew<
       dyfYes: previousMetrics.dyfYes,
     };
 
+    const callsByTopicPercentChange = getArraySelectedPercentChange(
+      ['calls'],
+      'tpc_id',
+      metricsWithPercentChange.callsByTopic,
+      previousMetrics.callsByTopic,
+    );
+
     return {
       ...metricsWithComparisons,
       dateRangeData,
       comparisonDateRangeData,
-      callsByTopic: getArraySelectedPercentChange(
+      callsByTopic: getArraySelectedAbsoluteChange(
         ['calls'],
         'tpc_id',
-        metricsWithPercentChange.callsByTopic,
+        callsByTopicPercentChange,
         previousMetrics.callsByTopic,
+        { suffix: 'Difference' },
       ),
       feedbackByDay: metricsWithPercentChange.metricsByDay.map(
         ({ date, numComments }) => ({

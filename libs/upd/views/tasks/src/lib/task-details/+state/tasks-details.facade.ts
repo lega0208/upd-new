@@ -474,7 +474,7 @@ export class TasksDetailsFacade {
         useArrows: true,
         showTextColours: true,
         secondaryField: {
-          field: 'difference',
+          field: 'callsDifference',
           pipe: 'number',
         },
         width: '160px',

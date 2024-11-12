@@ -408,7 +408,10 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     title: string;
     attachments: AttachmentData[];
   }[];
-  callsByTopic: (CallsByTopic & { callsPercentChange?: number | null })[];
+  callsByTopic: (CallsByTopic & {
+    callsPercentChange?: number | null;
+    callsDifference?: number | null;
+  })[];
   searchTerms: InternalSearchTerm[];
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
   visitsByPage?: {
