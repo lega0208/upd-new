@@ -314,7 +314,7 @@
   "Task success by UX test": "Succès de la tâche par test UX",
   "Task success by UX Test": "Succès de la tâche par test UX",
   "nodata-available": "Les données ne sont pas disponibles pour cette plage de dates.",
-  "nocall-drivers-mapped": "Aucun pilote d’appel n’est mappé à cette tâche.",
+  "nocall-drivers-mapped": "Aucun facteur générateur d'appels est associé à cette tâche.",
   "project": "UX projet",
   "change-for-clicks": "Changement (pour les clics)",
   "Breakdown by Page - Search from Google": "Répartition par page - Recherche à partir de Google",

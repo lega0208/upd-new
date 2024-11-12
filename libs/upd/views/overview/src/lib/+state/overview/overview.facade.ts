@@ -687,30 +687,6 @@ export class OverviewFacade {
     ),
   );
 
-  calldriverTopicsConfig$ = createColConfigWithI18n(this.i18n.service, [
-    { field: 'tpc_id', header: 'tpc_id' },
-    { field: 'enquiry_line', header: 'enquiry_line', translate: true},
-    { field: 'topic', header: 'topic', translate: true },
-    { field: 'subtopic', header: 'sub-topic', translate: true },
-    { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
-    { field: 'tasks', header: 'tasks', translate: true },
-    { field: 'calls', header: 'calls', pipe: 'number' },
-    {
-      field: 'change',
-      header: 'change',
-      pipe: 'percent',
-      pipeParam: '1.0-2',
-      upGoodDownBad: true,
-      indicator: true,
-      useArrows: true,
-      showTextColours: true,
-      secondaryField: {
-        field: 'difference',
-        pipe: 'number',
-      },
-      width: '160px',
-    },
-  ] as ColumnConfig<UnwrapObservable<typeof this.calldriverTopics$>>[]);
 
   gcTasksTable$ = this.overviewData$.pipe(
     map((data) =>

@@ -27,7 +27,7 @@
         [keyword]="'calls'"
         [scale]="1"
         [difference]="(apexCallDifference$ | async) || 0"
-        [emptyMessage]="(callsEmptyMessages$ | async) || '' | translate"
+        [emptyMessage]="(callsEmptyMessages$ | async) || ''"
         modal=" {{ 'kpi-calls-per-100-guidance-task' | translate }}"
       ></upd-apex-spark-line>
     </div>
@@ -41,7 +41,6 @@
         [scale]="1"
         [kpiObjectiveCriteria]="feedbackKpiObjectiveCriteria"
         [difference]="(kpiFeedbackDifference$ | async) || 0"
-        [emptyMessage]="'nodata-available' | translate"
         modal=" {{ 'kpi-feedback-per-1000-guidance-task' | translate }} "
         [keyword]="'feedback'"
       ></upd-apex-spark-line>
@@ -68,7 +67,7 @@
         [displayKpis]="false"
         [kpiObjectiveCriteria]="callVolumeObjectiveCriteria"
         [kpiStylesConfig]="callVolumeKpiConfig"
-        [emptyMessage]="(callsEmptyMessages$ | async) || '' | translate"
+        [emptyMessage]="(callsEmptyMessages$ | async) || ''"
         comparisonMode="upBadDownGood"
       ></upd-data-card>
     </div>

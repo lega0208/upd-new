@@ -7,7 +7,7 @@
 >
   <ng-container *ngIf="!hasData; else elseBlock">
     <p>
-      <span *ngIf="emptyMessage" [translate]="emptyMessage"></span>
+      <span [translate]="emptyMessage"></span>
     </p>
   </ng-container>
   <ng-template #elseBlock>

@@ -87,8 +87,6 @@ export class ProjectDetailsSummaryComponent implements OnInit {
     fail: { message: 'kpi-not-met-volume' },
   };
 
-  // memberList$ = this.projectsDetailsService.members$;
-  // memberListCols: ColumnConfig[] = [];
 
   description$ = this.projectsDetailsService.description$;
 

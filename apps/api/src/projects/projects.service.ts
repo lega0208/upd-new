@@ -446,8 +446,6 @@ export class ProjectsService {
       .find((uxTest) => uxTest.launch_date)
       ?.launch_date.toISOString();
 
-    // const members = uxTests.find((uxTest) => uxTest.project_lead)?.project_lead;
-
     console.time('dateRangeData');
     const dateRangeData = await this.getAggregatedMetrics(
       projectId,
@@ -524,7 +522,6 @@ export class ProjectsService {
       description,
       startDate,
       launchDate,
-      // members,
       avgTaskSuccessFromLastTest: avgTestSuccess,
       avgSuccessValueChange: projectPercentChange,
       avgSuccessPercentChange: last_task_success_percent_change,
