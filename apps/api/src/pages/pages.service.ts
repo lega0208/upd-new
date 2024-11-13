@@ -263,14 +263,16 @@ export class PagesService {
       mostRelevantCommentsAndWords.en.comments.length +
       mostRelevantCommentsAndWords.fr.comments.length;
 
-    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
-      parseDateRangeString(params.comparisonDateRange);
+    const mostRelevantCommentsAndWordsComparison =
+      await this.feedbackService.getMostRelevantCommentsAndWords({
+        dateRange: parseDateRangeString(params.comparisonDateRange),
+        type: 'page',
+        id: params.id,
+      });
 
-    const numPreviousComments = await this.feedbackModel
-      .countDocuments({
-        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
-      })
-      .exec();
+    const numPreviousComments =
+    mostRelevantCommentsAndWordsComparison.en.comments.length +
+    mostRelevantCommentsAndWordsComparison.fr.comments.length;
 
     const numCommentsPercentChange =
       !params.ipd && numPreviousComments
