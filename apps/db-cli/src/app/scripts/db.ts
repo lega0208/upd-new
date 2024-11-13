@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import chalk from 'chalk';
-import { existsSync } from 'fs';
-import { readFile, writeFile, mkdir } from 'fs/promises';
+import { existsSync, mkdir } from 'fs';
+import { readFile, writeFile } from 'fs/promises';
 import { Types, type mongo } from 'mongoose';
 import { difference, filterObject, omit, uniq } from 'rambdax';
 import { utils, writeFile as writeXlsx } from 'xlsx';
@@ -26,7 +26,9 @@ import {
   arrayToDictionaryMultiref,
   dayjs,
   logJson,
+  parseDateRangeString,
   prettyJson,
+  round,
 } from '@dua-upd/utils-common';
 import { IFeedback, IPage, IReadability, IUrl } from '@dua-upd/types-common';
 import { BlobStorageService } from '@dua-upd/blob-storage';
@@ -35,6 +37,7 @@ import { startTimer } from './utils/misc';
 import { outputExcel, outputJson } from './utils/output';
 import { spawn } from 'child_process';
 import { preprocessCommentWords } from '@dua-upd/feedback';
+import { FeedbackService } from '@dua-upd/api/feedback';
 
 export const recalculateViews = async (
   db: DbService,
@@ -1180,4 +1183,349 @@ export async function syncCalldriversRefs(db: DbService) {
   console.time('syncCalldriversRefs');
   await db.collections.callDrivers.syncTaskReferences(db.collections.tasks);
   console.timeEnd('syncCalldriversRefs');
+}
+
+export async function thirty30Report() {
+  const db = (<RunScriptCommand>this).inject<DbService>(DbService);
+  const feedback = (<RunScriptCommand>this).inject<FeedbackService>(
+    FeedbackService,
+  );
+
+  const outDir = '30-30_reports';
+
+  if (!existsSync(outDir)) {
+    await mkdir(outDir, (err) => {
+      if (err) {
+        console.error(`Error creating directory ${outDir}:`, err);
+      } else {
+        console.log(`Directory ${outDir} created successfully.`);
+      }
+    });
+  }
+
+  // ------------------- Input Values ----------------------
+
+  const dateRangeBefore = {
+    start: '2024-08-26',
+    end: '2024-09-24',
+    // start: '2024-10-20',
+    // end: '2024-10-26',
+  };
+
+  const dateRangeAfter = {
+    start: '2024-09-25',
+    end: '2024-10-24',
+  };
+
+  const project = '6597b740c6cda2812bbb141f';
+
+  // --------------------------------------------------------
+
+  const dateRanges = [dateRangeBefore, dateRangeAfter];
+
+  const projectId = new Types.ObjectId(project);
+  const tasks = await db.collections.tasks
+    .find({ projects: projectId })
+    .lean()
+    .exec();
+
+  async function collectMetricsForTasks(dateRange) {
+    const metricsByTask: any = {};
+    const metricsByCallDrivers: any = {};
+    const metricsByFeedbackEN: any = {};
+    const metricsByFeedbackFR: any = {};
+
+    for (const task of tasks) {
+      const calls = (
+        await db.collections.callDrivers.getCallsByTpcId(
+          `${dateRange.start}/${dateRange.end}`,
+          task.tpc_ids,
+        )
+      ).reduce((a, b) => a + b.calls, 0);
+
+      const callsByTask = await db.collections.callDrivers.getCallsByTopic(
+        `${dateRange.start}/${dateRange.end}`,
+        {
+          tasks: task._id,
+        },
+      );
+
+      const mostRelevantCommentsAndWords =
+        await feedback.getMostRelevantCommentsAndWords({
+          dateRange: parseDateRangeString(
+            `${dateRange.start}/${dateRange.end}`,
+          ),
+          type: 'task',
+          id: task._id.toString(),
+        });
+
+      metricsByTask[task._id.toString()] = {
+        _id: task._id.toString(),
+        title: task.title,
+        calls,
+      };
+
+      metricsByCallDrivers[task._id.toString()] = {
+        ...callsByTask,
+      };
+
+      metricsByFeedbackEN[task._id.toString()] = {
+        ...mostRelevantCommentsAndWords.en.comments,
+      };
+
+      metricsByFeedbackFR[task._id.toString()] = {
+        ...mostRelevantCommentsAndWords.fr.comments,
+      };
+    }
+
+    const metrics = await db.collections.pageMetrics
+      .aggregate<{
+        _id: Types.ObjectId;
+        url: string;
+        visits: number;
+        no_clicks: number;
+        yes_clicks: number;
+      }>()
+      .match({
+        projects: projectId,
+        date: {
+          $gte: new Date(dateRange.start),
+          $lte: new Date(dateRange.end),
+        },
+      })
+      .project({
+        date: 1,
+        visits: 1,
+        dyf_no: 1,
+        dyf_yes: 1,
+        tasks: 1,
+        url: 1,
+      })
+      .unwind('tasks')
+      .group({
+        _id: '$tasks',
+        visits: {
+          $sum: '$visits',
+        },
+        no_clicks: {
+          $sum: '$dyf_no',
+        },
+        yes_clicks: {
+          $sum: '$dyf_yes',
+        },
+      })
+      .exec();
+
+    for (const taskMetrics of metrics) {
+      const _id = taskMetrics._id.toString();
+      const taskMetricz = metricsByTask[_id];
+
+      delete taskMetrics._id;
+
+      if (taskMetricz) {
+        metricsByTask[_id] = {
+          _id,
+          start: dateRange.start,
+          end: dateRange.end,
+          ...taskMetricz,
+          ...taskMetrics,
+        };
+
+        const calls_per_100_visits =
+          metricsByTask[_id].visits > 0
+            ? round(
+                (metricsByTask[_id].calls / metricsByTask[_id].visits) * 100,
+                3,
+              ) || 0
+            : 0;
+
+        const no_clicks_per_1000_visits =
+          metricsByTask[_id].no_clicks > 0
+            ? round(
+                (metricsByTask[_id].no_clicks / metricsByTask[_id].visits) *
+                  1000,
+                3,
+              ) || 0
+            : 0;
+
+        metricsByTask[_id].calls_per_100_visits = calls_per_100_visits;
+        metricsByTask[_id].no_clicks_per_1000_visits =
+          no_clicks_per_1000_visits;
+      }
+    }
+
+    return {
+      metricsByTask,
+      metricsByCallDrivers,
+      metricsByFeedbackEN,
+      metricsByFeedbackFR,
+    };
+  }
+
+  async function collectMetricsForProjects(dateRange) {
+    const projectMetrics = await db.collections.pageMetrics
+      .aggregate<{
+        visits: number;
+        no_clicks: number;
+        yes_clicks: number;
+      }>()
+      .match({
+        projects: projectId,
+        date: {
+          $gte: new Date(dateRange.start),
+          $lte: new Date(dateRange.end),
+        },
+      })
+      .group({
+        _id: null,
+        visits: { $sum: '$visits' },
+        no_clicks: { $sum: '$dyf_no' },
+        yes_clicks: { $sum: '$dyf_yes' },
+      })
+      .exec();
+
+    const totalVisits = projectMetrics[0]?.visits || 0;
+    const totalNoClicks = projectMetrics[0]?.no_clicks || 0;
+    const totalYesClicks = projectMetrics[0]?.yes_clicks || 0;
+
+    const totalCalls = (
+      await db.collections.callDrivers.getCallsByTpcId(
+        `${dateRange.start}/${dateRange.end}`,
+        tasks.map((task) => task.tpc_ids).flat(),
+      )
+    ).reduce((a, b) => a + b.calls, 0);
+
+    const calls_per_100_visits =
+      totalVisits > 0 ? round((totalCalls / totalVisits) * 100, 3) : 0;
+
+    const no_clicks_per_1000_visits =
+      totalVisits > 0 ? round((totalNoClicks / totalVisits) * 1000, 3) : 0;
+
+    return [
+      {
+        project_id: projectId.toString(),
+        start: dateRange.start,
+        end: dateRange.end,
+        total_visits: totalVisits,
+        total_calls: totalCalls,
+        total_no_clicks: totalNoClicks,
+        total_yes_clicks: totalYesClicks,
+        calls_per_100_visits,
+        no_clicks_per_1000_visits,
+      },
+    ];
+  }
+
+  function getValidSheetName(title: string, suffix: string): string {
+    const maxTitleLength = 31 - suffix.length - 6;
+    const shortenedTitle =
+      title.length > maxTitleLength
+        ? `${title.slice(0, maxTitleLength)}...`
+        : title;
+
+    return `${shortenedTitle}${suffix}`;
+  }
+
+  const {
+    metricsByTask: tasksBeforeArray,
+    metricsByCallDrivers: callDriverBeforeArray,
+    metricsByFeedbackEN: feedbackENBeforeData,
+    metricsByFeedbackFR: feedbackFRBeforeData,
+  } = await collectMetricsForTasks(dateRanges[0]);
+  const {
+    metricsByTask: tasksAfterArray,
+    metricsByCallDrivers: callDriverAfterArray,
+    metricsByFeedbackEN: feedbackENAfterData,
+    metricsByFeedbackFR: feedbackFRAfterData,
+  } = await collectMetricsForTasks(dateRanges[1]);
+
+  const projectsBeforeArray = await collectMetricsForProjects(dateRanges[0]);
+  const projectsAfterArray = await collectMetricsForProjects(dateRanges[1]);
+
+  const overviewData = [
+    {
+      sheetName: 'tasks-before',
+      data: Object.values(tasksBeforeArray) as Record<string, unknown>[],
+    },
+    {
+      sheetName: 'tasks-after',
+      data: Object.values(tasksAfterArray) as Record<string, unknown>[],
+    },
+    {
+      sheetName: 'projects-before',
+      data: projectsBeforeArray as Record<string, unknown>[],
+    },
+    {
+      sheetName: 'projects-after',
+      data: projectsAfterArray as Record<string, unknown>[],
+    },
+  ];
+  const callDriversData = [];
+  const feedbackData = [];
+
+  //CALL DRIVERS SHEET CONF STARTS ---------
+
+  for (const [taskId, data] of Object.entries(callDriverBeforeArray)) {
+    const taskTitle = tasksBeforeArray[taskId]?.title || `Task-${taskId}`;
+    callDriversData.push({
+      sheetName: getValidSheetName(taskTitle, '-before'),
+      data: Object.values(data) as Record<string, unknown>[],
+    });
+  }
+
+  for (const [taskId, data] of Object.entries(callDriverAfterArray)) {
+    const taskTitle = tasksAfterArray[taskId]?.title || `Task-${taskId}`;
+    callDriversData.push({
+      sheetName: getValidSheetName(taskTitle, '-after'),
+      data: Object.values(data) as Record<string, unknown>[],
+    });
+  }
+ 
+  //CALL DRIVERS SHEET CONF ENDS --------
+
+  //FEEDBACK SHEET CONF STARTS ---------
+  for (const [taskId, data] of Object.entries(feedbackENBeforeData)) {
+    const taskTitle = tasksBeforeArray[taskId]?.title || `Task-${taskId}`;
+    feedbackData.push({
+      sheetName: getValidSheetName(taskTitle, '-en-before'),
+      data: Object.values(data) as Record<string, unknown>[],
+    });
+  }
+
+  for (const [taskId, data] of Object.entries(feedbackFRBeforeData)) {
+    const taskTitle = tasksAfterArray[taskId]?.title || `Task-${taskId}`;
+    feedbackData.push({
+      sheetName: getValidSheetName(taskTitle, '-fr-before'),
+      data: Object.values(data) as Record<string, unknown>[],
+    });
+  }
+
+  for (const [taskId, data] of Object.entries(feedbackENAfterData)) {
+    const taskTitle = tasksBeforeArray[taskId]?.title || `Task-${taskId}`;
+    feedbackData.push({
+      sheetName: getValidSheetName(taskTitle, '-en-after'),
+      data: Object.values(data) as Record<string, unknown>[],
+    });
+  }
+
+  for (const [taskId, data] of Object.entries(feedbackFRAfterData)) {
+    const taskTitle = tasksAfterArray[taskId]?.title || `Task-${taskId}`;
+    feedbackData.push({
+      sheetName: getValidSheetName(taskTitle, '-fr-after'),
+      data: Object.values(data) as Record<string, unknown>[],
+    });
+  }
+
+  //FEEDBACK SHEET CONF ENDS ---------
+
+  const date = new Date().toISOString().slice(0, 10);
+
+  await outputExcel(`${outDir}/overview_report_${date}.xlsx`, overviewData);
+  await outputExcel(
+    `${outDir}/call_drivers_report_${date}.xlsx`,
+    callDriversData,
+  );
+  await outputExcel(`${outDir}/feedback_report_${date}.xlsx`, feedbackData);
+
+  console.log(`Excel report generated successfully in ${outDir}`);
 }
