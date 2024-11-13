@@ -497,16 +497,15 @@ export class ProjectsService {
       mostRelevantCommentsAndWords.en.comments.length +
       mostRelevantCommentsAndWords.fr.comments.length;
 
-    const mostRelevantCommentsAndWordsComparison =
-      await this.feedbackService.getMostRelevantCommentsAndWords({
-        dateRange: parseDateRangeString(params.comparisonDateRange),
-        type: 'project',
-        id: params.id,
-      });
+    const { start: prevDateRangeStart, end: prevDateRangeEnd } =
+      parseDateRangeString(params.comparisonDateRange);
 
-    const numPreviousComments =
-      mostRelevantCommentsAndWordsComparison.en.comments.length +
-      mostRelevantCommentsAndWordsComparison.fr.comments.length;
+    const numPreviousComments = await this.feedbackModel
+      .countDocuments({
+        date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+        projects: projectId,
+      })
+      .exec();
 
     const numCommentsPercentChange = numPreviousComments
       ? percentChange(numComments, numPreviousComments)
