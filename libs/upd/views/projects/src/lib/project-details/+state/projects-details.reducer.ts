@@ -24,7 +24,7 @@ export const projectDetailsInitialState: ProjectsDetailsState = {
     status: 'Unknown',
     startDate: undefined,
     launchDate: undefined,
-    members: undefined,
+    // members: undefined,
     dateRange: '',
     comparisonDateRange: '',
     avgTaskSuccessFromLastTest: null,

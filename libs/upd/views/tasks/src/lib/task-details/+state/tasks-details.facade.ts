@@ -6,8 +6,12 @@ import utc from 'dayjs/esm/plugin/utc';
 import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
-import type { LocaleId } from '@dua-upd/upd/i18n';
-import type { AttachmentData, TaskDetailsData } from '@dua-upd/types-common';
+import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
+import type {
+  AttachmentData,
+  TaskDetailsData,
+  ColumnConfig,
+} from '@dua-upd/types-common';
 import {
   type GetTableProps,
   type KeysOfType,
@@ -423,6 +427,9 @@ export class TasksDetailsFacade {
   callsByTopic$ = this.tasksDetailsData$.pipe(
     map((data) => data?.callsByTopic),
   );
+  hasTopicIds$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.tpc_ids.length > 0),
+  );
 
   callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(
     this.i18n.service,
@@ -461,8 +468,18 @@ export class TasksDetailsFacade {
         field: 'callsPercentChange',
         header: 'change',
         pipe: 'percent',
+        pipeParam: '1.0-2',
+        upGoodDownBad: true,
+        indicator: true,
+        useArrows: true,
+        showTextColours: true,
+        secondaryField: {
+          field: 'callsDifference',
+          pipe: 'number',
+        },
+        width: '160px',
       },
-    ],
+    ] as ColumnConfig<UnwrapObservable<typeof this.callsByTopic$>>[],
   );
 
   currentCallVolume$ = this.tasksDetailsData$.pipe(

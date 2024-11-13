@@ -408,7 +408,10 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     title: string;
     attachments: AttachmentData[];
   }[];
-  callsByTopic: (CallsByTopic & { callsPercentChange?: number | null })[];
+  callsByTopic: (CallsByTopic & {
+    callsPercentChange?: number | null;
+    callsDifference?: number | null;
+  })[];
   searchTerms: InternalSearchTerm[];
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
   visitsByPage?: {
@@ -539,7 +542,6 @@ export interface ProjectsDetailsData
   description?: string;
   startDate: string | undefined;
   launchDate: string | undefined;
-  members: string | undefined;
   avgTaskSuccessFromLastTest: number | null;
   avgSuccessPercentChange: number | null;
   avgSuccessValueChange: number | null;
