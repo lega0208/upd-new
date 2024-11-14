@@ -503,6 +503,7 @@ export class ProjectsService {
     const numPreviousComments = await this.feedbackModel
       .countDocuments({
         date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+        projects: projectId,
       })
       .exec();
 
