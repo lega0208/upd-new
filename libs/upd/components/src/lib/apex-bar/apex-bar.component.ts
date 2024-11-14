@@ -31,6 +31,7 @@ export class ApexBarComponent implements OnInit {
   @Input() tableCols: ColumnConfig[] = [];
   @Input() tableExport = true;
   @Input() allowHeaderWrap = false;
+  @Input() emptyMessage = 'nodata-available';
 
   @Input() set showPercent(value: {
     isPercent: boolean;
