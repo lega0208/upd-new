@@ -37,6 +37,7 @@ import {
   AsyncLogTiming,
   hours,
   logJson,
+  mapWithETALoggingAsync,
   prettyJson,
 } from '@dua-upd/utils-common';
 import { PageVisits, PageVisitsView } from './db.views';
@@ -282,6 +283,7 @@ export class DbService {
   }
 
   private async simplifiedValidatePageRefs(filter: FilterQuery<PageMetrics>) {
+    console.log('Validating page metrics references...');
     const pages: Page[] = await this.pages
       .find({}, { url: 1, tasks: 1, projects: 1, ux_tests: 1 })
       .lean()
@@ -293,33 +295,29 @@ export class DbService {
 
     const dateFilter = filter.date ? { date: filter.date } : {};
 
-    const bulkWriteOps: mongo.AnyBulkWriteOperation<PageMetrics>[] = pages.map(
-      (page) => ({
-        updateMany: {
-          filter: {
-            ...dateFilter,
-            url: page.url,
-          },
-          update: {
-            $set: {
-              page: page._id,
-              projects: page.projects,
-              tasks: page.tasks,
-              ux_tests: page.ux_tests,
+    await mapWithETALoggingAsync(
+      pages,
+      async (page) =>
+        await this.pageMetrics
+          .updateMany(
+            {
+              ...dateFilter,
+              url: page.url,
             },
-          },
-        },
-      }),
+            {
+              $set: {
+                page: page._id,
+                projects: page.projects,
+                tasks: page.tasks,
+                ux_tests: page.ux_tests,
+              },
+            },
+          )
+          .exec(),
+      25,
     );
 
-    if (bulkWriteOps.length) {
-      const writeResults = await this.pageMetrics.bulkWrite(bulkWriteOps, {
-        ordered: false,
-      });
-
-      console.log('validatePageRefs writeResults:');
-      logJson(writeResults);
-    }
+    console.log('validatePageRefs complete');
   }
 
   private async validateFilteredPageMetricsRefs(

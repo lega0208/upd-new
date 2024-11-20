@@ -13,7 +13,7 @@ import type { ColumnConfig } from '@dua-upd/types-common';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { TasksDetailsFacade } from '../+state/tasks-details.facade';
 import { createCategoryConfig } from '@dua-upd/upd/utils';
-import { combineLatest } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 
 @Component({
   selector: 'upd-task-details-summary',
@@ -85,6 +85,14 @@ export class TaskDetailsSummaryComponent implements OnInit {
 
   avgTaskSuccessKpiCriteria = (successRate: number) =>
     successRate >= 0.8 ? 'pass' : 'fail';
+
+  hasTopicIds$ = this.taskDetailsService.hasTopicIds$;
+
+  callsEmptyMessages$ = this.hasTopicIds$.pipe(
+    map((hasTopicIds) =>
+      hasTopicIds === false ? 'nocall-drivers-mapped' : 'nodata-available',
+    ),
+  );
 
   ngOnInit(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });
