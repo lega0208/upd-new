@@ -48,6 +48,7 @@ export interface CallsByTasks {
 export interface TopCalldriverTopics extends CallsByTopic {
   Inquiry: string;
   change: number | null;
+  difference: number | null;
 }
 
 export interface ICallDriver {
@@ -78,6 +79,8 @@ export interface IFeedback {
   unique_id?: Types.ObjectId;
   url: string;
   date: Date;
+  tasks?: Types.ObjectId[];
+  projects?: Types.ObjectId[];
   lang: string;
   comment: string;
   words?: string[];

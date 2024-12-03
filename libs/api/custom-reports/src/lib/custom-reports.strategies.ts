@@ -1,7 +1,8 @@
 import { mongo, Types, UpdateQuery } from 'mongoose';
 import { keys, union } from 'rambdax';
 import { CustomReportsMetrics, DbService } from '@dua-upd/db';
-import { type AAResponseBody, queryDateFormat } from '@dua-upd/external-data';
+import { queryDateFormat } from '@dua-upd/node-utils';
+import type { AAResponseBody } from '@dua-upd/node-utils';
 import type {
   AADimensionName,
   AAMetricName,

@@ -366,6 +366,7 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
   subtopic: string;
   sub_subtopic: string[];
   user_type: string[];
+  tpc_ids: number[];
   program: string;
   service: string;
   user_journey: string[];
@@ -407,7 +408,10 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     title: string;
     attachments: AttachmentData[];
   }[];
-  callsByTopic: (CallsByTopic & { callsPercentChange?: number | null })[];
+  callsByTopic: (CallsByTopic & {
+    callsPercentChange?: number | null;
+    callsDifference?: number | null;
+  })[];
   searchTerms: InternalSearchTerm[];
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
   visitsByPage?: {
@@ -441,7 +445,7 @@ export type ProjectStatus =
   | 'Planning'
   | 'In Progress'
   | 'Exploratory'
-  | 'Being monitored'
+  | 'Monitoring'
   | 'Needs review'
   | 'Complete'
   | 'Paused'
@@ -538,13 +542,19 @@ export interface ProjectsDetailsData
   description?: string;
   startDate: string | undefined;
   launchDate: string | undefined;
-  members: string | undefined;
   avgTaskSuccessFromLastTest: number | null;
   avgSuccessPercentChange: number | null;
   avgSuccessValueChange: number | null;
   dateFromLastTest: Date;
   taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
-  tasks: Pick<ITask, '_id' | 'title'>[];
+  taskMetrics: {
+    _id: string;
+    title: string;
+    callsPer100Visits: number;
+    dyfNoPer1000Visits: number;
+    uxTestInLastTwoYears: boolean;
+    latestSuccessRate: number;
+  }[];
   searchTerms: InternalSearchTerm[];
   attachments: AttachmentData[];
   feedbackByPage: {

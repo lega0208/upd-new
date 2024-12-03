@@ -8,9 +8,8 @@ import {
   SearchFilter,
 } from './query';
 import { DataState, Dimension } from './gsc-property';
-import { GscSearchTermMetrics, IOverall, IPageMetrics } from '@dua-upd/types-common';
+import type { DateRange, GscSearchTermMetrics, IOverall, IPageMetrics } from '@dua-upd/types-common';
 import { wait } from '@dua-upd/utils-common';
-import { DateRange } from '../types';
 import { singleDatesFromDateRange, withRetry } from '../utils';
 
 export * from './client';
@@ -61,7 +60,7 @@ export class SearchAnalyticsClient {
     return queryWithRetry(query);
   }
 
-  async getOverallMetrics(dateRange: DateRange | Date, dataState?: DataState) {
+  async getOverallMetrics(dateRange: DateRange<string> | Date, dataState?: DataState) {
     const dates =
       dateRange instanceof Date
         ? [dayjs.utc(dateRange).format('YYYY-MM-DD')]
@@ -156,7 +155,7 @@ export class SearchAnalyticsClient {
   }
 
   async getPageMetrics(
-    dateRange: DateRange | Date,
+    dateRange: DateRange<string> | Date,
     options?: SearchAnalyticsPageQueryOptions & {
       onComplete?: (data: Partial<IPageMetrics>[]) => Promise<void>;
     }

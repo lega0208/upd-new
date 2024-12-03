@@ -359,7 +359,8 @@ export class CallDriver implements ICallDriver {
           change: !previousData?.calls
             ? null
             : percentChange(currentData.calls, previousData.calls),
-        };
+            difference: currentData.calls - (previousData?.calls ?? 0),
+      };
       })
       .sort((a, b) => (b.calls ?? 0) - (a.calls ?? 0));
   }

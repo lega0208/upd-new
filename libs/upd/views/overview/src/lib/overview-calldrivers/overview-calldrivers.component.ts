@@ -70,7 +70,7 @@ export class OverviewCalldriversComponent implements OnInit {
       this.calldriversCols = [
         {
           field: 'name',
-          header: this.i18n.service.translate('Inquiry line', lang),
+          header: this.i18n.service.translate('enquiry_line', lang),
         },
         {
           field: 'currValue',
@@ -128,8 +128,19 @@ export class OverviewCalldriversComponent implements OnInit {
         },
         {
           field: 'change',
-          header: 'comparison',
+          header: 'change',
           pipe: 'percent',
+          pipeParam: '1.0-2',
+        upGoodDownBad: true,
+        indicator: true,
+        useArrows: true,
+        showTextColours: true,
+        secondaryField: {
+          field: 'difference',
+          pipe: 'number',
+        },
+        width: '160px',
+
         },
       ];
     });

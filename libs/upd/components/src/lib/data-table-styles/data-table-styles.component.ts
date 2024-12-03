@@ -120,7 +120,7 @@ export class DataTableStylesComponent implements OnInit {
         return (
           formatDate(
             data,
-            effectivePipeParam ?? 'YYYY-MM-dd',
+            effectivePipeParam ?? 'yyyy-MM-dd',
             this.currentLang,
             'UTC',
           ) || ''

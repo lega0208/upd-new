@@ -7,7 +7,11 @@ import 'dayjs/esm/locale/en-ca';
 import 'dayjs/esm/locale/fr-ca';
 import { I18nFacade, selectRoute } from '@dua-upd/upd/state';
 import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
-import type { AttachmentData, TaskDetailsData } from '@dua-upd/types-common';
+import type {
+  AttachmentData,
+  TaskDetailsData,
+  ColumnConfig,
+} from '@dua-upd/types-common';
 import {
   type GetTableProps,
   type KeysOfType,
@@ -208,28 +212,51 @@ export class TasksDetailsFacade {
   dateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
-  ]).pipe(map(([data, lang]) => this.getDateRangeLabel(data.dateRange, lang) as string));
+  ]).pipe(
+    map(
+      ([data, lang]) => this.getDateRangeLabel(data.dateRange, lang) as string,
+    ),
+  );
 
   comparisonDateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) =>
-      this.getDateRangeLabel(data.comparisonDateRange || '', lang) as string,
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(data.comparisonDateRange || '', lang) as string,
     ),
   );
 
   fullDateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
-  ]).pipe(map(([data, lang]) => this.getDateRangeLabel(data.dateRange, lang, 'MMM D YYYY', 'to', true) as string[]));
+  ]).pipe(
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(
+          data.dateRange,
+          lang,
+          'MMM D YYYY',
+          'to',
+          true,
+        ) as string[],
+    ),
+  );
 
   fullComparisonDateRangeLabel$ = combineLatest([
     this.tasksDetailsData$,
     this.currentLang$,
   ]).pipe(
-    map(([data, lang]) =>
-      this.getDateRangeLabel(data.comparisonDateRange || '', lang , 'MMM D YYYY', 'to', true) as string[],
+    map(
+      ([data, lang]) =>
+        this.getDateRangeLabel(
+          data.comparisonDateRange || '',
+          lang,
+          'MMM D YYYY',
+          'to',
+          true,
+        ) as string[],
     ),
   );
 
@@ -400,6 +427,9 @@ export class TasksDetailsFacade {
   callsByTopic$ = this.tasksDetailsData$.pipe(
     map((data) => data?.callsByTopic),
   );
+  hasTopicIds$ = this.tasksDetailsData$.pipe(
+    map((data) => data?.tpc_ids.length > 0),
+  );
 
   callsByTopicConfig$ = createColConfigWithI18n<CallsByTopicTableType>(
     this.i18n.service,
@@ -407,6 +437,11 @@ export class TasksDetailsFacade {
       {
         field: 'tpc_id',
         header: 'tpc_id',
+        translate: true,
+      },
+      {
+        field: 'enquiry_line',
+        header: 'enquiry_line',
         translate: true,
       },
       {
@@ -425,21 +460,26 @@ export class TasksDetailsFacade {
         translate: true,
       },
       {
-        field: 'enquiry_line',
-        header: 'enquiry_line',
-        translate: true,
-      },
-      {
         field: 'calls',
         header: 'calls',
         pipe: 'number',
       },
       {
         field: 'callsPercentChange',
-        header: 'comparison',
+        header: 'change',
         pipe: 'percent',
+        pipeParam: '1.0-2',
+        upGoodDownBad: true,
+        indicator: true,
+        useArrows: true,
+        showTextColours: true,
+        secondaryField: {
+          field: 'callsDifference',
+          pipe: 'number',
+        },
+        width: '160px',
       },
-    ],
+    ] as ColumnConfig<UnwrapObservable<typeof this.callsByTopic$>>[],
   );
 
   currentCallVolume$ = this.tasksDetailsData$.pipe(
@@ -583,8 +623,8 @@ export class TasksDetailsFacade {
           : d.test_type,
         date: d.date,
         total_users: totalSum,
-        scenario: d.scenario
-      }))
+        scenario: d.scenario,
+      }));
       return [...(taskSuccessByUxTest || [])];
     }),
   );
@@ -647,7 +687,7 @@ export class TasksDetailsFacade {
   >(this.i18n.service, [
     { field: 'term', header: 'search-term' },
     { field: 'clicks', header: 'clicks', pipe: 'number' },
-    { field: 'clicksChange', header: 'comparison-for-clicks', pipe: 'percent' },
+    { field: 'clicksChange', header: 'change-for-clicks', pipe: 'percent' },
     {
       field: 'position',
       header: 'position',

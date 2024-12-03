@@ -50,6 +50,10 @@ export const updateAirtable = async (
   return await updateService.updateUxData(true);
 };
 
+export async function validatePageRefs(db: DbService) {
+  await db.validatePageMetricsRefs();
+}
+
 export const addMissingPageMetricsRefs = async (db: DbService) => {
   await db.addMissingAirtableRefsToPageMetrics();
 };

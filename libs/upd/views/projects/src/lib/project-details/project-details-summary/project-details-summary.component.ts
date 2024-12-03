@@ -87,8 +87,6 @@ export class ProjectDetailsSummaryComponent implements OnInit {
     fail: { message: 'kpi-not-met-volume' },
   };
 
-  memberList$ = this.projectsDetailsService.members$;
-  memberListCols: ColumnConfig[] = [];
 
   description$ = this.projectsDetailsService.description$;
 
@@ -102,6 +100,28 @@ export class ProjectDetailsSummaryComponent implements OnInit {
       translate: true,
       type: 'link',
       typeParams: { preLink: '/' + this.langLink + '/tasks', link: '_id' },
+    },
+    {
+      field: 'callsPer100Visits',
+      header: 'Calls / 100 Visits',
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
+    {
+      field: 'dyfNoPer1000Visits',
+      header: '"No clicks" / 1,000 Visits',
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
+    {
+      field: 'uxTestInLastTwoYears',
+      header: 'UX Test in Past 2 Years?',
+      translate: true,
+    },
+    {
+      field: 'latestSuccessRate',
+      header: 'Latest UX Task Success Rate',
+      pipe: 'percent',
     },
   ];
 
@@ -156,16 +176,16 @@ export class ProjectDetailsSummaryComponent implements OnInit {
         },
       ];
 
-      this.memberListCols = [
-        {
-          field: 'name',
-          header: this.i18n.service.translate('Name', lang),
-        },
-        {
-          field: 'role',
-          header: this.i18n.service.translate('Role', lang),
-        },
-      ];
+      // this.memberListCols = [
+      //   {
+      //     field: 'name',
+      //     header: this.i18n.service.translate('Name', lang),
+      //   },
+      //   {
+      //     field: 'role',
+      //     header: this.i18n.service.translate('Role', lang),
+      //   },
+      // ];
     });
   }
 }

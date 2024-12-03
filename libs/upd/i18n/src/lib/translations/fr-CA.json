@@ -117,7 +117,7 @@
   "d3-hard-to-understand": "L'info est difficile à comprendre",
   "d3-error": "Erreur/quelque chose n'a pas fonctionné",
   "d3-other": "Autre raison",
-  "d3-tcbil": "Nombre total des appels par ligne de renseignements",
+  "d3-tcbel": "Nombre total des appels par ligne de renseignements",
   "d3-ITE": "Demandes de renseignements sur l'impôt des particuliers (DRIP)",
   "d3-e-Services Help Desk": "Services électroniques - bureau d'aide",
   "d3-Benefits": "Prestations",
@@ -314,12 +314,13 @@
   "Task success by UX test": "Succès de la tâche par test UX",
   "Task success by UX Test": "Succès de la tâche par test UX",
   "nodata-available": "Les données ne sont pas disponibles pour cette plage de dates.",
+  "nocall-drivers-mapped": "Aucun facteur générateur d'appels est associé à cette tâche.",
   "project": "UX projet",
-  "comparison-for-clicks": "Comparaison (pour les clics)",
+  "change-for-clicks": "Changement (pour les clics)",
   "Breakdown by Page - Search from Google": "Répartition par page - Recherche à partir de Google",
-  "comparison-for-No-answer": "Comparaison (pour réponses \"Non\")",
-  "comparison-for-searches": "Comparaison (pour Recherches)",
-  "comparison-for-comments": "Comparaison (pour nombre de commentaires)",
+  "change-for-No-answer": "Changement (pour réponses \"Non\")",
+  "change-for-searches": "Changement (pour Recherches)",
+  "change-for-comments": "Changement (pour nombre de commentaires)",
   "% of visitors who left feedback": "% de visiteurs ayant laissé des commentaires",
   "Breakdown by Page - Did you find what you were looking for?": "Répartition par page - Avez-vous trouvé ce que vous cherchiez?",
   "Scenario": "Scénario",
@@ -430,9 +431,9 @@
   "kpi-ux-test-improved-title": "Taux de réussite moyen sur les tâches améliorées",
   "kpi-ux-test-improved-tooltip": "Taux de réussite moyen sur toutes les tâches améliorées",
   "kpi-ux-test-improved-guidance": "<strong>Qu'est-ce que c'est?</strong>  <br />Le pourcentage de taux de réussite moyen pour les tâches améliorées à partir de leur dernier test de validation UX. Il mesure également l'amélioration en comparant le taux de réussite moyen des tests UX précédents (base de référence) avec les tests UX les plus récents (validation).<br />L'objectif pour cet indicateur de performance clé est de 80%.<br /><br /><strong>Comment cet ICR est-il calculé?</strong>  <br />A: La somme des taux de réussite de validation sur toutes les tâches améliorées<br />B: Nombre total de tâches testées<br /> <br />A/B<br /><br />L'amélioration est la différence entre ce taux de réussite moyen et le taux de réussite moyen de toutes les tâches améliorées par rapport à leurs tests UX de base.<br /><br />",
-  "kpi-ux-test-improved-text":   "{{unique}}/{{total}} tâches uniques testées",
+  "kpi-ux-test-improved-text": "{{unique}}/{{total}} tâches uniques testées",
 
-  "increase": "d'augmentation",                
+  "increase": "d'augmentation",
   "decrease": "de diminution",
   "from Baseline UX tests": "à partir des tests UX de base",
   "increase from Baseline UX tests": "Augmentation de {{value}} par rapport aux tests UX de bases",
@@ -442,7 +443,7 @@
   "kpi-ux-test-top50-title": "Taux de réussite moyen des 50 principales tâches",
   "kpi-ux-test-top50-tooltip": "Taux de réussite moyen des tâches classées parmi les 50 premières selon les métriques de performance du trimestre précédent.",
   "kpi-ux-test-top50-guidance": "<strong>Qu'est-ce que c'est?</strong>  <br />Ce KPI mesure le taux de réussite moyen des tâches classées parmi les 50 premières du trimestre précédent. Il inclut uniquement les tâches améliorées, qui ont à la fois des tests UX de base et de validation. Il mesure également l'amélioration en comparant le taux de réussite moyen des tests UX précédents (de base) avec les tests UX les plus récents (validation) pour ces tâches.<br />L'objectif de cet indicateur de performance clé est de 80 %.<br /><br /><strong>Comment cet ICR est-il calculé?</strong>  <br />A: La somme des taux de réussite de toutes les tâches améliorées parmi les 50 premières dans les tests de validation les plus récents<br />B: Nombre total de tâches améliorées testées<br /> <br />A/B<br /><br />L'amélioration est la différence entre ce taux de réussite moyen et le taux de réussite moyen des mêmes tâches dans leurs tests de base.<br /><br />",
-  "kpi-ux-test-top50-text":  "{{unique}}/{{total}} tâches uniques testées",
+  "kpi-ux-test-top50-text": "{{unique}}/{{total}} tâches uniques testées",
 
   "Total searches": "Recherches totales",
 
@@ -462,8 +463,6 @@
   "Total participants": "Nombre total de participants",
   "Project description": "Description du projet UX",
   "Project description not available": "La description du projet UX n'est pas disponible",
-  "Members": "Membres",
-  "Members list not available": "La liste de membres n'est pas disponible",
   "Timeline": "Chronologie",
   "Timeline not available": "La chronologie du projet n'est pas disponible",
   "Role": "Rôle",
@@ -474,7 +473,7 @@
   "Delayed": "Retardé",
   "Unknown": "Inconnu",
   "Discovery": "Découverte",
-  "Being monitored": "En cours de surveillance",
+  "Monitoring": "En cours de surveillance",
   "Needs review": "Besoin d'un examen",
   "Paused": "En pause",
   "Showing": "Montrant",
@@ -911,7 +910,7 @@
   "Seattle (United States)": "Seattle (États-Unis)",
 
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",
-  
+
   "Manage or update a My Business Account": "Gérer ou mettre à jour un compte Mon dossier d’entreprise",
   "Open a My Account": "Ouvrir un compte Mon dossier",
   "Get a copy of my T1 notice of assessment or reassessment": "Obtenir une copie de mon avis de cotisation (ADC) T1 ou de nouvelle cotisation",
@@ -1239,7 +1238,7 @@
   "Find out about the Children's special allowances (CSA)": "Renseignez vous sur Les allocations spéciales pour enfants (ASE)",
   "Apply for or cancel Children's special allowances (CSA)": "Demander ou annuler les allocations spéciales pour enfants (ASE)",
   "Send mail to the CRA": "Envoyer un courrier à l'ARC",
-    
+
   "---END-TASKS---": "--------------------------END TASK TRANSLATION------------------------------------",
 
   "---TASKS-TOPICS---": "---------------TASK TOPICS and SUB TOPICS (categories and sub-categories------------------",
@@ -1274,7 +1273,7 @@
   "Report": "Rapport",
 
   "------GC TASKS----": "---------------------------GC TASKS TRANSLATION--------------------------------------",
-  
+
   "Apply for the Canada Child Benefit": "Demander l’Allocation canadienne pour enfants",
   "Apply for the disability tax credit": "Demander le crédit d’impôt pour personnes handicapées",
   "Canada Emergency Recovery Benefit repayment (CERB)": "Remboursement de la Prestation canadienne d'urgence (PCU)",
@@ -1328,7 +1327,7 @@
   "Tourism and Hospitality Recovery Program (THRP)": "Programme de relance pour le tourisme et l'accueil (PRTA)",
   "View or download T4 and other tax slips": "Voir et télécharger les feuillets T4 et autres feuillets fiscaux",
   "What to do following a death": "Quoi faire après un décès",
-  
+
   "------PROJECTS----": "---------------------------PROJECTS TRANSLATION--------------------------------------",
   "Canada Child Benefit (CCB)": "Allocation canadienne pour enfants (ACE)",
   "Benefits and Credits - UX and web content improvements": "Prestations et crédits – amélioration de l'expérience utilisateur et du contenu Web",
@@ -1409,8 +1408,8 @@
   "Seniors": "Personnes âgées (y compris SV / SRG / RPC)",
 
   "------GC Tasks----": "---------------------------GC Tasks TRANSLATION--------------------------------------",
-  "Insufficient data" : "Données insuffisantes",
-  "Higher margin of error/Use data with caution" : "Marge d'erreur plus élevée / Utiliser les données avec prudence",
+  "Insufficient data": "Données insuffisantes",
+  "Higher margin of error/Use data with caution": "Marge d'erreur plus élevée / Utiliser les données avec prudence",
   "Low margin of error/Reliable data": "Faible marge d'erreur / Données fiables",
 
   "------PAGE FEEDBACK What Was Wrong categories----": "---------------------------PAGE FEEDBACK What Was Wrong categories TRANSLATION--------------------------------------",

@@ -561,12 +561,12 @@ export class TasksViewService extends DbViewNew<
   }
 
   // overriding inherited methods for cleaner types
-  override find(
+  override find<T = TasksView>(
     filter?: FilterQuery<TasksView>,
     projection: ProjectionType<TasksView> = {},
     options: QueryOptions<TasksView> = {},
-  ): Promise<TasksView[]> {
-    return super.find(filter, projection, options);
+  ): Promise<T[]> {
+    return super.find(filter, projection, options) as Promise<T[]>;
   }
 
   override findOne(
@@ -619,6 +619,7 @@ export class TasksViewService extends DbViewNew<
       subtopic: string;
       sub_subtopic: string[];
       user_type: string[];
+      tpc_ids: number[];
       program: string;
       service: string;
       user_journey: string[];
@@ -662,6 +663,7 @@ export class TasksViewService extends DbViewNew<
         subtopic: '$task.subtopic',
         sub_subtopic: '$task.sub_subtopic',
         user_type: '$task.user_type',
+        tpc_ids: '$task.tpc_ids',
         program: '$task.program',
         service: '$task.service',
         user_journey: '$task.user_journey',
@@ -828,15 +830,23 @@ export class TasksViewService extends DbViewNew<
       dyfYes: previousMetrics.dyfYes,
     };
 
+    const callsByTopicPercentChange = getArraySelectedPercentChange(
+      ['calls'],
+      'tpc_id',
+      metricsWithPercentChange.callsByTopic,
+      previousMetrics.callsByTopic,
+    );
+
     return {
       ...metricsWithComparisons,
       dateRangeData,
       comparisonDateRangeData,
-      callsByTopic: getArraySelectedPercentChange(
+      callsByTopic: getArraySelectedAbsoluteChange(
         ['calls'],
         'tpc_id',
-        metricsWithPercentChange.callsByTopic,
+        callsByTopicPercentChange,
         previousMetrics.callsByTopic,
+        { suffix: 'Difference' },
       ),
       feedbackByDay: metricsWithPercentChange.metricsByDay.map(
         ({ date, numComments }) => ({

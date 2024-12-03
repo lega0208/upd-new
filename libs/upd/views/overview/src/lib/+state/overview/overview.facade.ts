@@ -9,6 +9,7 @@ import 'dayjs/locale/fr-ca';
 import { combineLatest, debounceTime, map, mergeMap, of } from 'rxjs';
 import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
 import type {
+  ColumnConfig,
   OverviewAggregatedData,
   OverviewData,
 } from '@dua-upd/types-common';
@@ -681,9 +682,11 @@ export class OverviewFacade {
         tasks: topicData.tasks,
         calls: topicData.calls,
         change: topicData.change,
+        difference: topicData.difference,
       })),
     ),
   );
+
 
   gcTasksTable$ = this.overviewData$.pipe(
     map((data) =>
@@ -803,6 +806,7 @@ export class OverviewFacade {
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
         change: topicData.change,
+        difference: topicData.difference,
       })),
     ),
   );
@@ -816,10 +820,23 @@ export class OverviewFacade {
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
       { field: 'calls', header: 'calls', pipe: 'number' },
-      { field: 'change', header: 'comparison', pipe: 'percent' },
-    ],
-  );
-
+      {
+        field: 'change',
+        header: 'change',
+        pipe: 'percent',
+        pipeParam: '1.0-2',
+        upGoodDownBad: true,
+        indicator: true,
+        useArrows: true,
+        showTextColours: true,
+        secondaryField: {
+          field: 'difference',
+          pipe: 'number',
+        },
+        width: '160px',
+      },
+    ] as ColumnConfig<UnwrapObservable<typeof this.top5IncreasedCalldriverTopics$>>[]);
+  
   top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
       data.top5DecreasedCalldriverTopics.map((topicData) => ({
@@ -830,6 +847,7 @@ export class OverviewFacade {
         sub_subtopic: topicData.sub_subtopic || '',
         calls: topicData.calls,
         change: topicData.change,
+        difference: topicData.difference,
       })),
     ),
   );
@@ -843,9 +861,22 @@ export class OverviewFacade {
       { field: 'subtopic', header: 'sub-topic', translate: true },
       { field: 'sub_subtopic', header: 'sub-subtopic', translate: true },
       { field: 'calls', header: 'calls', pipe: 'number' },
-      { field: 'change', header: 'comparison', pipe: 'percent' },
-    ],
-  );
+      {
+        field: 'change',
+        header: 'change',
+        pipe: 'percent',
+        pipeParam: '1.0-2',
+        upGoodDownBad: true,
+        indicator: true,
+        useArrows: true,
+        showTextColours: true,
+        secondaryField: {
+          field: 'difference',
+          pipe: 'number',
+        },
+        width: '160px',
+      },
+    ] as ColumnConfig<UnwrapObservable<typeof this.top5DecreasedCalldriverTopics$>>[]);
 
   top20SearchTermsEn$ = this.overviewData$.pipe(
     map((data) => data?.searchTermsEn),
@@ -861,7 +892,7 @@ export class OverviewFacade {
     { field: 'total_searches', header: 'Total searches', pipe: 'number' },
     {
       field: 'searchesChange',
-      header: 'comparison-for-searches',
+      header: 'change-for-searches',
       pipe: 'percent',
     },
     { field: 'clicks', header: 'clicks', pipe: 'number' },

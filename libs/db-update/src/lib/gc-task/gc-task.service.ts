@@ -1,10 +1,9 @@
-import { IGCTasks } from '@dua-upd/types-common';
+import type { AbstractDate, IGCTasks } from '@dua-upd/types-common';
 import { AsyncLogTiming } from '@dua-upd/utils-common';
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { dayjs, today } from '@dua-upd/utils-common';
-import type { DateType } from '@dua-upd/external-data';
 import { GcTasks, GcTasksDocument } from '@dua-upd/db';
 import { FeedbackService } from '../feedback/feedback.service';
 
@@ -48,7 +47,7 @@ export class GcTaskService {
   ) {}
 
   @AsyncLogTiming
-  async updateGcTaskData(endDate?: DateType, useProcessedDate = true) {
+  async updateGcTaskData(endDate?: AbstractDate, useProcessedDate = true) {
     this.logger.log('Updating GC task data');
     const latestDataDate: Date | null = (
       await this.gcTasksModel.findOne({}, { date: 1 }).sort({ date: -1 })

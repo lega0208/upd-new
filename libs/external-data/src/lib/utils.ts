@@ -1,15 +1,15 @@
 // Utilities for timeouts, retries, and request throttling, etc.
 
-import { DateRange } from './types';
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import chalk from 'chalk';
+import type { DateRange } from '@dua-upd/types-common';
 
 dayjs.extend(utc);
 
 export const withTimeout = <T>(
   fn: () => Promise<T>,
-  timeout: number
+  timeout: number,
 ): (() => Promise<T>) => {
   return () =>
     new Promise((resolve, reject) => {
@@ -25,17 +25,17 @@ export const withTimeout = <T>(
         (err) => {
           clearTimeout(timer);
           reject(err);
-        }
+        },
       );
     });
 };
 
 export const withRetry = <
-  T extends <U>(...args: Parameters<T>) => Promise<ReturnType<T>>
+  T extends <U>(...args: Parameters<T>) => Promise<ReturnType<T>>,
 >(
   fn: T,
   retries: number,
-  delay: number
+  delay: number,
 ) => {
   return <U>(...args: Parameters<T>): Promise<ReturnType<T>> =>
     new Promise((resolve, reject) => {
@@ -51,8 +51,8 @@ export const withRetry = <
               chalk.red(
                 `Error below occurred in ${fn.name}, retrying (${
                   retries - 1
-                } attempts left)`
-              )
+                } attempts left)`,
+              ),
             );
             console.error(chalk.red(err.message));
 
@@ -64,13 +64,13 @@ export const withRetry = <
               }, delay * delayMultiplier);
             } else {
               console.error(
-                chalk.red(`All retry attempts for ${fn.name} failed:`)
+                chalk.red(`All retry attempts for ${fn.name} failed:`),
               );
               console.error(chalk.red(err.stack));
 
               reject(err);
             }
-          }
+          },
         );
       };
 
@@ -86,9 +86,9 @@ export const withRetry = <
  * @param inclusive Whether or not to include the end date in the range (AA is exclusive)
  */
 export function singleDatesFromDateRange(
-  dateRange: DateRange,
+  dateRange: DateRange<string>,
   format: string | false = 'YYYY-MM-DD',
-  inclusive = false
+  inclusive = false,
 ): Date[] | string[] {
   const dates: Dayjs[] = [];
 
