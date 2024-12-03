@@ -1711,6 +1711,8 @@
   "flow-tooltip-top-next": "La liste ci-dessous contient les principales pages que les utilisateurs ont visitées après la page focus <strong>{{ focuspage }}</strong>,  en suivant le flux de pages existant jusqu'à la page <strong>{{ page }}</strong>",
   "flow-total-visits": "visites totales",
   "flow-visits": "visites",
-  "flow-tooltip-flow-prev": "Dans le flux sélectionné vers la page focus, <strong>{{ visits }}</strong> visites ont inclus <strong>{{ page }}</strong> à un moment donné avant d'atteindre la page focus, en suivant les pages sélectionnées dans le flux.",
-  "flow-tooltip-flow-next": "Dans le flux sélectionné depuis la page focus, <strong>{{ visits }}</strong> visites ont inclus <strong>{{ page }}</strong> à un moment donné après avoir quitté la page focus, en suivant les pages sélectionnées dans le flux."
+  "flow-tooltip-flow-prev": "Dans le flux sélectionné vers la page focus, <strong>{{ visits }}</strong> visites ont inclus la page <strong>{{ page }}</strong> à un moment donné avant d'atteindre la page focus, en suivant les pages sélectionnées dans le flux.",
+  "flow-tooltip-flow-prev-beforefocus": "Dans le flux sélectionné vers la page focus, <strong>{{ visits }}</strong> visites ont inclus la page <strong>{{ page }}</strong> avant d'atteindre la page focus.",
+  "flow-tooltip-flow-next": "Dans le flux sélectionné depuis la page focus, <strong>{{ visits }}</strong> visites ont inclus la page <strong>{{ page }}</strong> à un moment donné après avoir quitté la page focus, en suivant les pages sélectionnées dans le flux.",
+  "flow-tooltip-flow-next-afterfocus": "Dans le flux sélectionné depuis la page focus, <strong>{{ visits }}</strong> visites ont inclus la page <strong>{{ page }}</strong> après avoir quitté la page focus."
 }

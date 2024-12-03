@@ -136,9 +136,11 @@
                   }})
                 </span>
                 @if (page !== focusPage()) {
-                <span class="my-1 d-block" [innerHTML]="'flow-tooltip-flow-prev' | translate: { visits: page.visits | localeNumber, page: (page?.title || page.url) }">
+                <span *ngIf="previousPages().length && previousPages()[previousPages().length - 1] === page" class="my-1 d-block" [innerHTML]="'flow-tooltip-flow-prev-beforefocus' | translate: { visits: page.visits | localeNumber, page: (page?.title || page.url) }">
                 </span>
-              }
+                <span *ngIf="previousPages().length > 1 && previousPages()[previousPages().length - 1] !== page" class="my-1 d-block" [innerHTML]="'flow-tooltip-flow-prev' | translate: { visits: page.visits | localeNumber, page: (page?.title || page.url) }">
+                </span>
+                }
               }
               @if (page.exits) {
                 <span class="my-1 d-block">
@@ -148,9 +150,11 @@
                   }})
                 </span>
                 @if (page !== focusPage()) {
-                <span class="my-1 d-block" [innerHTML]="'flow-tooltip-flow-next' | translate: { visits: page.visits | localeNumber, page: (page?.title || page.url) }">
+                <span *ngIf="nextPages().length && nextPages()[0] === page" class="my-1 d-block" [innerHTML]="'flow-tooltip-flow-next-afterfocus' | translate: { visits: page.visits | localeNumber, page: (page?.title || page.url) }">
                 </span>
-              }
+                <span *ngIf="nextPages().length > 1 && nextPages()[0] !== page" class="my-1 d-block" [innerHTML]="'flow-tooltip-flow-next' | translate: { visits: page.visits | localeNumber, page: (page?.title || page.url) }">
+                </span>
+                }
               }
             </ng-template>
             <div
