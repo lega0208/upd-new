@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import type {
   CalldriversTableRow,
+  ColumnConfig,
   ProjectDetailsAggregatedData,
   ProjectsDetailsData,
   TaskKpi,
@@ -395,9 +396,10 @@ export class ProjectsDetailsFacade {
           subtopic: callsByTopic.subtopic || '',
           sub_subtopic: callsByTopic.sub_subtopic || '',
           calls: callsByTopic.calls,
-          comparison: !previousCalls?.calls
+          change: !previousCalls?.calls
             ? null
             : percentChange(callsByTopic.calls, previousCalls.calls),
+          difference: callsByTopic.calls - (previousCalls?.calls || 0),
         };
       });
     }),
@@ -409,6 +411,11 @@ export class ProjectsDetailsFacade {
       {
         field: 'tpc_id',
         header: 'tpc_id',
+      },
+      {
+        field: 'enquiry_line',
+        header: 'enquiry_line',
+        translate: true,
       },
       {
         field: 'topic',
@@ -426,26 +433,31 @@ export class ProjectsDetailsFacade {
         translate: true,
       },
       {
-        field: 'enquiry_line',
-        header: 'enquiry_line',
-        translate: true,
-      },
-      {
         field: 'tasks',
-        header: 'task',
+        header: 'Task',
         translate: true,
-      },
+        }, 
       {
         field: 'calls',
         header: 'calls',
         pipe: 'number',
       },
       {
-        field: 'comparison',
+        field: 'change',
         header: 'change',
         pipe: 'percent',
+        pipeParam: '1.0-2',
+        upGoodDownBad: true,
+        indicator: true,
+        useArrows: true,
+        showTextColours: true,
+        secondaryField: {
+          field: 'difference',
+          pipe: 'number',
+        },
+        width: '160px',
       },
-    ],
+    ] as ColumnConfig<UnwrapObservable<typeof this.callsByTopic$>>[]
   );
 
   dyfDataApex$ = combineLatest([
@@ -926,17 +938,6 @@ export class ProjectsDetailsFacade {
   launchDate$ = this.projectsDetailsData$.pipe(
     map(({ launchDate }) => launchDate),
   );
-  members$ = this.projectsDetailsData$.pipe(
-    map(({ members }) =>
-      (members || '')
-        .split(', ')
-        .filter((member) => member)
-        .map((member) => ({
-          name: member,
-          role: 'Project lead',
-        })),
-    ),
-  );
 
   getDateRangeLabel(
     dateRange: string,
@@ -965,7 +966,7 @@ export class ProjectsDetailsFacade {
   feedbackMostRelevant = this.store.selectSignal(
     ProjectsDetailsSelectors.selectFeedbackMostRelevant,
   );
-
+ 
   error$ = this.store.select(
     ProjectsDetailsSelectors.selectProjectsDetailsError,
   );

@@ -411,15 +411,40 @@ export function chunkMap<T, ReturnT>(
   return chunks;
 }
 
-// Thanks ChatGPT
+/**
+ * Utility class for timing and logging iterations.
+ *
+ * @example
+ * ```typescript
+ * const anArray = ['an', 'array'];
+ * const timingUtility = new TimingUtility(anArray.length);
+ *
+ * for (const item of anArray) {
+ *   // Perform some operation
+ *   timingUtility.logIteration(`Iteration ${i + 1} completed`);
+ * }
+ * ```
+ */
 export class TimingUtility {
   private previousIterationEndTime = Date.now();
   private iterationDurations: number[] = [];
   private iterationCount = 0;
   private averageDuration = 1500;
 
-  constructor(private totalIterations: number) {}
+  /**
+   * Creates an instance of TimingUtility.
+   *
+   * @param totalIterations - The total number of iterations to be performed.
+   * @param logInterval - The interval at which to output a log message. Defaults to 100.
+   */
+  constructor(
+    private totalIterations: number,
+    private logInterval = 100,
+  ) {}
 
+  /**
+   * Calculates the average duration of the iterations.
+   */
   private calculateAverage(): void {
     const sum = this.iterationDurations.reduce(
       (total, duration) => total + duration,
@@ -428,6 +453,12 @@ export class TimingUtility {
     this.averageDuration = sum / this.iterationDurations.length;
   }
 
+  /**
+   * Formats the remaining time in a human-readable string.
+   *
+   * @param milliseconds - The remaining time in milliseconds.
+   * @returns The formatted remaining time as a string.
+   */
   private formatTimeRemaining(milliseconds: number): string {
     const seconds = Math.ceil(milliseconds / 1000);
     const minutes = (seconds / 60).toFixed(2);
@@ -436,22 +467,38 @@ export class TimingUtility {
       : `${seconds} second${seconds === 1 ? '' : 's'}`;
   }
 
+  /**
+   * Formats the iteration count with leading zeros.
+   *
+   * @returns The formatted iteration count as a string.
+   */
   private formatIterationCount() {
     const lessThan10 = this.iterationCount < 10 ? '0' : '';
     const lessThan100 = this.iterationCount < 100 ? '0' : '';
     return `${lessThan10}${lessThan100}${this.iterationCount}`;
   }
 
+  /**
+   * Logs the duration of the current iteration and other relevant information.
+   *
+   * @param customMessage - An optional custom message to include in the log.
+   */
   public logIteration(customMessage?: string): void {
     const iterationStartTime = Date.now();
+
     const iterationDuration =
       iterationStartTime - this.previousIterationEndTime;
+
     this.iterationDurations.push(iterationDuration);
+
     this.iterationCount++;
+
     this.calculateAverage();
+
     const timeRemaining = this.formatTimeRemaining(
       (this.totalIterations - this.iterationCount) * this.averageDuration,
     );
+
     const message =
       `${chalk.green('✔')}  ${chalk.dim(new Date().toLocaleTimeString())} | ` +
       `${chalk.bold(this.formatIterationCount())}: ${chalk.yellow(
@@ -463,6 +510,7 @@ export class TimingUtility {
       }\r`;
 
     if (
+      (this.logInterval && this.iterationCount % this.logInterval === 0) ||
       iterationDuration >= 500 ||
       (iterationDuration <= 200 && this.iterationCount % 100 === 0) ||
       (iterationDuration > 200 && this.iterationCount % 8 === 0)
@@ -472,6 +520,62 @@ export class TimingUtility {
 
     this.previousIterationEndTime = Date.now();
   }
+}
+
+/**
+ * Maps an array using the provided mapping function and logs the estimated time of arrival (ETA) at specified intervals.
+ *
+ * @template T - The type of elements in the input array.
+ * @template U - The type of elements in the output array.
+ * @param array - The array to be mapped.
+ * @param mapFunc - The mapping function to apply to each element in the array.
+ * @param logInterval - The interval at which to log the ETA. Defaults to 100.
+ * @returns  The array resulting from applying the mapping function to each element in the input array.
+ */
+export function mapWithETALogging<T, U>(
+  array: T[],
+  mapFunc: (val: T) => U,
+  logInterval = 100,
+): U[] {
+  const timingUtility = new TimingUtility(array.length, logInterval);
+
+  const results: U[] = [];
+
+  for (const [i, val] of array.entries()) {
+    results.push(mapFunc(val));
+
+    timingUtility.logIteration();
+  }
+
+  return results;
+}
+
+/**
+ * Asynchronously maps an array using a provided mapping function and logs the estimated time of arrival (ETA) at specified intervals.
+ *
+ * @template T - The type of elements in the input array.
+ * @template U - The type of elements in the resulting array.
+ * @param array - The array to be mapped.
+ * @param mapFunc - The asynchronous mapping function to apply to each element.
+ * @param logInterval - The interval at which to log the ETA. Defaults to 100.
+ * @returns A promise that resolves to an array of mapped values.
+ */
+export async function mapWithETALoggingAsync<T, U>(
+  array: T[],
+  mapFunc: (val: T) => Promise<U>,
+  logInterval = 100,
+) {
+  const timingUtility = new TimingUtility(array.length, logInterval);
+
+  const results: U[] = [];
+
+  for (const val of array) {
+    results.push(await mapFunc(val));
+
+    timingUtility.logIteration();
+  }
+
+  return results;
 }
 
 /*

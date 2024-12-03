@@ -286,6 +286,7 @@ export class PagesService {
     const numPreviousComments = await this.feedbackModel
       .countDocuments({
         date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+        page: page._id,
       })
       .exec();
 
