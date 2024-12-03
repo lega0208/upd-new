@@ -119,7 +119,7 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
   }
 
   switch (true) {
-    case statuses.every((status) => status === 'Complete'):
+    case statuses.some((status) => status === 'Complete'):
       return 'Complete';
     case statuses.some((status) => status === 'Delayed'):
       return 'Delayed';
@@ -446,8 +446,6 @@ export class ProjectsService {
       .find((uxTest) => uxTest.launch_date)
       ?.launch_date.toISOString();
 
-    const members = uxTests.find((uxTest) => uxTest.project_lead)?.project_lead;
-
     console.time('dateRangeData');
     const dateRangeData = await this.getAggregatedMetrics(
       projectId,
@@ -486,7 +484,6 @@ export class ProjectsService {
         percentChange,
       }))
       .sort((a, b) => b.sum - a.sum);
-    console.log(feedbackByPage.length);
     console.timeEnd('commentsByPage');
 
     const mostRelevantCommentsAndWords =
@@ -506,6 +503,7 @@ export class ProjectsService {
     const numPreviousComments = await this.feedbackModel
       .countDocuments({
         date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+        projects: projectId,
       })
       .exec();
 
@@ -525,7 +523,6 @@ export class ProjectsService {
       description,
       startDate,
       launchDate,
-      members,
       avgTaskSuccessFromLastTest: avgTestSuccess,
       avgSuccessValueChange: projectPercentChange,
       avgSuccessPercentChange: last_task_success_percent_change,
