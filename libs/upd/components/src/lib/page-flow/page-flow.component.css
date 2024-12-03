@@ -74,7 +74,7 @@ a:not(.btn) {
 .flow-item {
   display: flex;
   padding: 0px 15px;
-  width: 225px;
+  width: 240px;
   height: 160px;
   border: 1px solid #ccc;
   border-radius: 10px;
