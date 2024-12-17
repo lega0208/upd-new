@@ -42,7 +42,6 @@ export const defaultAuthParams = (): AuthParams => {
 };
 
 export async function getAuthToken(params: AuthParams) {
-  console.log(params.clientId);
   try {
     const response = await axios.post(
       'https://ims-na1.adobelogin.com/ims/token/v3',
