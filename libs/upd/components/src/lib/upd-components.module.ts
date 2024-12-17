@@ -62,6 +62,8 @@ import { RadioComponent } from './radio/radio.component';
 import { DidYouKnowComponent } from './did-you-know/did-you-know.component';
 import { RangeSliderComponent } from './range-slider/range-slider.component';
 import { HeatmapComponent } from './heatmap/heatmap.component';
+import { PageFlowComponent } from './page-flow/page-flow.component';
+import { ArrowConnectComponent } from './arrow-connect/arrow-connect.component';
 
 @NgModule({
   imports: [
@@ -128,6 +130,8 @@ import { HeatmapComponent } from './heatmap/heatmap.component';
     RadioComponent,
     DidYouKnowComponent,
     HeatmapComponent,
+    PageFlowComponent,
+    ArrowConnectComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -174,6 +178,8 @@ import { HeatmapComponent } from './heatmap/heatmap.component';
     DidYouKnowComponent,
     RangeSliderComponent,
     HeatmapComponent,
+    PageFlowComponent,
+    ArrowConnectComponent,
   ],
 })
 export class UpdComponentsModule {}

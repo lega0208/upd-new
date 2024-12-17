@@ -16,6 +16,7 @@ import {
 } from './populate.questions';
 import { environment } from '../environments/environment';
 import { BlobStorageModule } from '@dua-upd/blob-storage';
+import { FeedbackModule } from '@dua-upd/api/feedback';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { BlobStorageModule } from '@dua-upd/blob-storage';
     LoggerModule,
     BlobStorageModule,
     ReadabilityModule,
+    FeedbackModule,
   ],
   providers: [
     ConsoleLogger,

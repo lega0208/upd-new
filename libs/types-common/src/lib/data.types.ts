@@ -626,3 +626,14 @@ export type SuccessRates = {
   validation: number;
   difference: number;
 };
+
+export type PageFlowData = {
+  url: string;
+  visits: number;
+  rank?: number;
+  sequence?: string | number;
+  title?: string;
+  total: number;
+  entries?: number;
+  exits?: number;
+};
