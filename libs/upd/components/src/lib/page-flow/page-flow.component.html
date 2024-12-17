@@ -17,15 +17,17 @@
         <span class="badge bg-dark">Focus</span>
       } @else if (page.rank && page.entries) {
         <!-- Left-align the Rank badge with entries -->
-        <span class="badge bg-warning text-dark">{{'Rank' | translate}} {{ page.rank }}</span>
+        <span class="badge bg-warning text-dark"
+          >{{ 'Rank' | translate }} {{ page.rank }}</span
+        >
       } @else if (page.rank && page.exits) {
         <!-- Right-align the Rank badge with exits -->
         <span class="badge" style="background: #1976d2"
-          >{{'Rank' | translate}} {{ page.rank }}</span
+          >{{ 'Rank' | translate }} {{ page.rank }}</span
         >
       } @else {
         <!-- Default case for Rank with a placeholder -->
-        <div class="badge badge-empty">{{'Rank' | translate}} ?</div>
+        <div class="badge badge-empty">{{ 'Rank' | translate }} ?</div>
       }
     </div>
 
@@ -34,13 +36,15 @@
     >
       @if (page.entries) {
         <span class="badge bg-success w-100" aria-describedby="entriesTooltip"
-          >{{'Entries:' | translate}} {{ page?.entries / page?.visits | localePercent: '1.0-1' }}</span
+          >{{ 'Entries:' | translate }}
+          {{ page?.entries / page?.visits | localePercent: '1.0-1' }}</span
         >
       }
 
       @if (page.exits) {
         <span class="badge bg-danger w-100" aria-describedby="exitsTooltip"
-          >{{'Exits:' | translate}} {{ page?.exits / page?.visits | localePercent: '1.0-1' }}</span
+          >{{ 'Exits:' | translate }}
+          {{ page?.exits / page?.visits | localePercent: '1.0-1' }}</span
         >
       }
 
@@ -52,17 +56,47 @@
 </ng-template>
 
 <ng-template #topPreviousTooltip>
-  <p *ngIf="previousPages().length === 0 && previousOptions().length > 0" [innerHTML]="'flow-tooltip-top-prev-nopages' | translate: { focuspage: (focusPage().title || focusPage().url) }">
-  </p>
-  <p *ngIf="previousPages().length > 0" [innerHTML]="'flow-tooltip-top-prev' | translate: { page: (selectedFlow()[0].title || selectedFlow()[0].url), focuspage: (focusPage().title || focusPage().url) }">
-  </p>
+  <p
+    *ngIf="previousPages().length === 0 && previousOptions().length > 0"
+    [innerHTML]="
+      'flow-tooltip-top-prev-nopages'
+        | translate: { focuspage: focusPage().title || focusPage().url }
+    "
+  ></p>
+  <p
+    *ngIf="previousPages().length > 0"
+    [innerHTML]="
+      'flow-tooltip-top-prev'
+        | translate
+          : {
+              page: selectedFlow()[0].title || selectedFlow()[0].url,
+              focuspage: focusPage().title || focusPage().url,
+            }
+    "
+  ></p>
 </ng-template>
 
 <ng-template #topNextTooltip>
-  <p *ngIf="nextPages().length === 0 && nextOptions().length > 0" [innerHTML]="'flow-tooltip-top-next-nopages' | translate: { focuspage: (focusPage().title || focusPage().url) }">
-  </p>
-  <p *ngIf="nextPages().length > 0" [innerHTML]="'flow-tooltip-top-next' | translate: { page: (selectedFlow()[selectedFlow().length - 1].title || selectedFlow()[selectedFlow().length - 1].url), focuspage: (focusPage().title || focusPage().url) }">
-  </p>
+  <p
+    *ngIf="nextPages().length === 0 && nextOptions().length > 0"
+    [innerHTML]="
+      'flow-tooltip-top-next-nopages'
+        | translate: { focuspage: focusPage().title || focusPage().url }
+    "
+  ></p>
+  <p
+    *ngIf="nextPages().length > 0"
+    [innerHTML]="
+      'flow-tooltip-top-next'
+        | translate
+          : {
+              page:
+                selectedFlow()[selectedFlow().length - 1].title ||
+                selectedFlow()[selectedFlow().length - 1].url,
+              focuspage: focusPage().title || focusPage().url,
+            }
+    "
+  ></p>
 </ng-template>
 
 <div class="container-fluid my-4 gx-0">
@@ -98,14 +132,14 @@
               class="flow-item current-flow inactive selected-previous-flow-item"
               tabindex="0"
             >
-              {{'flow-select-previous' | translate}}
+              {{ 'flow-select-previous' | translate }}
             </div>
 
             <div class="material-icons">chevron_right</div>
           }
 
           <!-- Flow items (dynamic items generated in a loop) -->
-          @for (page of selectedFlow(); track page.url) {
+          @for (page of selectedFlow(); track page.url + $index) {
             <ng-template #tooltip>
               @if (page?.title) {
                 <strong class="my-1">{{ page.title }}</strong> <br />
@@ -113,44 +147,108 @@
               {{ page.url }}
               <span class="d-block mt-2 my-1">
                 @if (page === focusPage()) {
-                  <strong>{{ page.visits | localeNumber }} {{'flow-total-visits' | translate}}</strong>
+                  <strong
+                    >{{ page.visits | localeNumber }}
+                    {{ 'flow-total-visits' | translate }}</strong
+                  >
                 } @else {
-                  <strong>{{ page.visits | localeNumber }} {{'flow-visits' | translate}} </strong> ({{
+                  <strong
+                    >{{ page.visits | localeNumber }}
+                    {{ 'flow-visits' | translate }}
+                  </strong>
+                  ({{
                     page.visits / focusPage().visits | localePercent: '1.0-1'
                   }})
                 }
               </span>
               @if (page === focusPage()) {
-                <span class="my-1 d-block"><strong>{{'Rank:' | translate}}</strong> Focus </span>
+                <span class="my-1 d-block"
+                  ><strong>{{ 'Rank:' | translate }}</strong> Focus
+                </span>
               }
               @if (page.rank) {
                 <span class="my-1 d-block"
-                  ><strong>{{'Rank:' | translate}}</strong> {{ page.rank }}</span
+                  ><strong>{{ 'Rank:' | translate }}</strong>
+                  {{ page.rank }}</span
                 >
               }
               @if (page.entries) {
                 <span class="my-1 d-block">
-                  <strong>{{'Entries:' | translate}}</strong>
+                  <strong>{{ 'Entries:' | translate }}</strong>
                   {{ page.entries | localeNumber }} ({{
                     page.entries / page.visits | localePercent: '1.0-1'
                   }})
                 </span>
                 @if (page !== focusPage()) {
-                <span class="my-1 d-block" [innerHTML]="'flow-tooltip-flow-prev' | translate: { visits: page.visits | localeNumber, page: (page?.title || page.url) }">
-                </span>
-              }
+                  <span
+                    *ngIf="
+                      previousPages().length &&
+                      previousPages()[previousPages().length - 1] === page
+                    "
+                    class="my-1 d-block"
+                    [innerHTML]="
+                      'flow-tooltip-flow-prev-beforefocus'
+                        | translate
+                          : {
+                              visits: page.visits | localeNumber,
+                              page: page?.title || page.url,
+                            }
+                    "
+                  >
+                  </span>
+                  <span
+                    *ngIf="
+                      previousPages().length > 1 &&
+                      previousPages()[previousPages().length - 1] !== page
+                    "
+                    class="my-1 d-block"
+                    [innerHTML]="
+                      'flow-tooltip-flow-prev'
+                        | translate
+                          : {
+                              visits: page.visits | localeNumber,
+                              page: page?.title || page.url,
+                            }
+                    "
+                  >
+                  </span>
+                }
               }
               @if (page.exits) {
                 <span class="my-1 d-block">
-                  <strong>{{'Exits:' | translate}}</strong>
+                  <strong>{{ 'Exits:' | translate }}</strong>
                   {{ page.exits | localeNumber }} ({{
                     page.exits / page.visits | localePercent: '1.0-1'
                   }})
                 </span>
                 @if (page !== focusPage()) {
-                <span class="my-1 d-block" [innerHTML]="'flow-tooltip-flow-next' | translate: { visits: page.visits | localeNumber, page: (page?.title || page.url) }">
-                </span>
-              }
+                  <span
+                    *ngIf="nextPages().length && nextPages()[0] === page"
+                    class="my-1 d-block"
+                    [innerHTML]="
+                      'flow-tooltip-flow-next-afterfocus'
+                        | translate
+                          : {
+                              visits: page.visits | localeNumber,
+                              page: page?.title || page.url,
+                            }
+                    "
+                  >
+                  </span>
+                  <span
+                    *ngIf="nextPages().length > 1 && nextPages()[0] !== page"
+                    class="my-1 d-block"
+                    [innerHTML]="
+                      'flow-tooltip-flow-next'
+                        | translate
+                          : {
+                              visits: page.visits | localeNumber,
+                              page: page?.title || page.url,
+                            }
+                    "
+                  >
+                  </span>
+                }
               }
             </ng-template>
             <div
@@ -181,14 +279,14 @@
               class="flow-item current-flow selected-next-flow-item inactive"
               tabindex="0"
             >
-            {{'flow-select-next' | translate}}
+              {{ 'flow-select-next' | translate }}
             </div>
           }
         </div>
 
         @if (totalPages() === 4) {
           <upd-alert [type]="'danger'" [dismissible]="false">
-            {{'flow-limit' | translate}}</upd-alert
+            {{ 'flow-limit' | translate }}</upd-alert
           >
         }
 
@@ -199,7 +297,7 @@
               class="card-tooltip me-2"
               [ngbTooltip]="topPreviousTooltip"
               aria-describedby="topPreviousTooltip"
-              >{{'flow-previous-top-pages' | translate}}</strong
+              >{{ 'flow-previous-top-pages' | translate }}</strong
             >
 
             @if (isLoadingPrevious || previousPages().length === 0) {
@@ -211,7 +309,7 @@
                 <span class="material-icons me-1" aria-hidden="true"
                   >refresh</span
                 >
-                {{'flow-reset'| translate}}
+                {{ 'flow-reset' | translate }}
               </button>
             } @else {
               <button
@@ -221,13 +319,13 @@
                 <span class="material-icons me-1" aria-hidden="true"
                   >refresh</span
                 >
-                {{'flow-reset' | translate}}
+                {{ 'flow-reset' | translate }}
               </button>
             }
           </div>
           @if (previousOptions().length > 0 && !isLoadingPrevious) {
             <div class="flow-wrapper">
-              @for (page of previousOptions(); track page.url) {
+              @for (page of previousOptions(); track page.url + $index) {
                 <ng-template #tooltip>
                   @if (page?.title) {
                     <strong>{{ page.title }}</strong> <br />
@@ -261,7 +359,8 @@
                     <div class="text-end text-nowrap">
                       <strong>{{ page.visits | localeNumber }}</strong>
                       ({{
-                        page.visits / focusPage().visits | localePercent: '1.0-1'
+                        page.visits / focusPage().visits
+                          | localePercent: '1.0-1'
                       }})
                     </div>
                   </div>
@@ -292,7 +391,8 @@
                     <div class="text-end text-nowrap">
                       <strong>{{ page.visits | localeNumber }}</strong>
                       ({{
-                        page.visits / focusPage().visits | localePercent: '1.0-1'
+                        page.visits / focusPage().visits
+                          | localePercent: '1.0-1'
                       }})
                     </div>
                   </div>
@@ -309,7 +409,9 @@
               tabindex="0"
               aria-label="Load more previous pages"
             >
-              <div class="d-flex align-items-center">{{'flow-load-more' | translate}}</div>
+              <div class="d-flex align-items-center">
+                {{ 'flow-load-more' | translate }}
+              </div>
             </div>
           } @else {
             @if (!isLoadingPrevious && previousPages().length === 0) {
@@ -319,15 +421,15 @@
                 tabindex="0"
                 aria-label="Load previous pages"
               >
-                <p>{{'flow-load-prev' | translate}}</p>
+                <p>{{ 'flow-load-prev' | translate }}</p>
               </div>
             } @else if (!isLoadingPrevious && previousPages().length > 0) {
               <div class="flow-item" tabindex="0" aria-label="No more results">
-                <p>{{'flow-no-more-result' | translate}}</p>
+                <p>{{ 'flow-no-more-result' | translate }}</p>
               </div>
             } @else {
               <div tabindex="0" aria-label="Loading previous pages">
-                <p>{{'flow-loading' | translate}}</p>
+                <p>{{ 'flow-loading' | translate }}</p>
               </div>
             }
           }
@@ -340,7 +442,7 @@
               class="card-tooltip me-2"
               [ngbTooltip]="topNextTooltip"
               aria-describedby="topNextTooltip"
-              >{{'flow-next-top-pages' | translate}}</strong
+              >{{ 'flow-next-top-pages' | translate }}</strong
             >
             @if (isLoadingNext || nextPages().length === 0) {
               <button
@@ -351,7 +453,7 @@
                 <span class="material-icons me-1" aria-hidden="true"
                   >refresh</span
                 >
-                {{'flow-reset' | translate}}
+                {{ 'flow-reset' | translate }}
               </button>
             } @else {
               <button
@@ -361,13 +463,13 @@
                 <span class="material-icons me-1" aria-hidden="true"
                   >refresh</span
                 >
-                {{'flow-reset' | translate}}
+                {{ 'flow-reset' | translate }}
               </button>
             }
           </div>
           @if (nextOptions().length > 0 && !isLoadingNext) {
             <div class="flow-wrapper">
-              @for (page of nextOptions(); track page.url) {
+              @for (page of nextOptions(); track page.url + $index) {
                 <ng-template #tooltip>
                   @if (page?.title) {
                     <strong>{{ page.title }}</strong> <br />
@@ -403,7 +505,8 @@
                     <div class="text-end text-nowrap">
                       <strong>{{ page.visits | localeNumber }}</strong>
                       ({{
-                        page.visits / focusPage().visits | localePercent: '1.0-1'
+                        page.visits / focusPage().visits
+                          | localePercent: '1.0-1'
                       }})
                     </div>
                   </div>
@@ -436,7 +539,8 @@
                     <div class="text-end text-nowrap">
                       <strong>{{ page.visits | localeNumber }}</strong>
                       ({{
-                        page.visits / focusPage().visits | localePercent: '1.0-1'
+                        page.visits / focusPage().visits
+                          | localePercent: '1.0-1'
                       }})
                     </div>
                   </div>
@@ -453,7 +557,9 @@
               tabindex="0"
               aria-label="Load more next pages"
             >
-              <div class="d-flex align-items-center">{{'flow-load-more' |translate}}</div>
+              <div class="d-flex align-items-center">
+                {{ 'flow-load-more' | translate }}
+              </div>
             </div>
           } @else {
             @if (!isLoadingNext && nextPages().length === 0) {
@@ -463,15 +569,15 @@
                 tabindex="0"
                 aria-label="Load next pages"
               >
-              <p>{{'flow-load-next' | translate}}</p>
+                <p>{{ 'flow-load-next' | translate }}</p>
               </div>
             } @else if (!isLoadingNext && nextPages().length > 0) {
               <div class="flow-item" tabindex="0" aria-label="No more results">
-                <p>{{'flow-no-more-result' | translate}}</p>
+                <p>{{ 'flow-no-more-result' | translate }}</p>
               </div>
             } @else {
               <div tabindex="0" aria-label="Loading next pages">
-                <p>{{'flow-loading' | translate}}</p>
+                <p>{{ 'flow-loading' | translate }}</p>
               </div>
             }
           }

@@ -1401,6 +1401,8 @@
   "flow-tooltip-top-next": "The list below consists of the top pages that users visited after the focus page <strong>{{ focuspage }}</strong>, following the existing page flow to the page <strong>{{ page }}</strong>",
   "flow-total-visits": "total visits",
   "flow-visits": "visits",
-  "flow-tooltip-flow-prev": "In the selected flow to the Focus Page, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> at some point before reaching the Focus Page, by following the selected pages in the flow.",
-  "flow-tooltip-flow-next": "In the selected flow from the Focus Page, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> at some point after leaving the Focus Page, by following the selected pages in the flow."
+  "flow-tooltip-flow-prev": "In the selected flow to the focus fage, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> page at some point before reaching the focus page, by following the selected pages in the flow.",
+  "flow-tooltip-flow-prev-beforefocus": "In the selected flow to the focus page, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> page before reaching the focus page.",
+  "flow-tooltip-flow-next": "In the selected flow from the focus page, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> page at some point after leaving the focus page, by following the selected pages in the flow.",
+  "flow-tooltip-flow-next-afterfocus": "In the selected flow from the focus page, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> page after leaving the focus page."
 }

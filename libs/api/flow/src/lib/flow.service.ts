@@ -1,6 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { FlowCache } from './flow.cache';
-import { AdobeAnalyticsClient, createQuery } from '@dua-upd/api/custom-reports';
+import {
+  AA_CLIENT_TOKEN,
+  AdobeAnalyticsClient,
+  createQuery,
+} from '@dua-upd/api/custom-reports';
 import {
   AAQueryConfig,
   AAQueryDateRange,
@@ -15,7 +19,7 @@ import { Model } from 'mongoose';
 @Injectable()
 export class FlowService {
   constructor(
-    private aaClient: AdobeAnalyticsClient,
+    @Inject(AA_CLIENT_TOKEN) private aaClient: AdobeAnalyticsClient,
     private db: DbService,
     @InjectModel(Page.name, 'defaultConnection')
     private pageModel: Model<PageDocument>,
@@ -37,11 +41,21 @@ export class FlowService {
       limit,
     };
 
-    const result = parseQueryResults(
+    const cachedResults = await this.cache.get(query);
+
+    if (cachedResults) {
+      return cachedResults;
+    }
+
+    const queryResults = parseQueryResults(
       await this.aaClient.execute(createQuery(query)),
     );
 
-    return await this.addPageTitles(result);
+    const flowData = await this.addPageTitles(queryResults);
+
+    await this.cache.set(query, flowData);
+
+    return flowData;
   }
 
   async addPageTitles(data: PageFlowData[]): Promise<PageFlowData[]> {

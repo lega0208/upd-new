@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { set } from 'mongoose';
-import { CustomReportsModule } from '@dua-upd/api/custom-reports';
+import { AdobeAnalyticsModule, CustomReportsModule } from '@dua-upd/api/custom-reports';
 import { QueryModule } from '@dua-upd/api/query';
 import { PagesModule } from '../pages/pages.module';
 import { OverallModule } from '../overall/overall.module';
@@ -42,6 +42,7 @@ import { FeedbackModule } from '@dua-upd/api/feedback';
         failoverDetector: true,
       },
     }),
+    AdobeAnalyticsModule.register(environment.production),
   ],
   providers: [],
 })
