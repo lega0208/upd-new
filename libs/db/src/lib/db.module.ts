@@ -1,7 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import zstd from '@mongodb-js/zstd'; // need to import this for it to be included in the build output
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   AAItemId,
@@ -91,9 +90,6 @@ export const views = {
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: process.env.DOTENV_CONFIG_PATH || '.env',
-    }),
     MongooseModule.forFeature(
       [
         ...Object.values({ ...models, ...views }).map((collection) => ({
@@ -117,11 +113,27 @@ export class DbModule {
 
     console.log(connectionString);
 
+    // Settings for DocumentDB
+    // const config: MongooseModuleOptions = production
+    //   ? {
+    //       ssl: true,
+    //       tlsCAFile: process.env.MONGO_TLS_CA_FILE,
+    //       auth: {
+    //         username: process.env.MONGO_USERNAME,
+    //         password: process.env.MONGO_PASSWORD,
+    //       },
+    //       replicaSet: 'rs0',
+    //       readPreference: 'secondaryPreferred',
+    //       retryWrites: false,
+    //     }
+    //   : {};
+
     return MongooseModule.forRoot(connectionString, {
       connectionName: 'defaultConnection',
       dbName,
-      compressors: ['zstd', 'snappy'],
+      compressors: ['zstd', 'snappy', 'zlib'],
       retryWrites: true,
+      // ...config,
     });
   }
 }

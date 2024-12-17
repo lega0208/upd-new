@@ -561,12 +561,12 @@ export class TasksViewService extends DbViewNew<
   }
 
   // overriding inherited methods for cleaner types
-  override find(
+  override find<T = TasksView>(
     filter?: FilterQuery<TasksView>,
     projection: ProjectionType<TasksView> = {},
     options: QueryOptions<TasksView> = {},
-  ): Promise<TasksView[]> {
-    return super.find(filter, projection, options);
+  ): Promise<T[]> {
+    return super.find(filter, projection, options) as Promise<T[]>;
   }
 
   override findOne(
@@ -830,15 +830,23 @@ export class TasksViewService extends DbViewNew<
       dyfYes: previousMetrics.dyfYes,
     };
 
+    const callsByTopicPercentChange = getArraySelectedPercentChange(
+      ['calls'],
+      'tpc_id',
+      metricsWithPercentChange.callsByTopic,
+      previousMetrics.callsByTopic,
+    );
+
     return {
       ...metricsWithComparisons,
       dateRangeData,
       comparisonDateRangeData,
-      callsByTopic: getArraySelectedPercentChange(
+      callsByTopic: getArraySelectedAbsoluteChange(
         ['calls'],
         'tpc_id',
-        metricsWithPercentChange.callsByTopic,
+        callsByTopicPercentChange,
         previousMetrics.callsByTopic,
+        { suffix: 'Difference' },
       ),
       feedbackByDay: metricsWithPercentChange.metricsByDay.map(
         ({ date, numComments }) => ({

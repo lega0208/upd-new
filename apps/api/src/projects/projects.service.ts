@@ -9,7 +9,6 @@ import {
   type CallDriverModel,
   DbService,
   type FeedbackModel,
-  PageDocument,
   type PageMetricsModel,
   ProjectDocument,
   UxTestDocument,
@@ -17,10 +16,8 @@ import {
 import {
   CallDriver,
   Feedback,
-  Page,
   PageMetrics,
   Project,
-  Task,
   UxTest,
 } from '@dua-upd/db';
 import type {
@@ -32,6 +29,7 @@ import type {
   ProjectStatus,
   ProjectsHomeData,
   DateRange,
+  IUxTest,
 } from '@dua-upd/types-common';
 import {
   dateRangeSplit,
@@ -39,6 +37,7 @@ import {
 } from '@dua-upd/utils-common/date';
 import {
   getArraySelectedPercentChange,
+  getLatestTaskSuccessRate,
   getLatestTest,
   getLatestTestData,
 } from '@dua-upd/utils-common/data';
@@ -120,7 +119,7 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
   }
 
   switch (true) {
-    case statuses.every((status) => status === 'Complete'):
+    case statuses.some((status) => status === 'Complete'):
       return 'Complete';
     case statuses.some((status) => status === 'Delayed'):
       return 'Delayed';
@@ -156,8 +155,6 @@ export class ProjectsService {
     private uxTestsModel: Model<UxTestDocument>,
     @InjectModel(Feedback.name, 'defaultConnection')
     private feedbackModel: FeedbackModel,
-    @InjectModel(Page.name, 'defaultConnection')
-    private pageModel: Model<PageDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private feedbackService: FeedbackService,
   ) {}
@@ -441,8 +438,6 @@ export class ProjectsService {
 
     console.timeEnd('getLatestTestData');
 
-    const tasks = populatedProjectDoc.tasks as Task[];
-
     const startDate = uxTests
       .find((uxTest) => uxTest.start_date)
       ?.start_date.toISOString();
@@ -450,8 +445,6 @@ export class ProjectsService {
     const launchDate = uxTests
       .find((uxTest) => uxTest.launch_date)
       ?.launch_date.toISOString();
-
-    const members = uxTests.find((uxTest) => uxTest.project_lead)?.project_lead;
 
     console.time('dateRangeData');
     const dateRangeData = await this.getAggregatedMetrics(
@@ -491,7 +484,6 @@ export class ProjectsService {
         percentChange,
       }))
       .sort((a, b) => b.sum - a.sum);
-    console.log(feedbackByPage.length);
     console.timeEnd('commentsByPage');
 
     const mostRelevantCommentsAndWords =
@@ -511,6 +503,7 @@ export class ProjectsService {
     const numPreviousComments = await this.feedbackModel
       .countDocuments({
         date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+        projects: projectId,
       })
       .exec();
 
@@ -518,7 +511,7 @@ export class ProjectsService {
       ? percentChange(numComments, numPreviousComments)
       : null;
 
-    const results = {
+    const results: ProjectsDetailsData = {
       _id: populatedProjectDoc._id.toString(),
       dateRange: params.dateRange,
       comparisonDateRange: params.comparisonDateRange,
@@ -530,22 +523,17 @@ export class ProjectsService {
       description,
       startDate,
       launchDate,
-      members,
       avgTaskSuccessFromLastTest: avgTestSuccess,
       avgSuccessValueChange: projectPercentChange,
       avgSuccessPercentChange: last_task_success_percent_change,
       dateFromLastTest,
       taskSuccessByUxTest: uxTests,
-      tasks,
+      taskMetrics: await this.getTaskMetrics(projectId, params.dateRange),
       searchTerms,
-      attachments: populatedProjectDoc.attachments.map((attachment) => {
-        attachment.storage_url = attachment.storage_url?.replace(
-          /^https:\/\//,
-          '',
-        );
-
-        return attachment;
-      }),
+      attachments: populatedProjectDoc.attachments.map((attachment) => ({
+        ...attachment,
+        storage_url: attachment.storage_url?.replace(/^https:\/\//, ''),
+      })),
       feedbackByPage,
       feedbackByDay: (
         await this.feedbackModel.getCommentsByDay(params.dateRange, {
@@ -555,12 +543,7 @@ export class ProjectsService {
         date: date.toISOString(),
         sum,
       })),
-      mostRelevantCommentsAndWords:
-        await this.feedbackService.getMostRelevantCommentsAndWords({
-          dateRange: parseDateRangeString(params.dateRange),
-          type: 'project',
-          id: params.id,
-        }),
+      mostRelevantCommentsAndWords,
       numComments,
       numCommentsPercentChange,
     };
@@ -797,5 +780,74 @@ export class ProjectsService {
       prevResults,
       { round: 2, suffix: 'Change' },
     );
+  }
+
+  async getTaskMetrics(projectId: Types.ObjectId, dateRange: string) {
+    const twoYearsAgo = dayjs().startOf('day').subtract(2, 'years').toDate();
+
+    return await this.db.views.tasks
+      .find<{
+        _id: Types.ObjectId;
+        title: string;
+        callsPer100Visits: number;
+        dyfNoPer1000Visits: number;
+        uxTestInLastTwoYears: boolean;
+        ux_tests: IUxTest[];
+      }>(
+        {
+          dateRange: parseDateRangeString(dateRange),
+          'projects._id': projectId,
+        },
+        {
+          _id: '$task._id',
+          dateRange: 1,
+          title: '$task.title',
+          'projects._id': 1,
+          callsPer100Visits: {
+            $multiply: ['$callsPerVisit', 100],
+          },
+          dyfNoPer1000Visits: {
+            $multiply: ['$dyfNoPerVisit', 1000],
+          },
+          uxTestInLastTwoYears: {
+            $cond: [
+              {
+                $anyElementTrue: {
+                  $map: {
+                    input: '$ux_tests',
+                    as: 'test',
+                    in: {
+                      $gte: ['$$test.date', twoYearsAgo],
+                    },
+                  },
+                },
+              },
+              'Yes',
+              'No',
+            ],
+          },
+          ux_tests: 1,
+        },
+      )
+      .then((tasks) =>
+        tasks.map(
+          ({
+            _id,
+            title,
+            callsPer100Visits,
+            dyfNoPer1000Visits,
+            uxTestInLastTwoYears,
+            ux_tests,
+          }) => ({
+            _id: _id.toString(),
+            title,
+            callsPer100Visits,
+            dyfNoPer1000Visits,
+            uxTestInLastTwoYears,
+            latestSuccessRate:
+              getLatestTaskSuccessRate(ux_tests).avgTestSuccess,
+          }),
+        ),
+      );
   }
 }

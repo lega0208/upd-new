@@ -26,6 +26,7 @@ import type {
   ActivityMapMetrics,
   IProject,
   PageStatus,
+  Direction,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
@@ -36,6 +37,7 @@ import {
 import type { InternalSearchTerm } from '@dua-upd/types-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import { compressString, decompressString } from '@dua-upd/node-utils';
+import { FlowService } from '@dua-upd/api/flow';
 
 @Injectable()
 export class PagesService {
@@ -51,6 +53,7 @@ export class PagesService {
     private readabilityModel: Model<Readability>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private feedbackService: FeedbackService,
+    private flowService: FlowService,
   ) {}
 
   async listPages({ projection, populate }): Promise<Page[]> {
@@ -61,6 +64,20 @@ export class PagesService {
     }
 
     return await query.exec();
+  }
+
+  async getFlowData(
+    direction: Direction,
+    limit: number,
+    urls: string,
+    dateRange: string,
+  ) {
+    return await this.flowService.getFlowData(
+      direction,
+      limit,
+      JSON.parse(urls),
+      JSON.parse(dateRange),
+    );
   }
 
   async getPagesHomeData(dateRange: string): Promise<PagesHomeData> {
@@ -269,6 +286,7 @@ export class PagesService {
     const numPreviousComments = await this.feedbackModel
       .countDocuments({
         date: { $gte: prevDateRangeStart, $lte: prevDateRangeEnd },
+        page: page._id,
       })
       .exec();
 

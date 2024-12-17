@@ -297,7 +297,6 @@ export class TasksService {
 
     const taskSuccessByUxTest = uxTests;
 
-
     const {
       avgTestSuccess: avgTaskSuccessFromLastTest,
       latestDate: dateFromLastTest,
@@ -315,11 +314,10 @@ export class TasksService {
       avgSuccessValueChange,
       dateFromLastTest,
       mostRelevantCommentsAndWords,
-    }
+    };
 
     await this.cacheManager.set(cacheKey, returnData);
 
     return returnData;
   }
 }
-

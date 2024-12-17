@@ -408,7 +408,10 @@ export interface TaskDetailsData extends EntityDetailsData<TaskDetailsMetrics> {
     title: string;
     attachments: AttachmentData[];
   }[];
-  callsByTopic: (CallsByTopic & { callsPercentChange?: number | null })[];
+  callsByTopic: (CallsByTopic & {
+    callsPercentChange?: number | null;
+    callsDifference?: number | null;
+  })[];
   searchTerms: InternalSearchTerm[];
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
   visitsByPage?: {
@@ -539,13 +542,19 @@ export interface ProjectsDetailsData
   description?: string;
   startDate: string | undefined;
   launchDate: string | undefined;
-  members: string | undefined;
   avgTaskSuccessFromLastTest: number | null;
   avgSuccessPercentChange: number | null;
   avgSuccessValueChange: number | null;
   dateFromLastTest: Date;
   taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
-  tasks: Pick<ITask, '_id' | 'title'>[];
+  taskMetrics: {
+    _id: string;
+    title: string;
+    callsPer100Visits: number;
+    dyfNoPer1000Visits: number;
+    uxTestInLastTwoYears: boolean;
+    latestSuccessRate: number;
+  }[];
   searchTerms: InternalSearchTerm[];
   attachments: AttachmentData[];
   feedbackByPage: {
@@ -616,4 +625,15 @@ export type SuccessRates = {
   baseline: number;
   validation: number;
   difference: number;
+};
+
+export type PageFlowData = {
+  url: string;
+  visits: number;
+  rank?: number;
+  sequence?: string | number;
+  title?: string;
+  total: number;
+  entries?: number;
+  exits?: number;
 };
