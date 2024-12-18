@@ -119,7 +119,7 @@ const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
   }
 
   switch (true) {
-    case statuses.some((status) => status === 'Complete'):
+    case statuses.every((status) => status === 'Complete'):
       return 'Complete';
     case statuses.some((status) => status === 'Delayed'):
       return 'Delayed';
@@ -185,7 +185,7 @@ export class ProjectsService {
           .group({
             _id: '$project',
             statuses: {
-              $addToSet: '$status',
+              $addToSet: { $ifNull: ['$status', 'Unknown', '$status'] },
             },
             date: { $min: '$date' },
           })
@@ -282,7 +282,7 @@ export class ProjectsService {
                 $avg: '$success_rate',
               },
               statuses: {
-                $addToSet: '$status',
+                $addToSet: { $ifNull: ['$status', 'Unknown', '$status'] },
               },
             },
           },
