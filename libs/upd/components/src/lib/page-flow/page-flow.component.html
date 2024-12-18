@@ -259,6 +259,7 @@
               [ngClass]="{ 'focal-url': page === focusPage() }"
               tabindex="0"
               (click)="flowClick(page)"
+              (keydown)="handleKeyDownFlow($event, page)"
             >
               <ng-container
                 *ngTemplateOutlet="itemTemplate; context: { page }"
