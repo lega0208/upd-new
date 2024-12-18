@@ -21,12 +21,6 @@ import { firstValueFrom } from 'rxjs';
 export class PageFlowComponent {
   private http = inject(HttpClient);
 
-  sourcePreviousFlow = viewChild<ElementRef<HTMLElement>>('sourcePreviousFlow');
-  targetPreviousFlow = viewChild<ElementRef<HTMLElement>>('targetPreviousFlow');
-
-  sourceNextFlow = viewChild<ElementRef<HTMLElement>>('sourceNextFlow');
-  targetNextFlow = viewChild<ElementRef<HTMLElement>>('targetNextFlow');
-
   url = input<string>('');
   dateRange = input<{ start: string; end: string }>();
   title = input<string>('');
@@ -209,35 +203,20 @@ export class PageFlowComponent {
     if (item && rank) {
       const newPage = { ...item, rank, sequence: pages.length + 1 };
 
-      // Trigger CSS animation for the selected node movement
-      const nodeClass = isPrevious ? '.previous-flow-item' : '.next-flow-item';
-      const flowItems = document.querySelectorAll(nodeClass);
-
-      if (flowItems[rank - 1]) {
-        const selectedNode = flowItems[rank - 1] as HTMLElement;
-
-        if (isPrevious) {
-          selectedNode.classList.add('move-to-next'); // Move to the current flow (right)
-        } else {
-          selectedNode.classList.add('move-to-prev'); // Move to the current flow (left)
-        }
-      }
-
       if (isPrevious) {
-        this.previousOptions.set([]); // Clear options
-        this.previousPages.set([newPage, ...pages]); // Add the new page to the list
+        this.previousOptions.set([]);
+        this.previousPages.set([newPage, ...pages]);
       } else {
-        this.nextOptions.set([]); // Clear options
-        this.nextPages.set([...pages, newPage]); // Add the new page to the list
+        this.nextOptions.set([]);
+        this.nextPages.set([...pages, newPage]);
       }
     }
 
-    // Update URLs for fetching the page flow data
     const urls = isPrevious
       ? [...this.previousPages().map((page) => page.url), url]
       : [url, ...this.nextPages().map((page) => page.url)];
 
-    this.getPageFlowData(direction, limit, urls); // Fetch the updated page flow data
+    this.getPageFlowData(direction, limit, urls);
   }
 
   flowClick(item: PageFlowData) {
@@ -253,6 +232,7 @@ export class PageFlowComponent {
     if (previousIndex !== -1 && nextIndex !== -1 && isFocusPage) return;
 
     if (previousIndex !== -1) {
+      if (previousIndex === 0) return;
       const updatedPreviousPages = previousPages.slice(previousIndex);
       this.previousPages.set(updatedPreviousPages);
       this.getPageFlowData('previous', 5, [
@@ -260,6 +240,7 @@ export class PageFlowComponent {
         url,
       ]);
     } else if (nextIndex !== -1) {
+      if (nextIndex === nextPages.length - 1) return;
       const updatedNextPages = nextPages.slice(0, nextIndex + 1);
       this.nextPages.set(updatedNextPages);
       this.getPageFlowData('next', 5, [
@@ -372,6 +353,16 @@ export class PageFlowComponent {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.pageClick(direction, limit, item, rank);
+    }
+  }
+
+  handleKeyDownFlow(
+    event: KeyboardEvent,
+    item: PageFlowData,
+  ) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.flowClick(item);
     }
   }
 }
