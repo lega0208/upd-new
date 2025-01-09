@@ -20,9 +20,9 @@ import {
   singleDatesFromDateRange,
 } from '@dua-upd/external-data';
 import {
+  GranularityPeriod,
   TimingUtility,
   arrayToDictionary,
-  arrayToDictionaryFlat,
   arrayToDictionaryMultiref,
   dayjs,
   logJson,
@@ -35,9 +35,10 @@ import { BlobStorageService } from '@dua-upd/blob-storage';
 import { RunScriptCommand } from '../run-script.command';
 import { startTimer } from './utils/misc';
 import { outputExcel, outputJson } from './utils/output';
-import { spawn } from 'child_process';
 import { preprocessCommentWords } from '@dua-upd/feedback';
 import { FeedbackService } from '@dua-upd/api/feedback';
+
+type Interval = 'full' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 
 export const recalculateViews = async (
   db: DbService,
@@ -1188,6 +1189,113 @@ export async function syncCalldriversRefs(db: DbService) {
   await db.collections.callDrivers.syncTaskReferences(db.collections.tasks);
   console.timeEnd('syncCalldriversRefs');
 }
+function getDateRanges(
+  startDate: string,
+  endDate: string,
+  interval: Interval,
+): { start: string; end: string }[] {
+  const start = dayjs(startDate, 'MM/DD/YYYY');
+  const end = dayjs(endDate, 'MM/DD/YYYY');
+
+  const dateRanges = [];
+  let current = start;
+
+  const addRange = (rangeStart, rangeEnd) => {
+    dateRanges.push({
+      start: rangeStart.format('YYYY-MM-DD'),
+      end: rangeEnd.format('YYYY-MM-DD'),
+    });
+  };
+
+  switch (interval) {
+    case 'full':
+    {
+      addRange(start, end);
+      break;
+    }
+    case 'weekly':
+      // Weekly intervals (Monday-Sunday)
+      {
+        const firstWeekEnd = current.endOf('week').isAfter(end)
+          ? end
+          : current.endOf('week').add(1, 'day');
+
+        addRange(current, firstWeekEnd);
+
+        current = firstWeekEnd.add(1, 'day').startOf('isoWeek');
+
+        while (current.isBefore(end) || current.isSame(end)) {
+          const weekStart = current;
+          const weekEnd = current.endOf('isoWeek').isAfter(end)
+            ? end
+            : current.endOf('isoWeek');
+
+          addRange(weekStart, weekEnd);
+
+          current = current.add(1, 'week').startOf('isoWeek');
+        }
+      }
+      break;
+
+    case 'monthly': {
+      const firstMonthEnd = current.endOf('month').isAfter(end)
+        ? end
+        : current.endOf('month');
+
+      addRange(current, firstMonthEnd);
+
+      current = current.add(1, 'month').startOf('month');
+
+      while (current.isBefore(end) && current.endOf('month').isBefore(end)) {
+        const monthStart = current.startOf('month');
+        const monthEnd = current.endOf('month');
+
+        addRange(monthStart, monthEnd);
+
+        current = current.add(1, 'month').startOf('month');
+      }
+
+      if (current.isBefore(end) || current.isSame(end)) {
+        const lastMonthEnd = end;
+        addRange(current, lastMonthEnd);
+      }
+      break;
+    }
+
+    case 'quarterly':
+      while (current.isBefore(end) || current.isSame(end)) {
+        const quarterStart = current.startOf('quarter');
+        const quarterEnd = current.endOf('quarter').isAfter(end)
+          ? end
+          : current.endOf('quarter');
+
+        addRange(quarterStart, quarterEnd);
+
+        current = current.add(1, 'quarter').startOf('quarter');
+      }
+      break;
+
+    case 'yearly':
+      while (current.isBefore(end) || current.isSame(end)) {
+        const yearStart = current.startOf('year');
+        const yearEnd = current.endOf('year').isAfter(end)
+          ? end
+          : current.endOf('year');
+
+        addRange(yearStart, yearEnd);
+
+        current = current.add(1, 'year').startOf('year');
+      }
+      break;
+
+    default:
+      throw new Error(
+        'Invalid interval. Use "full", "weekly", "monthly", "quarterly", or "yearly".',
+      );
+  }
+
+  return dateRanges;
+}
 
 export async function thirty30Report() {
   const db = (<RunScriptCommand>this).inject<DbService>(DbService);
@@ -1209,23 +1317,34 @@ export async function thirty30Report() {
 
   // ------------------- Input Values ----------------------
 
-  const dateRangeBefore = {
-    start: '2024-08-26',
+  const interval: Interval = 'monthly';
+
+  const dateRangeBefore: GranularityPeriod = {
+    start: '2024-06-24',
     end: '2024-09-24',
-    // start: '2024-10-20',
-    // end: '2024-10-26',
   };
 
-  const dateRangeAfter = {
+  const dateRangeAfter: GranularityPeriod = {
     start: '2024-09-25',
-    end: '2024-10-24',
+    end: '2024-12-25',
   };
 
   const project = '6597b740c6cda2812bbb141f';
 
   // --------------------------------------------------------
 
-  const dateRanges = [dateRangeBefore, dateRangeAfter];
+  const dateRangeBeforeInterval = getDateRanges(
+    dateRangeBefore.start,
+    dateRangeBefore.end,
+    interval
+  );
+  const dateRangeAfterInterval = getDateRanges(
+    dateRangeAfter.start,
+    dateRangeAfter.end,
+    interval
+  );
+
+  const dateRangesInterval = [dateRangeBeforeInterval, dateRangeAfterInterval];
 
   const projectId = new Types.ObjectId(project);
   const tasks = await db.collections.tasks
@@ -1234,40 +1353,31 @@ export async function thirty30Report() {
     .exec();
 
   async function collectMetricsForTasks(dateRange) {
-    const metricsByTask: any = {};
+    const metricsByTask = [];
     const metricsByCallDrivers: any = {};
     const metricsByFeedbackEN: any = {};
     const metricsByFeedbackFR: any = {};
 
-    for (const task of tasks) {
-      const calls = (
-        await db.collections.callDrivers.getCallsByTpcId(
-          `${dateRange.start}/${dateRange.end}`,
-          task.tpc_ids,
-        )
-      ).reduce((a, b) => a + b.calls, 0);
+    // Ensure dateRange is an array
+    const dateRangesArray = Array.isArray(dateRange) ? dateRange : [dateRange];
 
+    // Calculate full range (earliest start to latest end)
+    const fullRangeStart = dateRangesArray[0].start;
+    const fullRangeEnd = dateRangesArray[dateRangesArray.length - 1].end;
+
+    // Collect data for the full range
+    for (const task of tasks) {
       const callsByTask = await db.collections.callDrivers.getCallsByTopic(
-        `${dateRange.start}/${dateRange.end}`,
-        {
-          tasks: task._id,
-        },
+        `${fullRangeStart}/${fullRangeEnd}`,
+        { tasks: task._id },
       );
 
       const mostRelevantCommentsAndWords =
         await feedback.getMostRelevantCommentsAndWords({
-          dateRange: parseDateRangeString(
-            `${dateRange.start}/${dateRange.end}`,
-          ),
+          dateRange: parseDateRangeString(`${fullRangeStart}/${fullRangeEnd}`),
           type: 'task',
           id: task._id.toString(),
         });
-
-      metricsByTask[task._id.toString()] = {
-        _id: task._id.toString(),
-        title: task.title,
-        calls,
-      };
 
       metricsByCallDrivers[task._id.toString()] = {
         ...callsByTask,
@@ -1282,81 +1392,77 @@ export async function thirty30Report() {
       };
     }
 
-    const metrics = await db.collections.pageMetrics
-      .aggregate<{
-        _id: Types.ObjectId;
-        url: string;
-        visits: number;
-        no_clicks: number;
-        yes_clicks: number;
-      }>()
-      .match({
-        projects: projectId,
-        date: {
-          $gte: new Date(dateRange.start),
-          $lte: new Date(dateRange.end),
-        },
-      })
-      .project({
-        date: 1,
-        visits: 1,
-        dyf_no: 1,
-        dyf_yes: 1,
-        tasks: 1,
-        url: 1,
-      })
-      .unwind('tasks')
-      .group({
-        _id: '$tasks',
-        visits: {
-          $sum: '$visits',
-        },
-        no_clicks: {
-          $sum: '$dyf_no',
-        },
-        yes_clicks: {
-          $sum: '$dyf_yes',
-        },
-      })
-      .exec();
+    // Process metrics by interval date range
+    for (const { start, end } of dateRangesArray) {
+      for (const task of tasks) {
+        // Aggregate call metrics for the interval
+        const calls = (
+          await db.collections.callDrivers.getCallsByTpcId(
+            `${start}/${end}`,
+            task.tpc_ids,
+          )
+        ).reduce((total, entry) => total + entry.calls, 0);
 
-    for (const taskMetrics of metrics) {
-      const _id = taskMetrics._id.toString();
-      const taskMetricz = metricsByTask[_id];
+        // Collect page metrics
+        const pageMetrics = await db.collections.pageMetrics
+          .aggregate<{
+            _id: Types.ObjectId;
+            visits: number;
+            no_clicks: number;
+            yes_clicks: number;
+          }>()
+          .match({
+            projects: projectId,
+            date: {
+              $gte: new Date(start),
+              $lte: new Date(end),
+            },
+          })
+          .project({
+            visits: 1,
+            no_clicks: '$dyf_no',
+            yes_clicks: '$dyf_yes',
+            tasks: 1,
+          })
+          .unwind('tasks')
+          .group({
+            _id: '$tasks',
+            visits: { $sum: '$visits' },
+            no_clicks: { $sum: '$no_clicks' },
+            yes_clicks: { $sum: '$yes_clicks' },
+          })
+          .exec();
 
-      delete taskMetrics._id;
+        const taskMetrics = pageMetrics.find(
+          (metric) => metric._id.toString() === task._id.toString(),
+        );
 
-      if (taskMetricz) {
-        metricsByTask[_id] = {
-          _id,
-          start: dateRange.start,
-          end: dateRange.end,
-          ...taskMetricz,
-          ...taskMetrics,
-        };
+        const visits = taskMetrics?.visits || 0;
+        const no_clicks = taskMetrics?.no_clicks || 0;
+        const yes_clicks = taskMetrics?.yes_clicks || 0;
 
         const calls_per_100_visits =
-          metricsByTask[_id].visits > 0
-            ? round(
-                (metricsByTask[_id].calls / metricsByTask[_id].visits) * 100,
-                3,
-              ) || 0
-            : 0;
-
+          visits > 0 ? round((calls / visits) * 100, 3) : 0;
         const no_clicks_per_1000_visits =
-          metricsByTask[_id].no_clicks > 0
-            ? round(
-                (metricsByTask[_id].no_clicks / metricsByTask[_id].visits) *
-                  1000,
-                3,
-              ) || 0
-            : 0;
+          visits > 0 ? round((no_clicks / visits) * 1000, 3) : 0;
 
-        metricsByTask[_id].calls_per_100_visits = calls_per_100_visits;
-        metricsByTask[_id].no_clicks_per_1000_visits =
-          no_clicks_per_1000_visits;
+        // Push metrics for this interval
+        metricsByTask.push({
+          task_id: task._id.toString(),
+          task_title: task.title,
+          start,
+          end,
+          calls,
+          visits,
+          no_clicks,
+          yes_clicks,
+          calls_per_100_visits,
+          no_clicks_per_1000_visits,
+        });
       }
     }
+
+    metricsByTask.sort((a, b) => a.task_title.localeCompare(b.task_title));
 
     return {
       metricsByTask,
@@ -1367,57 +1473,103 @@ export async function thirty30Report() {
   }
 
   async function collectMetricsForProjects(dateRange) {
-    const projectMetrics = await db.collections.pageMetrics
-      .aggregate<{
-        visits: number;
-        no_clicks: number;
-        yes_clicks: number;
-      }>()
-      .match({
-        projects: projectId,
-        date: {
-          $gte: new Date(dateRange.start),
-          $lte: new Date(dateRange.end),
-        },
-      })
-      .group({
-        _id: null,
-        visits: { $sum: '$visits' },
-        no_clicks: { $sum: '$dyf_no' },
-        yes_clicks: { $sum: '$dyf_yes' },
-      })
-      .exec();
+    const projectMetrics = [];
+    const callsByWeek = [];
 
-    const totalVisits = projectMetrics[0]?.visits || 0;
-    const totalNoClicks = projectMetrics[0]?.no_clicks || 0;
-    const totalYesClicks = projectMetrics[0]?.yes_clicks || 0;
+    // Ensure dateRange is an array
+    const dateRangesArray = Array.isArray(dateRange) ? dateRange : [dateRange];
 
-    const totalCalls = (
-      await db.collections.callDrivers.getCallsByTpcId(
-        `${dateRange.start}/${dateRange.end}`,
-        tasks.map((task) => task.tpc_ids).flat(),
-      )
-    ).reduce((a, b) => a + b.calls, 0);
+    for (const { start, end } of dateRangesArray) {
+      // Aggregate project metrics
+      const intervalMetrics = await db.collections.pageMetrics
+        .aggregate<{
+          visits: number;
+          no_clicks: number;
+          yes_clicks: number;
+        }>()
+        .match({
+          projects: projectId,
+          date: {
+            $gte: new Date(start),
+            $lte: new Date(end),
+          },
+        })
+        .project({
+          visits: 1,
+          no_clicks: '$dyf_no',
+          yes_clicks: '$dyf_yes',
+        })
+        .group({
+          _id: null,
+          visits: { $sum: '$visits' },
+          no_clicks: { $sum: '$no_clicks' },
+          yes_clicks: { $sum: '$yes_clicks' },
+        })
+        .exec();
 
-    const calls_per_100_visits =
-      totalVisits > 0 ? round((totalCalls / totalVisits) * 100, 3) : 0;
+      // Ensure we have data before processing
+      if (intervalMetrics.length > 0) {
+        projectMetrics.push({
+          visits: intervalMetrics[0].visits || 0,
+          no_clicks: intervalMetrics[0].no_clicks || 0,
+          yes_clicks: intervalMetrics[0].yes_clicks || 0,
+          start,
+          end,
+        });
+      } else {
+        projectMetrics.push({
+          visits: 0,
+          no_clicks: 0,
+          yes_clicks: 0,
+          start,
+          end,
+        });
+      }
 
-    const no_clicks_per_1000_visits =
-      totalVisits > 0 ? round((totalNoClicks / totalVisits) * 1000, 3) : 0;
+      // Get total calls for the date range
+      const totalCalls = (
+        await db.collections.callDrivers.getCallsByTpcId(
+          `${start}/${end}`,
+          tasks.map((task) => task.tpc_ids).flat(), // Flatten task IDs array
+        )
+      ).reduce((a, b) => a + b.calls, 0);
 
-    return [
-      {
+      callsByWeek.push({
+        calls: totalCalls,
+        start,
+        end,
+      });
+    }
+
+    // Combine project metrics and call data
+    const intervalMetrics = projectMetrics.map((metric) => {
+      const callData = callsByWeek.find(
+        (call) => call.start === metric.start && call.end === metric.end,
+      );
+      const totalCalls = callData ? callData.calls : 0;
+
+      const calls_per_100_visits =
+        metric.visits > 0 ? round((totalCalls / metric.visits) * 100, 3) : 0;
+
+      const no_clicks_per_1000_visits =
+        metric.visits > 0
+          ? round((metric.no_clicks / metric.visits) * 1000, 3)
+          : 0;
+
+      return {
         project_id: projectId.toString(),
-        start: dateRange.start,
-        end: dateRange.end,
-        total_visits: totalVisits,
+        start: metric.start,
+        end: metric.end,
+        total_visits: metric.visits,
         total_calls: totalCalls,
-        total_no_clicks: totalNoClicks,
-        total_yes_clicks: totalYesClicks,
+        total_no_clicks: metric.no_clicks,
+        total_yes_clicks: metric.yes_clicks,
         calls_per_100_visits,
         no_clicks_per_1000_visits,
-      },
-    ];
+      };
+    });
+
+    return intervalMetrics;
   }
 
   function getValidSheetName(title: string, suffix: string): string {
@@ -1430,106 +1582,82 @@ export async function thirty30Report() {
     return `${shortenedTitle}${suffix}`;
   }
 
-  const {
-    metricsByTask: tasksBeforeArray,
-    metricsByCallDrivers: callDriverBeforeArray,
-    metricsByFeedbackEN: feedbackENBeforeData,
-    metricsByFeedbackFR: feedbackFRBeforeData,
-  } = await collectMetricsForTasks(dateRanges[0]);
-  const {
-    metricsByTask: tasksAfterArray,
-    metricsByCallDrivers: callDriverAfterArray,
-    metricsByFeedbackEN: feedbackENAfterData,
-    metricsByFeedbackFR: feedbackFRAfterData,
-  } = await collectMetricsForTasks(dateRanges[1]);
-
-  const projectsBeforeArray = await collectMetricsForProjects(dateRanges[0]);
-  const projectsAfterArray = await collectMetricsForProjects(dateRanges[1]);
-
+  function createSheetData(dataObject, suffix, tasksDict) {
+    const sheetData = [];
+    let index = 0;
+  
+    for (const [taskId, data] of Object.entries(dataObject)) {
+      const taskTitle = `${index}-${tasksDict[taskId]?.task_title}` || `Task-${index}-${taskId}`;
+      sheetData.push({
+        sheetName: getValidSheetName(taskTitle, suffix),
+        data: Object.values(data) as Record<string, unknown>[],
+      });
+      index++;
+    }
+  
+    return sheetData;
+  }
+  
+  // Collect metrics for tasks and projects
+  const [
+    {
+      metricsByTask: tasksBeforeArray,
+      metricsByCallDrivers: callDriverBeforeArray,
+      metricsByFeedbackEN: feedbackENBeforeData,
+      metricsByFeedbackFR: feedbackFRBeforeData,
+    },
+    {
+      metricsByTask: tasksAfterArray,
+      metricsByCallDrivers: callDriverAfterArray,
+      metricsByFeedbackEN: feedbackENAfterData,
+      metricsByFeedbackFR: feedbackFRAfterData,
+    },
+  ] = await Promise.all([
+    collectMetricsForTasks(dateRangesInterval[0]),
+    collectMetricsForTasks(dateRangesInterval[1]),
+  ]);
+  
+  const [
+    projectsBeforeArray,
+    projectsAfterArray,
+  ] = await Promise.all([
+    collectMetricsForProjects(dateRangesInterval[0]),
+    collectMetricsForProjects(dateRangesInterval[1]),
+  ]);
+  
+  // Prepare overview data
   const overviewData = [
-    {
-      sheetName: 'tasks-before',
-      data: Object.values(tasksBeforeArray) as Record<string, unknown>[],
-    },
-    {
-      sheetName: 'tasks-after',
-      data: Object.values(tasksAfterArray) as Record<string, unknown>[],
-    },
-    {
-      sheetName: 'projects-before',
-      data: projectsBeforeArray as Record<string, unknown>[],
-    },
-    {
-      sheetName: 'projects-after',
-      data: projectsAfterArray as Record<string, unknown>[],
-    },
+    { sheetName: 'tasks-before', data: Object.values(tasksBeforeArray) },
+    { sheetName: 'tasks-after', data: Object.values(tasksAfterArray) },
+    { sheetName: 'projects-before', data: projectsBeforeArray },
+    { sheetName: 'projects-after', data: projectsAfterArray },
   ];
-  const callDriversData = [];
-  const feedbackData = [];
-
-  //CALL DRIVERS SHEET CONF STARTS ---------
-
-  for (const [taskId, data] of Object.entries(callDriverBeforeArray)) {
-    const taskTitle = tasksBeforeArray[taskId]?.title || `Task-${taskId}`;
-    callDriversData.push({
-      sheetName: getValidSheetName(taskTitle, '-before'),
-      data: Object.values(data) as Record<string, unknown>[],
-    });
-  }
-
-  for (const [taskId, data] of Object.entries(callDriverAfterArray)) {
-    const taskTitle = tasksAfterArray[taskId]?.title || `Task-${taskId}`;
-    callDriversData.push({
-      sheetName: getValidSheetName(taskTitle, '-after'),
-      data: Object.values(data) as Record<string, unknown>[],
-    });
-  }
- 
-  //CALL DRIVERS SHEET CONF ENDS --------
-
-  //FEEDBACK SHEET CONF STARTS ---------
-  for (const [taskId, data] of Object.entries(feedbackENBeforeData)) {
-    const taskTitle = tasksBeforeArray[taskId]?.title || `Task-${taskId}`;
-    feedbackData.push({
-      sheetName: getValidSheetName(taskTitle, '-en-before'),
-      data: Object.values(data) as Record<string, unknown>[],
-    });
-  }
-
-  for (const [taskId, data] of Object.entries(feedbackFRBeforeData)) {
-    const taskTitle = tasksAfterArray[taskId]?.title || `Task-${taskId}`;
-    feedbackData.push({
-      sheetName: getValidSheetName(taskTitle, '-fr-before'),
-      data: Object.values(data) as Record<string, unknown>[],
-    });
-  }
-
-  for (const [taskId, data] of Object.entries(feedbackENAfterData)) {
-    const taskTitle = tasksBeforeArray[taskId]?.title || `Task-${taskId}`;
-    feedbackData.push({
-      sheetName: getValidSheetName(taskTitle, '-en-after'),
-      data: Object.values(data) as Record<string, unknown>[],
-    });
-  }
-
-  for (const [taskId, data] of Object.entries(feedbackFRAfterData)) {
-    const taskTitle = tasksAfterArray[taskId]?.title || `Task-${taskId}`;
-    feedbackData.push({
-      sheetName: getValidSheetName(taskTitle, '-fr-after'),
-      data: Object.values(data) as Record<string, unknown>[],
-    });
-  }
-
-  //FEEDBACK SHEET CONF ENDS ---------
+  
+  // Generate task dictionaries on task_id data
+  const beforeTasksDict = arrayToDictionary(tasksBeforeArray, 'task_id', true);
+  const afterTasksDict = arrayToDictionary(tasksAfterArray, 'task_id', true);
+  
+  const callDriversData = [
+    ...createSheetData(callDriverBeforeArray, '-before', beforeTasksDict),
+    ...createSheetData(callDriverAfterArray, '-after', afterTasksDict),
+  ];
+  
+  // Generate feedback data
+  const feedbackData = [
+    ...createSheetData(feedbackENBeforeData, '-en-before', beforeTasksDict),
+    ...createSheetData(feedbackFRBeforeData, '-fr-before', beforeTasksDict),
+    ...createSheetData(feedbackENAfterData, '-en-after', afterTasksDict),
+    ...createSheetData(feedbackFRAfterData, '-fr-after', afterTasksDict),
+  ];
 
   const date = new Date().toISOString().slice(0, 10);
 
-  await outputExcel(`${outDir}/overview_report_${date}.xlsx`, overviewData);
+  await outputExcel(`${outDir}/overview_report_${interval}_${date}.xlsx`, overviewData);
   await outputExcel(
-    `${outDir}/call_drivers_report_${date}.xlsx`,
+    `${outDir}/call_drivers_report_${interval}_${date}.xlsx`,
     callDriversData,
   );
-  await outputExcel(`${outDir}/feedback_report_${date}.xlsx`, feedbackData);
+  await outputExcel(`${outDir}/feedback_report_${interval}_${date}.xlsx`, feedbackData);
 
   console.log(`Excel report generated successfully in ${outDir}`);
 }
