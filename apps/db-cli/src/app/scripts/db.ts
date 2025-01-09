@@ -37,6 +37,8 @@ import { startTimer } from './utils/misc';
 import { outputExcel, outputJson } from './utils/output';
 import { preprocessCommentWords } from '@dua-upd/feedback';
 import { FeedbackService } from '@dua-upd/api/feedback';
+import isoWeek from 'dayjs/plugin/isoWeek';
+dayjs.extend(isoWeek);
 
 type Interval = 'full' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 
