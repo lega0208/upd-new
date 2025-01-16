@@ -290,6 +290,10 @@ export type OverviewFeedback = {
   feedbackByDay: { date: string; sum: number }[];
 };
 
+export type PartialOverviewFeedback = OverviewFeedback & {
+  mostRelevantCommentsAndWords: { parts: number };
+};
+
 export type InternalSearchTerm = {
   term: string;
   clicks: number;
