@@ -42,12 +42,14 @@ import type {
   OverviewProjectData,
   OverviewProject,
   OverallSearchTerm,
-  OverviewFeedback,
+  PartialOverviewFeedback,
+  ChunkedMostRelevantCommentsAndWords,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
   AsyncLogTiming,
   avg,
+  chunkMap,
   dateRangeSplit,
   getImprovedKpiSuccessRates,
   getImprovedKpiTopSuccessRates,
@@ -270,7 +272,7 @@ export class OverallService {
   }
 
   @AsyncLogTiming
-  async getFeedback(params: ApiParams): Promise<OverviewFeedback> {
+  async getFeedback(params: ApiParams): Promise<PartialOverviewFeedback> {
     const cacheKey = `OverviewFeedback-${params.dateRange}-${params['ipd']}`;
 
     const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
@@ -278,7 +280,9 @@ export class OverallService {
         cachedData &&
         // it's actually still a string here, but we want to avoid deserializing it
         // and then reserializing it to send over http while still keeping our types intact
-        ((await decompressString(cachedData)) as unknown as OverviewFeedback),
+        ((await decompressString(
+          cachedData,
+        )) as unknown as PartialOverviewFeedback),
     );
 
     if (cachedData) {
@@ -326,8 +330,58 @@ export class OverallService {
       }))
       .sort((a, b) => (b.sum || 0) - (a.sum || 0));
 
+    const chunkSize = 40000;
+
+    const enCommentsChunks = {
+      cacheKey: `${cacheKey}-en-comments`,
+      chunks: chunkMap(
+        mostRelevantCommentsAndWords.en.comments,
+        (chunk) => chunk,
+        chunkSize,
+      ),
+    };
+
+    const enWordsChunks = {
+      cacheKey: `${cacheKey}-en-words`,
+      chunks: chunkMap(
+        mostRelevantCommentsAndWords.en.words,
+        (chunk) => chunk,
+        chunkSize,
+      ),
+    };
+
+    const frCommentsChunks = {
+      cacheKey: `${cacheKey}-fr-comments`,
+      chunks: chunkMap(
+        mostRelevantCommentsAndWords.fr.comments,
+        (chunk) => chunk,
+        chunkSize,
+      ),
+    };
+
+    const frWordsChunks = {
+      cacheKey: `${cacheKey}-fr-words`,
+      chunks: chunkMap(
+        mostRelevantCommentsAndWords.fr.words,
+        (chunk) => chunk,
+        chunkSize,
+      ),
+    };
+
+    // chunks will likely not be the same length, but to make it easier,
+    // we'll still get everything at the same time when fetching and just
+    // return an empty array if everything is already fetched for that language/key
+    const longestChunks = Math.max(
+      enCommentsChunks.chunks.length,
+      enWordsChunks.chunks.length,
+      frCommentsChunks.chunks.length,
+      frWordsChunks.chunks.length,
+    );
+
     const overviewFeedback = {
-      mostRelevantCommentsAndWords,
+      mostRelevantCommentsAndWords: {
+        parts: longestChunks,
+      },
       numComments,
       numCommentsPercentChange,
       commentsByPage,
@@ -339,12 +393,78 @@ export class OverallService {
       })),
     };
 
+    for (const i of Array.from({ length: longestChunks }).keys()) {
+      for (const chunkSet of [
+        enCommentsChunks,
+        enWordsChunks,
+        frCommentsChunks,
+        frWordsChunks,
+      ]) {
+        const chunkKey = `${chunkSet.cacheKey}-${i}`;
+
+        await compressString(JSON.stringify(chunkSet.chunks[i] || [])).then(
+          (compressed) => {
+            this.cacheManager.set(chunkKey, compressed);
+          },
+        );
+
+        logMemoryUsage(`Cached chunked data for part ${i}`);
+        delete chunkSet.chunks[i];
+      }
+    }
+
     await this.cacheManager.set(
       cacheKey,
       await compressString(JSON.stringify(overviewFeedback)),
     );
 
-    return overviewFeedback;
+    // it's actually still a string here, but we want to avoid deserializing it
+    // and then reserializing it to send over http while still keeping our types intact
+    return overviewFeedback as unknown as PartialOverviewFeedback;
+  }
+
+  async getCachedCommentsAndWordsChunk(
+    params: ApiParams,
+    chunkIndex: number,
+  ): Promise<ChunkedMostRelevantCommentsAndWords> {
+    const cacheKey = `OverviewFeedback-${params.dateRange}-${params['ipd']}`;
+
+    const enCommentsKey = `${cacheKey}-en-comments-${chunkIndex}`;
+    const enWordsKey = `${cacheKey}-en-words-${chunkIndex}`;
+    const frCommentsKey = `${cacheKey}-fr-comments-${chunkIndex}`;
+    const frWordsKey = `${cacheKey}-fr-words-${chunkIndex}`;
+
+    const enComments = await this.cacheManager.store
+      .get<string>(enCommentsKey)
+      .then(
+        async (cachedData) =>
+          cachedData && (await decompressString(cachedData)),
+      );
+
+    const enWords = await this.cacheManager.store
+      .get<string>(enWordsKey)
+      .then(
+        async (cachedData) =>
+          cachedData && (await decompressString(cachedData)),
+      );
+    const frComments = await this.cacheManager.store
+      .get<string>(frCommentsKey)
+      .then(
+        async (cachedData) =>
+          cachedData && (await decompressString(cachedData)),
+      );
+    const frWords = await this.cacheManager.store
+      .get<string>(frWordsKey)
+      .then(
+        async (cachedData) =>
+          cachedData && (await decompressString(cachedData)),
+      );
+
+    // it's actually still a string here, but we want to avoid deserializing it
+    // and then reserializing it to send over http while still keeping our types intact
+    const chunkedData = `{"enComments": ${enComments || '[]'}, "enWords": ${enWords || '[]'}, "frComments": ${frComments || '[]'}, "frWords": ${frWords || '[]'}}`;
+
+    return chunkedData as unknown as ChunkedMostRelevantCommentsAndWords;
   }
 
   async getTopSearchTerms(
@@ -1132,3 +1252,11 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
     copsTestsCompletedSince2018,
   };
 }
+
+const logMemoryUsage = (contextString: string) => {
+  const mbUsed = process.memoryUsage().heapUsed / 1024 / 1024;
+
+  console.log(
+    `[${contextString}] Memory used: ${Math.round(mbUsed * 100) / 100} MB`,
+  );
+};

@@ -35,3 +35,11 @@ export type MostRelevantCommentsAndWordsByLang = {
   en: MostRelevantCommentsAndWords;
   fr: MostRelevantCommentsAndWords;
 };
+
+// to get around JSON.stringify string length/memory issues
+export type ChunkedMostRelevantCommentsAndWords = {
+  enComments: MostRelevantCommentsAndWords['comments'];
+  enWords: MostRelevantCommentsAndWords['words'];
+  frComments: MostRelevantCommentsAndWords['comments'];
+  frWords: MostRelevantCommentsAndWords['words'];
+};
