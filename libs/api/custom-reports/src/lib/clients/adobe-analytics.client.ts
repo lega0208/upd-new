@@ -1,15 +1,18 @@
 import type { AnalyticsCoreAPI } from '@adobe/aio-lib-analytics';
-import { days, withMutex, withRetry } from '@dua-upd/utils-common';
+import {
+  days,
+  wait,
+  withErrorCallback,
+  withMutex,
+  withRetry,
+} from '@dua-upd/utils-common';
 import type {
   AuthParams,
   AAMaybeResponse,
   AAResponseBody,
   AdobeAnalyticsReportQuery,
 } from '@dua-upd/node-utils';
-import {
-  defaultAuthParams,
-  getAAClient,
-} from '@dua-upd/node-utils';
+import { defaultAuthParams, getAAClient } from '@dua-upd/node-utils';
 
 class AAClient {
   private client!: AnalyticsCoreAPI;
@@ -81,19 +84,54 @@ const createAAClient = (authParams?: AuthParams) =>
 // can make this generic to any client type and add settings like concurrency, rate limiting, etc.
 export class AdobeAnalyticsClient {
   private clientPool: AAClient[] = [];
+  private pendingPauses: Promise<void>[] = [];
+  private pausePromise: Promise<void> | null = null;
 
-  constructor(authParams: AuthParams[] = []) {
+  constructor(
+    authParams: AuthParams[] = [],
+    private errorPauseDuration = 500,
+  ) {
     if (authParams.length === 0) {
       this.clientPool = [createAAClient()];
 
       return;
     }
 
-    this.clientPool = authParams.map((params) => createAAClient(params));
+    const boundPause = this.pausePool.bind(this);
+
+    this.clientPool = authParams.map((params) =>
+      withErrorCallback(createAAClient(params), () => {
+        console.error(
+          `Error in AA client - pausing pool for ${this.errorPauseDuration}ms`,
+        );
+        boundPause();
+      }),
+    );
   }
 
   async init() {
     await Promise.all(this.clientPool.map((client) => client.initClient()));
+  }
+
+  pausePool() {
+    if (this.pausePromise) {
+      console.log('AA client pool already paused - resetting pause promise');
+    }
+
+    this.pausePromise && this.pendingPauses.push(this.pausePromise);
+
+    this.pendingPauses.push(wait(this.errorPauseDuration));
+
+    this.pausePromise = Promise.all([
+      ...this.pendingPauses.splice(0, this.pendingPauses.length),
+    ]).then(() => {
+      // make sure no new pauses were added while waiting
+      // if so, we don't want to set pausePromise to null
+      if (this.pendingPauses.length === 0) {
+        console.log('unpausing AA client pool');
+        this.pausePromise = null;
+      }
+    });
   }
 
   async execute(query: AdobeAnalyticsReportQuery) {
@@ -101,6 +139,12 @@ export class AdobeAnalyticsClient {
 
     if (!client) {
       throw new Error('No clients available');
+    }
+
+    // use while loop, because the pause may be reset while waiting
+    while (this.pausePromise) {
+      console.log('AA client pool paused - waiting to resume');
+      await this.pausePromise;
     }
 
     const results = client.execute(query);
