@@ -330,7 +330,7 @@ export class OverallService {
       }))
       .sort((a, b) => (b.sum || 0) - (a.sum || 0));
 
-    const chunkSize = 40000;
+    const chunkSize = 80000;
 
     const enCommentsChunks = {
       cacheKey: `${cacheKey}-en-comments`,
@@ -408,9 +408,9 @@ export class OverallService {
           },
         );
 
-        logMemoryUsage(`Cached chunked data for part ${i}`);
         delete chunkSet.chunks[i];
       }
+      logMemoryUsage(`Cached chunked data for part ${i}`);
     }
 
     await this.cacheManager.set(

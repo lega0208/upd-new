@@ -1,15 +1,9 @@
 import { inject, Injectable } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { createEffect, Actions, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import { Store } from '@ngrx/store';
-import {
-  catchError,
-  EMPTY,
-  mergeMap,
-  map,
-  concat,
-  reduce,
-} from 'rxjs';
+import { catchError, mergeMap, map, forkJoin, of } from 'rxjs';
 import { selectDateRanges } from '@dua-upd/upd/state';
 import { ApiService } from '@dua-upd/upd/services';
 import { OverviewFeedbackActions } from './overview-feedback.actions';
@@ -47,68 +41,50 @@ export class OverviewFeedbackEffects {
             // initial response gives us the number of parts left to fetch for the most relevant comments and words
             // with that, we create a nested observable to fetch all parts
             mergeMap((data) => {
-              console.log('data');
               const parts = Array.from(
                 { length: data.mostRelevantCommentsAndWords.parts },
                 (_, i) => i,
               );
 
-              const returnData = {
-                ...data,
-                mostRelevantCommentsAndWords: {
-                  en: {
-                    comments: [],
-                    words: [],
-                  },
-                  fr: {
-                    comments: [],
-                    words: [],
-                  },
-                } as MostRelevantCommentsAndWordsByLang,
-              };
-
-              const requests$ = concat(
-                ...parts.map((part) =>
+              // fetch all parts in parallel
+              return forkJoin(
+                parts.map((part) =>
                   this.api.getOverviewMostRelevant({
                     ...apiParams,
                     ipd,
                     part,
                   }),
                 ),
+              ).pipe(
+                // assemble all parts into the final object
+                map((responses) => {
+                  const enComments = responses.map((r) => r.enComments).flat();
+                  const enWords = responses.map((r) => r.enWords).flat();
+                  const frComments = responses.map((r) => r.frComments).flat();
+                  const frWords = responses.map((r) => r.frWords).flat();
+
+                  return {
+                    ...data,
+                    mostRelevantCommentsAndWords: {
+                      en: {
+                        comments: enComments,
+                        words: enWords,
+                      },
+                      fr: {
+                        comments: frComments,
+                        words: frWords,
+                      },
+                    } as MostRelevantCommentsAndWordsByLang,
+                  };
+                }),
               );
-
-              const combinedData$ = requests$.pipe(
-                reduce((acc, mostRelevant) => {
-                  acc.mostRelevantCommentsAndWords.en.comments =
-                    acc.mostRelevantCommentsAndWords.en.comments.concat(
-                      mostRelevant.enComments,
-                    );
-
-                  acc.mostRelevantCommentsAndWords.en.words =
-                    acc.mostRelevantCommentsAndWords.en.words.concat(
-                      mostRelevant.enWords,
-                    );
-
-                  acc.mostRelevantCommentsAndWords.fr.comments =
-                    acc.mostRelevantCommentsAndWords.fr.comments.concat(
-                      mostRelevant.frComments,
-                    );
-
-                  acc.mostRelevantCommentsAndWords.fr.words =
-                    acc.mostRelevantCommentsAndWords.fr.words.concat(
-                      mostRelevant.frWords,
-                    );
-
-                  return acc;
-                }, returnData),
-              );
-
-              return combinedData$;
             }),
             map((data) =>
               OverviewFeedbackActions.loadFeedbackSuccess({ data }),
             ),
-            catchError(() => EMPTY),
+            catchError((err: HttpErrorResponse) =>
+              of(OverviewFeedbackActions.loadFeedbackError({ error: err })),
+            ),
           );
       }),
     );

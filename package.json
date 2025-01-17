@@ -4,8 +4,8 @@
   "license": "MIT",
   "scripts": {
     "ng": "nx",
-    "start": "set NX_NATIVE_COMMAND_RUNNER=false& nx run-many --target=serve --projects=api,upd --parallel",
-    "dev": "set NX_NATIVE_COMMAND_RUNNER=false& nx run-many --target=serve --projects=api,upd --parallel --output-style=static",
+    "start": "set NODE_OPTIONS=\"--max-old-space-size=6144\"& set NX_NATIVE_COMMAND_RUNNER=false& nx run-many --target=serve --projects=api,upd --parallel",
+    "dev": "set NX_NATIVE_COMMAND_RUNNER=false& nx run-many --target=serve --projects=api,upd --parallel",
     "preview": "nx run-many --target=preview --projects=api,upd --parallel --output-style=static",
     "build": "nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel=false --prod --output-style=static",
     "build:parallel": "nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel --prod --output-style=static",
