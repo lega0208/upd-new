@@ -746,3 +746,37 @@ export function withMutex<T extends object>(
     },
   });
 }
+
+export function withErrorCallback<
+  T extends object,
+  Fn extends (err: unknown) => any,
+>(
+  obj: T,
+  callback: Fn,
+  options?: {
+    methodList?: (keyof T)[];
+  },
+): T {
+  const methodList = options?.methodList;
+
+  return new Proxy(obj, {
+    get(target, propKey, receiver) {
+      const origMethod = Reflect.get(target, propKey, receiver);
+
+      if (
+        typeof origMethod === 'function' &&
+        (!methodList || methodList.includes(propKey as keyof T))
+      ) {
+        return async (...args: unknown[]) => {
+          try {
+            return await origMethod.apply(target, args);
+          } catch (err) {
+            await callback(err);
+            throw err;
+          }
+        };
+      }
+      return origMethod;
+    },
+  });
+}
