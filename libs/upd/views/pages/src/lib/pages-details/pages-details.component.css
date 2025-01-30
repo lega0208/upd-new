@@ -1,3 +1,7 @@
 #view_url:hover, #copy_url:hover {
     color: #2e5ea7;
 }
+.clickable-link {
+    cursor: pointer;
+    text-decoration: underline;
+  }

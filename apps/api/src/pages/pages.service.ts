@@ -8,6 +8,7 @@ import type {
   MetricsConfig,
   PageDocument,
   PageMetricsModel,
+  UrlDocument,
 } from '@dua-upd/db';
 import {
   DbService,
@@ -27,17 +28,21 @@ import type {
   IProject,
   PageStatus,
   Direction,
+  UrlHash,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
   dateRangeSplit,
   parseDateRangeString,
   percentChange,
+  wait,
 } from '@dua-upd/utils-common';
 import type { InternalSearchTerm } from '@dua-upd/types-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import { compressString, decompressString } from '@dua-upd/node-utils';
 import { FlowService } from '@dua-upd/api/flow';
+import { BlobStorageService } from '@dua-upd/blob-storage';
+import { format } from 'prettier';
 
 @Injectable()
 export class PagesService {
@@ -54,6 +59,7 @@ export class PagesService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private feedbackService: FeedbackService,
     private flowService: FlowService,
+    @Inject(BlobStorageService.name) private blob: BlobStorageService,
   ) {}
 
   async listPages({ projection, populate }): Promise<Page[]> {
@@ -267,7 +273,38 @@ export class PagesService {
     const readability = await this.readabilityModel
       .find({ page: new Types.ObjectId(params.id) })
       .sort({ date: -1 })
+      .lean()
       .exec();
+
+    const urls = await this.db.collections.urls
+      .find({ page: new Types.ObjectId(params.id) })
+      .sort({ date: -1 })
+      .lean()
+      .exec();
+
+    const hash = urls.map((url) => url.hashes).flat();
+
+    const promises: Promise<UrlHash>[] = [];
+
+    for (const h of hash) {
+      promises.push(
+        this.blob.blobModels.urls
+          .blob(h.hash)
+          .downloadToString()
+          .then(async (blob) => ({
+            hash: h.hash,
+            date: h.date,
+            blob: await format(blob, {
+              parser: 'html',
+            }),
+          })),
+      );
+      await wait(30);
+    }
+
+    const hashes = (await Promise.all(promises)).sort(
+      (a, b) => b.date.getTime() - a.date.getTime(),
+    );
 
     const mostRelevantCommentsAndWords =
       await this.feedbackService.getMostRelevantCommentsAndWords({
@@ -294,6 +331,20 @@ export class PagesService {
       !params.ipd && numPreviousComments
         ? percentChange(numComments, numPreviousComments)
         : null;
+
+    const alternateUrl = await this.pageModel.findById(
+      new Types.ObjectId(params.id),
+      {
+        altLangHref: 1,
+      },
+    );
+
+    const altLangPage = await this.pageModel.findOne(
+      { url: alternateUrl.altLangHref },
+      { _id: 1 },
+    );
+
+    const alternatePageId = altLangPage._id;
 
     const results = {
       ...page,
@@ -336,6 +387,8 @@ export class PagesService {
       mostRelevantCommentsAndWords,
       numComments,
       numCommentsPercentChange,
+      hashes,
+      alternatePageId,
     } as PageDetailsData;
 
     await this.cacheManager.set(cacheKey, results);

@@ -22,6 +22,7 @@
   "tab-details": "Details",
   "tab-flow": "Flow",
   "tab-readability": "Readability",
+  "tab-version-history": "Version history",
   "tab-gctasks": "GC Task Success Survey",
   "dr-lastweek": "Last week",
   "dr-lastmonth": "Last month",
@@ -1149,6 +1150,7 @@
   "Pages | Page feedback": "UPD | Pages | Page feedback",
   "Pages | Flow": "UPD | Pages | Flow",
   "Pages | Readability": "UPD | Pages | Readability",
+  "Pages | Version history": "UPD | Pages | Version history",
   "Projects | Home": "UPD | UX projects | Home",
   "Projects | Summary": "UPD | UX projects | Summary",
   "Projects | Web traffic": "UPD | UX projects | Web traffic",
@@ -1404,5 +1406,7 @@
   "flow-tooltip-flow-prev": "In the selected flow to the focus fage, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> page at some point before reaching the focus page, by following the selected pages in the flow.",
   "flow-tooltip-flow-prev-beforefocus": "In the selected flow to the focus page, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> page before reaching the focus page.",
   "flow-tooltip-flow-next": "In the selected flow from the focus page, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> page at some point after leaving the focus page, by following the selected pages in the flow.",
-  "flow-tooltip-flow-next-afterfocus": "In the selected flow from the focus page, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> page after leaving the focus page."
+  "flow-tooltip-flow-next-afterfocus": "In the selected flow from the focus page, <strong>{{ visits }}</strong> visits included <strong>{{ page }}</strong> page after leaving the focus page.",
+  "-----VERSION HISTORY TAB---": "-----------------------------------------------------",
+  "version-history": "Version history"
 }

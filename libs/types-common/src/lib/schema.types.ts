@@ -377,6 +377,7 @@ export interface IUxTest {
 export interface UrlHash {
   hash: string;
   date: Date;
+  blob?: string;
 }
 
 export interface IUrl {

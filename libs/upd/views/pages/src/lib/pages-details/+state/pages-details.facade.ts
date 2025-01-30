@@ -6,7 +6,7 @@ import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
 import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
-import { I18nFacade, selectDatePeriodSelection } from '@dua-upd/upd/state';
+import { I18nFacade, selectDatePeriodSelection, selectUrl } from '@dua-upd/upd/state';
 import { percentChange, UnwrapObservable } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import type {
@@ -47,6 +47,10 @@ export class PagesDetailsFacade {
   );
 
   currentLang$ = this.i18n.currentLang$;
+
+  currentRoute$ = this.store
+      .select(selectUrl)
+      .pipe(map((url) => url.replace(/\?.+$/, '')));
 
   dateRangeSelected$ = this.store.select(selectDatePeriodSelection);
 
@@ -120,6 +124,10 @@ export class PagesDetailsFacade {
 
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
+
+  hashes$ = this.pagesDetailsData$.pipe(map((data) => data?.hashes));
+  
+  altPageId$ = this.pagesDetailsData$.pipe(map((data) => data?.alternatePageId || 0));
 
   pageStatus$ = this.pagesDetailsData$.pipe(
     map((data) => {
