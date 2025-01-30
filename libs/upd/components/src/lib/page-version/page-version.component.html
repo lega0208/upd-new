@@ -77,6 +77,8 @@
   <div class="row mt-3">
     <div [class.hidden]="viewMode().value !== 'live'">
       <div class="group-legend">
+        <upd-modal [modalTitle]="'Lorem ipsum'" [modalContent]="'Lorem ipsum'">
+        </upd-modal>
         <div *ngFor="let item of legendItems()" class="legend-item">
           <div
             class="legend-box"
@@ -91,9 +93,6 @@
           ></div>
           <span class="legend-text">{{ item.text }}</span>
         </div>
-
-        <upd-modal [modalTitle]="'Lorem ipsum'" [modalContent]="'Lorem ipsum'">
-        </upd-modal>
       </div>
       <div class="col-12">
         <div #liveContainer class="live-container"></div>

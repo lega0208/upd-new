@@ -55,7 +55,7 @@ interface HashSelection {
   encapsulation: ViewEncapsulation.None,
 })
 export class PageVersionComponent {
-  i18n= inject(I18nFacade);
+  i18n = inject(I18nFacade);
   hashes = input<HashSelection[]>([]);
   url = input<string>('');
   shadowDOM = signal<ShadowRoot | null>(null);
@@ -82,7 +82,7 @@ export class PageVersionComponent {
 
   dropdownOptions: Signal<DropdownOption<string>[]> = computed(() => {
     const current = this.hashes()[0]?.hash;
-  
+
     return this.hashes().map(({ hash, date }) => ({
       label: `${dayjs(date).format(this.dateParams())}${hash === current ? ' (Current)' : ''}`,
       value: hash,
@@ -123,19 +123,26 @@ export class PageVersionComponent {
   currentIndex = signal<number>(0);
   lastExpandedDetails = signal<HTMLElement | null>(null);
 
-  legendItems = signal<{ text: string; colour: string; style: string; lineStyle?: string }[]>([
+  legendItems = signal<
+    { text: string; colour: string; style: string; lineStyle?: string }[]
+  >([
     { text: 'Previous version', colour: '#F3A59D', style: 'highlight' },
     { text: 'Updated version', colour: '#83d5a8', style: 'highlight' },
     { text: 'Hidden content', colour: '#6F9FFF', style: 'line' },
-    { text: 'Modal content', colour: '#666', style: 'line', lineStyle: 'dashed' },
+    {
+      text: 'Modal content',
+      colour: '#666',
+      style: 'line',
+      lineStyle: 'dashed',
+    },
+    {
+      text: 'Ajax-loaded content',
+      colour: '#000',
+      style: 'line',
+    }
   ]);
 
   constructor(private renderer: Renderer2) {
-    effect(() => {
-      console.log(`Initial selection for 'left':`, this.getInitialSelection('left')());
-      console.log(`Dropdown options:`, this.dropdownOptions());
-    });
-
     effect(() => {
       const liveContainer = this.liveContainer()?.nativeElement;
       if (!liveContainer) return;
@@ -257,20 +264,27 @@ export class PageVersionComponent {
   private handleDocumentClick(event: MouseEvent): void {
     const liveContainer = this.liveContainer()?.nativeElement;
     if (!liveContainer) return;
-  
-    const diffViewer = liveContainer.querySelector('diff-viewer') as HTMLElement;
+
+    const diffViewer = liveContainer.querySelector(
+      'diff-viewer',
+    ) as HTMLElement;
     if (!diffViewer || !diffViewer.shadowRoot) return;
-  
+
     let target = event.target as HTMLElement;
     while (target && target.tagName !== 'A') {
       target = target.parentElement as HTMLElement;
     }
-  
-    if (target?.tagName === 'A' && target.getAttribute('href')?.startsWith('#')) {
+
+    if (
+      target?.tagName === 'A' &&
+      target.getAttribute('href')?.startsWith('#')
+    ) {
       event.preventDefault();
       const sectionId = target.getAttribute('href')?.substring(1); // Extract ID (removes the #)
-      const targetSection = diffViewer.shadowRoot?.getElementById(sectionId ?? '');
-  
+      const targetSection = diffViewer.shadowRoot?.getElementById(
+        sectionId ?? '',
+      );
+
       if (targetSection) {
         targetSection.scrollIntoView({
           behavior: 'smooth',
@@ -279,127 +293,20 @@ export class PageVersionComponent {
       }
     } else {
       const changeElements = Array.from(
-        diffViewer.shadowRoot.querySelectorAll<HTMLElement>('[data-id]')
+        diffViewer.shadowRoot.querySelectorAll<HTMLElement>('[data-id]'),
       );
-  
+
       if (!changeElements.length) return;
-  
+
       const clickedElement = changeElements.find((el) =>
-        el.contains(event.target as Node)
+        el.contains(event.target as Node),
       );
-  
+
       if (!clickedElement) return;
       const index = Number(clickedElement.getAttribute('data-id'));
       this.scrollToElement(index);
     }
   }
-
-  // private findNearestElement(
-  //   event: MouseEvent,
-  //   elements: HTMLElement[],
-  //   container: HTMLElement,
-  // ): HTMLElement | null {
-  //   const { left: containerLeft, top: containerTop } =
-  //     container.getBoundingClientRect();
-  //   const clickX = event.clientX - containerLeft;
-  //   const clickY = event.clientY - containerTop;
-
-  //   return elements.reduce(
-  //     (nearest, element) => {
-  //       const rect = element.getBoundingClientRect();
-  //       const distance = Math.hypot(
-  //         rect.left + rect.width / 2 - containerLeft - clickX,
-  //         rect.top + rect.height / 2 - containerTop - clickY,
-  //       );
-
-  //       return distance < nearest.distance ? { element, distance } : nearest;
-  //     },
-  //     { element: null as HTMLElement | null, distance: Infinity },
-  //   ).element;
-  // }
-
-  // private initializeScrollables(): void {
-  //   const beforeElement = this.beforeContainer()?.nativeElement;
-  //   const afterElement = this.afterContainer()?.nativeElement;
-
-  //   if (!beforeElement || !afterElement) return;
-
-  //   //     // Balance content heights
-  //   // this.balanceContentHeights();
-
-  //   // Add scroll event listeners for synchronization
-  //   beforeElement.addEventListener('scroll', () => this.handleScroll('before'));
-  //   afterElement.addEventListener('scroll', () => this.handleScroll('after'));
-  // }
-
-  // private handleScroll(source: 'before' | 'after'): void {
-  //   const beforeElement = this.beforeContainer()?.nativeElement;
-  //   const afterElement = this.afterContainer()?.nativeElement;
-
-  //   const sourceElement = source === 'before' ? beforeElement : afterElement;
-  //   const targetElement = source === 'before' ? afterElement : beforeElement;
-
-  //   if (!sourceElement || !targetElement) return;
-
-  //   console.log({
-  //     sourceScrollTop: sourceElement.scrollTop,
-  //     sourceScrollHeight: sourceElement.scrollHeight,
-  //     sourceClientHeight: sourceElement.clientHeight,
-  //     targetScrollTop: targetElement.scrollTop,
-  //     targetScrollHeight: targetElement.scrollHeight,
-  //     targetClientHeight: targetElement.clientHeight,
-  //   });
-
-  //   // Calculate the proportion of scrolling in the source element
-  //   const sourceScrollHeight =
-  //     sourceElement.scrollHeight - sourceElement.clientHeight;
-  //   const targetScrollHeight =
-  //     targetElement.scrollHeight - targetElement.clientHeight;
-
-  //   if (sourceScrollHeight <= 0 || targetScrollHeight <= 0) {
-  //     return; // Avoid division by zero
-  //   }
-
-  //   // Calculate the visible scroll ratio in the source element
-  //   const sourceScrollRatio = sourceElement.scrollTop / sourceScrollHeight;
-
-  //   // Calculate the target scroll offset based on the ratio
-  //   const targetScrollTop = sourceScrollRatio * targetScrollHeight;
-
-  //   // Directly set the scrollTop for the target element
-  //   targetElement.scrollTop = targetScrollTop;
-
-  //   // Debugging: Log the synchronization details
-  //   console.log({
-  //     sourceScrollTop: sourceElement.scrollTop,
-  //     sourceScrollHeight,
-  //     targetScrollTop,
-  //     targetScrollHeight,
-  //   });
-  // }
-
-  // private balanceContentHeights(): void {
-  //   const beforeElement = this.beforeContainer()?.nativeElement;
-  //   const afterElement = this.afterContainer()?.nativeElement;
-
-  //   if (!beforeElement || !afterElement) return;
-
-  //   const beforeHeight = beforeElement.scrollHeight;
-  //   const afterHeight = afterElement.scrollHeight;
-
-  //   if (beforeHeight > afterHeight) {
-  //     this.addPadding(afterElement, beforeHeight - afterHeight);
-  //   } else if (afterHeight > beforeHeight) {
-  //     this.addPadding(beforeElement, afterHeight - beforeHeight);
-  //   }
-  // }
-
-  // private addPadding(element: HTMLElement, padding: number): void {
-  //   const paddingDiv = document.createElement('div');
-  //   paddingDiv.style.height = `${padding}px`;
-  //   element.appendChild(paddingDiv);
-  // }
-
   private getStoredConfig(): PageConfig | null {
     const currentUrl = this.url();
     return currentUrl
@@ -597,6 +504,7 @@ export class PageVersionComponent {
 
         for (const element of ajaxElements) {
           const $el = $(element);
+          const tag = $el.prop('tagName').toLowerCase();
           const attributes = $el.attr();
 
           for (const [attr, ajaxUrl] of Object.entries(attributes || {})) {
@@ -607,14 +515,17 @@ export class PageVersionComponent {
             const fullUrl = `${baseUrl}${url}`;
             const $ajaxContent = load(await fetchUrl(fullUrl));
 
-            const content = $ajaxContent(`#${anchor}`)
-              .map((_, el) => $(el).html())
-              .get()
-              .join('');
+            const content = anchor
+              ? $ajaxContent(`#${anchor}`)
+                  .map((_, e) => $(e))
+                  .toArray()
+                  .join('')
+              : $ajaxContent.html();
+
+            if (!content) continue;
 
             const styledContent = `
-              <span style="color: rgb(0, 0, 128); font-weight: bold; background-color: rgb(255, 239, 213);"> &lt;${attr} URL&gt; </span>
-              <div style="border: 3px dashed rgb(0, 0, 128);"> ${anchor ? content : $ajaxContent.html() || ''} </div>
+              <div style="border: 3px solid #000;"> <${tag}>${content}</${tag}> </div>
             `;
 
             $el.replaceWith(styledContent);
@@ -656,7 +567,7 @@ export class PageVersionComponent {
         const $el = $(element);
         const href = $el.attr('href');
         const src = $el.attr('src');
-    
+
         if (href) {
           if (href.startsWith('/')) {
             $el.attr('href', `${baseUrl}${href}`).attr('target', '_blank');
@@ -664,7 +575,7 @@ export class PageVersionComponent {
             $el.attr('target', '_blank');
           }
         }
-    
+
         if (src && src.startsWith('/')) {
           $el.attr('src', `${baseUrl}${src}`);
         }
@@ -702,8 +613,7 @@ export class PageVersionComponent {
 
     const addToc = () => {
       const $tocSection = $('.section.mwsinpagetoc');
-      if (!$tocSection.length)
-        return console.log('No `.section.mwsinpagetoc` element found');
+      if (!$tocSection.length) return;
 
       const tocLinks = $tocSection
         .find('a')
@@ -716,7 +626,7 @@ export class PageVersionComponent {
         })
         .get();
 
-      if (!tocLinks.length) return console.log('No links found in the TOC');
+      if (!tocLinks.length) return;
 
       $('h2, h3, h4, h5, h6').each((_, heading) => {
         const $heading = $(heading);
@@ -869,15 +779,18 @@ export class PageVersionComponent {
 
   getInitialSelection = (side: 'left' | 'right') =>
     computed(() => {
-      const currentHash = side === 'left' ? this.before()?.hash : this.after()?.hash;
+      const currentHash =
+        side === 'left' ? this.before()?.hash : this.after()?.hash;
       const availableOptions = this.dropdownOptions(); // Explicit dependency on dropdownOptions
-  
+
       // Ensure we track the available options and current hash explicitly
-      const isCurrentHashAvailable = availableOptions.some(option => option.value === currentHash);
+      const isCurrentHashAvailable = availableOptions.some(
+        (option) => option.value === currentHash,
+      );
       if (isCurrentHashAvailable) {
         return currentHash;
       }
-  
+
       return availableOptions.length > 0 ? availableOptions[0].value : '';
     });
 
