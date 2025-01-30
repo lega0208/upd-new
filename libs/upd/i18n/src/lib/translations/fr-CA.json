@@ -22,6 +22,7 @@
   "tab-details": "Détails",
   "tab-flow": "Flux",
   "tab-readability": "Lisibilité",
+  "tab-version-history": "Historique des versions",
   "tab-gctasks": "Sondage sur la réussite des tâches du GC",
   "dr-lastweek": "La semaine dernière",
   "dr-lastmonth": "Le mois dernier",
@@ -1453,6 +1454,7 @@
   "Pages | Page feedback": "TBPC | Pages | Rétroaction sur la page",
   "Pages | Flow": "TBPC | Pages | Flux",
   "Pages | Readability": "TBPC | Pages | Lisibilité",
+  "Pages | Version history": "TBPC | Pages | Historique des versions",
   "Projects | Home": "TBPC | Projets UX | Accueil",
   "Projects | Summary": "TBPC | Projets UX | Résumé",
   "Projects | Web traffic": "TBPC | Projets UX | Trafic Web",
@@ -1714,5 +1716,7 @@
   "flow-tooltip-flow-prev": "Dans le flux sélectionné vers la page focus, <strong>{{ visits }}</strong> visites ont inclus la page <strong>{{ page }}</strong> à un moment donné avant d'atteindre la page focus, en suivant les pages sélectionnées dans le flux.",
   "flow-tooltip-flow-prev-beforefocus": "Dans le flux sélectionné vers la page focus, <strong>{{ visits }}</strong> visites ont inclus la page <strong>{{ page }}</strong> avant d'atteindre la page focus.",
   "flow-tooltip-flow-next": "Dans le flux sélectionné depuis la page focus, <strong>{{ visits }}</strong> visites ont inclus la page <strong>{{ page }}</strong> à un moment donné après avoir quitté la page focus, en suivant les pages sélectionnées dans le flux.",
-  "flow-tooltip-flow-next-afterfocus": "Dans le flux sélectionné depuis la page focus, <strong>{{ visits }}</strong> visites ont inclus la page <strong>{{ page }}</strong> après avoir quitté la page focus."
+  "flow-tooltip-flow-next-afterfocus": "Dans le flux sélectionné depuis la page focus, <strong>{{ visits }}</strong> visites ont inclus la page <strong>{{ page }}</strong> après avoir quitté la page focus.",
+  "-----VERSION HISTORY TAB---": "-----------------------------------------------------",
+  "version-history": "Historique des versions"
 }

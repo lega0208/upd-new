@@ -34,6 +34,8 @@ export const pagesDetailsInitialState: PagesDetailsState = {
     },
     numComments: 0,
     numCommentsPercentChange: null,
+    hashes: [],
+    alternatePageId: '',
   },
   loading: false,
   loaded: false,

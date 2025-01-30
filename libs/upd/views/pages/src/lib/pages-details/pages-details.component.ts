@@ -1,8 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { PagesDetailsFacade } from './+state/pages-details.facade';
 import type { ColumnConfig } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
-import { filter, map } from 'rxjs';
+import { combineLatest, filter, map, startWith } from 'rxjs';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import { NavigationEnd, Router } from '@angular/router';
 
@@ -20,61 +21,91 @@ export class PagesDetailsComponent implements OnInit {
   url$ = this.pageDetailsService.pageUrl$;
   pageStatus$ = this.pageDetailsService.pageStatus$;
   loading$ = this.pageDetailsService.loading$;
-  currentLang$ = this.i18n.currentLang$;
   showUrl = true;
   showAlert = false;
-
+  altPageId = toSignal(this.pageDetailsService.altPageId$) as () => string;
+  currentLang = this.i18n.currentLang;
   langLink = 'en';
   navTabs: { href: string; title: string }[] = [];
   projects$ = this.pageDetailsService.projects$;
   projectsCol: ColumnConfig = { field: '', header: '' };
 
-  currentUrl$ = this.router.events.pipe(
-    filter((event) => event instanceof NavigationEnd),
-    map(() => this.router.url.substring(this.router.url.lastIndexOf('/') + 1)),
-  );
+  currentRoute$ = this.pageDetailsService.currentRoute$;
+  currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map(() =>
+        this.router.url.substring(this.router.url.lastIndexOf('/') + 1),
+      ),
+      startWith(
+        this.router.url.substring(this.router.url.lastIndexOf('/') + 1),
+      ),
+    ),
+  ) as () => string;
+
+  navigateToAltPage() {
+    window.location.href = `/${this.currentLang() === 'en-CA' ? 'en' : 'fr'}/pages/${this.altPageId()}/${this.currentUrl()}`;
+  }
 
   ngOnInit(): void {
     this.pageDetailsService.init();
 
-    this.currentLang$.subscribe((lang) => {
-      this.langLink = lang === EN_CA ? 'en' : 'fr';
+    this.navTabs = [
+      {
+        href: 'summary',
+        title: this.i18n.service.translate('tab-summary', this.currentLang()),
+      },
+      {
+        href: 'webtraffic',
+        title: this.i18n.service.translate(
+          'tab-webtraffic',
+          this.currentLang(),
+        ),
+      },
+      {
+        href: 'searchanalytics',
+        title: this.i18n.service.translate(
+          'tab-searchanalytics',
+          this.currentLang(),
+        ),
+      },
+      {
+        href: 'pagefeedback',
+        title: this.i18n.service.translate(
+          'tab-pagefeedback',
+          this.currentLang(),
+        ),
+      },
+      {
+        href: 'flow',
+        title: this.i18n.service.translate('tab-flow', this.currentLang()),
+      },
+      {
+        href: 'readability',
+        title: this.i18n.service.translate(
+          'tab-readability',
+          this.currentLang(),
+        ),
+      },
+      {
+        href: 'version-history',
+        title: this.i18n.service.translate(
+          'tab-version-history',
+          this.currentLang(),
+        ),
+      },
+      // { href: 'details', title: this.i18n.service.translate('tab-details', lang) },
+    ];
 
-      this.navTabs = [
-        {
-          href: 'summary',
-          title: this.i18n.service.translate('tab-summary', lang),
-        },
-        {
-          href: 'webtraffic',
-          title: this.i18n.service.translate('tab-webtraffic', lang),
-        },
-        {
-          href: 'searchanalytics',
-          title: this.i18n.service.translate('tab-searchanalytics', lang),
-        },
-        {
-          href: 'pagefeedback',
-          title: this.i18n.service.translate('tab-pagefeedback', lang),
-        },
-        { href: 'flow', title: this.i18n.service.translate('tab-flow', lang) },
-        {
-          href: 'readability',
-          title: this.i18n.service.translate('tab-readability', lang),
-        },
-        // { href: 'details', title: this.i18n.service.translate('tab-details', lang) },
-      ];
-
-      this.projectsCol = {
-        field: 'title',
-        header: 'project',
-        type: 'link',
-        typeParams: {
-          preLink: '/' + this.langLink + '/projects',
-          link: 'id',
-        },
-      } as ColumnConfig;
-    });
+    this.projectsCol = {
+      field: 'title',
+      header: 'project',
+      type: 'link',
+      typeParams: {
+        preLink: '/' + this.langLink + '/projects',
+        link: 'id',
+      },
+    } as ColumnConfig;
   }
 
   toggleUrl() {

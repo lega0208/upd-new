@@ -32,6 +32,7 @@
   <ng-container *ngIf="showUrl"
     ><p class="page_url">{{ url$ | async }}</p></ng-container
   >
+  <a (click)="navigateToAltPage()" class="clickable-link">View equivalent alternate language page</a>
   <div class="page_header back_link">
     <span id="page_project">
       <span id="view_url" (click)="toggleUrl()" tabindex="0">
@@ -69,7 +70,10 @@
   <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
 
   <upd-date-selector
-    *ngIf="!(currentUrl$ | async)?.startsWith('readability')"
+    *ngIf="
+      !((currentRoute$ | async) || '').endsWith('readability') &&
+      !((currentRoute$ | async) || '').endsWith('versions')
+    "
   ></upd-date-selector>
 
   <router-outlet></router-outlet>

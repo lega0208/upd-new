@@ -6,6 +6,7 @@ import { DbModule, DbService } from '@dua-upd/db';
 import { hours } from '@dua-upd/utils-common';
 import { FeedbackModule } from '@dua-upd/api/feedback';
 import { FlowModule } from '@dua-upd/api/flow';
+import { BlobStorageModule, BlobStorageService } from '@dua-upd/blob-storage';
 
 @Module({
   imports: [
@@ -13,8 +14,9 @@ import { FlowModule } from '@dua-upd/api/flow';
     DbModule,
     FeedbackModule,
     FlowModule.register(),
+    BlobStorageModule,
   ],
   controllers: [PagesController],
-  providers: [PagesService, DbService],
+  providers: [PagesService, DbService, BlobStorageService],
 })
 export class PagesModule {}

@@ -1,0 +1,115 @@
+@if (hashes().length < 1) {
+  <p>Does not have a comparison</p>
+} @else {
+  <div class="row g-3 align-items-center">
+    <div class="col-md-8 d-flex justify-content-start">
+      <!-- Previous Version Dropdown -->
+      <div class="me-3">
+        <label for="previous-version" class="form-label me-2"
+          >Previous version:</label
+        >
+        <upd-dropdown
+          id="previous-version"
+          class="w-100"
+          [label]="'Select' | translate"
+          [options]="dropdownOptions()"
+          [initialSelection]="getInitialSelection('left')()"
+          (selectOption)="updateSelection($event.value || '', 'left')"
+        ></upd-dropdown>
+      </div>
+
+      <!-- Current Version Dropdown -->
+      <div>
+        <label for="current-version" class="form-label me-2"
+          >Compared to:</label
+        >
+        <upd-dropdown
+          id="current-version"
+          class="w-100"
+          [label]="'Select' | translate"
+          [options]="dropdownOptions()"
+          [initialSelection]="getInitialSelection('right')()"
+          (selectOption)="updateSelection($event.value || '', 'right')"
+        ></upd-dropdown>
+      </div>
+    </div>
+    <div class="col-md-4 d-flex justify-content-end">
+      @if (viewMode().value !== 'source') {
+        @if (elements().length > 0) {
+          <div class="slide-content text-end">
+            <p class="change-text">
+              Total: {{ elements().length }} updates |
+              {{ currentIndex() === 0 ? '-' : currentIndex() }}/{{
+                elements().length
+              }}
+            </p>
+
+            <div class="btn custom-prev" (click)="prev()">
+              <span class="material-icons">keyboard_arrow_up</span>
+            </div>
+            <div class="btn custom-next" (click)="next()">
+              <span class="material-icons">keyboard_arrow_down</span>
+            </div>
+          </div>
+        } @else if (elements().length === 0) {
+          <p class="text-end">No updates!</p>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Output Section -->
+  <div class="row g-3 mt-4">
+    <div class="col-12">
+      <label for="output-selection" class="form-label">Output:</label>
+      <upd-radio
+        id="output-selection"
+        class="w-100"
+        [items]="viewModeOptions"
+        (selectedItemsChange)="changeViewMode($event)"
+        [initialSelection]="getInitialSelectionView()()"
+        [displayTooltip]="false"
+      ></upd-radio>
+    </div>
+  </div>
+
+  <!-- Live Container -->
+  <div class="row mt-3">
+    <div [class.hidden]="viewMode().value !== 'live'">
+      <div class="group-legend">
+        <div *ngFor="let item of legendItems()" class="legend-item">
+          <div
+            class="legend-box"
+            [ngStyle]="{
+              'background-color':
+                item.style === 'highlight' ? item.colour : 'transparent',
+              border:
+                item.style === 'line'
+                  ? '2px ' + (item.lineStyle || 'solid') + ' ' + item.colour
+                  : 'none',
+            }"
+          ></div>
+          <span class="legend-text">{{ item.text }}</span>
+        </div>
+
+        <upd-modal [modalTitle]="'Lorem ipsum'" [modalContent]="'Lorem ipsum'">
+        </upd-modal>
+      </div>
+      <div class="col-12">
+        <div #liveContainer class="live-container"></div>
+      </div>
+    </div>
+
+    <!-- Source Container -->
+    <div [class.hidden]="viewMode().value !== 'source'">
+      <upd-dropdown
+        id="format"
+        [label]="'Select' | translate"
+        [options]="sourceFormatOptions"
+        [initialSelection]="outputFormat()"
+        (selectOption)="changeOutputFormat($event.value || '')"
+      ></upd-dropdown>
+      <div #sourceContainer></div>
+    </div>
+  </div>
+}
