@@ -126,7 +126,7 @@ export class PageVersionComponent {
   legendItems = signal<{ text: string; colour: string; style: string; lineStyle?: string }[]>([
     { text: 'Previous version', colour: '#F3A59D', style: 'highlight' },
     { text: 'Updated version', colour: '#83d5a8', style: 'highlight' },
-    { text: 'Invisible content', colour: '#6F9FFF', style: 'line' },
+    { text: 'Hidden content', colour: '#6F9FFF', style: 'line' },
     { text: 'Modal content', colour: '#666', style: 'line', lineStyle: 'dashed' },
   ]);
 
