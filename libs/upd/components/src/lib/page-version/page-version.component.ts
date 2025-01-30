@@ -136,7 +136,7 @@ export class PageVersionComponent {
       lineStyle: 'dashed',
     },
     {
-      text: 'Ajax-loaded content',
+      text: 'Dynamic content',
       colour: '#000',
       style: 'line',
     }
@@ -377,6 +377,9 @@ export class PageVersionComponent {
       <link rel="stylesheet" href="https://www.canada.ca/etc/designs/canada/wet-boew/css/theme.min.css"/>
       <link rel="stylesheet" href="https://www.canada.ca/etc/designs/canada/wet-boew/méli-mélo/2024-09-kejimkujik.min.css" crossorigin="anonymous" integrity="sha384-G6/REI+fqg3y/BLFAY+CvJtr+5uK4A96h1v5fIJAmeHqbJdCOE99tmE6CeicCHQv"/>
       <style>
+      .cnjnctn-type-or>[class*=cnjnctn-col]:not(:first-child):before {
+    content: "or";
+}
         ins,
         del {
           display: inline-block;
