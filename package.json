@@ -97,7 +97,6 @@
     "ng-apexcharts": "1.8.0",
     "ngrx-store-localstorage": "18.0.0",
     "ngx-google-analytics": "^14.0.1",
-    "node-html-parser": "^7.0.1",
     "nodejs-polars": "0.15.0",
     "notifications-node-client": "8.2.1",
     "prettier": "3.3.3",

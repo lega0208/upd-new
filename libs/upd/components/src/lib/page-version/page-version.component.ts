@@ -18,12 +18,12 @@ import {
   Diff2HtmlUI,
 } from 'diff2html/lib/ui/js/diff2html-ui';
 import { createPatch } from 'diff';
-import { valid } from 'node-html-parser';
 import { load } from 'cheerio/lib/slim';
 import { Diff } from '@ali-tas/htmldiff-js';
 import { RadioOption } from '../radio/radio.component';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { FR_CA } from '@dua-upd/upd/i18n';
+import { arrayToDictionary } from '@dua-upd/utils-common';
 interface DiffOptions {
   repeatingWordsAccuracy?: number;
   ignoreWhiteSpaceDifferences?: boolean;
@@ -59,19 +59,14 @@ export class PageVersionComponent {
   hashes = input<HashSelection[]>([]);
   url = input<string>('');
   shadowDOM = signal<ShadowRoot | null>(null);
-
   sourceContainer = viewChild<ElementRef<HTMLElement>>('sourceContainer');
   liveContainer = viewChild<ElementRef<HTMLElement>>('liveContainer');
-  beforeContainer = viewChild<ElementRef<HTMLElement>>('beforeContainer');
-  afterContainer = viewChild<ElementRef<HTMLElement>>('afterContainer');
-
   outputFormat = signal<'side-by-side' | 'line-by-line'>('side-by-side');
   viewMode = signal<RadioOption<string>>({
-    label: 'Live View',
+    label: 'Web page',
     value: 'live',
     description: 'View the live page',
   });
-
   before = signal<HashSelection | null>(null);
   after = signal<HashSelection | null>(null);
 
@@ -81,27 +76,56 @@ export class PageVersionComponent {
   });
 
   dropdownOptions: Signal<DropdownOption<string>[]> = computed(() => {
-    const current = this.hashes()[0]?.hash;
+    const hashes = this.hashes();
+    const currentHash = hashes[0]?.hash;
 
-    return this.hashes().map(({ hash, date }) => ({
-      label: `${dayjs(date).format(this.dateParams())}${hash === current ? ' (Current)' : ''}`,
+    return hashes.map(({ hash, date }) => ({
+      label: `${dayjs(date).format(this.dateParams())}${hash === currentHash ? ' (Current)' : ''}`,
       value: hash,
     }));
+  });
+
+  beforeDropdownOptions: Signal<DropdownOption<string>[]> = computed(() => {
+    const options = this.dropdownOptions();
+    const selectedHash = this.versionConfig()?.after?.hash;
+
+    if (!selectedHash) return options;
+
+    const selectedDate = this.versionConfig()?.after?.date;
+    if (!selectedDate) return options;
+
+    const hashesDict = arrayToDictionary(this.hashes(), 'hash');
+
+    return options.filter(({ value }) => {
+      const optionDate = value ? hashesDict[value].date : undefined;
+      return optionDate && dayjs(optionDate).isBefore(dayjs(selectedDate));
+    });
+  });
+  afterDropdownOptions: Signal<DropdownOption<string>[]> = computed(() => {
+    const options = this.dropdownOptions();
+    const selectedHash = this.versionConfig()?.before?.hash;
+
+    if (!selectedHash) return options;
+
+    const selectedDate = this.versionConfig()?.before?.date;
+    if (!selectedDate) return options;
+
+    const hashesDict = arrayToDictionary(this.hashes(), 'hash');
+
+    return options?.filter(({ value }) => {
+      const optionDate = value ? hashesDict[value].date : undefined;
+      return optionDate && dayjs(optionDate).isAfter(dayjs(selectedDate));
+    });
   });
   sourceFormatOptions: DropdownOption<string>[] = [
     { label: 'Side by side', value: 'side-by-side' },
     { label: 'Unified', value: 'line-by-line' },
   ];
 
-  liveFormatOptions: DropdownOption<string>[] = [
-    { label: 'Side by side', value: 'side-by-side' },
-    { label: 'Unified', value: 'line-by-line' },
-  ];
-
   viewModeOptions: RadioOption<string>[] = [
-    { label: 'Live View', value: 'live', description: '' },
+    { label: 'Web page', value: 'live', description: '' },
     {
-      label: 'Page Source',
+      label: 'Page source',
       value: 'source',
       description: '',
     },
@@ -118,10 +142,7 @@ export class PageVersionComponent {
   }));
 
   elements = signal<string[]>([]);
-  currentSlide = signal<number>(0);
-  scrollElement = viewChild<ElementRef<HTMLElement>>('scrollElement');
   currentIndex = signal<number>(0);
-  lastExpandedDetails = signal<HTMLElement | null>(null);
 
   legendItems = signal<
     { text: string; colour: string; style: string; lineStyle?: string }[]
@@ -137,9 +158,10 @@ export class PageVersionComponent {
     },
     {
       text: 'Dynamic content',
-      colour: '#000',
+      colour: '#fbc02f',
       style: 'line',
-    }
+      lineStyle: 'dashed',
+    },
   ]);
 
   constructor(private renderer: Renderer2) {
@@ -162,45 +184,6 @@ export class PageVersionComponent {
         this.handleDocumentClick.bind(this),
       );
     });
-
-    // effect(() => {
-    //   const liveContainer = this.liveContainer()?.nativeElement;
-    //   if (!liveContainer) return;
-
-    //   const shadowDOM = this.shadowDOM()?.innerHTML;
-    //   if (!shadowDOM) return;
-
-    //   const diffViewer = liveContainer.querySelector(
-    //     'diff-viewer',
-    //   ) as HTMLElement;
-
-    //   if (!diffViewer || !diffViewer.shadowRoot) return;
-
-    //   this.renderer.listen(diffViewer.shadowRoot, 'click', (event: Event) => {
-    //     const target = event.target as HTMLElement;
-
-    //     // Check if the clicked element is an anchor tag with an href starting with #
-    //     if (
-    //       target.tagName === 'A' &&
-    //       target.getAttribute('href')?.startsWith('#')
-    //     ) {
-    //       event.preventDefault(); // Prevent default anchor behavior
-
-    //       const sectionId = target.getAttribute('href')?.substring(1); // Extract ID (removes the #)
-    //       const targetSection = diffViewer.shadowRoot?.getElementById(
-    //         sectionId ?? '',
-    //       );
-
-    //       if (targetSection) {
-    //         // Scroll smoothly to the target section
-    //         targetSection.scrollIntoView({
-    //           behavior: 'smooth',
-    //           block: 'start',
-    //         });
-    //       }
-    //     }
-    //   });
-    // });
 
     effect(
       () => {
@@ -357,13 +340,6 @@ export class PageVersionComponent {
     const shadowDOM =
       element.shadowRoot || element.attachShadow({ mode: 'open' });
 
-    // const fontAwesomeCss = this.httpClient.getCache(
-    //   'https://use.fontawesome.com/releases/v5.15.4/css/all.css',
-    // );
-    // const wetBoewCss = this.httpCache.getCached(
-    //   'https://www.canada.ca/etc/designs/canada/wet-boew/css/theme.min.css',
-    // );
-
     const parser = new DOMParser();
     const sanitizedUnifiedContent = parser.parseFromString(
       differences,
@@ -486,15 +462,18 @@ export class PageVersionComponent {
     const baseUrl = 'https://www.canada.ca';
 
     /**
-     * Fetches content from a URL and returns it as text.
+     * Fetches content from a URL and returns it.
      */
-    const fetchUrl = async (url: string): Promise<string> => {
+    const fetchUrl = async (
+      url: string,
+      type: 'json' | 'text',
+    ): Promise<any> => {
       try {
         const response = await fetch(url);
-        return await response.text();
+        return type === 'json' ? response.json() : response.text();
       } catch (error) {
         console.error(`Error fetching URL: ${url}`, error);
-        return '';
+        return type === 'json' ? {} : '';
       }
     };
 
@@ -516,7 +495,7 @@ export class PageVersionComponent {
 
             const [url, anchor] = ajaxUrl.split('#');
             const fullUrl = `${baseUrl}${url}`;
-            const $ajaxContent = load(await fetchUrl(fullUrl));
+            const $ajaxContent = load(await fetchUrl(fullUrl, 'text'));
 
             const content = anchor
               ? $ajaxContent(`#${anchor}`)
@@ -528,7 +507,7 @@ export class PageVersionComponent {
             if (!content) continue;
 
             const styledContent = `
-              <div style="border: 3px solid #000;"> <${tag}>${content}</${tag}> </div>
+              <div style="border: 3px dashed #fbc02f; padding: 8px; border-radius: 4px;"> <${tag}>${content}</${tag}> </div>
             `;
 
             $el.replaceWith(styledContent);
@@ -546,6 +525,93 @@ export class PageVersionComponent {
           '[data-ajax-replace^="/"], [data-ajax-after^="/"], [data-ajax-append^="/"], [data-ajax-before^="/"], [data-ajax-prepend^="/"]',
         ).length;
       } while (currentCount && currentCount !== previousCount);
+    };
+
+    const processJsonReplacements = async () => {
+      const jsonElements = $('[data-wb-jsonmanager]').toArray();
+      if (!jsonElements.length) return;
+
+      const jsonDataMap = new Map<string, any>();
+
+      // Fetch JSON data
+      await Promise.all(
+        jsonElements.map(async (element) => {
+          const jsonConfig = parseJsonConfig(
+            $(element).attr('data-wb-jsonmanager') || '',
+          );
+          if (!jsonConfig?.['url'] || !jsonConfig?.['name']) return;
+
+          const { url, jsonKey } = parseJsonUrl(jsonConfig['url']);
+          const fullUrl = `${baseUrl}${url}`;
+
+          try {
+            const jsonData = await fetchUrl(fullUrl, 'json');
+            const content = resolveJsonPath(jsonData, jsonKey);
+
+            jsonDataMap.set(jsonConfig['name'], content);
+          } catch (error) {
+            console.error(
+              `Error fetching JSON for ${jsonConfig['name']}:`,
+              error,
+            );
+          }
+        }),
+      );
+
+      $('[data-json-replace]').each((_, element) => {
+        const replacePath = $(element).attr('data-json-replace') || '';
+        const match = replacePath.match(/^#\[(.*?)\](.*)$/);
+        if (!match) return;
+
+        const jsonName = match[1];
+        const jsonPath = match[2].substring(1);
+
+        if (!jsonDataMap.has(jsonName)) {
+          console.warn(`No JSON data found for: ${jsonName}`);
+          return;
+        }
+
+        const jsonData = jsonDataMap.get(jsonName);
+        const content = resolveJsonPath(jsonData, jsonPath);
+
+        // Styled output
+        const styledContent = `
+          <div style="
+            border: 3px dashed #fbc02f;
+            padding: 8px;
+            border-radius: 4px;
+          "> 
+            ${content} 
+          </div>
+        `;
+
+        $(element).replaceWith(styledContent);
+      });
+    };
+
+    const parseJsonUrl = (url: string): { url: string; jsonKey: string } => {
+      const [baseUrl, jsonKey = ''] = url.split('#');
+      return { url: baseUrl, jsonKey: jsonKey.slice(1) };
+    };
+
+    // Parse JSON Config safely
+    const parseJsonConfig = (config: string): Record<string, any> | null => {
+      try {
+        return JSON.parse(config.replace(/&quot;/g, '"'));
+      } catch (error) {
+        console.error('Error parsing JSON config:', error);
+        return null;
+      }
+    };
+
+    // Resolve JSON path safely
+    const resolveJsonPath = (obj: any, path: string): any => {
+      return path
+        .split('/')
+        .reduce(
+          (acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined),
+          obj,
+        );
     };
 
     const processModalDialogs = () => {
@@ -642,6 +708,7 @@ export class PageVersionComponent {
 
     // Execute the processing steps
     await processAjaxReplacements();
+    await processJsonReplacements();
     processModalDialogs();
     updateRelativeURLs();
     cleanupUnnecessaryElements();
@@ -662,8 +729,6 @@ export class PageVersionComponent {
     const leftBlobContent = await this.extractContent(leftBlob);
     const rightBlobContent = await this.extractContent(rightBlob);
 
-    const isValid = valid(leftBlobContent) && valid(rightBlobContent);
-
     const options: DiffOptions = {
       repeatingWordsAccuracy: 0,
       ignoreWhiteSpaceDifferences: false,
@@ -672,11 +737,11 @@ export class PageVersionComponent {
       combineWords: true,
     };
 
-    let liveDiffs = isValid
-      ? Diff.execute(leftBlobContent, rightBlobContent, options)
-      : '';
-
-    liveDiffs = liveDiffs.replace(
+    const liveDiffs = Diff.execute(
+      leftBlobContent,
+      rightBlobContent,
+      options,
+    ).replace(
       /<(ins|del)[^>]*>(\s|&nbsp;|&#32;|&#160;|&#x00e2;|&#x0080;|&#x00af;|&#x202f;|&#xa0;)+<\/(ins|del)>/gis,
       ' ',
     );
@@ -784,17 +849,14 @@ export class PageVersionComponent {
     computed(() => {
       const currentHash =
         side === 'left' ? this.before()?.hash : this.after()?.hash;
-      const availableOptions = this.dropdownOptions(); // Explicit dependency on dropdownOptions
+      const availableOptions = this.dropdownOptions(); // Ensure dependency is tracked
 
-      // Ensure we track the available options and current hash explicitly
-      const isCurrentHashAvailable = availableOptions.some(
-        (option) => option.value === currentHash,
-      );
-      if (isCurrentHashAvailable) {
-        return currentHash;
-      }
-
-      return availableOptions.length > 0 ? availableOptions[0].value : '';
+      // Ensure currentHash is valid, otherwise fallback to the first available option
+      return availableOptions.some((opt) => opt.value === currentHash)
+        ? (currentHash ?? '')
+        : availableOptions.length > 0
+          ? availableOptions[0].value
+          : '';
     });
 
   getInitialSelectionView = () =>
