@@ -1,38 +1,34 @@
 @if (hashes().length < 1) {
   <p>Does not have a comparison</p>
 } @else {
-  <div class="row g-3 align-items-center">
-    <div class="col-md-8 d-flex justify-content-start">
-      <!-- Previous Version Dropdown -->
-      <div class="me-3">
-        <label for="previous-version" class="form-label me-2"
-          >Previous version:</label
-        >
-        <upd-dropdown
-          id="previous-version"
-          class="w-100"
-          [label]="'Select' | translate"
-          [options]="dropdownOptions()"
-          [initialSelection]="getInitialSelection('left')()"
-          (selectOption)="updateSelection($event.value || '', 'left')"
-        ></upd-dropdown>
+    <div class="row g-3 align-items-center">
+      <div class="col-md-8 d-flex justify-content-start">
+        <!-- Previous Version Dropdown -->
+        <div class="me-3">
+          <label for="previous-version" class="form-label me-2">Previous version:</label>
+          <upd-dropdown
+            id="previous-version"
+            class="w-100"
+            [label]="'Select' | translate"
+            [options]="beforeDropdownOptions()"
+            [initialSelection]="getInitialSelection('left')()"
+            (selectOption)="updateSelection($event.value || '', 'left')"
+          ></upd-dropdown>
+        </div>
+    
+        <!-- Current Version Dropdown -->
+        <div>
+          <label for="current-version" class="form-label me-2">Compared to:</label>
+          <upd-dropdown
+            id="current-version"
+            class="w-100"
+            [label]="'Select' | translate"
+            [options]="afterDropdownOptions()"
+            [initialSelection]="getInitialSelection('right')()"
+            (selectOption)="updateSelection($event.value || '', 'right')"
+          ></upd-dropdown>
+        </div>
       </div>
-
-      <!-- Current Version Dropdown -->
-      <div>
-        <label for="current-version" class="form-label me-2"
-          >Compared to:</label
-        >
-        <upd-dropdown
-          id="current-version"
-          class="w-100"
-          [label]="'Select' | translate"
-          [options]="dropdownOptions()"
-          [initialSelection]="getInitialSelection('right')()"
-          (selectOption)="updateSelection($event.value || '', 'right')"
-        ></upd-dropdown>
-      </div>
-    </div>
     <div class="col-md-4 d-flex justify-content-end">
       @if (viewMode().value !== 'source') {
         @if (elements().length > 0) {
@@ -61,7 +57,7 @@
   <!-- Output Section -->
   <div class="row g-3 mt-4">
     <div class="col-12">
-      <label for="output-selection" class="form-label">Output:</label>
+      <label for="output-selection" class="form-label">View:</label>
       <upd-radio
         id="output-selection"
         class="w-100"
@@ -74,11 +70,9 @@
   </div>
 
   <!-- Live Container -->
-  <div class="row mt-3">
+  <div class="row my-3">
     <div [class.hidden]="viewMode().value !== 'live'">
       <div class="group-legend">
-        <upd-modal [modalTitle]="'Lorem ipsum'" [modalContent]="'Lorem ipsum'">
-        </upd-modal>
         <div *ngFor="let item of legendItems()" class="legend-item">
           <div
             class="legend-box"
@@ -93,6 +87,9 @@
           ></div>
           <span class="legend-text">{{ item.text }}</span>
         </div>
+        
+        <upd-modal [modalTitle]="'Lorem ipsum'" [modalContent]="'Lorem ipsum'">
+        </upd-modal>
       </div>
       <div class="col-12">
         <div #liveContainer class="live-container"></div>
