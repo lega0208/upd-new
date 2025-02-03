@@ -18,7 +18,7 @@ import {
   Diff2HtmlUI,
 } from 'diff2html/lib/ui/js/diff2html-ui';
 import { createPatch } from 'diff';
-import { load } from 'cheerio/lib/slim';
+import { load, Cheerio, AnyNode } from 'cheerio/lib/slim';
 import { Diff } from '@ali-tas/htmldiff-js';
 import { RadioOption } from '../radio/radio.component';
 import { I18nFacade } from '@dua-upd/upd/state';
@@ -149,6 +149,7 @@ export class PageVersionComponent {
   >([
     { text: 'Previous version', colour: '#F3A59D', style: 'highlight' },
     { text: 'Updated version', colour: '#83d5a8', style: 'highlight' },
+    { text: 'Updated link', colour: '#FFEE8C', style: 'highlight' },
     { text: 'Hidden content', colour: '#6F9FFF', style: 'line' },
     {
       text: 'Modal content',
@@ -228,13 +229,9 @@ export class PageVersionComponent {
         if (!container) return;
 
         try {
-          const { liveDiffs, leftBlobContent, rightBlobContent } =
+          const { liveDiffs, leftBlobContent } =
             await this.createLiveDiffContent();
-          this.renderLiveDifferences(
-            liveDiffs,
-            leftBlobContent,
-            rightBlobContent,
-          );
+          this.renderLiveDifferences(liveDiffs, leftBlobContent);
           this.storeConfig();
         } catch (error) {
           console.error('Error in live diff effect:', error);
@@ -325,8 +322,7 @@ export class PageVersionComponent {
 
   private async renderLiveDifferences(
     differences: string,
-    left: string,
-    right: string,
+    before: string,
   ): Promise<void> {
     const liveContainer = this.liveContainer();
     if (!liveContainer) return;
@@ -349,15 +345,17 @@ export class PageVersionComponent {
     //     ${fontAwesomeCss() || ''}
     // ${wetBoewCss() || ''}
     shadowDOM.innerHTML = `
-      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"/>
-      <link rel="stylesheet" href="https://www.canada.ca/etc/designs/canada/wet-boew/css/theme.min.css"/>
-      <link rel="stylesheet" href="https://www.canada.ca/etc/designs/canada/wet-boew/méli-mélo/2024-09-kejimkujik.min.css" crossorigin="anonymous" integrity="sha384-G6/REI+fqg3y/BLFAY+CvJtr+5uK4A96h1v5fIJAmeHqbJdCOE99tmE6CeicCHQv"/>
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+      <link rel="stylesheet" href="https://www.canada.ca/etc/designs/canada/wet-boew/css/theme.min.css" />
+      <link rel="stylesheet" href="https://www.canada.ca/etc/designs/canada/wet-boew/méli-mélo/2024-09-kejimkujik.min.css" crossorigin="anonymous" integrity="sha384-G6/REI+fqg3y/BLFAY+CvJtr+5uK4A96h1v5fIJAmeHqbJdCOE99tmE6CeicCHQv" />
       <style>
-      .cnjnctn-type-or>[class*=cnjnctn-col]:not(:first-child):before {
-    content: "or";
-}
+        .cnjnctn-type-or>[class*=cnjnctn-col]:not(:first-child):before {
+          content: "or";
+        }
+
         ins,
-        del {
+        del,
+        .updated-link {
           display: inline-block;
           padding: 0 .3em;
           height: auto;
@@ -379,8 +377,14 @@ export class PageVersionComponent {
           background: #F3A59D;
           text-decoration: strikethrough;
         }
-          
-        del.highlight, ins.highlight {
+
+        .updated-link {
+          background-color: #FFEE8C;
+        }
+
+        del.highlight,
+        ins.highlight,
+        .updated-link.highlight {
           border: #000 2px dotted;
           display: inline;
           padding: 0 .35em 0em 0.35em;
@@ -390,19 +394,60 @@ export class PageVersionComponent {
           height: unset;
           transition: padding-left ease .3s, padding-right ease .3s, color ease .7s;
         }
-    </style>
-    <div class="diff-container">
+      </style>
+      <div class="diff-container">
         <div>${sanitizedUnifiedContent}</div>
-    </div>
+      </div>
     `;
 
-    await this.adjustDOM(shadowDOM);
+    await this.adjustDOM(shadowDOM, before);
   }
 
-  private async adjustDOM(shadowDOM: ShadowRoot) {
+  private async adjustDOM(shadowDOM: ShadowRoot, before: string) {
     const $ = load(shadowDOM.innerHTML);
+    const $before = load(before);
 
-    const seen = new Set<string>();
+    const newLinks = new Map<
+      string,
+      { href: string; element: Cheerio<AnyNode> }[]
+    >();
+
+    $('a').each((_, el) => {
+      const $el = $(el);
+      const text = $el.contents().not('ins').text().trim();
+      const href = $el.attr('href');
+
+      if (!text || !href) return;
+
+      if (!newLinks.has(text)) {
+        newLinks.set(text, []);
+      }
+      newLinks.get(text)?.push({ href, element: $el });
+    });
+
+    $before('a').each((_, el) => {
+      const $beforeEl = $before(el);
+      const beforeHref = $beforeEl.attr('href');
+      const beforeText = $beforeEl.text().trim();
+
+      const matches = newLinks.get(beforeText);
+
+      if (!matches || matches.some(({ href }) => href === beforeHref)) return;
+
+      const $del = matches.find(({ element }) => element.is('del'))?.element;
+      if ($del && $del.text().trim() === beforeText) {
+        return;
+      }
+
+      matches.forEach(({ element }) => {
+        const oldHref = element.attr('href');
+        element.replaceWith(`
+          <span class="updated-link" title="Old URL: ${beforeHref || oldHref}">
+            ${element}
+          </span>
+        `);
+      });
+    });
 
     $('del>del, ins>ins').each((index, element) => {
       const $element = $(element);
@@ -423,20 +468,15 @@ export class PageVersionComponent {
 
     shadowDOM.innerHTML = $.html();
 
-    const uniqueElements = $('ins, del')
+    const uniqueElements = $('ins, del, .updated-link')
       .toArray()
       .map((element) => {
         const $element = $(element);
         const parent = $element.parent();
 
         const outerHTML = parent?.html()?.replace(/\n/g, '').trim() || '';
-        const contentOnly = parent?.text().trim() || '';
-        const normalizedContent = $element
-          .text()
-          .trim()
-          .replace(/\s|&nbsp;/g, '');
 
-        return { element: $element, normalizedContent, outerHTML, contentOnly };
+        return { element: $element, outerHTML };
       });
     // .filter(({ normalizedContent, contentOnly }) => {
     //   if (!normalizedContent || !contentOnly || seen.has(contentOnly)) {
@@ -721,7 +761,6 @@ export class PageVersionComponent {
   private async createLiveDiffContent(): Promise<{
     liveDiffs: string;
     leftBlobContent: string;
-    rightBlobContent: string;
   }> {
     const leftBlob = this.before()?.blob || '';
     const rightBlob = this.after()?.blob || '';
@@ -746,7 +785,7 @@ export class PageVersionComponent {
       ' ',
     );
 
-    return { liveDiffs, leftBlobContent, rightBlobContent };
+    return { liveDiffs, leftBlobContent };
   }
 
   next() {
