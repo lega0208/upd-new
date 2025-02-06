@@ -1087,7 +1087,9 @@ export const processHtml = (html: string): ProcessedHtml => {
       .toArray()
       .filter((link) => link.attribs.hreflang && link.attribs.href)
       .map((link) => {
-        const href = link.attribs.href.replace('https://', '');
+        const href = link.attribs.href
+          .replace('https://', '')
+          .replace(/(\.html)+$/i, ".html");
 
         return [link.attribs.hreflang, href];
       }),

@@ -334,17 +334,26 @@ export class PagesService {
 
     const alternateUrl = await this.pageModel.findById(
       new Types.ObjectId(params.id),
-      {
-        altLangHref: 1,
-      },
+      { altLangHref: 1 },
     );
 
-    const altLangPage = await this.pageModel.findOne(
-      { url: alternateUrl.altLangHref },
+    let alternatePageUrl = alternateUrl.altLangHref || '';
+
+    let alternatePage = await this.pageModel.findOne(
+      { url: alternatePageUrl },
       { _id: 1 },
     );
 
-    const alternatePageId = altLangPage._id;
+    if (!alternatePage) {
+      alternatePageUrl = alternatePageUrl.replace(/(\.html)+$/i, ".html");
+
+      alternatePage = await this.pageModel.findOne(
+        { url: alternatePageUrl },
+        { _id: 1 },
+      );
+    }
+
+    const alternatePageId = alternatePage?._id || null;
 
     const results = {
       ...page,
