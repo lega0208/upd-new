@@ -1,20 +1,26 @@
-<div>
-  <strong
-    >{{ 'readability-score-last-calculated' | translate }}
-    {{ pageLastUpdated$ | async | localeDate }}</strong
+<div class="my-3">
+  <label for="readability-dropdown" class="form-label me-2"
+    ><strong>{{ 'readability-score-calculation-for-date' | translate }}</strong></label
   >
+  <upd-dropdown
+    id="readability-dropdown"
+    [options]="dropdownOptions() || []"
+    [label]="'Select Readability Date'"
+    [initialSelection]="getInitialSelection() || ''"
+    (selectOption)="updateSelection($event.value || '')"
+  ></upd-dropdown>
 </div>
 
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
       <upd-data-card
-        [current]="totalScore$ | async"
+        [current]="readabilityStats().totalScore"
         [title]="'total-score'"
         [tooltip]="'tooltip-total-score'"
         [displayKpis]="true"
         [kpiObjectiveCriteria]="totalScoreKpiCriteria"
-        [kpiStylesConfig]="(totalScoreKpiConfig$ | async) || {}"
+        [kpiStylesConfig]="totalScoreKpiConfig() || {}"
         [modalTitle]="'meaning-of-score'"
         [modal]="'meaning-of-score-description'"
         [pipe]="'template'"
@@ -24,29 +30,30 @@
 
     <div class="col">
       <upd-data-card
-        [current]="readabilityPoints$ | async"
+        [current]="readabilityStats().readabilityPoints"
         [title]="'tab-readability'"
         [tooltip]="'tooltip-readability'"
         [modalTitle]="'calculation-of-readability-points'"
-        [modal]="(readabilityDescriptionKey$ | async) || ''"
+        [modal]="readabilityDescriptionKey() || ''"
         [pipe]="'template'"
         [pipeParams]="readabilityScoreTemplateParams"
       >
-      <div
-      *ngIf="fleshKincaidFormatted$ | async as fleshKincaid"
-      class="row row-no-gutters d-block"
-    >
-      <div class="col">
-        <p class="mb-0 mt-2 row flex-nowrap">
-          <span class="me-0 col-auto pe-2">{{ fleshKincaid }}</span>
-        </p>
-      </div>
-    </div></upd-data-card>
+        <div
+          *ngIf="fleshKincaidFormatted() as fleshKincaid"
+          class="row row-no-gutters d-block"
+        >
+          <div class="col">
+            <p class="mb-0 mt-2 row flex-nowrap">
+              <span class="me-0 col-auto pe-2">{{ fleshKincaid }}</span>
+            </p>
+          </div>
+        </div></upd-data-card
+      >
     </div>
 
     <div class="col">
       <upd-data-card
-        [current]="headingPoints$ | async"
+        [current]="readabilityStats().headingPoints"
         [title]="'heading'"
         [tooltip]="'tooltip-heading'"
         [modalTitle]="'calculation-of-heading-points'"
@@ -55,7 +62,7 @@
         [pipeParams]="otherScoresTemplateParams"
       >
         <div
-          *ngIf="wordsPerHeadingFormatted$ | async as wordsPerHeading"
+          *ngIf="wordsPerHeadingFormatted() as wordsPerHeading"
           class="row row-no-gutters d-block"
         >
           <div class="col">
@@ -69,7 +76,7 @@
 
     <div class="col">
       <upd-data-card
-        [current]="paragraphPoints$ | async"
+        [current]="readabilityStats().paragraphPoints"
         [title]="'paragraph'"
         [tooltip]="'tooltip-paragraph'"
         [modalTitle]="'calculation-of-paragraph-points'"
@@ -78,7 +85,7 @@
         [pipeParams]="otherScoresTemplateParams"
       >
         <div
-          *ngIf="wordsPerParagraphFormatted$ | async as wordsPerParagraph"
+          *ngIf="wordsPerParagraphFormatted() as wordsPerParagraph"
           class="row row-no-gutters d-block"
         >
           <div class="col">
@@ -96,8 +103,8 @@
   <div class="row">
     <div class="col">
       <upd-data-table-card
-        [cols]="(mostFrequentWordsOnPageCols$ | async) || []"
-        [data]="(mostFrequentWordsOnPage$ | async) || []"
+        [cols]="mostFrequentWordsOnPageCols() || []"
+        [data]="readabilityStats().mostFrequentWordsOnPage || []"
         [title]="'most-frequent-words-on-page'"
         [tooltip]="'tooltip-most-frequent-words-on-page'"
       >
@@ -110,7 +117,7 @@
   <div class="row">
     <div class="col">
       <upd-data-card
-        [current]="wordCount$ | async"
+        [current]="readabilityStats().wordCount"
         [title]="'words'"
         [tooltip]="'tooltip-words'"
       ></upd-data-card>
@@ -118,7 +125,7 @@
 
     <div class="col">
       <upd-data-card
-        [current]="paragraphCount$ | async"
+        [current]="readabilityStats().paragraphCount"
         [title]="'paragraphs'"
         [tooltip]="'tooltip-paragraphs'"
       ></upd-data-card>
@@ -126,7 +133,7 @@
 
     <div class="col">
       <upd-data-card
-        [current]="headingCount$ | async"
+        [current]="readabilityStats().headingCount"
         [title]="'headings'"
         [tooltip]="'tooltip-headings'"
       ></upd-data-card>
@@ -141,7 +148,7 @@
         [title]="'improving-web-readability'"
         [titleTooltip]="'tooltip-improving-web-readability'"
       >
-        <ng-container *ngIf="(currentLang$ | async) === 'en-CA'">
+        <ng-container *ngIf="currentLang() === 'en-CA'">
           <p>
             To improve web readability, follow web writing best practices, like:
           </p>
@@ -157,7 +164,7 @@
             >
           </p>
         </ng-container>
-        <ng-container *ngIf="(currentLang$ | async) === 'fr-CA'">
+        <ng-container *ngIf="currentLang() === 'fr-CA'">
           <p>
             Pour améliorer la lisibilité Web, suivez les meilleures pratiques en
             matière d'écriture pour le web, telles que:
