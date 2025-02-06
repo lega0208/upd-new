@@ -193,58 +193,6 @@ export class PagesDetailsFacade {
 
   pageLang$ = this.store.select(selectPageLang);
 
-  latestReadability$ = this.readability$.pipe(
-    map((readability) => readability[0]),
-  );
-
-  pageLastUpdated$ = this.latestReadability$.pipe(
-    map((readability) => readability?.date),
-  );
-
-  totalScore$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_score),
-  );
-
-  readabilityPoints$ = this.latestReadability$.pipe(
-    map((readability) => readability?.fk_points),
-  );
-
-  fleshKincaid$ = this.latestReadability$.pipe(
-    map((readability) => readability?.final_fk_score),
-  );
-
-  headingPoints$ = this.latestReadability$.pipe(
-    map((readability) => readability?.header_points),
-  );
-
-  wordsPerHeading$ = this.latestReadability$.pipe(
-    map((readability) => readability?.avg_words_per_header),
-  );
-
-  paragraphPoints$ = this.latestReadability$.pipe(
-    map((readability) => readability?.paragraph_points),
-  );
-
-  wordsPerParagraph$ = this.latestReadability$.pipe(
-    map((readability) => readability?.avg_words_per_paragraph),
-  );
-
-  mostFrequentWordsOnPage$ = this.latestReadability$.pipe(
-    map((readability) => readability?.word_counts || []),
-  );
-
-  wordCount$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_words),
-  );
-
-  paragraphCount$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_paragraph),
-  );
-
-  headingCount$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_headings),
-  );
-
   currentKpiFeedback$ = this.pagesDetailsData$.pipe(
     map((data) => {
       const dyfNoCurrent = data?.dateRangeData?.dyf_no || 0;

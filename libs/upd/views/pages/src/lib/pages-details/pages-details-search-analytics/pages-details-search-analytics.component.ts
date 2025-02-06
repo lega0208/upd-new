@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import type { ColumnConfig } from '@dua-upd/types-common';
 import type { LocaleId } from '@dua-upd/upd/i18n';
@@ -20,12 +20,10 @@ type ReferrerTypeColTypes = GetTableProps<
   templateUrl: './pages-details-search-analytics.component.html',
   styleUrls: ['./pages-details-search-analytics.component.css'],
 })
-export class PagesDetailsSearchAnalyticsComponent implements OnInit {
+export class PagesDetailsSearchAnalyticsComponent {
   private i18n = inject(I18nFacade);
   private pageDetailsService = inject(PagesDetailsFacade);
-
-  currentLang!: LocaleId;
-  currentLang$ = this.i18n.currentLang$;
+  currentLang = this.i18n.currentLang;
 
   totalImpressionsGSC$ = this.pageDetailsService.impressions$;
   totalImpressionsGSCPercentChange$ =
@@ -47,77 +45,65 @@ export class PagesDetailsSearchAnalyticsComponent implements OnInit {
 
   referrerType$ = this.pageDetailsService.referrerType$;
 
-  topGSCSearchTermsCols: ColumnConfig<GscSearchTermsColTypes>[] = [];
-  searchTermsCanadaCols: ColumnConfig[] = [];
-  referrerTypeCols: ColumnConfig<ReferrerTypeColTypes>[] = [];
+  topGscSearchTermsCols = computed<ColumnConfig<GscSearchTermsColTypes>[]>(() => [
+    {
+      field: 'term',
+      header: this.i18n.service.translate('search-terms', this.currentLang()),
+    },
+    {
+      field: 'clicks',
+      header: this.i18n.service.translate('clicks', this.currentLang()),
+      pipe: 'number',
+    },
+    {
+      field: 'change',
+      header: this.i18n.service.translate('change', this.currentLang()),
+      pipe: 'percent',
+    },
+    {
+      field: 'impressions',
+      header: this.i18n.service.translate('impressions', this.currentLang()),
+      pipe: 'number',
+    },
+    {
+      field: 'ctr',
+      header: this.i18n.service.translate('ctr', this.currentLang()),
+      pipe: 'percent',
+    },
+    {
+      field: 'position',
+      header: this.i18n.service.translate('position', this.currentLang()),
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
+  ]);
 
-  ngOnInit(): void {
-    this.i18n.service.onLangChange(({ lang }) => {
-      this.currentLang = lang as LocaleId;
-    });
+  searchTermsCanadaCols = computed<ColumnConfig[]>(() => [
+    {
+      field: 'term',
+      header: this.i18n.service.translate('search-terms', this.currentLang()),
+    },
+    {
+      field: 'clicks',
+      header: this.i18n.service.translate('clicks', this.currentLang()),
+    },
+    {
+      field: 'change',
+      header: this.i18n.service.translate('comparison', this.currentLang()),
+    },
+  ]);
 
-    this.currentLang$.subscribe((lang) => {
-      this.topGSCSearchTermsCols = [
-        {
-          field: 'term',
-          header: this.i18n.service.translate('search-terms', lang),
-        },
-        {
-          field: 'clicks',
-          header: this.i18n.service.translate('clicks', lang),
-          pipe: 'number',
-        },
-        {
-          field: 'change',
-          header: this.i18n.service.translate('change', lang),
-          pipe: 'percent',
-        },
-        {
-          field: 'impressions',
-          header: this.i18n.service.translate('impressions', lang),
-          pipe: 'number',
-        },
-        {
-          field: 'ctr',
-          header: this.i18n.service.translate('ctr', lang),
-          pipe: 'percent',
-        },
-        {
-          field: 'position',
-          header: this.i18n.service.translate('position', lang),
-          pipe: 'number',
-          pipeParam: '1.0-2',
-        },
-      ];
-
-      this.searchTermsCanadaCols = [
-        {
-          field: 'term',
-          header: this.i18n.service.translate('search-terms', lang),
-        },
-        {
-          field: 'clicks',
-          header: this.i18n.service.translate('clicks', lang),
-        },
-        {
-          field: 'change',
-          header: this.i18n.service.translate('comparison', lang),
-        },
-      ];
-
-      this.referrerTypeCols = [
-        { field: 'type', header: this.i18n.service.translate('type', lang) },
-        {
-          field: 'value',
-          header: this.i18n.service.translate('visits', lang),
-          pipe: 'number',
-        },
-        {
-          field: 'change',
-          header: this.i18n.service.translate('change', lang),
-          pipe: 'percent',
-        },
-      ];
-    });
-  }
+  referrerTypeCols = computed<ColumnConfig<ReferrerTypeColTypes>[]>(() => [
+    { field: 'type', header: this.i18n.service.translate('type', this.currentLang()) },
+    {
+      field: 'value',
+      header: this.i18n.service.translate('visits', this.currentLang()),
+      pipe: 'number',
+    },
+    {
+      field: 'change',
+      header: this.i18n.service.translate('change', this.currentLang()),
+      pipe: 'percent',
+    },
+  ]);
 }

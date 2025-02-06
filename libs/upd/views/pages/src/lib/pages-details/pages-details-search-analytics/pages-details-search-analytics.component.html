@@ -36,7 +36,7 @@
     <div class="col">
       <upd-data-table-card
         [data]="(topGSCSearchTerms$ | async) || []"
-        [cols]="topGSCSearchTermsCols"
+        [cols]="topGscSearchTermsCols()"
         [title]="'top25-search-terms-google-page'"
         [tooltip]="'tooltip_table_title_top25_search_terms_google'"
       >
@@ -65,7 +65,7 @@
     <div class="col">
       <upd-data-table-card
         [data]="(referrerType$ | async) || []"
-        [cols]="referrerTypeCols"
+        [cols]="referrerTypeCols()"
         [pagination]="false"
         [title]="'referrer-type'"
       >

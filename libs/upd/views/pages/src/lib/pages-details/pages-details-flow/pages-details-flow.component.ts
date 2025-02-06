@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
-import type { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -19,5 +18,8 @@ export class PagesDetailsFlowComponent {
   error$ = this.pageDetailsService.error$;
 
   url = toSignal(this.pageDetailsService.pageUrl$) as () => string;
-  rawDateRange = toSignal(this.pageDetailsService.rawDateRange$) as () => { start: string; end: string }
+  rawDateRange = toSignal(this.pageDetailsService.rawDateRange$) as () => {
+    start: string;
+    end: string;
+  };
 }
