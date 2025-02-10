@@ -8,7 +8,6 @@ import type {
   MetricsConfig,
   PageDocument,
   PageMetricsModel,
-  UrlDocument,
 } from '@dua-upd/db';
 import {
   DbService,
@@ -168,6 +167,7 @@ export class PagesService {
         projects: 1,
         is_404: 1,
         redirect: 1,
+        altLangHref: 1,
       })
       .populate('tasks')
       .populate('projects')
@@ -284,7 +284,7 @@ export class PagesService {
 
     const hash = urls.map((url) => url.hashes).flat();
 
-    const promises: Promise<UrlHash>[] = [];
+    const promises: Promise<UrlHash | void>[] = [];
 
     for (const h of hash) {
       promises.push(
@@ -297,14 +297,19 @@ export class PagesService {
             blob: await format(blob, {
               parser: 'html',
             }),
-          })),
+          }))
+          .catch((err) => {
+            console.error(err);
+          }),
       );
+
       await wait(30);
     }
 
-    const hashes = (await Promise.all(promises)).sort(
-      (a, b) => b.date.getTime() - a.date.getTime(),
-    );
+    const hashes = (await Promise.allSettled(promises))
+      .filter((p) => p.status === 'fulfilled')
+      .map((p) => p.value as UrlHash)
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
 
     const mostRelevantCommentsAndWords =
       await this.feedbackService.getMostRelevantCommentsAndWords({
@@ -332,28 +337,14 @@ export class PagesService {
         ? percentChange(numComments, numPreviousComments)
         : null;
 
-    const alternateUrl = await this.pageModel.findById(
-      new Types.ObjectId(params.id),
-      { altLangHref: 1 },
-    );
-
-    let alternatePageUrl = alternateUrl.altLangHref || '';
-
-    let alternatePage = await this.pageModel.findOne(
-      { url: alternatePageUrl },
-      { _id: 1 },
-    );
-
-    if (!alternatePage) {
-      alternatePageUrl = alternatePageUrl.replace(/(\.html)+$/i, ".html");
-
-      alternatePage = await this.pageModel.findOne(
-        { url: alternatePageUrl },
-        { _id: 1 },
-      );
-    }
-
-    const alternatePageId = alternatePage?._id || null;
+    const alternatePageId = page.altLangHref
+      ? (
+          await this.pageModel
+            .findOne({ url: page.altLangHref }, { _id: 1 })
+            .lean()
+            .exec()
+        )?._id
+      : null;
 
     const results = {
       ...page,

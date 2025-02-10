@@ -1,4 +1,4 @@
-import { Component, computed, inject, Signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import type {
   ColumnConfig,
@@ -103,13 +103,7 @@ export class PagesDetailsFeedbackComponent {
     },
   ];
 
-  dyfChartLegend = computed(
-    () =>
-      [
-        this.i18n.service.translate('yes', this.currentLang()),
-        this.i18n.service.translate('no', this.currentLang()),
-      ] as string[],
-  );
+  dyfChartLegend = this.i18n.service.translationSignal(['yes', 'no']);
 
   dyfTableCols = computed<
     ColumnConfig<{ name: string; currValue: number; prevValue: string }>[]

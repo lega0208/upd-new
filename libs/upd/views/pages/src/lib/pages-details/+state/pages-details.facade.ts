@@ -5,9 +5,9 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
+import { type LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade, selectDatePeriodSelection, selectUrl } from '@dua-upd/upd/state';
-import { percentChange, UnwrapObservable } from '@dua-upd/utils-common';
+import { percentChange } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import type {
   GscSearchTermMetrics,
@@ -18,7 +18,6 @@ import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import type {
   ApexAxisChartSeries,
-  ApexNonAxisChartSeries,
 } from 'ng-apexcharts';
 import {
   selectPageLang,
@@ -27,7 +26,6 @@ import {
   selectVisitsByDayChartTable,
   selectDyfNoPerVisitsSeries,
 } from './pages-details.selectors';
-import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 
 dayjs.extend(utc);
 
@@ -699,20 +697,6 @@ export class PagesDetailsFacade {
   topSearchTerms$ = this.pagesDetailsData$.pipe(
     map((data) => data?.searchTerms),
   );
-
-  searchTermsColConfig$ = createColConfigWithI18n<
-    UnwrapObservable<typeof this.topSearchTerms$>
-  >(this.i18n.service, [
-    { field: 'term', header: 'search-term' },
-    { field: 'clicks', header: 'clicks', pipe: 'number' },
-    { field: 'clicksChange', header: 'change-for-clicks', pipe: 'percent' },
-    {
-      field: 'position',
-      header: 'position',
-      pipe: 'number',
-      pipeParam: '1.0-2',
-    },
-  ]);
 
   feedbackMostRelevant = this.store.selectSignal(
     PagesDetailsSelectors.selectFeedbackMostRelevant,

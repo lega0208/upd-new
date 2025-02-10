@@ -1,9 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-} from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PagesDetailsFacade } from './+state/pages-details.facade';
 import type { ColumnConfig } from '@dua-upd/types-common';
@@ -23,9 +18,7 @@ export class PagesDetailsComponent {
   private router = inject(Router);
 
   constructor() {
-    effect(() => {
-      this.pageDetailsService.init();
-    }, { allowSignalWrites: true });
+    this.pageDetailsService.init();
   }
 
   title$ = this.pageDetailsService.pageTitle$;
@@ -34,7 +27,7 @@ export class PagesDetailsComponent {
   loading$ = this.pageDetailsService.loading$;
   showUrl = true;
   showAlert = false;
-  altPageId = toSignal(this.pageDetailsService.altPageId$) as () => string;
+  altPageId = toSignal(this.pageDetailsService.altPageId$);
   currentLang = this.i18n.currentLang;
   langLink = computed(() => (this.currentLang() === EN_CA ? 'en' : 'fr'));
   projects$ = this.pageDetailsService.projects$;
@@ -50,51 +43,42 @@ export class PagesDetailsComponent {
         this.router.url.substring(this.router.url.lastIndexOf('/') + 1),
       ),
     ),
-  ) as () => string;
+  );
 
   navigateToAltPage() {
     window.location.href = `/${this.langLink()}/pages/${this.altPageId()}/${this.currentUrl()}`;
   }
 
-  navTabs = computed<{ href: string; title: string }[]>(() => [
+  navTabs: { href: string; title: string }[] = [
     {
       href: 'summary',
-      title: this.i18n.service.translate('tab-summary', this.currentLang()),
+      title: 'tab-summary',
     },
     {
       href: 'webtraffic',
-      title: this.i18n.service.translate('tab-webtraffic', this.currentLang()),
+      title: 'tab-webtraffic',
     },
     {
       href: 'searchanalytics',
-      title: this.i18n.service.translate(
-        'tab-searchanalytics',
-        this.currentLang(),
-      ),
+      title: 'tab-searchanalytics',
     },
     {
       href: 'pagefeedback',
-      title: this.i18n.service.translate(
-        'tab-pagefeedback',
-        this.currentLang(),
-      ),
+      title: 'tab-pagefeedback',
     },
     {
       href: 'flow',
-      title: this.i18n.service.translate('tab-flow', this.currentLang()),
+      title: 'tab-flow',
     },
     {
       href: 'readability',
-      title: this.i18n.service.translate('tab-readability', this.currentLang()),
+      title: 'tab-readability',
     },
     {
       href: 'version-history',
-      title: this.i18n.service.translate(
-        'tab-version-history',
-        this.currentLang(),
-      ),
+      title: 'tab-version-history',
     },
-  ]);
+  ];
 
   projectsCol = computed(() => {
     return {

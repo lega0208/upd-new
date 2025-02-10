@@ -6,6 +6,7 @@ import {
   signal,
   Signal,
   WritableSignal,
+  OnInit,
 } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type {
@@ -19,65 +20,23 @@ import { formatNumber } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import dayjs from 'dayjs';
 import { FR_CA } from '@dua-upd/upd/i18n';
-
-interface SelectedDate {
-  date: string;
-}
+import { isNullish } from '@dua-upd/utils-common';
 
 @Component({
   selector: 'upd-pages-details-readability',
   templateUrl: './pages-details-readability.component.html',
   styleUrls: ['./pages-details-readability.component.css'],
 })
-export class PagesDetailsReadabilityComponent {
+export class PagesDetailsReadabilityComponent implements OnInit {
   private i18n = inject(I18nFacade);
   private pageDetailsService = inject(PagesDetailsFacade);
 
-  constructor() {
-    effect(
-      () => {
-        const storedConfig = this.getStoredConfig();
-
-        if (storedConfig) {
-          this.selectedDate.set(storedConfig.date);
-        } else {
-          this.selectedDate.set(this.getInitialSelection());
-        }
-      },
-      { allowSignalWrites: true },
-    );
-
-    effect(() => {
-      this.storeConfig();
-    }, { allowSignalWrites: true });
-  }
+  url = toSignal(this.pageDetailsService.pageUrl$);
 
   currentLang = this.i18n.currentLang;
-  dateParams = computed(() => {
-    return this.currentLang() == FR_CA ? 'DD MMM YYYY' : 'MMM DD, YYYY';
-  });
-
-  url = toSignal(this.pageDetailsService.pageUrl$) as () => string;
-
-  private storeConfig(): void {
-    const currentUrl = this.url();
-    sessionStorage.setItem(
-      `${currentUrl}-readability-config`,
-      JSON.stringify(this.readabilityConfig()),
-    );
-  }
-
-  private getStoredConfig(): SelectedDate | null {
-    const currentUrl = this.url();
-    
-    return currentUrl
-      ? JSON.parse(
-          sessionStorage.getItem(`${currentUrl}-readability-config`) || 'null',
-        )
-      : null;
-  }
 
   pageLang = toSignal(this.pageDetailsService.pageLang$);
+
   // Flesch-Kincaid vs. Kandel-Moles
   readabilityDescriptionKey = computed(() => {
     const pageLang = this.pageLang();
@@ -89,36 +48,35 @@ export class PagesDetailsReadabilityComponent {
   readabilityArray = toSignal(this.pageDetailsService.readability$);
   dropdownOptions: Signal<DropdownOption<string>[]> = computed(() => {
     const dates = this.readabilityArray();
+    const currentLang = this.currentLang();
+
+    const dateFormat = currentLang === FR_CA ? 'DD MMM YYYY' : 'MMM DD, YYYY';
 
     return (dates ?? []).map(({ date }) => ({
-      label: dayjs(date).format(this.dateParams()),
+      label: dayjs(date).locale(this.currentLang()).format(dateFormat),
       value: date.toString(),
     }));
   });
-  selectedDate: WritableSignal<string | null> = signal(null);
 
-  readabilityConfig: Signal<SelectedDate> = computed(() => ({
-    date: this.selectedDate() ?? '',
-  }));
+  selectedDateIndex: WritableSignal<number | null> = signal(null);
+  selectedDate: Signal<DropdownOption<string> | null> = computed(() => {
+    const selectedDateIndex = this.selectedDateIndex();
 
-  getInitialSelection = computed(() => {
-    const availableOptions = this.dropdownOptions();
-    const currentDate = this.readabilityConfig()?.date;
+    const options = this.dropdownOptions();
 
-    return availableOptions.some((opt) => opt.value === currentDate)
-      ? (currentDate ?? '')
-      : availableOptions.length > 0
-        ? availableOptions[0].value
-        : '';
+    if (options.length === 0 || !this.url()) return null;
+
+    if (isNullish(this.selectedDateIndex()) || selectedDateIndex === -1) {
+      return options[0];
+    }
+
+    return options[selectedDateIndex as number];
   });
 
   selectedReadability = computed(() => {
     const data = this.readabilityArray() || [];
-    return (
-      data.find(
-        (r) => r.date.toString() === this.readabilityConfig().date?.toString(),
-      ) || data[0]
-    );
+
+    return data[this.selectedDateIndex() ?? 0];
   });
 
   readabilityStats = computed(() => {
@@ -182,21 +140,19 @@ export class PagesDetailsReadabilityComponent {
     return `${message} ${value}`;
   });
 
-  mostFrequentWordsOnPageCols = computed(
-    () =>
-      [
-        {
-          field: 'word',
-          header: this.i18n.service.translate('word', this.currentLang()),
-          headerClass: 'col-3',
-        },
-        {
-          field: 'count',
-          header: this.i18n.service.translate('count', this.currentLang()),
-          headerClass: 'col-auto',
-        },
-      ] as ColumnConfig<{ word: string; count: number }>[],
-  );
+  mostFrequentWordsOnPageCols: ColumnConfig<{ word: string; count: number }>[] =
+    [
+      {
+        field: 'word',
+        header: 'word',
+        headerClass: 'col-3',
+      },
+      {
+        field: 'count',
+        header: 'count',
+        headerClass: 'col-auto',
+      },
+    ];
 
   totalScoreTemplateParams = ['{{}}/100', '1.0-2'];
   readabilityScoreTemplateParams = ['{{}}/60', '1.0-2'];
@@ -224,6 +180,53 @@ export class PagesDetailsReadabilityComponent {
     };
   });
 
+  constructor() {
+    effect(
+      () => {
+        if (!this.url()) return;
+
+        const storedConfig = this.getStoredConfig();
+
+        if (storedConfig) {
+          this.updateSelection(storedConfig);
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(() => {
+      if (
+        !this.selectedDate() ||
+        !this.url() ||
+        isNullish(this.selectedDateIndex())
+      )
+        return;
+
+      sessionStorage.setItem(
+        `${this.url()}-readability-config`,
+        JSON.stringify(this.selectedDate()),
+      );
+    });
+  }
+
+  ngOnInit() {
+    const storedConfig = this.getStoredConfig();
+
+    if (storedConfig) {
+      this.updateSelection(storedConfig);
+    }
+  }
+
+  private getStoredConfig(): DropdownOption<string> | null {
+    const currentUrl = this.url();
+
+    return currentUrl
+      ? JSON.parse(
+          sessionStorage.getItem(`${currentUrl}-readability-config`) || 'null',
+        )
+      : null;
+  }
+
   totalScoreKpiCriteria: KpiObjectiveCriteria = (totalScore: number) => {
     switch (true) {
       case totalScore >= 70:
@@ -237,11 +240,13 @@ export class PagesDetailsReadabilityComponent {
     }
   };
 
-  updateSelection(date: string): void {
-    const select =
-      this.readabilityArray()?.find((d) => d.date.toString() === date) || null;
-    if (!select) return;
+  updateSelection(option: DropdownOption<string>) {
+    if (!this.url()) return;
 
-    this.selectedDate.set(select.date.toString());
+    const dateOptionIndex = this.dropdownOptions()?.findIndex(
+      (opt) => opt.value === option.value,
+    );
+
+    this.selectedDateIndex.set(dateOptionIndex);
   }
 }

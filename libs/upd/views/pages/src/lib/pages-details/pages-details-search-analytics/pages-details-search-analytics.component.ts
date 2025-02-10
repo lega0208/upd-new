@@ -1,7 +1,6 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
-import type { ColumnConfig } from '@dua-upd/types-common';
-import type { LocaleId } from '@dua-upd/upd/i18n';
+import type { ColumnConfig, InternalSearchTerm } from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type { GetTableProps } from '@dua-upd/utils-common';
 import { map } from 'rxjs';
@@ -41,69 +40,67 @@ export class PagesDetailsSearchAnalyticsComponent {
     map((searchTerms) => [...searchTerms]),
   );
 
-  searchTermsColConfig$ = this.pageDetailsService.searchTermsColConfig$;
-
   referrerType$ = this.pageDetailsService.referrerType$;
 
-  topGscSearchTermsCols = computed<ColumnConfig<GscSearchTermsColTypes>[]>(() => [
+  searchTermsColConfig: ColumnConfig<InternalSearchTerm>[] = [
+    { field: 'term', header: 'search-term' },
+    { field: 'clicks', header: 'clicks', pipe: 'number' },
+    { field: 'clicksChange', header: 'change-for-clicks', pipe: 'percent' },
+    {
+      field: 'position',
+      header: 'position',
+      pipe: 'number',
+      pipeParam: '1.0-2',
+    },
+  ];
+
+  topGscSearchTermsCols: ColumnConfig<GscSearchTermsColTypes>[] = [
     {
       field: 'term',
-      header: this.i18n.service.translate('search-terms', this.currentLang()),
+      header: 'search-terms',
     },
     {
       field: 'clicks',
-      header: this.i18n.service.translate('clicks', this.currentLang()),
+      header: 'clicks',
       pipe: 'number',
     },
     {
       field: 'change',
-      header: this.i18n.service.translate('change', this.currentLang()),
+      header: 'change',
       pipe: 'percent',
     },
     {
       field: 'impressions',
-      header: this.i18n.service.translate('impressions', this.currentLang()),
+      header: 'impressions',
       pipe: 'number',
     },
     {
       field: 'ctr',
-      header: this.i18n.service.translate('ctr', this.currentLang()),
+      header: 'ctr',
       pipe: 'percent',
     },
     {
       field: 'position',
-      header: this.i18n.service.translate('position', this.currentLang()),
+      header: 'position',
       pipe: 'number',
       pipeParam: '1.0-2',
     },
-  ]);
+  ];
 
-  searchTermsCanadaCols = computed<ColumnConfig[]>(() => [
+  referrerTypeCols: ColumnConfig<ReferrerTypeColTypes>[] = [
     {
-      field: 'term',
-      header: this.i18n.service.translate('search-terms', this.currentLang()),
+      field: 'type',
+      header: 'type',
     },
-    {
-      field: 'clicks',
-      header: this.i18n.service.translate('clicks', this.currentLang()),
-    },
-    {
-      field: 'change',
-      header: this.i18n.service.translate('comparison', this.currentLang()),
-    },
-  ]);
-
-  referrerTypeCols = computed<ColumnConfig<ReferrerTypeColTypes>[]>(() => [
-    { field: 'type', header: this.i18n.service.translate('type', this.currentLang()) },
     {
       field: 'value',
-      header: this.i18n.service.translate('visits', this.currentLang()),
+      header: 'visits',
       pipe: 'number',
     },
     {
       field: 'change',
-      header: this.i18n.service.translate('change', this.currentLang()),
+      header: 'change',
       pipe: 'percent',
     },
-  ]);
+  ];
 }
