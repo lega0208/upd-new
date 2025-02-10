@@ -108,6 +108,22 @@ export type ReportConfig<DateType = string> = {
   breakdownDimension?: AADimensionName;
 };
 
+export type ReportFeedbackConfig<DateType = string> = {
+  dateRange: {
+    start: DateType;
+    end: DateType;
+  };
+  pages: FeedbackSelectionData[];
+  tasks: FeedbackSelectionData[];
+  projects: FeedbackSelectionData[];
+};
+
+export type FeedbackSelectionData = {
+  _id: string;
+  title: string;
+  pages?: string[];
+};
+
 export type ReportCreate = {
   _id: string;
 };
