@@ -1,6 +1,6 @@
 <div class="back_link">
   <span class="material-icons align-top">west</span>
-  <a [routerLink]="['/', langLink, 'pages']">Pages</a>
+  <a [routerLink]="['/', langLink(), 'pages']">Pages</a>
 </div>
 
 <upd-loading-spinner
@@ -61,10 +61,10 @@
       </ng-container>
     </span>
   </div>
-
+ 
   <upd-project-header
     [data]="(projects$ | async) || []"
-    [config]="projectsCol"
+    [config]="projectsCol()"
   ></upd-project-header>
 
   <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
@@ -72,7 +72,7 @@
   <upd-date-selector
     *ngIf="
       !((currentRoute$ | async) || '').endsWith('readability') &&
-      !((currentRoute$ | async) || '').endsWith('versions')
+      !((currentRoute$ | async) || '').endsWith('version-history')
     "
   ></upd-date-selector>
 

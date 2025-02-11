@@ -1,4 +1,4 @@
-@if (hashes().length < 1) {
+@if (hashes().length <= 1) {
   <p>Does not have a comparison</p>
 } @else {
     <div class="row g-3 align-items-center">
@@ -55,7 +55,7 @@
   </div>
 
   <!-- Output Section -->
-  <div class="row g-3 mt-4">
+  <div class="row g-3 mt-1">
     <div class="col-12">
       <label for="output-selection" class="form-label">View:</label>
       <upd-radio
