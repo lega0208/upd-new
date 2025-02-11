@@ -32,7 +32,6 @@
   <ng-container *ngIf="showUrl"
     ><p class="page_url">{{ url$ | async }}</p></ng-container
   >
-  <a (click)="navigateToAltPage()" class="clickable-link">View equivalent alternate language page</a>
   <div class="page_header back_link">
     <span id="page_project">
       <span id="view_url" (click)="toggleUrl()" tabindex="0">
@@ -60,6 +59,11 @@
         <upd-alert position="top">Copied successfully!</upd-alert>
       </ng-container>
     </span>
+    <span id="language" (click)="navigateToAltPage()" tabindex="0">
+      <span class="material-icons align-top" aria-hidden="true">language</span>
+      View {{ pageLangText() }} page data
+    </span>
+      
   </div>
  
   <upd-project-header

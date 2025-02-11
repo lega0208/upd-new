@@ -31,6 +31,10 @@ export class PagesDetailsComponent {
   currentLang = this.i18n.currentLang;
   langLink = computed(() => (this.currentLang() === EN_CA ? 'en' : 'fr'));
   projects$ = this.pageDetailsService.projects$;
+  pageLang = toSignal(this.pageDetailsService.pageLang$);
+  pageLangText = computed(() =>
+    this.pageLang() === 'fr' ? 'English' : 'French',
+  );
 
   currentRoute$ = this.pageDetailsService.currentRoute$;
   currentUrl = toSignal(
