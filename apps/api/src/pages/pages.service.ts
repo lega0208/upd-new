@@ -287,23 +287,41 @@ export class PagesService {
     const promises: Promise<UrlHash | void>[] = [];
 
     for (const h of hash) {
-      promises.push(
-        this.blob.blobModels.urls
-          .blob(h.hash)
-          .downloadToString()
-          .then(async (blob) => ({
+      const blobCacheKey = `blob-cache-${h.hash}`;
+
+      const cachedBlob =
+        await this.cacheManager.store.get<string>(blobCacheKey);
+      if (cachedBlob) {
+        promises.push(
+          Promise.resolve({
             hash: h.hash,
             date: h.date,
-            blob: await format(blob, {
-              parser: 'html',
-            }),
-          }))
-          .catch((err) => {
-            console.error(err);
+            blob: cachedBlob,
           }),
-      );
+        );
+      } else {
+        promises.push(
+          this.blob.blobModels.urls
+            .blob(h.hash)
+            .downloadToString()
+            .then(async (blob) => {
+              const formattedBlob = await format(blob, { parser: 'html' });
 
-      await wait(30);
+              await this.cacheManager.store.set(blobCacheKey, formattedBlob);
+
+              return {
+                hash: h.hash,
+                date: h.date,
+                blob: formattedBlob,
+              };
+            })
+            .catch((err) => {
+              console.error(err);
+            }),
+        );
+        
+        await wait(30);
+      }
     }
 
     const hashes = (await Promise.allSettled(promises))
