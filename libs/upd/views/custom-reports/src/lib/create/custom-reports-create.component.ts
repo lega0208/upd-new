@@ -814,14 +814,6 @@ export class CustomReportsCreateComponent {
     const startDate = dayjs.utc(config.dateRange.start);
     const endDate = dayjs.utc(config.dateRange.end);
 
-    console.log(
-      'here',
-      !!config.dateRange.start &&
-        !!config.dateRange.end &&
-        startDate.isBefore(dayjs.utc().startOf('day')) &&
-        endDate.isAfter(startDate),
-    );
-
     return (
       !!config.dateRange.start &&
       !!config.dateRange.end &&
@@ -835,14 +827,6 @@ export class CustomReportsCreateComponent {
 
     const startDate = dayjs.utc(config.dateRange.start);
     const endDate = dayjs.utc(config.dateRange.end);
-
-    console.log(
-      'over here',
-      !!config.dateRange.start &&
-        !!config.dateRange.end &&
-        startDate.isBefore(dayjs.utc().startOf('day')) &&
-        endDate.isAfter(startDate),
-    );
 
     return (
       !!config.dateRange.start &&
@@ -936,8 +920,8 @@ export class CustomReportsCreateComponent {
     const projectIds = config.projects.map((project) => project._id);
 
     const queryParams: QueryParams = {
-      start: dayjs(dateRangeStart).format('YYYY-MM-DD'),
-      end: dayjs(dateRangeEnd).format('YYYY-MM-DD'),
+      start: dateRangeStart.slice(0, 10),
+      end: dateRangeEnd.slice(0, 10),
     };
 
     if (pageIds.length > 0) {

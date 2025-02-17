@@ -3,20 +3,14 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '@dua-upd/upd/services';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ColumnConfig, IFeedback } from '@dua-upd/types-common';
 import { Types } from 'mongoose';
+import type {
+  ColumnConfig,
+  CustomReportsFeedback,
+} from '@dua-upd/types-common';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { UpdComponentsModule } from '@dua-upd/upd-components';
 import { I18nModule } from '@dua-upd/upd/i18n';
-
-type CommentsData = IFeedback & {
-  pageTitle: { _id: string; title: string };
-  taskTitles: [string];
-  projectTitles: [string];
-  selectedPages: { _id: string; title: string }[];
-  selectedTasks: { _id: string; title: string; pages: string[] }[];
-  selectedProjects: { _id: string; title: string; pages: string[] }[];
-};
 
 @Component({
   selector: 'dua-upd-custom-reports-feedback-report',
@@ -30,7 +24,6 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private readonly api = inject(ApiService);
-  private i18n = inject(I18nFacade);
 
   queryParams = toSignal(this.route.queryParamMap);
 
@@ -39,7 +32,7 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
   endDate = computed(() => this.queryParams()?.get('end') || '');
 
   pages = computed(() => {
-    const param = this.queryParams()?.get('pages') || '';
+    const param = this.queryParams()?.get('pages');
 
     if (param) {
       const pages = param.split('-');
@@ -50,7 +43,7 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
   });
 
   tasks = computed(() => {
-    const param = this.queryParams()?.get('tasks') || '';
+    const param = this.queryParams()?.get('tasks');
 
     if (param) {
       const tasks = param.split('-');
@@ -61,7 +54,7 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
   });
 
   projects = computed(() => {
-    const param = this.queryParams()?.get('projects') || '';
+    const param = this.queryParams()?.get('projects');
 
     if (param) {
       const projects = param.split('-');
@@ -71,9 +64,9 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
     return [];
   });
 
-  comments: Signal<{ comments: CommentsData[] } | null> = toSignal(
+  queryResults: Signal<{ feedback: CustomReportsFeedback } | null> = toSignal(
     this.api.queryDb({
-      comments: {
+      feedback: {
         collection: 'feedback',
         filter: {
           date: {
@@ -93,37 +86,38 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
 
   commentsData = computed(() => {
     const comments =
-      this.comments()?.comments.map((c) => ({
+      this.queryResults()?.feedback.comments.map((c) => ({
         date: c.date,
         url: c.url,
         comment: c.comment,
         taskTitles: c.taskTitles.join(', '),
         projectTitles: c.projectTitles.join(', '),
       })) || [];
+
     return comments.sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
   });
 
-  selectedPages = computed(() => this.comments()?.comments[0].selectedPages);
+  selectedPages = computed(() => this.queryResults()?.feedback.selectedPages);
 
-  selectedTasks = computed(() => this.comments()?.comments[0].selectedTasks);
+  selectedTasks = computed(() => this.queryResults()?.feedback.selectedTasks);
 
   selectedProjects = computed(
-    () => this.comments()?.comments[0].selectedProjects,
+    () => this.queryResults()?.feedback.selectedProjects,
   );
 
-  selectedPagesAmount = computed(() => this.selectedPages()?.length || 0);
+  selectedPagesCount = computed(() => this.selectedPages()?.length || 0);
 
-  selectedTasksAmount = computed(() => this.selectedTasks()?.length || 0);
+  selectedTasksCount = computed(() => this.selectedTasks()?.length || 0);
 
-  selectedProjectsAmount = computed(() => this.selectedProjects()?.length || 0);
+  selectedProjectsCount = computed(() => this.selectedProjects()?.length || 0);
 
-  selectedAmount = computed(
+  selectedCount = computed(
     () =>
-      this.selectedPagesAmount() +
-      this.selectedTasksAmount() +
-      this.selectedProjectsAmount(),
+      this.selectedPagesCount() +
+      this.selectedTasksCount() +
+      this.selectedProjectsCount(),
   );
 
   columnsComments: ColumnConfig<{
