@@ -22,7 +22,7 @@ export class PagesDetailsComponent {
   }
 
   title$ = this.pageDetailsService.pageTitle$;
-  url$ = this.pageDetailsService.pageUrl$;
+  url = toSignal(this.pageDetailsService.pageUrl$);
   pageStatus$ = this.pageDetailsService.pageStatus$;
   loading$ = this.pageDetailsService.loading$;
   showUrl = true;
@@ -30,11 +30,19 @@ export class PagesDetailsComponent {
   altPageId = toSignal(this.pageDetailsService.altPageId$);
   currentLang = this.i18n.currentLang;
   langLink = computed(() => (this.currentLang() === EN_CA ? 'en' : 'fr'));
-  projects$ = this.pageDetailsService.projects$;
+  projects = toSignal(this.pageDetailsService.projects$);
   pageLang = toSignal(this.pageDetailsService.pageLang$);
-  pageLangText = computed(() =>
-    this.pageLang() === 'fr' ? 'English' : 'French',
-  );
+  pageLangText = computed(() => {
+    const langLink = this.langLink();
+    const pageLang = this.pageLang() === 'fr' ? 'en' : 'fr';
+  
+    const translations = {
+      en: { fr: "French", en: "English" },
+      fr: { fr: "française", en: "en anglais" },
+    };
+  
+    return translations[langLink]?.[pageLang];
+  });
 
   currentRoute$ = this.pageDetailsService.currentRoute$;
   currentUrl = toSignal(

@@ -39,6 +39,11 @@ export const selectPagesDetailsData = createSelector(
   (state: PagesDetailsState) => state.data
 );
 
+export const selectHashesData = createSelector(
+  selectPagesDetailsData,
+  (data) => data?.hashes,
+);
+
 // data select (current/previous)
 export const selectCurrentData = createSelector(
   selectPagesDetailsData,

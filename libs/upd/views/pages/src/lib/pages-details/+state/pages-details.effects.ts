@@ -10,10 +10,13 @@ import {
   selectDatePeriod,
 } from '@dua-upd/upd/state';
 import {
+  getHashes,
+  getHashesSuccess,
   loadPagesDetailsInit,
   loadPagesDetailsSuccess,
 } from './pages-details.actions';
 import { selectPagesDetailsData } from './pages-details.selectors';
+import { UrlHash } from '@dua-upd/types-common';
 
 @Injectable()
 export class PagesDetailsEffects {
@@ -69,6 +72,28 @@ export class PagesDetailsEffects {
     return this.actions$.pipe(
       ofType(selectDatePeriod),
       mergeMap(() => of(loadPagesDetailsInit())),
+    );
+  });
+
+  getHashes$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(getHashes),
+      concatLatestFrom(() => [this.store.select(selectRouteNestedParam('id'))]),
+      mergeMap(([, id]) =>
+        this.api
+          .get<
+            UrlHash[],
+            {
+              id: string;
+            }
+          >('/api/hashes/get-hashes', {
+            id,
+          })
+          .pipe(
+            map((data) => getHashesSuccess({ data })),
+            catchError(() => EMPTY),
+          ),
+      ),
     );
   });
 }

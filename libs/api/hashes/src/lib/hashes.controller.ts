@@ -1,0 +1,16 @@
+import { Controller, Get, Query } from '@nestjs/common';
+import { HashesService } from './hashes.service';
+
+@Controller('hashes')
+export class HashesController {
+    constructor(private hashesService: HashesService) {}
+
+    @Get('get-hashes')
+    async hashes(
+      @Query('id') id: string,
+    ) {
+        console.log('Getting hashes for page with id:', id);
+  
+      return await this.hashesService.getHashes(id);
+    }
+}

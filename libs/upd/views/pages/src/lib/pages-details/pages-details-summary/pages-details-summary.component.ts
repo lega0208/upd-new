@@ -1,7 +1,6 @@
-import { Component, computed, inject, Signal } from '@angular/core';
-import { combineLatest } from 'rxjs';
+import { Component, computed, inject, Signal, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { EN_CA, type LocaleId } from '@dua-upd/upd/i18n';
+import { EN_CA } from '@dua-upd/upd/i18n';
 import { feedbackKpiObjectiveCriteria } from '@dua-upd/upd-components';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type { ColumnConfig } from '@dua-upd/types-common';
@@ -23,7 +22,7 @@ type VisitsByDeviceColTypes = GetTableProps<
   templateUrl: './pages-details-summary.component.html',
   styleUrls: ['./pages-details-summary.component.css'],
 })
-export class PagesDetailsSummaryComponent {
+export class PagesDetailsSummaryComponent implements OnInit {
   private i18n = inject(I18nFacade);
   private pageDetailsService = inject(PagesDetailsFacade);
 
@@ -105,6 +104,10 @@ export class PagesDetailsSummaryComponent {
   ];
 
   barTableCols: Signal<ColumnConfig<BarTableColTypes>[]> = computed(() => [
+    {
+      field: 'date',
+      header: 'Dates',
+    },
     {
       field: 'visits',
       header: this.i18n.service.translate('Visits for ', this.currentLang(), {

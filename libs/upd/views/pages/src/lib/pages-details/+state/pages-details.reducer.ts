@@ -80,6 +80,19 @@ const reducer = createReducer(
       error,
     }),
   ),
+  on(
+    PagesDetailsActions.getHashesSuccess,
+    (state, payload): PagesDetailsState => ({
+      ...state,
+      data: {
+        ...state.data,
+        hashes: payload.data,
+      },
+      loading: false,
+      loaded: true,
+      error: null,
+    }),
+  ),
 );
 
 export function pagesDetailsReducer(

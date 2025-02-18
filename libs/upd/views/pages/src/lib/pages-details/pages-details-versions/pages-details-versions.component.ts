@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, Signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, Signal } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
 import type { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
@@ -17,7 +17,7 @@ interface UrlHash {
   templateUrl: './pages-details-versions.component.html',
   styleUrls: ['./pages-details-versions.component.css'],
 })
-export class PagesDetailsVersionsComponent {
+export class PagesDetailsVersionsComponent implements OnInit {
   private i18n = inject(I18nFacade);
   private pageDetailsService = inject(PagesDetailsFacade);
 
@@ -25,6 +25,14 @@ export class PagesDetailsVersionsComponent {
 
   data$ = this.pageDetailsService.pagesDetailsData$;
   error$ = this.pageDetailsService.error$;
-  hashes = toSignal(this.pageDetailsService.hashes$) as () => UrlHash[];
+  hashes = this.pageDetailsService.hashesData;
   url = toSignal(this.pageDetailsService.pageUrl$) as () => string;
+
+  getHashes() {
+    this.pageDetailsService.getHashes();
+  }
+
+  ngOnInit() {
+    this.getHashes();
+  }
 }
