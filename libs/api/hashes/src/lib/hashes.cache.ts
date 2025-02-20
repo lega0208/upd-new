@@ -1,4 +1,8 @@
-import type { AAQueryConfig, PageFlowData, UrlHash } from '@dua-upd/types-common';
+import type {
+  AAQueryConfig,
+  PageFlowData,
+  UrlHash,
+} from '@dua-upd/types-common';
 import { hours } from '@dua-upd/utils-common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
@@ -9,24 +13,23 @@ import { createHash } from 'crypto';
 export class HashesCache {
   constructor(@Inject(CACHE_MANAGER) private cache: Cache) {}
 
-    private generateKey(id: string): string {
-        const hasher = createHash('md5');
-        hasher.update(JSON.stringify(id));
-        const hash = hasher.digest('hex');
-    
-        return `hashes-${hash}`;
-    }
+  private generateKey(id: string): string {
+    const hasher = createHash('md5');
+    hasher.update(JSON.stringify(id));
+    const hash = hasher.digest('hex');
 
-    async get(id: string): Promise<string | undefined> {
-        const key = this.generateKey(id);
-    
-        return this.cache.get<string>(key);
-    }
+    return `hashes-${hash}`;
+  }
 
-    async set(id: string, results: string): Promise<void> {
-        const key = this.generateKey(id);
-    
-        await this.cache.set(key, results, hours(1));
-    }
+  async get(id: string): Promise<string | undefined> {
+    const key = this.generateKey(id);
 
+    return this.cache.get<string>(key);
+  }
+
+  async set(id: string, results: string): Promise<void> {
+    const key = this.generateKey(id);
+
+    await this.cache.set(key, results, hours(1));
+  }
 }

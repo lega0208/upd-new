@@ -23,9 +23,10 @@ export class HashesService {
   async getHashes(id: string): Promise<UrlHash[]> {
     const urls = await this.db.collections.urls
       .find({ page: new Types.ObjectId(id) })
-      .sort({ date: -1 })
       .lean()
       .exec();
+
+    if (!urls) return [];
 
     const hash = urls.map((url) => url.hashes).flat();
 
