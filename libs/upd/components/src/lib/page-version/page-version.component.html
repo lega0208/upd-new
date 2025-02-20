@@ -1,11 +1,14 @@
 @if (hashes().length <= 1) {
   <p>Does not have a comparison</p>
 } @else {
-    <div class="row g-3 align-items-center">
+  <div class="row g-3 align-items-center">
+    @if (dropdownOptions().length && selectedDate('left')() && selectedDate('right')()) {
       <div class="col-md-8 d-flex justify-content-start">
         <!-- Previous Version Dropdown -->
         <div class="me-3">
-          <label for="previous-version" class="form-label me-2">Previous version:</label>
+          <label for="previous-version" class="form-label me-2"
+            >Previous version:</label
+          >
           <upd-dropdown
             id="previous-version"
             class="w-100"
@@ -15,10 +18,12 @@
             (selectOption)="updateSelection($event, 'left')"
           ></upd-dropdown>
         </div>
-    
+
         <!-- Current Version Dropdown -->
         <div>
-          <label for="current-version" class="form-label me-2">Compared to:</label>
+          <label for="current-version" class="form-label me-2"
+            >Compared to:</label
+          >
           <upd-dropdown
             id="current-version"
             class="w-100"
@@ -29,6 +34,7 @@
           ></upd-dropdown>
         </div>
       </div>
+    }
     <div class="col-md-4 d-flex justify-content-end">
       @if (viewMode().value !== 'source') {
         @if (elements().length > 0) {
@@ -87,7 +93,7 @@
           ></div>
           <span class="legend-text">{{ item.text }}</span>
         </div>
-        
+
         <upd-modal [modalTitle]="'Lorem ipsum'" [modalContent]="'Lorem ipsum'">
         </upd-modal>
       </div>

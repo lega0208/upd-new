@@ -189,6 +189,7 @@ export class PageVersionComponent {
     effect(
       () => {
         const storedConfig = this.getStoredConfig();
+        console.log('storedConfig', storedConfig);
         if (storedConfig) {
           this.restoreConfig(storedConfig);
         } else {
@@ -223,6 +224,16 @@ export class PageVersionComponent {
       { allowSignalWrites: true },
     );
 
+    effect(() => {
+      const before = this.selectedBeforeIndex();
+      const after = this.selectedAfterIndex();
+
+      if (!isNullish(before) && !isNullish(after)) {
+        this.beforeDropdownOptions();
+        this.afterDropdownOptions();
+      }
+    });
+
     effect(
       async () => {
         const container = this.liveContainer();
@@ -240,6 +251,14 @@ export class PageVersionComponent {
       { allowSignalWrites: true },
     );
   }
+
+  // ngOnInit() {
+  //   const storedConfig = this.getStoredConfig();
+
+  //   if (storedConfig) {
+  //     this.updateSelection(storedConfig);
+  //   }
+  // }
 
   private handleDocumentClick(event: MouseEvent): void {
     const liveContainer = this.liveContainer()?.nativeElement;
@@ -406,215 +425,92 @@ export class PageVersionComponent {
   private async adjustDOM(shadowDOM: ShadowRoot, before: string) {
     const $ = load(shadowDOM.innerHTML);
     const $before = load(before);
-
     const newLinks = new Map<
       string,
-      { text: string; href: string; element: Cheerio<AnyNode> }[]
+      {
+        text: string;
+        href: string;
+        insText: string;
+        element: Cheerio<AnyNode>;
+      }[]
     >();
 
-    const cleanText = (text: string): string =>
-      text?.trim().replace(/\s+/g, ' ') || '';
-
-    const wrapWithSpan = ($el: Cheerio<AnyNode>, title: string): string =>
+    const cleanText = (text: string) => text?.trim().replace(/\s+/g, ' ') || '';
+    const wrapWithSpan = ($el: Cheerio<AnyNode>, title: string) =>
       `<span class="updated-link" title="${title}">${$.html($el)}</span>`;
-
     const findMatchingLinks = (beforeText: string) =>
       newLinks.get(beforeText) ||
-      [...newLinks.values()].flat().filter(({ text }) => text === beforeText);
+      [...newLinks.values()]
+        .flat()
+        .filter(({ insText }) => insText === beforeText);
 
-    $('a').each((_, el) => {
+    for (const el of $('a').toArray()) {
       const $el = $(el);
       const text = cleanText($el.text());
       const href = $el.attr('href');
-      if (!text || !href) return;
+      if (!text || !href) continue;
 
-      if (!newLinks.has(text)) newLinks.set(text, []);
-
+      newLinks.set(text, newLinks.get(text) || []);
       newLinks.get(text)?.push({
-        text: cleanText($el.contents().not('ins').text()),
+        text,
+        insText:
+          cleanText($el.contents().not('ins').text()) ||
+          cleanText($el.contents().children().not('ins').text()),
         href,
         element: $el,
       });
-    });
+    }
 
-    $before('a').each((_, el) => {
-      const $beforeEl = $before(el);
-      const beforeHref = $beforeEl.attr('href');
-      const beforeText = cleanText($beforeEl.text());
+    for (const el of $before('a').toArray()) {
+      const $el = $before(el);
+      const text = cleanText($el.text());
+      const href = $el.attr('href');
+      if (!text || !href) continue;
 
-      const matches = findMatchingLinks(beforeText);
-      if (!matches || matches.length === 0) return;
+      const matches = findMatchingLinks(text);
+      if (!matches.length) continue;
 
       const matchingKey = [...newLinks.keys()].find((key) =>
-        newLinks.get(key)?.some(({ text }) => text === beforeText),
+        newLinks.get(key)?.some(({ insText }) => insText === text),
       );
-
       if (matchingKey) newLinks.delete(matchingKey);
 
-      if (matches.some(({ href }) => href === beforeHref)) {
-        newLinks.delete(beforeText);
-        return;
+      if (matches.some(({ href: matchHref }) => matchHref === href)) {
+        newLinks.delete(text);
+        continue;
       }
 
-      const deletedLink = matches.find(({ element }) => element.is('del'));
-      if (deletedLink && cleanText(deletedLink.element.text()) === beforeText) {
-        newLinks.delete(beforeText);
-        return;
+      if (
+        matches
+          .find(({ element }) => element.is('del'))
+          ?.element.text()
+          .trim() === text
+      )
+        newLinks.delete(text);
+      if (
+        matches
+          .find(({ element }) => element.children().is('ins'))
+          ?.element.text()
+          .trim() === text
+      ) {
+        newLinks.delete(text);
+        continue;
       }
 
-      matches.forEach(({ element }) => {
-        element.replaceWith(wrapWithSpan(element, `Old URL: ${beforeHref}`));
-      });
-
-      newLinks.delete(beforeText);
-    });
-
-    console.log({ newLinks });
+      for (const { insText, element } of matches) {
+        if (insText)
+          element.replaceWith(wrapWithSpan(element, `Old URL: ${href}`));
+      }
+      newLinks.delete(text);
+    }
 
     // Mark newly added links
-    newLinks.forEach((links) => {
-      links.forEach(({ element }) => {
-        element.replaceWith(wrapWithSpan(element, 'Newly added link'));
-      });
-    });
-
-    // for (const el of $('a').toArray()) {
-    //   const $el = $(el);
-    //   const text = cleanText($el.text());
-    //   const href = $el.attr('href');
-    //   if (!text || !href) continue;
-
-    //   if (!newLinks.has(text)) newLinks.set(text, []);
-
-    //   const insText =
-    //     cleanText($el.contents().not('ins').text()) ||
-    //     cleanText($el.contents().children().not('ins').text());
-
-    //   newLinks.get(text)?.push({
-    //     text,
-    //     insText,
-    //     href,
-    //     element: $el,
-    //   });
-    // }
-
-    // // Collect new links
-    // $('a').each((_, el) => {
-    //   const $el = $(el);
-    //   const text = cleanText($el.text());
-    //   const href = $el.attr('href');
-    //   if (!text || !href) return;
-
-    //   if (!newLinks.has(text)) newLinks.set(text, []);
-
-    //   // Choose the first non-empty result
-    //   const insText = cleanText($el.contents().not('ins').text()) || cleanText($el.contents().children().not('ins').text());
-
-    //   newLinks.get(text)?.push({
-    //     text,
-    //     insText,
-    //     href,
-    //     element: $el,
-    //   });
-    // });
-
-    // for (const el of $before('a').toArray()) {
-    //   const $el = $before(el);
-    //   const text = cleanText($el.text());
-    //   const href = $el.attr('href');
-    //   if (!text || !href) continue;
-
-    //   const matches = findMatchingLinks(text);
-    //   if (!matches || matches.length === 0) break;
-
-    //   const matchingKey = [...newLinks.keys()].find((key) =>
-    //     newLinks.get(key)?.some(({ insText }) => insText === text),
-    //   );
-
-    //   if (matchingKey) newLinks.delete(matchingKey);
-
-    //   if (matches.some(({ href }) => href === href)) {
-    //     newLinks.delete(text);
-    //     continue;
-    //   }
-
-    //   const deletedLink = matches.find(({ element }) => element.is('del'));
-    //   if (deletedLink && cleanText(deletedLink.element.text()) === text) {
-    //     newLinks.delete(text);
-    //   }
-
-    //   console.log({ matches });
-
-    //   matches.forEach(({ insText, element }) => {
-    //     element.replaceWith(
-    //       wrapWithSpan(
-    //         element,
-    //         `Old URL: ${element.attr('href') || href}`,
-    //       ),
-    //     );
-    //   });
-
-    //   newLinks.delete(text);
-    // }
-
-    /// ------------------------------
-
-    // $before('a').each((_, el) => {
-    //   const $beforeEl = $before(el);
-    //   const beforeHref = $beforeEl.attr('href');
-    //   const beforeText = cleanText($beforeEl.text());
-
-    //   const matches = findMatchingLinks(beforeText);
-    //   if (!matches || matches.length === 0) return;
-
-    //   const matchingKey = [...newLinks.keys()].find((key) =>
-    //     newLinks.get(key)?.some(({ insText }) => insText === beforeText),
-    //   );
-
-    //   if (matchingKey) newLinks.delete(matchingKey);
-
-    //   if (matches.some(({ href }) => href === beforeHref)) {
-    //     newLinks.delete(beforeText);
-    //     return;
-    //   }
-
-    //   const deletedLink = matches.find(({ element }) => element.is('del'));
-    //   if (deletedLink && cleanText(deletedLink.element.text()) === beforeText) {
-    //     newLinks.delete(beforeText);
-    //   }
-
-    //   // const intertedLink = matches.find(({ element }) =>
-    //   //   element.children().is('ins'),
-    //   // );
-    //   // console.log({ intertedLink });
-    //   // if (
-    //   //   intertedLink &&
-    //   //   cleanText(intertedLink.element.text()) === beforeText
-    //   // ) {
-    //   //   newLinks.delete(beforeText);
-    //   //   return;
-    //   // }
-
-    //   matches.forEach(({ insText, element }) => {
-    //     if (insText === '') return;
-    //     element.replaceWith(
-    //       wrapWithSpan(
-    //         element,
-    //         `Old URL: ${element.attr('href') || beforeHref}`,
-    //       ),
-    //     );
-    //   });
-
-    //   newLinks.delete(beforeText);
-    // });
-
-    // console.log({ newLinks });
-    // Mark newly added links
-    // newLinks.forEach((links) => {
-    //   links.forEach(({ element, insText, text }) => {
-    //     element.replaceWith(wrapWithSpan(element, 'Newly added link'));
-    //   });
-    // });
+    for (const links of newLinks.values()) {
+      for (const { element, insText } of links) {
+        if (insText)
+          element.replaceWith(wrapWithSpan(element, 'Newly added link'));
+      }
+    }
 
     $('del>del, ins>ins').each((index, element) => {
       const $element = $(element);
@@ -1023,13 +919,24 @@ export class PageVersionComponent {
   ): void {
     if (!this.hashes()) return;
 
-    const dateOptionIndex = this.dropdownOptions()?.findIndex(
-      (opt) => opt.value === option.value,
-    );
-
-    side === 'left'
-      ? this.before.set(this.hashes()[dateOptionIndex])
-      : this.after.set(this.hashes()[dateOptionIndex]);
+    // Find the corresponding version object from hashes
+    const versionIndex = this.hashes().findIndex((h) => h.hash === option.value);
+    const version = versionIndex !== -1 ? this.hashes()[versionIndex] : null;
+  
+    // Find the index of the selected option in the dropdown options
+    const dateOptionIndex = (
+      side === 'left' ? this.beforeDropdownOptions() : this.afterDropdownOptions()
+    ).findIndex((opt) => opt.value === option.value);
+  
+    console.log('Version Index:', versionIndex, 'Dropdown Index:', dateOptionIndex, 'Side:', side);
+  
+    if (side === 'left') {
+      this.before.set(version);
+      this.selectedBeforeIndex.set(dateOptionIndex !== -1 ? dateOptionIndex : null);
+    } else {
+      this.after.set(version);
+      this.selectedAfterIndex.set(dateOptionIndex !== -1 ? dateOptionIndex : null);
+    }
   }
 
   private restoreConfig(config: PageConfig): void {
@@ -1066,20 +973,22 @@ export class PageVersionComponent {
     );
   }
 
-  selectedBefore: WritableSignal<number | null> = signal(null);
-  selectedAfter: WritableSignal<number | null> = signal(null);
+  selectedBeforeIndex: WritableSignal<number | null> = signal(null);
+  selectedAfterIndex: WritableSignal<number | null> = signal(null);
   selectedDate = (
     side: 'left' | 'right',
   ): Signal<DropdownOption<string> | null> =>
     computed(() => {
       const selectedDateIndex =
-        side === 'left' ? this.selectedBefore() : this.selectedAfter();
+        side === 'left'
+          ? this.selectedBeforeIndex()
+          : this.selectedAfterIndex();
       const options =
         side === 'left'
           ? this.beforeDropdownOptions()
           : this.afterDropdownOptions();
 
-      if (options.length === 0 || !this.hashes()) return null;
+      if (options.length === 0 || !this.hashes() || !this.url()) return null;
 
       return isNullish(selectedDateIndex) || selectedDateIndex === -1
         ? options[0]

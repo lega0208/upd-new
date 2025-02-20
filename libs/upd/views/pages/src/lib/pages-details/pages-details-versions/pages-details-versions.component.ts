@@ -1,16 +1,9 @@
-import { Component, computed, inject, OnInit, signal, Signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
-import type { GetTableProps } from '@dua-upd/utils-common';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { toSignal } from '@angular/core/rxjs-interop';
-import dayjs from 'dayjs';
-import { DropdownOption } from '@dua-upd/upd-components';
+import { UrlHash } from '@dua-upd/types-common';
 
-interface UrlHash {
-  hash: string;
-  date: Date;
-  blob: string;
-}
 
 @Component({
   selector: 'upd-page-details-versions',

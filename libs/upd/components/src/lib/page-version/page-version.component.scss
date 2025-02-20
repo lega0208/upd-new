@@ -42,19 +42,11 @@
   align-items: center; /* Vertically center the text and buttons */
 }
 
-.scrollable {
-  max-height: 200px;
-  overflow-y: auto;
-  width: 100%;
-  overflow-x: hidden;
-}
-
 .change-text {
   margin: 0;
   text-align: right; /* Align the text to the right */
   padding: 10px;
 }
-
 
 .custom-prev,
 .custom-next {
