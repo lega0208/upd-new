@@ -13,23 +13,13 @@ import { createHash } from 'crypto';
 export class HashesCache {
   constructor(@Inject(CACHE_MANAGER) private cache: Cache) {}
 
-  private generateKey(id: string): string {
-    const hasher = createHash('md5');
-    hasher.update(JSON.stringify(id));
-    const hash = hasher.digest('hex');
-
-    return `hashes-${hash}`;
-  }
-
   async get(id: string): Promise<string | undefined> {
-    const key = this.generateKey(id);
-
+    const key = `hashes-${id}`;
     return this.cache.get<string>(key);
   }
 
   async set(id: string, results: string): Promise<void> {
-    const key = this.generateKey(id);
-
+    const key = `hashes-${id}`;
     await this.cache.set(key, results, hours(1));
   }
 }
