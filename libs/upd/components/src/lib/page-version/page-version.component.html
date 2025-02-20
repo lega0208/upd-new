@@ -2,7 +2,6 @@
   <p>Does not have a comparison</p>
 } @else {
   <div class="row g-3 align-items-center">
-    @if (dropdownOptions().length && selectedDate('left')() && selectedDate('right')()) {
       <div class="col-md-8 d-flex justify-content-start">
         <!-- Previous Version Dropdown -->
         <div class="me-3">
@@ -34,7 +33,6 @@
           ></upd-dropdown>
         </div>
       </div>
-    }
     <div class="col-md-4 d-flex justify-content-end">
       @if (viewMode().value !== 'source') {
         @if (elements().length > 0) {

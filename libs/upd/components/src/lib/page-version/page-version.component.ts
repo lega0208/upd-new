@@ -189,7 +189,6 @@ export class PageVersionComponent {
     effect(
       () => {
         const storedConfig = this.getStoredConfig();
-        console.log('storedConfig', storedConfig);
         if (storedConfig) {
           this.restoreConfig(storedConfig);
         } else {
@@ -919,23 +918,27 @@ export class PageVersionComponent {
   ): void {
     if (!this.hashes()) return;
 
-    // Find the corresponding version object from hashes
-    const versionIndex = this.hashes().findIndex((h) => h.hash === option.value);
+    const versionIndex = this.hashes().findIndex(
+      (h) => h.hash === option.value,
+    );
     const version = versionIndex !== -1 ? this.hashes()[versionIndex] : null;
-  
-    // Find the index of the selected option in the dropdown options
+
     const dateOptionIndex = (
-      side === 'left' ? this.beforeDropdownOptions() : this.afterDropdownOptions()
+      side === 'left'
+        ? this.beforeDropdownOptions()
+        : this.afterDropdownOptions()
     ).findIndex((opt) => opt.value === option.value);
-  
-    console.log('Version Index:', versionIndex, 'Dropdown Index:', dateOptionIndex, 'Side:', side);
-  
+
     if (side === 'left') {
       this.before.set(version);
-      this.selectedBeforeIndex.set(dateOptionIndex !== -1 ? dateOptionIndex : null);
+      this.selectedBeforeIndex.set(
+        dateOptionIndex !== -1 ? dateOptionIndex : null,
+      );
     } else {
       this.after.set(version);
-      this.selectedAfterIndex.set(dateOptionIndex !== -1 ? dateOptionIndex : null);
+      this.selectedAfterIndex.set(
+        dateOptionIndex !== -1 ? dateOptionIndex : null,
+      );
     }
   }
 
@@ -979,20 +982,22 @@ export class PageVersionComponent {
     side: 'left' | 'right',
   ): Signal<DropdownOption<string> | null> =>
     computed(() => {
-      const selectedDateIndex =
-        side === 'left'
-          ? this.selectedBeforeIndex()
-          : this.selectedAfterIndex();
-      const options =
-        side === 'left'
-          ? this.beforeDropdownOptions()
-          : this.afterDropdownOptions();
+      if (!this.before() || !this.after()) return null;
 
-      if (options.length === 0 || !this.hashes() || !this.url()) return null;
+      const currentHash =
+        side === 'left' ? this.before()?.hash : this.after()?.hash;
+      const availableOptions = this.dropdownOptions();
 
-      return isNullish(selectedDateIndex) || selectedDateIndex === -1
-        ? options[0]
-        : options[selectedDateIndex as number];
+      const index = availableOptions.findIndex(
+        (option) => option.value === currentHash,
+      );
+
+      if (availableOptions.length === 0 || !this.hashes() || !this.url())
+        return null;
+
+      return isNullish(index) || index === -1
+        ? availableOptions[0]
+        : availableOptions[index];
     });
 
   getInitialSelectionView = () =>
