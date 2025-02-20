@@ -11,8 +11,8 @@
             class="w-100"
             [label]="'Select' | translate"
             [options]="beforeDropdownOptions()"
-            [initialSelection]="getInitialSelection('left')()"
-            (selectOption)="updateSelection($event.value || '', 'left')"
+            [initialSelection]="selectedDate('left')()"
+            (selectOption)="updateSelection($event, 'left')"
           ></upd-dropdown>
         </div>
     
@@ -24,8 +24,8 @@
             class="w-100"
             [label]="'Select' | translate"
             [options]="afterDropdownOptions()"
-            [initialSelection]="getInitialSelection('right')()"
-            (selectOption)="updateSelection($event.value || '', 'right')"
+            [initialSelection]="selectedDate('right')()"
+            (selectOption)="updateSelection($event, 'right')"
           ></upd-dropdown>
         </div>
       </div>
