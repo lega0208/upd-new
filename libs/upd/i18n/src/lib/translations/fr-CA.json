@@ -675,6 +675,7 @@
   "duplicate-items": "Élément(s) en double détecté(s) :",
   "duplicate-items-note": "Les éléments suivants étaient déjà présents dans notre liste et n'ont pas été ajoutés à nouveau pour éviter la duplication :",
   "items": "Éléments",
+  "feedback-report-error": "Une erreur s'est produite, veuillez réessayer.",
   "No feedback data was found": "Aucune donnée n'a été trouvée pour les éléments sélectionnés dans la plage de dates spécifiée.",
   "United States": "États-Unis",
   "Albania": "Albanie",

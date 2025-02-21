@@ -72,7 +72,7 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
     return [];
   });
 
-  error = signal<string | null>(null);
+  error = signal<string | ''>('');
 
   queryResults: Signal<{ feedback: CustomReportsFeedback } | null> = toSignal(
     this.api
@@ -92,7 +92,7 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
       })
       .pipe(
         catchError((err) => {
-          this.error.set(err.message);
+          this.error.set('feedback-report-error');
           return of(null);
         }),
       ),

@@ -675,6 +675,7 @@
   "duplicate-items": "Duplicate item(s) detected:",
   "duplicate-items-note": "The following item(s) were already present in our list and were not added again to avoid duplication:",
   "items": "Items",
+  "feedback-report-error": "An error occurred, please try again.",
   "No feedback data was found": "No data was found for the selected item(s) in the specified date range.",
 
   "------TASKS----": "---------------------------TASKS TRANSLATION--------------------------------------",
