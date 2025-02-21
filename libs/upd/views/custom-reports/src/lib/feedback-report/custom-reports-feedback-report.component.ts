@@ -74,7 +74,7 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
 
   error = signal<string | null>(null);
 
-  data: Signal<{ feedback: CustomReportsFeedback } | null> = toSignal(
+  queryResults: Signal<{ feedback: CustomReportsFeedback } | null> = toSignal(
     this.api
       .queryDb<{ feedback: CustomReportsFeedback }>({
         feedback: {
@@ -100,8 +100,6 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
       initialValue: null,
     },
   );
-
-  queryResults = computed(() => this.data() || null);
 
   commentsData = computed(() => {
     const comments =

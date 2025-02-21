@@ -16,10 +16,6 @@ export class QueryController {
 
   @Get()
   async getData(@Query() serializedQueries: { [key: string]: string }) {
-    try {
-      return await this.queryService.getData(serializedQueries);
-    } catch (error) {
-      throw new HttpException('Error', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return await this.queryService.getData(serializedQueries);
   }
 }
