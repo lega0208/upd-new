@@ -223,16 +223,6 @@ export class PageVersionComponent {
       { allowSignalWrites: true },
     );
 
-    effect(() => {
-      const before = this.selectedBeforeIndex();
-      const after = this.selectedAfterIndex();
-
-      if (!isNullish(before) && !isNullish(after)) {
-        this.beforeDropdownOptions();
-        this.afterDropdownOptions();
-      }
-    });
-
     effect(
       async () => {
         const container = this.liveContainer();
@@ -250,15 +240,6 @@ export class PageVersionComponent {
       { allowSignalWrites: true },
     );
   }
-
-  // ngOnInit() {
-  //   const storedConfig = this.getStoredConfig();
-
-  //   if (storedConfig) {
-  //     this.updateSelection(storedConfig);
-  //   }
-  // }
-
   private handleDocumentClick(event: MouseEvent): void {
     const liveContainer = this.liveContainer()?.nativeElement;
     if (!liveContainer) return;
@@ -904,13 +885,6 @@ export class PageVersionComponent {
 
     this.currentIndex.set(index);
   }
-
-  // updateSelection(hash: string, side: 'left' | 'right'): void {
-  //   const version = this.hashes().find((h) => h.hash === hash) || null;
-  //   if (!version) return;
-
-  //   side === 'left' ? this.before.set(version) : this.after.set(version);
-  // }
 
   updateSelection(
     option: DropdownOption<string>,
