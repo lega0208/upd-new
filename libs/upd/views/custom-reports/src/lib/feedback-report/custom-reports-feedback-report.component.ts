@@ -1,4 +1,11 @@
-import { Component, computed, inject, Signal, OnInit } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  Signal,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '@dua-upd/upd/services';
@@ -11,6 +18,7 @@ import type {
 import { I18nFacade } from '@dua-upd/upd/state';
 import { UpdComponentsModule } from '@dua-upd/upd-components';
 import { I18nModule } from '@dua-upd/upd/i18n';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'dua-upd-custom-reports-feedback-report',
@@ -64,25 +72,36 @@ export class CustomReportsFeedbackReportComponent implements OnInit {
     return [];
   });
 
-  queryResults: Signal<{ feedback: CustomReportsFeedback } | null> = toSignal(
-    this.api.queryDb({
-      feedback: {
-        collection: 'feedback',
-        filter: {
-          date: {
-            $gte: new Date(this.startDate()),
-            $lte: new Date(this.endDate()),
+  error = signal<string | null>(null);
+
+  data: Signal<{ feedback: CustomReportsFeedback } | null> = toSignal(
+    this.api
+      .queryDb<{ feedback: CustomReportsFeedback }>({
+        feedback: {
+          collection: 'feedback',
+          filter: {
+            date: {
+              $gte: new Date(this.startDate()),
+              $lte: new Date(this.endDate()),
+            },
+            page: this.pages(),
+            tasks: this.tasks(),
+            projects: this.projects(),
           },
-          page: this.pages(),
-          tasks: this.tasks(),
-          projects: this.projects(),
         },
-      },
-    }),
+      })
+      .pipe(
+        catchError((err) => {
+          this.error.set(err.message);
+          return of(null);
+        }),
+      ),
     {
       initialValue: null,
     },
   );
+
+  queryResults = computed(() => this.data() || null);
 
   commentsData = computed(() => {
     const comments =
