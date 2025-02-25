@@ -4,7 +4,6 @@ import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UrlHash } from '@dua-upd/types-common';
 
-
 @Component({
   selector: 'upd-page-details-versions',
   templateUrl: './pages-details-versions.component.html',
@@ -18,6 +17,9 @@ export class PagesDetailsVersionsComponent implements OnInit {
 
   data$ = this.pageDetailsService.pagesDetailsData$;
   error$ = this.pageDetailsService.error$;
+  loadingHashes = toSignal(
+    this.pageDetailsService.loadingHashes$,
+  ) as () => boolean;
   hashes = this.pageDetailsService.hashesData;
   url = toSignal(this.pageDetailsService.pageUrl$) as () => string;
 

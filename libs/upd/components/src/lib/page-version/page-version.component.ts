@@ -52,6 +52,7 @@ interface PageConfig {
 })
 export class PageVersionComponent {
   i18n = inject(I18nFacade);
+  loading = input<boolean>(true);
   hashes = input<UrlHash[]>([]);
   url = input<string>('');
   shadowDOM = signal<ShadowRoot | null>(null);
@@ -416,8 +417,10 @@ export class PageVersionComponent {
     >();
 
     const cleanText = (text: string) => text?.trim().replace(/\s+/g, ' ') || '';
+    
     const wrapWithSpan = ($el: Cheerio<AnyNode>, title: string) =>
       `<span class="updated-link" title="${title}">${$.html($el)}</span>`;
+
     const findMatchingLinks = (beforeText: string) =>
       newLinks.get(beforeText) ||
       [...newLinks.values()]

@@ -40,6 +40,12 @@ export class PagesDetailsFacade {
     .select(PagesDetailsSelectors.selectPagesDetailsLoading)
     .pipe(debounceTime(500));
 
+  loadedHashes$ = this.store.select(PagesDetailsSelectors.selectHashesLoaded);
+
+  loadingHashes$ = this.store
+    .select(PagesDetailsSelectors.selectHashesLoading)
+    .pipe(debounceTime(500));
+
   pagesDetailsData$ = this.store.select(
     PagesDetailsSelectors.selectPagesDetailsData,
   );

@@ -10,6 +10,9 @@ export interface PagesDetailsState {
   loaded: boolean; // has the PagesDetails list been loaded
   loading: boolean; // is the PagesDetails list currently being loaded
   error?: string | null; // last known error (if any)
+  loadedHashes: boolean;
+  loadingHashes: boolean;
+  errorHashes?: string | null;
 }
 
 export interface PagesDetailsPartialState {
@@ -40,6 +43,9 @@ export const pagesDetailsInitialState: PagesDetailsState = {
   loading: false,
   loaded: false,
   error: null,
+  loadingHashes: false,
+  loadedHashes: false,
+  errorHashes: null,
 };
 
 const reducer = createReducer(
@@ -49,6 +55,7 @@ const reducer = createReducer(
     (state): PagesDetailsState => ({
       ...state,
       loading: true,
+      loadingHashes: true,
       loaded: false,
       error: null,
     }),
@@ -81,16 +88,42 @@ const reducer = createReducer(
     }),
   ),
   on(
-    PagesDetailsActions.getHashesSuccess,
-    (state, payload): PagesDetailsState => ({
+    PagesDetailsActions.getHashes,
+    (state): PagesDetailsState => ({
       ...state,
-      data: {
-        ...state.data,
-        hashes: payload.data,
-      },
-      loading: false,
-      loaded: true,
-      error: null,
+      loadingHashes: true,
+      loadedHashes: false,
+      errorHashes: null,
+    }),
+  ),
+  on(
+    PagesDetailsActions.getHashesSuccess,
+    (state, { data }): PagesDetailsState =>
+      data === null
+        ? {
+            ...state,
+            loadingHashes: false,
+            loadedHashes: true,
+            errorHashes: null,
+          }
+        : {
+            ...state,
+            data: {
+              ...state.data,
+              hashes: data,
+            },
+            loadingHashes: false,
+            loadedHashes: true,
+            errorHashes: null,
+          },
+  ),
+  on(
+    PagesDetailsActions.getHashesError,
+    (state, { error }): PagesDetailsState => ({
+      ...state,
+      loadingHashes: false,
+      loadedHashes: true,
+      errorHashes: error,
     }),
   ),
 );

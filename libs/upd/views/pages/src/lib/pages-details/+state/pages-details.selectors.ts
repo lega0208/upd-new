@@ -39,6 +39,16 @@ export const selectPagesDetailsData = createSelector(
   (state: PagesDetailsState) => state.data
 );
 
+export const selectHashesLoaded = createSelector(
+  selectPagesDetailsState,
+  (state: PagesDetailsState) => state.loadedHashes
+);
+
+export const selectHashesLoading = createSelector(
+  selectPagesDetailsState,
+  (state: PagesDetailsState) => state.loadingHashes
+);
+
 export const selectHashesData = createSelector(
   selectPagesDetailsData,
   (data) => data?.hashes,
