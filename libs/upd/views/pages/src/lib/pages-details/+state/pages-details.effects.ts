@@ -11,6 +11,7 @@ import {
 } from '@dua-upd/upd/state';
 import {
   getHashes,
+  getHashesError,
   getHashesSuccess,
   loadPagesDetailsInit,
   loadPagesDetailsSuccess,
@@ -91,7 +92,9 @@ export class PagesDetailsEffects {
           })
           .pipe(
             map((data) => getHashesSuccess({ data })),
-            catchError(() => EMPTY),
+            catchError((error) =>
+              of(getHashesError({ error: error.message || 'Failed to get hashes' })),
+            ),
           ),
       ),
     );
