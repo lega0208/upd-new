@@ -27,21 +27,17 @@ import type {
   IProject,
   PageStatus,
   Direction,
-  UrlHash,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
   dateRangeSplit,
   parseDateRangeString,
   percentChange,
-  wait,
 } from '@dua-upd/utils-common';
 import type { InternalSearchTerm } from '@dua-upd/types-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import { compressString, decompressString } from '@dua-upd/node-utils';
 import { FlowService } from '@dua-upd/api/flow';
-import { BlobStorageService } from '@dua-upd/blob-storage';
-import { format } from 'prettier';
 
 @Injectable()
 export class PagesService {
@@ -58,7 +54,6 @@ export class PagesService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private feedbackService: FeedbackService,
     private flowService: FlowService,
-    @Inject(BlobStorageService.name) private blob: BlobStorageService,
   ) {}
 
   async listPages({ projection, populate }): Promise<Page[]> {
@@ -276,41 +271,6 @@ export class PagesService {
       .lean()
       .exec();
 
-    const urls = await this.db.collections.urls
-      .find({ page: new Types.ObjectId(params.id) })
-      .sort({ date: -1 })
-      .lean()
-      .exec();
-
-    const hash = urls.map((url) => url.hashes).flat();
-
-    const promises: Promise<UrlHash | void>[] = [];
-
-    for (const h of hash) {
-      promises.push(
-        this.blob.blobModels.urls
-          .blob(h.hash)
-          .downloadToString()
-          .then(async (blob) => ({
-            hash: h.hash,
-            date: h.date,
-            blob: await format(blob, {
-              parser: 'html',
-            }),
-          }))
-          .catch((err) => {
-            console.error(err);
-          }),
-      );
-
-      await wait(30);
-    }
-
-    const hashes = (await Promise.allSettled(promises))
-      .filter((p) => p.status === 'fulfilled')
-      .map((p) => p.value as UrlHash)
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
-
     const mostRelevantCommentsAndWords =
       await this.feedbackService.getMostRelevantCommentsAndWords({
         dateRange: parseDateRangeString(params.dateRange),
@@ -387,7 +347,7 @@ export class PagesService {
       mostRelevantCommentsAndWords,
       numComments,
       numCommentsPercentChange,
-      hashes,
+      hashes: [],
       alternatePageId,
     } as PageDetailsData;
 

@@ -40,6 +40,12 @@ export class PagesDetailsFacade {
     .select(PagesDetailsSelectors.selectPagesDetailsLoading)
     .pipe(debounceTime(500));
 
+  loadedHashes$ = this.store.select(PagesDetailsSelectors.selectHashesLoaded);
+
+  loadingHashes$ = this.store
+    .select(PagesDetailsSelectors.selectHashesLoading)
+    .pipe(debounceTime(500));
+
   pagesDetailsData$ = this.store.select(
     PagesDetailsSelectors.selectPagesDetailsData,
   );
@@ -122,8 +128,6 @@ export class PagesDetailsFacade {
 
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
-
-  hashes$ = this.pagesDetailsData$.pipe(map((data) => data?.hashes));
   
   altPageId$ = this.pagesDetailsData$.pipe(map((data) => data?.alternatePageId || 0));
 
@@ -733,6 +737,14 @@ export class PagesDetailsFacade {
   }
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
+
+  hashesData = this.store.selectSignal(
+    PagesDetailsSelectors.selectHashesData
+  );
+
+  getHashes() {
+    this.store.dispatch(PagesDetailsActions.getHashes());
+  }
 
   /**
    * Use the initialization action to perform one

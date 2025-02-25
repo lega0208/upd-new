@@ -10,6 +10,7 @@ import {
   Signal,
   viewChild,
   ViewEncapsulation,
+  WritableSignal,
 } from '@angular/core';
 import { DropdownOption } from '../dropdown/dropdown.component';
 import dayjs from 'dayjs';
@@ -23,7 +24,8 @@ import { Diff } from '@ali-tas/htmldiff-js';
 import { RadioOption } from '../radio/radio.component';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { FR_CA } from '@dua-upd/upd/i18n';
-import { arrayToDictionary } from '@dua-upd/utils-common';
+import { arrayToDictionary, isNullish } from '@dua-upd/utils-common';
+import { UrlHash } from '@dua-upd/types-common';
 interface DiffOptions {
   repeatingWordsAccuracy?: number;
   ignoreWhiteSpaceDifferences?: boolean;
@@ -38,14 +40,8 @@ interface MainConfig {
 }
 
 interface PageConfig {
-  before: HashSelection | null;
-  after: HashSelection | null;
-}
-
-interface HashSelection {
-  hash: string;
-  date: Date;
-  blob: string;
+  before: UrlHash | null;
+  after: UrlHash | null;
 }
 
 @Component({
@@ -56,7 +52,8 @@ interface HashSelection {
 })
 export class PageVersionComponent {
   i18n = inject(I18nFacade);
-  hashes = input<HashSelection[]>([]);
+  loading = input<boolean>(true);
+  hashes = input<UrlHash[]>([]);
   url = input<string>('');
   shadowDOM = signal<ShadowRoot | null>(null);
   sourceContainer = viewChild<ElementRef<HTMLElement>>('sourceContainer');
@@ -67,8 +64,8 @@ export class PageVersionComponent {
     value: 'live',
     description: 'View the live page',
   });
-  before = signal<HashSelection | null>(null);
-  after = signal<HashSelection | null>(null);
+  before = signal<UrlHash | null>(null);
+  after = signal<UrlHash | null>(null);
 
   currentLang = this.i18n.currentLang;
   dateParams = computed(() => {
@@ -78,34 +75,38 @@ export class PageVersionComponent {
   dropdownOptions: Signal<DropdownOption<string>[]> = computed(() => {
     const hashes = this.hashes();
     const currentHash = hashes[0]?.hash;
+    const lang = this.currentLang();
 
-    return hashes.map(({ hash, date }) => ({
-      label: `${dayjs(date).format(this.dateParams())}${hash === currentHash ? ' (Current)' : ''}`,
-      value: hash,
-    }));
+    return hashes.map(({ hash, date }) => {
+      const formattedDate = dayjs(date).locale(lang).format(this.dateParams());
+      const isCurrent = hash === currentHash;
+
+      return {
+        label: `${formattedDate} ${isCurrent ? '(Current)' : ''}`,
+        value: hash,
+      };
+    });
   });
 
   beforeDropdownOptions: Signal<DropdownOption<string>[]> = computed(() => {
     const options = this.dropdownOptions();
-    const selectedHash = this.versionConfig()?.after?.hash;
-
-    if (!selectedHash) return options;
+    if (options.length < 2) return options;
 
     const selectedDate = this.versionConfig()?.after?.date;
-    if (!selectedDate) return options;
+    if (!selectedDate) return options.slice(1);
 
     const hashesDict = arrayToDictionary(this.hashes(), 'hash');
 
-    return options.filter(({ value }) => {
-      const optionDate = value ? hashesDict[value].date : undefined;
+    const filteredOptions = options.filter(({ value }) => {
+      const optionDate = value ? hashesDict[value]?.date : undefined;
       return optionDate && dayjs(optionDate).isBefore(dayjs(selectedDate));
     });
+
+    return filteredOptions.length > 1 ? filteredOptions : options.slice(1);
   });
+
   afterDropdownOptions: Signal<DropdownOption<string>[]> = computed(() => {
     const options = this.dropdownOptions();
-    const selectedHash = this.versionConfig()?.before?.hash;
-
-    if (!selectedHash) return options;
 
     const selectedDate = this.versionConfig()?.before?.date;
     if (!selectedDate) return options;
@@ -240,7 +241,6 @@ export class PageVersionComponent {
       { allowSignalWrites: true },
     );
   }
-
   private handleDocumentClick(event: MouseEvent): void {
     const liveContainer = this.liveContainer()?.nativeElement;
     if (!liveContainer) return;
@@ -406,48 +406,94 @@ export class PageVersionComponent {
   private async adjustDOM(shadowDOM: ShadowRoot, before: string) {
     const $ = load(shadowDOM.innerHTML);
     const $before = load(before);
-
     const newLinks = new Map<
       string,
-      { href: string; element: Cheerio<AnyNode> }[]
+      {
+        text: string;
+        href: string;
+        insText: string;
+        element: Cheerio<AnyNode>;
+      }[]
     >();
 
-    $('a').each((_, el) => {
+    const cleanText = (text: string) => text?.trim().replace(/\s+/g, ' ') || '';
+    
+    const wrapWithSpan = ($el: Cheerio<AnyNode>, title: string) =>
+      `<span class="updated-link" title="${title}">${$.html($el)}</span>`;
+
+    const findMatchingLinks = (beforeText: string) =>
+      newLinks.get(beforeText) ||
+      [...newLinks.values()]
+        .flat()
+        .filter(({ insText }) => insText === beforeText);
+
+    for (const el of $('a').toArray()) {
       const $el = $(el);
-      const text = $el.contents().not('ins').text().trim();
+      const text = cleanText($el.text());
       const href = $el.attr('href');
+      if (!text || !href) continue;
 
-      if (!text || !href) return;
-
-      if (!newLinks.has(text)) {
-        newLinks.set(text, []);
-      }
-      newLinks.get(text)?.push({ href, element: $el });
-    });
-
-    $before('a').each((_, el) => {
-      const $beforeEl = $before(el);
-      const beforeHref = $beforeEl.attr('href');
-      const beforeText = $beforeEl.text().trim();
-
-      const matches = newLinks.get(beforeText);
-
-      if (!matches || matches.some(({ href }) => href === beforeHref)) return;
-
-      const $del = matches.find(({ element }) => element.is('del'))?.element;
-      if ($del && $del.text().trim() === beforeText) {
-        return;
-      }
-
-      matches.forEach(({ element }) => {
-        const oldHref = element.attr('href');
-        element.replaceWith(`
-          <span class="updated-link" title="Old URL: ${beforeHref || oldHref}">
-            ${element}
-          </span>
-        `);
+      newLinks.set(text, newLinks.get(text) || []);
+      newLinks.get(text)?.push({
+        text,
+        insText:
+          cleanText($el.contents().not('ins').text()) ||
+          cleanText($el.contents().children().not('ins').text()),
+        href,
+        element: $el,
       });
-    });
+    }
+
+    for (const el of $before('a').toArray()) {
+      const $el = $before(el);
+      const text = cleanText($el.text());
+      const href = $el.attr('href');
+      if (!text || !href) continue;
+
+      const matches = findMatchingLinks(text);
+      if (!matches.length) continue;
+
+      const matchingKey = [...newLinks.keys()].find((key) =>
+        newLinks.get(key)?.some(({ insText }) => insText === text),
+      );
+      if (matchingKey) newLinks.delete(matchingKey);
+
+      if (matches.some(({ href: matchHref }) => matchHref === href)) {
+        newLinks.delete(text);
+        continue;
+      }
+
+      if (
+        matches
+          .find(({ element }) => element.is('del'))
+          ?.element.text()
+          .trim() === text
+      )
+        newLinks.delete(text);
+      if (
+        matches
+          .find(({ element }) => element.children().is('ins'))
+          ?.element.text()
+          .trim() === text
+      ) {
+        newLinks.delete(text);
+        continue;
+      }
+
+      for (const { insText, element } of matches) {
+        if (insText)
+          element.replaceWith(wrapWithSpan(element, `Old URL: ${href}`));
+      }
+      newLinks.delete(text);
+    }
+
+    // Mark newly added links
+    for (const links of newLinks.values()) {
+      for (const { element, insText } of links) {
+        if (insText)
+          element.replaceWith(wrapWithSpan(element, 'Newly added link'));
+      }
+    }
 
     $('del>del, ins>ins').each((index, element) => {
       const $element = $(element);
@@ -843,11 +889,34 @@ export class PageVersionComponent {
     this.currentIndex.set(index);
   }
 
-  updateSelection(hash: string, side: 'left' | 'right'): void {
-    const version = this.hashes().find((h) => h.hash === hash) || null;
-    if (!version) return;
+  updateSelection(
+    option: DropdownOption<string>,
+    side: 'left' | 'right',
+  ): void {
+    if (!this.hashes()) return;
 
-    side === 'left' ? this.before.set(version) : this.after.set(version);
+    const versionIndex = this.hashes().findIndex(
+      (h) => h.hash === option.value,
+    );
+    const version = versionIndex !== -1 ? this.hashes()[versionIndex] : null;
+
+    const dateOptionIndex = (
+      side === 'left'
+        ? this.beforeDropdownOptions()
+        : this.afterDropdownOptions()
+    ).findIndex((opt) => opt.value === option.value);
+
+    if (side === 'left') {
+      this.before.set(version);
+      this.selectedBeforeIndex.set(
+        dateOptionIndex !== -1 ? dateOptionIndex : null,
+      );
+    } else {
+      this.after.set(version);
+      this.selectedAfterIndex.set(
+        dateOptionIndex !== -1 ? dateOptionIndex : null,
+      );
+    }
   }
 
   private restoreConfig(config: PageConfig): void {
@@ -884,18 +953,28 @@ export class PageVersionComponent {
     );
   }
 
-  getInitialSelection = (side: 'left' | 'right') =>
+  selectedBeforeIndex: WritableSignal<number | null> = signal(null);
+  selectedAfterIndex: WritableSignal<number | null> = signal(null);
+  selectedDate = (
+    side: 'left' | 'right',
+  ): Signal<DropdownOption<string> | null> =>
     computed(() => {
+      if (!this.before() || !this.after()) return null;
+
       const currentHash =
         side === 'left' ? this.before()?.hash : this.after()?.hash;
-      const availableOptions = this.dropdownOptions(); // Ensure dependency is tracked
+      const availableOptions = this.dropdownOptions();
 
-      // Ensure currentHash is valid, otherwise fallback to the first available option
-      return availableOptions.some((opt) => opt.value === currentHash)
-        ? (currentHash ?? '')
-        : availableOptions.length > 0
-          ? availableOptions[0].value
-          : '';
+      const index = availableOptions.findIndex(
+        (option) => option.value === currentHash,
+      );
+
+      if (availableOptions.length === 0 || !this.hashes() || !this.url())
+        return null;
+
+      return isNullish(index) || index === -1
+        ? availableOptions[0]
+        : availableOptions[index];
     });
 
   getInitialSelectionView = () =>
