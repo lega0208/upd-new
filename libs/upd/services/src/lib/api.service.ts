@@ -54,6 +54,10 @@ export class ApiService {
     return this.get('/api/pages/flow', params);
   }
 
+  getHashes(params: ApiParams) {
+    return this.get('/api/hashes', params);
+  }
+
   getOverviewData(params: ApiParams) {
     return this.get<OverviewData>('/api/overall', params);
   }

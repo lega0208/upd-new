@@ -10,6 +10,7 @@ import { PagesDetailsSearchAnalyticsComponent } from './pages-details/pages-deta
 import { PagesDetailsFeedbackComponent } from './pages-details/pages-details-feedback/pages-details-feedback.component';
 import { PagesDetailsFlowComponent } from './pages-details/pages-details-flow/pages-details-flow.component';
 import { PagesDetailsReadabilityComponent } from './pages-details/pages-details-readability/pages-details-readability.component';
+import { PagesDetailsVersionsComponent } from './pages-details/pages-details-versions/pages-details-versions.component';
 
 const routes: Routes = [
   {
@@ -28,6 +29,7 @@ const routes: Routes = [
           { path: 'pagefeedback', component: PagesDetailsFeedbackComponent, data: {title: 'Pages | Page feedback'} },
           { path: 'flow', component: PagesDetailsFlowComponent, data: {title: 'Pages | Flow'} },
           { path: 'readability', component: PagesDetailsReadabilityComponent, data: {title: 'Pages | Readability'} },
+          { path: 'version-history', component: PagesDetailsVersionsComponent, data: {title: 'Pages | Version history'} },
         ],
       },
     ],

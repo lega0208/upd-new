@@ -16,6 +16,7 @@ import type {
   IReadability,
   IAnnotations,
   IReports,
+  UrlHash,
 } from './schema.types';
 import type { MostRelevantCommentsAndWordsByLang } from './feedback.types';
 
@@ -132,6 +133,9 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
   numComments: number;
   numCommentsPercentChange: number | null;
+
+  hashes: UrlHash[];
+  alternatePageId: string;
 }
 
 export interface OverviewAggregatedData {
