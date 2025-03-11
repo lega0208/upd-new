@@ -246,6 +246,7 @@
   "Copy URL": "Copier le lien",
   "Copied successfully!": "Copié avec succès !",
   "Average task success from last UX test": "Réussite moyenne des tâches depuis le dernier test UX",
+  "tooltip-avg_success_last_uxtest": "Taux de réussite moyen du test UX le plus récent (ex. Base de référence, Validation)",
   "Legend": "Légende",
   "lowest": "Le plus bas",
   "low": "Bas",

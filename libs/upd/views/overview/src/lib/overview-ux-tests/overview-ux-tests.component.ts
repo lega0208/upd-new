@@ -117,6 +117,7 @@ export class OverviewUxTestsComponent implements OnInit {
           field: 'lastAvgSuccessRate',
           header: this.i18n.service.translate('Average success rate', lang),
           pipe: 'percent',
+          tooltip: 'tooltip-avg_success_last_uxtest'
         },
         {
           field: 'totalUsers',
