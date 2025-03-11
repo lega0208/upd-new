@@ -82,7 +82,7 @@ export class PageVersionComponent {
       const isCurrent = hash === currentHash;
 
       return {
-        label: `${formattedDate} ${isCurrent ? '(Current)' : ''}`,
+        label: `${formattedDate} ${isCurrent ? `(${this.i18n.service.translate('Current', lang)})` : ''}`,
         value: hash,
       };
     });
