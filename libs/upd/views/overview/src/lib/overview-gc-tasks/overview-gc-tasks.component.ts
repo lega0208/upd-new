@@ -17,4 +17,15 @@ export class OverviewGCTasksComponent {
 
   gcTasksCommentsTable$ = this.overviewService.gcTasksCommentsTable$;
   gcTasksCommentsTableConfig$ = this.overviewService.gcTasksCommentsTableConfig$;
+
+  gcTasksCompletionsAvg$ = this.overviewService.gcTasksCompletionsAvg$;
+  gcTasksCompletionsPercentChange$ = this.overviewService.gcTasksCompletionsPercentChange$;
+
+  gcTasksEasesAvg$ = this.overviewService.gcTasksEasesAvg$;
+  gcTasksEasesPercentChange$ = this.overviewService.gcTasksEasesPercentChange$;
+
+  gcTasksSatisfactionsAvg$ = this.overviewService.gcTasksSatisfactionsAvg$;
+  gcTasksSatisfactionsPercentChange$ = this.overviewService.gcTasksSatisfactionsPercentChange$;
+
+
 }

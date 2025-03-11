@@ -1,3 +1,35 @@
+<div class="container-fluid gx-0">
+  <div class="row">
+    <div class="col">
+      <upd-data-card
+        [current]="gcTasksCompletionsAvg$ | async"
+        [pipe]="'percent'"
+        [comparison]="gcTasksCompletionsPercentChange$ | async"
+        [title]="'gc-tasks-average-completion'"
+        [tooltip]="'tooltip-gc-tasks-average-completion'"
+      ></upd-data-card>
+    </div>
+    <div class="col">
+      <upd-data-card
+        [current]="gcTasksEasesAvg$ | async"
+        [pipe]="'percent'"
+        [comparison]="gcTasksEasesPercentChange$ | async"
+        [title]="'gc-tasks-average-ease'"
+        [tooltip]="'tooltip-gc-tasks-average-ease'"
+      ></upd-data-card>
+    </div>
+    <div class="col">
+      <upd-data-card
+        [current]="gcTasksSatisfactionsAvg$ | async"
+        [pipe]="'percent'"
+        [comparison]="gcTasksSatisfactionsPercentChange$ | async"
+        [title]="'gc-tasks-average-satisfaction'"
+        [tooltip]="'tooltip-gc-tasks-average-satisfaction'"
+      ></upd-data-card>
+    </div>
+  </div>
+</div>
+
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
