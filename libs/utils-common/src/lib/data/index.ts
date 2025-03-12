@@ -34,13 +34,14 @@ export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
  * @returns The data object with percent change properties added
  */
 export const getSelectedPercentChange = <
-  T extends Record<string, any>,
-  const Props extends readonly (keyof T)[],
+  T2 extends Record<string, any>,
+  T extends T2,
+  const Props extends readonly (keyof T2)[],
   const Suffix extends string = 'PercentChange',
 >(
   props: Props extends readonly (string | number)[] ? Props : never,
   data: T,
-  comparisonData: T,
+  comparisonData: T2,
   options: { round?: number; suffix: Suffix } = {
     suffix: 'PercentChange' as Suffix,
   } as const,
@@ -96,14 +97,15 @@ export const getSelectedPercentChange = <
  * // result = [{ id: 1, value: 10, valuePercentChange: 100 }, { id: 2, value: 20, valuePercentChange: 100 }]
  */
 export const getArraySelectedPercentChange = <
-  T extends Record<string, any>,
-  const Props extends readonly (keyof T)[],
+  T2 extends Record<string, any>,
+  T extends T2,
+  const Props extends readonly (keyof T2)[],
   const Suffix extends string = 'PercentChange',
 >(
   props: Props extends readonly (string | number)[] ? Props : never,
-  joinKey: keyof T & string,
+  joinKey: keyof T2 & string,
   data: T[],
-  comparisonData: T[],
+  comparisonData: T2[],
   options: { round?: number; suffix: Suffix } = {
     suffix: 'PercentChange' as Suffix,
   } as const,
@@ -135,13 +137,14 @@ export const getArraySelectedPercentChange = <
  * @returns The data object with absolute change properties added
  */
 export const getSelectedAbsoluteChange = <
-  T extends Record<string, any>,
-  const Props extends readonly (keyof T)[],
+  T2 extends Record<string, any>,
+  T extends T2,
+  const Props extends readonly (keyof T2)[],
   const Suffix extends string = 'Difference',
 >(
   props: Props extends readonly string[] ? Props : never,
   data: T,
-  comparisonData: T,
+  comparisonData: T2,
   options: { round?: number; suffix: Suffix } = {
     suffix: 'Difference' as Suffix,
   } as const,
@@ -180,14 +183,15 @@ export const getSelectedAbsoluteChange = <
  * @returns The data object with absolute change properties added
  */
 export const getArraySelectedAbsoluteChange = <
-  T extends Record<string, any>,
-  const Props extends readonly (keyof T)[],
+  T2 extends Record<string, any>,
+  T extends T2,
+  const Props extends readonly (keyof T2)[],
   const Suffix extends string = 'Difference',
 >(
   props: Props extends readonly string[] ? Props : never,
-  joinKey: keyof T & string,
+  joinKey: keyof T2 & string,
   data: T[],
-  comparisonData: T[],
+  comparisonData: T2[],
   options: { round?: number; suffix: Suffix } = {
     suffix: 'Difference' as Suffix,
   } as const,
