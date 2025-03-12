@@ -712,6 +712,163 @@ export class OverviewFacade {
     ),
   );
 
+  comparisonGcTasksTable$ = this.overviewData$.pipe(
+    map((data) =>
+      data?.comparisonDateRangeData?.gcTasksData.map((d) => {
+        const data_reliability = evaluateDataReliability(d.margin_of_error);
+        const baseData = { ...d, data_reliability };
+
+        return data_reliability === 'Insufficient data'
+          ? {
+              ...baseData,
+              able_to_complete: NaN,
+              ease: NaN,
+              satisfaction: NaN,
+              margin_of_error: NaN,
+            }
+          : baseData;
+      }),
+    ),
+  );
+
+  gcTasksCompletionsAvg$ = this.gcTasksTable$.pipe(
+    map((data) => {
+      const able_to_complete_data = data?.reduce((able_to_complete_arr, item) => {
+        return typeof(item.able_to_complete) === 'number' && !isNaN(item.able_to_complete)
+        ? [...able_to_complete_arr,item.able_to_complete]:able_to_complete_arr},[] as number[]);
+
+      const able_to_complete_total = data?.reduce((sum,item) => { 
+        return typeof(item.able_to_complete) === 'number' && !isNaN(item.able_to_complete)
+        ? sum + item.able_to_complete
+        : sum},0);
+  
+      const able_to_complete_avg = able_to_complete_total as number / (able_to_complete_data as number[])?.length as number;
+
+      return able_to_complete_avg;
+       }),
+  );
+
+  comparissonGcTasksCompletionsAvg$ = this.comparisonGcTasksTable$.pipe(
+    map((data) => {
+      const able_to_complete_data = data?.reduce((able_to_complete_arr, item) => {
+        return typeof(item.able_to_complete) === 'number' && !isNaN(item.able_to_complete)
+        ? [...able_to_complete_arr,item.able_to_complete]:able_to_complete_arr},[] as number[]);
+
+      const able_to_complete_total = data?.reduce((sum,item) => { 
+        return typeof(item.able_to_complete) === 'number' && !isNaN(item.able_to_complete)
+        ? sum + item.able_to_complete
+        : sum},0);
+
+      const able_to_complete_AVG = able_to_complete_total as number / (able_to_complete_data as number[])?.length as number;
+
+      return able_to_complete_AVG;
+       }),
+  );
+
+  gcTasksCompletionsPercentChange$ = combineLatest([
+    this.gcTasksCompletionsAvg$,
+    this.comparissonGcTasksCompletionsAvg$,
+  ]).pipe(
+    map(([gcTasksCompletionsAvg, comparissonGcTasksCompletionsAvg]) => {
+      return percentChange(
+        gcTasksCompletionsAvg,
+        comparissonGcTasksCompletionsAvg,
+      );
+    }),
+  );
+
+  gcTasksEasesAvg$ = this.gcTasksTable$.pipe(
+    map((data) => {
+      const ease_data = data?.reduce((ease_arr, item) => {
+        return typeof(item.ease) === 'number' && !isNaN(item.ease)
+        ? [...ease_arr,item.ease]:ease_arr},[] as number[]);
+
+      const ease_total = data?.reduce((sum,item) => { 
+        return typeof(item.ease) === 'number' && !isNaN(item.ease)
+        ? sum + item.ease
+        : sum},0);
+
+      const ease_avg = ease_total as number / (ease_data as number[])?.length as number;
+
+      return ease_avg;
+       }),
+  );
+
+  comparissonGcTasksEasesAvg$ = this.comparisonGcTasksTable$.pipe(
+    map((data) => {
+      const ease_comparissonData = data?.reduce((ease_arr, item) => {
+        return typeof(item.ease) === 'number' && !isNaN(item.ease)
+        ? [...ease_arr,item.ease]:ease_arr},[] as number[]);
+
+      const ease_comparissonTotal = data?.reduce((sum,item) => { 
+        return typeof(item.ease) === 'number' && !isNaN(item.ease)
+        ? sum + item.ease
+        : sum},0);
+
+      const ease_comparissonAVG = ease_comparissonTotal as number / (ease_comparissonData as number[])?.length as number;
+
+      return ease_comparissonAVG;
+       }),
+  );
+
+  gcTasksEasesPercentChange$ = combineLatest([
+    this.gcTasksEasesAvg$,
+    this.comparissonGcTasksEasesAvg$,
+  ]).pipe(
+    map(([gcTasksEasesAvg, comparissonGcTasksEasesAvg]) => {
+      return percentChange(
+        gcTasksEasesAvg,
+        comparissonGcTasksEasesAvg,
+      );
+    }),
+  );
+
+  gcTasksSatisfactionsAvg$ = this.gcTasksTable$.pipe(
+    map((data) => {
+      const satisfaction_data = data?.reduce((satisfaction_arr, item) => {
+        return typeof(item.satisfaction) === 'number' && !isNaN(item.satisfaction)
+        ? [...satisfaction_arr,item.satisfaction]:satisfaction_arr},[] as number[]);
+
+      const satisfaction_total = data?.reduce((sum,item) => { 
+        return typeof(item.satisfaction) === 'number' && !isNaN(item.satisfaction)
+        ? sum + item.satisfaction
+        : sum},0);
+
+      const satisfaction_avg = satisfaction_total as number / (satisfaction_data as number[])?.length as number;
+
+      return satisfaction_avg;
+       }),
+  );
+
+  comparissonGcTasksSatisfactionsAvg$ = this.comparisonGcTasksTable$.pipe(
+    map((data) => {
+      const satisfaction_comparisonData = data?.reduce((satisfaction_comparisonArr, item) => {
+        return typeof(item.satisfaction) === 'number' && !isNaN(item.satisfaction)
+        ? [...satisfaction_comparisonArr,item.satisfaction]:satisfaction_comparisonArr},[] as number[]);
+      
+      const satisfaction_comparisonTotal = data?.reduce((sum,item) => { 
+        return typeof(item.satisfaction) === 'number' && !isNaN(item.satisfaction)
+        ? sum + item.satisfaction
+        : sum},0);
+
+      const satisfaction_comparissonAVG = satisfaction_comparisonTotal as number / (satisfaction_comparisonData as number[])?.length as number;
+
+      return satisfaction_comparissonAVG;
+       }),
+  );
+
+  gcTasksSatisfactionsPercentChange$ = combineLatest([
+    this.gcTasksSatisfactionsAvg$,
+    this.comparissonGcTasksSatisfactionsAvg$,
+  ]).pipe(
+    map(([gcTasksSatisfactionsAvg, comparissonGcTasksSatisfactionsAvg]) => {
+      return percentChange(
+        gcTasksSatisfactionsAvg,
+        comparissonGcTasksSatisfactionsAvg,
+      );
+    }),
+  );
+
   gcTasksTableConfig$ = createColConfigWithI18n(this.i18n.service, [
     { field: 'gc_task', header: 'gc_task', translate: true },
     { field: 'theme', header: 'theme', translate: true },
