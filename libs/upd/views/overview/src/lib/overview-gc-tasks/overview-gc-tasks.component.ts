@@ -1,7 +1,4 @@
-import {
-  Component,
-  inject,
-} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
@@ -16,16 +13,17 @@ export class OverviewGCTasksComponent {
   gcTasksTableConfig$ = this.overviewService.gcTasksTableConfig$;
 
   gcTasksCommentsTable$ = this.overviewService.gcTasksCommentsTable$;
-  gcTasksCommentsTableConfig$ = this.overviewService.gcTasksCommentsTableConfig$;
+  gcTasksCommentsTableConfig$ =
+    this.overviewService.gcTasksCommentsTableConfig$;
 
-  gcTasksCompletionsAvg$ = this.overviewService.gcTasksCompletionsAvg$;
-  gcTasksCompletionsPercentChange$ = this.overviewService.gcTasksCompletionsPercentChange$;
+  gcTasksCompletionAvg$ = this.overviewService.gcTasksCompletionAvg$;
+  gcTasksCompletionPercentChange$ =
+    this.overviewService.gcTasksCompletionPercentChange$;
 
-  gcTasksEasesAvg$ = this.overviewService.gcTasksEasesAvg$;
-  gcTasksEasesPercentChange$ = this.overviewService.gcTasksEasesPercentChange$;
+  gcTasksEaseAvg$ = this.overviewService.gcTasksEaseAvg$;
+  gcTasksEasePercentChange$ = this.overviewService.gcTasksEasePercentChange$;
 
-  gcTasksSatisfactionsAvg$ = this.overviewService.gcTasksSatisfactionsAvg$;
-  gcTasksSatisfactionsPercentChange$ = this.overviewService.gcTasksSatisfactionsPercentChange$;
-
-
+  gcTasksSatisfactionAvg$ = this.overviewService.gcTasksSatisfactionAvg$;
+  gcTasksSatisfactionPercentChange$ =
+    this.overviewService.gcTasksSatisfactionPercentChange$;
 }
