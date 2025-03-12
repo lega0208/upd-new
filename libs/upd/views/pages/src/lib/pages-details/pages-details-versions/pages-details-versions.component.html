@@ -4,6 +4,8 @@
       <upd-card
         [title]="'version-history'"
         [titleTooltip]="'tooltip-versioning'"
+        modal="{{ 'guidance-versioning' | translate }}"
+        modalSize="lg"
       >
         <upd-page-version [hashes]="hashes()" [url]="url()" [loading]="loadingHashes()"></upd-page-version>
       </upd-card>

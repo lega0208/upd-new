@@ -4,14 +4,14 @@
   </div>
 } @else {
   @if (hashes().length <= 1) {
-    <p>Does not have a comparison</p>
+    <p>{{ 'no-comparison-available' | translate }}</p>
   } @else {
     <div class="row g-3 align-items-center">
       <div class="col-md-8 d-flex justify-content-start">
         <!-- Previous Version Dropdown -->
         <div class="me-3">
           <label for="previous-version" class="form-label me-2"
-            >Previous version:</label
+            >{{ 'previous-version' | translate }}</label
           >
           <upd-dropdown
             id="previous-version"
@@ -26,7 +26,7 @@
         <!-- Current Version Dropdown -->
         <div>
           <label for="current-version" class="form-label me-2"
-            >Compared to:</label
+            >{{ 'compared-to' | translate }}</label
           >
           <upd-dropdown
             id="current-version"
@@ -44,7 +44,7 @@
           @if (elements().length > 0) {
             <div class="slide-content text-end">
               <p class="change-text">
-                Total: {{ elements().length }} updates |
+                {{ (elements().length === 1 ? 'total-changesOne' : 'total-changesOther') | translate:{ num: elements().length } }}  |
                 {{ currentIndex() === 0 ? '-' : currentIndex() }}/{{
                   elements().length
                 }}
@@ -58,7 +58,12 @@
               </div>
             </div>
           } @else if (elements().length === 0) {
-            <p class="text-end">No updates!</p>
+            <div class="slide-content text-end">
+              <p class="change-text">
+                {{ 'total-changesOther' | translate:{ num: elements().length } }}
+              </p>
+            </div>
+            <!-- <p class="text-end">{{ 'no-pageversion-changes' | translate }}</p> -->
           }
         }
       </div>
@@ -67,7 +72,7 @@
     <!-- Output Section -->
     <div class="row g-3 mt-1">
       <div class="col-12">
-        <label for="output-selection" class="form-label">View:</label>
+        <label for="output-selection" class="form-label">{{ 'View' | translate }}</label>
         <upd-radio
           id="output-selection"
           class="w-100"
@@ -95,17 +100,11 @@
                     : 'none',
               }"
             ></div>
-            <span class="legend-text">{{ item.text }}</span>
+            <span class="legend-text">{{ item.text | translate }}</span>
           </div>
-
-          <upd-modal
-            [modalTitle]="'Lorem ipsum'"
-            [modalContent]="'Lorem ipsum'"
-          >
-          </upd-modal>
         </div>
         <div class="col-12">
-          <div #liveContainer class="live-container"></div>
+          <div #liveContainer class="live-container mt-3"></div>
         </div>
       </div>
 
@@ -118,7 +117,7 @@
           [initialSelection]="outputFormat()"
           (selectOption)="changeOutputFormat($event.value || '')"
         ></upd-dropdown>
-        <div #sourceContainer></div>
+        <div #sourceContainer class="mt-3"></div>
       </div>
     </div>
   }
