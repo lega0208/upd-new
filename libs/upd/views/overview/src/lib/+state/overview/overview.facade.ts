@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -535,6 +536,11 @@ export class OverviewFacade {
     }),
   );
 
+  topTasksTable = toSignal(
+    this.overviewData$.pipe(map((data) => data?.topTasksTable || [])),
+    { initialValue: [] },
+  );
+
   searchAssessmentData$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
@@ -687,7 +693,6 @@ export class OverviewFacade {
     ),
   );
 
-
   gcTasksTable$ = this.overviewData$.pipe(
     map((data) =>
       data?.dateRangeData?.gcTasksData.map((d) => {
@@ -835,8 +840,11 @@ export class OverviewFacade {
         },
         width: '160px',
       },
-    ] as ColumnConfig<UnwrapObservable<typeof this.top5IncreasedCalldriverTopics$>>[]);
-  
+    ] as ColumnConfig<
+      UnwrapObservable<typeof this.top5IncreasedCalldriverTopics$>
+    >[],
+  );
+
   top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
       data.top5DecreasedCalldriverTopics.map((topicData) => ({
@@ -876,7 +884,10 @@ export class OverviewFacade {
         },
         width: '160px',
       },
-    ] as ColumnConfig<UnwrapObservable<typeof this.top5DecreasedCalldriverTopics$>>[]);
+    ] as ColumnConfig<
+      UnwrapObservable<typeof this.top5DecreasedCalldriverTopics$>
+    >[],
+  );
 
   top20SearchTermsEn$ = this.overviewData$.pipe(
     map((data) => data?.searchTermsEn),

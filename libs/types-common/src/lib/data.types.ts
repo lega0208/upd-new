@@ -277,6 +277,19 @@ export interface OverviewData
     allTopTasks: number;
     topSuccessRates: SuccessRates;
   };
+  topTasksTable: {
+    _id: string;
+    tmf_rank: number;
+    title: string;
+    calls_per_100_visits_percent_change: number | null;
+    calls_per_100_visits_difference: number | null;
+    dyf_no_per_1000_visits_percent_change: number | null;
+    dyf_no_per_1000_visits_difference: number | null;
+    latest_ux_success: number | null;
+    latest_success_rate_difference: number | null;
+    latest_success_rate_percent_change: number | null;
+    survey_completed: number;
+  }[];
 }
 
 export type OverviewFeedback = {

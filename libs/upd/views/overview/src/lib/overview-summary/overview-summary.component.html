@@ -48,7 +48,7 @@
               : {
                   passed: (kpiSearchAssessmentPassed$ | async)?.passed,
                   total: (kpiSearchAssessmentPassed$ | async)?.total,
-                  date: satEnd
+                  date: satEnd,
                 }
         }}
       </upd-apex-radial-bar>
@@ -69,7 +69,7 @@
         <div>
           <ng-container
             *ngIf="{
-              value: improvedKpiSuccessRateDifference$ | async
+              value: improvedKpiSuccessRateDifference$ | async,
             } as improvedKpi"
           >
             <span
@@ -86,7 +86,7 @@
                 | translate
                   : {
                       unique: (improvedKpiUniqueTasks$ | async) || 0,
-                      total: (uniqueTaskTestedLatestTestKpi$ | async) || 0
+                      total: (uniqueTaskTestedLatestTestKpi$ | async) || 0,
                     }
             }}
           </ng-container>
@@ -184,7 +184,7 @@
         [yAxis]="'Date range' | translate"
         [xAxis]="[
           (fullDateRangeLabel$ | async) || [],
-          (fullComparisonDateRangeLabel$ | async) || []
+          (fullComparisonDateRangeLabel$ | async) || [],
         ]"
         [tableCols]="dyfTableCols"
         [table]="dyfChart$ | async"
@@ -192,6 +192,22 @@
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"
         [stacked]="{ isStacked: true, isStacked100: true, hasDataLabels: true }"
       ></upd-apex-bar>
-      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid my-4 gx-0">
+  <div class="row">
+    <div class="col-sm-12">
+      <upd-card title="Top 50 tasks" titleSize="h5">
+        <upd-data-table
+          id="overview-top-tasks-"
+          [data]="topTasksTable()"
+          [cols]="topTasksTableCols"
+          [displayRows]="25"
+          [loading]="(loading$ | async) !== false"
+        ></upd-data-table>
+      </upd-card>
+    </div>
   </div>
 </div>

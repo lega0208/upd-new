@@ -446,10 +446,11 @@
   "decrease from Baseline UX tests": "Diminution de {{value}} par rapport aux tests UX de bases",
   " from Baseline UX tests": "Amélioration de {{value}} par rapport aux tests UX de bases",
 
-  "kpi-ux-test-top50-title": "Taux de réussite moyen des 50 principales tâches",
+  "kpi-ux-test-top50-title": "Taux de réussite moyen des 50 tâches prioritaires",
   "kpi-ux-test-top50-tooltip": "Taux de réussite moyen des tâches classées parmi les 50 premières selon les métriques de performance du trimestre précédent.",
   "kpi-ux-test-top50-guidance": "<strong>Qu'est-ce que c'est?</strong>  <br />Ce KPI mesure le taux de réussite moyen des tâches classées parmi les 50 premières du trimestre précédent. Il inclut uniquement les tâches améliorées, qui ont à la fois des tests UX de base et de validation. Il mesure également l'amélioration en comparant le taux de réussite moyen des tests UX précédents (de base) avec les tests UX les plus récents (validation) pour ces tâches.<br />L'objectif de cet indicateur de performance clé est de 80 %.<br /><br /><strong>Comment cet ICR est-il calculé?</strong>  <br />A: La somme des taux de réussite de toutes les tâches améliorées parmi les 50 premières dans les tests de validation les plus récents<br />B: Nombre total de tâches améliorées testées<br /> <br />A/B<br /><br />L'amélioration est la différence entre ce taux de réussite moyen et le taux de réussite moyen des mêmes tâches dans leurs tests de base.<br /><br />",
   "kpi-ux-test-top50-text": "{{unique}}/{{total}} tâches uniques testées",
+  "Top 50 tasks": "50 tâches prioritaires",
 
   "Total searches": "Recherches totales",
 

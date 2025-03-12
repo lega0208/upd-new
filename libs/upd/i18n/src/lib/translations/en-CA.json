@@ -450,6 +450,7 @@
   "kpi-ux-test-top50-tooltip": "Average Success Rate of tasks ranked in the top 50 based on performance metrics from the previous quarter",
   "kpi-ux-test-top50-guidance": "<strong>What is this?</strong>  <br />This KPI measures the average success rate of tasks ranked in the top 50 from the previous quarter. It includes only improved tasks, which have both baseline and validation UX tests. It also measures improvement by comparing the average success rate of previous UX tests (baseline) with the most recent UX tests (validation) for these tasks.<br />The target for this Key performance indicator is 80%.<br /><br /><strong>How is this KPI calculated?</strong>  <br />A: The sum of success rates for all improved top 50 tasks in the latest validation tests<br />B: Total number of improved tasks tested<br /> <br />A/B<br /><br />Improvement is the difference between this average success rate and the average success rate of the same tasks in their baseline tests.<br /><br />",
   "kpi-ux-test-top50-text": "{{unique}}/{{total}} unique tasks tested",
+  "Top 50 tasks": "Top 50 tasks",
 
   "Total searches": "Total searches",
 

@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import type { FilterQuery, Model } from 'mongoose';
+import { pick } from 'rambdax';
 import type {
   CallDriverModel,
   OverallDocument,
@@ -51,6 +52,7 @@ import {
   avg,
   chunkMap,
   dateRangeSplit,
+  getAvgSuccessFromLatestTests,
   getImprovedKpiSuccessRates,
   getImprovedKpiTopSuccessRates,
   getLatestTestData,
@@ -202,20 +204,61 @@ export class OverallService {
     const lastQuarter =
       getStructuredDateRangesWithComparison().quarter.dateRange;
 
-    const topTasksDateRange = {
+    const lastQuarterDateRange = {
       start: lastQuarter.start.toDate(),
       end: lastQuarter.end.toDate(),
     };
 
-    const topTaskIds =
-      await this.db.views.tasks.getTop50TaskIds(topTasksDateRange);
+    const lastQuarterTopTaskIds =
+      await this.db.views.tasks.getTop50TaskIds(lastQuarterDateRange);
 
     const improvedKpiTopSuccessRate = getImprovedKpiTopSuccessRates(
-      topTaskIds,
+      lastQuarterTopTaskIds,
       uxTests,
     );
 
     const totalTasks = await this.taskModel.countDocuments().exec();
+
+    const topTasksTable = (
+      await this.db.views.tasks.getAllWithComparisons(
+        parseDateRangeString(params.dateRange),
+        parseDateRangeString(params.comparisonDateRange),
+      )
+    )
+      .filter((task) => task.top_task)
+      .map((taskData) => {
+        const { avgTestSuccess, percentChange: avgSuccessPercentChange } =
+          getAvgSuccessFromLatestTests(taskData.ux_tests);
+
+        const latest_success_rate_percent_change = percentChange(
+          avgTestSuccess,
+          avgTestSuccess - avgSuccessPercentChange,
+        );
+
+        const latest_success_rate_difference = avgSuccessPercentChange * 100;
+
+        return {
+          _id: taskData._id.toString(),
+          ...pick(
+            [
+              'tmf_rank',
+              'title',
+              'calls_per_100_visits_percent_change',
+              'calls_per_100_visits_difference',
+              'dyf_no_per_1000_visits_percent_change',
+              'dyf_no_per_1000_visits_difference',
+              'latest_ux_success',
+              'latest_success_rate_difference',
+              'latest_success_rate_percent_change',
+              'survey_completed',
+            ],
+            taskData,
+          ),
+          latest_ux_success: avgTestSuccess,
+          latest_success_rate_difference,
+          latest_success_rate_percent_change,
+        };
+      });
 
     const results = {
       dateRange: params.dateRange,
@@ -261,6 +304,7 @@ export class OverallService {
       searchTermsEn: await this.getTopSearchTerms(params, 'en'),
       searchTermsFr: await this.getTopSearchTerms(params, 'fr'),
       totalTasks,
+      topTasksTable,
     };
 
     await this.cacheManager.set(
