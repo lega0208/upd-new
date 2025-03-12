@@ -1,8 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { TasksDetailsFacade } from './+state/tasks-details.facade';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { EN_CA } from '@dua-upd/upd/i18n';
 import type { ColumnConfig } from '@dua-upd/types-common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { globalColours, getOptimalTextcolour } from '@dua-upd/utils-common';
 
 @Component({
   selector: 'upd-task-details',
@@ -26,6 +28,18 @@ export class TaskDetailsComponent implements OnInit {
 
   projects$ = this.taskDetailsService.projects$;
   projectsCol: ColumnConfig = { field: '', header: '' };
+
+  colours = globalColours;
+  getOptimalTextColour = getOptimalTextcolour;
+  
+  taskHeader = toSignal(this.taskDetailsService.taskHeader$);
+  
+  audience = computed(() => {
+    return this.taskHeader()?.audience ?? [];
+  });
+  service = computed(() => {
+    return this.taskHeader()?.service ?? [];
+  });
 
   ngOnInit() {
     this.taskDetailsService.init();
