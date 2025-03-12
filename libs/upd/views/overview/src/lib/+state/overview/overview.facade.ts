@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -13,7 +14,11 @@ import type {
   OverviewAggregatedData,
   OverviewData,
 } from '@dua-upd/types-common';
-import { percentChange, type UnwrapObservable } from '@dua-upd/utils-common';
+import {
+  avg,
+  percentChange,
+  type UnwrapObservable,
+} from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import * as OverviewActions from './overview.actions';
 import * as OverviewSelectors from './overview.selectors';
@@ -535,6 +540,11 @@ export class OverviewFacade {
     }),
   );
 
+  topTasksTable = toSignal(
+    this.overviewData$.pipe(map((data) => data?.topTasksTable || [])),
+    { initialValue: [] },
+  );
+
   searchAssessmentData$ = combineLatest([
     this.overviewData$,
     this.currentLang$,
@@ -687,7 +697,6 @@ export class OverviewFacade {
     ),
   );
 
-
   gcTasksTable$ = this.overviewData$.pipe(
     map((data) =>
       data?.dateRangeData?.gcTasksData.map((d) => {
@@ -704,6 +713,126 @@ export class OverviewFacade {
             }
           : baseData;
       }),
+    ),
+  );
+
+  comparisonGcTasksTable$ = this.overviewData$.pipe(
+    map((data) =>
+      data?.comparisonDateRangeData?.gcTasksData.map((d) => {
+        const data_reliability = evaluateDataReliability(d.margin_of_error);
+        const baseData = { ...d, data_reliability };
+
+        return data_reliability === 'Insufficient data'
+          ? {
+              ...baseData,
+              able_to_complete: NaN,
+              ease: NaN,
+              satisfaction: NaN,
+              margin_of_error: NaN,
+            }
+          : baseData;
+      }),
+    ),
+  );
+
+  gcTasksCompletionAvg$ = this.gcTasksTable$.pipe(
+    map((data) =>
+      data?.length
+        ? avg(
+            data
+              .map((d) => d.able_to_complete)
+              .filter((value) => value === 0 || value),
+          )
+        : null,
+    ),
+  );
+
+  comparisonGcTasksCompletionsAvg$ = this.comparisonGcTasksTable$.pipe(
+    map((data) =>
+      data?.length
+        ? avg(
+            data
+              .map((d) => d.able_to_complete)
+              .filter((value) => value === 0 || value),
+          )
+        : null,
+    ),
+  );
+
+  gcTasksCompletionPercentChange$ = combineLatest([
+    this.gcTasksCompletionAvg$,
+    this.comparisonGcTasksCompletionsAvg$,
+  ]).pipe(
+    map(([gcTasksCompletionsAvg, comparisonGcTasksCompletionsAvg]) =>
+      gcTasksCompletionsAvg !== null && comparisonGcTasksCompletionsAvg !== null
+        ? percentChange(gcTasksCompletionsAvg, comparisonGcTasksCompletionsAvg)
+        : null,
+    ),
+  );
+
+  gcTasksEaseAvg$ = this.gcTasksTable$.pipe(
+    map((data) =>
+      data?.length
+        ? avg(data.map((d) => d.ease).filter((value) => value === 0 || value))
+        : null,
+    ),
+  );
+
+  comparisonGcTasksEaseAvg$ = this.comparisonGcTasksTable$.pipe(
+    map((data) =>
+      data?.length
+        ? avg(data.map((d) => d.ease).filter((value) => value === 0 || value))
+        : null,
+    ),
+  );
+
+  gcTasksEasePercentChange$ = combineLatest([
+    this.gcTasksEaseAvg$,
+    this.comparisonGcTasksEaseAvg$,
+  ]).pipe(
+    map(([gcTasksEaseAvg, comparisonGcTasksEaseAvg]) =>
+      gcTasksEaseAvg !== null && comparisonGcTasksEaseAvg !== null
+        ? percentChange(gcTasksEaseAvg, comparisonGcTasksEaseAvg)
+        : null,
+    ),
+  );
+
+  gcTasksSatisfactionAvg$ = this.gcTasksTable$.pipe(
+    map((data) =>
+      data?.length
+        ? avg(
+            data
+              .map((d) => d.satisfaction)
+              .filter((value) => value === 0 || value),
+          )
+        : null,
+    ),
+  );
+
+  comparisonGcTasksSatisfactionAvg$ = this.comparisonGcTasksTable$.pipe(
+    map((data) =>
+      data?.length
+        ? avg(
+            data
+              .map((d) => d.satisfaction)
+              .filter((value) => value === 0 || value),
+          )
+        : null,
+    ),
+  );
+
+  gcTasksSatisfactionPercentChange$ = combineLatest([
+    this.gcTasksSatisfactionAvg$,
+    this.comparisonGcTasksSatisfactionAvg$,
+  ]).pipe(
+    map(([gcTasksSatisfactionAvg, comparisonGcTasksSatisfactionAvg]) =>
+      gcTasksSatisfactionAvg !== null &&
+      comparisonGcTasksSatisfactionAvg !== null
+        ? percentChange(
+            gcTasksSatisfactionAvg,
+            comparisonGcTasksSatisfactionAvg,
+          )
+        : null,
     ),
   );
 
@@ -835,8 +964,11 @@ export class OverviewFacade {
         },
         width: '160px',
       },
-    ] as ColumnConfig<UnwrapObservable<typeof this.top5IncreasedCalldriverTopics$>>[]);
-  
+    ] as ColumnConfig<
+      UnwrapObservable<typeof this.top5IncreasedCalldriverTopics$>
+    >[],
+  );
+
   top5DecreasedCalldriverTopics$ = this.overviewData$.pipe(
     map((data) =>
       data.top5DecreasedCalldriverTopics.map((topicData) => ({
@@ -876,7 +1008,10 @@ export class OverviewFacade {
         },
         width: '160px',
       },
-    ] as ColumnConfig<UnwrapObservable<typeof this.top5DecreasedCalldriverTopics$>>[]);
+    ] as ColumnConfig<
+      UnwrapObservable<typeof this.top5DecreasedCalldriverTopics$>
+    >[],
+  );
 
   top20SearchTermsEn$ = this.overviewData$.pipe(
     map((data) => data?.searchTermsEn),

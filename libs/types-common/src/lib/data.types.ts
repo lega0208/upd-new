@@ -16,6 +16,7 @@ import type {
   IReadability,
   IAnnotations,
   IReports,
+  IFeedback,
   UrlHash,
 } from './schema.types';
 import type { MostRelevantCommentsAndWordsByLang } from './feedback.types';
@@ -276,6 +277,19 @@ export interface OverviewData
     allTopTasks: number;
     topSuccessRates: SuccessRates;
   };
+  topTasksTable: {
+    _id: string;
+    tmf_rank: number;
+    title: string;
+    calls_per_100_visits_percent_change: number | null;
+    calls_per_100_visits_difference: number | null;
+    dyf_no_per_1000_visits_percent_change: number | null;
+    dyf_no_per_1000_visits_difference: number | null;
+    latest_ux_success: number | null;
+    latest_success_rate_difference: number | null;
+    latest_success_rate_percent_change: number | null;
+    survey_completed: number;
+  }[];
 }
 
 export type OverviewFeedback = {
@@ -292,6 +306,10 @@ export type OverviewFeedback = {
     sections?: string;
   }[];
   feedbackByDay: { date: string; sum: number }[];
+};
+
+export type PartialOverviewFeedback = OverviewFeedback & {
+  mostRelevantCommentsAndWords: { parts: number };
 };
 
 export type InternalSearchTerm = {
@@ -641,3 +659,15 @@ export type PageFlowData = {
   entries?: number;
   exits?: number;
 };
+
+export type CustomReportsComment = Pick<IFeedback, 'comment' | 'date' | 'url'> & {
+  taskTitles: string[];
+  projectTitles: string[];
+};
+
+export type CustomReportsFeedback = {
+  comments: CustomReportsComment[];
+  selectedPages: { _id: string; title: string }[];
+  selectedTasks: { _id: string; title: string; pages: string[] }[];
+  selectedProjects: { _id: string; title: string; pages: string[] }[];
+}

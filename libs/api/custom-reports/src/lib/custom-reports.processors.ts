@@ -93,9 +93,11 @@ export class FetchAndProcessDataProcessor extends WorkerHost {
     } catch (err) {
       console.error('\nAn error occurred processing child job:');
       console.error('jobId: ', job.id);
+      console.error('job state: ', job.getState());
       console.error('parent report id: ', job.data.reportId);
       console.error('AA query: ', job.data.query);
       console.error((<Error>err).stack);
+
       throw err;
     }
   }

@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import type { FilterQuery, Model } from 'mongoose';
+import { pick } from 'rambdax';
 import type {
   CallDriverModel,
   OverallDocument,
@@ -42,13 +43,16 @@ import type {
   OverviewProjectData,
   OverviewProject,
   OverallSearchTerm,
-  OverviewFeedback,
+  PartialOverviewFeedback,
+  ChunkedMostRelevantCommentsAndWords,
 } from '@dua-upd/types-common';
 import {
   arrayToDictionary,
   AsyncLogTiming,
   avg,
+  chunkMap,
   dateRangeSplit,
+  getAvgSuccessFromLatestTests,
   getImprovedKpiSuccessRates,
   getImprovedKpiTopSuccessRates,
   getLatestTestData,
@@ -200,20 +204,61 @@ export class OverallService {
     const lastQuarter =
       getStructuredDateRangesWithComparison().quarter.dateRange;
 
-    const topTasksDateRange = {
+    const lastQuarterDateRange = {
       start: lastQuarter.start.toDate(),
       end: lastQuarter.end.toDate(),
     };
 
-    const topTaskIds =
-      await this.db.views.tasks.getTop50TaskIds(topTasksDateRange);
+    const lastQuarterTopTaskIds =
+      await this.db.views.tasks.getTop50TaskIds(lastQuarterDateRange);
 
     const improvedKpiTopSuccessRate = getImprovedKpiTopSuccessRates(
-      topTaskIds,
+      lastQuarterTopTaskIds,
       uxTests,
     );
 
     const totalTasks = await this.taskModel.countDocuments().exec();
+
+    const topTasksTable = (
+      await this.db.views.tasks.getAllWithComparisons(
+        parseDateRangeString(params.dateRange),
+        parseDateRangeString(params.comparisonDateRange),
+      )
+    )
+      .filter((task) => task.top_task)
+      .map((taskData) => {
+        const { avgTestSuccess, percentChange: avgSuccessPercentChange } =
+          getAvgSuccessFromLatestTests(taskData.ux_tests);
+
+        const latest_success_rate_percent_change = percentChange(
+          avgTestSuccess,
+          avgTestSuccess - avgSuccessPercentChange,
+        );
+
+        const latest_success_rate_difference = avgSuccessPercentChange * 100;
+
+        return {
+          _id: taskData._id.toString(),
+          ...pick(
+            [
+              'tmf_rank',
+              'title',
+              'calls_per_100_visits_percent_change',
+              'calls_per_100_visits_difference',
+              'dyf_no_per_1000_visits_percent_change',
+              'dyf_no_per_1000_visits_difference',
+              'latest_ux_success',
+              'latest_success_rate_difference',
+              'latest_success_rate_percent_change',
+              'survey_completed',
+            ],
+            taskData,
+          ),
+          latest_ux_success: avgTestSuccess,
+          latest_success_rate_difference,
+          latest_success_rate_percent_change,
+        };
+      });
 
     const results = {
       dateRange: params.dateRange,
@@ -259,6 +304,7 @@ export class OverallService {
       searchTermsEn: await this.getTopSearchTerms(params, 'en'),
       searchTermsFr: await this.getTopSearchTerms(params, 'fr'),
       totalTasks,
+      topTasksTable,
     };
 
     await this.cacheManager.set(
@@ -270,7 +316,7 @@ export class OverallService {
   }
 
   @AsyncLogTiming
-  async getFeedback(params: ApiParams): Promise<OverviewFeedback> {
+  async getFeedback(params: ApiParams): Promise<PartialOverviewFeedback> {
     const cacheKey = `OverviewFeedback-${params.dateRange}-${params['ipd']}`;
 
     const cachedData = await this.cacheManager.store.get<string>(cacheKey).then(
@@ -278,7 +324,9 @@ export class OverallService {
         cachedData &&
         // it's actually still a string here, but we want to avoid deserializing it
         // and then reserializing it to send over http while still keeping our types intact
-        ((await decompressString(cachedData)) as unknown as OverviewFeedback),
+        ((await decompressString(
+          cachedData,
+        )) as unknown as PartialOverviewFeedback),
     );
 
     if (cachedData) {
@@ -326,8 +374,58 @@ export class OverallService {
       }))
       .sort((a, b) => (b.sum || 0) - (a.sum || 0));
 
+    const chunkSize = 80000;
+
+    const enCommentsChunks = {
+      cacheKey: `${cacheKey}-en-comments`,
+      chunks: chunkMap(
+        mostRelevantCommentsAndWords.en.comments,
+        (chunk) => chunk,
+        chunkSize,
+      ),
+    };
+
+    const enWordsChunks = {
+      cacheKey: `${cacheKey}-en-words`,
+      chunks: chunkMap(
+        mostRelevantCommentsAndWords.en.words,
+        (chunk) => chunk,
+        chunkSize,
+      ),
+    };
+
+    const frCommentsChunks = {
+      cacheKey: `${cacheKey}-fr-comments`,
+      chunks: chunkMap(
+        mostRelevantCommentsAndWords.fr.comments,
+        (chunk) => chunk,
+        chunkSize,
+      ),
+    };
+
+    const frWordsChunks = {
+      cacheKey: `${cacheKey}-fr-words`,
+      chunks: chunkMap(
+        mostRelevantCommentsAndWords.fr.words,
+        (chunk) => chunk,
+        chunkSize,
+      ),
+    };
+
+    // chunks will likely not be the same length, but to make it easier,
+    // we'll still get everything at the same time when fetching and just
+    // return an empty array if everything is already fetched for that language/key
+    const longestChunks = Math.max(
+      enCommentsChunks.chunks.length,
+      enWordsChunks.chunks.length,
+      frCommentsChunks.chunks.length,
+      frWordsChunks.chunks.length,
+    );
+
     const overviewFeedback = {
-      mostRelevantCommentsAndWords,
+      mostRelevantCommentsAndWords: {
+        parts: longestChunks,
+      },
       numComments,
       numCommentsPercentChange,
       commentsByPage,
@@ -339,12 +437,78 @@ export class OverallService {
       })),
     };
 
+    for (const i of Array.from({ length: longestChunks }).keys()) {
+      for (const chunkSet of [
+        enCommentsChunks,
+        enWordsChunks,
+        frCommentsChunks,
+        frWordsChunks,
+      ]) {
+        const chunkKey = `${chunkSet.cacheKey}-${i}`;
+
+        await compressString(JSON.stringify(chunkSet.chunks[i] || [])).then(
+          (compressed) => {
+            this.cacheManager.set(chunkKey, compressed);
+          },
+        );
+
+        delete chunkSet.chunks[i];
+      }
+      logMemoryUsage(`Cached chunked data for part ${i}`);
+    }
+
     await this.cacheManager.set(
       cacheKey,
       await compressString(JSON.stringify(overviewFeedback)),
     );
 
-    return overviewFeedback;
+    // it's actually still a string here, but we want to avoid deserializing it
+    // and then reserializing it to send over http while still keeping our types intact
+    return overviewFeedback as unknown as PartialOverviewFeedback;
+  }
+
+  async getCachedCommentsAndWordsChunk(
+    params: ApiParams,
+    chunkIndex: number,
+  ): Promise<ChunkedMostRelevantCommentsAndWords> {
+    const cacheKey = `OverviewFeedback-${params.dateRange}-${params['ipd']}`;
+
+    const enCommentsKey = `${cacheKey}-en-comments-${chunkIndex}`;
+    const enWordsKey = `${cacheKey}-en-words-${chunkIndex}`;
+    const frCommentsKey = `${cacheKey}-fr-comments-${chunkIndex}`;
+    const frWordsKey = `${cacheKey}-fr-words-${chunkIndex}`;
+
+    const enComments = await this.cacheManager.store
+      .get<string>(enCommentsKey)
+      .then(
+        async (cachedData) =>
+          cachedData && (await decompressString(cachedData)),
+      );
+
+    const enWords = await this.cacheManager.store
+      .get<string>(enWordsKey)
+      .then(
+        async (cachedData) =>
+          cachedData && (await decompressString(cachedData)),
+      );
+    const frComments = await this.cacheManager.store
+      .get<string>(frCommentsKey)
+      .then(
+        async (cachedData) =>
+          cachedData && (await decompressString(cachedData)),
+      );
+    const frWords = await this.cacheManager.store
+      .get<string>(frWordsKey)
+      .then(
+        async (cachedData) =>
+          cachedData && (await decompressString(cachedData)),
+      );
+
+    // it's actually still a string here, but we want to avoid deserializing it
+    // and then reserializing it to send over http while still keeping our types intact
+    const chunkedData = `{"enComments": ${enComments || '[]'}, "enWords": ${enWords || '[]'}, "frComments": ${frComments || '[]'}, "frWords": ${frWords || '[]'}}`;
+
+    return chunkedData as unknown as ChunkedMostRelevantCommentsAndWords;
   }
 
   async getTopSearchTerms(
@@ -1132,3 +1296,11 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
     copsTestsCompletedSince2018,
   };
 }
+
+const logMemoryUsage = (contextString: string) => {
+  const mbUsed = process.memoryUsage().heapUsed / 1024 / 1024;
+
+  console.log(
+    `[${contextString}] Memory used: ${Math.round(mbUsed * 100) / 100} MB`,
+  );
+};
