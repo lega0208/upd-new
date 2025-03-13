@@ -260,7 +260,7 @@ export class PageVersionComponent {
       target.getAttribute('href')?.startsWith('#')
     ) {
       event.preventDefault();
-      const sectionId = target.getAttribute('href')?.substring(1); // Extract ID (removes the #)
+      const sectionId = target.getAttribute('href')?.substring(1);
       const targetSection = diffViewer.shadowRoot?.getElementById(
         sectionId ?? '',
       );
@@ -342,8 +342,6 @@ export class PageVersionComponent {
       'text/html',
     ).body.innerHTML;
 
-    //     ${fontAwesomeCss() || ''}
-    // ${wetBoewCss() || ''}
     shadowDOM.innerHTML = `
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
       <link rel="stylesheet" href="https://www.canada.ca/etc/designs/canada/wet-boew/css/theme.min.css" />
@@ -378,13 +376,63 @@ export class PageVersionComponent {
           text-decoration: strikethrough;
         }
 
+        .overlay-wrapper {
+          position: relative;
+          display: inline-block;
+          width: 100%;
+          height: 100%;
+        }
+
+        .overlay-wrapper::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(131, 213, 168, 0.4);
+          z-index: 10;
+          border-radius: 5px;
+          pointer-events: none;
+        }
+
+        .overlay-wrapper.del::before {
+          background: rgba(243, 165, 157, 0.5);
+        }
+
+        .overlay-wrapper.del::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background: rgba(24, 21, 21, 0.5);
+          z-index: 20;
+          pointer-events: none;
+          opacity: 0.8;
+        }
+
+        .overlay-wrapper img {
+          width: 100%;
+          display: block;
+        }
+
+        .overlay-wrapper.updated-link::before {
+          background: rgba(250, 237, 165, 0.23);
+        }
+
+        .overlay-wrapper.highlight::before {
+          border: 2px dotted #000;
+        }
+
         .updated-link {
           background-color: #FFEE8C;
         }
 
         del.highlight,
         ins.highlight,
-        .updated-link.highlight {
+        .updated-link.highlight:not(.overlay-wrapper.updated-link) {
           border: #000 2px dotted;
           display: inline;
           padding: 0 .35em 0em 0.35em;
@@ -404,20 +452,21 @@ export class PageVersionComponent {
   }
 
   private async adjustDOM(shadowDOM: ShadowRoot, before: string) {
+    interface LinkData {
+      text: string;
+      href: string;
+      insText: string;
+      element: Cheerio<AnyNode>;
+    }
+
+    type LinksMap = Map<string, LinkData[]>;
+
     const $ = load(shadowDOM.innerHTML);
     const $before = load(before);
-    const newLinks = new Map<
-      string,
-      {
-        text: string;
-        href: string;
-        insText: string;
-        element: Cheerio<AnyNode>;
-      }[]
-    >();
+    const newLinks: LinksMap = new Map();
 
     const cleanText = (text: string) => text?.trim().replace(/\s+/g, ' ') || '';
-    
+
     const wrapWithSpan = ($el: Cheerio<AnyNode>, title: string) =>
       `<span class="updated-link" title="${title}">${$.html($el)}</span>`;
 
@@ -467,10 +516,7 @@ export class PageVersionComponent {
         matches
           .find(({ element }) => element.is('del'))
           ?.element.text()
-          .trim() === text
-      )
-        newLinks.delete(text);
-      if (
+          .trim() === text ||
         matches
           .find(({ element }) => element.children().is('ins'))
           ?.element.text()
@@ -487,7 +533,6 @@ export class PageVersionComponent {
       newLinks.delete(text);
     }
 
-    // Mark newly added links
     for (const links of newLinks.values()) {
       for (const { element, insText } of links) {
         if (insText)
@@ -515,25 +560,45 @@ export class PageVersionComponent {
     shadowDOM.innerHTML = $.html();
 
     const uniqueElements = $('ins, del, .updated-link')
-      .toArray()
-      .map((element) => {
+      .map((_, element) => {
         const $element = $(element);
-        const parent = $element.parent();
-
-        const outerHTML = parent?.html()?.replace(/\n/g, '').trim() || '';
-
-        return { element: $element, outerHTML };
-      });
-    // .filter(({ normalizedContent, contentOnly }) => {
-    //   if (!normalizedContent || !contentOnly || seen.has(contentOnly)) {
-    //     return false;
-    //   }
-    //   seen.add(contentOnly);
-    //   return true;
-    // });
+        return {
+          element: $element,
+          outerHTML: $element.parent()?.html()?.replace(/\n/g, '').trim() || '',
+        };
+      })
+      .toArray();
 
     uniqueElements.forEach(({ element }, index) => {
-      element.attr('data-id', `${index + 1}`); // Start from 1 instead of 0
+      element.attr('data-id', `${index + 1}`);
+    });
+
+    const wrapWithOverlayWrapper = (
+      $el: Cheerio<AnyNode>,
+      parentClass: string,
+    ) => {
+      const parent = $el.parent();
+      const dataId = parent.attr('data-id');
+
+      return parent.replaceWith(
+        `<div class="overlay-wrapper ${parentClass}" ${dataId ? `data-id="${dataId}"` : ''}>${$.html($el)}</div>`,
+      );
+    };
+
+    $('ins img, del img, .updated-link img').each((_, element) => {
+      const $element = $(element);
+      const parent = $element.parent();
+
+      let parentClass = '';
+      if (parent.is('ins')) parentClass = 'ins';
+      else if (parent.is('del')) parentClass = 'del';
+
+      if (parentClass) {
+        const wrappedElement = wrapWithOverlayWrapper($element, parentClass);
+        if (wrappedElement) {
+          $element.replaceWith(wrappedElement);
+        }
+      }
     });
 
     shadowDOM.innerHTML = $.html();
@@ -547,9 +612,6 @@ export class PageVersionComponent {
     const $ = load(html);
     const baseUrl = 'https://www.canada.ca';
 
-    /**
-     * Fetches content from a URL and returns it.
-     */
     const fetchUrl = async (
       url: string,
       type: 'json' | 'text',
@@ -619,7 +681,6 @@ export class PageVersionComponent {
 
       const jsonDataMap = new Map<string, any>();
 
-      // Fetch JSON data
       await Promise.all(
         jsonElements.map(async (element) => {
           const jsonConfig = parseJsonConfig(
@@ -660,7 +721,6 @@ export class PageVersionComponent {
         const jsonData = jsonDataMap.get(jsonName);
         const content = resolveJsonPath(jsonData, jsonPath);
 
-        // Styled output
         const styledContent = `
           <div style="
             border: 3px dashed #fbc02f;
@@ -680,7 +740,6 @@ export class PageVersionComponent {
       return { url: baseUrl, jsonKey: jsonKey.slice(1) };
     };
 
-    // Parse JSON Config safely
     const parseJsonConfig = (config: string): Record<string, any> | null => {
       try {
         return JSON.parse(config.replace(/&quot;/g, '"'));
@@ -690,7 +749,6 @@ export class PageVersionComponent {
       }
     };
 
-    // Resolve JSON path safely
     const resolveJsonPath = (obj: any, path: string): any => {
       return path
         .split('/')
@@ -714,9 +772,6 @@ export class PageVersionComponent {
       });
     };
 
-    /**
-     * Updates relative URLs for `<a>` and `<img>` elements to be absolute and opens links in a new tab.
-     */
     const updateRelativeURLs = () => {
       $('a, img').each((index, element) => {
         const $el = $(element);
@@ -737,20 +792,6 @@ export class PageVersionComponent {
       });
     };
 
-    // const updateFootnotes = () => {
-    //   $('a[href^="#"]').each((index, element) => {
-    //     const $el = $(element);
-    //     const href = $el.attr('href');
-
-    //     if (href) {
-    //       $el.attr('href', `${href}`);
-    //     }
-    //   });
-    // };
-
-    /**
-     * Removes unnecessary elements like the chat bottom bar.
-     */
     const cleanupUnnecessaryElements = () => {
       $('section#chat-bottom-bar').remove();
     };
@@ -792,7 +833,6 @@ export class PageVersionComponent {
       });
     };
 
-    // Execute the processing steps
     await processAjaxReplacements();
     await processJsonReplacements();
     processModalDialogs();
