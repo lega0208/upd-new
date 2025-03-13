@@ -45,6 +45,7 @@ export class TaskDetailsComponent implements OnInit {
     this.taskDetailsService.init();
 
     this.currentLang$.subscribe((lang) => {
+      this.langLink = lang === EN_CA ? 'en' : 'fr';
       this.navTabs = [
         {
           href: 'summary',
@@ -80,13 +81,12 @@ export class TaskDetailsComponent implements OnInit {
         field: 'title',
         header: 'project',
         type: 'link',
+        translate: true,
         typeParams: {
           preLink: '/' + this.langLink + '/projects',
           link: '_id',
         },
       } as ColumnConfig;
-
-      this.langLink = lang === EN_CA ? 'en' : 'fr';
     });
   }
 }

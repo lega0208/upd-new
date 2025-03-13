@@ -5,7 +5,11 @@
   @if (data.length > 0) {
     <span id="page_project">
       <!-- <span class="material-icons align-top px-1">folder</span> -->
-      <span class="align-top px-1"><strong>{{ 'Project' | translate }}:</strong></span>
+      <span class="align-top px-1">
+        <strong>
+          {{ (data.length > 1 ? 'Projects' : 'Project') | translate }}:
+        </strong>
+      </span>
       <ng-container *ngFor="let d of data; let i = index">
         <a
           *ngIf="config.typeParams"
@@ -20,8 +24,12 @@
     </span>
   }
   @if (service().length > 0) {
-    <span id="page_project" class="d-block">
-      <span class="align-top px-1"><strong>{{ 'Service' | translate }}:</strong></span>
+    <span id="page_project" class="d-block m-0 p-0">
+      <span class="align-top px-1">
+        <strong>
+          {{ (service().length > 1 ? 'Services' : 'Service') | translate }}:
+        </strong>
+      </span>
       <ng-container *ngFor="let s of service(); let i = index">
         {{ s }}
         <ng-container *ngIf="!(i === service().length - 1)"
