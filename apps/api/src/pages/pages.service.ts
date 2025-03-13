@@ -162,6 +162,7 @@ export class PagesService {
         projects: 1,
         is_404: 1,
         redirect: 1,
+        altLangHref: 1,
       })
       .populate('tasks')
       .populate('projects')
@@ -267,6 +268,7 @@ export class PagesService {
     const readability = await this.readabilityModel
       .find({ page: new Types.ObjectId(params.id) })
       .sort({ date: -1 })
+      .lean()
       .exec();
 
     const mostRelevantCommentsAndWords =
@@ -294,6 +296,15 @@ export class PagesService {
       !params.ipd && numPreviousComments
         ? percentChange(numComments, numPreviousComments)
         : null;
+
+    const alternatePageId = page.altLangHref
+      ? (
+          await this.pageModel
+            .findOne({ url: page.altLangHref }, { _id: 1 })
+            .lean()
+            .exec()
+        )?._id
+      : null;
 
     const results = {
       ...page,
@@ -336,6 +347,8 @@ export class PagesService {
       mostRelevantCommentsAndWords,
       numComments,
       numCommentsPercentChange,
+      hashes: [],
+      alternatePageId,
     } as PageDetailsData;
 
     await this.cacheManager.set(cacheKey, results);

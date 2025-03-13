@@ -79,6 +79,7 @@ export interface IFeedback {
   unique_id?: Types.ObjectId;
   url: string;
   date: Date;
+  page?: Types.ObjectId;
   tasks?: Types.ObjectId[];
   projects?: Types.ObjectId[];
   lang: string;
@@ -377,6 +378,7 @@ export interface IUxTest {
 export interface UrlHash {
   hash: string;
   date: Date;
+  blob?: string;
 }
 
 export interface IUrl {

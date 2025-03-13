@@ -30,6 +30,7 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { I18nModule } from '@dua-upd/upd/i18n';
 import { PagesDetailsReadabilityComponent } from './pages-details/pages-details-readability/pages-details-readability.component';
 import { PipesModule } from '@dua-upd/upd/pipes';
+import { PagesDetailsVersionsComponent } from './pages-details/pages-details-versions/pages-details-versions.component';
 
 @NgModule({
   imports: [
@@ -55,6 +56,7 @@ import { PipesModule } from '@dua-upd/upd/pipes';
     PagesDetailsFeedbackComponent,
     PagesDetailsFlowComponent,
     PagesDetailsReadabilityComponent,
+    PagesDetailsVersionsComponent,
   ],
   providers: [PagesHomeFacade, PagesDetailsFacade, ApiService],
 })

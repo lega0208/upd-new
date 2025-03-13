@@ -325,12 +325,29 @@ export const getDateRangesWithComparison = (options?: {
     })
     .flat();
 
-const getStructuredDateRange = (
+export type StructuredDateRangeWithComparison<T extends AbstractDate> = {
+  dateRange: DateRange<T>;
+  comparisonDateRange: DateRange<T>;
+};
+
+function getStructuredDateRange(
   type: keyof typeof structuredDateRangeConfigs,
-) => {
+  asDate: true,
+): StructuredDateRangeWithComparison<Date>;
+function getStructuredDateRange(
+  type: keyof typeof structuredDateRangeConfigs,
+  asDate: false,
+): StructuredDateRangeWithComparison<Dayjs>;
+function getStructuredDateRange(
+  type: keyof typeof structuredDateRangeConfigs,
+): StructuredDateRangeWithComparison<Dayjs>;
+function getStructuredDateRange(
+  type: keyof typeof structuredDateRangeConfigs,
+  asDate = false,
+) {
   const dateRange = structuredDateRangeConfigs[type].getDateRange();
 
-  return {
+  const dateRanges = {
     dateRange,
     comparisonDateRange: {
       start: structuredDateRangeConfigs[type].getComparisonDate(
@@ -339,7 +356,22 @@ const getStructuredDateRange = (
       end: structuredDateRangeConfigs[type].getComparisonDate(dateRange.end),
     },
   };
-};
+
+  if (asDate) {
+    return {
+      dateRange: {
+        start: dateRanges.dateRange.start.toDate(),
+        end: dateRanges.dateRange.end.toDate(),
+      },
+      comparisonDateRange: {
+        start: dateRanges.comparisonDateRange.start.toDate(),
+        end: dateRanges.comparisonDateRange.end.toDate(),
+      },
+    };
+  }
+
+  return dateRanges;
+}
 
 export const getStructuredDateRangesWithComparison = () => ({
   week: getStructuredDateRange('week'),
@@ -350,6 +382,50 @@ export const getStructuredDateRangesWithComparison = () => ({
   last_52_weeks: getStructuredDateRange('last_52_weeks'),
   year_to_date: getStructuredDateRange('year_to_date'),
 });
+
+export type GetDateRangeOptions = {
+  asDate?: boolean;
+  withComparison: boolean;
+};
+
+const getDateRangeDefaults = {
+  asDate: true,
+  withComparison: false,
+} as const;
+
+export function getDateRange(
+  type: DateRangeType,
+): DateRange<Date>;
+export function getDateRange(
+  type: DateRangeType,
+  options: GetDateRangeOptions & { asDate: false },
+): DateRange<Dayjs>;
+export function getDateRange(
+  type: DateRangeType,
+  options: GetDateRangeOptions & { withComparison: true },
+): ReturnType<typeof getStructuredDateRange>;
+
+export function getDateRange(
+  type: DateRangeType,
+  options: GetDateRangeOptions = getDateRangeDefaults,
+) {
+  // basically just a type guard
+  if (type === 'custom') {
+    throw new Error('Cannot get date range for custom type');
+  }
+
+  const mergedOptions = { ...getDateRangeDefaults, ...options };
+
+  const withComparison = mergedOptions.asDate
+    ? getStructuredDateRange(type, mergedOptions.asDate)
+    : getStructuredDateRange(type);
+
+  if (options.withComparison) {
+    return withComparison;
+  }
+
+  return withComparison.dateRange;
+}
 
 export function createCustomDateRangePeriod(
   dateRangeString: string,

@@ -875,7 +875,7 @@ export class TasksViewService extends DbViewNew<
     dateRange: DateRange<Date>,
     comparisonDateRange: DateRange<Date>,
   ) {
-    type ProjectedTasks = {
+    type ProjectedTask = {
       _id: Types.ObjectId;
       title: string;
       tmf_ranking_index: number;
@@ -955,11 +955,7 @@ export class TasksViewService extends DbViewNew<
     };
 
     const [data, comparisonData] = await Promise.all([
-      (
-        this.find({ dateRange }, projection) as unknown as Promise<
-          ProjectedTasks[]
-        >
-      ).then((results) =>
+      this.find<ProjectedTask>({ dateRange }, projection).then((results) =>
         results
           .sort((a, b) => b.tmf_ranking_index - a.tmf_ranking_index)
           .map((task, i) => ({
@@ -974,10 +970,7 @@ export class TasksViewService extends DbViewNew<
             ),
           })),
       ),
-      this.find(
-        { dateRange: comparisonDateRange },
-        projection,
-      ) as unknown as Promise<ProjectedTasks[]>,
+      this.find<ProjectedTask>({ dateRange: comparisonDateRange }, projection),
     ]);
 
     const comparisonProps = [
@@ -985,7 +978,7 @@ export class TasksViewService extends DbViewNew<
       'dyf_no',
       'calls_per_100_visits',
       'dyf_no_per_1000_visits',
-    ] satisfies (keyof ProjectedTasks)[];
+    ] satisfies (keyof ProjectedTask)[];
 
     const dataWithPercentChange = getArraySelectedPercentChange(
       comparisonProps,
@@ -1000,7 +993,7 @@ export class TasksViewService extends DbViewNew<
       '_id',
       dataWithPercentChange,
       // Need to cast it to the same type to get the correct type for the return value
-      comparisonData as typeof dataWithPercentChange,
+      comparisonData,
       { suffix: '_difference' },
     );
   }
