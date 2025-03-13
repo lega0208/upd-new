@@ -206,6 +206,7 @@
           [cols]="topTasksTableCols"
           [displayRows]="25"
           [loading]="(loading$ | async) !== false"
+          [allowHeaderWrap]="true"
         ></upd-data-table>
       </upd-card>
     </div>
