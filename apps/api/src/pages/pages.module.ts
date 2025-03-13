@@ -12,7 +12,7 @@ import { FlowModule } from '@dua-upd/api/flow';
     CacheModule.register({ ttl: hours(12) }),
     DbModule,
     FeedbackModule,
-    FlowModule.register(),
+    FlowModule.register()
   ],
   controllers: [PagesController],
   providers: [PagesService, DbService],

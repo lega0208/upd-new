@@ -64,6 +64,7 @@ import { RangeSliderComponent } from './range-slider/range-slider.component';
 import { HeatmapComponent } from './heatmap/heatmap.component';
 import { PageFlowComponent } from './page-flow/page-flow.component';
 import { ArrowConnectComponent } from './arrow-connect/arrow-connect.component';
+import { PageVersionComponent } from './page-version/page-version.component';
 
 @NgModule({
   imports: [
@@ -96,7 +97,7 @@ import { ArrowConnectComponent } from './arrow-connect/arrow-connect.component';
     NgApexchartsModule,
     ProgressBarModule,
     RangeSliderComponent,
-  ],
+],
   declarations: [
     CardComponent,
     DataTableComponent,
@@ -132,6 +133,7 @@ import { ArrowConnectComponent } from './arrow-connect/arrow-connect.component';
     HeatmapComponent,
     PageFlowComponent,
     ArrowConnectComponent,
+    PageVersionComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -180,6 +182,7 @@ import { ArrowConnectComponent } from './arrow-connect/arrow-connect.component';
     HeatmapComponent,
     PageFlowComponent,
     ArrowConnectComponent,
+    PageVersionComponent,
   ],
 })
 export class UpdComponentsModule {}

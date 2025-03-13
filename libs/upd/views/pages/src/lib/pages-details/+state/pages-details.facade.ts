@@ -5,9 +5,9 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { FR_CA, type LocaleId } from '@dua-upd/upd/i18n';
-import { I18nFacade, selectDatePeriodSelection } from '@dua-upd/upd/state';
-import { percentChange, UnwrapObservable } from '@dua-upd/utils-common';
+import { type LocaleId } from '@dua-upd/upd/i18n';
+import { I18nFacade, selectDatePeriodSelection, selectUrl } from '@dua-upd/upd/state';
+import { percentChange } from '@dua-upd/utils-common';
 import type { PickByType } from '@dua-upd/utils-common';
 import type {
   GscSearchTermMetrics,
@@ -18,7 +18,6 @@ import * as PagesDetailsActions from './pages-details.actions';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import type {
   ApexAxisChartSeries,
-  ApexNonAxisChartSeries,
 } from 'ng-apexcharts';
 import {
   selectPageLang,
@@ -27,7 +26,6 @@ import {
   selectVisitsByDayChartTable,
   selectDyfNoPerVisitsSeries,
 } from './pages-details.selectors';
-import { createColConfigWithI18n } from '@dua-upd/upd/utils';
 
 dayjs.extend(utc);
 
@@ -42,11 +40,21 @@ export class PagesDetailsFacade {
     .select(PagesDetailsSelectors.selectPagesDetailsLoading)
     .pipe(debounceTime(500));
 
+  loadedHashes$ = this.store.select(PagesDetailsSelectors.selectHashesLoaded);
+
+  loadingHashes$ = this.store
+    .select(PagesDetailsSelectors.selectHashesLoading)
+    .pipe(debounceTime(500));
+
   pagesDetailsData$ = this.store.select(
     PagesDetailsSelectors.selectPagesDetailsData,
   );
 
   currentLang$ = this.i18n.currentLang$;
+
+  currentRoute$ = this.store
+      .select(selectUrl)
+      .pipe(map((url) => url.replace(/\?.+$/, '')));
 
   dateRangeSelected$ = this.store.select(selectDatePeriodSelection);
 
@@ -120,6 +128,8 @@ export class PagesDetailsFacade {
 
   pageTitle$ = this.pagesDetailsData$.pipe(map((data) => data?.title));
   pageUrl$ = this.pagesDetailsData$.pipe(map((data) => data?.url));
+  
+  altPageId$ = this.pagesDetailsData$.pipe(map((data) => data?.alternatePageId || 0));
 
   pageStatus$ = this.pagesDetailsData$.pipe(
     map((data) => {
@@ -184,58 +194,6 @@ export class PagesDetailsFacade {
   apexKpiFeedback$ = this.store.select(selectDyfNoPerVisitsSeries);
 
   pageLang$ = this.store.select(selectPageLang);
-
-  latestReadability$ = this.readability$.pipe(
-    map((readability) => readability[0]),
-  );
-
-  pageLastUpdated$ = this.latestReadability$.pipe(
-    map((readability) => readability?.date),
-  );
-
-  totalScore$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_score),
-  );
-
-  readabilityPoints$ = this.latestReadability$.pipe(
-    map((readability) => readability?.fk_points),
-  );
-
-  fleshKincaid$ = this.latestReadability$.pipe(
-    map((readability) => readability?.final_fk_score),
-  );
-
-  headingPoints$ = this.latestReadability$.pipe(
-    map((readability) => readability?.header_points),
-  );
-
-  wordsPerHeading$ = this.latestReadability$.pipe(
-    map((readability) => readability?.avg_words_per_header),
-  );
-
-  paragraphPoints$ = this.latestReadability$.pipe(
-    map((readability) => readability?.paragraph_points),
-  );
-
-  wordsPerParagraph$ = this.latestReadability$.pipe(
-    map((readability) => readability?.avg_words_per_paragraph),
-  );
-
-  mostFrequentWordsOnPage$ = this.latestReadability$.pipe(
-    map((readability) => readability?.word_counts || []),
-  );
-
-  wordCount$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_words),
-  );
-
-  paragraphCount$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_paragraph),
-  );
-
-  headingCount$ = this.latestReadability$.pipe(
-    map((readability) => readability?.total_headings),
-  );
 
   currentKpiFeedback$ = this.pagesDetailsData$.pipe(
     map((data) => {
@@ -744,20 +702,6 @@ export class PagesDetailsFacade {
     map((data) => data?.searchTerms),
   );
 
-  searchTermsColConfig$ = createColConfigWithI18n<
-    UnwrapObservable<typeof this.topSearchTerms$>
-  >(this.i18n.service, [
-    { field: 'term', header: 'search-term' },
-    { field: 'clicks', header: 'clicks', pipe: 'number' },
-    { field: 'clicksChange', header: 'change-for-clicks', pipe: 'percent' },
-    {
-      field: 'position',
-      header: 'position',
-      pipe: 'number',
-      pipeParam: '1.0-2',
-    },
-  ]);
-
   feedbackMostRelevant = this.store.selectSignal(
     PagesDetailsSelectors.selectFeedbackMostRelevant,
   );
@@ -793,6 +737,14 @@ export class PagesDetailsFacade {
   }
 
   error$ = this.store.select(PagesDetailsSelectors.selectPagesDetailsError);
+
+  hashesData = this.store.selectSignal(
+    PagesDetailsSelectors.selectHashesData
+  );
+
+  getHashes() {
+    this.store.dispatch(PagesDetailsActions.getHashes());
+  }
 
   /**
    * Use the initialization action to perform one

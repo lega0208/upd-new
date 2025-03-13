@@ -35,3 +35,4 @@ export * from './lib/range-slider/range-slider.component';
 export * from './lib/heatmap/heatmap.component';
 export * from './lib/page-flow/page-flow.component';
 export * from './lib/arrow-connect/arrow-connect.component';
+export * from './lib/page-version/page-version.component';

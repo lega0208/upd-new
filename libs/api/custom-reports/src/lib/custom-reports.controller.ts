@@ -7,7 +7,6 @@ import {
   Body,
   Controller,
   Get,
-  Header,
   type MessageEvent,
   Param,
   Post,

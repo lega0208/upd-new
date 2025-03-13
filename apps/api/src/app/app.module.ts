@@ -13,6 +13,7 @@ import { DbModule } from '@dua-upd/db';
 import { InternalSearchModule } from '../internal-search/internal-search.module';
 import { ReportsModule } from '../reports/reports.module';
 import { FeedbackModule } from '@dua-upd/api/feedback';
+import { HashesModule } from '@dua-upd/api/hashes';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { FeedbackModule } from '@dua-upd/api/feedback';
     CustomReportsModule.register(environment.production),
     QueryModule,
     FeedbackModule,
+    HashesModule,
     BullModule.forRoot({
       connection: {
         host: environment.redisHost,
