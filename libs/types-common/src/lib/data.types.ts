@@ -568,7 +568,9 @@ export interface ProjectsDetailsData
   avgSuccessPercentChange: number | null;
   avgSuccessValueChange: number | null;
   dateFromLastTest: Date;
-  taskSuccessByUxTest: (Partial<IUxTest> & { tasks: string })[];
+  taskSuccessByUxTest: (Omit<IUxTest, 'project' | 'tasks' | 'pages'> & {
+    tasks: string;
+  })[];
   taskMetrics: {
     _id: string;
     title: string;
