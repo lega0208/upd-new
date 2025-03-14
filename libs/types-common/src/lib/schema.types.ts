@@ -372,7 +372,7 @@ export interface IUxTest {
   launch_date?: Date;
   status?: string;
   cops?: boolean;
-  attachments?: AttachmentData[];
+  start_date?: Date;
 }
 
 export interface UrlHash {
