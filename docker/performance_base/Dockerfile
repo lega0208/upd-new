@@ -56,7 +56,7 @@ RUN --mount=type=cache,target=/home/node/.npm npm ci
 FROM node_base as db-updater-dev
 RUN echo -e '#!/bin/sh\nnode db-cli/main.js "$@"' >> /bin/db-cli && chmod +x /bin/db-cli
 COPY --from=db-updater-dev-base . .
-COPY dist/apps/db-updater/ .
+COPY dist/apps/db-updater/main.js .
 CMD ["node", "main.js"]
 
 FROM nginx:alpine as nginx

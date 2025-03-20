@@ -42,22 +42,24 @@ services:
     # depends_on:
     #   - mongodb
 
-#  db-updater:
-#    image: "upd_db-updater"
-#    container_name: upd_db-updater
-#    restart: unless-stopped
-#    build:
-#      context: ../
-#      dockerfile: docker/performance_base/Dockerfile
-#      target: db-updater-dev
-#    secrets:
-#      - .env
-#      - secret.pem
-#      - service-account-credentials.json
-#    environment:
-#      DOTENV_CONFIG_PATH: /run/secrets/.env
-#      AA_KEY_PATH: /run/secrets/secret.pem
-#      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/service-account-credentials.json
+  db-updater:
+    image: "upd_db-updater"
+    container_name: upd_db-updater
+    network_mode: host
+    restart: unless-stopped
+    build:
+      context: ../
+      dockerfile: docker/performance_base/Dockerfile
+      target: db-updater-dev
+    secrets:
+      - .env
+      - secret.pem
+      - service-account-credentials.json
+    environment:
+      DOTENV_CONFIG_PATH: /run/secrets/.env
+      AA_KEY_PATH: /run/secrets/secret.pem
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/service-account-credentials.json
+      DB_HOST: "localhost"
 #    depends_on:
 #      - mongodb
 
