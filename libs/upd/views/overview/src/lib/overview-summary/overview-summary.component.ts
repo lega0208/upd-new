@@ -330,7 +330,7 @@ export class OverviewSummaryComponent implements OnInit {
           header: 'Latest success rate',
           pipe: 'percent',
           tooltip: 'tooltip-latest-success-rate',
-          width: '150px',
+          width: '140px',
         },
         {
           field: 'latest_success_rate_percent_change',

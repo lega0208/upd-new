@@ -957,7 +957,11 @@ export class TasksViewService extends DbViewNew<
     const [data, comparisonData] = await Promise.all([
       this.find<ProjectedTask>({ dateRange }, projection).then((results) =>
         results
-          .sort((a, b) => b.tmf_ranking_index - a.tmf_ranking_index)
+          .sort((a, b) => {
+            const aIfActive = a.status === 'Inactive' ? 0 : a.tmf_ranking_index;
+            const bIfActive = b.status === 'Inactive' ? 0 : b.tmf_ranking_index;
+            return bIfActive - aIfActive;
+          })
           .map((task, i) => ({
             ...task,
             tmf_rank: i + 1,
