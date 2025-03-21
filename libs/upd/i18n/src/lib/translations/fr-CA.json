@@ -335,6 +335,7 @@
   "Scenario": "Scénario",
   "Result": "Résultat",
   "Latest success rate": "Dernier taux de réussite",
+  "Latest UX success rate": "Dernier taux de réussite UX",
   "Total participants from all tests": "Nombre total de participants à tous les tests",
   "Tasks success by Test": "Succès des tâches par test UX",
   "Average tasks success by test": "Succès moyenne des tâches par test",

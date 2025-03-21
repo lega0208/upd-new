@@ -334,10 +334,10 @@ export class OverviewSummaryComponent implements OnInit {
         },
         {
           field: 'latest_ux_success',
-          header: 'Latest success rate',
+          header: 'Latest UX success rate',
           pipe: 'percent',
           tooltip: 'tooltip-latest-success-rate',
-          width: '140px',
+          width: '145px',
         },
         {
           field: 'latest_success_rate_percent_change',
