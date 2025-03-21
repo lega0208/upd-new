@@ -335,6 +335,7 @@
   "Scenario": "Scenario",
   "Result": "Result",
   "Latest success rate": "Latest success rate",
+  "Latest UX success rate": "Latest UX success rate",
   "Total participants from all tests": "Total participants from all tests",
   "Tasks success by Test": "Tasks success by UX test",
   "Average tasks success by test": "Average tasks success by test",
