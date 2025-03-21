@@ -326,6 +326,13 @@ export class OverviewSummaryComponent implements OnInit {
           width: '220px',
         },
         {
+          field: 'survey_completed',
+          header: 'Self-reported success',
+          pipe: 'percent',
+          tooltip: 'tooltip-self-reported-success',
+          width: '140px',
+        },
+        {
           field: 'latest_ux_success',
           header: 'Latest success rate',
           pipe: 'percent',
@@ -347,13 +354,6 @@ export class OverviewSummaryComponent implements OnInit {
             pipeParam: '1.0-2',
           },
           width: '150px',
-        },
-        {
-          field: 'survey_completed',
-          header: 'Self-reported success',
-          pipe: 'percent',
-          tooltip: 'tooltip-self-reported-success',
-          width: '140px',
         },
       ];
     });
