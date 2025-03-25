@@ -591,6 +591,10 @@ export class TasksDetailsFacade {
     }),
   );
 
+  taskSuccessChartHeight$ = this.taskSuccessChartLegend$.pipe(
+    map((legend) => legend.length * 20 + 100),
+  );
+
   gscTotalClicks$ = this.tasksDetailsData$.pipe(
     map((data) => data?.gscTotalClicks || 0),
   );
