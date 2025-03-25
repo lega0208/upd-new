@@ -44,6 +44,7 @@
           showMarker: true,
           shared: false
         }"
+        [height]="(taskSuccessChartHeight$ | async) || 0"
         [table]="(taskSuccessChart$ | async) || []"
         [tableCols]="taskSuccessChartCols"
         [emptyMessage]="(taskSuccessChart$ | async)?.length === 0 ? ('task-not-tested' | translate) : ('nodata-available' | translate)"
