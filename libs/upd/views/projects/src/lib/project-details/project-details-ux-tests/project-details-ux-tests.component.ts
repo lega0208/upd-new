@@ -43,6 +43,9 @@ export class ProjectDetailsUxTestsComponent implements OnInit {
   apexTaskSuccessByUxTest$ =
     this.projectsDetailsService.apexTaskSuccessByUxTest$;
 
+  taskSuccessChartHeight$ =
+    this.projectsDetailsService.taskSuccessChartHeight$;
+
   avgTaskSuccessFromLastTest$ =
     this.projectsDetailsService.avgTaskSuccessFromLastTest$;
 
