@@ -36,6 +36,7 @@
         [series]="(apexTaskSuccessByUxTest$ | async)?.series || []"
         [yAxis]="'tasks' | translate"
         [xAxis]="(apexTaskSuccessByUxTest$ | async)?.xaxis || []"
+        [height]="(taskSuccessChartHeight$ | async) || 0"
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"
         [showPercent]="{
           isPercent: true,
