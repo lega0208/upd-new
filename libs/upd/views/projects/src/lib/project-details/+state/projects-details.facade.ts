@@ -436,7 +436,7 @@ export class ProjectsDetailsFacade {
         field: 'tasks',
         header: 'Task',
         translate: true,
-        }, 
+      },
       {
         field: 'calls',
         header: 'calls',
@@ -457,7 +457,7 @@ export class ProjectsDetailsFacade {
         },
         width: '160px',
       },
-    ] as ColumnConfig<UnwrapObservable<typeof this.callsByTopic$>>[]
+    ] as ColumnConfig<UnwrapObservable<typeof this.callsByTopic$>>[],
   );
 
   dyfDataApex$ = combineLatest([
@@ -634,6 +634,10 @@ export class ProjectsDetailsFacade {
         ),
       };
     }),
+  );
+
+  taskSuccessChartHeight$ = this.apexTaskSuccessByUxTest$.pipe(
+    map((chart) => chart.xaxis.length * 20 * chart.series.length + 100),
   );
 
   taskSuccessByUxTestKpi$ = combineLatest([
@@ -966,7 +970,7 @@ export class ProjectsDetailsFacade {
   feedbackMostRelevant = this.store.selectSignal(
     ProjectsDetailsSelectors.selectFeedbackMostRelevant,
   );
- 
+
   error$ = this.store.select(
     ProjectsDetailsSelectors.selectProjectsDetailsError,
   );
