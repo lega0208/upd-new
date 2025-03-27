@@ -1,17 +1,10 @@
-.language-picker-area {
-    display: flex;
-    justify-content: flex-end;
-  }
-  
-  .picker-label {
-    margin-right: 20px;
-  }
-  
-  .language-picker {
-    width: 100px;
-  }
+.picker-label {
+  margin-right: 20px;
+}
 
-  .langs, .langs:hover, .langs:visited {
-    text-decoration: underline;
-    color: #2e5ea7;
-  }
+.langs,
+.langs:hover,
+.langs:visited {
+  text-decoration: underline;
+  color: #2e5ea7;
+}

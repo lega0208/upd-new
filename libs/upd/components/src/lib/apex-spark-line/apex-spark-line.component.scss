@@ -2,7 +2,8 @@
   height: 100px;
 }
 
-.box > .kpi-text, .second-box > .kpi-text {
+.box > .kpi-text,
+.second-box > .kpi-text {
   font-size: 0.6rem;
   font-size: clamp(0.6rem, 0.5rem + 0.5vw, 1.1rem);
 }
@@ -19,4 +20,8 @@
 
 .push {
   margin-left: auto;
+}
+
+.kpi-text {
+  color: #6b7280;
 }

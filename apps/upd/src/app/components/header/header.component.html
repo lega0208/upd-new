@@ -1,27 +1,56 @@
 <header id="header">
-  <div class="row">
-    <div class="col-lg-3 col-md-4 col-sm-6 col-6 text-start">
+  <div class="me-auto">
+    <a
+      [routerLink]="[langPath()]"
+      [queryParamsHandling]="'merge'"
+      class="logo d-flex text-decoration-none"
+    >
       <img
-        class="img-fluid fip-colour"
-        [ngSrc]="craLogo"
-        width="834"
-        height="76"
-        alt="{{ 'government_of_canada' | translate }}"
-        priority="true"
+        src="../../../assets/img/UPD-logo.svg"
+        alt="{{ 'app.title' | translate }}"
+        width="32"
+        height="32"
       />
-    </div>
-    <div class="col-lg-9 col-md-8 col-sm-6 col-6 text-end lang-toggle">
-      <div class="language-picker-area">
-        <div class="picker-label"></div>
-        <a
-          style="cursor: pointer"
-          class="langs"
-          (click)="selectLanguage(oppositeLang())"
-          tabindex="0"
-        >
-          {{ 'opposite.language' | translate }}
-        </a>
-      </div>
-    </div>
+      <span class="align-self-end h5 ps-2 pt-1 fw-bold"
+        >Usability Performance Dashboard</span
+      >
+    </a>
   </div>
+
+  <div>
+    <div class="picker-label"></div>
+    <button
+      class="btn border border-1 text-white"
+      id="range-button"
+      translate="{{ 'opposite.language' | translate }}"
+      style="background-color: #1976d2; border-radius: 0.5rem"
+      (click)="selectLanguage(oppositeLang())"
+    >
+      <span class="material-icons align-top pe-1" aria-hidden="true"
+        >language</span
+      >
+      <span></span>&nbsp;
+    </button>
+    <!-- <span class="material-icons nav_icon text-white" aria-hidden="true"
+      >language</span
+    >
+    <a
+      style="cursor: pointer"
+      class="langs text-decoration-none text-white"
+      (click)="selectLanguage(oppositeLang())"
+      tabindex="0"
+    >
+      
+    </a> -->
+  </div>
+  <!-- <div>
+    <img
+      class="img-fluid fip-colour"
+      [ngSrc]="craLogo"
+      width="300"
+      height="76"
+      alt="{{ 'government_of_canada' | translate }}"
+      priority="true"
+    />
+  </div> -->
 </header>

@@ -3,10 +3,12 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'upd-accordion',
   template: `
-    <div ngbAccordion [class]="flash" [ngClass]="styleClass">
-      <div ngbAccordionItem [collapsed]="!expanded">
+    <div class="shadow-sm" ngbAccordion [class]="flash" [ngClass]="styleClass">
+      <div ngbAccordionItem class="border-0" [collapsed]="!expanded">
         <h2 ngbAccordionHeader [ngClass]="headerClass">
-          <button ngbAccordionButton>{{ title | translate }}</button>
+          <button ngbAccordionButton>
+            {{ title | translate }}
+          </button>
         </h2>
 
         <div ngbAccordionCollapse>

@@ -1,8 +1,3 @@
-<div class="back_link">
-  <span class="material-icons align-top">west</span>
-  <a [routerLink]="['/', langLink(), 'pages']">Pages</a>
-</div>
-
 <upd-loading-spinner
   *ngIf="loading$ | async; else elseBlock2"
 ></upd-loading-spinner>
@@ -15,61 +10,82 @@
 <!--    "-->
 <!--  ></upd-page-404>-->
 <!--</ng-template>-->
-<ng-template #elseBlock2>
-  <h2 class="h3 pt-2 pb-2">
-    <ng-container *ngIf="title$ | async as title">
-      {{ title }}
-    </ng-container>
 
-    <span class="h5 d-inline-block mb-0 align-top ms-1">
+<div class="d-flex justify-content-start details p-3">
+  <div class="back_link">
+    <a [routerLink]="['/', langLink, 'pages']"
+      ><span class="material-icons align-top">west</span></a
+    >
+  </div>
+  <div>
+    <h5 class="ps-2 pt-1 mb-0">
+      <ng-container *ngIf="title$ | async as title">
+        {{ title }}
+      </ng-container>
+    </h5>
+
+    <small class="ps-2"
+      ><a [href]="'https://' + url()" style="text-decoration: none">{{
+        url()
+      }}</a></small
+    >
+  </div>
+  <div>
+    <span class="h5 d-inline-block mb-0 align-top ms-3">
       <ng-container *ngIf="(pageStatus$ | async) !== null">
         <upd-project-status-label [pageStatus]="pageStatus$ | async">
         </upd-project-status-label>
       </ng-container>
     </span>
-  </h2>
-
-  <p class="page_url">
-    <span class="material-icons material-icon-wysiwyg">wysiwyg</span>
-    <a [href]="'https://' + url()" target="_blank">{{ url() }}</a>
-  </p>
-  <div class="page_header back_link">
-    <span id="page_project">
-      <span
-        id="copy_url"
-        cdkCopyToClipboard="{{ url() }}"
-        [cdkCopyToClipboardAttempts]="5"
-        (click)="toggleAlert()"
-        translate
-        tabindex="0"
-        ><span class="material-icons align-top" aria-hidden="true"
-          >content_copy</span
-        >
-        Copy URL</span
-      >
-      <ng-container *ngIf="showAlert">
-        <upd-alert position="top">Copied successfully!</upd-alert>
-      </ng-container>
-    </span>
-    <span id="language" (click)="navigateToAltPage()" tabindex="0">
-      <span class="material-icons align-top" aria-hidden="true">language</span>
-      {{ 'View page' | translate: { lang: pageLangText() } }}
-    </span>
   </div>
+</div>
+<ng-template #elseBlock2>
+  <div style="margin-top: 7rem">
+    <!-- <ng-container *ngIf="showUrl"
+      ><p class="page_url">{{ url$ | async }}</p></ng-container
+    > -->
+    <div class="page_header back_link">
+      <!-- <span id="page_project">
+        <span id="view_url" (click)="toggleUrl()" tabindex="0">
+          <span class="material-icons align-top" aria-hidden="true">link</span>
+          <span class="m-0" translate
+            ><ng-container *ngIf="!showUrl"> View URL</ng-container></span
+          >
+          <span class="m-0" translate
+            ><ng-container *ngIf="showUrl"> Hide URL</ng-container></span
+          >
+        </span>
+        <span
+          id="copy_url"
+          cdkCopyToClipboard="{{ url$ | async }}"
+          [cdkCopyToClipboardAttempts]="5"
+          (click)="toggleAlert()"
+          translate
+          tabindex="0"
+          ><span class="material-icons align-top" aria-hidden="true"
+            >content_copy</span
+          >
+          Copy URL</span
+        >
+        <ng-container *ngIf="showAlert">
+          <upd-alert position="top">Copied successfully!</upd-alert>
+        </ng-container>
+      </span> -->
+    </div>
 
-  <upd-project-header
-    [data]="projects() || []"
-    [config]="projectsCol()"
-  ></upd-project-header>
+    <upd-project-header
+      [data]="projects() || []"
+      [config]="projectsCol()"
+    ></upd-project-header>
 
-  <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
-
-  <upd-date-selector
-    *ngIf="
-      !((currentRoute$ | async) || '').endsWith('readability') &&
-      !((currentRoute$ | async) || '').endsWith('version-history')
-    "
-  ></upd-date-selector>
+    <upd-date-selector
+      *ngIf="
+        !((currentRoute$ | async) || '')?.endsWith('readability') &&
+        !((currentRoute$ | async) || '')?.endsWith('version-history')
+      "
+    ></upd-date-selector>
+  </div>
 
   <router-outlet></router-outlet>
 </ng-template>
+<upd-nav-tabs [tabs]="navTabs" class="tabs sticky details-tabs"></upd-nav-tabs>

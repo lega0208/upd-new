@@ -89,6 +89,7 @@ export class ApexSparkLineComponent {
     offsetY: 25,
     locales: [fr, en],
     defaultLocale: 'en',
+    fontFamily: 'Inter, sans-serif',
   };
 
   chartOptions: Partial<ApexOptions> = {
@@ -96,7 +97,7 @@ export class ApexSparkLineComponent {
     labels: this.labels,
     stroke: {
       curve: 'smooth',
-      width: 1.8,
+      width: 6,
     },
     xaxis: {
       type: 'datetime',

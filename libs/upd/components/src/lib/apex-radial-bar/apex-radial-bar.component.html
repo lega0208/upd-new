@@ -4,6 +4,7 @@
   [h]="100"
   [config]="secondaryTitleCols"
   [data]="secondaryTitleData"
+  [modal]="modal"
 >
   <div class="radialBar">
     <apx-chart
@@ -30,13 +31,23 @@
       <ng-content></ng-content>
     </upd-modal>
   </div> -->
+  <hr />
 
+  <div class="d-flex justify-content-center" *ngIf="kpiText">
+    <span *ngIf="improvedKpi">
+      <span [style.color]="getTrendIconAndColor(improvedKpi).color">
+        <i class="material-icons">{{
+          getTrendIconAndColor(improvedKpi).iconName
+        }}</i>
+        <span class="fw-bold text-nowrap pe-2">{{
+          improvedKpi | percent: undefined : currentLangSignal()
+        }}</span>
+      </span></span
+    >
+    <span class="text">{{ kpiText }}</span>
+  </div>
   <div class="d-flex justify-content-between position-relative mt-2">
     <ng-content></ng-content>
-    <div class="d-flex justify-content-end" *ngIf="modal">
-      <upd-modal [modalTitle]="title" [modalContent]="modal">
-      </upd-modal>
-    </div>
   </div>
 
   <!--

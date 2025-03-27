@@ -76,6 +76,7 @@ type ChartOptions = {
 })
 export class ApexRadialBarComponent implements OnChanges {
   private i18n = inject(I18nFacade);
+  currentLangSignal = this.i18n.currentLang;
 
   @ViewChild('chart', { static: false }) chart!: ChartComponent;
   @Input() secondaryTitleCols: ColumnConfig = { field: '', header: '' };
@@ -84,7 +85,7 @@ export class ApexRadialBarComponent implements OnChanges {
   @Input() titleTooltip = '';
   @Input() current = 0;
   @Input() comparison = 0;
-  @Input() comparisonMode= 0;
+  @Input() comparisonMode = 0;
   @Input() labels: string[] = [];
   @Input() seriesLabel = 'visits';
   @Input() kpiObjectiveCriteria = defaultKpiObjectiveCriteria;
@@ -93,6 +94,8 @@ export class ApexRadialBarComponent implements OnChanges {
   @Input() postValue = '';
   @Input() preLabel = '';
   @Input() valueLabel = 0;
+  @Input() kpiText = '';
+  @Input() improvedKpi = 0;
   type: ChartType = 'radialBar';
 
   chartOptions: Partial<ChartOptions> = {
@@ -129,14 +132,14 @@ export class ApexRadialBarComponent implements OnChanges {
             show: true,
             fontSize: '18px',
             fontWeight: 'default',
-            fontFamily: 'Noto Sans',
+            fontFamily: 'Inter',
             offsetY: -5,
           },
           value: {
             offsetY: -55,
             fontSize: '32px',
             fontWeight: 'bold',
-            fontFamily: 'Noto Sans',
+            fontFamily: 'Inter',
             color: '#333',
             formatter: function (val) {
               return val + '%';
@@ -254,6 +257,24 @@ export class ApexRadialBarComponent implements OnChanges {
     ],
   };
 
+  getTrendIconAndColor(diff: number): { iconName: string; color: string } {
+    let iconName = '';
+    let color = '';
+
+    if (diff > 0) {
+      iconName = 'arrow_upward';
+      color = '#26A69A';
+    } else if (diff < 0) {
+      iconName = 'arrow_downward';
+      color = '#DF2929';
+    } else {
+      iconName = '';
+      color = '';
+    }
+
+    return { iconName, color };
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['current'] || changes['comparison'] || changes['labels']) {
       this.i18n.currentLang$.subscribe((lang) => {
@@ -292,15 +313,15 @@ export class ApexRadialBarComponent implements OnChanges {
             this.labels.length === 1
               ? this.labels
               : this.preLabel && this.valueLabel
-              ? [
-                  `${this.i18n.service.translate(
-                    this.preLabel,
-                    (locale + '-CA') as LocaleId,
-                  )} ${formatPercent(this.valueLabel, locale)}`,
-                ]
-              : this.comparison !== 0
-              ? [comparison]
-              : [''],
+                ? [
+                    `${this.i18n.service.translate(
+                      this.preLabel,
+                      (locale + '-CA') as LocaleId,
+                    )} ${formatPercent(this.valueLabel, locale)}`,
+                  ]
+                : this.comparison !== 0
+                  ? [comparison]
+                  : [''],
           plotOptions: {
             radialBar: {
               ...this.chartOptions.plotOptions?.radialBar,
