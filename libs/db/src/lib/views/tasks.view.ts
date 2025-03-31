@@ -19,6 +19,7 @@ import type {
   IUxTest,
 } from '@dua-upd/types-common';
 import {
+  $trunc,
   arrayToDictionary,
   arrayToDictionaryMultiref,
   getArraySelectedAbsoluteChange,
@@ -375,9 +376,7 @@ export class TasksViewService extends DbViewNew<
           _id: 0,
           term: '$_id',
           clicks: 1,
-          position: {
-            $round: ['$position', 2],
-          },
+          position: $trunc('$position', 3),
         })
         .exec()) || []
     );
@@ -412,13 +411,9 @@ export class TasksViewService extends DbViewNew<
           _id: 0,
           term: '$_id',
           clicks: 1,
-          ctr: {
-            $round: ['$ctr', 2],
-          },
+          ctr: $trunc('$ctr', 3),
           impressions: 1,
-          position: {
-            $round: ['$position', 2],
-          },
+          position: $trunc('$position', 3),
         })
         .exec()) || []
     );
@@ -677,25 +672,7 @@ export class TasksViewService extends DbViewNew<
             in: {
               _id: '$$project._id',
               title: '$$project.title',
-              attachments: {
-                $map: {
-                  input: '$$project.attachments',
-                  as: 'attachment',
-                  in: {
-                    _id: '$$attachment._id',
-                    url: '$$attachment.url',
-                    filename: '$$attachment.filename',
-                    size: '$$attachment.size',
-                    storage_url: {
-                      $replaceOne: {
-                        input: '$$attachment.storage_url',
-                        find: 'https://',
-                        replacement: '',
-                      },
-                    },
-                  },
-                },
-              },
+              attachments: '$$project.attachments',
             },
           },
         },
@@ -940,14 +917,12 @@ export class TasksViewService extends DbViewNew<
         $cond: {
           if: { $eq: ['$survey', 0] },
           then: null,
-          else: {
-            $round: [
-              {
-                $divide: ['$survey_completed', '$survey'],
-              },
-              4,
-            ],
-          },
+          else: $trunc(
+            {
+              $divide: ['$survey_completed', '$survey'],
+            },
+            5,
+          ),
         },
       },
       visits: 1,

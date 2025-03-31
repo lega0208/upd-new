@@ -316,9 +316,18 @@ export function sortArrayDesc(arr: { data: number; value: string }[][]) {
 }
 
 export const globalColours: string[] = [
-  '#2E5EA7', '#64B5F6', '#26A69A', '#FBC02D',
-  '#1DE9B6', '#F57F17', '#602E9C', '#2196F3',
-  '#DE4CAE', '#C3680A', '#C5C5FF', '#1A8361',
+  '#2E5EA7',
+  '#64B5F6',
+  '#26A69A',
+  '#FBC02D',
+  '#1DE9B6',
+  '#F57F17',
+  '#602E9C',
+  '#2196F3',
+  '#DE4CAE',
+  '#C3680A',
+  '#C5C5FF',
+  '#1A8361',
 ];
 
 /**
@@ -805,3 +814,28 @@ export function withErrorCallback<
     },
   });
 }
+
+/**
+ * Helper function to work around DocumentDB's lack of support for the $pow operator
+ * @param mongoExpression - The expression to be raised to the power of exponent
+ * @param exponent - The exponent to raise the expression to
+ */
+export const $pow = (
+  mongoExpression: string | Record<string, unknown>,
+  exponent: number,
+) => ({ $multiply: Array(exponent).fill(mongoExpression) });
+
+/**
+ * Helper function to work around DocumentDB's lack of support for the $trunc operator
+ * @param mongoExpression - The expression to be truncated
+ * @param precision - The number of decimal places to truncate to
+ */
+export const $trunc = (
+  mongoExpression: string | Record<string, unknown>,
+  precision: number,
+) => ({
+  $divide: [
+    { $floor: { $multiply: [mongoExpression, Math.pow(10, precision)] } },
+    Math.pow(10, precision),
+  ],
+});

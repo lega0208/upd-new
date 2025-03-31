@@ -42,7 +42,6 @@ import {
   CustomReportsMetrics,
   CustomReportsMetricsSchema,
 } from './db.schemas';
-import { PageVisitsViewSchema, PageVisitsView } from './db.views';
 import {
   GCTasksMappings,
   GCTasksMappingsSchema,
@@ -83,7 +82,6 @@ export const models = {
 } as const;
 
 export const views = {
-  pageVisits: { model: PageVisitsView, schema: PageVisitsViewSchema },
   pagesView: { model: PagesView, schema: PagesViewSchema },
   tasksView: { model: TasksView, schema: TasksViewSchema },
 } as const;

@@ -42,7 +42,7 @@ import {
   getLatestTest,
   getLatestTestData,
 } from '@dua-upd/utils-common/data';
-import { AsyncLogTiming, percentChange } from '@dua-upd/utils-common';
+import { $trunc, AsyncLogTiming, percentChange } from '@dua-upd/utils-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 
 dayjs.extend(utc);
@@ -753,9 +753,7 @@ export class ProjectsService {
           _id: 0,
           term: '$_id',
           clicks: 1,
-          position: {
-            $round: ['$position', 2],
-          },
+          position: $trunc('$position', 3),
         });
     };
 
