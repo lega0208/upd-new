@@ -150,7 +150,7 @@ export class DataIntegrityService {
     this.logger.log('Cleaning page urls...');
 
     const pageUrlsToClean = await this.pageModel
-      .find({ url: /^https/i }, { url: 1 })
+      .find({ url: /^https:\/\//i }, { url: 1 })
       .lean()
       .exec();
 
@@ -164,15 +164,12 @@ export class DataIntegrityService {
     );
 
     const updates: mongo.AnyBulkWriteOperation<IPage>[] = pageUrlsToClean.map(
-      (page) => {
-        const url = page.url.replace(/^https/i, '');
-        return {
-          updateOne: {
-            filter: { _id: page._id },
-            update: { $set: { url } },
-          },
-        };
-      },
+      ({ _id, url }) => ({
+        updateOne: {
+          filter: { _id },
+          update: { $set: { url: url.replace(/^https:\/\//i, '') } },
+        },
+      }),
     );
 
     await this.pageModel.bulkWrite(updates, {
