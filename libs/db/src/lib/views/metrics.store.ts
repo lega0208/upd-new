@@ -5,6 +5,7 @@ import {
   datesFromDateRange,
   batchAwait,
   getDateRangesWithComparison,
+  $trunc,
 } from '@dua-upd/utils-common';
 import type { DbService } from '../db.service';
 
@@ -96,9 +97,7 @@ export class TaskMetricsStore {
               $cond: [
                 { $eq: ['$visits', 0] },
                 null,
-                {
-                  $round: [{ $divide: ['$dyf_no', '$visits'] }, 5],
-                },
+                $trunc({ $divide: ['$dyf_no', '$visits'] }, 6),
               ],
             },
             dyfYes: '$dyf_yes',
