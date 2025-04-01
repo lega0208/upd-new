@@ -3,8 +3,12 @@ import { Injectable } from '@nestjs/common';
 import { Types, type FilterQuery } from 'mongoose';
 import { omit } from 'rambdax';
 import { DbService, Feedback } from '@dua-upd/db';
-import { arrayToDictionary } from '@dua-upd/utils-common';
-import type { DateRange, FeedbackBase, FeedbackWithScores } from '@dua-upd/types-common';
+import { $trunc, arrayToDictionary } from '@dua-upd/utils-common';
+import type {
+  DateRange,
+  FeedbackBase,
+  FeedbackWithScores,
+} from '@dua-upd/types-common';
 import { FeedbackCache } from './feedback.cache';
 import type {
   IFeedback,
@@ -111,7 +115,7 @@ export class FeedbackService {
         totalWords: { $sum: { $size: '$words' } },
       })
       .addFields({
-        avgWords: { $round: ['$avgWords', 4] },
+        avgWords: $trunc('$avgWords', 5),
       })
       .exec();
 
@@ -334,21 +338,19 @@ export class FeedbackService {
         //     7,
         //   ],
         // },
-        term_frequency: {
-          $round: [
-            {
-              $ln: {
-                $sum: [
-                  1,
-                  {
-                    $divide: ['$word_occurrences', totalWords],
-                  },
-                ],
-              },
+        term_frequency: $trunc(
+          {
+            $ln: {
+              $sum: [
+                1,
+                {
+                  $divide: ['$word_occurrences', totalWords],
+                },
+              ],
             },
-            7,
-          ],
-        },
+          },
+          8,
+        ),
       })
       .addFields({
         // ...ifPage({
@@ -361,14 +363,12 @@ export class FeedbackService {
         //     ],
         //   },
         // }),
-        comment_frequency: {
-          $round: [
-            {
-              $divide: ['$comment_occurrences', totalComments],
-            },
-            6,
-          ],
-        },
+        comment_frequency: $trunc(
+          {
+            $divide: ['$comment_occurrences', totalComments],
+          },
+          7,
+        ),
       })
       .match({
         term_frequency: { $gt: 0.000001 },
@@ -397,48 +397,46 @@ export class FeedbackService {
 
         // --------------------------- EXPERIMENTAL IDF CALCULATION!
 
-        inverse_doc_frequency: {
-          $round: [
-            {
-              $multiply: [
-                Math.E,
-                {
-                  $ln: {
-                    $sum: [
-                      1,
-                      {
-                        $divide: [
-                          {
-                            $sum: [
-                              {
-                                $subtract: [
-                                  totalComments,
-                                  '$comment_occurrences',
-                                ],
-                              },
-                              {
-                                $sqrt: totalComments,
-                              },
-                            ],
-                          },
-                          {
-                            $sum: [
-                              '$comment_occurrences',
-                              {
-                                $sqrt: totalComments,
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
+        inverse_doc_frequency: $trunc(
+          {
+            $multiply: [
+              Math.E,
+              {
+                $ln: {
+                  $sum: [
+                    1,
+                    {
+                      $divide: [
+                        {
+                          $sum: [
+                            {
+                              $subtract: [
+                                totalComments,
+                                '$comment_occurrences',
+                              ],
+                            },
+                            {
+                              $sqrt: totalComments,
+                            },
+                          ],
+                        },
+                        {
+                          $sum: [
+                            '$comment_occurrences',
+                            {
+                              $sqrt: totalComments,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
                 },
-              ],
-            },
-            4,
-          ],
-        },
+              },
+            ],
+          },
+          5,
+        ),
         // ----------- not using page score for now
         // ...ifPage({
         //   // --------------------------- could potentially use "EXPERIMENTAL CALCULATION" here too

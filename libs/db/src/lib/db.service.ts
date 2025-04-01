@@ -92,10 +92,6 @@ export class DbService {
   } as const;
 
   readonly views = {
-    pageVisits: new PageVisitsView(
-      this.pageVisits,
-      this.collections.pageMetrics,
-    ),
     pages: new PagesViewService(this, {
       name: 'PagesView',
       model: this.pagesViewModel,
@@ -143,8 +139,6 @@ export class DbService {
     private readability: ReadabilityModel,
     @InjectModel(Annotations.name, 'defaultConnection')
     private annotations: Model<Annotations>,
-    @InjectModel(PageVisitsView.name, 'defaultConnection')
-    private pageVisits: Model<PageVisits>,
     @InjectModel(PagesView.name, 'defaultConnection')
     private pagesViewModel: PagesViewModel,
     @InjectModel(TasksView.name, 'defaultConnection')
@@ -164,47 +158,6 @@ export class DbService {
     @InjectConnection('defaultConnection')
     private connection: Connection,
   ) {}
-
-  @AsyncLogTiming
-  async syncPageMetricsTimeSeries() {
-    const mostRecentTimeSeries = (
-      await this.pageMetricsTS
-        .findOne<{ date: Date }>({}, { date: 1 }, { sort: { date: -1 } })
-        .exec()
-    )?.date;
-
-    const mostRecentPageMetrics = (
-      await this.pageMetrics
-        .findOne<{ date: Date }>({}, { date: 1 }, { sort: { date: -1 } })
-        .exec()
-    )?.date;
-
-    if (!mostRecentPageMetrics) {
-      throw Error('No data found in the `pages_metrics` collection');
-    }
-
-    if (!mostRecentTimeSeries) {
-      throw Error(
-        'No time series data found in pageMetricsTS collection.\n' +
-          'This is not a good way to populate the collection from scratch, mongodump/mongorestore should be used instead.',
-      );
-    }
-
-    const uniqueDates = await this.pageMetrics
-      .distinct<Date>('date', { date: { $gt: mostRecentTimeSeries } })
-      .exec();
-
-    uniqueDates.sort((a, b) => a.getTime() - b.getTime());
-
-    for (const date of uniqueDates) {
-      const metrics = await this.pageMetrics.toTimeSeries({
-        start: date,
-        end: date,
-      });
-
-      await this.pageMetricsTS.insertMany(metrics);
-    }
-  }
 
   @AsyncLogTiming
   async validatePageMetricsRefs(filter: FilterQuery<PageMetrics> = {}) {
@@ -551,4 +504,45 @@ export class DbService {
 
     console.log('Finished adding missing refs to pages_metrics.');
   }
+  
+  // @AsyncLogTiming
+  // async syncPageMetricsTimeSeries() {
+  //   const mostRecentTimeSeries = (
+  //     await this.pageMetricsTS
+  //       .findOne<{ date: Date }>({}, { date: 1 }, { sort: { date: -1 } })
+  //       .exec()
+  //   )?.date;
+
+  //   const mostRecentPageMetrics = (
+  //     await this.pageMetrics
+  //       .findOne<{ date: Date }>({}, { date: 1 }, { sort: { date: -1 } })
+  //       .exec()
+  //   )?.date;
+
+  //   if (!mostRecentPageMetrics) {
+  //     throw Error('No data found in the `pages_metrics` collection');
+  //   }
+
+  //   if (!mostRecentTimeSeries) {
+  //     throw Error(
+  //       'No time series data found in pageMetricsTS collection.\n' +
+  //         'This is not a good way to populate the collection from scratch, mongodump/mongorestore should be used instead.',
+  //     );
+  //   }
+
+  //   const uniqueDates = await this.pageMetrics
+  //     .distinct<Date>('date', { date: { $gt: mostRecentTimeSeries } })
+  //     .exec();
+
+  //   uniqueDates.sort((a, b) => a.getTime() - b.getTime());
+
+  //   for (const date of uniqueDates) {
+  //     const metrics = await this.pageMetrics.toTimeSeries({
+  //       start: date,
+  //       end: date,
+  //     });
+
+  //     await this.pageMetricsTS.insertMany(metrics);
+  //   }
+  // }
 }

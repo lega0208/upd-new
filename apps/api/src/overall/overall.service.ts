@@ -47,6 +47,7 @@ import type {
   ChunkedMostRelevantCommentsAndWords,
 } from '@dua-upd/types-common';
 import {
+  $trunc,
   arrayToDictionary,
   AsyncLogTiming,
   avg,
@@ -556,14 +557,10 @@ export class OverallService {
             $cond: {
               if: { $eq: ['$total_searches', 0] },
               then: 0,
-              else: {
-                $round: [{ $divide: ['$clicks', '$total_searches'] }, 2],
-              },
+              else: $trunc({ $divide: ['$clicks', '$total_searches'] }, 3),
             },
           },
-          position: {
-            $round: ['$position', 2],
-          },
+          position: $trunc('$position', 3),
         })
         .exec()) || [];
 

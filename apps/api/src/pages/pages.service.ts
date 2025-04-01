@@ -29,6 +29,7 @@ import type {
   Direction,
 } from '@dua-upd/types-common';
 import {
+  $trunc,
   arrayToDictionary,
   dateRangeSplit,
   parseDateRangeString,
@@ -532,9 +533,7 @@ export class PagesService {
           _id: 0,
           term: '$_id',
           clicks: 1,
-          position: {
-            $round: ['$position', 2],
-          },
+          position: $trunc('$position', 3),
         })
         .exec()) || [];
 
