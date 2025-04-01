@@ -10,7 +10,7 @@ import {
 import { DataState, Dimension } from './gsc-property';
 import type { DateRange, GscSearchTermMetrics, IOverall, IPageMetrics } from '@dua-upd/types-common';
 import { wait } from '@dua-upd/utils-common';
-import { singleDatesFromDateRange, withRetry } from '../utils';
+import { singleDatesFromDateRange, withExponentialBackoff, withRetry } from '../utils';
 
 export * from './client';
 export * from './query';
@@ -58,6 +58,16 @@ export class SearchAnalyticsClient {
     );
 
     return queryWithRetry(query);
+  }
+
+  async queryWithExponentialBackoff(query: SearchAnalyticsReportQuery): GaxiosPromise<searchconsole_v1.Schema$SearchAnalyticsQueryResponse> {
+    const queryWithExponentialBackoff = withExponentialBackoff(
+      this.client.searchanalytics.query.bind(this.client.searchanalytics),
+      5,
+      1000
+    );
+
+    return queryWithExponentialBackoff(query);
   }
 
   async getOverallMetrics(dateRange: DateRange<string> | Date, dataState?: DataState) {
@@ -132,7 +142,7 @@ export class SearchAnalyticsClient {
       .setRowLimit(options?.rowLimit || 250)
       .build();
 
-    const results = await this.query(query);
+    const results = await this.queryWithExponentialBackoff(query);
 
     if (!results.data.rows || results.data.rows?.length === 0) {
       return {};
@@ -255,7 +265,7 @@ export class SearchAnalyticsClient {
       .setRowLimit(options?.rowLimit || 25000)
       .build();
 
-    const results = await this.query(pageMetricsQuery);
+    const results = await this.queryWithExponentialBackoff(pageMetricsQuery);
 
     if (!results.data.rows || results.data.rows?.length === 0) {
       return {};
@@ -307,7 +317,7 @@ export class SearchAnalyticsClient {
       .setRowLimit(options?.rowLimit || 25000)
       .build();
 
-    const results = await this.query(query);
+    const results = await this.queryWithExponentialBackoff(query);
 
     if (!results.data.rows || results.data.rows?.length === 0) {
       return {};

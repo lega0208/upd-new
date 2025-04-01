@@ -78,6 +78,62 @@ export const withRetry = <
     });
 };
 
+export const withExponentialBackoff = <
+  T extends <U>(...args: Parameters<T>) => Promise<ReturnType<T>>,
+>(
+  fn: T,
+  retries = 5,
+  baseDelay = 1000,
+) => {
+  return (...args: Parameters<T>): Promise<ReturnType<T>> => {
+    return new Promise((resolve, reject) => {
+      const attempt = async (retriesLeft: number, attemptNum: number) => {
+        try {
+          const result = await fn(...args);
+          return resolve(result);
+        } catch (err) {
+          const isQuotaError =
+            err?.message?.includes('quota exceeded') ||
+            err?.errors?.some((e) => e.message?.includes('quota exceeded'));
+
+          if (!isQuotaError) {
+            console.error(
+              chalk.red(`Non-retryable error in ${fn.name}:`, err.message),
+            );
+            console.error(chalk.red(err.stack));
+            return reject(err);
+          }
+
+          if (retriesLeft <= 0) {
+            console.error(
+              chalk.red(
+                `All retry attempts for ${fn.name} failed.`,
+                err.message,
+              ),
+            );
+            console.error(chalk.red(err.stack));
+            return reject(err);
+          }
+
+          const delay = baseDelay * Math.pow(2, attemptNum);
+          const jitter = Math.floor(Math.random() * 300);
+          const totalDelay = delay + jitter;
+
+          console.warn(
+            `Quota exceeded in ${fn.name}, retrying in ${totalDelay}ms... (${retriesLeft - 1} retries left)`,
+          );
+
+          setTimeout(() => {
+            attempt(retriesLeft - 1, attemptNum + 1);
+          }, totalDelay);
+        }
+      };
+
+      attempt(retries, 0);
+    });
+  };
+};
+
 // For GSC or AA page queries, because they're only done on individual dates
 /**
  *
