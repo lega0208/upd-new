@@ -1,15 +1,23 @@
-<h2 class="pb-2" data-i18n="overview-title">
-  {{ 'overview-title' | translate }}
-</h2>
+<div class="d-flex justify-content-start details p-3">
+  <h2 data-i18n="overview-title" class="m-0">
+    {{ 'overview-title' | translate }}
+  </h2>
+</div>
 
 <upd-loading-spinner
   *ngIf="loading$ | async; else elseBlock"
 ></upd-loading-spinner>
 
 <ng-template #elseBlock>
-  <upd-nav-tabs [tabs]="navTabs"></upd-nav-tabs>
-  <upd-date-selector
-    *ngIf="!((currentRoute$ | async) || '').endsWith('uxtests')"
-  ></upd-date-selector>
-  <router-outlet></router-outlet>
+  <div style="margin-top: 7rem">
+    <upd-nav-tabs
+      [tabs]="navTabs"
+      class="tabs sticky details-tabs"
+    ></upd-nav-tabs>
+    <upd-date-selector
+      *ngIf="!((currentRoute$ | async) || '').endsWith('uxtests')"
+      style="margin-top: 200px"
+    ></upd-date-selector>
+    <router-outlet></router-outlet>
+  </div>
 </ng-template>

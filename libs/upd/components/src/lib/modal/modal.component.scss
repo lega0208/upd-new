@@ -1,16 +1,16 @@
 .floating {
   background-color: #fff;
   color: #8c9093;
-  border-radius: 20px;
-  text-align: center;
-  padding: 1px 6px;
-  border: #8c9093 2px solid;
+  padding: 0;
+  // border-radius: 20px;
+  // text-align: center;
+  // padding: 1px 6px;
+  // border: #8c9093 2px solid;
   //-webkit-text-stroke-width: 2px;
 }
 
 .floating:hover {
-  background-color: #333;
-  color: #fff;
+  color: #333;
 }
 
 .pre-line {

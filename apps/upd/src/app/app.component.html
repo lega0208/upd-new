@@ -1,22 +1,30 @@
-<div class="container vh-100">
+<div class="content">
   <upd-header></upd-header>
   <upd-sidebar></upd-sidebar>
   <h1 class="visually-hidden">{{ this.titleFromNavigation() | translate }}</h1>
   <main [@routeAnimations]="getRouteAnimationData()" style="min-height: 100%">
     <router-outlet></router-outlet>
   </main>
-  <footer class="mt-4">
-    <div class="d-flex justify-content-between align-items-end mt-auto pb-4">
-      <div class="align-self-end">
-        <span class="text-muted small">version: {{ updVersion }} </span>
-      </div>
-      <div class="col-lg-2 col-md-3 col-sm-4 col-4">
-        <img
-          class="img-fluid"
-          [src]="canadaLogo"
-          alt="{{'government_of_canada' | translate}}"
-        />
-      </div>
-    </div>
-  </footer>
 </div>
+<footer>
+  <div class="me-auto">
+    <span class="text-muted small">version: {{ updVersion }} </span>
+  </div>
+  <img
+    class="img-fluid fip-colour"
+    [ngSrc]="craLogo"
+    width="300"
+    height="76"
+    alt="{{ 'government_of_canada' | translate }}"
+    priority="true"
+  />
+  <div class="vr"></div>
+  <div>
+    <img
+      class="img-fluid ps-5"
+      [src]="canadaLogo"
+      alt="{{ 'government_of_canada' | translate }}"
+      style="max-width: 300px; max-height: 30px; width: auto; height: auto"
+    />
+  </div>
+</footer>

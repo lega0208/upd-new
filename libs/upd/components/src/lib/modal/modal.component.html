@@ -3,12 +3,14 @@
   class="btn floating material-icons"
   (click)="open(mymodal)"
 >
-  question_mark
+  help
 </button>
 <!-- <span class="btn btn-lg btn-floating btn-dark insert material-icons text-white" (click)="open(mymodal)">question_mark</span> -->
 <ng-template #mymodal let-modal>
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{ modalTitle | translate }}</h4>
+    <h4 class="modal-title" id="modal-basic-title">
+      {{ modalTitle | translate }}
+    </h4>
     <button
       type="button"
       class="btn-close"
@@ -16,8 +18,7 @@
       (click)="modal.dismiss('Cross click')"
     ></button>
   </div>
-  <div class="modal-body mb-2" [innerHTML]="modalContent">
-  </div>
+  <div class="modal-body mb-2" [innerHTML]="modalContent"></div>
   <!-- <div class="modal-footer">
     <button
       type="button"

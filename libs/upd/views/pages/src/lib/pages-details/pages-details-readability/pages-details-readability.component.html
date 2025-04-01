@@ -26,7 +26,7 @@
         [kpiObjectiveCriteria]="totalScoreKpiCriteria"
         [kpiStylesConfig]="totalScoreKpiConfig() || {}"
         [modalTitle]="'meaning-of-score'"
-        [modal]="'meaning-of-score-description'"
+        modal="{{ 'meaning-of-score-description' | translate }}"
         [pipe]="'template'"
         [pipeParams]="totalScoreTemplateParams"
       ></upd-data-card>

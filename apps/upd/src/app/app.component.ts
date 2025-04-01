@@ -53,6 +53,7 @@ export class AppComponent {
   en = EN_CA;
   updVersion = packageJson.version;
   canadaLogo = '../assets/img/canada-black-30mm.png';
+  craLogo = '../../../assets/img/CRA-FIP-9pt-e.png';
 
   constructor(private swUpdates: SwUpdateService) {
     this.i18n.init();

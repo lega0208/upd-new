@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'upd-nav-tabs',
   template: `
-    <div class="tabs sticky">
+    <div [className]="class">
       <ul>
         @for (tab of tabs; track $index) {
           <li>
@@ -23,4 +23,5 @@ import { Component, Input } from '@angular/core';
 })
 export class NavTabsComponent {
   @Input() tabs: { href: string; title: string }[] = [];
+  @Input() class = 'tabs sticky';
 }

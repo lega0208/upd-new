@@ -4,8 +4,10 @@ import {
   computed,
   inject,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { EN_CA, FR_CA, LocaleId } from '@dua-upd/upd/i18n';
 import { I18nFacade } from '@dua-upd/upd/state';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'upd-header',
@@ -30,4 +32,10 @@ export class HeaderComponent {
 
     this.i18n.setLang(value);
   }
+
+  isFr = toSignal(this.i18n.currentLang$.pipe(map((lang) => lang === FR_CA)), {
+    initialValue: false,
+  });
+
+  langPath = computed(() => (this.isFr() ? 'fr' : 'en'));
 }

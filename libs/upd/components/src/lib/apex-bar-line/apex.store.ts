@@ -321,7 +321,7 @@ export function seriesTooltipHtml(
     ></span>
     <div
       class="apexcharts-tooltip-text"
-      style="font-family: 'Noto Sans',sans-serif; font-size: 0.7rem"
+      style="font-family: 'Inter',sans-serif; font-size: 0.7rem"
     >
       <div class="apexcharts-tooltip-y-group">
         <span class="apexcharts-tooltip-text-y-label"
@@ -348,7 +348,7 @@ export function getTooltipHtml(
             (ann) => `
       <div class="apexcharts-tooltip-series-group apexcharts-active d-flex" style="order: 99;">
         <span class="apexcharts-tooltip-marker annotation"></span>
-        <div class="apexcharts-tooltip-text" style="font-family: 'Noto Sans', sans-serif; font-size: 0.7rem">
+        <div class="apexcharts-tooltip-text" style="font-family: 'Inter', sans-serif; font-size: 0.7rem">
           <div class="apexcharts-tooltip-y-group">
             <span class="apexcharts-tooltip-text-y-label"><strong>${eventText}:</strong> ${ann.text}: </span>
             <span class="apexcharts-tooltip-text-y-value">${title}</span>
@@ -370,7 +370,7 @@ export function getTooltipHtml(
   return `
     <div
       class="apexcharts-tooltip-title apexcharts-active d-flex"
-      style="font-family: 'Noto Sans',sans-serif; font-size: 0.8rem"
+      style="font-family: 'Inter',sans-serif; font-size: 0.8rem"
     >
       ${title}
     </div>

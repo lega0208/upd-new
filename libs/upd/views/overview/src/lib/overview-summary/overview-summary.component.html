@@ -1,6 +1,6 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
-    <div class="col-lg-3 col-md-12 col-sm-12">
+    <div class="col">
       <upd-apex-spark-line
         [title]="'kpi-calls-per-100-title'"
         [titleTooltip]="'kpi-calls-per-100-tooltip'"
@@ -14,7 +14,7 @@
       ></upd-apex-spark-line>
     </div>
 
-    <div class="col-lg-3 col-md-12 col-sm-12">
+    <div class="col">
       <upd-apex-spark-line
         [title]="'kpi-feedback-per-1000-title'"
         [titleTooltip]="'kpi-feedback-per-1000-tooltip'"
@@ -30,7 +30,7 @@
       <!-- pass text and kpiFEedbackPercentChange$ to upd-apex-radial-bar component-->
     </div>
 
-    <div class="col-lg-3 col-md-12 col-sm-12">
+    <div class="col">
       <upd-apex-radial-bar
         [title]="'kpi-search-assessment-title'"
         [titleTooltip]="'kpi-search-assessment-tooltip'"
@@ -42,7 +42,7 @@
         [valueLabel]="0.8"
         [keyword]="'search'"
         modal="{{ 'kpi-search-assessment-guidance' | translate }}"
-        >{{
+        kpiText="{{
           'kpi-search-assessment-text'
             | translate
               : {
@@ -50,11 +50,12 @@
                   total: (kpiSearchAssessmentPassed$ | async)?.total,
                   date: satEnd,
                 }
-        }}
+        }}"
+      >
       </upd-apex-radial-bar>
     </div>
 
-    <div class="col-lg-3 col-md-12 col-sm-12">
+    <div class="col">
       <upd-apex-radial-bar
         class="custom-radial-bar"
         [title]="'kpi-ux-test-improved-title'"
@@ -65,32 +66,16 @@
         [kpiObjectiveCriteria]="uxTestsKpiObjectiveCriteria"
         [keyword]="'ux'"
         modal="{{ 'kpi-ux-test-improved-guidance' | translate }}"
+        [improvedKpi]="(improvedKpiSuccessRateDifference$ | async) || 0"
+        kpiText="{{
+          'kpi-ux-test-improved-text'
+            | translate
+              : {
+                  unique: (improvedKpiUniqueTasks$ | async) || 0,
+                  total: (uniqueTaskTestedLatestTestKpi$ | async) || 0,
+                }
+        }}"
       >
-        <div>
-          <ng-container
-            *ngIf="{
-              value: improvedKpiSuccessRateDifference$ | async,
-            } as improvedKpi"
-          >
-            <span
-              [style.color]="getTrendIconAndColor(improvedKpi.value ?? 0).color"
-            >
-              <i class="material-icons">{{
-                getTrendIconAndColor(improvedKpi.value ?? 0).iconName
-              }}</i>
-              {{ improvedKpi.value | percent: undefined : currentLangSignal() }}
-            </span>
-            <br />
-            {{
-              'kpi-ux-test-improved-text'
-                | translate
-                  : {
-                      unique: (improvedKpiUniqueTasks$ | async) || 0,
-                      total: (uniqueTaskTestedLatestTestKpi$ | async) || 0,
-                    }
-            }}
-          </ng-container>
-        </div>
       </upd-apex-radial-bar>
     </div>
   </div>
@@ -190,7 +175,11 @@
         [table]="dyfChart$ | async"
         [allowHeaderWrap]="true"
         [horizontal]="{ isHorizontal: true, colorDistributed: false }"
-        [stacked]="{ isStacked: true, isStacked100: true, hasDataLabels: true }"
+        [stacked]="{
+          isStacked: true,
+          isStacked100: true,
+          hasDataLabels: true,
+        }"
       ></upd-apex-bar>
     </div>
   </div>

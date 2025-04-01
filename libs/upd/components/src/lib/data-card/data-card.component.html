@@ -2,6 +2,7 @@
   [title]="title | translate"
   [titleTooltip]="tooltip | translate"
   [h]="100"
+  [modal]="modal"
 >
   <div class="container-fluid p-0">
     <div class="row row-no-gutters">
@@ -19,11 +20,14 @@
           class="col-auto ml-auto"
         >
           <span class="h3 text-nowrap d-flex align-items-center">
-            <span *ngIf="comparison !== 0 " [ngClass]="comparisonStyles.colourClass">
+            <span
+              *ngIf="comparison !== 0"
+              [ngClass]="comparisonStyles.colourClass"
+            >
+              {{ comparison | localePercent }}
               <span *ngIf="comparisonStyles.iconName" class="material-icons">{{
                 comparisonStyles.iconName
               }}</span>
-              {{ comparison | localePercent }}
             </span>
             <span
               *ngIf="comparisonValue !== null && comparisonValue !== undefined"

@@ -31,6 +31,7 @@ export interface DropdownOption<T> {
       filterMatchMode="notEquals"
       (onShow)="this.showOptions()"
       (onHide)="this.hideOptions()"
+      [style]="{ 'border-radius': '0.5rem' }"
     >
       <ng-template pTemplate="selectedItem">
         <span
@@ -45,7 +46,10 @@ export interface DropdownOption<T> {
       </ng-template>
 
       <ng-template pTemplate="item" let-option>
-        <div [class]="option.styleClasses || ''">
+        <div
+          [class]="option.styleClasses || ''"
+          style="font-family: 'Inter', sans-serif; font-size: 0.9rem;"
+        >
           <span
             *ngIf="option.icon"
             class="pe-1 pi pi-{{ option.icon }} me-2"
@@ -59,8 +63,8 @@ export interface DropdownOption<T> {
   styles: [
     `
       .dropdown-label {
-        font-family: 'Noto Sans', sans-serif;
-        font-size: 1rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
       }
     `,
   ],

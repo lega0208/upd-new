@@ -8,7 +8,9 @@
   [customSort]="true"
   [rowsPerPageOptions]="[5, 10, 25, 50, 100]"
   [loading]="loading"
-  styleClass="p-datatable-striped p-datatable-sm border"
+  styleClass="p-datatable-sm"
+  [style]="{ 'font-family': 'Inter' }"
+  tableStyleClass="prime-table"
   [paginator]="pagination"
   currentPageReportTemplate="{{
     'dt-paginator'
@@ -37,6 +39,7 @@
               type="text"
               (input)="dt.filterGlobal(getEventValue($event), 'contains')"
               placeholder="{{ placeholderText | translate }}"
+              style="font-size: 0.9rem; border-radius: 0.5rem"
             />
           </span>
         </div>
@@ -228,7 +231,7 @@
               kpi &&
               (rowData[col.field] >= 0.8 ||
                 (col.secondaryField?.field === 'change' &&
-                  rowData[col.secondaryField?.field] >= 20))
+                  rowData[col.secondaryField?.field] >= 20)),
           }"
           class="{{ col.columnClass || '' }}"
         >

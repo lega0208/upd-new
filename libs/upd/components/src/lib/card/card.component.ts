@@ -5,7 +5,12 @@ import type { ColumnConfig } from '@dua-upd/types-common';
 @Component({
   selector: 'upd-card',
   template: `
-    <div class="card pt-2" [ngClass]="[cardHeight, styleClass]" tabindex="0">
+    <div
+      class="card pt-2 shadow-sm bg-white"
+      [ngClass]="[cardHeight, styleClass]"
+      tabindex="0"
+      style="border: none; border-radius: 0.5rem"
+    >
       <div class="card-body card-pad pt-2 h-100">
         <div class="d-flex justify-content-between">
           <h3
@@ -17,7 +22,12 @@ import type { ColumnConfig } from '@dua-upd/types-common';
               title | translate
             }}</span>
             <span *ngIf="modal" class="modal-icon-by-title">
-              <upd-modal [modalTitle]="title" [modalContent]="modal" [modalSize]="modalSize"> </upd-modal>
+              <upd-modal
+                [modalTitle]="title"
+                [modalContent]="modal"
+                [modalSize]="modalSize"
+              >
+              </upd-modal>
             </span>
           </h3>
 
