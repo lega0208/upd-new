@@ -63,7 +63,7 @@ export class DataIntegrityService {
           date: {
             $gte: new Date('2020-09-01'),
           },
-          url: 'www.canada.ca/en/revenue-agency/services/e-services/represent-a-client.html',
+          url: 'www.canada.ca/en/revenue-agency.html',
           gsc_total_impressions: { $exists: false },
         })
         .exec()
