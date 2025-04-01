@@ -37,7 +37,7 @@ services:
       AA_KEY_POOL_PATH: /run/secrets/aa_creds_pool.json
       PORT: 9321
       INSTANCE_ID: "docker-dev-001"
-      NODE_OPTIONS: "--max-old-space-size=6144"
+      NODE_OPTIONS: "--max-old-space-size=8192"
       DB_HOST: "localhost"
     # depends_on:
     #   - mongodb
