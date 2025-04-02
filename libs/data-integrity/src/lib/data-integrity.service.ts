@@ -57,11 +57,13 @@ export class DataIntegrityService {
   }
 
   async findMissingGscPageMetrics() {
+    const sixteenMonthsAgo = dayjs(new Date()).subtract(16, 'month').toDate();
+
     const missingDays = (
       await this.pageMetricsModel
         .find({
           date: {
-            $gte: new Date('2020-09-01'),
+            $gte: sixteenMonthsAgo,
           },
           url: 'www.canada.ca/en/revenue-agency.html',
           gsc_total_impressions: { $exists: false },
@@ -90,12 +92,14 @@ export class DataIntegrityService {
   }
 
   async findMissingGscOverallMetrics() {
+    const sixteenMonthsAgo = dayjs(new Date()).subtract(16, 'month').toDate();
+
     const missingDays = (
       await this.overallModel
         .find(
           {
             date: {
-              $gte: new Date('2020-09-01'),
+              $gte: sixteenMonthsAgo,
             },
             gsc_total_impressions: { $exists: false },
           },
