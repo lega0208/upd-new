@@ -193,12 +193,12 @@ export class BlobClient {
     config: BlobsConfig,
     blobType: BlobType = 'block',
   ) {
-    this.path = config.path;
+    this.path = config.path || '';
     this.container = config.container;
     this.overwrite = !!config.overwrite;
     this.blobType = blobType;
 
-    const blobPath = config.path ? `${config.path}/${blobName}` : blobName;
+    const blobPath = this.path ? `${this.path}/${blobName}` : blobName;
 
     if (blobType === 'append') {
       this.client = this.container.getClient().getAppendBlobClient(blobPath);
