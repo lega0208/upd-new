@@ -4,14 +4,15 @@ import { UrlHash } from '@dua-upd/types-common';
 import { AsyncLogTiming } from '@dua-upd/utils-common';
 import { format } from 'prettier';
 import { DuckDbService } from '@dua-upd/duckdb';
-import type { DbService } from '@dua-upd/db';
+import { DbService } from '@dua-upd/db';
 import { Types } from 'mongoose';
 
 @Injectable()
 export class HashesService {
   constructor(
+    @Inject(DbService)
     private db: DbService,
-    @Inject(DuckDbService)
+    @Inject(DuckDbService.name)
     private duckDb: DuckDbService,
   ) {}
 
