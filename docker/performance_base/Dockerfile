@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.3
-FROM node:22.8-alpine3.20 as builder
+FROM node:22.14.0-bookworm-slim as builder
 WORKDIR /builder
 VOLUME ["/builder"]
 COPY ["package.json", "package-lock.json", "./"]
@@ -12,12 +12,12 @@ RUN npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --prod -
 RUN npx nx daemon --stop
 RUN rm -r /builder/node_modules && rm -r /builder/tmp
 
-FROM alpine:3.20 as apps
+FROM debian:bookworm-20250407 as apps
 WORKDIR /apps
 COPY --from=builder /builder/dist/apps/ .
 
-FROM node:22.8-alpine3.20 as node_base
-RUN apk update && apk add tzdata && apk add curl
+FROM node:22.8.0-bookworm-slim as node_base
+RUN apt-get update && apt-get install -y tzdata curl
 ENV TZ=America/Toronto
 
 FROM node_base as web

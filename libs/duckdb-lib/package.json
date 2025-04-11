@@ -1,0 +1,13 @@
+{
+  "name": "duckdb-lib",
+  "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "@swc/helpers": "0.5.13",
+    "drizzle-orm": "^0.40.1",
+    "@duckdbfan/drizzle-duckdb": "^0.0.7",
+    "@dua-upd/blob-storage": "0.0.1",
+    "@nestjs/common": "10.4.1",
+    "duckdb-async": "^1.2.1"
+  }
+}
