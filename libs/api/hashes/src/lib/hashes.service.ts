@@ -1,85 +1,59 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { desc, eq } from 'drizzle-orm';
 import { UrlHash } from '@dua-upd/types-common';
-import { Cache } from 'cache-manager';
-import { DbService, Page, PageDocument } from '@dua-upd/db';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import { HashesCache } from './hashes.cache';
-import { wait } from '@dua-upd/utils-common';
-import { BlobStorageService } from '@dua-upd/blob-storage';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { AsyncLogTiming } from '@dua-upd/utils-common';
 import { format } from 'prettier';
+import { DuckDbService } from '@dua-upd/duckdb';
+import { DbService } from '@dua-upd/db';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class HashesService {
   constructor(
+    @Inject(DbService)
     private db: DbService,
-    @InjectModel(Page.name, 'defaultConnection')
-    private pageModel: Model<PageDocument>,
-    @Inject(BlobStorageService.name) private blob: BlobStorageService,
-    private cache: HashesCache,
+    @Inject(DuckDbService.name)
+    private duckDb: DuckDbService,
   ) {}
 
+  @AsyncLogTiming
   async getHashes(id: string): Promise<UrlHash[]> {
-    const urls = await this.db.collections.urls
-      .find({ page: new Types.ObjectId(id) })
-      .lean()
-      .exec();
+    const pageUrl = (
+      await this.db.collections.pages
+        .findById(new Types.ObjectId(id), { url: 1 })
+        .lean()
+        .exec()
+    )?.url;
 
-    if (!urls) return [];
-
-    const hash = urls.map((url) => url.hashes).flat();
-
-    const promises: Promise<UrlHash | void>[] = [];
-
-    for (const h of hash) {
-      if (!h) continue;
-
-      const cachedBlob = await this.cache.get(h.hash);
-
-      if (cachedBlob) {
-        promises.push(
-          Promise.resolve({
-            hash: h.hash,
-            date: h.date,
-            blob: cachedBlob,
-          }),
-        );
-      } else {
-        if (!this.blob.blobModels.urls) {
-          continue;
-        }
-        promises.push(
-          this.blob.blobModels.urls
-            .blob(h.hash)
-            .downloadToString()
-            .then(async (blob) => {
-              if (!blob) {
-                throw new Error('Blob is undefined');
-              }
-              const formattedBlob = await format(blob, { parser: 'html' });
-
-              await this.cache.set(h.hash, formattedBlob);
-
-              return {
-                hash: h.hash,
-                date: h.date,
-                blob: formattedBlob,
-              };
-            })
-            .catch((err) => {
-              console.error(err);
-            }),
-        );
-
-        await wait(30);
-      }
+    if (!pageUrl) {
+      throw Error(`Page not found for for id ${id}`);
     }
 
-    const hashes = (await Promise.allSettled(promises))
-      .filter((p) => p.status === 'fulfilled')
-      .map((p) => p.value as UrlHash)
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
+    const htmlTable = this.duckDb.remote.html.table;
+
+    const hashes = await this.duckDb.remote.html
+      .selectRemote({
+        hash: htmlTable.hash,
+        date: htmlTable.date,
+        html: htmlTable.html,
+      })
+      .where(eq(htmlTable.url, pageUrl))
+      .orderBy(desc(htmlTable.date))
+      .execute()
+      .then(async (rows) =>
+        Promise.allSettled(
+          rows.map(async ({ hash, date, html }) => ({
+            hash: hash || '',
+            date: date || new Date(date || 0),
+            blob: await format(html || '', { parser: 'html' }),
+          })),
+        ),
+      )
+      .then((results) =>
+        results
+          .filter((result) => result.status === 'fulfilled')
+          .map((result) => result.value),
+      );
 
     return hashes;
   }

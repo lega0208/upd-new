@@ -30,6 +30,7 @@ module.exports = composePlugins(withNx(), (config) => {
       'cheerio',
       'dayjs',
       'dotenv',
+      'duckdb',
       'html-minifier-terser',
       'mongoose',
       'nodejs-polars',

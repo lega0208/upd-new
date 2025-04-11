@@ -14,6 +14,7 @@ import { InternalSearchModule } from '../internal-search/internal-search.module'
 import { ReportsModule } from '../reports/reports.module';
 import { FeedbackModule } from '@dua-upd/api/feedback';
 import { HashesModule } from '@dua-upd/api/hashes';
+import { HealthCheckController } from '../healthcheck/healthcheck.controller';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { HashesModule } from '@dua-upd/api/hashes';
     AdobeAnalyticsModule.register(environment.production),
   ],
   providers: [],
+  controllers: [HealthCheckController],
 })
 export class AppModule {
   constructor() {

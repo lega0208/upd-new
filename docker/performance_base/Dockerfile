@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.3
-FROM node:22.8-alpine3.20 as builder
+FROM node:22.14.0-bookworm-slim as builder
 WORKDIR /builder
 VOLUME ["/builder"]
 COPY ["package.json", "package-lock.json", "./"]
@@ -12,19 +12,19 @@ RUN npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --prod -
 RUN npx nx daemon --stop
 RUN rm -r /builder/node_modules && rm -r /builder/tmp
 
-FROM alpine:3.20 as apps
+FROM debian:bookworm-20250407 as apps
 WORKDIR /apps
 COPY --from=builder /builder/dist/apps/ .
 
-FROM node:22.8-alpine3.20 as node_base
-RUN apk update && apk add tzdata && apk add curl
+FROM node:22.14.0-bookworm-slim as node_base
+RUN apt-get update && apt-get install -y tzdata curl
 ENV TZ=America/Toronto
 
 FROM node_base as web
 COPY --from=apps apps/api/package.json .
 RUN --mount=type=cache,target=/home/node/.npm npm install
 COPY --from=apps apps/api/ .
-RUN wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -P /etc/ssl
+RUN curl -o /etc/ssl/global-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 EXPOSE 9000
 USER node
 CMD ["node", "main.js"]
@@ -36,7 +36,7 @@ RUN --mount=type=cache,target=/home/node/.npm npm ci
 FROM node_base as web-dev
 COPY --from=web-dev-base . .
 COPY dist/apps/api/ .
-RUN wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -P /etc/ssl
+RUN curl -o /etc/ssl/global-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 EXPOSE 9000
 USER node
 CMD ["node", "main.js"]

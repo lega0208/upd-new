@@ -64,6 +64,13 @@ export const addMissingPageMetricsRefs = async (db: DbService) => {
   await db.addMissingAirtableRefsToPageMetrics();
 };
 
+export async function syncRemoteHtmlParquet() {
+  const urlsService = (<RunScriptCommand>this).inject<UrlsService>(UrlsService);
+
+  await urlsService.syncRemoteParquet();
+  process.exit(0);
+}
+
 export async function uploadFeedback(_, __, ___, blob: BlobStorageService) {
   const time = startTimer('uploadFeedback');
   const feedback = await readFile(
@@ -1210,8 +1217,7 @@ function getDateRanges(
   };
 
   switch (interval) {
-    case 'full':
-    {
+    case 'full': {
       addRange(start, end);
       break;
     }
@@ -1338,12 +1344,12 @@ export async function thirty30Report() {
   const dateRangeBeforeInterval = getDateRanges(
     dateRangeBefore.start,
     dateRangeBefore.end,
-    interval
+    interval,
   );
   const dateRangeAfterInterval = getDateRanges(
     dateRangeAfter.start,
     dateRangeAfter.end,
-    interval
+    interval,
   );
 
   const dateRangesInterval = [dateRangeBeforeInterval, dateRangeAfterInterval];
@@ -1587,19 +1593,21 @@ export async function thirty30Report() {
   function createSheetData(dataObject, suffix, tasksDict) {
     const sheetData = [];
     let index = 0;
-  
+
     for (const [taskId, data] of Object.entries(dataObject)) {
-      const taskTitle = `${index}-${tasksDict[taskId]?.task_title}` || `Task-${index}-${taskId}`;
+      const taskTitle =
+        `${index}-${tasksDict[taskId]?.task_title}` ||
+        `Task-${index}-${taskId}`;
       sheetData.push({
         sheetName: getValidSheetName(taskTitle, suffix),
         data: Object.values(data) as Record<string, unknown>[],
       });
       index++;
     }
-  
+
     return sheetData;
   }
-  
+
   // Collect metrics for tasks and projects
   const [
     {
@@ -1618,15 +1626,12 @@ export async function thirty30Report() {
     collectMetricsForTasks(dateRangesInterval[0]),
     collectMetricsForTasks(dateRangesInterval[1]),
   ]);
-  
-  const [
-    projectsBeforeArray,
-    projectsAfterArray,
-  ] = await Promise.all([
+
+  const [projectsBeforeArray, projectsAfterArray] = await Promise.all([
     collectMetricsForProjects(dateRangesInterval[0]),
     collectMetricsForProjects(dateRangesInterval[1]),
   ]);
-  
+
   // Prepare overview data
   const overviewData = [
     { sheetName: 'tasks-before', data: Object.values(tasksBeforeArray) },
@@ -1634,16 +1639,16 @@ export async function thirty30Report() {
     { sheetName: 'projects-before', data: projectsBeforeArray },
     { sheetName: 'projects-after', data: projectsAfterArray },
   ];
-  
+
   // Generate task dictionaries on task_id data
   const beforeTasksDict = arrayToDictionary(tasksBeforeArray, 'task_id', true);
   const afterTasksDict = arrayToDictionary(tasksAfterArray, 'task_id', true);
-  
+
   const callDriversData = [
     ...createSheetData(callDriverBeforeArray, '-before', beforeTasksDict),
     ...createSheetData(callDriverAfterArray, '-after', afterTasksDict),
   ];
-  
+
   // Generate feedback data
   const feedbackData = [
     ...createSheetData(feedbackENBeforeData, '-en-before', beforeTasksDict),
@@ -1654,12 +1659,18 @@ export async function thirty30Report() {
 
   const date = new Date().toISOString().slice(0, 10);
 
-  await outputExcel(`${outDir}/overview_report_${interval}_${date}.xlsx`, overviewData);
+  await outputExcel(
+    `${outDir}/overview_report_${interval}_${date}.xlsx`,
+    overviewData,
+  );
   await outputExcel(
     `${outDir}/call_drivers_report_${interval}_${date}.xlsx`,
     callDriversData,
   );
-  await outputExcel(`${outDir}/feedback_report_${interval}_${date}.xlsx`, feedbackData);
+  await outputExcel(
+    `${outDir}/feedback_report_${interval}_${date}.xlsx`,
+    feedbackData,
+  );
 
   console.log(`Excel report generated successfully in ${outDir}`);
 }
