@@ -97,7 +97,7 @@ export class StorageClient {
  * e.g. the path "logs" for the blob named "log1.txt" will have the full blobName "logs/log1.txt"
  */
 export type BlobsConfig = {
-  path: string;
+  path?: string;
   container: StorageContainer;
   overwrite?: boolean;
   compression?: CompressionAlgorithm;
