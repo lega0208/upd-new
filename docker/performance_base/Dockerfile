@@ -3,63 +3,80 @@ FROM node:22.14.0-bookworm-slim AS builder
 WORKDIR /builder
 VOLUME ["/builder"]
 COPY ["package.json", "package-lock.json", "./"]
-RUN --mount=type=cache,target=/home/node/.npm npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 COPY ./nx.json /tsconfig.base.json /tsconfig.json /.eslintrc.json ./
 COPY ./apps/ ./apps
 COPY ./libs/ ./libs
 RUN npx nx daemon --start
-RUN npx nx run-many --target=build --projects=api,upd,db-updater,db-cli --prod --parallel
+RUN npx nx run-many --target=build --projects=api,upd,db-updater --prod --parallel
 RUN npx nx daemon --stop
 RUN rm -r /builder/node_modules && rm -r /builder/tmp
+
 
 FROM debian:bookworm-20250407-slim AS apps
 WORKDIR /apps
 COPY --from=builder /builder/dist/apps/ .
 
+
 FROM node:22.14.0-bookworm-slim AS node_base
 RUN apt-get update && apt-get install -y tzdata curl
 ENV TZ=America/Toronto
 
+
 FROM node_base AS web
+WORKDIR /app
+RUN chown node:node ./
 COPY --from=apps ["apps/api/package.json", "apps/api/package-lock.json", "./"]
-RUN --mount=type=cache,target=/home/node/.npm npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci --only-production
 COPY --from=apps apps/api/ .
 RUN curl -o /etc/ssl/global-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 EXPOSE 9000
 USER node
 CMD ["node", "main.js"]
 
+
 FROM node_base AS web-dev-base
+WORKDIR /app
 COPY ["dist/apps/api/package.json", "dist/apps/api/package-lock.json", "./"]
-RUN --mount=type=cache,target=/home/node/.npm npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci --only-production
+
 
 FROM node_base AS web-dev
-COPY --from=web-dev-base . .
+WORKDIR /app
+RUN chown node:node ./
+COPY --from=web-dev-base /app/ .
 COPY dist/apps/api/ .
 RUN curl -o /etc/ssl/global-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 EXPOSE 9000
 USER node
 CMD ["node", "main.js"]
 
+
 FROM node_base AS db-updater
-RUN echo -e '#!/bin/sh\nnode db-cli/main.js "$@"' >> /bin/db-cli && chmod +x /bin/db-cli
+WORKDIR /app
+RUN chown node:node ./
 COPY --from=apps ["apps/db-updater/package.json", "apps/db-updater/package-lock.json", "./"]
-RUN --mount=type=cache,target=/home/node/.npm npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci --only-production
 COPY --from=apps apps/db-updater/ .
-COPY --from=apps apps/db-cli/ db-cli/
 EXPOSE 9001
 USER node
 CMD ["node", "main.js"]
 
+
 FROM node_base AS db-updater-dev-base
+WORKDIR /app
 COPY ["dist/apps/db-updater/package.json", "dist/apps/db-updater/package-lock.json", "./"]
-RUN --mount=type=cache,target=/home/node/.npm npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci --only-production
+
 
 FROM node_base AS db-updater-dev
-RUN echo -e '#!/bin/sh\nnode db-cli/main.js "$@"' >> /bin/db-cli && chmod +x /bin/db-cli
-COPY --from=db-updater-dev-base . .
+WORKDIR /app
+RUN chown node:node ./
+COPY --from=db-updater-dev-base /app/ .
 COPY dist/apps/db-updater/main.js .
+USER node
 CMD ["node", "main.js"]
+
 
 FROM nginx:alpine AS nginx
 RUN apk update && apk add tzdata
@@ -68,6 +85,7 @@ COPY --from=apps apps/upd/ /var/www/html/
 COPY docker/performance_nginx/nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80
 EXPOSE 443
+
 
 FROM nginx:alpine AS nginx-dev
 RUN apk update && apk add tzdata
