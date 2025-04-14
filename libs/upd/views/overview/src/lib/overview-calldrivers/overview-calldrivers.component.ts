@@ -131,16 +131,15 @@ export class OverviewCalldriversComponent implements OnInit {
           header: 'change',
           pipe: 'percent',
           pipeParam: '1.0-2',
-        upGoodDownBad: true,
-        indicator: true,
-        useArrows: true,
-        showTextColours: true,
-        secondaryField: {
-          field: 'difference',
-          pipe: 'number',
-        },
-        width: '160px',
-
+          upGoodDownBad: false,
+          indicator: true,
+          useArrows: true,
+          showTextColours: true,
+          secondaryField: {
+            field: 'difference',
+            pipe: 'number',
+          },
+          width: '160px',
         },
       ];
     });
