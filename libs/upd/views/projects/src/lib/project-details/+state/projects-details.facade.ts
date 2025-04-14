@@ -447,7 +447,7 @@ export class ProjectsDetailsFacade {
         header: 'change',
         pipe: 'percent',
         pipeParam: '1.0-2',
-        upGoodDownBad: true,
+        upGoodDownBad: false,
         indicator: true,
         useArrows: true,
         showTextColours: true,
