@@ -27,7 +27,7 @@
     "analyze-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json",
     "pre-pr": "npm run lint && npm run build:parallel",
     "translations": "npm run db-script -- -ngenerateTaskTranslations",
-    "bun-script": "bun ./scripts/bun-script.sh"
+    "bun-script": "bun ./scripts/bun-script.ts"
   },
   "private": true,
   "dependencies": {
