@@ -564,22 +564,22 @@ export class ProjectsDetailsFacade {
         ...uxTests.map((test) => test.total_users || 0),
       );
 
-      return uxTests.map((uxTest) => {
-        return {
-          ...uxTest,
-          date: dayjs.utc(uxTest.date).locale(lang).format(dateFormat),
-          test_type: uxTest.test_type
-            ? this.i18n.service.translate(uxTest.test_type, lang)
-            : uxTest.test_type,
-          tasks: uxTest.tasks
-            .split('; ')
-            .map((task) =>
-              task ? this.i18n.service.translate(task, lang) : task,
-            )
-            .join('; '),
-          total_users: maxTotalUsers,
-        };
-      });
+      return uxTests.map((uxTest) => ({
+        ...uxTest,
+        date: uxTest.date
+          ? dayjs.utc(uxTest.date).locale(lang).format(dateFormat)
+          : null,
+        test_type: uxTest.test_type
+          ? this.i18n.service.translate(uxTest.test_type, lang)
+          : uxTest.test_type,
+        tasks: uxTest.tasks
+          .split('; ')
+          .map((task) =>
+            task ? this.i18n.service.translate(task, lang) : task,
+          )
+          .join('; '),
+        total_users: maxTotalUsers,
+      }));
     }),
   );
 
@@ -637,7 +637,7 @@ export class ProjectsDetailsFacade {
   );
 
   taskSuccessChartHeight$ = this.apexTaskSuccessByUxTest$.pipe(
-    map((chart) => chart.xaxis.length * 20 * chart.series.length + 100),
+    map((chart) => chart.xaxis.length * 35 * chart.series.length + 100),
   );
 
   taskSuccessByUxTestKpi$ = combineLatest([
