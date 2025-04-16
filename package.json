@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "nx",
-    "start": "set NODE_OPTIONS=\"--max-old-space-size=6144\"& set NX_NATIVE_COMMAND_RUNNER=false& nx run-many --target=serve --projects=api,upd --parallel",
+    "start": "nx run-many --target=serve --projects=api,upd --parallel",
     "dev": "set NX_NATIVE_COMMAND_RUNNER=false& nx run-many --target=serve --projects=api,upd --parallel",
     "preview": "nx run-many --target=preview --projects=api,upd --parallel --output-style=static",
     "build": "nx run-many --target=build --projects=api,upd,db-updater,db-cli --parallel=false --prod --output-style=static",
@@ -27,6 +27,13 @@
     "analyze-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json",
     "pre-pr": "npm run lint && npm run build:parallel",
     "translations": "npm run db-script -- -ngenerateTaskTranslations",
+    "mongo-parquet:sync": "cd python/mongo-parquet && uv sync",
+    "mongo-parquet": "cd python/mongo-parquet/src && uv run mongo_parquet",
+    "mongo-parquet:download": "npm run mongo-parquet -- --download-from-remote",
+    "mongo-parquet:upload": "npm run mongo-parquet -- --upload-to-remote",
+    "mongo-parquet:seed-mongo": "npm run mongo-parquet -- --import-to-mongo --from-remote",
+    "mongo-parquet:seed-mongo-local": "npm run mongo-parquet -- --import-to-mongo",
+    "mongo-parquet:export": "npm run mongo-parquet -- --export-from-mongo",
     "bun-script": "bun ./scripts/bun-script.ts"
   },
   "private": true,
