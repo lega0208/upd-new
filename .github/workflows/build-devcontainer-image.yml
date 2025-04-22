@@ -7,6 +7,10 @@ on:
     branches:
       - main
 
+env:
+  REGISTRY: ghcr.io
+  REPO_NAME: ${{ github.repository }}
+
 jobs:
   build-and-push-image:
     if: github.event.pull_request.merged == true
