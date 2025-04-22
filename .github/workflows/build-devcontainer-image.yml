@@ -19,7 +19,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - id: devcontainer-changed
+        run: |
+          echo "::set-output name=config_changed::$(git diff --name-only HEAD^ HEAD .devcontainer/build/devcontainer.json)"
+          echo "::set-output name=dockerfile_changed::$(git diff --name-only HEAD^ HEAD .devcontainer/build/Dockerfile)"
+        shell: bash
+
       - name: Log in to the Container registry
+        if: steps.devcontainer-changed.outputs.config_changed != '' || steps.devcontainer-changed.outputs.dockerfile_changed != ''
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -27,6 +34,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pre-build dev container image
+        if: steps.devcontainer-changed.outputs.config_changed != '' || steps.devcontainer-changed.outputs.dockerfile_changed != ''
         uses: devcontainers/ci@v0.3
         with:
           imageName: ghcr.io/${{ env.REPO_NAME }}/codespaces-devcontainer-base
