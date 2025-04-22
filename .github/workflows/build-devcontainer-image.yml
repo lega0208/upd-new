@@ -43,6 +43,6 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           imageName: ghcr.io/${{ env.REPO_NAME }}/codespaces-devcontainer-base
-          configFilePath: .devcontainer/build/devcontainer.json
+          configFile: .devcontainer/build/devcontainer.json
           cacheFrom: ghcr.io/${{ env.REPO_NAME }}/codespaces-devcontainer-base
           push: always
