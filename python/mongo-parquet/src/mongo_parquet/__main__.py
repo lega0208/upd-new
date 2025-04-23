@@ -47,21 +47,16 @@ class MongoParquet:
             }
 
         elif self.storage == "s3":
-            self.s3_key = os.getenv("AWS_ACCESS_KEY_ID", "")
-            self.s3_secret = os.getenv("AWS_SECRET_ACCESS_KEY", "")
-            self.s3_endpoint = os.getenv("AWS_S3_ENDPOINT", None)
-            s3_kwargs = {
-                "key": self.s3_key,
-                "secret": self.s3_secret,
-            }
-            if self.s3_endpoint:
-                s3_kwargs["client_kwargs"] = {"endpoint_url": self.s3_endpoint}
+            self.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "")
+            self.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+            self.region_name = os.getenv("AWS_DEFAULT_REGION", "ca-central-1")
 
-            self.fs = fsspec.filesystem("s3fs", **s3_kwargs)
-            self.pl_storage_options = {
-                "aws_access_key_id": self.s3_key,
-                "aws_secret_access_key": self.s3_secret,
-            }
+            self.fs = fsspec.filesystem(
+                "s3",
+                key=self.aws_access_key_id,
+                secret=self.aws_secret_access_key,
+                client_kwargs={"region_name": self.region_name},
+            )
 
     def export_from_mongo(
         self,
@@ -73,10 +68,24 @@ class MongoParquet:
     ):
         from mongo_parquet.mongo import MongoConverter
         from mongo_parquet.schemas import (
-            AASearchTerms, ActivityMap, Calldrivers, Feedback,
-            GSCSearchTerms, GcTss, OverallMetrics, OverallGSCSearchTerms,
-            PageMetrics, Pages, Projects, Tasks, Urls, UxTests, Readability,
-            SearchAssessment, Reports, Annotations,
+            AASearchTerms,
+            ActivityMap,
+            Calldrivers,
+            Feedback,
+            GSCSearchTerms,
+            GcTss,
+            OverallMetrics,
+            OverallGSCSearchTerms,
+            PageMetrics,
+            Pages,
+            Projects,
+            Tasks,
+            Urls,
+            UxTests,
+            Readability,
+            SearchAssessment,
+            Reports,
+            Annotations,
         )
 
         db = self.client[db_name] if db_name is not None else self.db
@@ -109,24 +118,41 @@ class MongoParquet:
             rename: Optional[str] = None
 
         MODELS = [
-            ExportModel(PageMetrics(),   {"tasks": {"$in": task_ids}},     True),
-            ExportModel(GcTss(),         None,                             True),
-            ExportModel(Feedback(),      None,                             True),
-            ExportModel(AASearchTerms(), {"tasks": {"$in": task_ids}},     True,  "pages_metrics_aa_searchterms"),
-            ExportModel(ActivityMap(),   {"tasks": {"$in": task_ids}},     True,  "pages_metrics_activity_map"),
-            ExportModel(GSCSearchTerms(),{"tasks": {"$in": task_ids}},     True,  "pages_metrics_gsc_searchterms"),
-            ExportModel(Calldrivers(),   None,                             True),
-            ExportModel(OverallMetrics(),None,                             True),
-            ExportModel(OverallGSCSearchTerms(), None,                     True,  "overall_metrics_gsc_searchterms"),
-            ExportModel(Pages(),         {"tasks": {"$in": task_ids}},     False),
-            ExportModel(Projects(),      {"_id": {"$in": project_ids}},     False),
-            ExportModel(Tasks(),         {"_id": {"$in": task_ids}},        False),
-            ExportModel(Urls(),          {"page": {"$in": page_ids}},      False),
-            ExportModel(UxTests(),       {"tasks": {"$in": task_ids}},     False),
-            ExportModel(Readability(),   {"page": {"$in": page_ids}},      False),
-            ExportModel(SearchAssessment(), None,                         False),
-            ExportModel(Reports(),       None,                             False),
-            ExportModel(Annotations(),   None,                             False),
+            ExportModel(PageMetrics(), {"tasks": {"$in": task_ids}}, True),
+            ExportModel(GcTss(), None, True),
+            ExportModel(Feedback(), None, True),
+            ExportModel(
+                AASearchTerms(),
+                {"tasks": {"$in": task_ids}},
+                True,
+                "pages_metrics_aa_searchterms",
+            ),
+            ExportModel(
+                ActivityMap(),
+                {"tasks": {"$in": task_ids}},
+                True,
+                "pages_metrics_activity_map",
+            ),
+            ExportModel(
+                GSCSearchTerms(),
+                {"tasks": {"$in": task_ids}},
+                True,
+                "pages_metrics_gsc_searchterms",
+            ),
+            ExportModel(Calldrivers(), None, True),
+            ExportModel(OverallMetrics(), None, True),
+            ExportModel(
+                OverallGSCSearchTerms(), None, True, "overall_metrics_gsc_searchterms"
+            ),
+            ExportModel(Pages(), {"tasks": {"$in": task_ids}}, False),
+            ExportModel(Projects(), {"_id": {"$in": project_ids}}, False),
+            ExportModel(Tasks(), {"_id": {"$in": task_ids}}, False),
+            ExportModel(Urls(), {"page": {"$in": page_ids}}, False),
+            ExportModel(UxTests(), {"tasks": {"$in": task_ids}}, False),
+            ExportModel(Readability(), {"page": {"$in": page_ids}}, False),
+            ExportModel(SearchAssessment(), None, False),
+            ExportModel(Reports(), None, False),
+            ExportModel(Annotations(), None, False),
         ]
 
         converter = MongoConverter()
@@ -249,10 +275,10 @@ class MongoParquet:
 
         def read_parquet(filepath: str) -> pl.DataFrame:
             print(f"📥 Reading {filepath}...")
-            
+
             if use_remote_storage:
-              with self.fs.open(f"{filepath}", "rb") as f:
-                  return pl.read_parquet(f.read())
+                with self.fs.open(f"{filepath}", "rb") as f:
+                    return pl.read_parquet(f.read())
 
             return pl.read_parquet(filepath)
 
@@ -430,7 +456,7 @@ class MongoParquet:
             print(f"⬇️  Downloading: {remote_path} → {local_path}")
             with self.fs.open(remote_path, "rb") as remote_file:
                 with open(local_path, "wb") as local_file:
-                    local_file.write(remote_file.read()) # type: ignore
+                    local_file.write(remote_file.read())  # type: ignore
 
         print("✅ All Parquet files downloaded.")
 
