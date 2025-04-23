@@ -16,8 +16,9 @@ class MongoParquet:
         remote_container="data",
         local_dir="sample",
         data_dir="sample",
+        storage="azure",
     ):
-        from adlfs import AzureBlobFileSystem
+        import fsspec
 
         load_dotenv()
 
@@ -30,15 +31,37 @@ class MongoParquet:
         self.local_dir = local_dir
         self.remote_container = remote_container
         self.data_dir = data_dir
-        # todo: later for s3: pass in some sort of cloud config that allows for multi-cloud
-        self.azure_storage_account_name = os.getenv("AZURE_DATA_ACCOUNT_NAME", "")
-        self.azure_storage_account_key = os.getenv("AZURE_DATA_ACCOUNT_KEY", "")
-        self.azure_connection_string = os.getenv("AZURE_DATA_CONNECTION_STRING", "")
-        self.fs = AzureBlobFileSystem(connection_string=self.azure_connection_string)
-        self.pl_storage_options = {
-            "azure_storage_account_name": self.azure_storage_account_name,
-            "azure_storage_account_key": self.azure_storage_account_key,
-        }
+        self.storage = storage
+
+        if self.storage == "azure":
+            self.azure_storage_account_name = os.getenv("AZURE_DATA_ACCOUNT_NAME", "")
+            self.azure_storage_account_key = os.getenv("AZURE_DATA_ACCOUNT_KEY", "")
+            self.azure_connection_string = os.getenv("AZURE_DATA_CONNECTION_STRING", "")
+            self.fs = fsspec.filesystem(
+                "abfs",
+                connection_string=self.azure_connection_string,
+            )
+            self.pl_storage_options = {
+                "azure_storage_account_name": self.azure_storage_account_name,
+                "azure_storage_account_key": self.azure_storage_account_key,
+            }
+
+        elif self.storage == "s3":
+            self.s3_key = os.getenv("AWS_ACCESS_KEY_ID", "")
+            self.s3_secret = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+            self.s3_endpoint = os.getenv("AWS_S3_ENDPOINT", None)
+            s3_kwargs = {
+                "key": self.s3_key,
+                "secret": self.s3_secret,
+            }
+            if self.s3_endpoint:
+                s3_kwargs["client_kwargs"] = {"endpoint_url": self.s3_endpoint}
+
+            self.fs = fsspec.filesystem("s3fs", **s3_kwargs)
+            self.pl_storage_options = {
+                "aws_access_key_id": self.s3_key,
+                "aws_secret_access_key": self.s3_secret,
+            }
 
     def export_from_mongo(
         self,
@@ -473,6 +496,13 @@ def main():
         help="Override the database name to use.",
     )
 
+    parser.add_argument(
+        "--storage",
+        type=str,
+        default="azure",
+        help="Override the remote storage type (azure or s3).",
+    )
+
     args = parser.parse_args()
 
     actions_selected = 0
@@ -501,6 +531,7 @@ def main():
         local_dir=args.local_dir,
         remote_container=args.remote_container,
         data_dir=args.data_dir,
+        storage=args.storage,
     )
 
     if args.export_from_mongo:
