@@ -42,8 +42,8 @@ class MongoParquet:
                 connection_string=self.azure_connection_string,
             )
             self.pl_storage_options = {
-                "account_name": self.azure_storage_account_name,
-                "account_key": self.azure_storage_account_key,
+                "azure_storage_account_name": self.azure_storage_account_name,
+                "azure_storage_account_key": self.azure_storage_account_key,
             }
 
         elif self.storage == "s3":
