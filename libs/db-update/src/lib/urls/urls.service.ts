@@ -1079,7 +1079,7 @@ export class UrlsService {
 
     await htmlTable.appendLocalToRemote({
       orderBy: appendOrderBy,
-      rowGroupSize: 10000,
+      rowGroupSize: 5000,
       compressionLevel: 7,
     });
 
