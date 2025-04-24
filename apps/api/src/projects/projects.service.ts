@@ -532,7 +532,6 @@ export class ProjectsService {
       attachments: populatedProjectDoc.attachments.map((attachment) => ({
         ...attachment,
         storage_url: attachment.storage_url?.replace(/^https:\/\//, ''),
-        filename: attachment.filename,
       })),
       feedbackByPage,
       feedbackByDay: (
