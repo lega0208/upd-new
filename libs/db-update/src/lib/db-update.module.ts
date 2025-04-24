@@ -24,6 +24,7 @@ import { ReadabilityService } from './readability/readability.service';
 import { AnnotationsService } from './airtable/annotations.service';
 import { GcTaskService } from './gc-task/gc-task.service';
 import { GCTasksMappingsService } from './airtable/gc-tasks-mappings.service';
+import { DuckDbModule } from '@dua-upd/duckdb';
 
 const date = dayjs().format('YYYY-MM-DD');
 const month = dayjs().format('YYYY-MM');
@@ -47,6 +48,7 @@ export class DbUpdateModule {
             log: `${month}/db-update_${date}`,
           },
         }),
+        DuckDbModule,
       ],
       providers: [
         AirtableService,

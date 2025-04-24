@@ -16,6 +16,7 @@ import {
   dateRangeSplit,
   percentChange,
   datesFromDateRange,
+  $trunc,
 } from '@dua-upd/utils-common';
 import { omit } from 'rambdax';
 
@@ -308,78 +309,72 @@ export class Feedback implements IFeedback {
         comment_occurrences: { $gt: 1 },
       })
       .addFields({
-        term_frequency: {
-          $round: [
-            {
-              $ln: {
-                $sum: [
-                  1,
-                  {
-                    $divide: ['$word_occurrences', totalWords],
-                  },
-                ],
-              },
+        term_frequency: $trunc(
+          {
+            $ln: {
+              $sum: [
+                1,
+                {
+                  $divide: ['$word_occurrences', totalWords],
+                },
+              ],
             },
-            7,
-          ],
-        },
+          },
+          8,
+        ),
       })
       .addFields({
-        comment_frequency: {
-          $round: [
-            {
-              $divide: ['$comment_occurrences', totalComments],
-            },
-            6,
-          ],
-        },
+        comment_frequency: $trunc(
+          {
+            $divide: ['$comment_occurrences', totalComments],
+          },
+          7,
+        ),
       })
       .match({
         term_frequency: { $gt: 0.000001 },
       })
       .addFields({
-        inverse_doc_frequency: {
-          $round: [
-            {
-              $multiply: [
-                Math.E,
-                {
-                  $ln: {
-                    $sum: [
-                      1,
-                      {
-                        $divide: [
-                          {
-                            $sum: [
-                              {
-                                $subtract: [
-                                  totalComments,
-                                  '$comment_occurrences',
-                                ],
-                              },
-                              {
-                                $sqrt: totalComments,
-                              },
-                            ],
-                          },
-                          {
-                            $sum: [
-                              '$comment_occurrences',
-                              {
-                                $sqrt: totalComments,
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
+        inverse_doc_frequency: $trunc(
+          {
+            $multiply: [
+              Math.E,
+              {
+                $ln: {
+                  $sum: [
+                    1,
+                    {
+                      $divide: [
+                        {
+                          $sum: [
+                            {
+                              $subtract: [
+                                totalComments,
+                                '$comment_occurrences',
+                              ],
+                            },
+                            {
+                              $sqrt: totalComments,
+                            },
+                          ],
+                        },
+                        {
+                          $sum: [
+                            '$comment_occurrences',
+                            {
+                              $sqrt: totalComments,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
                 },
-              ],
-            },
-            4,
-          ],
-        },
+              },
+            ],
+          },
+          5,
+        ),
       })
       .match({
         term_frequency: { $gte: 0.00001 },
@@ -443,7 +438,7 @@ export class Feedback implements IFeedback {
         totalWords: { $sum: { $size: '$words' } },
       })
       .addFields({
-        avgWords: { $round: ['$avgWords', 4] },
+        avgWords: $trunc('$avgWords', 5),
       })
       .exec();
 

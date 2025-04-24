@@ -49,6 +49,10 @@ export class ApexBarComponent implements OnInit {
     this.apexStore.setSeries(value);
   }
 
+  @Input() set height(value: number) {
+    this.apexStore.setHeight(value);
+  }
+
   @Input() set xAxis(value: string[][] | string[]) {
     this.apexStore.setXAxis(value);
   }

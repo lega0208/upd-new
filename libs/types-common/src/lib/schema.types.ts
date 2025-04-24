@@ -372,7 +372,7 @@ export interface IUxTest {
   launch_date?: Date;
   status?: string;
   cops?: boolean;
-  attachments?: AttachmentData[];
+  start_date?: Date;
 }
 
 export interface UrlHash {
@@ -540,7 +540,6 @@ export type AnnotationsAudienceType =
   | 'Charities';
 
 export type AccumulatorOperator =
-  | '$accumulator'
   | '$addToSet'
   | '$avg'
   | '$count'
@@ -550,8 +549,6 @@ export type AccumulatorOperator =
   | '$mergeObjects'
   | '$min'
   | '$push'
-  | '$stdDevPop'
-  | '$stdDevSamp'
   | '$sum';
 
 /*

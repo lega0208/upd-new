@@ -496,7 +496,7 @@ export class TasksDetailsFacade {
         header: 'change',
         pipe: 'percent',
         pipeParam: '1.0-2',
-        upGoodDownBad: true,
+        upGoodDownBad: false,
         indicator: true,
         useArrows: true,
         showTextColours: true,
@@ -589,6 +589,10 @@ export class TasksDetailsFacade {
         ({ title }, idx) => `UX Test: ${idx + 1} - ${title}`,
       );
     }),
+  );
+
+  taskSuccessChartHeight$ = this.taskSuccessChartLegend$.pipe(
+    map((legend) => legend.length * 35 + 100),
   );
 
   gscTotalClicks$ = this.tasksDetailsData$.pipe(

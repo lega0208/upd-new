@@ -436,7 +436,7 @@ export class ProjectsDetailsFacade {
         field: 'tasks',
         header: 'Task',
         translate: true,
-        }, 
+      },
       {
         field: 'calls',
         header: 'calls',
@@ -447,7 +447,7 @@ export class ProjectsDetailsFacade {
         header: 'change',
         pipe: 'percent',
         pipeParam: '1.0-2',
-        upGoodDownBad: true,
+        upGoodDownBad: false,
         indicator: true,
         useArrows: true,
         showTextColours: true,
@@ -457,7 +457,7 @@ export class ProjectsDetailsFacade {
         },
         width: '160px',
       },
-    ] as ColumnConfig<UnwrapObservable<typeof this.callsByTopic$>>[]
+    ] as ColumnConfig<UnwrapObservable<typeof this.callsByTopic$>>[],
   );
 
   dyfDataApex$ = combineLatest([
@@ -564,22 +564,22 @@ export class ProjectsDetailsFacade {
         ...uxTests.map((test) => test.total_users || 0),
       );
 
-      return uxTests.map((uxTest) => {
-        return {
-          ...uxTest,
-          date: dayjs.utc(uxTest.date).locale(lang).format(dateFormat),
-          test_type: uxTest.test_type
-            ? this.i18n.service.translate(uxTest.test_type, lang)
-            : uxTest.test_type,
-          tasks: uxTest.tasks
-            .split('; ')
-            .map((task) =>
-              task ? this.i18n.service.translate(task, lang) : task,
-            )
-            .join('; '),
-          total_users: maxTotalUsers,
-        };
-      });
+      return uxTests.map((uxTest) => ({
+        ...uxTest,
+        date: uxTest.date
+          ? dayjs.utc(uxTest.date).locale(lang).format(dateFormat)
+          : null,
+        test_type: uxTest.test_type
+          ? this.i18n.service.translate(uxTest.test_type, lang)
+          : uxTest.test_type,
+        tasks: uxTest.tasks
+          .split('; ')
+          .map((task) =>
+            task ? this.i18n.service.translate(task, lang) : task,
+          )
+          .join('; '),
+        total_users: maxTotalUsers,
+      }));
     }),
   );
 
@@ -634,6 +634,10 @@ export class ProjectsDetailsFacade {
         ),
       };
     }),
+  );
+
+  taskSuccessChartHeight$ = this.apexTaskSuccessByUxTest$.pipe(
+    map((chart) => chart.xaxis.length * 35 * chart.series.length + 100),
   );
 
   taskSuccessByUxTestKpi$ = combineLatest([
@@ -966,7 +970,7 @@ export class ProjectsDetailsFacade {
   feedbackMostRelevant = this.store.selectSignal(
     ProjectsDetailsSelectors.selectFeedbackMostRelevant,
   );
- 
+
   error$ = this.store.select(
     ProjectsDetailsSelectors.selectProjectsDetailsError,
   );
