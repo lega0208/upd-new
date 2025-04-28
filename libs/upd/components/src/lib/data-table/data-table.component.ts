@@ -20,9 +20,10 @@ import { SortEvent } from 'primeng/api';
 import { isNullish } from '@dua-upd/utils-common';
 
 @Component({
-  selector: 'upd-data-table',
-  templateUrl: './data-table.component.html',
-  styleUrls: ['./data-table.component.css'],
+    selector: 'upd-data-table',
+    templateUrl: './data-table.component.html',
+    styleUrls: ['./data-table.component.css'],
+    standalone: false
 })
 export class DataTableComponent<T extends object> {
   @ViewChild('dt') table!: Table;
@@ -53,6 +54,7 @@ export class DataTableComponent<T extends object> {
   inputSearchFields = input<string[]>([], { alias: 'searchFields' });
   columnSelection = input(false);
   groupedColumnSelection = input(false);
+  resizableColumns = input(false);
 
   cols = this.i18n.service.computedMap(this.initialCols, (col, translate) => ({
     ...col,

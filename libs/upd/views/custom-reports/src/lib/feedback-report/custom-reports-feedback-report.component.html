@@ -8,11 +8,11 @@
   </div>
 </div>
 
-@if (!error() && commentsData()?.length === 0 && !queryResults()) {
+@if (!error() && commentsData().length === 0 && !queryResults()) {
   <upd-did-you-know></upd-did-you-know>
 }
 
-@if (!error() && commentsData()?.length !== 0 && queryResults()) {
+@if (!error() && commentsData().length !== 0 && queryResults()) {
   <upd-alert position="top" [selfClosing]="true">
     {{ 'success-generating-report' | translate }}
   </upd-alert>
@@ -94,7 +94,7 @@
       </div>
     </div>
 
-    @if (commentsData()?.length !== 0) {
+    @if (commentsData().length !== 0) {
       <div class="w-100 d-inline-block mx-mx-auto mt-4">
         <div class="d-flex flex-fill align-content-center h-100 w-100">
           <div class="card align-middle w-100">
@@ -131,7 +131,7 @@
   </div>
 }
 
-@if (queryResults() && commentsData()?.length === 0) {
+@if (queryResults() && commentsData().length === 0) {
   <div
     class="alert alert-warning d-inline-block mx-auto mt-4"
     style="width: 100%"

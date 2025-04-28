@@ -29,10 +29,11 @@ export type DateRangePreset = {
 };
 
 @Component({
-  selector: 'upd-calendar',
-  templateUrl: './calendar.component.html',
-  styleUrls: ['./calendar.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'upd-calendar',
+    templateUrl: './calendar.component.html',
+    styleUrls: ['./calendar.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class CalendarComponent implements OnChanges {
   @ViewChild('myCalendar') datePicker!: Calendar;

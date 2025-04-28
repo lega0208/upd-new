@@ -51,7 +51,7 @@
       "@dua-upd/utils-common/types": [
         "libs/utils-common/src/lib/types/index.ts"
       ],
-      "@dua-upd/workspace-plugin": ["tools/workspace-plugin/src/index.ts"],
+      "@dua-upd/workspace-plugin": ["tools/workspace-plugin/src/index.ts"]
     },
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

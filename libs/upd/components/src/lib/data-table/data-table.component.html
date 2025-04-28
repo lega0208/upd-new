@@ -8,7 +8,9 @@
   [customSort]="true"
   [rowsPerPageOptions]="[5, 10, 25, 50, 100]"
   [loading]="loading"
-  styleClass="p-datatable-striped p-datatable-sm border"
+  stripedRows
+  size="small"
+  styleClass="border"
   [paginator]="pagination"
   currentPageReportTemplate="{{
     'dt-paginator'
@@ -22,6 +24,7 @@
   (selectionChange)="onSelectionChange($event)"
   (sortFunction)="customSort($event)"
   [(selection)]="selectedRows"
+  [resizableColumns]="resizableColumns"
 >
   <ng-template *ngIf="filter || captionTitle || exports" pTemplate="caption">
     <div>
@@ -126,7 +129,7 @@
             [ngStyle]="{ 'white-space': allowHeaderWrap ? 'normal' : 'nowrap' }"
           >
             <span
-              class="p-column-title datatable-headers"
+              class="p-column-title datatable-headers mx-2"
               [class.card-tooltip]="col.tooltip"
               [ngbTooltip]="col.tooltip | translate"
               placement="top"
@@ -230,7 +233,7 @@
                 (col.secondaryField?.field === 'change' &&
                   rowData[col.secondaryField?.field] >= 20))
           }"
-          class="{{ col.columnClass || '' }}"
+          class="text-wrap {{ col.columnClass || '' }}"
         >
           <span
             class="p-column-title datatable-headers"

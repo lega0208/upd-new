@@ -227,6 +227,7 @@ export interface IFeedbackView {
   refId: Types.ObjectId;
   dateRange: DateRange<Date>;
   lang: 'en' | 'fr';
+  lastUpdated: Date;
 }
 
 export interface IFeedbackViewWord extends IFeedbackView {

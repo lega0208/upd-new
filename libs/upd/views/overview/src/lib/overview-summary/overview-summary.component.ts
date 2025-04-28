@@ -16,10 +16,11 @@ import { OverviewFacade } from '../+state/overview/overview.facade';
 import { combineLatest } from 'rxjs';
 
 @Component({
-  selector: 'upd-overview-summary',
-  templateUrl: './overview-summary.component.html',
-  styleUrls: ['./overview-summary.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'upd-overview-summary',
+    templateUrl: './overview-summary.component.html',
+    styleUrls: ['./overview-summary.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class OverviewSummaryComponent implements OnInit {
   private overviewService = inject(OverviewFacade);

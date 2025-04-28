@@ -38,6 +38,7 @@ import type { InternalSearchTerm } from '@dua-upd/types-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import { compressString, decompressString } from '@dua-upd/node-utils';
 import { FlowService } from '@dua-upd/api/flow';
+import { omit } from 'rambdax';
 
 @Injectable()
 export class PagesService {
@@ -303,11 +304,12 @@ export class PagesService {
             .findOne({ url: page.altLangHref }, { _id: 1 })
             .lean()
             .exec()
-        )?._id
+        )?._id.toString()
       : null;
 
     const results = {
-      ...page,
+      _id: page._id.toString(),
+      ...omit(['_id'], page),
       is404: page.is_404,
       isRedirect: !!page.redirect,
       redirectUrl: page.redirect || null,

@@ -61,20 +61,19 @@ interface QueryParams {
 }
 
 @Component({
-  selector: 'dua-upd-custom-reports-create',
-  standalone: true,
-  imports: [
-    CommonModule,
-    UpdComponentsModule,
-    TranslateModule,
-    ClipboardModule,
-    I18nModule,
-    NgbTooltipModule,
-  ],
-  templateUrl: './custom-reports-create.component.html',
-  styleUrls: ['./custom-reports-create.component.scss'],
-  providers: [ApiService, I18nFacade],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'dua-upd-custom-reports-create',
+    imports: [
+        CommonModule,
+        UpdComponentsModule,
+        TranslateModule,
+        ClipboardModule,
+        I18nModule,
+        NgbTooltipModule,
+    ],
+    templateUrl: './custom-reports-create.component.html',
+    styleUrls: ['./custom-reports-create.component.scss'],
+    providers: [ApiService, I18nFacade],
+    encapsulation: ViewEncapsulation.None
 })
 export class CustomReportsCreateComponent {
   private router = inject(Router);

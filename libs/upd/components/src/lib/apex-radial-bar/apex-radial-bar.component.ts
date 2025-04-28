@@ -69,10 +69,11 @@ type ChartOptions = {
 };
 
 @Component({
-  selector: 'upd-apex-radial-bar',
-  templateUrl: './apex-radial-bar.component.html',
-  styleUrls: ['./apex-radial-bar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'upd-apex-radial-bar',
+    templateUrl: './apex-radial-bar.component.html',
+    styleUrls: ['./apex-radial-bar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ApexRadialBarComponent implements OnChanges {
   private i18n = inject(I18nFacade);

@@ -17,8 +17,8 @@ export interface DropdownOption<T> {
 }
 
 @Component({
-  selector: 'upd-dropdown',
-  template: `
+    selector: 'upd-dropdown',
+    template: `
     <p-dropdown
       [options]="this.placeholder ? displayedOptions : options"
       optionLabel="label"
@@ -56,14 +56,15 @@ export interface DropdownOption<T> {
       </ng-template>
     </p-dropdown>
   `,
-  styles: [
-    `
+    styles: [
+        `
       .dropdown-label {
         font-family: 'Noto Sans', sans-serif;
         font-size: 1rem;
       }
     `,
-  ],
+    ],
+    standalone: false
 })
 export class DropdownComponent<T> implements OnInit {
   @Input() @Required id!: string;

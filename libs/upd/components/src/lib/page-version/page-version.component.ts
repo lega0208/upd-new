@@ -45,10 +45,11 @@ interface PageConfig {
 }
 
 @Component({
-  selector: 'upd-page-version',
-  templateUrl: './page-version.component.html',
-  styleUrls: ['./page-version.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'upd-page-version',
+    templateUrl: './page-version.component.html',
+    styleUrls: ['./page-version.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class PageVersionComponent {
   i18n = inject(I18nFacade);

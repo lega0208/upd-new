@@ -29,12 +29,13 @@ interface SelectedItem {
 }
 
 @Component({
-  selector: 'upd-filter-table',
-  templateUrl: './filter-table.component.html',
-  styleUrls: ['./filter-table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [FilterTableStore],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'upd-filter-table',
+    templateUrl: './filter-table.component.html',
+    styleUrls: ['./filter-table.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [FilterTableStore],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class FilterTableComponent<T extends object> implements OnInit {
   private i18n = inject(I18nFacade);
