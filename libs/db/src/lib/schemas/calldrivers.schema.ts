@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import {
   type Document,
+  Schema as MSchema,
   Types,
   type Model,
   type mongo,
@@ -27,7 +28,7 @@ export type CallDriverDocument = CallDriver & Document;
 
 @Schema()
 export class CallDriver implements ICallDriver {
-  @Prop({ type: Types.ObjectId, required: true })
+  @Prop({ type: MSchema.Types.ObjectId, required: true })
   _id: Types.ObjectId = new Types.ObjectId();
 
   @Prop({ type: String })
@@ -66,10 +67,10 @@ export class CallDriver implements ICallDriver {
   @Prop({ type: Number })
   selfserve_na?: number;
 
-  @Prop({ type: [Types.ObjectId], index: true })
+  @Prop({ type: [MSchema.Types.ObjectId], index: true })
   tasks?: Types.ObjectId[];
 
-  @Prop({ type: [Types.ObjectId], index: true })
+  @Prop({ type: [MSchema.Types.ObjectId], index: true })
   projects?: Types.ObjectId[];
 
   static async getCallsByTopicFromIds(

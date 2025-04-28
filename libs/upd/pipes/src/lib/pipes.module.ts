@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { formatNumber, formatDate, formatPercent } from '@angular/common';
 import { I18nModule, I18nService, type LocaleId } from '@dua-upd/upd/i18n';
-import { val } from 'cheerio/lib/api/attributes';
 
 @Pipe({
     name: 'localeNumber', pure: false,

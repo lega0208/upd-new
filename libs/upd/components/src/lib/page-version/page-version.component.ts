@@ -19,7 +19,8 @@ import {
   Diff2HtmlUI,
 } from 'diff2html/lib/ui/js/diff2html-ui';
 import { createPatch } from 'diff';
-import { load, Cheerio, AnyNode } from 'cheerio/lib/slim';
+import { load, type Cheerio } from 'cheerio';
+import type { AnyNode } from 'domhandler';
 import { Diff } from '@ali-tas/htmldiff-js';
 import { RadioOption } from '../radio/radio.component';
 import { I18nFacade } from '@dua-upd/upd/state';
@@ -635,7 +636,7 @@ export class PageVersionComponent {
 
         for (const element of ajaxElements) {
           const $el = $(element);
-          const tag = $el.prop('tagName').toLowerCase();
+          const tag = $el.prop('tagName')?.toLowerCase();
           const attributes = $el.attr();
 
           for (const [attr, ajaxUrl] of Object.entries(attributes || {})) {

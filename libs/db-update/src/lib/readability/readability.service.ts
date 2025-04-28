@@ -1,5 +1,5 @@
 import { ConsoleLogger, Inject, Injectable, Optional } from '@nestjs/common';
-import { load } from 'cheerio/lib/slim';
+import { load } from 'cheerio/slim';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { Types, mongo, type AnyBulkWriteOperation } from 'mongoose';
