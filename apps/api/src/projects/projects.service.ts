@@ -30,6 +30,7 @@ import type {
   ProjectsHomeData,
   DateRange,
   IUxTest,
+  IProject,
 } from '@dua-upd/types-common';
 import {
   dateRangeSplit,
@@ -41,7 +42,7 @@ import {
   getLatestTest,
   getLatestTestData,
 } from '@dua-upd/utils-common/data';
-import { AsyncLogTiming, percentChange } from '@dua-upd/utils-common';
+import { $trunc, AsyncLogTiming, percentChange } from '@dua-upd/utils-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 
 dayjs.extend(utc);
@@ -355,8 +356,15 @@ export class ProjectsService {
       return;
     }
 
+    type ProjectedTask = { _id: string; title: string };
+    type ProjectedUxTest = Omit<IUxTest, 'project' | 'pages'> & { tasks: ProjectedTask[] };
+    type ProjectedProject = Omit<IProject, 'pages' | 'tasks' | 'ux_tests'> & {
+      tasks: ProjectedTask[];
+      ux_tests: ProjectedUxTest[];
+    };
+
     console.time('populate');
-    const populatedProjectDoc = (await this.projectsModel
+    const populatedProjectDoc = await this.projectsModel
       .findById(projectId, {
         title: 1,
         description: 1,
@@ -365,60 +373,51 @@ export class ProjectsService {
         attachments: 1,
       })
       .populate([
-        {
-          path: 'tasks',
-          select: '_id title',
-        },
+        { path: 'tasks', select: '_id title' },
         {
           path: 'ux_tests',
           select: '-project -pages',
-          populate: {
-            path: 'tasks',
-            select: '_id title',
-          },
+          populate: { path: 'tasks', select: '_id title' },
         },
       ])
-      .exec()) as Project;
+      .lean<ProjectedProject>()
+      .exec()
+      .then((project) => ({
+        ...project,
+        tasks: project.tasks.filter(
+          (task) => !(task instanceof Types.ObjectId),
+        ),
+        ux_tests: project.ux_tests.filter(
+          (test) => !(test instanceof Types.ObjectId),
+        ),
+      }));
     console.timeEnd('populate');
 
     const title = populatedProjectDoc.title;
 
     console.time('getProjectStatus');
     const status = getProjectStatus(
-      (populatedProjectDoc.ux_tests as UxTest[])
-        .filter((test) => !(test instanceof Types.ObjectId))
-        .map((test) => test.status as ProjectStatus),
+      populatedProjectDoc.ux_tests.map((test) => test.status as ProjectStatus),
     );
     console.timeEnd('getProjectStatus');
 
-    const cops = (populatedProjectDoc.ux_tests as UxTest[])
-      .filter((test) => !(test instanceof Types.ObjectId))
-      .some((test) => test.cops);
+    const cops = populatedProjectDoc.ux_tests.some((test) => test.cops);
 
     const description = populatedProjectDoc.description;
 
     console.time('uxTests');
     const uxTests = populatedProjectDoc.ux_tests.map((uxTest) => {
-      uxTest = uxTest._doc;
-
       if (!('tasks' in uxTest) || !uxTest.tasks.length) {
-        return {
-          ...uxTest,
-          tasks: '',
-        };
+        return { ...uxTest, tasks: '' };
       }
 
       const tasks =
         uxTest.tasks.length > 1
-          ? uxTest.tasks.map((task) => task._doc.title).join('; ')
+          ? uxTest.tasks.map((task) => task.title).join('; ')
           : uxTest.tasks[0].title;
 
-      return {
-        ...uxTest,
-        tasks,
-      };
-    }) as (Partial<UxTest> & { tasks: string })[];
-
+      return { ...uxTest, tasks };
+    });
     console.timeEnd('uxTests');
 
     console.time('getLatestTest');
@@ -754,9 +753,7 @@ export class ProjectsService {
           _id: 0,
           term: '$_id',
           clicks: 1,
-          position: {
-            $round: ['$position', 2],
-          },
+          position: $trunc('$position', 3),
         });
     };
 

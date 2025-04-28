@@ -44,6 +44,8 @@ export class OverviewUxTestsComponent implements OnInit {
   improvedKpiSuccessRateDifference$ =
     this.overviewService.improvedKpiSuccessRateDifference$;
 
+  improvedKpiSuccessRateDifferencePoints$ = this.overviewService.improvedKpiSuccessRateDifferencePoints$;
+
   improvedKpiSuccessRateValidation$ =
     this.overviewService.improvedKpiSuccessRateValidation$;
 
@@ -53,6 +55,8 @@ export class OverviewUxTestsComponent implements OnInit {
   improvedKpiTopSuccessRate$ = this.overviewService.improvedKpiTopSuccessRate$;
   improvedKpiTopSuccessRateDifference$ =
     this.overviewService.improvedKpiTopSuccessRateDifference$;
+
+  improvedKpiTopSuccessRateDifferencePoints$ = this.overviewService.improvedKpiTopSuccessRateDifferencePoints$;
 
   improvedKpiTopSuccessRateValidation$ =
     this.overviewService.improvedKpiTopSuccessRateValidation$;
@@ -118,6 +122,7 @@ export class OverviewUxTestsComponent implements OnInit {
           field: 'lastAvgSuccessRate',
           header: this.i18n.service.translate('Average success rate', lang),
           pipe: 'percent',
+          tooltip: 'tooltip-avg_success_last_uxtest'
         },
         {
           field: 'totalUsers',

@@ -152,6 +152,7 @@ export class PagesDetailsSummaryComponent implements OnInit {
       field: 'title',
       header: this.i18n.service.translate('Task', this.currentLang()),
       type: 'link',
+      translate: true,
       typeParams: {
         preLink: '/' + this.langLink() + '/tasks',
         link: '_id',

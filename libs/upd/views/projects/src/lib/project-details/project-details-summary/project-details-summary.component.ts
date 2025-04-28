@@ -94,38 +94,8 @@ export class ProjectDetailsSummaryComponent implements OnInit {
   startDate$ = this.projectsDetailsService.startDate$;
   launchDate$ = this.projectsDetailsService.launchDate$;
 
-  participantTasksCols: ColumnConfig<ParticipantTasksColTypes>[] = [
-    {
-      field: 'title',
-      header: 'Task list',
-      translate: true,
-      type: 'link',
-      typeParams: { preLink: '/' + this.langLink + '/tasks', link: '_id' },
-    },
-    {
-      field: 'callsPer100Visits',
-      header: 'Calls / 100 Visits',
-      pipe: 'number',
-      pipeParam: '1.0-2',
-    },
-    {
-      field: 'dyfNoPer1000Visits',
-      header: '"No clicks" / 1,000 Visits',
-      pipe: 'number',
-      pipeParam: '1.0-2',
-    },
-    {
-      field: 'uxTestInLastTwoYears',
-      header: 'UX Test in Past 2 Years?',
-      translate: true,
-    },
-    {
-      field: 'latestSuccessRate',
-      header: 'Latest UX Task Success Rate',
-      pipe: 'percent',
-    },
-  ];
-
+  participantTasksCols: ColumnConfig<ParticipantTasksColTypes>[] = [];
+    
   dyfTableCols: ColumnConfig<{
     name: string;
     currValue: number;
@@ -176,6 +146,40 @@ export class ProjectDetailsSummaryComponent implements OnInit {
           pipe: 'number',
         },
       ];
+
+      this.participantTasksCols = [
+        {
+          field: 'title',
+          header: 'Task list',
+          translate: true,
+          type: 'link',
+          typeParams: { preLink: '/' + this.langLink + '/tasks', link: '_id' },
+        },
+        {
+          field: 'callsPer100Visits',
+          header: 'kpi-calls-per-100-title',
+          pipe: 'number',
+          pipeParam: '1.0-2',
+        },
+        {
+          field: 'dyfNoPer1000Visits',
+          header: 'kpi-feedback-per-1000-title',
+          pipe: 'number',
+          pipeParam: '1.0-2',
+        },
+        {
+          field: 'uxTestInLastTwoYears',
+          header: 'UX Test in Past 2 Years?',
+          translate: true,
+        },
+        {
+          field: 'latestSuccessRate',
+          header: 'Latest success rate',
+          pipe: 'percent',
+          tooltip: 'tooltip-latest-success-rate',
+        },
+      ];
+    
 
       // this.memberListCols = [
       //   {

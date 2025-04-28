@@ -231,12 +231,11 @@ export class TasksHomeComponent implements OnInit {
     },
     {
       field: 'latest_ux_success',
-      header: 'Latest success rate',
+      header: 'Latest UX success rate',
       pipe: 'percent',
-      hide: true,
       tooltip: 'tooltip-latest-success-rate',
-      width: '100px',
-      group: 'metrics',
+      width: '110px',
+      frozen: true,
     },
     {
       field: 'latest_success_rate_percent_change',

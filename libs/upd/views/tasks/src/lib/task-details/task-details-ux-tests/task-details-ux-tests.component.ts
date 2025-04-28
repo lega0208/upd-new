@@ -23,6 +23,7 @@ export class TaskDetailsUxTestsComponent implements OnInit {
   taskSuccessChart$ = this.taskDetailsService.taskSuccessChart$;
   taskSuccessChartData$ = this.taskDetailsService.taskSuccessChartData$;
   taskSuccessChartLegend$ = this.taskDetailsService.taskSuccessChartLegend$;
+  taskSuccessChartHeight$ = this.taskDetailsService.taskSuccessChartHeight$;
   taskSuccessData$ = this.taskDetailsService.taskSuccessByUxTest$;
 
   totalParticipants$ = this.taskDetailsService.totalParticipants$;

@@ -19,6 +19,7 @@ import type {
   IUxTest,
 } from '@dua-upd/types-common';
 import {
+  $trunc,
   arrayToDictionary,
   arrayToDictionaryMultiref,
   getArraySelectedAbsoluteChange,
@@ -377,9 +378,7 @@ export class TasksViewService extends DbViewNew<
           _id: 0,
           term: '$_id',
           clicks: 1,
-          position: {
-            $round: ['$position', 2],
-          },
+          position: $trunc('$position', 3),
         })
         .exec()) || []
     );
@@ -414,13 +413,9 @@ export class TasksViewService extends DbViewNew<
           _id: 0,
           term: '$_id',
           clicks: 1,
-          ctr: {
-            $round: ['$ctr', 2],
-          },
+          ctr: $trunc('$ctr', 3),
           impressions: 1,
-          position: {
-            $round: ['$position', 2],
-          },
+          position: $trunc('$position', 3),
         })
         .exec()) || []
     );
@@ -679,25 +674,7 @@ export class TasksViewService extends DbViewNew<
             in: {
               _id: '$$project._id',
               title: '$$project.title',
-              attachments: {
-                $map: {
-                  input: '$$project.attachments',
-                  as: 'attachment',
-                  in: {
-                    _id: '$$attachment._id',
-                    url: '$$attachment.url',
-                    filename: '$$attachment.filename',
-                    size: '$$attachment.size',
-                    storage_url: {
-                      $replaceOne: {
-                        input: '$$attachment.storage_url',
-                        find: 'https://',
-                        replacement: '',
-                      },
-                    },
-                  },
-                },
-              },
+              attachments: '$$project.attachments',
             },
           },
         },
@@ -877,7 +854,7 @@ export class TasksViewService extends DbViewNew<
     dateRange: DateRange<Date>,
     comparisonDateRange: DateRange<Date>,
   ) {
-    type ProjectedTasks = {
+    type ProjectedTask = {
       _id: Types.ObjectId;
       title: string;
       tmf_ranking_index: number;
@@ -942,14 +919,12 @@ export class TasksViewService extends DbViewNew<
         $cond: {
           if: { $eq: ['$survey', 0] },
           then: null,
-          else: {
-            $round: [
-              {
-                $divide: ['$survey_completed', '$survey'],
-              },
-              4,
-            ],
-          },
+          else: $trunc(
+            {
+              $divide: ['$survey_completed', '$survey'],
+            },
+            5,
+          ),
         },
       },
       visits: 1,
@@ -957,13 +932,13 @@ export class TasksViewService extends DbViewNew<
     };
 
     const [data, comparisonData] = await Promise.all([
-      (
-        this.find({ dateRange }, projection) as unknown as Promise<
-          ProjectedTasks[]
-        >
-      ).then((results) =>
+      this.find<ProjectedTask>({ dateRange }, projection).then((results) =>
         results
-          .sort((a, b) => b.tmf_ranking_index - a.tmf_ranking_index)
+          .sort((a, b) => {
+            const aIfActive = a.status === 'Inactive' ? 0 : a.tmf_ranking_index;
+            const bIfActive = b.status === 'Inactive' ? 0 : b.tmf_ranking_index;
+            return bIfActive - aIfActive;
+          })
           .map((task, i) => ({
             ...task,
             tmf_rank: i + 1,
@@ -976,10 +951,7 @@ export class TasksViewService extends DbViewNew<
             ),
           })),
       ),
-      this.find(
-        { dateRange: comparisonDateRange },
-        projection,
-      ) as unknown as Promise<ProjectedTasks[]>,
+      this.find<ProjectedTask>({ dateRange: comparisonDateRange }, projection),
     ]);
 
     const comparisonProps = [
@@ -987,7 +959,7 @@ export class TasksViewService extends DbViewNew<
       'dyf_no',
       'calls_per_100_visits',
       'dyf_no_per_1000_visits',
-    ] satisfies (keyof ProjectedTasks)[];
+    ] satisfies (keyof ProjectedTask)[];
 
     const dataWithPercentChange = getArraySelectedPercentChange(
       comparisonProps,
@@ -1002,7 +974,7 @@ export class TasksViewService extends DbViewNew<
       '_id',
       dataWithPercentChange,
       // Need to cast it to the same type to get the correct type for the return value
-      comparisonData as typeof dataWithPercentChange,
+      comparisonData,
       { suffix: '_difference' },
     );
   }

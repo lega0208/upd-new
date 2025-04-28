@@ -49,6 +49,33 @@ export class TasksDetailsFacade {
 
   titleHeader$ = this.getTranslatedProp('title');
 
+  taskHeader$ = this.store.select(selectTasksDetailsDataWithI18n).pipe(
+    map(([data, lang]) => {
+      const translateAndSortAudience = (values?: string | string[]): { text: string; index: number }[] => {
+        if (!values) return [];
+        if (!Array.isArray(values)) return [{ text: this.i18n.service.translate(values, lang), index: 0 }];
+  
+        return values
+          .map((val, i) => ({ text: this.i18n.service.translate(val, lang), index: i }))
+          .sort((a, b) => a.text.localeCompare(b.text));
+      };
+  
+      const translateAndSortService = (values?: string | string[]): string[] => {
+        if (!values) return [];
+        if (!Array.isArray(values)) return [this.i18n.service.translate(values, lang)];
+  
+        return values
+          .map((val) => this.i18n.service.translate(val, lang))
+          .sort((a, b) => a.localeCompare(b));
+      };
+  
+      return {
+        audience: translateAndSortAudience(data?.user_type),
+        service: translateAndSortService(data?.service),
+      };
+    })
+  );
+
   detailsTable$ = this.store.select(selectTasksDetailsDataWithI18n).pipe(
     map(([data, lang]) => {
       const detailsFieldNames = [
@@ -469,7 +496,7 @@ export class TasksDetailsFacade {
         header: 'change',
         pipe: 'percent',
         pipeParam: '1.0-2',
-        upGoodDownBad: true,
+        upGoodDownBad: false,
         indicator: true,
         useArrows: true,
         showTextColours: true,
@@ -562,6 +589,10 @@ export class TasksDetailsFacade {
         ({ title }, idx) => `UX Test: ${idx + 1} - ${title}`,
       );
     }),
+  );
+
+  taskSuccessChartHeight$ = this.taskSuccessChartLegend$.pipe(
+    map((legend) => legend.length * 35 + 100),
   );
 
   gscTotalClicks$ = this.tasksDetailsData$.pipe(

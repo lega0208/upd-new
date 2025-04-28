@@ -94,5 +94,13 @@
   },
   "nxCloudAccessToken": "NWZiNDZlNGMtMDhjYS00NTBlLTg0YWMtY2EwMTlmYzk2MTJjfHJlYWQ=",
   "defaultBase": "main",
-  "useLegacyCache": false
+  "useLegacyCache": false,
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "eslint:lint"
+      }
+    }
+  ]
 }

@@ -1,6 +1,7 @@
 /*
  * Type utilities
  */
+import type { Signal } from '@angular/core';
 import type { Model, Types } from 'mongoose';
 import type { Observable } from 'rxjs';
 
@@ -34,6 +35,17 @@ export type OptionalKeyOf<T = void> = T extends void
 export type UnwrapObservable<T = void> = T extends void
   ? void
   : T extends Observable<infer U>
+    ? U extends Array<infer V>
+      ? V
+      : U
+    : T;
+
+/**
+ * For getting property keys of a type from an object array wrapped in a Signal
+ */
+export type UnwrapSignal<T = void> = T extends void
+  ? void
+  : T extends Signal<infer U>
     ? U extends Array<infer V>
       ? V
       : U

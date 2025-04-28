@@ -315,6 +315,40 @@ export function sortArrayDesc(arr: { data: number; value: string }[][]) {
   return arr;
 }
 
+export const globalColours: string[] = [
+  '#2E5EA7',
+  '#64B5F6',
+  '#26A69A',
+  '#FBC02D',
+  '#1DE9B6',
+  '#F57F17',
+  '#602E9C',
+  '#2196F3',
+  '#DE4CAE',
+  '#C3680A',
+  '#C5C5FF',
+  '#1A8361',
+];
+
+/**
+ * Determines the optimal text colour (black or white) for readability
+ * based on the background colour’s luminance.
+ * @param {string} backgroundColour - The hex colour code to evaluate.
+ * @returns {string} The ideal contrast colour (`#333` for dark text or `#FFF` for light text).
+ */
+export function getOptimalTextcolour(backgroundColour: string): string {
+  const hex = backgroundColour.replace('#', '');
+
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+  // Calculate relative luminance (WCAG formula)
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+
+  return luminance > 0.5 ? '#333' : '#FFF';
+}
+
 /**
  * Performs async processing in batches of a given size, with
  * an optional delay between calls to handle rate-limiting.
@@ -780,3 +814,28 @@ export function withErrorCallback<
     },
   });
 }
+
+/**
+ * Helper function to work around DocumentDB's lack of support for the $pow operator
+ * @param mongoExpression - The expression to be raised to the power of exponent
+ * @param exponent - The exponent to raise the expression to
+ */
+export const $pow = (
+  mongoExpression: string | Record<string, unknown>,
+  exponent: number,
+) => ({ $multiply: Array(exponent).fill(mongoExpression) });
+
+/**
+ * Helper function to work around DocumentDB's lack of support for the $trunc operator
+ * @param mongoExpression - The expression to be truncated
+ * @param precision - The number of decimal places to truncate to
+ */
+export const $trunc = (
+  mongoExpression: string | Record<string, unknown>,
+  precision: number,
+) => ({
+  $divide: [
+    { $floor: { $multiply: [mongoExpression, Math.pow(10, precision)] } },
+    Math.pow(10, precision),
+  ],
+});

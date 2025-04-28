@@ -21,12 +21,7 @@ import { DbViewNew, ViewConfig } from '../db.views.new';
 import { PagesView, PagesViewSchema } from './pages-view.schema';
 import { DbService } from '../db.service';
 import { topLevelMetricsGrouping } from './metrics';
-import {
-  arrayToDictionary,
-  prettyJson,
-  type Empty,
-  type NotEmpty,
-} from '@dua-upd/utils-common';
+import { $trunc, arrayToDictionary, prettyJson } from '@dua-upd/utils-common';
 
 export type PagesViewConfig = ViewConfig<typeof PagesViewSchema>;
 
@@ -306,9 +301,7 @@ export class PagesViewService extends DbViewNew<
           _id: 0,
           term: '$_id',
           clicks: 1,
-          position: {
-            $round: ['$position', 2],
-          },
+          position: $trunc('$position', 3),
         })
         .exec()) || []
     );
@@ -351,13 +344,9 @@ export class PagesViewService extends DbViewNew<
           _id: 0,
           term: '$_id',
           clicks: 1,
-          ctr: {
-            $round: ['$ctr', 2],
-          },
+          ctr: $trunc('$ctr', 3),
           impressions: 1,
-          position: {
-            $round: ['$position', 2],
-          },
+          position: $trunc('$position', 3),
         })
         .exec()) || []
     );

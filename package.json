@@ -1,6 +1,6 @@
 {
   "name": "dua-upd",
-  "version": "3.1.0",
+  "version": "3.5.0",
   "license": "MIT",
   "scripts": {
     "ng": "nx",
@@ -16,7 +16,7 @@
     "db-repopulate": "npm run db-cli repopulate",
     "db-script": "node -r @swc-node/register apps/db-cli/src/main.ts run-script",
     "deploy": "git pull && cd docker && docker-compose pull && docker-compose up -d",
-    "deploy:local": "git pull && cd docker && docker-compose build -f docker-compose.local.yml && docker-compose up -d",
+    "deploy:local": "git pull && cd docker && docker compose -f docker-compose.local.yml build && docker compose -f docker-compose.local.yml up -d",
     "docker-dev:build": "docker compose -f ./docker/docker-compose.dev.local.yml build",
     "docker-dev:deps": "nx run-many --target=build --projects=api,upd --prod --parallel",
     "docker-dev:up": "docker compose -f ./docker/docker-compose.dev.local.yml up -d",
@@ -27,7 +27,15 @@
     "analyze-bundle": "webpack-bundle-analyzer dist/apps/upd/stats.json",
     "analyze-bundle:api": "webpack-bundle-analyzer dist/apps/api/stats.json",
     "pre-pr": "npm run lint && npm run build:parallel",
-    "translations": "npm run db-script -- -ngenerateTaskTranslations"
+    "translations": "npm run db-script -- -ngenerateTaskTranslations",
+    "mongo-parquet:sync": "cd python/mongo-parquet && uv sync",
+    "mongo-parquet": "cd python/mongo-parquet/src && uv run mongo_parquet",
+    "mongo-parquet:download": "npm run mongo-parquet -- --download-from-remote",
+    "mongo-parquet:upload": "npm run mongo-parquet -- --upload-to-remote",
+    "mongo-parquet:seed-mongo": "npm run mongo-parquet -- --import-to-mongo --from-remote",
+    "mongo-parquet:seed-mongo-local": "npm run mongo-parquet -- --import-to-mongo",
+    "mongo-parquet:export": "npm run mongo-parquet -- --export-from-mongo",
+    "bun-script": "bun ./scripts/bun-script.ts"
   },
   "private": true,
   "dependencies": {
@@ -47,6 +55,7 @@
     "@azure/core-http-compat": "^2.2.0",
     "@azure/identity": "^4.4.1",
     "@azure/storage-blob": "^12.24.0",
+    "@duckdbfan/drizzle-duckdb": "^0.0.7",
     "@googleapis/searchconsole": "1.0.5",
     "@mongodb-js/zstd": "1.2.1",
     "@nestjs/bullmq": "^10.2.1",
@@ -87,6 +96,8 @@
     "diff-match-patch-ts": "^0.6.0",
     "diff2html": "^3.4.48",
     "dotenv": "16.4.5",
+    "drizzle-orm": "^0.40.1",
+    "duckdb-async": "^1.2.1",
     "file-saver": "^2.0.5",
     "helmet": "^5.0.1",
     "html-minifier-terser": "^7.2.0",
@@ -158,6 +169,7 @@
     "@swc/core": "1.11.8",
     "@swc/jest": "0.2.37",
     "@twittwer/compodoc": "1.12.0",
+    "@types/bun": "^1.2.9",
     "@types/cache-manager": "4.0.6",
     "@types/cron": "^2.0.1",
     "@types/file-saver": "^2.0.5",

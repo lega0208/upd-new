@@ -6,12 +6,14 @@ import { hours } from '@dua-upd/utils-common';
 import { HashesCache } from './hashes.cache';
 import { DbModule, DbService } from '@dua-upd/db';
 import { BlobStorageModule, BlobStorageService } from '@dua-upd/blob-storage';
+import { DuckDbModule } from '@dua-upd/duckdb';
 
 @Module({
   imports: [
     CacheModule.register({ ttl: hours(3) }),
     DbModule,
     BlobStorageModule,
+    DuckDbModule,
   ],
   controllers: [HashesController],
   providers: [DbService, HashesCache, HashesService, BlobStorageService],

@@ -136,4 +136,9 @@ export class DataTableStylesComponent implements OnInit {
   get currentLang() {
     return this.i18n.service.currentLang;
   }
+
+  ensureLinkFormat(link: string | number) {
+    if (typeof link !== 'string') return link;
+    return link.replace(/^(?!https:\/\/)/, 'https://');
+  }
 }
