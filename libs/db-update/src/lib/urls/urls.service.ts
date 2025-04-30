@@ -24,7 +24,6 @@ import { createUpdateQueue } from '../utils';
 import {
   DuckDbService,
   type HtmlSnapshot,
-  type OrderBy,
 } from '@dua-upd/duckdb';
 import { sql } from 'drizzle-orm';
 
@@ -1072,14 +1071,8 @@ export class UrlsService {
     await htmlTable.createLocalTable();
     await htmlTable.insertLocal(snapshots);
 
-    const appendOrderBy: OrderBy<typeof htmlTable.table> = {
-      [htmlTable.table.url.name]: 'ASC',
-      [htmlTable.table.date.name]: 'DESC',
-    };
-
     await htmlTable.appendLocalToRemote({
-      orderBy: appendOrderBy,
-      rowGroupSize: 2500,
+      rowGroupSize: 10000,
       compressionLevel: 7,
     });
 
@@ -1205,11 +1198,7 @@ export class UrlsService {
 
     console.time('Remote DuckDB append time');
     await htmlTable.appendLocalToRemote({
-      orderBy: {
-        [htmlTable.table.url.name]: 'ASC',
-        [htmlTable.table.date.name]: 'DESC',
-      },
-      rowGroupSize: 2500,
+      rowGroupSize: 10000,
       compressionLevel: 7,
     });
     console.timeEnd('Remote DuckDB append time');
