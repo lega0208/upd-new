@@ -45,8 +45,7 @@ export class ArrowConnectComponent {
         } else {
           this.clearLine();
         }
-      },
-      { allowSignalWrites: true },
+      }
     );
   }
 

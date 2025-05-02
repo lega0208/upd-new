@@ -447,8 +447,7 @@ export class CustomReportsCreateComponent {
         if (granularityChanged) {
           this.calendarComponent?.resetCalendar();
         }
-      },
-      { allowSignalWrites: true },
+      }
     );
 
     effect(() => {
