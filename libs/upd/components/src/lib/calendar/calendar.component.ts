@@ -14,7 +14,7 @@ import {
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { Calendar } from 'primeng/calendar';
+import { DatePicker } from 'primeng/datepicker';
 import { dateRangeConfigs } from '@dua-upd/utils-common';
 
 dayjs.extend(utc);
@@ -36,7 +36,7 @@ export type DateRangePreset = {
     standalone: false
 })
 export class CalendarComponent implements OnChanges {
-  @ViewChild('myCalendar') datePicker!: Calendar;
+  @ViewChild('myCalendar') datePicker!: DatePicker;
 
   @Input() granularity = 'day';
   @Input() showPreset = false;

@@ -1,5 +1,5 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import * as cheerio from 'cheerio/lib/slim';
+import * as cheerio from 'cheerio/slim';
 import dayjs from 'dayjs';
 import { minify } from 'html-minifier-terser';
 import { type FilterQuery, Types, type AnyBulkWriteOperation } from 'mongoose';
