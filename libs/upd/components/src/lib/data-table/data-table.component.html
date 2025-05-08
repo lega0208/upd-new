@@ -293,14 +293,4 @@
       </p>
     </div>
   </ng-template>
-  <ng-template pTemplate="expandedrow" let-rowData let-columns="columns">
-    <td [colSpan]="columns.length + 1">
-      <upd-metadata-analysis
-        [query]="rowData['query']"
-        [title]="rowData['metadata_title']"
-        [description]="rowData['metadata_description']"
-        [keywords]="rowData['metadata_keywords']"
-      ></upd-metadata-analysis>
-    </td>
-  </ng-template>
 </p-table>
