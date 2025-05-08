@@ -513,8 +513,13 @@ margin: 0px 20px 0px 20px;
   display: flex;
 }
 
-.pages-home input.p-inputtext {
+.pages-home p-iconfield {
+  display: block;
   width: calc(100% - 80px);
+}
+
+.pages-home input.p-inputtext {
+  width: calc(100%);
   box-sizing: border-box;
 }
 
@@ -549,6 +554,11 @@ margin: 0px 20px 0px 20px;
   margin: 0 10px;
 }
 
+.p-tree-root-children {
+  margin-left: 0px;
+  padding-left: 0px;
+}
+
 .modal-icon-by-title {
   margin-left: 10px;
 }
@@ -560,4 +570,8 @@ margin: 0px 20px 0px 20px;
 
 ol[role='listbox'], ul[role='listbox'] {
   padding-left: 0 !important;
+}
+
+.p-select-label.p-select-label-empty {
+  opacity: 1 !important;
 }
