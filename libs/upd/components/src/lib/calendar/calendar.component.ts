@@ -92,8 +92,7 @@ export class CalendarComponent implements OnChanges {
         if (dates.length === 0 || dates.length === 2) {
           this.dateChange.emit(dates);
         }
-      },
-      { allowSignalWrites: true },
+      }
     );
   }
 

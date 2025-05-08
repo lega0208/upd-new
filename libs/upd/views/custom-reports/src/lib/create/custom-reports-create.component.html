@@ -311,83 +311,7 @@
                     </upd-data-table>
                   </p-tabpanel>
                 </p-tabs>
-                <!-- 
-            <p-tabView styleClass="tabview-custom">
-              <p-tabPanel>
-                <ng-template pTemplate="header">
-                  <span>{{ 'Bulk Pages' | translate }}</span>
-                </ng-template>
-                <span class="p-float-label mt-3">
-                  <textarea
-                    pTextarea
-                    #urlTextarea
-                    rows="5"
-                    id="float-input"
-                    class="w-100"
-                  ></textarea>
-                  <label for="float-input">{{
-                    'Enter URLs' | translate
-                  }}</label>
-                </span>
-              </p-tabPanel>
-              <p-tabPanel>
-                <ng-template pTemplate="header">
-                  <span>{{ 'pages' | translate }}</span>
-                </ng-template>
-                <upd-data-table
-                  #dataTable
-                  id="pages-home-"
-                  [data]="pages()"
-                  [cols]="columns()"
-                  [displayRows]="5"
-                  [loading]="selectionData() === null"
-                  placeholderText="dt_search_keyword_url"
-                  [searchFields]="searchFields()"
-                  [exports]="false"
-                  [checkboxes]="true"
-                  (rowSelectionChanged)="selectPages($event)"
-                  [ngClass]="'pages-home'"
-                >
-                </upd-data-table>
-              </p-tabPanel>
-              <p-tabPanel>
-                <ng-template pTemplate="header">
-                  <span>{{ 'tasks' | translate }}</span>
-                </ng-template>
-                <upd-data-table
-                  #tasksTable
-                  id="tasks-list-"
-                  [data]="tasks()"
-                  [cols]="taskColumns()"
-                  [displayRows]="5"
-                  [loading]="selectionData() === null"
-                  [exports]="false"
-                  [checkboxes]="true"
-                  (rowSelectionChanged)="selectTasks($event)"
-                  [ngClass]="'tasks-list'"
-                >
-                </upd-data-table>
-              </p-tabPanel>
-              <p-tabPanel>
-                <ng-template pTemplate="header">
-                  <span>{{ 'ux_projects' | translate }}</span>
-                </ng-template>
-                <upd-data-table
-                  #projectsTable
-                  id="projects-list-"
-                  [data]="projects()"
-                  [cols]="taskColumns()"
-                  [displayRows]="5"
-                  [loading]="selectionData() === null"
-                  [exports]="false"
-                  [checkboxes]="true"
-                  (rowSelectionChanged)="selectProjects($event)"
-                  [ngClass]="'projects-list'"
-                >
-                </upd-data-table>
-              </p-tabPanel>
-            </p-tabView> -->
-
+                
                 <button
                   class="btn btn-outline-primary"
                   [translate]="'Add pages'"
@@ -828,10 +752,8 @@
                     <p-tab value="3">{{ 'ux_projects' | translate }}</p-tab>
                   </p-tablist>
                   <p-tabpanel value="0">
-                    <ng-template pTemplate="header">
-                      <span>{{ 'Bulk Pages' | translate }}</span>
-                    </ng-template>
-                    <span class="p-float-label mt-3">
+                    <span class="p-float-label mt-3"></span>
+                    <p-floatlabel>
                       <textarea
                         pTextarea
                         #urlTextarea2
@@ -839,10 +761,8 @@
                         id="float-input"
                         class="w-100"
                       ></textarea>
-                      <label for="float-input">{{
-                        'Enter URLs' | translate
-                      }}</label>
-                    </span>
+                      <label for="float-input">{{ 'Enter URLs' | translate }}</label>
+                    </p-floatlabel>
                   </p-tabpanel>
                   <p-tabpanel value="1">
                     <ng-template pTemplate="header">
@@ -901,81 +821,6 @@
                     </upd-data-table>
                   </p-tabpanel>
                 </p-tabs>
-                <!-- <p-tabView styleClass="tabview-custom">
-                  <p-tabPanel>
-                    <ng-template pTemplate="header">
-                      <span>{{ 'Bulk Pages' | translate }}</span>
-                    </ng-template>
-                    <span class="p-float-label mt-3">
-                      <textarea
-                        pTextarea
-                        #urlTextarea2
-                        rows="5"
-                        id="float-input"
-                        class="w-100"
-                      ></textarea>
-                      <label for="float-input">{{
-                        'Enter URLs' | translate
-                      }}</label>
-                    </span>
-                  </p-tabPanel>
-                  <p-tabPanel>
-                    <ng-template pTemplate="header">
-                      <span>{{ 'pages' | translate }}</span>
-                    </ng-template>
-                    <upd-data-table
-                      #dataTable2
-                      id="pages-home-"
-                      [data]="pages()"
-                      [cols]="columns()"
-                      [displayRows]="5"
-                      [loading]="selectionData() === null"
-                      placeholderText="dt_search_keyword_url"
-                      [searchFields]="searchFields()"
-                      [exports]="false"
-                      [checkboxes]="true"
-                      (rowSelectionChanged)="selectPages($event)"
-                      [ngClass]="'pages-home'"
-                    >
-                    </upd-data-table>
-                  </p-tabPanel>
-                  <p-tabPanel>
-                    <ng-template pTemplate="header">
-                      <span>{{ 'tasks' | translate }}</span>
-                    </ng-template>
-                    <upd-data-table
-                      #tasksTable2
-                      id="tasks-list-"
-                      [data]="tasks()"
-                      [cols]="taskColumns()"
-                      [displayRows]="5"
-                      [loading]="selectionData() === null"
-                      [exports]="false"
-                      [checkboxes]="true"
-                      (rowSelectionChanged)="selectTasks($event)"
-                      [ngClass]="'tasks-list'"
-                    >
-                    </upd-data-table>
-                  </p-tabPanel>
-                  <p-tabPanel>
-                    <ng-template pTemplate="header">
-                      <span>{{ 'ux_projects' | translate }}</span>
-                    </ng-template>
-                    <upd-data-table
-                      #projectsTable2
-                      id="projects-list-"
-                      [data]="projects()"
-                      [cols]="taskColumns()"
-                      [displayRows]="5"
-                      [loading]="selectionData() === null"
-                      [exports]="false"
-                      [checkboxes]="true"
-                      (rowSelectionChanged)="selectProjects($event)"
-                      [ngClass]="'projects-list'"
-                    >
-                    </upd-data-table>
-                  </p-tabPanel>
-                </p-tabView> -->
 
                 <button
                   class="btn btn-outline-primary"

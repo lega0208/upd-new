@@ -98,10 +98,14 @@ li[role='presentation'].p-highlight a {
   background: #f8f9f8;
 }
 
+.p-tablist-content {
+  padding-bottom: 20px;
+}
+
 .report-tabs {
   .p-tabpanels {
     background: none;
-    padding: 20px 0px 0px;
+    padding: 0;
   }
 }
 
@@ -175,6 +179,7 @@ li[role='presentation'].p-highlight a {
 
 .p-tab-active {
   color: #4070b8 !important;
+  border-color: none !important;
 }
 
 // .add-pages-card,

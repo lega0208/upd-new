@@ -49,10 +49,9 @@ export class FilterTableComponent<T extends object> implements OnInit {
 
     const d = [this._data, this.cols] as [T[], ColumnConfig<T>[]];
     this.filterTableStore.setData(d);
-    this.i18n.currentLang$.subscribe((lang) => {
+    const lang = this.i18n.currentLang();
       this.filterTableStore.setLabels(lang);
       this.updateNodeLabels(lang);
-    });
   }
 
   get data() {
