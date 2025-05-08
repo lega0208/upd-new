@@ -238,3 +238,30 @@ const avgMarginOfErrorExpr = (props: string[]) => ({
     props.length,
   ],
 });
+
+// new moe?
+// const marginOfErrorExpr = (prop: string) => ({
+//   $multiply: [
+//     1.96,
+//     {
+//       $sqrt: {
+//         $divide: [
+//           {
+//             $multiply: [`$${prop}`, { $subtract: [1, `$${prop}`] }],
+//           },
+//           '$total_entries',
+//         ],
+//       },
+//     },
+//   ],
+// });
+
+// const avgMarginOfErrorExpr = (props: string[]) => ({
+//   $cond: {
+//     if: { $gte: ['$total_entries', 30] },
+//     then: {
+//       $avg: props.map((prop) => marginOfErrorExpr(prop)),
+//     },
+//     else: 'N/A',
+//   },
+// });

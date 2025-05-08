@@ -29,7 +29,6 @@ import { SwUpdateService } from './sw-update.service';
 import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
-import Lara from '@primeng/themes/lara';
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidebarComponent],
@@ -75,7 +74,7 @@ import Lara from '@primeng/themes/lara';
     provideHttpClient(withInterceptorsFromDi()),
     providePrimeNG({
       theme: {
-          preset: definePreset(Lara, {
+          preset: definePreset(Aura, {
             semantic: {
                 primary: {
                     50: '{blue.50}',
@@ -95,7 +94,7 @@ import Lara from '@primeng/themes/lara';
           // preset: Lara, // based on bootstrap
           options: {
               prefix: 'p',
-              darkModeSelector: 'system',
+              darkModeSelector: 'class',
               cssLayer: {
                 name: 'primeng',
               }

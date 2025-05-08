@@ -17,13 +17,14 @@ import type { ColumnConfig } from '@dua-upd/types-common';
 import type { SelectedNode } from '../filter-table/filter-table.component';
 import { toGroupedColumnSelect } from '@dua-upd/upd/utils';
 import { SortEvent } from 'primeng/api';
+import { FilterService } from 'primeng/api';
 import { isNullish } from '@dua-upd/utils-common';
 
 @Component({
-    selector: 'upd-data-table',
-    templateUrl: './data-table.component.html',
-    styleUrls: ['./data-table.component.css'],
-    standalone: false
+  selector: 'upd-data-table',
+  templateUrl: './data-table.component.html',
+  styleUrls: ['./data-table.component.css'],
+  standalone: false,
 })
 export class DataTableComponent<T extends object> {
   @ViewChild('dt') table!: Table;
@@ -39,6 +40,7 @@ export class DataTableComponent<T extends object> {
   @Input() kpi = false;
   @Input() exports = true;
   @Input() checkboxes = false;
+  @Input() expandable = false;
   @Input() id?: string;
   @Input() placeholderText = 'dt_search_keyword';
   @Input() selectedNodes: SelectedNode[] = [];
@@ -48,6 +50,7 @@ export class DataTableComponent<T extends object> {
 
   @Output() rowSelectionChanged = new EventEmitter<T[]>();
   i18n = inject(I18nFacade);
+  filterService = inject(FilterService);
 
   data = input<T[] | null>(null);
   initialCols = input<ColumnConfig<T>[]>([], { alias: 'cols' });
@@ -115,11 +118,29 @@ export class DataTableComponent<T extends object> {
     return cols;
   });
 
+  expandedRows = {};
+
   constructor() {
     effect(() => {
       this.translatedData();
       this.table?._filter();
       this.table?.clearState();
+    });
+    effect(() => {
+      this.filterService.register(
+        'arrayFilter',
+        (value: string[], filters: string[]): boolean => {
+          if (!filters?.length) {
+            return true;
+          }
+
+          if (!value) {
+            return false;
+          }
+
+          return filters.some((v) => value.includes(v));
+        },
+      );
     });
     effect(
       () => {
@@ -134,8 +155,7 @@ export class DataTableComponent<T extends object> {
           this.selectedColumns.set(initialColumns);
           return;
         }
-      },
-      { allowSignalWrites: true },
+      }
     );
   }
 

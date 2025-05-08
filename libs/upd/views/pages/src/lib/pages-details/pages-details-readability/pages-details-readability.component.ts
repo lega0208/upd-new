@@ -191,8 +191,7 @@ export class PagesDetailsReadabilityComponent implements OnInit {
         if (storedConfig) {
           this.updateSelection(storedConfig);
         }
-      },
-      { allowSignalWrites: true },
+      }
     );
 
     effect(() => {

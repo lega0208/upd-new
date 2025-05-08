@@ -149,8 +149,7 @@ export class PageFlowComponent {
             this.isInit.set(false);
           }
         }
-      },
-      { allowSignalWrites: true },
+      }
     );
 
     effect(
@@ -171,8 +170,7 @@ export class PageFlowComponent {
         ) {
           this.setCurrentFlowData();
         }
-      },
-      { allowSignalWrites: true },
+      }
     );
   }
 

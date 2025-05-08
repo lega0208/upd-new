@@ -197,8 +197,7 @@ export class PageVersionComponent {
         } else {
           this.useDefaultSelection();
         }
-      },
-      { allowSignalWrites: true },
+      }
     );
 
     effect(
@@ -210,8 +209,7 @@ export class PageVersionComponent {
         if (storedConfig) {
           this.restoreMainConfig(storedConfig);
         }
-      },
-      { allowSignalWrites: true },
+      }
     );
 
     effect(
@@ -222,8 +220,7 @@ export class PageVersionComponent {
         this.createHtmlDiffContent(container);
 
         this.storeConfig();
-      },
-      { allowSignalWrites: true },
+      }
     );
 
     effect(
@@ -239,8 +236,7 @@ export class PageVersionComponent {
         } catch (error) {
           console.error('Error in live diff effect:', error);
         }
-      },
-      { allowSignalWrites: true },
+      }
     );
   }
   private handleDocumentClick(event: MouseEvent): void {

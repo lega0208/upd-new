@@ -19,7 +19,7 @@ export interface DropdownOption<T> {
 @Component({
     selector: 'upd-dropdown',
     template: `
-    <p-dropdown
+    <p-select
       [options]="this.placeholder ? displayedOptions : options"
       optionLabel="label"
       [(ngModel)]="selectedOption"
@@ -54,7 +54,7 @@ export interface DropdownOption<T> {
           >{{ option.label | translate }}
         </div>
       </ng-template>
-    </p-dropdown>
+    </p-select>
   `,
     styles: [
         `
