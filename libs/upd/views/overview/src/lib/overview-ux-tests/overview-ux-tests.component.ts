@@ -12,10 +12,11 @@ import type { OverviewProject } from '@dua-upd/types-common';
 import { OverviewFacade } from '../+state/overview/overview.facade';
 
 @Component({
-  selector: 'upd-overview-ux-tests',
-  templateUrl: './overview-ux-tests.component.html',
-  styleUrls: ['./overview-ux-tests.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'upd-overview-ux-tests',
+    templateUrl: './overview-ux-tests.component.html',
+    styleUrls: ['./overview-ux-tests.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class OverviewUxTestsComponent implements OnInit {
   private overviewService = inject(OverviewFacade);
@@ -43,6 +44,8 @@ export class OverviewUxTestsComponent implements OnInit {
   improvedKpiSuccessRateDifference$ =
     this.overviewService.improvedKpiSuccessRateDifference$;
 
+  improvedKpiSuccessRateDifferencePoints$ = this.overviewService.improvedKpiSuccessRateDifferencePoints$;
+
   improvedKpiSuccessRateValidation$ =
     this.overviewService.improvedKpiSuccessRateValidation$;
 
@@ -52,6 +55,8 @@ export class OverviewUxTestsComponent implements OnInit {
   improvedKpiTopSuccessRate$ = this.overviewService.improvedKpiTopSuccessRate$;
   improvedKpiTopSuccessRateDifference$ =
     this.overviewService.improvedKpiTopSuccessRateDifference$;
+
+  improvedKpiTopSuccessRateDifferencePoints$ = this.overviewService.improvedKpiTopSuccessRateDifferencePoints$;
 
   improvedKpiTopSuccessRateValidation$ =
     this.overviewService.improvedKpiTopSuccessRateValidation$;

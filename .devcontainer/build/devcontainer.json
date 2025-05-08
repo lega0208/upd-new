@@ -1,0 +1,21 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node-mongo
+{
+  "name": "Base image builder",
+  "workspaceFolder": "/workspace",
+  "build": {
+    "context": "../../",
+    "dockerfile": "Dockerfile",
+    "cacheFrom": "ghcr.io/lega0208/upd-new/codespaces-devcontainer-base"
+  },
+  "containerEnv": {
+    "SHELL": "/bin/zsh"
+  },
+  "features": {
+    "ghcr.io/devcontainers-extra/features/gh-cli:1": {}
+  },
+  "remoteUser": "node"
+
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
+}

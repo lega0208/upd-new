@@ -64,18 +64,18 @@ export class StorageClient {
   async container(containerName: string) {
     const containerClient = this.baseClient.getContainerClient(containerName);
 
-    const response = await containerClient.createIfNotExists();
+    // const response = await containerClient.createIfNotExists();
 
-    if (response.errorCode && response.errorCode !== 'ContainerAlreadyExists') {
-      throw Error(
-        `Got errorCode ${
-          response.errorCode
-        } when running createIfNotExists() for container "${containerName}".\r\n${prettyJson(
-          response,
-        )}`,
-        { cause: response },
-      );
-    }
+    // if (response.errorCode && response.errorCode !== 'ContainerAlreadyExists') {
+    //   throw Error(
+    //     `Got errorCode ${
+    //       response.errorCode
+    //     } when running createIfNotExists() for container "${containerName}".\r\n${prettyJson(
+    //       response,
+    //     )}`,
+    //     { cause: response },
+    //   );
+    // }
 
     return new StorageContainer(containerClient);
   }
@@ -213,11 +213,11 @@ export class BlobClient {
       this.setCompression(config.compression);
     }
 
-    if (!this.path) {
-      throw Error(
-        'Expected a non-empty path in BlobsConfig, but none was provided.',
-      );
-    }
+    // if (!this.path) {
+    //   throw Error(
+    //     'Expected a non-empty path in BlobsConfig, but none was provided.',
+    //   );
+    // }
   }
 
   get url() {

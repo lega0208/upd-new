@@ -1,0 +1,59 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+{
+  "name": "Base config + Terraform & AWS CLI",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "containerEnv": {
+    "SHELL": "/bin/zsh"
+  },
+
+  // Configure tool-specific properties.
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "hashicorp.terraform",
+        "hashicorp.hcl",
+        "github.copilot",
+        "GitHub.copilot-chat",
+        "github.vscode-github-actions",
+        "Angular.ng-template",
+        "aaron-bond.better-comments",
+        "jasonlhy.hungry-delete",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "tamasfe.even-better-toml",
+        "mongodb.mongodb-vscode"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "npm.packageManager": "bun"
+      }
+    }
+  },
+
+  "features": {
+    "ghcr.io/devcontainers/features/aws-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "latest",
+      "tflint": "latest",
+      "terragrunt": "latest"
+    }
+  },
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [8080, 9000],
+
+  "remoteUser": "node",
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "bun install --ignore-scripts && chmod +x .devcontainer/get-duckdb-node-binding.sh && .devcontainer/get-duckdb-node-binding.sh && npm run mongo-parquet:sync && npm run mongo-parquet:seed-mongo"
+}

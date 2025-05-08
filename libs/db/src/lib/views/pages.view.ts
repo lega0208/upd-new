@@ -5,6 +5,7 @@ import {
   type ProjectionType,
   type QueryOptions,
   Types,
+  type UpdateOneModel,
 } from 'mongoose';
 import { difference, pick } from 'rambdax';
 import type {
@@ -57,11 +58,12 @@ type RefreshContext = {
 };
 
 type RefreshWriteOp = {
-  updateOne: mongo.UpdateOneModel<IPageView> & { upsert: true };
+  updateOne: UpdateOneModel<IPageView> & { upsert: true };
 };
 
 // Not an actual Nest service, but couldn't think of a better name
 export class PagesViewService extends DbViewNew<
+  PagesView,
   typeof PagesViewSchema,
   BaseDoc,
   RefreshContext
@@ -384,20 +386,20 @@ export class PagesViewService extends DbViewNew<
   }
 
   // overriding inherited methods for cleaner types
-  override find(
-    filter?: FilterQuery<PagesView>,
-    projection: ProjectionType<PagesView> = {},
-    options: QueryOptions<PagesView> = {},
-  ): Promise<PagesView[]> {
-    return super.find(filter, projection, options);
+  override async find<ReturnT = PagesView>(
+    filter: FilterQuery<PagesView>,
+    projection?: ProjectionType<PagesView>,
+    options?: QueryOptions<PagesView>,
+  ): Promise<ReturnT[] | null> {
+    return await super.find<ReturnT>(filter, projection, options);
   }
 
-  override findOne(
-    filter?: FilterQuery<PagesView>,
-    projection: ProjectionType<PagesView> = {},
-    options: QueryOptions<PagesView> = {},
-  ): Promise<PagesView> {
-    return super.findOne(filter, projection, options);
+  override async findOne<ReturnT = PagesView>(
+    filter: FilterQuery<PagesView>,
+    projection?: ProjectionType<PagesView>,
+    options?: QueryOptions<PagesView>,
+  ): Promise<ReturnT | null> {
+    return await super.findOne<ReturnT>(filter, projection, options);
   }
 
   override aggregate<T>(
@@ -417,11 +419,11 @@ export class PagesViewService extends DbViewNew<
 
   async clearNonExisting() {
     const pageIds = await this.db.collections.pages
-      .distinct<Types.ObjectId>('_id')
+      .distinct('_id')
       .then((ids) => ids.map((id) => id.toString()));
 
     const viewPageIds = await this._model
-      .distinct<Types.ObjectId>('task._id')
+      .distinct('task._id')
       .then((ids) => ids.map((id) => id.toString()));
 
     const nonExistingIds = difference(viewPageIds, pageIds);
