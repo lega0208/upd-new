@@ -5,6 +5,7 @@ import {
   Types,
   type FilterQuery,
   type UpdateOneModel,
+  type mongo,
 } from 'mongoose';
 import { difference, omit, pick } from 'rambdax';
 import type { TasksView, TasksViewSchema } from './tasks-view.schema';
@@ -979,7 +980,7 @@ export class TasksViewService extends DbViewNew<
     );
   }
 
-  async clearNonExisting() {
+  async clearNonExisting(): Promise<mongo.DeleteResult | null> {
     const taskIds = await this.db.collections.tasks
       .distinct('_id')
       .then((ids) => ids.map((id) => id.toString()));

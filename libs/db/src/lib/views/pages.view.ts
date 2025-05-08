@@ -417,7 +417,7 @@ export class PagesViewService extends DbViewNew<
     ) as unknown as Promise<{ url: string; visits: number }[]>;
   }
 
-  async clearNonExisting() {
+  async clearNonExisting(): Promise<mongo.DeleteResult | null> {
     const pageIds = await this.db.collections.pages
       .distinct('_id')
       .then((ids) => ids.map((id) => id.toString()));
