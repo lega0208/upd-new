@@ -1,8 +1,8 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import * as cheerio from 'cheerio/lib/slim';
+import * as cheerio from 'cheerio/slim';
 import dayjs from 'dayjs';
 import { minify } from 'html-minifier-terser';
-import { FilterQuery, Types, type mongo } from 'mongoose';
+import { type FilterQuery, Types, type AnyBulkWriteOperation } from 'mongoose';
 import { filter, mapObject, omit, pick, pipe } from 'rambdax';
 import { BlobStorageService } from '@dua-upd/blob-storage';
 import { DbService, Page, Readability, Url } from '@dua-upd/db';
@@ -85,7 +85,7 @@ export class UrlsService {
 
     const httpsRegex = new RegExp('https?://', 'ig');
 
-    const updateOps: mongo.AnyBulkWriteOperation<Page>[] = pagesToUpdate.map(
+    const updateOps: AnyBulkWriteOperation<Page>[] = pagesToUpdate.map(
       (page) => ({
         updateOne: {
           filter: { _id: page._id },
@@ -158,7 +158,7 @@ export class UrlsService {
         return value;
       };
 
-      const bulkWriteOps: mongo.AnyBulkWriteOperation<Url>[] = JSON.parse(
+      const bulkWriteOps: AnyBulkWriteOperation<Url>[] = JSON.parse(
         blobData,
         jsonReviver,
       ).map(
@@ -174,7 +174,7 @@ export class UrlsService {
               },
               upsert: true,
             },
-          }) as mongo.AnyBulkWriteOperation<Url>,
+          }),
       );
 
       const bulkWriteResults = await this.db.collections.urls.bulkWrite(
@@ -184,7 +184,7 @@ export class UrlsService {
 
       this.logger.accent(
         `${
-          bulkWriteResults.nModified + bulkWriteResults.nUpserted
+          bulkWriteResults.modifiedCount + bulkWriteResults.upsertedCount
         } urls updated.`,
       );
 
@@ -337,7 +337,7 @@ export class UrlsService {
     const urlsParquetUpdateQueue: HtmlSnapshot[] = [];
 
     // using an update queue to batch updates rather than flooding the db with requests
-    const urlsQueue = createUpdateQueue<mongo.AnyBulkWriteOperation<Url>>(
+    const urlsQueue = createUpdateQueue<AnyBulkWriteOperation<Url>>(
       100,
       async (ops) => {
         await this.db.collections.urls.bulkWrite(ops);
@@ -364,7 +364,7 @@ export class UrlsService {
       }
 
       if (!urlData.hash) {
-        const updateOp: mongo.AnyBulkWriteOperation<Url> = {
+        const updateOp: AnyBulkWriteOperation<Url> = {
           updateOne: {
             filter: {
               _id: urlData._id,
@@ -382,7 +382,7 @@ export class UrlsService {
         return;
       }
 
-      const updateOp: mongo.AnyBulkWriteOperation<Url> = {
+      const updateOp: AnyBulkWriteOperation<Url> = {
         updateOne: {
           filter: {
             _id: urlData._id,
@@ -791,7 +791,7 @@ export class UrlsService {
 
     this.logger.log(`${urlsWithTitleMatch.length} urls with title matches:`);
 
-    const bulkWriteOps: mongo.AnyBulkWriteOperation<Url>[] = [
+    const bulkWriteOps: AnyBulkWriteOperation<Url>[] = [
       ...urlsWithTitleMatch,
       ...noMatchWithPageTitles,
     ].map(({ _id, title }) => ({
@@ -885,7 +885,7 @@ export class UrlsService {
       return;
     }
 
-    const pageWriteOps: mongo.AnyBulkWriteOperation<Page>[] = pagesToUpdate.map(
+    const pageWriteOps: AnyBulkWriteOperation<Page>[] = pagesToUpdate.map(
       (url) => ({
         updateOne: {
           filter: { _id: url.page._id },
@@ -1037,7 +1037,7 @@ export class UrlsService {
       return;
     }
 
-    const bulkWriteOps: mongo.AnyBulkWriteOperation<IUrl>[] =
+    const bulkWriteOps: AnyBulkWriteOperation<IUrl>[] =
       pagesForUpdates.map((page) => ({
         updateOne: {
           filter: { url: page.url },
