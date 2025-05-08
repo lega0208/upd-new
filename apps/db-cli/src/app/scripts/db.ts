@@ -1595,9 +1595,9 @@ export async function thirty30Report() {
     let index = 0;
 
     for (const [taskId, data] of Object.entries(dataObject)) {
-      const taskTitle =
-        `${index}-${tasksDict[taskId]?.task_title}` ||
-        `Task-${index}-${taskId}`;
+      const taskTitle = tasksDict[taskId]?.task_title
+        ? `${index}-${tasksDict[taskId]?.task_title}`
+        : `Task-${index}-${taskId}`;
       sheetData.push({
         sheetName: getValidSheetName(taskTitle, suffix),
         data: Object.values(data) as Record<string, unknown>[],

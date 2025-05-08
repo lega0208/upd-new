@@ -250,7 +250,6 @@ export interface IFeedbackViewComment extends IFeedbackView {
 }
 
 export type IFeedbackViewType = IFeedbackView &
-  // eslint-disable-next-line @typescript-eslint/ban-types
   (IFeedbackViewWord | IFeedbackViewComment);
 
 /*
