@@ -53,7 +53,9 @@ export class DataTableComponent<T extends object> {
   filterService = inject(FilterService);
 
   data = input<T[] | null>(null);
+  // eslint-disable-next-line @angular-eslint/no-input-rename
   initialCols = input<ColumnConfig<T>[]>([], { alias: 'cols' });
+  // eslint-disable-next-line @angular-eslint/no-input-rename
   inputSearchFields = input<string[]>([], { alias: 'searchFields' });
   columnSelection = input(false);
   groupedColumnSelection = input(false);
