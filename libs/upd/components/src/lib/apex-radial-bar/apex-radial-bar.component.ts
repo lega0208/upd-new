@@ -59,6 +59,7 @@ export class ApexRadialBarComponent {
 
   readonly chartConfig: ApexChart = {
     height: 350,
+    width: 325,
     type: this.type,
     locales: [fr, en],
     defaultLocale: 'en',
@@ -92,7 +93,7 @@ export class ApexRadialBarComponent {
           },
           value: {
             offsetY: -55,
-            fontSize: '28px',
+            fontSize: '32px',
             fontWeight: 'bold',
             fontFamily: 'Noto Sans',
             color: '#333',
