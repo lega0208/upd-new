@@ -4,7 +4,6 @@
   --first-color: #1b1c1e;
   --first-color-light: #efefef;
   --white-color: #333;
-  --body-font: 'Noto Sans', sans-serif;
   --z-fixed: 100;
 }
 
@@ -20,7 +19,6 @@ body {
   position: relative;
   margin: var(--header-height) 0 0 0;
   padding: 0 1rem;
-  font-family: var(--body-font);
   transition: 0.5s;
 }
 
