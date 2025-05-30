@@ -35,6 +35,8 @@
     "mongo-parquet:seed-mongo": "npm run mongo-parquet -- --import-to-mongo --from-remote",
     "mongo-parquet:seed-mongo-local": "npm run mongo-parquet -- --import-to-mongo",
     "mongo-parquet:export": "npm run mongo-parquet -- --export-from-mongo",
+    "update-pages:sync": "cd python/update-pages && uv sync",
+    "update-pages": "cd python/update-pages/src && uv run update_pages",
     "bun-script": "bun ./scripts/bun-script.ts"
   },
   "private": true,

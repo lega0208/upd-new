@@ -69,13 +69,17 @@ class MongoParquet:
         from mongo_parquet.mongo import MongoConverter
         from mongo_parquet.schemas import (
             AASearchTerms,
+            AAItemIds,
             ActivityMap,
             Calldrivers,
+            CustomReportsRegistry,
             Feedback,
             GSCSearchTerms,
             GcTss,
+            GcTasksMappings,
             OverallMetrics,
             OverallGSCSearchTerms,
+            PagesList,
             PageMetrics,
             Pages,
             Projects,
@@ -153,6 +157,10 @@ class MongoParquet:
             ExportModel(SearchAssessment(), None, False),
             ExportModel(Reports(), None, False),
             ExportModel(Annotations(), None, False),
+            ExportModel(AAItemIds(), None, False),
+            ExportModel(CustomReportsRegistry(), None, False),
+            ExportModel(GcTasksMappings(), None, False),
+            ExportModel(PagesList(), None, False),
         ]
 
         converter = MongoConverter()
@@ -316,9 +324,9 @@ class MongoParquet:
             },
         }
 
-        print(
-            f"🚀 Starting import from {'Remote storage' if use_remote_storage else 'Local filesystem'}..."
-        )
+        source = "Remote storage" if use_remote_storage else "Local filesystem"
+        target = db_name or self.db_name
+        print(f"🚀 Starting import from {source} → 📦 MongoDB `{target}`...")
 
         files = (
             sorted(self.fs.find(remote_container or self.remote_container))
