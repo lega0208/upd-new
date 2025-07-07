@@ -4,15 +4,15 @@ export * from './lib/storage.module';
 export * from './lib/storage.utils';
 
 // Export specific classes with aliases to avoid conflicts
-export { 
+export {
   AzureStorageClient,
   AzureStorageContainer,
   BlobModel as AzureBlobModel,
   BlobClient as AzureBlobClient,
-  AzureBlobType
+  type AzureBlobType,
 } from './lib/azure.storage.client';
 
-export { 
+export {
   S3StorageClient,
   S3Bucket,
   S3ObjectModel,
