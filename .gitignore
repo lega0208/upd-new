@@ -57,6 +57,8 @@ vitest.config.*.timestamp*
 # Project documentation files
 CLAUDE.md
 UPD_PROJECT_REFERENCE.md
+ACCESSIBILITY.md
+psi_accessibility_app.py
 
 # Zone.Identifier files (Windows WSL)
 *:Zone.Identifier
