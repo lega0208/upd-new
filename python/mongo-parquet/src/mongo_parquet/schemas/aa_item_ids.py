@@ -1,13 +1,14 @@
 import polars as pl
 from pymongoarrow.api import Schema
 from pymongoarrow.types import ObjectIdType
-from pyarrow import string, list_, struct
+from pyarrow import string, list_
 from bson import ObjectId
-from ..mongo import MongoModel
+from . import MongoCollection, ParquetModel
 
 
-class AAItemIds(MongoModel):
+class AAItemIds(ParquetModel):
     collection: str = "aa_item_ids"
+    parquet_filename: str = "aa_item_ids.parquet"
     filter: dict = {}
     projection: dict | None = None
     schema: Schema = Schema(
@@ -22,10 +23,20 @@ class AAItemIds(MongoModel):
     )
 
     def transform(self, df: pl.DataFrame) -> pl.DataFrame:
-        return (
-            df.with_columns(
-                pl.col("_id").bin.encode("hex"),
-                pl.col("page").bin.encode("hex"),
-                pl.col("pages").cast(pl.List(pl.Binary)).list.eval(pl.element().bin.encode("hex")),
-            )
+        return df.with_columns(
+            pl.col("_id").bin.encode("hex"),
+            pl.col("page").bin.encode("hex"),
+            pl.col("pages").list.eval(pl.element().bin.encode("hex")),
         )
+
+    def reverse_transform(self, df: pl.DataFrame) -> pl.DataFrame:
+        return df.with_columns(
+            pl.col("_id").str.decode("hex"),
+            pl.col("page").str.decode("hex"),
+            pl.col("pages").list.eval(pl.element().str.decode("hex")),
+        )
+
+
+class AAItemIdsModel(MongoCollection):
+    collection = "aa_item_ids"
+    primary_model = AAItemIds()
