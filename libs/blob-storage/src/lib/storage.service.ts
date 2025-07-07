@@ -4,6 +4,7 @@ import {
   StorageClient,
   type StorageProvider,
 } from './storage.client';
+import { normalize } from 'node:path/posix';
 import { CompressionAlgorithm } from '@dua-upd/node-utils';
 
 export type BlobDefinition = {
@@ -33,7 +34,7 @@ export type RegisteredBlobModel = BlobModels[number];
 
 @Injectable()
 export class BlobStorageService {
-  private storageClient: StorageClient | null = null;
+  private _storageClient: StorageClient | null = null;
 
   private readonly blobDefinitions: Record<
     RegisteredBlobModel,
@@ -87,20 +88,44 @@ export class BlobStorageService {
     html_snapshots_backup: null,
   };
 
-  constructor(storageProvider: StorageProvider) {
-    this.storageClient = new StorageClient(storageProvider);
+  get storageClient() {
+    return this._storageClient;
+  }
+
+  setStorageProvider(storageProvider: StorageProvider) {
+    this._storageClient = new StorageClient(storageProvider);
+    return this;
   }
 
   private async configureBlobs(): Promise<BlobStorageService> {
     for (const [modelName, blobDefinition] of Object.entries(
       this.blobDefinitions,
     ) as [RegisteredBlobModel, BlobDefinition][]) {
-      const container = await this.storageClient?.container(
-        blobDefinition.containerName,
-      );
+      const trueContainer =
+        this.storageClient.storageType === 's3'
+          ? process.env['DATA_BUCKET_NAME']
+          : blobDefinition.containerName;
+
+      if (
+        this.storageClient.storageType === 's3' &&
+        !process.env['DATA_BUCKET_NAME']
+      ) {
+        throw new Error(
+          `storageType is 's3' but DATA_BUCKET_NAME is not defined`,
+        );
+      }
+
+      const truePath =
+        this.storageClient.storageType === 's3'
+          ? normalize(
+              `${blobDefinition.containerName}/${blobDefinition.path ?? ''}`,
+            )
+          : normalize(`${blobDefinition.path ?? ''}`);
+
+      const container = await this._storageClient?.container(trueContainer);
 
       this.blobModels[modelName] = container?.createBlobsClient({
-        path: blobDefinition.path,
+        path: truePath,
         overwrite: blobDefinition['overwrite'],
         compression: blobDefinition['compression'],
       });
@@ -110,10 +135,12 @@ export class BlobStorageService {
   }
 
   static async init(storageProvider: StorageProvider) {
-    return await new BlobStorageService(storageProvider).configureBlobs();
+    return await new BlobStorageService()
+      .setStorageProvider(storageProvider)
+      .configureBlobs();
   }
 
   async container(containerName: string) {
-    return this.storageClient.container(containerName);
+    return this._storageClient.container(containerName);
   }
 }

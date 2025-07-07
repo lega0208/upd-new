@@ -10,7 +10,6 @@
  */
 
 import type { Readable } from 'stream';
-import { cpus } from 'os';
 import type { S3ClientConfig } from '@aws-sdk/client-s3';
 import {
   S3Client,
@@ -21,14 +20,12 @@ import {
   DeleteObjectCommand,
   CopyObjectCommand,
   ListBucketsCommand,
-  CreateBucketCommand,
   HeadBucketCommand,
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import chalk from 'chalk';
 import { stat, writeFile } from 'fs/promises';
-import { makeFileUploadProgressLogger } from './storage.utils';
-import { logJson, prettyJson } from '@dua-upd/utils-common';
+import { logJson } from '@dua-upd/utils-common';
 import { Buffer } from 'buffer';
 import {
   CompressionAlgorithm,
@@ -36,6 +33,7 @@ import {
   decompressString,
 } from '@dua-upd/node-utils';
 import { RegisteredBlobModel } from './storage.service';
+import { normalize } from 'path/posix';
 
 /**
  * The base client for connecting to S3 storage. Wraps the official AWS S3 client.
@@ -251,7 +249,10 @@ export class S3ObjectClient {
     this.container = config.container;
     this.overwrite = !!config.overwrite;
 
-    const objectPath = this.path ? `${this.path}/${objectName}` : objectName;
+    const objectPath = this.path
+      ? normalize(`${this.path}/${objectName}`)
+      : objectName;
+      
     this.objectKey = objectPath;
     this.name = objectPath;
     this.filename = objectName;

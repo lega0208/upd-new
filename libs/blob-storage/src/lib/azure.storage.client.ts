@@ -23,8 +23,9 @@ import {
 } from '@azure/storage-blob';
 import chalk from 'chalk';
 import { stat, writeFile } from 'fs/promises';
+import { normalize } from 'path/posix';
 import { makeFileUploadProgressLogger } from './storage.utils';
-import { logJson, prettyJson } from '@dua-upd/utils-common';
+import { logJson } from '@dua-upd/utils-common';
 import { Buffer } from 'buffer';
 import {
   CompressionAlgorithm,
@@ -33,7 +34,7 @@ import {
 } from '@dua-upd/node-utils';
 import { RegisteredBlobModel } from './storage.service';
 
-export type BlobType = 'block' | 'append';
+export type AzureBlobType = 'block' | 'append';
 
 /**
  * The base client for connecting to Blob storage. Wraps the official Azure client.
@@ -160,7 +161,7 @@ export class BlobModel {
     return this.container;
   }
 
-  blob(blobName: string, blobType?: BlobType) {
+  blob(blobName: string, blobType?: AzureBlobType) {
     return new BlobClient(blobName, this.config, blobType);
   }
 }
@@ -175,7 +176,7 @@ export class BlobClient {
   private readonly path: string = '';
   private readonly container: AzureStorageContainer;
   private overwrite = false;
-  readonly blobType: BlobType;
+  readonly blobType: AzureBlobType;
   private compression?: CompressionAlgorithm | void;
 
   private client: AzureBlobClient;
@@ -185,14 +186,14 @@ export class BlobClient {
   constructor(
     blobName: string,
     config: BlobsConfig,
-    blobType: BlobType = 'block',
+    blobType: AzureBlobType = 'block',
   ) {
     this.path = config.path || '';
     this.container = config.container;
     this.overwrite = !!config.overwrite;
     this.blobType = blobType;
 
-    const blobPath = this.path ? `${this.path}/${blobName}` : blobName;
+    const blobPath = this.path ? normalize(`${this.path}/${blobName}`) : blobName;
 
     if (blobType === 'append') {
       this.client = this.container.getClient().getAppendBlobClient(blobPath);

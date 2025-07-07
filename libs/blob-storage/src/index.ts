@@ -9,7 +9,7 @@ export {
   AzureStorageContainer,
   BlobModel as AzureBlobModel,
   BlobClient as AzureBlobClient,
-  BlobType as AzureBlobType
+  AzureBlobType
 } from './lib/azure.storage.client';
 
 export { 

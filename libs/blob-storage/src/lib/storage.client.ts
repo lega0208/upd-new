@@ -8,6 +8,7 @@
 
 import {
   type BlobClient as AzureBlobClient,
+  type AzureBlobType,
   AzureStorageClient,
   AzureStorageContainer,
   BlobsConfig,
@@ -19,9 +20,6 @@ import type { CompressionAlgorithm } from '@dua-upd/node-utils';
 import { RegisteredBlobModel } from './storage.service';
 
 export type StorageProvider = 'azure' | 's3';
-
-// for compatibility with blob storage
-export type BlobType = 'block' | 'append';
 
 export type BlobClient = AzureBlobClient | S3ObjectClient;
 
@@ -44,10 +42,9 @@ export type StorageClientOptions = {
  */
 export class StorageClient {
   private client: AzureStorageClient | S3StorageClient | null = null;
-  private readonly storageType: StorageProvider;
+  readonly storageType: StorageProvider;
 
   constructor(provider: StorageProvider, options?: StorageClientOptions) {
-    // Use provided provider or auto-detect from environment
     this.storageType = provider;
 
     if (this.storageType === 'azure') {
@@ -145,7 +142,7 @@ export class BlobModel {
     return this.container;
   }
 
-  blob(blobName: string, blobType?: BlobType) {
+  blob(blobName: string, blobType?: AzureBlobType) {
     return this.model.blob(blobName, blobType);
   }
 }
