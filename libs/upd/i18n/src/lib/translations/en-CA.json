@@ -23,6 +23,7 @@
   "tab-flow": "Flow",
   "tab-readability": "Readability",
   "tab-version-history": "Version history",
+  "tab-accessibility": "Accessibility",
   "tab-gctasks": "GC Task Success Survey",
   "dr-lastweek": "Last week",
   "dr-lastmonth": "Last month",
@@ -1459,5 +1460,19 @@
   "Updated link": "Updated link",
   "Hidden content": "Hidden content",
   "Modal content": "Modal/pop-up content",
-  "Dynamic content": "Dynamic content"
+  "Dynamic content": "Dynamic content",
+  "accessibility.title": "Page Accessibility Testing",
+  "accessibility.description": "Test this page for WCAG 2.1 AA compliance using automated accessibility checks.",
+  "accessibility.run-test": "Run Accessibility Test",
+  "accessibility.testing-url": "Testing page accessibility...",
+  "accessibility.results-placeholder": "Test results will appear here.",
+  "accessibility.desktop": "Desktop",
+  "accessibility.mobile": "Mobile",
+  "accessibility.score": "Accessibility Score",
+  "accessibility.score-tooltip": "Overall accessibility score based on WCAG 2.1 AA criteria",
+  "accessibility.tested-at": "Tested At",
+  "accessibility.tested-at-tooltip": "When this accessibility test was performed",
+  "accessibility.desktop-results": "Desktop accessibility test results",
+  "accessibility.mobile-results": "Mobile accessibility test results",
+  "pages.accessibility": "Page Accessibility"
 }

@@ -23,6 +23,7 @@
   "tab-flow": "Flux",
   "tab-readability": "Lisibilité",
   "tab-version-history": "Historique des versions",
+  "tab-accessibility": "Accessibilité",
   "tab-gctasks": "Sondage sur la réussite des tâches du GC",
   "dr-lastweek": "La semaine dernière",
   "dr-lastmonth": "Le mois dernier",
@@ -1844,5 +1845,19 @@
   "Updated link": "Lien mis à jour",
   "Hidden content": "Contenu masqué",
   "Modal content": "Contenu modale/pop-up",
-  "Dynamic content": "Contenu dynamique"
+  "Dynamic content": "Contenu dynamique",
+  "accessibility.title": "Test d'accessibilité de la page",
+  "accessibility.description": "Testez cette page pour la conformité WCAG 2.1 AA en utilisant des vérifications d'accessibilité automatisées.",
+  "accessibility.run-test": "Exécuter le test d'accessibilité",
+  "accessibility.testing-url": "Test d'accessibilité de la page en cours...",
+  "accessibility.results-placeholder": "Les résultats du test apparaîtront ici.",
+  "accessibility.desktop": "Bureau",
+  "accessibility.mobile": "Mobile",
+  "accessibility.score": "Score d'accessibilité",
+  "accessibility.score-tooltip": "Score global d'accessibilité basé sur les critères WCAG 2.1 AA",
+  "accessibility.tested-at": "Testé à",
+  "accessibility.tested-at-tooltip": "Quand ce test d'accessibilité a été effectué",
+  "accessibility.desktop-results": "Résultats du test d'accessibilité de bureau",
+  "accessibility.mobile-results": "Résultats du test d'accessibilité mobile",
+  "pages.accessibility": "Accessibilité de la page"
 }

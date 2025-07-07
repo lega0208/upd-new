@@ -39,6 +39,7 @@ import type { InternalSearchTerm } from '@dua-upd/types-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import { compressString, decompressString } from '@dua-upd/node-utils';
 import { FlowService } from '@dua-upd/api/flow';
+import { PageSpeedInsightsService } from '@dua-upd/external-data';
 import { omit } from 'rambdax';
 
 @Injectable()
@@ -56,6 +57,7 @@ export class PagesService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private feedbackService: FeedbackService,
     private flowService: FlowService,
+    private pageSpeedInsightsService: PageSpeedInsightsService,
   ) {}
 
   async listPages({ projection, populate }): Promise<Page[]> {
@@ -596,6 +598,22 @@ export class PagesService {
         clicksChange,
       };
     });
+  }
+
+  async runAccessibilityTest(url: string) {
+    try {
+      // Run tests for both desktop and mobile
+      const results = await this.pageSpeedInsightsService.runAccessibilityTestForBothStrategies(url);
+      return {
+        success: true,
+        data: results,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Failed to run accessibility test',
+      };
+    }
   }
 }
 
