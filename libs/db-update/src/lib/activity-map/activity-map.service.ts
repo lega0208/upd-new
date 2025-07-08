@@ -229,6 +229,7 @@ export class ActivityMapService {
       return {
         ...itemId,
         ...(uniquePages.length ? { pages: uniquePages } : {}),
+        type: 'activityMapTitle' as const,
       };
     });
   }
@@ -301,6 +302,9 @@ export class ActivityMapService {
         chalk.blueBright('Finding valid Page references and inserting...'),
       );
       const itemIdsWithPageRefs = await this.addPageRefsToItemIds(newItems);
+      this.logger.log(
+        chalk.greenBright(`Found ${JSON.stringify(itemIdsWithPageRefs)} valid Page references`),
+      );
       await this.db.collections.aaItemIds.insertMany(itemIdsWithPageRefs);
 
       this.logger.log(`Inserted ${newItems.length} new itemIds`);
