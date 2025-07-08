@@ -1,85 +1,84 @@
 <div class="container-fluid my-4 gx-0">
   <div class="row">
     <div class="col">
-      <h2>{{ 'accessibility.title' | translate }}</h2>
-      <p>{{ 'accessibility.description' | translate }}</p>
-      
-      <!-- Run Test Button -->
-      <button 
-        pButton 
-        type="button" 
-        [label]="'accessibility.run-test' | translate"
-        [disabled]="isTestRunning"
-        (click)="runAccessibilityTest()"
-        class="p-button-primary mb-3">
-      </button>
-      
-      <!-- Loading State -->
-      <div *ngIf="isTestRunning" class="text-center p-4">
-        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-        <p class="mt-2">{{ 'accessibility.testing-url' | translate }}</p>
-      </div>
-      
-      <!-- Error State -->
-      <div *ngIf="errorMessage && !isTestRunning" class="alert alert-danger">
-        {{ errorMessage }}
-      </div>
-      
-      <!-- Results -->
-      <div *ngIf="testResults?.success && !isTestRunning">
-        <!-- Desktop and Mobile Tabs -->
-        <p-tabView>
-          <!-- Desktop Tab -->
-          <p-tabPanel [header]="'accessibility.desktop' | translate">
-            <div class="row mb-4">
-              <div class="col-md-6">
-                <upd-data-card
-                  [title]="'accessibility.score' | translate"
-                  [current]="testResults?.data?.desktop?.score ?? null"
-                  [pipe]="'percent'"
-                  [tooltip]="'accessibility.score-tooltip' | translate">
-                </upd-data-card>
+      <upd-card
+        [title]="'accessibility'"
+      >
+        <p>{{ 'accessibility-description' | translate }}</p>
+        
+        <button 
+          pButton 
+          type="button" 
+          [label]="'accessibility-run-test' | translate"
+          [disabled]="isTestRunning"
+          (click)="runAccessibilityTest()"
+          class="p-button-primary mb-3">
+        </button>
+        
+        <div *ngIf="isTestRunning" class="text-center p-4">
+          <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+          <p class="mt-2">{{ 'accessibility-testing-url' | translate }}</p>
+        </div>
+        
+        <div *ngIf="errorMessage && !isTestRunning" class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+        
+        <div *ngIf="testResults?.success && !isTestRunning">
+          <!-- Desktop and Mobile Tabs -->
+          <p-tabView>
+            <!-- Desktop Tab -->
+            <p-tabPanel [header]="'accessibility-desktop' | translate">
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <upd-data-card
+                    [title]="'accessibility-score' | translate"
+                    [current]="testResults?.data?.desktop?.score ?? null"
+                    [pipe]="'percent'"
+                    [tooltip]="'accessibility-score-tooltip' | translate">
+                  </upd-data-card>
+                </div>
+                <div class="col-md-6">
+                  <upd-card [title]="'accessibility-tested-at' | translate">
+                    <p class="h3">{{ testResults?.data?.desktop?.testedAt | date:'medium' }}</p>
+                  </upd-card>
+                </div>
               </div>
-              <div class="col-md-6">
-                <upd-card [title]="'accessibility.tested-at' | translate">
-                  <p class="h3">{{ testResults?.data?.desktop?.testedAt | date:'medium' }}</p>
-                </upd-card>
+              
+              <!-- Desktop Audit Results -->
+              <div class="audit-results">
+                <p>{{ 'accessibility-desktop-results' | translate }}</p>
+                <!-- We'll add detailed results here next -->
               </div>
-            </div>
+            </p-tabPanel>
             
-            <!-- Desktop Audit Results -->
-            <div class="audit-results">
-              <p>{{ 'accessibility.desktop-results' | translate }}</p>
-              <!-- We'll add detailed results here next -->
-            </div>
-          </p-tabPanel>
-          
-          <!-- Mobile Tab -->
-          <p-tabPanel [header]="'accessibility.mobile' | translate">
-            <div class="row mb-4">
-              <div class="col-md-6">
-                <upd-data-card
-                  [title]="'accessibility.score' | translate"
-                  [current]="testResults?.data?.mobile?.score ?? null"
-                  [pipe]="'percent'"
-                  [tooltip]="'accessibility.score-tooltip' | translate">
-                </upd-data-card>
+            <!-- Mobile Tab -->
+            <p-tabPanel [header]="'accessibility-mobile' | translate">
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <upd-data-card
+                    [title]="'accessibility-score' | translate"
+                    [current]="testResults?.data?.mobile?.score ?? null"
+                    [pipe]="'percent'"
+                    [tooltip]="'accessibility-score-tooltip' | translate">
+                  </upd-data-card>
+                </div>
+                <div class="col-md-6">
+                  <upd-card [title]="'accessibility-tested-at' | translate">
+                    <p class="h3">{{ testResults?.data?.mobile?.testedAt | date:'medium' }}</p>
+                  </upd-card>
+                </div>
               </div>
-              <div class="col-md-6">
-                <upd-card [title]="'accessibility.tested-at' | translate">
-                  <p class="h3">{{ testResults?.data?.mobile?.testedAt | date:'medium' }}</p>
-                </upd-card>
+              
+              <!-- Mobile Audit Results -->
+              <div class="audit-results">
+                <p>{{ 'accessibility-mobile-results' | translate }}</p>
+                
               </div>
-            </div>
-            
-            <!-- Mobile Audit Results -->
-            <div class="audit-results">
-              <p>{{ 'accessibility.mobile-results' | translate }}</p>
-              <!-- We'll add detailed results here next -->
-            </div>
-          </p-tabPanel>
-        </p-tabView>
-      </div>
+            </p-tabPanel>
+          </p-tabView>
+        </div>
+      </upd-card>
     </div>
   </div>
 </div>

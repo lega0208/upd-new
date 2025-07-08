@@ -602,8 +602,13 @@ export class PagesService {
 
   async runAccessibilityTest(url: string) {
     try {
+      // Ensure URL has https:// protocol for PageSpeed Insights API
+      const fullUrl = url.startsWith('http://') || url.startsWith('https://') 
+        ? url 
+        : `https://${url}`;
+      
       // Run tests for both desktop and mobile
-      const results = await this.pageSpeedInsightsService.runAccessibilityTestForBothStrategies(url);
+      const results = await this.pageSpeedInsightsService.runAccessibilityTestForBothStrategies(fullUrl);
       return {
         success: true,
         data: results,
