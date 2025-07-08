@@ -18,7 +18,7 @@ export class AAItemId implements IAAItemId {
   @Prop({ type: [MSchema.Types.ObjectId], index: true })
   pages?: Types.ObjectId[];
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, index: true })
   itemId!: string;
 
   @Prop({ type: String, required: true, index: true })
