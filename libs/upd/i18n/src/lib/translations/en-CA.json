@@ -1498,7 +1498,7 @@
   "accessibility-audit-id": "Audit ID",
   "accessibility-code-snippet": "Code Snippet",
   "accessibility-automated-score": "Automated Accessibility Score",
-  "accessibility-all-tests-passed": "Congratulations! All automated accessibility tests passed. Remember that automated testing can only detect about 30% of accessibility issues - manual testing is still required.",
+  "accessibility-all-tests-passed": "All automated accessibility tests passed. Remember that automated testing can only detect about 30% of accessibility issues - manual testing is still required.",
   "accessibility-audit-distribution": "Audit Results Distribution",
   "accessibility-audit-overview": "Audit Overview",
   "accessibility-desktop-results": "Desktop Results",
