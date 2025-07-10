@@ -33,6 +33,7 @@ import { PipesModule } from '@dua-upd/upd/pipes';
 import { PagesDetailsVersionsComponent } from './pages-details/pages-details-versions/pages-details-versions.component';
 import { PagesDetailsAccessibilityComponent } from './pages-details/pages-details-accessibility/pages-details-accessibility.component';
 import { TabViewModule } from 'primeng/tabview';
+import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   imports: [
@@ -48,6 +49,7 @@ import { TabViewModule } from 'primeng/tabview';
     ServicesModule,
     PipesModule,
     TabViewModule,
+    NgbAccordionModule,
   ],
   declarations: [
     PagesComponent,
