@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ApiService } from '@dua-upd/upd/services';
 import { catchError, finalize, filter, takeUntil } from 'rxjs/operators';
 import { of, Subject } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 interface AccessibilityTestResponse {
   success: boolean;
@@ -48,6 +49,8 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   private i18n = inject(I18nFacade);
   private pageDetailsService = inject(PagesDetailsFacade);
   private apiService = inject(ApiService);
+  private sanitizer = inject(DomSanitizer);
+  private cdr = inject(ChangeDetectorRef);
   private destroy$ = new Subject<void>();
 
   currentLang$ = this.i18n.currentLang$;
@@ -64,6 +67,14 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   mobileChartData: { series: number[]; labels: string[] } | null = null;
   desktopMetrics: any = null;
   mobileMetrics: any = null;
+
+  // Getter for mobile chart data to ensure proper change detection
+  get mobileChartDataComputed() {
+    if (this.testResults?.data?.mobile?.audits) {
+      return this.getAuditDistributionData(this.testResults.data.mobile.audits);
+    }
+    return null;
+  }
 
   ngOnInit() {
     // Automatically run accessibility test when page URL changes
@@ -148,6 +159,20 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     return 'text-danger';
   }
 
+  // Parse markdown-style links in description text
+  parseMarkdownLinks(description: string): SafeHtml {
+    // Regular expression to match markdown links: [text](url)
+    const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    
+    // Replace markdown links with HTML anchor tags
+    const htmlDescription = description.replace(markdownLinkRegex, (_match, linkText, url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary">${linkText}</a>`;
+    });
+    
+    // Sanitize the HTML to prevent XSS attacks while allowing safe anchor tags
+    return this.sanitizer.sanitize(1, htmlDescription) || description;
+  }
+
   // Run accessibility test
   runAccessibilityTest() {
     const url = this.pageUrl();
@@ -186,6 +211,8 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
             this.mobileChartData = this.getAuditDistributionData(response.data.mobile.audits);
             this.mobileMetrics = this.getAutomatedTestMetrics(response.data.mobile.audits);
           }
+          // Manually trigger change detection to ensure charts are updated
+          this.cdr.detectChanges();
         } else {
           this.errorMessage = response.error || 'An error occurred during testing';
           this.desktopChartData = null;

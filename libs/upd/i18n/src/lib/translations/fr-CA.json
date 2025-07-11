@@ -1884,10 +1884,6 @@
   "accessibility-code-snippet": "Extrait de code",
   "accessibility-automated-score": "Score d'accessibilité automatisé",
   "accessibility-all-tests-passed": "Tous les tests d'accessibilité automatisés ont réussi. N'oubliez pas que les tests automatisés ne peuvent détecter qu'environ 30% des problèmes d'accessibilité - des tests manuels sont toujours nécessaires.",
-  "accessibility-audit-distribution": "Distribution des résultats d'audit",
-  "accessibility-audit-overview": "Aperçu de l'audit",
-  "accessibility-desktop-results": "Résultats ordinateur",
-  "accessibility-mobile-results": "Résultats mobile",
   "accessibility-element": "Élément",
   "accessibility-failed-tests-count": "Tests échoués ({{count}})",
   "accessibility-help": "Aide",
@@ -1896,7 +1892,5 @@
   "accessibility-no-data": "Aucune donnée d'accessibilité disponible",
   "accessibility-not-applicable-count": "Non applicable ({{count}})",
   "accessibility-passed-tests-count": "Tests réussis ({{count}})",
-  "accessibility-refresh-test": "Actualiser le test",
-  "accessibility-tested-at": "Testé le",
-  "accessibility-testing-url": "Test d'accessibilité de la page en cours..."
+  "accessibility-refresh-test": "Actualiser le test"
 }

@@ -207,7 +207,7 @@
                                   @for (audit of categorized.manual; track trackByAuditId($index, audit)) {
                                     <div class="audit-item mb-3 p-3 border rounded">
                                       <h6 class="text-warning">{{ audit.title }}</h6>
-                                      <p>{{ audit.description }}</p>
+                                      <p [innerHTML]="parseMarkdownLinks(audit.description)"></p>
                                     </div>
                                   }
                                 </div>
@@ -267,10 +267,10 @@
                         <div class="row mb-4">
                           <div class="col-md-5">
                             <h5>{{ 'accessibility-audit-overview' | translate }}</h5>
-                            @if (mobileChartData) {
+                            @if (mobileChartDataComputed) {
                               <upd-apex-donut
-                                [series]="mobileChartData.series"
-                                [labels]="mobileChartData.labels"
+                                [series]="mobileChartDataComputed.series"
+                                [labels]="mobileChartDataComputed.labels"
                                 [title]="'accessibility-audit-distribution' | translate"
                                 [colours]="['#ff4b4b', '#00cc44', '#ffa500', '#aaaaaa']">
                               </upd-apex-donut>
@@ -399,7 +399,7 @@
                                   @for (audit of categorized.manual; track trackByAuditId($index, audit)) {
                                     <div class="audit-item mb-3 p-3 border rounded">
                                       <h6 class="text-warning">{{ audit.title }}</h6>
-                                      <p>{{ audit.description }}</p>
+                                      <p [innerHTML]="parseMarkdownLinks(audit.description)"></p>
                                     </div>
                                   }
                                 </div>
