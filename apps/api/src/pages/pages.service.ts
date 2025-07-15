@@ -620,6 +620,27 @@ export class PagesService {
       };
     }
   }
+
+  async runCoreWebVitalsTest(url: string) {
+    try {
+      // Ensure URL has https:// protocol for PageSpeed Insights API
+      const fullUrl = url.startsWith('http://') || url.startsWith('https://') 
+        ? url 
+        : `https://${url}`;
+      
+      // Run tests for both desktop and mobile
+      const results = await this.pageSpeedInsightsService.runCoreWebVitalsTestForBothStrategies(fullUrl);
+      return {
+        success: true,
+        data: results,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Failed to run Core Web Vitals test',
+      };
+    }
+  }
 }
 
 function aggregateSearchTermMetrics(dailyPageMetrics: PageMetrics[]) {

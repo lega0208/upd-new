@@ -12,6 +12,7 @@ import { PagesDetailsFlowComponent } from './pages-details/pages-details-flow/pa
 import { PagesDetailsReadabilityComponent } from './pages-details/pages-details-readability/pages-details-readability.component';
 import { PagesDetailsVersionsComponent } from './pages-details/pages-details-versions/pages-details-versions.component';
 import { PagesDetailsAccessibilityComponent } from './pages-details/pages-details-accessibility/pages-details-accessibility.component';
+import { PagesDetailsCoreWebVitalsComponent } from './pages-details/pages-details-core-web-vitals/pages-details-core-web-vitals.component';
 
 const routes: Routes = [
   {
@@ -32,6 +33,7 @@ const routes: Routes = [
           { path: 'readability', component: PagesDetailsReadabilityComponent, data: {title: 'Pages | Readability'} },
           { path: 'version-history', component: PagesDetailsVersionsComponent, data: {title: 'Pages | Version history'} },
           { path: 'accessibility', component: PagesDetailsAccessibilityComponent, data: {title: 'Pages | Accessibility'} },
+          { path: 'core-web-vitals', component: PagesDetailsCoreWebVitalsComponent, data: {title: 'Pages | Core Web Vitals'} },
         ],
       },
     ],

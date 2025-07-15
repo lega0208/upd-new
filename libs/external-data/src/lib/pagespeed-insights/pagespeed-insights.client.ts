@@ -18,6 +18,14 @@ export interface PageSpeedInsightsResponse {
           group?: string;
         }>;
       };
+      performance?: {
+        score: number;
+        auditRefs: Array<{
+          id: string;
+          weight: number;
+          group?: string;
+        }>;
+      };
     };
     audits: {
       [key: string]: {
@@ -26,6 +34,8 @@ export interface PageSpeedInsightsResponse {
         description: string;
         score: number | null;
         scoreDisplayMode: string;
+        displayValue?: string;
+        numericValue?: number;
         details?: {
           items?: Array<{
             node?: {
