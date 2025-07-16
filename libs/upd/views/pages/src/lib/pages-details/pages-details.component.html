@@ -68,7 +68,8 @@
     *ngIf="
       !((currentRoute$ | async) || '').endsWith('readability') &&
       !((currentRoute$ | async) || '').endsWith('version-history') &&
-      !((currentRoute$ | async) || '').endsWith('accessibility')
+      !((currentRoute$ | async) || '').endsWith('accessibility') &&
+      !((currentRoute$ | async) || '').endsWith('core-web-vitals')
     "
   ></upd-date-selector>
 

@@ -45,13 +45,19 @@ export class PagesController {
 
   @Get('accessibility-test')
   @Header('Content-Type', 'application/json')
-  async runAccessibilityTest(@Query('url') url: string) {
-    return this.pagesService.runAccessibilityTest(url);
+  async runAccessibilityTest(
+    @Query('url') url: string,
+    @Query('locale') locale?: string,
+  ) {
+    return this.pagesService.runAccessibilityTest(url, locale);
   }
 
   @Get('core-web-vitals')
   @Header('Content-Type', 'application/json')
-  async runCoreWebVitalsTest(@Query('url') url: string) {
-    return this.pagesService.runCoreWebVitalsTest(url);
+  async runCoreWebVitalsTest(
+    @Query('url') url: string,
+    @Query('locale') locale?: string,
+  ) {
+    return this.pagesService.runCoreWebVitalsTest(url, locale);
   }
 }

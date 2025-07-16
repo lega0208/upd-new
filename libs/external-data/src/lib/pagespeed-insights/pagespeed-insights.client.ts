@@ -5,6 +5,7 @@ export interface PageSpeedInsightsParams {
   key: string;
   category: 'ACCESSIBILITY' | 'PERFORMANCE' | 'BEST_PRACTICES' | 'SEO';
   strategy: 'mobile' | 'desktop';
+  locale?: string;
 }
 
 export interface PageSpeedInsightsResponse {
@@ -54,12 +55,17 @@ export class PageSpeedInsightsClient {
   private readonly apiKey = process.env.PAGESPEED_API_KEY || '';
 
   async runPageSpeedTest(params: Omit<PageSpeedInsightsParams, 'key'>): Promise<PageSpeedInsightsResponse> {
-    const queryParams = {
+    const queryParams: any = {
       url: params.url,
       key: this.apiKey,
       category: params.category,
       strategy: params.strategy,
     };
+
+    // Add locale if provided
+    if (params.locale) {
+      queryParams.locale = params.locale;
+    }
 
     const response = await axios.get<PageSpeedInsightsResponse>(this.API_ENDPOINT, {
       params: queryParams,

@@ -7,6 +7,9 @@ import { catchError, finalize, filter, takeUntil } from 'rxjs/operators';
 import { of, Subject } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
+// Module-level cache that persists between component instances
+const accessibilityCache = new Map<string, AccessibilityTestResponse>();
+
 interface AccessibilityTestResponse {
   success: boolean;
   data?: {
@@ -61,6 +64,7 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   isTestRunning = false;
   testResults: AccessibilityTestResponse | null = null;
   errorMessage = '';
+  private lastTestedUrl = '';
   
   // Computed data for charts (to avoid recalculation on every change detection)
   desktopChartData: { series: number[]; labels: string[] } | null = null;
@@ -81,8 +85,29 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     this.pageUrl$.pipe(
       filter(url => !!url),
       takeUntil(this.destroy$)
-    ).subscribe(() => {
-      this.runAccessibilityTest();
+    ).subscribe((url) => {
+      // Check if we have cached results for this URL
+      const cached = accessibilityCache.get(url);
+      if (cached) {
+        // Use cached results
+        this.testResults = cached;
+        this.errorMessage = '';
+        this.lastTestedUrl = url;
+        // Re-compute chart data and metrics from cached results
+        if (cached.data?.desktop?.audits) {
+          this.desktopChartData = this.getAuditDistributionData(cached.data.desktop.audits);
+          this.desktopMetrics = this.getAutomatedTestMetrics(cached.data.desktop.audits);
+        }
+        if (cached.data?.mobile?.audits) {
+          this.mobileChartData = this.getAuditDistributionData(cached.data.mobile.audits);
+          this.mobileMetrics = this.getAutomatedTestMetrics(cached.data.mobile.audits);
+        }
+        this.cdr.detectChanges();
+      } else {
+        // New URL or no cache, run the test
+        this.lastTestedUrl = url;
+        this.runAccessibilityTest();
+      }
     });
   }
 
@@ -111,11 +136,20 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
       categorized.notApplicable.length
     ];
     
+    // Translation keys for chart labels
+    const labelKeys = [
+      'accessibility-failed-tests',
+      'accessibility-passed-tests',
+      'accessibility-manual-checks',
+      'accessibility-not-applicable'
+    ];
+    
     // Only include categories that have values > 0
     const filteredData = series.reduce((acc, value, index) => {
       if (value > 0) {
         acc.series.push(value);
-        acc.labels.push(['Failed', 'Passed', 'Manual Check', 'Not Applicable'][index]);
+        // Use instant translation for immediate rendering
+        acc.labels.push(this.i18n.service.instant(labelKeys[index]));
       }
       return acc;
     }, { series: [] as number[], labels: [] as string[] });
@@ -124,7 +158,7 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     if (filteredData.series.length === 0) {
       return {
         series: [1],
-        labels: ['No audits available']
+        labels: [this.i18n.service.instant('accessibility-no-data')]
       };
     }
     
@@ -185,8 +219,12 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.testResults = null;
 
+    // Get the current language to pass to the API
+    const currentLang = this.i18n.service.currentLang;
+    const locale = currentLang === 'fr-CA' ? 'fr' : 'en';
+
     this.apiService
-      .get<AccessibilityTestResponse>(`/api/pages/accessibility-test?url=${encodeURIComponent(url)}`)
+      .get<AccessibilityTestResponse>(`/api/pages/accessibility-test?url=${encodeURIComponent(url)}&locale=${locale}`)
       .pipe(
         catchError((error) => {
           console.error('Accessibility test error:', error);
@@ -202,6 +240,10 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
       .subscribe((response) => {
         if (response.success) {
           this.testResults = response;
+          // Cache the successful results
+          if (url) {
+            accessibilityCache.set(url, response);
+          }
           // Pre-compute chart data and metrics to avoid recalculation on every change detection
           if (response.data?.desktop?.audits) {
             this.desktopChartData = this.getAuditDistributionData(response.data.desktop.audits);

@@ -600,7 +600,7 @@ export class PagesService {
     });
   }
 
-  async runAccessibilityTest(url: string) {
+  async runAccessibilityTest(url: string, locale?: string) {
     try {
       // Ensure URL has https:// protocol for PageSpeed Insights API
       const fullUrl = url.startsWith('http://') || url.startsWith('https://') 
@@ -608,7 +608,7 @@ export class PagesService {
         : `https://${url}`;
       
       // Run tests for both desktop and mobile
-      const results = await this.pageSpeedInsightsService.runAccessibilityTestForBothStrategies(fullUrl);
+      const results = await this.pageSpeedInsightsService.runAccessibilityTestForBothStrategies(fullUrl, locale);
       return {
         success: true,
         data: results,
@@ -621,7 +621,7 @@ export class PagesService {
     }
   }
 
-  async runCoreWebVitalsTest(url: string) {
+  async runCoreWebVitalsTest(url: string, locale?: string) {
     try {
       // Ensure URL has https:// protocol for PageSpeed Insights API
       const fullUrl = url.startsWith('http://') || url.startsWith('https://') 
@@ -629,7 +629,7 @@ export class PagesService {
         : `https://${url}`;
       
       // Run tests for both desktop and mobile
-      const results = await this.pageSpeedInsightsService.runCoreWebVitalsTestForBothStrategies(fullUrl);
+      const results = await this.pageSpeedInsightsService.runCoreWebVitalsTestForBothStrategies(fullUrl, locale);
       return {
         success: true,
         data: results,

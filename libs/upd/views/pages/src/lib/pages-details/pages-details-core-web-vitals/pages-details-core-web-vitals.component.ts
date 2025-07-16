@@ -6,6 +6,9 @@ import { ApiService } from '@dua-upd/upd/services';
 import { catchError, finalize, filter, takeUntil } from 'rxjs/operators';
 import { of, Subject } from 'rxjs';
 
+// Module-level cache that persists between component instances
+const coreWebVitalsCache = new Map<string, CoreWebVitalsTestResponse>();
+
 interface CoreWebVitalsTestResponse {
   success: boolean;
   data?: {
@@ -63,14 +66,27 @@ export class PagesDetailsCoreWebVitalsComponent implements OnInit, OnDestroy {
   isTestRunning = false;
   testResults: CoreWebVitalsTestResponse | null = null;
   errorMessage = '';
+  private lastTestedUrl = '';
 
   ngOnInit() {
     // Automatically run Core Web Vitals test when page URL changes
     this.pageUrl$.pipe(
       filter(url => !!url),
       takeUntil(this.destroy$)
-    ).subscribe(() => {
-      this.runCoreWebVitalsTest();
+    ).subscribe((url) => {
+      // Check if we have cached results for this URL
+      const cached = coreWebVitalsCache.get(url);
+      if (cached) {
+        // Use cached results
+        this.testResults = cached;
+        this.errorMessage = '';
+        this.lastTestedUrl = url;
+        this.cdr.detectChanges();
+      } else {
+        // New URL or no cache, run the test
+        this.lastTestedUrl = url;
+        this.runCoreWebVitalsTest();
+      }
     });
   }
 
@@ -136,8 +152,12 @@ export class PagesDetailsCoreWebVitalsComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.testResults = null;
 
+    // Get the current language to pass to the API
+    const currentLang = this.i18n.service.currentLang;
+    const locale = currentLang === 'fr-CA' ? 'fr' : 'en';
+
     this.apiService
-      .get<CoreWebVitalsTestResponse>(`/api/pages/core-web-vitals?url=${encodeURIComponent(url)}`)
+      .get<CoreWebVitalsTestResponse>(`/api/pages/core-web-vitals?url=${encodeURIComponent(url)}&locale=${locale}`)
       .pipe(
         catchError((error) => {
           console.error('Core Web Vitals test error:', error);
@@ -153,6 +173,10 @@ export class PagesDetailsCoreWebVitalsComponent implements OnInit, OnDestroy {
       .subscribe((response) => {
         if (response.success) {
           this.testResults = response;
+          // Cache the successful results
+          if (url) {
+            coreWebVitalsCache.set(url, response);
+          }
           // Manually trigger change detection to ensure UI updates
           this.cdr.detectChanges();
         } else {

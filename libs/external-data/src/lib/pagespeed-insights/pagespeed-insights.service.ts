@@ -60,7 +60,8 @@ export class PageSpeedInsightsService {
   @Retry(3, 1000)
   async runAccessibilityTest(
     url: string,
-    strategy: 'mobile' | 'desktop' = 'desktop'
+    strategy: 'mobile' | 'desktop' = 'desktop',
+    locale?: string
   ): Promise<AccessibilityTestResult> {
     this.logger.log(`Running accessibility test for ${url} (${strategy})`);
 
@@ -69,6 +70,7 @@ export class PageSpeedInsightsService {
         url,
         category: 'ACCESSIBILITY',
         strategy,
+        locale,
       });
 
       if (!response?.lighthouseResult) {
@@ -128,18 +130,18 @@ export class PageSpeedInsightsService {
     }
   }
 
-  async runAccessibilityTestForBothStrategies(url: string): Promise<{
+  async runAccessibilityTestForBothStrategies(url: string, locale?: string): Promise<{
     desktop: AccessibilityTestResult;
     mobile: AccessibilityTestResult;
   }> {
     // Run desktop test
-    const desktop = await this.runAccessibilityTest(url, 'desktop');
+    const desktop = await this.runAccessibilityTest(url, 'desktop', locale);
     
     // Wait to avoid rate limiting
     await wait(800);
     
     // Run mobile test
-    const mobile = await this.runAccessibilityTest(url, 'mobile');
+    const mobile = await this.runAccessibilityTest(url, 'mobile', locale);
 
     return { desktop, mobile };
   }
@@ -164,7 +166,8 @@ export class PageSpeedInsightsService {
   @Retry(3, 1000)
   async runCoreWebVitalsTest(
     url: string,
-    strategy: 'mobile' | 'desktop' = 'desktop'
+    strategy: 'mobile' | 'desktop' = 'desktop',
+    locale?: string
   ): Promise<CoreWebVitalsTestResult> {
     this.logger.log(`Running Core Web Vitals test for ${url} (${strategy})`);
 
@@ -173,6 +176,7 @@ export class PageSpeedInsightsService {
         url,
         category: 'PERFORMANCE',
         strategy,
+        locale,
       });
 
       if (!response?.lighthouseResult) {
@@ -292,18 +296,18 @@ export class PageSpeedInsightsService {
     }
   }
 
-  async runCoreWebVitalsTestForBothStrategies(url: string): Promise<{
+  async runCoreWebVitalsTestForBothStrategies(url: string, locale?: string): Promise<{
     desktop: CoreWebVitalsTestResult;
     mobile: CoreWebVitalsTestResult;
   }> {
     // Run desktop test
-    const desktop = await this.runCoreWebVitalsTest(url, 'desktop');
+    const desktop = await this.runCoreWebVitalsTest(url, 'desktop', locale);
     
     // Wait to avoid rate limiting
     await wait(800);
     
     // Run mobile test
-    const mobile = await this.runCoreWebVitalsTest(url, 'mobile');
+    const mobile = await this.runCoreWebVitalsTest(url, 'mobile', locale);
 
     return { desktop, mobile };
   }
