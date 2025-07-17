@@ -7,7 +7,13 @@ import { catchError, finalize, filter, takeUntil } from 'rxjs/operators';
 import { of, Subject } from 'rxjs';
 
 // Module-level cache that persists between component instances
-const coreWebVitalsCache = new Map<string, CoreWebVitalsTestResponse>();
+// Cache structure: URL -> { en: results, fr: results }
+const coreWebVitalsCache = new Map<string, LocalizedCoreWebVitalsTestResponse>();
+
+interface LocalizedCoreWebVitalsTestResponse {
+  en?: CoreWebVitalsTestResponse;
+  fr?: CoreWebVitalsTestResponse;
+}
 
 interface CoreWebVitalsTestResponse {
   success: boolean;
@@ -69,25 +75,56 @@ export class PagesDetailsCoreWebVitalsComponent implements OnInit, OnDestroy {
   private lastTestedUrl = '';
 
   ngOnInit() {
+    // Subscribe to language changes
+    this.currentLang$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      // When language changes, update the displayed results if we have cached data
+      const url = this.pageUrl();
+      if (url && this.testResults) {
+        this.updateResultsForCurrentLanguage(url);
+      }
+    });
+
     // Automatically run Core Web Vitals test when page URL changes
     this.pageUrl$.pipe(
       filter(url => !!url),
       takeUntil(this.destroy$)
     ).subscribe((url) => {
-      // Check if we have cached results for this URL
-      const cached = coreWebVitalsCache.get(url);
-      if (cached) {
-        // Use cached results
-        this.testResults = cached;
-        this.errorMessage = '';
-        this.lastTestedUrl = url;
-        this.cdr.detectChanges();
-      } else {
-        // New URL or no cache, run the test
-        this.lastTestedUrl = url;
-        this.runCoreWebVitalsTest();
-      }
+      this.handleUrlChange(url);
     });
+  }
+
+  private handleUrlChange(url: string) {
+    // Check if we have cached results for this URL
+    const cachedData = coreWebVitalsCache.get(url);
+    const currentLang = this.i18n.service.currentLang;
+    const langKey = currentLang === 'fr-CA' ? 'fr' : 'en';
+    
+    if (cachedData && cachedData[langKey]) {
+      // Use cached results for the current language
+      this.testResults = cachedData[langKey];
+      this.errorMessage = '';
+      this.lastTestedUrl = url;
+      this.cdr.detectChanges();
+    } else {
+      // New URL or no cache, run the test
+      this.lastTestedUrl = url;
+      this.runCoreWebVitalsTest();
+    }
+  }
+
+  private updateResultsForCurrentLanguage(url: string) {
+    const cachedData = coreWebVitalsCache.get(url);
+    const currentLang = this.i18n.service.currentLang;
+    const langKey = currentLang === 'fr-CA' ? 'fr' : 'en';
+    
+    if (cachedData && cachedData[langKey]) {
+      // Update to show results in the new language
+      this.testResults = cachedData[langKey];
+      this.errorMessage = '';
+      this.cdr.detectChanges();
+    }
   }
 
   ngOnDestroy() {
@@ -152,35 +189,43 @@ export class PagesDetailsCoreWebVitalsComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.testResults = null;
 
-    // Get the current language to pass to the API
-    const currentLang = this.i18n.service.currentLang;
-    const locale = currentLang === 'fr-CA' ? 'fr' : 'en';
-
+    // API will fetch both English and French results
     this.apiService
-      .get<CoreWebVitalsTestResponse>(`/api/pages/core-web-vitals?url=${encodeURIComponent(url)}&locale=${locale}`)
+      .get<LocalizedCoreWebVitalsTestResponse>(`/api/pages/core-web-vitals?url=${encodeURIComponent(url)}`)
       .pipe(
         catchError((error) => {
           console.error('Core Web Vitals test error:', error);
-          return of({
+          const errorResponse = {
             success: false,
             error: error.message || 'Failed to run Core Web Vitals test'
-          } as CoreWebVitalsTestResponse);
+          } as CoreWebVitalsTestResponse;
+          return of({
+            en: errorResponse,
+            fr: errorResponse
+          } as LocalizedCoreWebVitalsTestResponse);
         }),
         finalize(() => {
           this.isTestRunning = false;
         })
       )
       .subscribe((response) => {
-        if (response.success) {
-          this.testResults = response;
-          // Cache the successful results
+        const currentLang = this.i18n.service.currentLang;
+        const langKey = currentLang === 'fr-CA' ? 'fr' : 'en';
+        
+        if (response && response[langKey] && response[langKey].success) {
+          // Cache both language results
           if (url) {
             coreWebVitalsCache.set(url, response);
           }
+          
+          // Use the current language results
+          this.testResults = response[langKey];
+          
           // Manually trigger change detection to ensure UI updates
           this.cdr.detectChanges();
         } else {
-          this.errorMessage = response.error || 'An error occurred during testing';
+          const errorResponse = response && response[langKey];
+          this.errorMessage = (errorResponse && errorResponse.error) || 'An error occurred during testing';
         }
       });
   }

@@ -63,7 +63,7 @@ export class PageSpeedInsightsService {
     strategy: 'mobile' | 'desktop' = 'desktop',
     locale?: string
   ): Promise<AccessibilityTestResult> {
-    this.logger.log(`Running accessibility test for ${url} (${strategy})`);
+    this.logger.log(`Running accessibility test for ${url} (${strategy}) with locale: ${locale}`);
 
     try {
       const response = await this.client.runPageSpeedTest({
@@ -96,6 +96,11 @@ export class PageSpeedInsightsService {
 
         // Categorize the audit
         const category = this.categorizeAudit(audit.score, audit.scoreDisplayMode);
+        
+        // Log manual audits to debug language issue
+        if (category === 'manual_check') {
+          this.logger.log(`Manual audit - Title: ${audit.title}, Locale: ${locale}`);
+        }
         
         // Extract snippet if available
         let snippet: string | undefined;
@@ -144,6 +149,22 @@ export class PageSpeedInsightsService {
     const mobile = await this.runAccessibilityTest(url, 'mobile', locale);
 
     return { desktop, mobile };
+  }
+
+  async runAccessibilityTestForBothLocales(url: string): Promise<{
+    en: { desktop: AccessibilityTestResult; mobile: AccessibilityTestResult };
+    fr: { desktop: AccessibilityTestResult; mobile: AccessibilityTestResult };
+  }> {
+    // Run English tests - try en-US which might be more specific
+    const enResults = await this.runAccessibilityTestForBothStrategies(url, 'en-US');
+    
+    // Wait to avoid rate limiting
+    await wait(800);
+    
+    // Run French tests - try fr-CA for Canadian French
+    const frResults = await this.runAccessibilityTestForBothStrategies(url, 'fr-CA');
+
+    return { en: enResults, fr: frResults };
   }
 
   private categorizeAudit(
@@ -310,5 +331,21 @@ export class PageSpeedInsightsService {
     const mobile = await this.runCoreWebVitalsTest(url, 'mobile', locale);
 
     return { desktop, mobile };
+  }
+
+  async runCoreWebVitalsTestForBothLocales(url: string): Promise<{
+    en: { desktop: CoreWebVitalsTestResult; mobile: CoreWebVitalsTestResult };
+    fr: { desktop: CoreWebVitalsTestResult; mobile: CoreWebVitalsTestResult };
+  }> {
+    // Run English tests - try en-US which might be more specific
+    const enResults = await this.runCoreWebVitalsTestForBothStrategies(url, 'en-US');
+    
+    // Wait to avoid rate limiting
+    await wait(800);
+    
+    // Run French tests - try fr-CA for Canadian French
+    const frResults = await this.runCoreWebVitalsTestForBothStrategies(url, 'fr-CA');
+
+    return { en: enResults, fr: frResults };
   }
 }

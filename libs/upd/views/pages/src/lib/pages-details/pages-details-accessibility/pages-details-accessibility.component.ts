@@ -8,7 +8,13 @@ import { of, Subject } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 // Module-level cache that persists between component instances
-const accessibilityCache = new Map<string, AccessibilityTestResponse>();
+// Cache structure: URL -> { en: results, fr: results }
+const accessibilityCache = new Map<string, LocalizedAccessibilityTestResponse>();
+
+interface LocalizedAccessibilityTestResponse {
+  en?: AccessibilityTestResponse;
+  fr?: AccessibilityTestResponse;
+}
 
 interface AccessibilityTestResponse {
   success: boolean;
@@ -64,7 +70,7 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   isTestRunning = false;
   testResults: AccessibilityTestResponse | null = null;
   errorMessage = '';
-  private lastTestedUrl = '';
+  private _lastTestedUrl = '';
   
   // Computed data for charts (to avoid recalculation on every change detection)
   desktopChartData: { series: number[]; labels: string[] } | null = null;
@@ -81,34 +87,75 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Subscribe to language changes
+    this.currentLang$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      // When language changes, update the displayed results if we have cached data
+      const url = this.pageUrl();
+      if (url && this.testResults) {
+        this.updateResultsForCurrentLanguage(url);
+      }
+    });
+
     // Automatically run accessibility test when page URL changes
     this.pageUrl$.pipe(
       filter(url => !!url),
       takeUntil(this.destroy$)
     ).subscribe((url) => {
-      // Check if we have cached results for this URL
-      const cached = accessibilityCache.get(url);
-      if (cached) {
-        // Use cached results
-        this.testResults = cached;
-        this.errorMessage = '';
-        this.lastTestedUrl = url;
-        // Re-compute chart data and metrics from cached results
-        if (cached.data?.desktop?.audits) {
-          this.desktopChartData = this.getAuditDistributionData(cached.data.desktop.audits);
-          this.desktopMetrics = this.getAutomatedTestMetrics(cached.data.desktop.audits);
-        }
-        if (cached.data?.mobile?.audits) {
-          this.mobileChartData = this.getAuditDistributionData(cached.data.mobile.audits);
-          this.mobileMetrics = this.getAutomatedTestMetrics(cached.data.mobile.audits);
-        }
-        this.cdr.detectChanges();
-      } else {
-        // New URL or no cache, run the test
-        this.lastTestedUrl = url;
-        this.runAccessibilityTest();
-      }
+      this.handleUrlChange(url);
     });
+  }
+
+  private handleUrlChange(url: string) {
+    // Check if we have cached results for this URL
+    const cachedData = accessibilityCache.get(url);
+    const currentLang = this.i18n.service.currentLang;
+    const langKey = currentLang === 'fr-CA' ? 'fr' : 'en';
+    
+    if (cachedData && cachedData[langKey]) {
+      // Use cached results for the current language
+      this.testResults = cachedData[langKey];
+      this.errorMessage = '';
+      this._lastTestedUrl = url;
+      // Re-compute chart data and metrics from cached results
+      if (cachedData[langKey].data?.desktop?.audits) {
+        this.desktopChartData = this.getAuditDistributionData(cachedData[langKey].data.desktop.audits);
+        this.desktopMetrics = this.getAutomatedTestMetrics(cachedData[langKey].data.desktop.audits);
+      }
+      if (cachedData[langKey].data?.mobile?.audits) {
+        this.mobileChartData = this.getAuditDistributionData(cachedData[langKey].data.mobile.audits);
+        this.mobileMetrics = this.getAutomatedTestMetrics(cachedData[langKey].data.mobile.audits);
+      }
+      this.cdr.detectChanges();
+    } else {
+      // New URL or no cache, run the test
+      this._lastTestedUrl = url;
+      this.runAccessibilityTest();
+    }
+  }
+
+  private updateResultsForCurrentLanguage(url: string) {
+    const cachedData = accessibilityCache.get(url);
+    const currentLang = this.i18n.service.currentLang;
+    const langKey = currentLang === 'fr-CA' ? 'fr' : 'en';
+    
+    if (cachedData && cachedData[langKey]) {
+      // Update to show results in the new language
+      this.testResults = cachedData[langKey];
+      this.errorMessage = '';
+      
+      // Re-compute chart data and metrics for the new language
+      if (cachedData[langKey].data?.desktop?.audits) {
+        this.desktopChartData = this.getAuditDistributionData(cachedData[langKey].data.desktop.audits);
+        this.desktopMetrics = this.getAutomatedTestMetrics(cachedData[langKey].data.desktop.audits);
+      }
+      if (cachedData[langKey].data?.mobile?.audits) {
+        this.mobileChartData = this.getAuditDistributionData(cachedData[langKey].data.mobile.audits);
+        this.mobileMetrics = this.getAutomatedTestMetrics(cachedData[langKey].data.mobile.audits);
+      }
+      this.cdr.detectChanges();
+    }
   }
 
   ngOnDestroy() {
@@ -198,9 +245,20 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     // Regular expression to match markdown links: [text](url)
     const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
     
+    // Get current language
+    const currentLang = this.i18n.service.currentLang;
+    const isEnglish = currentLang === 'en-CA';
+    
     // Replace markdown links with HTML anchor tags
     const htmlDescription = description.replace(markdownLinkRegex, (_match, linkText, url) => {
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary">${linkText}</a>`;
+      // Add ?hl=fr to Chrome developer documentation URLs if user is on French page
+      let processedUrl = url;
+      if (!isEnglish && url.includes('https://developer.chrome.com/docs/lighthouse/accessibility')) {
+        // Check if URL already has query parameters
+        processedUrl = url.includes('?') ? `${url}&hl=fr` : `${url}?hl=fr`;
+      }
+      
+      return `<a href="${processedUrl}" target="_blank" rel="noopener noreferrer" class="text-primary">${linkText}</a>`;
     });
     
     // Sanitize the HTML to prevent XSS attacks while allowing safe anchor tags
@@ -219,44 +277,52 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.testResults = null;
 
-    // Get the current language to pass to the API
-    const currentLang = this.i18n.service.currentLang;
-    const locale = currentLang === 'fr-CA' ? 'fr' : 'en';
-
+    // API will fetch both English and French results
     this.apiService
-      .get<AccessibilityTestResponse>(`/api/pages/accessibility-test?url=${encodeURIComponent(url)}&locale=${locale}`)
+      .get<LocalizedAccessibilityTestResponse>(`/api/pages/accessibility-test?url=${encodeURIComponent(url)}`)
       .pipe(
         catchError((error) => {
           console.error('Accessibility test error:', error);
-          return of({
+          const errorResponse = {
             success: false,
             error: error.message || 'Failed to run accessibility test'
-          } as AccessibilityTestResponse);
+          } as AccessibilityTestResponse;
+          return of({
+            en: errorResponse,
+            fr: errorResponse
+          } as LocalizedAccessibilityTestResponse);
         }),
         finalize(() => {
           this.isTestRunning = false;
         })
       )
       .subscribe((response) => {
-        if (response.success) {
-          this.testResults = response;
-          // Cache the successful results
+        const currentLang = this.i18n.service.currentLang;
+        const langKey = currentLang === 'fr-CA' ? 'fr' : 'en';
+        
+        if (response && response[langKey] && response[langKey].success) {
+          // Cache both language results
           if (url) {
             accessibilityCache.set(url, response);
           }
+          
+          // Use the current language results
+          this.testResults = response[langKey];
+          
           // Pre-compute chart data and metrics to avoid recalculation on every change detection
-          if (response.data?.desktop?.audits) {
-            this.desktopChartData = this.getAuditDistributionData(response.data.desktop.audits);
-            this.desktopMetrics = this.getAutomatedTestMetrics(response.data.desktop.audits);
+          if (response[langKey].data?.desktop?.audits) {
+            this.desktopChartData = this.getAuditDistributionData(response[langKey].data.desktop.audits);
+            this.desktopMetrics = this.getAutomatedTestMetrics(response[langKey].data.desktop.audits);
           }
-          if (response.data?.mobile?.audits) {
-            this.mobileChartData = this.getAuditDistributionData(response.data.mobile.audits);
-            this.mobileMetrics = this.getAutomatedTestMetrics(response.data.mobile.audits);
+          if (response[langKey].data?.mobile?.audits) {
+            this.mobileChartData = this.getAuditDistributionData(response[langKey].data.mobile.audits);
+            this.mobileMetrics = this.getAutomatedTestMetrics(response[langKey].data.mobile.audits);
           }
           // Manually trigger change detection to ensure charts are updated
           this.cdr.detectChanges();
         } else {
-          this.errorMessage = response.error || 'An error occurred during testing';
+          const errorResponse = response && response[langKey];
+          this.errorMessage = (errorResponse && errorResponse.error) || 'An error occurred during testing';
           this.desktopChartData = null;
           this.mobileChartData = null;
           this.desktopMetrics = null;

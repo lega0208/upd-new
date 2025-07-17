@@ -600,44 +600,66 @@ export class PagesService {
     });
   }
 
-  async runAccessibilityTest(url: string, locale?: string) {
+  async runAccessibilityTest(url: string) {
     try {
       // Ensure URL has https:// protocol for PageSpeed Insights API
       const fullUrl = url.startsWith('http://') || url.startsWith('https://') 
         ? url 
         : `https://${url}`;
       
-      // Run tests for both desktop and mobile
-      const results = await this.pageSpeedInsightsService.runAccessibilityTestForBothStrategies(fullUrl, locale);
+      // Run tests for both locales (English and French)
+      const results = await this.pageSpeedInsightsService.runAccessibilityTestForBothLocales(fullUrl);
+      
       return {
-        success: true,
-        data: results,
+        en: {
+          success: true,
+          data: results.en,
+        },
+        fr: {
+          success: true,
+          data: results.fr,
+        },
       };
     } catch (error) {
-      return {
+      const errorResponse = {
         success: false,
         error: error.message || 'Failed to run accessibility test',
+      };
+      return {
+        en: errorResponse,
+        fr: errorResponse,
       };
     }
   }
 
-  async runCoreWebVitalsTest(url: string, locale?: string) {
+  async runCoreWebVitalsTest(url: string) {
     try {
       // Ensure URL has https:// protocol for PageSpeed Insights API
       const fullUrl = url.startsWith('http://') || url.startsWith('https://') 
         ? url 
         : `https://${url}`;
       
-      // Run tests for both desktop and mobile
-      const results = await this.pageSpeedInsightsService.runCoreWebVitalsTestForBothStrategies(fullUrl, locale);
+      // Run tests for both locales (English and French)
+      const results = await this.pageSpeedInsightsService.runCoreWebVitalsTestForBothLocales(fullUrl);
+      
       return {
-        success: true,
-        data: results,
+        en: {
+          success: true,
+          data: results.en,
+        },
+        fr: {
+          success: true,
+          data: results.fr,
+        },
       };
     } catch (error) {
-      return {
+      const errorResponse = {
         success: false,
         error: error.message || 'Failed to run Core Web Vitals test',
+      };
+      return {
+        en: errorResponse,
+        fr: errorResponse,
       };
     }
   }
