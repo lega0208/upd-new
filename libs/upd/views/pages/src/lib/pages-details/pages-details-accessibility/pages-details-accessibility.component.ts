@@ -75,8 +75,8 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   // Computed data for charts (to avoid recalculation on every change detection)
   desktopChartData: { series: number[]; labels: string[]; colors: string[] } | null = null;
   mobileChartData: { series: number[]; labels: string[]; colors: string[] } | null = null;
-  desktopMetrics: any = null;
-  mobileMetrics: any = null;
+  desktopMetrics: { totalAutomated: number; failed: number; passed: number; passRate: number; manualChecks: number } | null = null;
+  mobileMetrics: { totalAutomated: number; failed: number; passed: number; passRate: number; manualChecks: number } | null = null;
 
   // Getter for mobile chart data to ensure proper change detection
   get mobileChartDataComputed() {
@@ -163,13 +163,42 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
   
+  // Mapping of API titles to translation keys for manual verification items
+  private manualVerificationMapping: { [key: string]: string } = {
+    'Interactive controls are keyboard focusable': 'accessibility-manual-interactive-control',
+    'Interactive elements indicate their purpose and state': 'accessibility-manual-interactive-elements',
+    'The page has a logical tab order': 'accessibility-manual-logical-tab',
+    'Visual order on the page follows DOM order': 'accessibility-manual-dom-order',
+    'User focus is not accidentally trapped in a region': 'accessibility-manual-focus-trap',
+    'The user\'s focus is directed to new content added to the page': 'accessibility-manual-new-content',
+    'HTML5 landmark elements are used to improve navigation': 'accessibility-manual-html5-landmark',
+    'Offscreen content is hidden from assistive technology': 'accessibility-manual-offscreen-content',
+    'Custom controls have associated labels': 'accessibility-manual-custom-control',
+    'Custom controls have ARIA roles': 'accessibility-manual-aria-roles'
+  };
+
   // Helper function to categorize audits by type
   getCategorizedAudits(audits: AccessibilityAudit[]) {
+    // Process manual verification items to use translated titles/descriptions
+    const processedAudits = audits.map(audit => {
+      if (audit.category === 'manual_check') {
+        const translationKey = this.manualVerificationMapping[audit.title];
+        if (translationKey) {
+          return {
+            ...audit,
+            title: this.i18n.service.instant(translationKey),
+            description: this.i18n.service.instant(`${translationKey}-description`)
+          };
+        }
+      }
+      return audit;
+    });
+
     return {
-      failed: audits.filter(audit => audit.category === 'failed'),
-      passed: audits.filter(audit => audit.category === 'passed'),
-      manual: audits.filter(audit => audit.category === 'manual_check'),
-      notApplicable: audits.filter(audit => audit.category === 'not_applicable')
+      failed: processedAudits.filter(audit => audit.category === 'failed'),
+      passed: processedAudits.filter(audit => audit.category === 'passed'),
+      manual: processedAudits.filter(audit => audit.category === 'manual_check'),
+      notApplicable: processedAudits.filter(audit => audit.category === 'not_applicable')
     };
   }
 

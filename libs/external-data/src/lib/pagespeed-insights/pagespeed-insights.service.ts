@@ -97,11 +97,6 @@ export class PageSpeedInsightsService {
         // Categorize the audit
         const category = this.categorizeAudit(audit.score, audit.scoreDisplayMode);
         
-        // Log manual audits to debug language issue
-        if (category === 'manual_check') {
-          this.logger.log(`Manual audit - Title: ${audit.title}, Locale: ${locale}`);
-        }
-        
         // Extract snippet if available
         let snippet: string | undefined;
         const items = audit.details?.items;
