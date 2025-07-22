@@ -46,6 +46,7 @@ interface AccessibilityAudit {
   selector?: string;
   impact?: string;
   tags?: string[];
+  helpUrl?: string;
 }
 
 @Component({
@@ -70,7 +71,6 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   isTestRunning = false;
   testResults: AccessibilityTestResponse | null = null;
   errorMessage = '';
-  private _lastTestedUrl = '';
   
   // Computed data for charts (to avoid recalculation on every change detection)
   desktopChartData: { series: number[]; labels: string[]; colors: string[] } | null = null;
@@ -117,7 +117,6 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
       // Use cached results for the current language
       this.testResults = cachedData[langKey];
       this.errorMessage = '';
-      this._lastTestedUrl = url;
       // Re-compute chart data and metrics from cached results
       if (cachedData[langKey].data?.desktop?.audits) {
         this.desktopChartData = this.getAuditDistributionData(cachedData[langKey].data.desktop.audits);
@@ -130,7 +129,6 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     } else {
       // New URL or no cache, run the test
-      this._lastTestedUrl = url;
       this.runAccessibilityTest();
     }
   }

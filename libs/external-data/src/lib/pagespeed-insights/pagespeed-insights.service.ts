@@ -11,6 +11,7 @@ export interface AccessibilityAudit {
   displayMode: string;
   category: 'failed' | 'manual_check' | 'passed' | 'not_applicable';
   snippet?: string;
+  helpUrl?: string;
 }
 
 export interface AccessibilityTestResult {
@@ -105,6 +106,9 @@ export class PageSpeedInsightsService {
           snippet = firstItem.node?.snippet || firstItem.snippet;
         }
 
+        // Extract help URL from description field
+        const helpUrl = audit.description.match(/\[Learn.*?\]\((https:\/\/[^)]+)\)/)?.[1];
+
         audits.push({
           id: audit.id,
           title: audit.title,
@@ -113,6 +117,7 @@ export class PageSpeedInsightsService {
           displayMode: audit.scoreDisplayMode,
           category,
           snippet,
+          helpUrl,
         });
       }
 
@@ -210,11 +215,11 @@ export class PageSpeedInsightsService {
       if (audits['largest-contentful-paint']) {
         const lcp = audits['largest-contentful-paint'];
         coreWebVitals.lcp = {
-          name: 'Largest Contentful Paint (LCP)',
+          name: lcp.title || 'Largest Contentful Paint (LCP)',
           value: lcp.displayValue || 'N/A',
           score: lcp.score || 0,
           numericValue: lcp.numericValue || 0,
-          description: 'Measures loading performance. To provide a good user experience, LCP should occur within 2.5 seconds.'
+          description: lcp.description || 'Measures loading performance. To provide a good user experience, LCP should occur within 2.5 seconds.'
         };
       }
 
@@ -222,11 +227,11 @@ export class PageSpeedInsightsService {
       if (audits['max-potential-fid']) {
         const fid = audits['max-potential-fid'];
         coreWebVitals.fid = {
-          name: 'First Input Delay (FID)',
+          name: fid.title || 'First Input Delay (FID)',
           value: fid.displayValue || 'N/A',
           score: fid.score || 0,
           numericValue: fid.numericValue || 0,
-          description: 'Measures interactivity. To provide a good user experience, pages should have a FID of 100 milliseconds or less.'
+          description: fid.description || 'Measures interactivity. To provide a good user experience, pages should have a FID of 100 milliseconds or less.'
         };
       }
 
@@ -234,11 +239,11 @@ export class PageSpeedInsightsService {
       if (audits['cumulative-layout-shift']) {
         const cls = audits['cumulative-layout-shift'];
         coreWebVitals.cls = {
-          name: 'Cumulative Layout Shift (CLS)',
+          name: cls.title || 'Cumulative Layout Shift (CLS)',
           value: cls.displayValue || 'N/A',
           score: cls.score || 0,
           numericValue: cls.numericValue || 0,
-          description: 'Measures visual stability. To provide a good user experience, pages should maintain a CLS of 0.1 or less.'
+          description: cls.description || 'Measures visual stability. To provide a good user experience, pages should maintain a CLS of 0.1 or less.'
         };
       }
 
@@ -246,11 +251,11 @@ export class PageSpeedInsightsService {
       if (audits['interaction-to-next-paint']) {
         const inp = audits['interaction-to-next-paint'];
         coreWebVitals.inp = {
-          name: 'Interaction to Next Paint (INP)',
+          name: inp.title || 'Interaction to Next Paint (INP)',
           value: inp.displayValue || 'N/A',
           score: inp.score || 0,
           numericValue: inp.numericValue || 0,
-          description: 'Measures responsiveness. To provide a good user experience, INP should be 200 milliseconds or less.'
+          description: inp.description || 'Measures responsiveness. To provide a good user experience, INP should be 200 milliseconds or less.'
         };
       }
 
@@ -258,44 +263,44 @@ export class PageSpeedInsightsService {
       if (audits['first-contentful-paint']) {
         const fcp = audits['first-contentful-paint'];
         coreWebVitals.fcp = {
-          name: 'First Contentful Paint (FCP)',
+          name: fcp.title || 'First Contentful Paint (FCP)',
           value: fcp.displayValue || 'N/A',
           score: fcp.score || 0,
           numericValue: fcp.numericValue || 0,
-          description: 'Measures the time from page start to rendering the first bit of content.'
+          description: fcp.description || 'Measures the time from page start to rendering the first bit of content.'
         };
       }
 
       if (audits['speed-index']) {
         const si = audits['speed-index'];
         coreWebVitals.si = {
-          name: 'Speed Index',
+          name: si.title || 'Speed Index',
           value: si.displayValue || 'N/A',
           score: si.score || 0,
           numericValue: si.numericValue || 0,
-          description: 'Shows how quickly the contents of a page are visibly populated.'
+          description: si.description || 'Shows how quickly the contents of a page are visibly populated.'
         };
       }
 
       if (audits['interactive']) {
         const tti = audits['interactive'];
         coreWebVitals.tti = {
-          name: 'Time to Interactive',
+          name: tti.title || 'Time to Interactive',
           value: tti.displayValue || 'N/A',
           score: tti.score || 0,
           numericValue: tti.numericValue || 0,
-          description: 'Measures the time until the page is fully interactive.'
+          description: tti.description || 'Measures the time until the page is fully interactive.'
         };
       }
 
       if (audits['total-blocking-time']) {
         const tbt = audits['total-blocking-time'];
         coreWebVitals.tbt = {
-          name: 'Total Blocking Time',
+          name: tbt.title || 'Total Blocking Time',
           value: tbt.displayValue || 'N/A',
           score: tbt.score || 0,
           numericValue: tbt.numericValue || 0,
-          description: 'Sum of all time periods where the main thread was blocked.'
+          description: tbt.description || 'Sum of all time periods where the main thread was blocked.'
         };
       }
 

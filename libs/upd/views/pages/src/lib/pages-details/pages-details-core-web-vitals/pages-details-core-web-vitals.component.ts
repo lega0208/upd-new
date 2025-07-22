@@ -153,11 +153,23 @@ export class PagesDetailsCoreWebVitalsComponent implements OnInit, OnDestroy {
   // Get status indicator for Core Web Vitals
   getVitalStatus(score: number): { icon: string; class: string; text: string } {
     if (score >= 0.9) {
-      return { icon: 'pi pi-check-circle', class: 'text-success', text: 'Good' };
+      return { 
+        icon: 'pi pi-check-circle', 
+        class: 'text-success', 
+        text: this.i18n.service.instant('core-web-vitals-status-good') 
+      };
     } else if (score >= 0.5) {
-      return { icon: 'pi pi-exclamation-triangle', class: 'text-warning', text: 'Needs Improvement' };
+      return { 
+        icon: 'pi pi-exclamation-triangle', 
+        class: 'text-warning', 
+        text: this.i18n.service.instant('core-web-vitals-status-needs-improvement') 
+      };
     } else {
-      return { icon: 'pi pi-times-circle', class: 'text-danger', text: 'Poor' };
+      return { 
+        icon: 'pi pi-times-circle', 
+        class: 'text-danger', 
+        text: this.i18n.service.instant('core-web-vitals-status-poor') 
+      };
     }
   }
 
