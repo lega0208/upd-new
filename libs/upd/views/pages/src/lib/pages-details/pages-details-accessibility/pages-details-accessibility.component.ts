@@ -73,8 +73,8 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   private _lastTestedUrl = '';
   
   // Computed data for charts (to avoid recalculation on every change detection)
-  desktopChartData: { series: number[]; labels: string[] } | null = null;
-  mobileChartData: { series: number[]; labels: string[] } | null = null;
+  desktopChartData: { series: number[]; labels: string[]; colors: string[] } | null = null;
+  mobileChartData: { series: number[]; labels: string[]; colors: string[] } | null = null;
   desktopMetrics: any = null;
   mobileMetrics: any = null;
 
@@ -191,21 +191,31 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
       'accessibility-not-applicable'
     ];
     
+    // Define colors for each category
+    const colors = [
+      '#dc3545', // Red for failed tests
+      '#28a745', // Green for passed tests
+      '#fd7e14', // Orange for manual checks
+      '#6c757d'  // Gray for not applicable
+    ];
+    
     // Only include categories that have values > 0
     const filteredData = series.reduce((acc, value, index) => {
       if (value > 0) {
         acc.series.push(value);
         // Use instant translation for immediate rendering
         acc.labels.push(this.i18n.service.instant(labelKeys[index]));
+        acc.colors.push(colors[index]);
       }
       return acc;
-    }, { series: [] as number[], labels: [] as string[] });
+    }, { series: [] as number[], labels: [] as string[], colors: [] as string[] });
     
     // If all values are 0, return at least one item to prevent "no data" message
     if (filteredData.series.length === 0) {
       return {
         series: [1],
-        labels: [this.i18n.service.instant('accessibility-no-data')]
+        labels: [this.i18n.service.instant('accessibility-no-data')],
+        colors: ['#6c757d'] // Gray for no data
       };
     }
     

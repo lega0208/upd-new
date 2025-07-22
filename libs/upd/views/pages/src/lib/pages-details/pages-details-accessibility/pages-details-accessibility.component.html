@@ -80,7 +80,7 @@
                                 [series]="desktopChartData.series"
                                 [labels]="desktopChartData.labels"
                                 [title]="'accessibility-audit-distribution' | translate"
-                                [colours]="['#ff4b4b', '#00cc44', '#ffa500', '#aaaaaa']">
+                                [colours]="desktopChartData.colors">
                               </upd-apex-donut>
                             }
                           </div>
@@ -272,7 +272,7 @@
                                 [series]="mobileChartDataComputed.series"
                                 [labels]="mobileChartDataComputed.labels"
                                 [title]="'accessibility-audit-distribution' | translate"
-                                [colours]="['#ff4b4b', '#00cc44', '#ffa500', '#aaaaaa']">
+                                [colours]="mobileChartDataComputed.colors">
                               </upd-apex-donut>
                             }
                           </div>
