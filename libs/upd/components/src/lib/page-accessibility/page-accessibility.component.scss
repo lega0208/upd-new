@@ -1,0 +1,21 @@
+.accessibility-content {
+  padding: 0;
+}
+
+.audit-item {
+  background-color: #f8f9fa;
+  
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+    font-size: 0.875rem;
+  }
+  
+  code {
+    color: #e83e8c;
+  }
+}
+
+.accordion-content {
+  padding: 0;
+}

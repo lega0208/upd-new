@@ -1,0 +1,440 @@
+<div class="accessibility-content">
+  <p>{{ 'accessibility-description' | translate }}</p>
+  
+  <!-- Important Note -->
+  <div class="alert alert-info mt-3" role="alert">
+    <i class="pi pi-info-circle"></i>
+    {{ 'accessibility-automated-limitation' | translate }}
+  </div>
+  
+  <!-- Initial loading state or re-running test -->
+  @if (isTestRunning) {
+    <div class="text-center mt-4">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      <p class="mt-2">{{ 'accessibility-testing-url' | translate }}</p>
+      @if (url) {
+        <p class="text-muted">{{ url }}</p>
+      }
+    </div>
+  }
+  
+  <!-- Error state -->
+  @if (errorMessage) {
+    <div class="alert alert-danger mt-3" role="alert">
+      <i class="pi pi-exclamation-triangle"></i>
+      {{ errorMessage }}
+    </div>
+  }
+  
+  <!-- Results -->
+  @if (testResults && testResults.success && testResults.data) {
+    <div class="mt-4">
+      <!-- Refresh button -->
+      <div class="d-flex justify-content-end mb-3">
+        <button 
+          pButton 
+          type="button" 
+          [label]="'accessibility-refresh-test' | translate" 
+          class="p-button-sm p-button-outlined"
+          (click)="runAccessibilityTest()"
+          [disabled]="isTestRunning"
+          icon="pi pi-refresh">
+        </button>
+      </div>
+      
+      <p-tabView>
+        <!-- Desktop Tab -->
+        <p-tabPanel [header]="'accessibility-desktop-results' | translate">
+          @if (testResults.data.desktop) {
+            <div class="desktop-results">
+              <!-- Score and Tested At -->
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <upd-card [title]="'accessibility-automated-score' | translate">
+                    <p class="h1 mb-0 {{ getScoreClass(testResults.data.desktop.score) }}">
+                      {{ testResults.data.desktop.scoreDisplay }}
+                    </p>
+                  </upd-card>
+                </div>
+                <div class="col-md-6">
+                  <upd-card [title]="'accessibility-tested-at' | translate">
+                    <p class="h3">{{ testResults.data.desktop.testedAt | localeDate:'medium' }}</p>
+                  </upd-card>
+                </div>
+              </div>
+              
+              <!-- Desktop Audit Results -->
+              @if (testResults.data.desktop.audits && testResults.data.desktop.audits.length > 0) {
+                <div class="audit-results">
+                  <!-- Summary Overview -->
+                  <div class="row mb-4">
+                    <div class="col-md-5">
+                      <h5>{{ 'accessibility-audit-overview' | translate }}</h5>
+                      @if (desktopChartData) {
+                        <upd-apex-donut
+                          [series]="desktopChartData.series"
+                          [labels]="desktopChartData.labels"
+                          [title]="'accessibility-audit-distribution' | translate"
+                          [colours]="desktopChartData.colors">
+                        </upd-apex-donut>
+                      }
+                    </div>
+                    <div class="col-md-7">
+                      <h5>{{ 'accessibility-automated-testing' | translate }}</h5>
+                      @if (desktopMetrics) {
+                        <div class="row">
+                          <div class="col-6">
+                            <upd-data-card
+                              [title]="'accessibility-total-automated' | translate"
+                              [current]="desktopMetrics.totalAutomated"
+                              [tooltip]="'accessibility-total-automated-tooltip' | translate">
+                            </upd-data-card>
+                          </div>
+                          <div class="col-6">
+                            <upd-card [title]="'accessibility-failed-tests' | translate" [titleTooltip]="'accessibility-failed-tests-tooltip' | translate">
+                              <p class="h3 w-100">{{ desktopMetrics.failed }}</p>
+                            </upd-card>
+                          </div>
+                        </div>
+                        <div class="row mt-3">
+                          <div class="col-6">
+                            <upd-data-card
+                              [title]="'accessibility-passed-tests' | translate"
+                              [current]="desktopMetrics.passed"
+                              [tooltip]="'accessibility-passed-tests-tooltip' | translate">
+                            </upd-data-card>
+                          </div>
+                          <div class="col-6">
+                            <upd-data-card
+                              [title]="'accessibility-manual-checks-needed' | translate"
+                              [current]="desktopMetrics.manualChecks"
+                              [tooltip]="'accessibility-manual-checks-tooltip' | translate">
+                            </upd-data-card>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Detailed Audit Results -->
+                  <div class="audit-details">
+                    @let categorized = getCategorizedAudits(testResults.data.desktop.audits);
+                    
+                    <!-- All tests passed message -->
+                    @if (categorized.failed.length === 0 && categorized.passed.length > 0) {
+                      <div class="alert alert-success mb-4" role="alert">
+                        <i class="pi pi-check-circle"></i>
+                        {{ 'accessibility-all-tests-passed' | translate }}
+                      </div>
+                    }
+                    
+                    <!-- Failed Tests Section -->
+                    @if (categorized.failed.length > 0) {
+                      <div class="mb-4">
+                        <upd-accordion 
+                          [title]="'accessibility-failed-tests-count' | translate: {count: categorized.failed.length}" 
+                          [expanded]="true"
+                          [styleClass]="'failed-section'"
+                          [headerClass]="'text-danger'">
+                          <div class="accordion-content">
+                            @for (audit of categorized.failed; track trackByAuditId($index, audit)) {
+                              <div class="audit-item mb-3 p-3 border rounded">
+                                <h6 class="text-danger">
+                                  {{ audit.title }}
+                                  @if (audit.helpUrl || audit.id) {
+                                    <a [href]="audit.helpUrl || 'https://dequeuniversity.com/rules/axe/latest/' + audit.id" 
+                                       target="_blank" 
+                                       rel="noopener noreferrer" 
+                                       class="ms-2 small">
+                                      <i class="pi pi-external-link"></i> Learn more
+                                    </a>
+                                  }
+                                </h6>
+                                <p class="mb-2">{{ audit.description }}</p>
+                                @if (audit.snippet) {
+                                  <pre class="bg-light p-2 rounded"><code>{{ audit.snippet }}</code></pre>
+                                }
+                                @if (audit.helpText) {
+                                  <div class="mt-2 text-muted small">
+                                    <strong>{{ 'accessibility-help' | translate }}:</strong> {{ audit.helpText }}
+                                  </div>
+                                }
+                                @if (audit.selector) {
+                                  <div class="mt-2 text-muted small">
+                                    <strong>{{ 'accessibility-element' | translate }}:</strong> <code>{{ audit.selector }}</code>
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </upd-accordion>
+                      </div>
+                    }
+                    
+                    <!-- Passed Tests Section -->
+                    @if (categorized.passed.length > 0) {
+                      <div class="mb-4">
+                        <upd-accordion 
+                          [title]="'accessibility-passed-tests-count' | translate: {count: categorized.passed.length}" 
+                          [expanded]="false"
+                          [styleClass]="'passed-section'"
+                          [headerClass]="'text-success'">
+                          <div class="accordion-content">
+                            @for (audit of categorized.passed; track trackByAuditId($index, audit)) {
+                              <div class="audit-item mb-2 p-2 border rounded">
+                                <h6 class="text-success">{{ audit.title }}</h6>
+                              </div>
+                            }
+                          </div>
+                        </upd-accordion>
+                      </div>
+                    }
+                    
+                    <!-- Manual Verification Section -->
+                    @if (categorized.manual.length > 0) {
+                      <div class="mb-4">
+                        <upd-accordion 
+                          [title]="'accessibility-manual-checks-count' | translate: {count: categorized.manual.length}" 
+                          [expanded]="false"
+                          [styleClass]="'manual-section'"
+                          [headerClass]="'text-warning'">
+                          <div class="accordion-content">
+                            @for (audit of categorized.manual; track trackByAuditId($index, audit)) {
+                              <div class="audit-item mb-3 p-3 border rounded">
+                                <h6 class="text-warning">{{ audit.title }}</h6>
+                                <p [innerHTML]="parseMarkdownLinks(audit.description)"></p>
+                              </div>
+                            }
+                          </div>
+                        </upd-accordion>
+                      </div>
+                    }
+                    
+                    <!-- Not Applicable Section -->
+                    @if (categorized.notApplicable.length > 0) {
+                      <div class="mb-4">
+                        <upd-accordion 
+                          [title]="'accessibility-not-applicable-count' | translate: {count: categorized.notApplicable.length}" 
+                          [expanded]="false"
+                          [styleClass]="'na-section'"
+                          [headerClass]="'text-muted'">
+                          <div class="accordion-content">
+                            @for (audit of categorized.notApplicable; track trackByAuditId($index, audit)) {
+                              <div class="audit-item mb-2 p-2 border rounded">
+                                <h6 class="text-muted">{{ audit.title }}</h6>
+                              </div>
+                            }
+                          </div>
+                        </upd-accordion>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </p-tabPanel>
+        
+        <!-- Mobile Tab -->
+        <p-tabPanel [header]="'accessibility-mobile-results' | translate">
+          @if (testResults.data.mobile) {
+            <div class="mobile-results">
+              <!-- Score and Tested At -->
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <upd-card [title]="'accessibility-automated-score' | translate">
+                    <p class="h1 mb-0 {{ getScoreClass(testResults.data.mobile.score) }}">
+                      {{ testResults.data.mobile.scoreDisplay }}
+                    </p>
+                  </upd-card>
+                </div>
+                <div class="col-md-6">
+                  <upd-card [title]="'accessibility-tested-at' | translate">
+                    <p class="h3">{{ testResults.data.mobile.testedAt | localeDate:'medium' }}</p>
+                  </upd-card>
+                </div>
+              </div>
+              
+              <!-- Mobile Audit Results -->
+              @if (testResults.data.mobile.audits && testResults.data.mobile.audits.length > 0) {
+                <div class="audit-results">
+                  <!-- Summary Overview -->
+                  <div class="row mb-4">
+                    <div class="col-md-5">
+                      <h5>{{ 'accessibility-audit-overview' | translate }}</h5>
+                      @if (mobileChartData) {
+                        <upd-apex-donut
+                          [series]="mobileChartData.series"
+                          [labels]="mobileChartData.labels"
+                          [title]="'accessibility-audit-distribution' | translate"
+                          [colours]="mobileChartData.colors">
+                        </upd-apex-donut>
+                      }
+                    </div>
+                    <div class="col-md-7">
+                      <h5>{{ 'accessibility-automated-testing' | translate }}</h5>
+                      @if (mobileMetrics) {
+                        <div class="row">
+                          <div class="col-6">
+                            <upd-data-card
+                              [title]="'accessibility-total-automated' | translate"
+                              [current]="mobileMetrics.totalAutomated"
+                              [tooltip]="'accessibility-total-automated-tooltip' | translate">
+                            </upd-data-card>
+                          </div>
+                          <div class="col-6">
+                            <upd-card [title]="'accessibility-failed-tests' | translate" [titleTooltip]="'accessibility-failed-tests-tooltip' | translate">
+                              <p class="h3 w-100">{{ mobileMetrics.failed }}</p>
+                            </upd-card>
+                          </div>
+                        </div>
+                        <div class="row mt-3">
+                          <div class="col-6">
+                            <upd-data-card
+                              [title]="'accessibility-passed-tests' | translate"
+                              [current]="mobileMetrics.passed"
+                              [tooltip]="'accessibility-passed-tests-tooltip' | translate">
+                            </upd-data-card>
+                          </div>
+                          <div class="col-6">
+                            <upd-data-card
+                              [title]="'accessibility-manual-checks-needed' | translate"
+                              [current]="mobileMetrics.manualChecks"
+                              [tooltip]="'accessibility-manual-checks-tooltip' | translate">
+                            </upd-data-card>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Detailed Audit Results -->
+                  <div class="audit-details">
+                    @let categorized = getCategorizedAudits(testResults.data.mobile.audits);
+                    
+                    <!-- All tests passed message -->
+                    @if (categorized.failed.length === 0 && categorized.passed.length > 0) {
+                      <div class="alert alert-success mb-4" role="alert">
+                        <i class="pi pi-check-circle"></i>
+                        {{ 'accessibility-all-tests-passed' | translate }}
+                      </div>
+                    }
+                    
+                    <!-- Failed Tests Section -->
+                    @if (categorized.failed.length > 0) {
+                      <div class="mb-4">
+                        <upd-accordion 
+                          [title]="'accessibility-failed-tests-count' | translate: {count: categorized.failed.length}" 
+                          [expanded]="true"
+                          [styleClass]="'failed-section'"
+                          [headerClass]="'text-danger'">
+                          <div class="accordion-content">
+                            @for (audit of categorized.failed; track trackByAuditId($index, audit)) {
+                              <div class="audit-item mb-3 p-3 border rounded">
+                                <h6 class="text-danger">
+                                  {{ audit.title }}
+                                  @if (audit.helpUrl || audit.id) {
+                                    <a [href]="audit.helpUrl || 'https://dequeuniversity.com/rules/axe/latest/' + audit.id" 
+                                       target="_blank" 
+                                       rel="noopener noreferrer" 
+                                       class="ms-2 small">
+                                      <i class="pi pi-external-link"></i> Learn more
+                                    </a>
+                                  }
+                                </h6>
+                                <p class="mb-2">{{ audit.description }}</p>
+                                @if (audit.snippet) {
+                                  <pre class="bg-light p-2 rounded"><code>{{ audit.snippet }}</code></pre>
+                                }
+                                @if (audit.helpText) {
+                                  <div class="mt-2 text-muted small">
+                                    <strong>{{ 'accessibility-help' | translate }}:</strong> {{ audit.helpText }}
+                                  </div>
+                                }
+                                @if (audit.selector) {
+                                  <div class="mt-2 text-muted small">
+                                    <strong>{{ 'accessibility-element' | translate }}:</strong> <code>{{ audit.selector }}</code>
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </upd-accordion>
+                      </div>
+                    }
+                    
+                    <!-- Passed Tests Section -->
+                    @if (categorized.passed.length > 0) {
+                      <div class="mb-4">
+                        <upd-accordion 
+                          [title]="'accessibility-passed-tests-count' | translate: {count: categorized.passed.length}" 
+                          [expanded]="false"
+                          [styleClass]="'passed-section'"
+                          [headerClass]="'text-success'">
+                          <div class="accordion-content">
+                            @for (audit of categorized.passed; track trackByAuditId($index, audit)) {
+                              <div class="audit-item mb-2 p-2 border rounded">
+                                <h6 class="text-success">{{ audit.title }}</h6>
+                              </div>
+                            }
+                          </div>
+                        </upd-accordion>
+                      </div>
+                    }
+                    
+                    <!-- Manual Verification Section -->
+                    @if (categorized.manual.length > 0) {
+                      <div class="mb-4">
+                        <upd-accordion 
+                          [title]="'accessibility-manual-checks-count' | translate: {count: categorized.manual.length}" 
+                          [expanded]="false"
+                          [styleClass]="'manual-section'"
+                          [headerClass]="'text-warning'">
+                          <div class="accordion-content">
+                            @for (audit of categorized.manual; track trackByAuditId($index, audit)) {
+                              <div class="audit-item mb-3 p-3 border rounded">
+                                <h6 class="text-warning">{{ audit.title }}</h6>
+                                <p [innerHTML]="parseMarkdownLinks(audit.description)"></p>
+                              </div>
+                            }
+                          </div>
+                        </upd-accordion>
+                      </div>
+                    }
+                    
+                    <!-- Not Applicable Section -->
+                    @if (categorized.notApplicable.length > 0) {
+                      <div class="mb-4">
+                        <upd-accordion 
+                          [title]="'accessibility-not-applicable-count' | translate: {count: categorized.notApplicable.length}" 
+                          [expanded]="false"
+                          [styleClass]="'na-section'"
+                          [headerClass]="'text-muted'">
+                          <div class="accordion-content">
+                            @for (audit of categorized.notApplicable; track trackByAuditId($index, audit)) {
+                              <div class="audit-item mb-2 p-2 border rounded">
+                                <h6 class="text-muted">{{ audit.title }}</h6>
+                              </div>
+                            }
+                          </div>
+                        </upd-accordion>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </p-tabPanel>
+      </p-tabView>
+    </div>
+  }
+  
+  <!-- No data state (initial load or no results) -->
+  @if (!isTestRunning && !testResults && !errorMessage) {
+    <div class="text-center mt-4 text-muted">
+      <i class="pi pi-search" style="font-size: 3rem"></i>
+      <p class="mt-2">{{ 'accessibility-no-data' | translate }}</p>
+    </div>
+  }
+</div>
