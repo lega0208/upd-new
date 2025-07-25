@@ -63,7 +63,7 @@
                       </div>
                       <div class="col-md-6">
                         <upd-card [title]="'accessibility-tested-at' | translate">
-                          <p class="h3">{{ testResults.data.desktop.testedAt | date:'medium' }}</p>
+                          <p class="h3">{{ testResults.data.desktop.testedAt | localeDate:'medium' }}</p>
                         </upd-card>
                       </div>
                     </div>
@@ -255,7 +255,7 @@
                       </div>
                       <div class="col-md-6">
                         <upd-card [title]="'accessibility-tested-at' | translate">
-                          <p class="h3">{{ testResults.data.mobile.testedAt | date:'medium' }}</p>
+                          <p class="h3">{{ testResults.data.mobile.testedAt | localeDate:'medium' }}</p>
                         </upd-card>
                       </div>
                     </div>
