@@ -142,11 +142,11 @@
                                 <h6 class="text-danger">
                                   {{ audit.title }}
                                   @if (audit.helpUrl || audit.id) {
-                                    <a [href]="audit.helpUrl || 'https://dequeuniversity.com/rules/axe/latest/' + audit.id" 
+                                    <a [href]="getDequeUrl(audit)" 
                                        target="_blank" 
                                        rel="noopener noreferrer" 
                                        class="ms-2 small">
-                                      <i class="pi pi-external-link"></i> Learn more
+                                      <i class="pi pi-external-link"></i> {{ 'accessibility-learn-more' | translate }}
                                     </a>
                                   }
                                 </h6>
@@ -334,11 +334,11 @@
                                 <h6 class="text-danger">
                                   {{ audit.title }}
                                   @if (audit.helpUrl || audit.id) {
-                                    <a [href]="audit.helpUrl || 'https://dequeuniversity.com/rules/axe/latest/' + audit.id" 
+                                    <a [href]="getDequeUrl(audit)" 
                                        target="_blank" 
                                        rel="noopener noreferrer" 
                                        class="ms-2 small">
-                                      <i class="pi pi-external-link"></i> Learn more
+                                      <i class="pi pi-external-link"></i> {{ 'accessibility-learn-more' | translate }}
                                     </a>
                                   }
                                 </h6>

@@ -1888,6 +1888,7 @@
   "accessibility-element": "Élément",
   "accessibility-failed-tests-count": "Tests échoués ({{count}})",
   "accessibility-help": "Aide",
+  "accessibility-learn-more": "En savoir plus",
   "accessibility-manual-checks-count": "Vérifications manuelles requises ({{count}})",
   "accessibility-manual-checks-needed": "Vérifications manuelles nécessaires",
   "accessibility-no-data": "Aucune donnée d'accessibilité disponible",

@@ -107,7 +107,8 @@ export class PageSpeedInsightsService {
         }
 
         // Extract help URL from description field
-        const helpUrl = audit.description.match(/\[Learn.*?\]\((https:\/\/[^)]+)\)/)?.[1];
+        // Match both English "Learn" and French "En savoir plus" or any text in square brackets
+        const helpUrl = audit.description.match(/\[[^\]]+\]\((https:\/\/dequeuniversity\.com[^)]+)\)/)?.[1];
 
         audits.push({
           id: audit.id,

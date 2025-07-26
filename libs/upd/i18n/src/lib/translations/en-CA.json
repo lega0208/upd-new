@@ -1503,6 +1503,7 @@
   "accessibility-element": "Element",
   "accessibility-failed-tests-count": "Failed Tests ({{count}})",
   "accessibility-help": "Help",
+  "accessibility-learn-more": "Learn more",
   "accessibility-manual-checks-count": "Manual Checks Required ({{count}})",
   "accessibility-manual-checks-needed": "Manual Checks Needed",
   "accessibility-no-data": "No accessibility data available",

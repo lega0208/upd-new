@@ -261,6 +261,16 @@ export class PageAccessibilityComponent implements OnInit, OnDestroy, OnChanges 
     return 'text-danger';
   }
 
+  // Get Deque University URL with language parameter for French
+  getDequeUrl(audit: AccessibilityAudit): string {
+    const baseUrl = audit.helpUrl || `https://dequeuniversity.com/rules/axe/latest/${audit.id}`;
+    // Add language parameter for French users
+    if (this.language === 'fr-CA') {
+      return baseUrl.includes('?') ? `${baseUrl}&lang=fr` : `${baseUrl}?lang=fr`;
+    }
+    return baseUrl;
+  }
+
   // Parse markdown-style links in description text
   parseMarkdownLinks(description: string): SafeHtml {
     // Regular expression to match markdown links: [text](url)
