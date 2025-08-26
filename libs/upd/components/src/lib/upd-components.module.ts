@@ -69,7 +69,6 @@ import { HeatmapComponent } from './heatmap/heatmap.component';
 import { PageFlowComponent } from './page-flow/page-flow.component';
 import { ArrowConnectComponent } from './arrow-connect/arrow-connect.component';
 import { PageVersionComponent } from './page-version/page-version.component';
-import { PageAccessibilityComponent } from './page-accessibility/page-accessibility.component';
 
 @NgModule({
   imports: [
@@ -144,7 +143,6 @@ import { PageAccessibilityComponent } from './page-accessibility/page-accessibil
     PageFlowComponent,
     ArrowConnectComponent,
     PageVersionComponent,
-    PageAccessibilityComponent,
   ],
   exports: [
     NgbPopoverModule,
@@ -200,7 +198,6 @@ import { PageAccessibilityComponent } from './page-accessibility/page-accessibil
     PageFlowComponent,
     ArrowConnectComponent,
     PageVersionComponent,
-    PageAccessibilityComponent,
   ],
 })
 export class UpdComponentsModule {}
