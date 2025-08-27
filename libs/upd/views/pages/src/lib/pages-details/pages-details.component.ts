@@ -95,10 +95,6 @@ export class PagesDetailsComponent {
       href: 'accessibility',
       title: 'tab-accessibility',
     },
-    {
-      href: 'core-web-vitals',
-      title: 'tab-core-web-vitals',
-    },
   ];
 
   projectsCol = computed(() => {

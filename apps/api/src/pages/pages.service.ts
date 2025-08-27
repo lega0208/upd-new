@@ -644,38 +644,6 @@ export class PagesService {
       };
     }
   }
-
-  async runCoreWebVitalsTest(url: string) {
-    try {
-      // Ensure URL has https:// protocol for PageSpeed Insights API
-      const fullUrl = url.startsWith('http://') || url.startsWith('https://') 
-        ? url 
-        : `https://${url}`;
-      
-      // Run tests for both locales (English and French)
-      const results = await this.pageSpeedInsightsService.runCoreWebVitalsTestForBothLocales(fullUrl);
-      
-      return {
-        en: {
-          success: true,
-          data: results.en,
-        },
-        fr: {
-          success: true,
-          data: results.fr,
-        },
-      };
-    } catch (error) {
-      const errorResponse = {
-        success: false,
-        error: error.message || 'Failed to run Core Web Vitals test',
-      };
-      return {
-        en: errorResponse,
-        fr: errorResponse,
-      };
-    }
-  }
 }
 
 function aggregateSearchTermMetrics(dailyPageMetrics: PageMetrics[]) {

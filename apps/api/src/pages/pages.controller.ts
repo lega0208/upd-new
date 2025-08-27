@@ -48,10 +48,4 @@ export class PagesController {
   async runAccessibilityTest(@Query('url') url: string) {
     return this.pagesService.runAccessibilityTest(url);
   }
-
-  @Get('core-web-vitals')
-  @Header('Content-Type', 'application/json')
-  async runCoreWebVitalsTest(@Query('url') url: string) {
-    return this.pagesService.runCoreWebVitalsTest(url);
-  }
 }

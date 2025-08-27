@@ -32,7 +32,6 @@ import { PagesDetailsReadabilityComponent } from './pages-details/pages-details-
 import { PipesModule } from '@dua-upd/upd/pipes';
 import { PagesDetailsVersionsComponent } from './pages-details/pages-details-versions/pages-details-versions.component';
 import { PagesDetailsAccessibilityComponent } from './pages-details/pages-details-accessibility/pages-details-accessibility.component';
-import { PagesDetailsCoreWebVitalsComponent } from './pages-details/pages-details-core-web-vitals/pages-details-core-web-vitals.component';
 import { TabViewModule } from 'primeng/tabview';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -64,7 +63,6 @@ import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
     PagesDetailsReadabilityComponent,
     PagesDetailsVersionsComponent,
     PagesDetailsAccessibilityComponent,
-    PagesDetailsCoreWebVitalsComponent,
   ],
   providers: [PagesHomeFacade, PagesDetailsFacade, ApiService],
 })
