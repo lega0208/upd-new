@@ -73,8 +73,8 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   testResults: AccessibilityTestResponse | null = null;
   errorMessage = '';
   mobileTabViewed = false;
-  desktopChartData: { series: number[]; labels: string[]; colors: string[] } | null = null;
-  mobileChartData: { series: number[]; labels: string[]; colors: string[] } | null = null;
+  desktopChartData: { series: any[]; labels: string[]; colors: string[] } | null = null;
+  mobileChartData: { series: any[]; labels: string[]; colors: string[] } | null = null;
   desktopMetrics: { totalAutomated: number; failed: number; passed: number; passRate: number; manualChecks: number } | null = null;
   mobileMetrics: { totalAutomated: number; failed: number; passed: number; passRate: number; manualChecks: number } | null = null;
 
@@ -182,7 +182,7 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
 
   getAuditDistributionData(audits: AccessibilityAudit[]) {
     const categorized = this.getCategorizedAudits(audits);
-    const series = [
+    const values = [
       categorized.failed.length,
       categorized.passed.length,
       categorized.manual.length,
@@ -203,7 +203,7 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
       '#6c757d'
     ];
     
-    const filteredData = series.reduce((acc, value, index) => {
+    const filteredData = values.reduce((acc, value, index) => {
       if (value > 0) {
         acc.series.push(value);
         acc.labels.push(this.translateService.instant(labelKeys[index]));
@@ -214,13 +214,23 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     
     if (filteredData.series.length === 0) {
       return {
-        series: [1],
+        series: [{
+          name: 'Audits',
+          data: [1]
+        }],
         labels: [this.translateService.instant('accessibility-no-data')],
         colors: ['#6c757d']
       };
     }
     
-    return filteredData;
+    return {
+      series: [{
+        name: 'Audits',
+        data: filteredData.series
+      }],
+      labels: filteredData.labels,
+      colors: filteredData.colors
+    };
   }
 
   getAutomatedTestMetrics(audits: AccessibilityAudit[]) {

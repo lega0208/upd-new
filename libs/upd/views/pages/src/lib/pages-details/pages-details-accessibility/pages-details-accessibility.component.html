@@ -8,7 +8,28 @@
           <!-- Important Note -->
           <div class="alert alert-info mt-3" role="alert">
             <i class="pi pi-info-circle"></i>
-            {{ 'accessibility-automated-limitation' | translate }}
+            {{ 'accessibility-automated-limitation-updated' | translate }}
+          </div>
+          
+          <!-- Manual Testing Examples Accordion -->
+          <div class="mt-3">
+            <upd-accordion 
+              [title]="'accessibility-manual-testing-examples' | translate" 
+              [expanded]="false"
+              [styleClass]="'manual-testing-examples'"
+              [headerClass]="'text-info small'">
+              <div class="small text-muted">
+                <p class="mb-2"><strong>{{ 'accessibility-manual-examples-intro' | translate }}</strong></p>
+                <ul class="mb-0">
+                  <li><strong>1.3.1 {{ 'accessibility-manual-info-relationships' | translate }}</strong> – {{ 'accessibility-manual-info-relationships-desc' | translate }}</li>
+                  <li><strong>1.4.3 {{ 'accessibility-manual-contrast' | translate }}</strong> – {{ 'accessibility-manual-contrast-desc' | translate }}</li>
+                  <li><strong>2.4.6 {{ 'accessibility-manual-headings-labels' | translate }}</strong> – {{ 'accessibility-manual-headings-labels-desc' | translate }}</li>
+                  <li><strong>3.1.1 {{ 'accessibility-manual-language' | translate }}</strong> – {{ 'accessibility-manual-language-desc' | translate }}</li>
+                  <li><strong>3.3.4 {{ 'accessibility-manual-error-prevention' | translate }}</strong> – {{ 'accessibility-manual-error-prevention-desc' | translate }}</li>
+                </ul>
+                <p class="mt-2 mb-0"><em>{{ 'accessibility-manual-conclusion' | translate }}</em></p>
+              </div>
+            </upd-accordion>
           </div>
           
           <!-- Initial loading state or re-running test -->
@@ -75,12 +96,14 @@
                             <div class="col-md-5">
                               <h5>{{ 'accessibility-audit-overview' | translate }}</h5>
                               @if (desktopChartData) {
-                                <upd-apex-donut
+                                <upd-apex-bar
                                   [series]="desktopChartData.series"
-                                  [labels]="desktopChartData.labels"
+                                  [xAxis]="desktopChartData.labels"
                                   [title]="'accessibility-audit-distribution' | translate"
-                                  [colours]="desktopChartData.colors">
-                                </upd-apex-donut>
+                                  [colours]="desktopChartData.colors"
+                                  [horizontal]="{ isHorizontal: true, colorDistributed: true }"
+                                  [height]="300">
+                                </upd-apex-bar>
                               }
                             </div>
                             <div class="col-md-7">
@@ -156,7 +179,7 @@
                                         </h6>
                                         <p class="mb-2">{{ audit.description }}</p>
                                         @if (audit.snippet) {
-                                          <pre class="bg-light p-2 rounded"><code>{{ audit.snippet }}</code></pre>
+                                          <div class="bg-light p-2 rounded" style="white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; font-family: monospace; font-size: 0.875rem;">{{ audit.snippet }}</div>
                                         }
                                         @if (audit.helpText) {
                                           <div class="mt-2 text-muted small">
@@ -268,12 +291,14 @@
                               <h5>{{ 'accessibility-audit-overview' | translate }}</h5>
                               @if (mobileChartData) {
                                 <div [attr.data-chart-key]="'mobile-' + (testResults.data.mobile.testedAt || '')">
-                                  <upd-apex-donut
+                                  <upd-apex-bar
                                     [series]="mobileChartData.series"
-                                    [labels]="mobileChartData.labels"
+                                    [xAxis]="mobileChartData.labels"
                                     [title]="'accessibility-audit-distribution' | translate"
-                                    [colours]="mobileChartData.colors">
-                                  </upd-apex-donut>
+                                    [colours]="mobileChartData.colors"
+                                    [horizontal]="{ isHorizontal: true, colorDistributed: true }"
+                                    [height]="300">
+                                  </upd-apex-bar>
                                 </div>
                               }
                             </div>
@@ -350,7 +375,7 @@
                                         </h6>
                                         <p class="mb-2">{{ audit.description }}</p>
                                         @if (audit.snippet) {
-                                          <pre class="bg-light p-2 rounded"><code>{{ audit.snippet }}</code></pre>
+                                          <div class="bg-light p-2 rounded" style="white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; font-family: monospace; font-size: 0.875rem;">{{ audit.snippet }}</div>
                                         }
                                         @if (audit.helpText) {
                                           <div class="mt-2 text-muted small">
