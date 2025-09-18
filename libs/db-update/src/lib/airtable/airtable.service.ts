@@ -798,9 +798,11 @@ export class AirtableService {
           try {
             await blobClient.copyFromUrlIfDifferent(url, size);
 
+            const storagePath = new URL(blobClient.url).pathname;
+
             return {
               blobFilename: blobClient.filename,
-              blobUrl: blobClient.url,
+              storagePath,
             };
           } catch (err) {
             this.logger.error(
@@ -812,12 +814,12 @@ export class AirtableService {
         }),
       )
         .then((results) => {
-          for (const { blobFilename, blobUrl } of results) {
+          for (const { blobFilename, storagePath } of results) {
             const attachmentIndex = project.attachments.findIndex(
               ({ filename }) => filename === blobFilename,
             );
 
-            project.attachments[attachmentIndex].storage_url = blobUrl;
+            project.attachments[attachmentIndex].storage_url = storagePath;
           }
 
           return project.save();
@@ -871,7 +873,9 @@ export class AirtableService {
 
             await blobClient.copyFromUrlIfDifferent(url, size);
 
-            attachments[i].storage_url = blobClient.url;
+            const storagePath = new URL(blobClient.url).pathname;
+
+            attachments[i].storage_url = storagePath;
           }
         }
 

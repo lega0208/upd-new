@@ -114,6 +114,8 @@ const projectStatusSwitchExpression = {
   },
 };
 
+const DOCUMENTS_URL = process.env.DOCUMENTS_URL || '';
+
 const getProjectStatus = (statuses: ProjectStatus[]): ProjectStatus => {
   if (statuses.length === 0) {
     return 'Unknown';
@@ -507,7 +509,7 @@ export class ProjectsService {
       searchTerms,
       attachments: populatedProjectDoc.attachments.map((attachment) => ({
         ...attachment,
-        storage_url: attachment.storage_url?.replace(/^https:\/\//, ''),
+        storage_url: `${DOCUMENTS_URL}${attachment.storage_url}`,
       })),
       feedbackByPage,
       feedbackByDay: (
