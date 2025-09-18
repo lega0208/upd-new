@@ -83,6 +83,8 @@ const projectStatusSwitchExpression = {
   },
 };
 
+const DOCUMENTS_URL = process.env.DOCUMENTS_URL || '';
+
 @Injectable()
 export class ReportsService {
   constructor(
@@ -112,14 +114,33 @@ export class ReportsService {
       .lean()
       .exec()
       .then((reports) =>
-        reports.map((report) => omit(['_id'], report)),
+        reports.map((report) => ({
+          ...omit(['_id'], report),
+          en_attachment: report.en_attachment?.map((attachment) => ({
+            ...attachment,
+            storage_url: `${DOCUMENTS_URL}${attachment.storage_url}`,
+          })),
+          fr_attachment: report.fr_attachment?.map((attachment) => ({
+            ...attachment,
+            storage_url: `${DOCUMENTS_URL}${attachment.storage_url}`,
+          })),
+        })),
       )) as IReports[];
 
     const projectAttachments: Pick<IProject, '_id' | 'attachments'>[] =
       await this.db.collections.projects
         .find({ attachments: { $ne: [] } }, { attachments: 1 })
         .lean()
-        .exec();
+        .exec()
+        .then((projects) =>
+          projects.map((project) => ({
+            _id: project._id,
+            attachments: project.attachments?.map((attachment) => ({
+              ...attachment,
+              storage_url: `${DOCUMENTS_URL}${attachment.storage_url}`,
+            })),
+          })),
+        );
 
     const projectAttachmentsDict = arrayToDictionary(projectAttachments, '_id');
 
