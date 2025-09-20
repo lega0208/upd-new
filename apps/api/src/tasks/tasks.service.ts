@@ -23,7 +23,7 @@ import { FeedbackService } from '@dua-upd/api/feedback';
 import { omit } from 'rambdax';
 import { compressString, decompressString } from '@dua-upd/node-utils';
 
-const DOCUMENTS_URL = process.env.DOCUMENTS_URL || '';
+const DOCUMENTS_URL = () => process.env.DOCUMENTS_URL || '';
 
 @Injectable()
 export class TasksService {
@@ -105,6 +105,8 @@ export class TasksService {
       );
     console.timeEnd('tasks');
 
+    const documentsUrl = DOCUMENTS_URL();
+
     const reports = (await this.db.collections.reports
       .find(
         { type: 'tasks' },
@@ -121,11 +123,11 @@ export class TasksService {
           ...omit(['_id'], report),
           en_attachment: report.en_attachment?.map((attachment) => ({
             ...attachment,
-            storage_url: `${DOCUMENTS_URL}${attachment.storage_url}`,
+            storage_url: `${documentsUrl}${attachment.storage_url}`,
           })),
           fr_attachment: report.fr_attachment?.map((attachment) => ({
             ...attachment,
-            storage_url: `${DOCUMENTS_URL}${attachment.storage_url}`,
+            storage_url: `${documentsUrl}${attachment.storage_url}`,
           })),
         })),
       )) as IReports[];

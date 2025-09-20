@@ -83,7 +83,7 @@ const projectStatusSwitchExpression = {
   },
 };
 
-const DOCUMENTS_URL = process.env.DOCUMENTS_URL || '';
+const DOCUMENTS_URL = () => process.env.DOCUMENTS_URL || '';
 
 @Injectable()
 export class ReportsService {
@@ -100,6 +100,8 @@ export class ReportsService {
     if (cachedData) {
       return cachedData;
     }
+
+    const documentsUrl = DOCUMENTS_URL();
 
     const tasksData = (await this.db.collections.reports
       .find(
@@ -118,11 +120,11 @@ export class ReportsService {
           ...omit(['_id'], report),
           en_attachment: report.en_attachment?.map((attachment) => ({
             ...attachment,
-            storage_url: `${DOCUMENTS_URL}${attachment.storage_url}`,
+            storage_url: `${documentsUrl}${attachment.storage_url}`,
           })),
           fr_attachment: report.fr_attachment?.map((attachment) => ({
             ...attachment,
-            storage_url: `${DOCUMENTS_URL}${attachment.storage_url}`,
+            storage_url: `${documentsUrl}${attachment.storage_url}`,
           })),
         })),
       )) as IReports[];
@@ -137,7 +139,7 @@ export class ReportsService {
             _id: project._id,
             attachments: project.attachments?.map((attachment) => ({
               ...attachment,
-              storage_url: `${DOCUMENTS_URL}${attachment.storage_url}`,
+              storage_url: `${documentsUrl}${attachment.storage_url}`,
             })),
           })),
         );
