@@ -439,7 +439,9 @@ export class AirtableService {
     );
 
     const existingMetricsPageIds = new Set(
-      (await this.pageMetricsModel.distinct('page')).map((id) => id.toString()),
+      (await this.pageMetricsModel.distinct('page'))
+        .filter((id) => id)
+        .map((id) => id.toString()),
     );
 
     // unset refs on metrics

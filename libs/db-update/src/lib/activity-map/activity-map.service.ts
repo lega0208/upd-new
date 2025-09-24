@@ -265,7 +265,7 @@ export class ActivityMapService {
       .filter(
         (item) =>
           !existingItemIdsDict[item.itemId] &&
-          !item.value.match(/^https?:\/\//),
+          !item.value?.match(/^https?:\/\//),
       )
       .map((item) => ({
         ...item,
