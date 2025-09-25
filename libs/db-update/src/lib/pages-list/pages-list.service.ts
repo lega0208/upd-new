@@ -35,7 +35,9 @@ export class PagesListService {
 
     const pagesList = await this.airtableService.getPagesList();
 
-    return await this.cacheManager.set('pagesList', pagesList);
+    await this.cacheManager.set('pagesList', pagesList);
+
+    return pagesList;
   }
 
   async getPagesList() {
