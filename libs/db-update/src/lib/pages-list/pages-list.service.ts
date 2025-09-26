@@ -4,6 +4,7 @@ import type { Cache } from 'cache-manager';
 import { PagesList } from '@dua-upd/db';
 import { IPageMetrics } from '@dua-upd/types-common';
 import { AirtableService } from '../airtable/airtable.service';
+import assert from 'node:assert';
 
 @Injectable()
 export class PagesListService {
@@ -55,7 +56,7 @@ export class PagesListService {
 
     return pagesList.reduce(
       (dictionary, page) => {
-        const url = page.last_255;
+        const url = page.last_255 || page.url;
 
         if (page.lang === 'en') {
           dictionary['en'][url] = page;
@@ -78,6 +79,8 @@ export class PagesListService {
     );
 
     return pageMetrics.map((metrics) => {
+      assert(metrics.url, 'metrics.url is undefined');
+      
       if (metrics.url.startsWith('www.canada.ca')) {
         return metrics;
       }
