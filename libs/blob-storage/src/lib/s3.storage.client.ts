@@ -224,6 +224,10 @@ export class S3ObjectModel implements IStorageModel<S3StorageClient> {
     return this.container;
   }
 
+  getPath() {
+    return this.config.path || '';
+  }
+
   blob(objectName: string) {
     return new S3ObjectClient(objectName, this.config);
   }
@@ -250,9 +254,7 @@ export class S3ObjectClient implements IStorageBlob {
     this.container = config.container;
     this.overwrite = !!config.overwrite;
 
-    const objectPath = this.path
-      ? normalize(`${this.path}/${objectName}`)
-      : objectName;
+    const objectPath = this.path ? `${this.path}/${objectName}` : objectName;
 
     this.objectKey = objectPath;
     this.name = objectPath;
