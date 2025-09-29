@@ -80,6 +80,7 @@ export class BlobStorageService {
     },
     html_snapshots: {
       containerName: 'html-snapshots',
+      overwrite: true,
     },
     html_snapshots_backup: {
       path: 'backup',
