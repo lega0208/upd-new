@@ -109,34 +109,23 @@ export class PageSpeedInsightsService {
     }
   }
 
-  async runAccessibilityTestForBothStrategies(url: string, locale?: string): Promise<{
-    desktop: AccessibilityTestResult;
-    mobile: AccessibilityTestResult;
-  }> {
-    // Run desktop test
-    const desktop = await this.runAccessibilityTest(url, 'desktop', locale);
-    
-    // Wait to avoid rate limiting
-    await wait(800);
-    
-    // Run mobile test
-    const mobile = await this.runAccessibilityTest(url, 'mobile', locale);
-
-    return { desktop, mobile };
+  async runAccessibilityTestDesktopOnly(url: string, locale?: string): Promise<AccessibilityTestResult> {
+    // Run desktop test only
+    return await this.runAccessibilityTest(url, 'desktop', locale);
   }
 
   async runAccessibilityTestForBothLocales(url: string): Promise<{
-    en: { desktop: AccessibilityTestResult; mobile: AccessibilityTestResult };
-    fr: { desktop: AccessibilityTestResult; mobile: AccessibilityTestResult };
+    en: AccessibilityTestResult;
+    fr: AccessibilityTestResult;
   }> {
-    // Run English tests - try en-US which might be more specific
-    const enResults = await this.runAccessibilityTestForBothStrategies(url, 'en-US');
-    
+    // Run English test for desktop only
+    const enResults = await this.runAccessibilityTestDesktopOnly(url, 'en-US');
+
     // Wait to avoid rate limiting
     await wait(800);
-    
-    // Run French tests - try fr-CA for Canadian French
-    const frResults = await this.runAccessibilityTestForBothStrategies(url, 'fr-CA');
+
+    // Run French test for desktop only
+    const frResults = await this.runAccessibilityTestDesktopOnly(url, 'fr-CA');
 
     return { en: enResults, fr: frResults };
   }

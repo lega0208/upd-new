@@ -607,17 +607,21 @@ export class PagesService {
         ? url 
         : `https://${url}`;
       
-      // Run tests for both locales (English and French)
+      // Run desktop tests for both locales (English and French)
       const results = await this.pageSpeedInsightsService.runAccessibilityTestForBothLocales(fullUrl);
-      
+
       return {
         en: {
           success: true,
-          data: results.en,
+          data: {
+            desktop: results.en,
+          },
         },
         fr: {
           success: true,
-          data: results.fr,
+          data: {
+            desktop: results.fr,
+          },
         },
       };
     } catch (error) {

@@ -58,6 +58,14 @@ const routes: Routes = [
       ),
     data: { animation: 'custom-reports', title: 'UPD | Custom reports' },
   },
+  {
+    path: 'social-listening',
+    loadChildren: () =>
+      import('@dua-upd/upd/views/social-listening').then(
+        (module) => module.SocialListeningModule,
+      ),
+    data: { animation: 'social-listening', title: 'UPD | Social Listening' },
+  },
   { path: '**', redirectTo: 'overview' },
 ];
 

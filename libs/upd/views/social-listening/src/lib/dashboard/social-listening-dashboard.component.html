@@ -1,0 +1,253 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col">
+      <h1>{{ 'social-listening-title' | translate }}</h1>
+      <p class="text-muted">{{ 'social-listening-description' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Data Fetcher Card -->
+  <div class="row mb-4">
+    <div class="col">
+      <upd-card [title]="'social-data-fetcher' | translate">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <p class="mb-2">{{ 'social-fetcher-description' | translate }}</p>
+              @if (lastFetchTime) {
+                <small class="text-muted">
+                  {{ 'social-last-fetch' | translate }}: {{ lastFetchTime | date: 'medium' }}
+                </small>
+              } @else {
+                <small class="text-muted">{{ 'social-no-data-fetched' | translate }}</small>
+              }
+            </div>
+            <div class="col-md-4 text-end">
+              <button
+                pButton
+                type="button"
+                [label]="isLoading ? ('social-fetching' | translate) : ('social-fetch-reddit' | translate)"
+                [disabled]="isLoading"
+                (click)="fetchRedditData()"
+                class="p-button-primary"
+                [icon]="isLoading ? 'pi pi-spin pi-spinner' : 'pi pi-refresh'">
+              </button>
+            </div>
+          </div>
+
+          @if (error) {
+            <div class="alert alert-danger mt-3" role="alert">
+              <i class="pi pi-exclamation-triangle"></i>
+              {{ error | translate }}
+            </div>
+          }
+        </div>
+      </upd-card>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="row">
+      <div class="col text-center py-5">
+        <p-progressSpinner></p-progressSpinner>
+        <p class="mt-3">{{ 'social-loading-reddit-data' | translate }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Data Display (show when we have data) -->
+  @if (!isLoading && redditData) {
+    <!-- Stats Overview -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <upd-data-card
+          [title]="'social-total-posts' | translate"
+          [current]="redditData.totalPosts || 0"
+          [tooltip]="'social-total-posts-tooltip' | translate">
+        </upd-data-card>
+      </div>
+      <div class="col-md-3">
+        <upd-data-card
+          [title]="'social-total-comments' | translate"
+          [current]="redditData.totalComments || 0"
+          [tooltip]="'social-total-comments-tooltip' | translate">
+        </upd-data-card>
+      </div>
+      <div class="col-md-3">
+        <upd-data-card
+          [title]="'social-active-subreddits' | translate"
+          [current]="redditData.activeSubreddits || 0"
+          [tooltip]="'social-active-subreddits-tooltip' | translate">
+        </upd-data-card>
+      </div>
+      <div class="col-md-3">
+        <upd-data-card
+          [title]="'social-engagement-rate' | translate"
+          [current]="redditData.engagementRate || 0"
+          [pipe]="'number'"
+          [tooltip]="'social-engagement-tooltip' | translate">
+        </upd-data-card>
+      </div>
+    </div>
+
+    <!-- Sentiment Analysis Chart -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <upd-card [title]="'social-sentiment-analysis' | translate">
+          <div class="card-body">
+            @if (sentimentChartData) {
+              <upd-apex-donut
+                [series]="sentimentChartData.series"
+                [labels]="sentimentChartData.labels"
+                [colours]="sentimentChartData.colours"
+                [title]="'social-sentiment-distribution' | translate">
+              </upd-apex-donut>
+            }
+          </div>
+        </upd-card>
+      </div>
+
+      <!-- Subreddit Summary -->
+      <div class="col-md-6">
+        <upd-card [title]="'social-subreddit-summary' | translate">
+          <div class="card-body">
+            @if (subredditStats && subredditStats.length > 0) {
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>{{ 'social-subreddit' | translate }}</th>
+                      <th>{{ 'social-posts' | translate }}</th>
+                      <th>{{ 'social-comments' | translate }}</th>
+                      <th>{{ 'social-sentiment' | translate }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (stat of subredditStats; track stat.subreddit) {
+                      <tr>
+                        <td>r/{{ stat.subreddit }}</td>
+                        <td>{{ stat.posts }}</td>
+                        <td>{{ stat.comments }}</td>
+                        <td>
+                          <i class="pi" [ngClass]="getPostSentimentIcon(stat.avgSentiment)"></i>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="text-muted">{{ 'social-no-subreddit-data' | translate }}</p>
+            }
+          </div>
+        </upd-card>
+      </div>
+    </div>
+
+    <!-- Active Posts -->
+    <div class="row mb-4">
+      <div class="col">
+        <upd-card [title]="'social-most-active-posts' | translate">
+          <div class="card-body">
+            @if (activePosts && activePosts.length > 0) {
+              <div class="list-group">
+                @for (post of activePosts; track post.id) {
+                  <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div class="flex-grow-1">
+                        <h6 class="mb-1">{{ post.title }}</h6>
+                        <p class="mb-1 text-muted small">
+                          r/{{ post.subreddit }} • {{ 'social-by' | translate }} {{ post.author }}
+                        </p>
+                        <div class="d-flex gap-3 small">
+                          <span>
+                            <i class="pi pi-arrow-up"></i> {{ post.score }}
+                          </span>
+                          <span>
+                            <i class="pi pi-comment"></i> {{ post.numComments }}
+                          </span>
+                          <span
+                            [ngClass]="getPostSentimentClass(post.sentiment)"
+                            [title]="post.sentimentReasoning || ''">
+                            <i class="pi" [ngClass]="getPostSentimentIcon(post.sentiment)"></i>
+                            {{ post.sentiment | translate }}
+                            @if (post.sentimentConfidence) {
+                              <small class="text-muted">
+                                ({{ (post.sentimentConfidence * 100).toFixed(0) }}%)
+                              </small>
+                            }
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <a [href]="post.url" target="_blank" class="btn btn-sm btn-outline-primary">
+                          <i class="pi pi-external-link"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-muted">{{ 'social-no-posts-data' | translate }}</p>
+            }
+          </div>
+        </upd-card>
+      </div>
+    </div>
+
+    <!-- Top Issues -->
+    <div class="row mb-4">
+      <div class="col">
+        <upd-card [title]="'social-top-issues' | translate">
+          <div class="card-body">
+            @if (topIssues && topIssues.length > 0) {
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>{{ 'social-issue-title' | translate }}</th>
+                      <th>{{ 'social-category' | translate }}</th>
+                      <th>{{ 'social-frequency' | translate }}</th>
+                      <th>{{ 'social-keywords' | translate }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (issue of topIssues; track issue.id) {
+                      <tr>
+                        <td>{{ issue.title }}</td>
+                        <td>
+                          <span class="badge bg-secondary">{{ issue.category }}</span>
+                        </td>
+                        <td>{{ issue.frequency }}</td>
+                        <td>
+                          @for (keyword of issue.keywords; track keyword) {
+                            <span class="badge bg-light text-dark me-1">{{ keyword }}</span>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="text-muted">{{ 'social-no-issues-data' | translate }}</p>
+            }
+          </div>
+        </upd-card>
+      </div>
+    </div>
+  }
+
+  <!-- Initial State (no data) -->
+  @if (!isLoading && !redditData) {
+    <div class="row">
+      <div class="col text-center py-5">
+        <i class="pi pi-reddit" style="font-size: 4rem; color: #FF4500;"></i>
+        <h3 class="mt-3">{{ 'social-no-data-title' | translate }}</h3>
+        <p class="text-muted">{{ 'social-no-data-description' | translate }}</p>
+      </div>
+    </div>
+  }
+</div>

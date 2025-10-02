@@ -1,0 +1,12 @@
+reddit:
+client secret
+personal use script
+w0goJCFqOVEbGbhdOoVmMg
+
+secret:
+secret	HGEm8zU4fd6BCdtECyooL7YTU204Uw
+
+pw: GeorgieDorySolo2147-3*!
+naomi.hanffcra@gmail.com
+
+OPENROUTER_API_KEY: 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

@@ -20,7 +20,6 @@ interface AccessibilityTestResponse {
   success: boolean;
   data?: {
     desktop: AccessibilityTestResult;
-    mobile: AccessibilityTestResult;
   };
   error?: string;
 }
@@ -72,11 +71,8 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   isTestRunning = false;
   testResults: AccessibilityTestResponse | null = null;
   errorMessage = '';
-  mobileTabViewed = false;
   desktopChartData: { series: any[]; labels: string[]; colors: string[] } | null = null;
-  mobileChartData: { series: any[]; labels: string[]; colors: string[] } | null = null;
   desktopMetrics: { totalAutomated: number; failed: number; passed: number; passRate: number; manualChecks: number } | null = null;
-  mobileMetrics: { totalAutomated: number; failed: number; passed: number; passRate: number; manualChecks: number } | null = null;
 
   private manualVerificationMapping: { [key: string]: string } = {
     'Interactive controls are keyboard focusable': 'accessibility-manual-interactive-control',
@@ -98,7 +94,7 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.currentLang$.pipe(takeUntil(this.destroy$)).subscribe(lang => {
+    this.currentLang$.pipe(takeUntil(this.destroy$)).subscribe(_lang => {
       if (this.url() && this.testResults) {
         this.updateResultsForCurrentLanguage(this.url()!);
       }
@@ -121,10 +117,6 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
         this.desktopChartData = this.getAuditDistributionData(cachedData[langKey].data.desktop.audits);
         this.desktopMetrics = this.getAutomatedTestMetrics(cachedData[langKey].data.desktop.audits);
       }
-      if (cachedData[langKey].data?.mobile?.audits) {
-        this.mobileChartData = this.getAuditDistributionData(cachedData[langKey].data.mobile.audits);
-        this.mobileMetrics = this.getAutomatedTestMetrics(cachedData[langKey].data.mobile.audits);
-      }
       this.cdr.detectChanges();
       setTimeout(() => {
         this.cdr.detectChanges();
@@ -145,10 +137,6 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
       if (cachedData[langKey].data?.desktop?.audits) {
         this.desktopChartData = this.getAuditDistributionData(cachedData[langKey].data.desktop.audits);
         this.desktopMetrics = this.getAutomatedTestMetrics(cachedData[langKey].data.desktop.audits);
-      }
-      if (cachedData[langKey].data?.mobile?.audits) {
-        this.mobileChartData = this.getAuditDistributionData(cachedData[langKey].data.mobile.audits);
-        this.mobileMetrics = this.getAutomatedTestMetrics(cachedData[langKey].data.mobile.audits);
       }
       this.cdr.detectChanges();
       setTimeout(() => {
@@ -282,19 +270,6 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     return this.sanitizer.sanitize(1, htmlDescription) || description;
   }
 
-  onTabChange(event: any) {
-    if (event.index === 1 && !this.mobileTabViewed) {
-      this.mobileTabViewed = true;
-      const tempData = this.mobileChartData;
-      this.mobileChartData = null;
-      this.cdr.detectChanges();
-      
-      setTimeout(() => {
-        this.mobileChartData = tempData;
-        this.cdr.detectChanges();
-      }, 100);
-    }
-  }
 
   runAccessibilityTest() {
     const currentUrl = this.url();
@@ -353,10 +328,6 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
             this.desktopChartData = this.getAuditDistributionData(response[langKey].data.desktop.audits);
             this.desktopMetrics = this.getAutomatedTestMetrics(response[langKey].data.desktop.audits);
           }
-          if (response[langKey].data?.mobile?.audits) {
-            this.mobileChartData = this.getAuditDistributionData(response[langKey].data.mobile.audits);
-            this.mobileMetrics = this.getAutomatedTestMetrics(response[langKey].data.mobile.audits);
-          }
           this.cdr.detectChanges();
               setTimeout(() => {
             this.cdr.detectChanges();
@@ -373,9 +344,7 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
             this.errorMessage = this.translateService.instant('accessibility-error-generic');
           }
           this.desktopChartData = null;
-          this.mobileChartData = null;
           this.desktopMetrics = null;
-          this.mobileMetrics = null;
         }
       });
   }

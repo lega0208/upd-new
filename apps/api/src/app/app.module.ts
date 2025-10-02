@@ -15,6 +15,7 @@ import { ReportsModule } from '../reports/reports.module';
 import { FeedbackModule } from '@dua-upd/api/feedback';
 import { HashesModule } from '@dua-upd/api/hashes';
 import { HealthCheckController } from '../healthcheck/healthcheck.controller';
+import { SocialModule } from '../social/social.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { HealthCheckController } from '../healthcheck/healthcheck.controller';
     QueryModule,
     FeedbackModule,
     HashesModule,
+    SocialModule,
     BullModule.forRoot({
       connection: {
         host: environment.redisHost,
