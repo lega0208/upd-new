@@ -73,7 +73,9 @@
                       <!-- Score and Tested At -->
                       <div class="row mb-4">
                         <div class="col-md-6">
-                          <upd-card [title]="'accessibility-automated-score' | translate">
+                          <upd-card
+                            [title]="'accessibility-automated-score' | translate"
+                            [titleTooltip]="'accessibility-automated-score-tooltip' | translate">
                             <p class="h1 mb-0 {{ getScoreClass(testResults.data.desktop.score) }}">
                               {{ testResults.data.desktop.scoreDisplay }}
                             </p>
@@ -108,14 +110,21 @@
                               <h5>{{ 'accessibility-automated-testing' | translate }}</h5>
                               @if (desktopMetrics) {
                                 <div class="row">
-                                  <div class="col-6">
+                                  <div class="col-4">
                                     <upd-data-card
                                       [title]="'accessibility-total-automated' | translate"
                                       [current]="desktopMetrics.totalAutomated"
                                       [tooltip]="'accessibility-total-automated-tooltip' | translate">
                                     </upd-data-card>
                                   </div>
-                                  <div class="col-6">
+                                  <div class="col-4">
+                                    <upd-data-card
+                                      [title]="'accessibility-passed-tests' | translate"
+                                      [current]="desktopMetrics.passed"
+                                      [tooltip]="'accessibility-passed-tests-tooltip' | translate">
+                                    </upd-data-card>
+                                  </div>
+                                  <div class="col-4">
                                     <upd-data-card
                                       [title]="'accessibility-failed-tests' | translate"
                                       [current]="desktopMetrics.failed"
@@ -126,16 +135,16 @@
                                 <div class="row mt-3">
                                   <div class="col-6">
                                     <upd-data-card
-                                      [title]="'accessibility-passed-tests' | translate"
-                                      [current]="desktopMetrics.passed"
-                                      [tooltip]="'accessibility-passed-tests-tooltip' | translate">
+                                      [title]="'accessibility-manual-checks-needed' | translate"
+                                      [current]="desktopMetrics.manualChecks"
+                                      [tooltip]="'accessibility-manual-checks-tooltip' | translate">
                                     </upd-data-card>
                                   </div>
                                   <div class="col-6">
                                     <upd-data-card
-                                      [title]="'accessibility-manual-checks-needed' | translate"
-                                      [current]="desktopMetrics.manualChecks"
-                                      [tooltip]="'accessibility-manual-checks-tooltip' | translate">
+                                      [title]="'accessibility-not-applicable-card' | translate"
+                                      [current]="desktopMetrics.notApplicable"
+                                      [tooltip]="'accessibility-not-applicable-card-tooltip' | translate">
                                     </upd-data-card>
                                   </div>
                                 </div>

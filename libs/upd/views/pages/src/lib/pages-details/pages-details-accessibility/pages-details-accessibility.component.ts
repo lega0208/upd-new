@@ -7,6 +7,7 @@ import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { of, Subject } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
+import { globalColours } from '@dua-upd/utils-common';
 
 // Cache structure: URL -> { en: results, fr: results }
 const accessibilityCache = new Map<string, LocalizedAccessibilityTestResponse>();
@@ -72,7 +73,7 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   testResults: AccessibilityTestResponse | null = null;
   errorMessage = '';
   desktopChartData: { series: any[]; labels: string[]; colors: string[] } | null = null;
-  desktopMetrics: { totalAutomated: number; failed: number; passed: number; passRate: number; manualChecks: number } | null = null;
+  desktopMetrics: { totalAutomated: number; failed: number; passed: number; passRate: number; manualChecks: number; notApplicable: number } | null = null;
 
   private manualVerificationMapping: { [key: string]: string } = {
     'Interactive controls are keyboard focusable': 'accessibility-manual-interactive-control',
@@ -183,12 +184,12 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
       'accessibility-manual-checks',
       'accessibility-not-applicable'
     ];
-    
+
     const colors = [
-      '#dc3545',
-      '#28a745',
-      '#fd7e14',
-      '#6c757d'
+      globalColours[5],  // Failed: #F57F17 (orange)
+      globalColours[2],  // Passed: #26A69A (teal)
+      globalColours[3],  // Manual: #FBC02D (yellow)
+      globalColours[10]  // Not Applicable: #C5C5FF (light purple)
     ];
     
     const filteredData = values.reduce((acc, value, index) => {
@@ -207,7 +208,7 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
           data: [1]
         }],
         labels: [this.translateService.instant('accessibility-no-data')],
-        colors: ['#6c757d']
+        colors: [globalColours[10]]
       };
     }
     
@@ -224,15 +225,16 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   getAutomatedTestMetrics(audits: AccessibilityAudit[]) {
     const categorized = this.getCategorizedAudits(audits);
     const automatedTestable = categorized.failed.length + categorized.passed.length;
-    const passRate = automatedTestable > 0 ? 
+    const passRate = automatedTestable > 0 ?
       Math.round((categorized.passed.length / automatedTestable) * 100) : 0;
-    
+
     return {
       totalAutomated: automatedTestable,
       failed: categorized.failed.length,
       passed: categorized.passed.length,
       passRate,
-      manualChecks: categorized.manual.length
+      manualChecks: categorized.manual.length,
+      notApplicable: categorized.notApplicable.length
     };
   }
 
