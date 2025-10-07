@@ -28,5 +28,3 @@ export class AAItemId implements IAAItemId {
 export const AAItemIdSchema = SchemaFactory.createForClass(AAItemId);
 
 AAItemIdSchema.index({ itemId: 1, type: 1 }, { unique: true });
-
-AAItemIdSchema.index({ itemId: 1, type: 1 }, { unique: true });

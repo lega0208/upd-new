@@ -1,15 +1,15 @@
-import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, effect, signal, computed } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ApiService } from '@dua-upd/upd/services';
-import { catchError, finalize, takeUntil } from 'rxjs/operators';
-import { of, Subject } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { globalColours } from '@dua-upd/utils-common';
+import type { ColumnConfig } from '@dua-upd/types-common';
 
-// Cache structure: URL -> { en: results, fr: results }
 const accessibilityCache = new Map<string, LocalizedAccessibilityTestResponse>();
 
 interface LocalizedAccessibilityTestResponse {
@@ -55,25 +55,63 @@ interface AccessibilityAudit {
     styleUrls: ['./pages-details-accessibility.component.css'],
     standalone: false
 })
-export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
+export class PagesDetailsAccessibilityComponent {
   private i18n = inject(I18nFacade);
   private pageDetailsService = inject(PagesDetailsFacade);
   private apiService = inject(ApiService);
   private sanitizer = inject(DomSanitizer);
-  private cdr = inject(ChangeDetectorRef);
   private translateService = inject(TranslateService);
-  private destroy$ = new Subject<void>();
 
   currentLang$ = this.i18n.currentLang$;
   pageUrl$ = this.pageDetailsService.pageUrl$;
   currentLang = toSignal(this.currentLang$);
   url = toSignal(this.pageUrl$);
 
-  isTestRunning = false;
-  testResults: AccessibilityTestResponse | null = null;
-  errorMessage = '';
-  desktopChartData: { series: any[]; labels: string[]; colors: string[] } | null = null;
-  desktopMetrics: { totalAutomated: number; failed: number; passed: number; passRate: number; manualChecks: number; notApplicable: number } | null = null;
+  isTestRunning = signal(false);
+  testResults = signal<AccessibilityTestResponse | null>(null);
+  errorMessage = signal('');
+
+  desktopChartData = computed(() => {
+    const results = this.testResults();
+    if (results?.data?.desktop?.audits) {
+      return this.getAuditDistributionData(results.data.desktop.audits);
+    }
+    return null;
+  });
+
+  desktopMetrics = computed(() => {
+    const results = this.testResults();
+    if (results?.data?.desktop?.audits) {
+      return this.getAutomatedTestMetrics(results.data.desktop.audits);
+    }
+    return null;
+  });
+
+  auditTableCols = computed<ColumnConfig<{ category: string; count: number }>[]>(() => [
+    {
+      field: 'category',
+      header: 'Category',
+      translate: true,
+    },
+    {
+      field: 'count',
+      header: 'Count',
+      pipe: 'number',
+    }
+  ]);
+
+  auditTableData = computed(() => {
+    const results = this.testResults();
+    if (!results?.data?.desktop?.audits) return null;
+
+    const categorized = this.getCategorizedAudits(results.data.desktop.audits);
+    return [
+      { category: 'accessibility-failed-tests', count: categorized.failed.length },
+      { category: 'accessibility-passed-tests', count: categorized.passed.length },
+      { category: 'accessibility-manual-checks', count: categorized.manual.length },
+      { category: 'accessibility-not-applicable', count: categorized.notApplicable.length }
+    ];
+  });
 
   private manualVerificationMapping: { [key: string]: string } = {
     'Interactive controls are keyboard focusable': 'accessibility-manual-interactive-control',
@@ -88,40 +126,32 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     'Custom controls have ARIA roles': 'accessibility-manual-aria-roles'
   };
 
-  ngOnInit() {
-    this.pageUrl$.pipe(takeUntil(this.destroy$)).subscribe(url => {
+  constructor() {
+    effect(() => {
+      const url = this.url();
       if (url) {
         this.handleUrlChange(url);
       }
     });
 
-    this.currentLang$.pipe(takeUntil(this.destroy$)).subscribe(_lang => {
-      if (this.url() && this.testResults) {
-        this.updateResultsForCurrentLanguage(this.url()!);
+    effect(() => {
+      const lang = this.currentLang();
+      const url = this.url();
+      const results = this.testResults();
+
+      if (url && results && lang) {
+        this.updateResultsForCurrentLanguage(url);
       }
     });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private handleUrlChange(url: string) {
     const cachedData = accessibilityCache.get(url);
     const langKey = this.currentLang() === 'fr-CA' ? 'fr' : 'en';
-    
+
     if (cachedData && cachedData[langKey]) {
-      this.testResults = cachedData[langKey];
-      this.errorMessage = '';
-      if (cachedData[langKey].data?.desktop?.audits) {
-        this.desktopChartData = this.getAuditDistributionData(cachedData[langKey].data.desktop.audits);
-        this.desktopMetrics = this.getAutomatedTestMetrics(cachedData[langKey].data.desktop.audits);
-      }
-      this.cdr.detectChanges();
-      setTimeout(() => {
-        this.cdr.detectChanges();
-      }, 100);
+      this.testResults.set(cachedData[langKey]!);
+      this.errorMessage.set('');
     } else {
       this.runAccessibilityTest();
     }
@@ -130,19 +160,10 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   private updateResultsForCurrentLanguage(url: string) {
     const cachedData = accessibilityCache.get(url);
     const langKey = this.currentLang() === 'fr-CA' ? 'fr' : 'en';
-    
+
     if (cachedData && cachedData[langKey]) {
-      this.testResults = cachedData[langKey];
-      this.errorMessage = '';
-      
-      if (cachedData[langKey].data?.desktop?.audits) {
-        this.desktopChartData = this.getAuditDistributionData(cachedData[langKey].data.desktop.audits);
-        this.desktopMetrics = this.getAutomatedTestMetrics(cachedData[langKey].data.desktop.audits);
-      }
-      this.cdr.detectChanges();
-      setTimeout(() => {
-        this.cdr.detectChanges();
-      }, 100);
+      this.testResults.set(cachedData[langKey]!);
+      this.errorMessage.set('');
     }
   }
 
@@ -186,10 +207,10 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
     ];
 
     const colors = [
-      globalColours[5],  // Failed: #F57F17 (orange)
-      globalColours[2],  // Passed: #26A69A (teal)
-      globalColours[3],  // Manual: #FBC02D (yellow)
-      globalColours[10]  // Not Applicable: #C5C5FF (light purple)
+      '#df2929',
+      globalColours[2],
+      globalColours[1],
+      globalColours[0]
     ];
     
     const filteredData = values.reduce((acc, value, index) => {
@@ -208,7 +229,7 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
           data: [1]
         }],
         labels: [this.translateService.instant('accessibility-no-data')],
-        colors: [globalColours[10]]
+        colors: [globalColours[0]]
       };
     }
     
@@ -276,20 +297,20 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
   runAccessibilityTest() {
     const currentUrl = this.url();
     if (!currentUrl) {
-      this.errorMessage = this.translateService.instant('accessibility-error-no-url');
+      this.errorMessage.set(this.translateService.instant('accessibility-error-no-url'));
       return;
     }
 
-    this.isTestRunning = true;
-    this.errorMessage = '';
-    this.testResults = null;
+    this.isTestRunning.set(true);
+    this.errorMessage.set('');
+    this.testResults.set(null);
 
     this.apiService
       .get<LocalizedAccessibilityTestResponse>(`/api/pages/accessibility-test?url=${encodeURIComponent(currentUrl)}`)
       .pipe(
         catchError((error) => {
           console.error('Accessibility test error:', error);
-          
+
           let errorKey = 'accessibility-error-generic';
           if (error.status === 429) {
             errorKey = 'accessibility-error-rate-limit';
@@ -300,53 +321,41 @@ export class PagesDetailsAccessibilityComponent implements OnInit, OnDestroy {
           } else if (error.name === 'TimeoutError' || error.status === 504) {
             errorKey = 'accessibility-error-timeout';
           }
-          
+
           const errorResponse = {
             success: false,
             error: errorKey
           } as AccessibilityTestResponse;
-          
+
           return of({
             en: errorResponse,
             fr: errorResponse
           } as LocalizedAccessibilityTestResponse);
         }),
         finalize(() => {
-          this.isTestRunning = false;
-        }),
-        takeUntil(this.destroy$)
+          this.isTestRunning.set(false);
+        })
       )
       .subscribe((response) => {
         const langKey = this.currentLang() === 'fr-CA' ? 'fr' : 'en';
-        
-        if (response && response[langKey] && response[langKey].success) {
+
+        if (response && response[langKey] && response[langKey]!.success) {
           if (currentUrl) {
             accessibilityCache.set(currentUrl, response);
           }
-          
-          this.testResults = response[langKey];
-          
-          if (response[langKey].data?.desktop?.audits) {
-            this.desktopChartData = this.getAuditDistributionData(response[langKey].data.desktop.audits);
-            this.desktopMetrics = this.getAutomatedTestMetrics(response[langKey].data.desktop.audits);
-          }
-          this.cdr.detectChanges();
-              setTimeout(() => {
-            this.cdr.detectChanges();
-          }, 100);
+
+          this.testResults.set(response[langKey]!);
         } else {
           const errorResponse = response && response[langKey];
           if (errorResponse && errorResponse.error) {
             if (errorResponse.error.startsWith('accessibility-error-')) {
-              this.errorMessage = this.translateService.instant(errorResponse.error);
+              this.errorMessage.set(this.translateService.instant(errorResponse.error));
             } else {
-              this.errorMessage = errorResponse.error || this.translateService.instant('accessibility-error-generic');
+              this.errorMessage.set(errorResponse.error || this.translateService.instant('accessibility-error-generic'));
             }
           } else {
-            this.errorMessage = this.translateService.instant('accessibility-error-generic');
+            this.errorMessage.set(this.translateService.instant('accessibility-error-generic'));
           }
-          this.desktopChartData = null;
-          this.desktopMetrics = null;
         }
       });
   }
