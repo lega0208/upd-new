@@ -43,7 +43,6 @@
       "@dua-upd/upd/views/pages": ["libs/upd/views/pages/src/index.ts"],
       "@dua-upd/upd/views/projects": ["libs/upd/views/projects/src/index.ts"],
       "@dua-upd/upd/views/reports": ["libs/upd/views/reports/src/index.ts"],
-      "@dua-upd/upd/views/social-listening": ["libs/upd/views/social-listening/src/index.ts"],
       "@dua-upd/upd/views/tasks": ["libs/upd/views/tasks/src/index.ts"],
       "@dua-upd/utils-common": ["libs/utils-common/src/index.ts"],
       "@dua-upd/utils-common/data": ["libs/utils-common/src/lib/data/index.ts"],

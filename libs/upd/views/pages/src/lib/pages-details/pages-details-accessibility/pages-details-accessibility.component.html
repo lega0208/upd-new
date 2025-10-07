@@ -111,41 +111,86 @@
                               @if (desktopMetrics) {
                                 <div class="row">
                                   <div class="col-4">
-                                    <upd-data-card
-                                      [title]="'accessibility-total-automated' | translate"
-                                      [current]="desktopMetrics.totalAutomated"
-                                      [tooltip]="'accessibility-total-automated-tooltip' | translate">
-                                    </upd-data-card>
+                                    @if (desktopMetrics.totalAutomated === 0) {
+                                      <upd-card
+                                        [title]="'accessibility-total-automated' | translate"
+                                        [titleTooltip]="'accessibility-total-automated-tooltip' | translate"
+                                        [h]="100">
+                                        <p class="h3 w-100">0</p>
+                                      </upd-card>
+                                    } @else {
+                                      <upd-data-card
+                                        [title]="'accessibility-total-automated' | translate"
+                                        [current]="desktopMetrics.totalAutomated"
+                                        [tooltip]="'accessibility-total-automated-tooltip' | translate">
+                                      </upd-data-card>
+                                    }
                                   </div>
                                   <div class="col-4">
-                                    <upd-data-card
-                                      [title]="'accessibility-passed-tests' | translate"
-                                      [current]="desktopMetrics.passed"
-                                      [tooltip]="'accessibility-passed-tests-tooltip' | translate">
-                                    </upd-data-card>
+                                    @if (desktopMetrics.passed === 0) {
+                                      <upd-card
+                                        [title]="'accessibility-passed-tests' | translate"
+                                        [titleTooltip]="'accessibility-passed-tests-tooltip' | translate"
+                                        [h]="100">
+                                        <p class="h3 w-100">0</p>
+                                      </upd-card>
+                                    } @else {
+                                      <upd-data-card
+                                        [title]="'accessibility-passed-tests' | translate"
+                                        [current]="desktopMetrics.passed"
+                                        [tooltip]="'accessibility-passed-tests-tooltip' | translate">
+                                      </upd-data-card>
+                                    }
                                   </div>
                                   <div class="col-4">
-                                    <upd-data-card
-                                      [title]="'accessibility-failed-tests' | translate"
-                                      [current]="desktopMetrics.failed"
-                                      [tooltip]="'accessibility-failed-tests-tooltip' | translate">
-                                    </upd-data-card>
+                                    @if (desktopMetrics.failed === 0) {
+                                      <upd-card
+                                        [title]="'accessibility-failed-tests' | translate"
+                                        [titleTooltip]="'accessibility-failed-tests-tooltip' | translate"
+                                        [h]="100">
+                                        <p class="h3 w-100">0</p>
+                                      </upd-card>
+                                    } @else {
+                                      <upd-data-card
+                                        [title]="'accessibility-failed-tests' | translate"
+                                        [current]="desktopMetrics.failed"
+                                        [tooltip]="'accessibility-failed-tests-tooltip' | translate">
+                                      </upd-data-card>
+                                    }
                                   </div>
                                 </div>
                                 <div class="row mt-3">
                                   <div class="col-6">
-                                    <upd-data-card
-                                      [title]="'accessibility-manual-checks-needed' | translate"
-                                      [current]="desktopMetrics.manualChecks"
-                                      [tooltip]="'accessibility-manual-checks-tooltip' | translate">
-                                    </upd-data-card>
+                                    @if (desktopMetrics.manualChecks === 0) {
+                                      <upd-card
+                                        [title]="'accessibility-manual-checks-needed' | translate"
+                                        [titleTooltip]="'accessibility-manual-checks-tooltip' | translate"
+                                        [h]="100">
+                                        <p class="h3 w-100">0</p>
+                                      </upd-card>
+                                    } @else {
+                                      <upd-data-card
+                                        [title]="'accessibility-manual-checks-needed' | translate"
+                                        [current]="desktopMetrics.manualChecks"
+                                        [tooltip]="'accessibility-manual-checks-tooltip' | translate">
+                                      </upd-data-card>
+                                    }
                                   </div>
                                   <div class="col-6">
-                                    <upd-data-card
-                                      [title]="'accessibility-not-applicable-card' | translate"
-                                      [current]="desktopMetrics.notApplicable"
-                                      [tooltip]="'accessibility-not-applicable-card-tooltip' | translate">
-                                    </upd-data-card>
+                                    @if (desktopMetrics.notApplicable === 0) {
+                                      <upd-card
+                                        [title]="'accessibility-not-applicable-card' | translate"
+                                        [titleTooltip]="'accessibility-not-applicable-card-tooltip' | translate"
+                                        [h]="100">
+                                        <p class="h3 w-100">0</p>
+                                      </upd-card>
+                                    } @else {
+                                      <upd-data-card
+                                        [title]="'accessibility-not-applicable-card' | translate"
+                                        [current]="desktopMetrics.notApplicable"
+                                        [tooltip]="'accessibility-not-applicable-card-tooltip' | translate">
+                                      </upd-data-card>
+                                    }
                                   </div>
                                 </div>
                               }
