@@ -13,6 +13,10 @@ export interface PagesDetailsState {
   loadedHashes: boolean;
   loadingHashes: boolean;
   errorHashes?: string | null;
+  accessibility: any | null;
+  loadedAccessibility: boolean;
+  loadingAccessibility: boolean;
+  errorAccessibility?: string | null;
 }
 
 export interface PagesDetailsPartialState {
@@ -46,6 +50,10 @@ export const pagesDetailsInitialState: PagesDetailsState = {
   loadingHashes: false,
   loadedHashes: false,
   errorHashes: null,
+  accessibility: null,
+  loadedAccessibility: false,
+  loadingAccessibility: false,
+  errorAccessibility: null,
 };
 
 const reducer = createReducer(
@@ -124,6 +132,34 @@ const reducer = createReducer(
       loadingHashes: false,
       loadedHashes: true,
       errorHashes: error,
+    }),
+  ),
+  on(
+    PagesDetailsActions.loadAccessibilityInit,
+    (state): PagesDetailsState => ({
+      ...state,
+      loadingAccessibility: true,
+      loadedAccessibility: false,
+      errorAccessibility: null,
+    }),
+  ),
+  on(
+    PagesDetailsActions.loadAccessibilitySuccess,
+    (state, { data }): PagesDetailsState => ({
+      ...state,
+      accessibility: data,
+      loadingAccessibility: false,
+      loadedAccessibility: true,
+      errorAccessibility: null,
+    }),
+  ),
+  on(
+    PagesDetailsActions.loadAccessibilityError,
+    (state, { error }): PagesDetailsState => ({
+      ...state,
+      loadingAccessibility: false,
+      loadedAccessibility: true,
+      errorAccessibility: error,
     }),
   ),
 );

@@ -1,16 +1,11 @@
-import { Component, inject, effect, signal, computed } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ApiService } from '@dua-upd/upd/services';
-import { catchError, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { globalColours } from '@dua-upd/utils-common';
 import type { ColumnConfig } from '@dua-upd/types-common';
-
-const accessibilityCache = new Map<string, LocalizedAccessibilityTestResponse>();
 
 interface LocalizedAccessibilityTestResponse {
   en?: AccessibilityTestResponse;
@@ -58,7 +53,6 @@ interface AccessibilityAudit {
 export class PagesDetailsAccessibilityComponent {
   private i18n = inject(I18nFacade);
   private pageDetailsService = inject(PagesDetailsFacade);
-  private apiService = inject(ApiService);
   private sanitizer = inject(DomSanitizer);
   private translateService = inject(TranslateService);
 
@@ -67,9 +61,25 @@ export class PagesDetailsAccessibilityComponent {
   currentLang = toSignal(this.currentLang$);
   url = toSignal(this.pageUrl$);
 
-  isTestRunning = signal(false);
-  testResults = signal<AccessibilityTestResponse | null>(null);
-  errorMessage = signal('');
+  accessibilityData = toSignal(this.pageDetailsService.accessibility$);
+  isTestRunning = toSignal(this.pageDetailsService.accessibilityLoading$);
+  accessibilityError = toSignal(this.pageDetailsService.accessibilityError$);
+
+  errorMessage = computed(() => {
+    const error = this.accessibilityError();
+    return error ? this.translateService.instant(error) : '';
+  });
+
+  testResults = computed(() => {
+    const data = this.accessibilityData();
+    const lang = this.currentLang();
+    const langKey = lang === 'fr-CA' ? 'fr' : 'en';
+
+    if (data && data[langKey]) {
+      return data[langKey];
+    }
+    return null;
+  });
 
   desktopChartData = computed(() => {
     const results = this.testResults();
@@ -126,46 +136,6 @@ export class PagesDetailsAccessibilityComponent {
     'Custom controls have ARIA roles': 'accessibility-manual-aria-roles'
   };
 
-  constructor() {
-    effect(() => {
-      const url = this.url();
-      if (url) {
-        this.handleUrlChange(url);
-      }
-    });
-
-    effect(() => {
-      const lang = this.currentLang();
-      const url = this.url();
-      const results = this.testResults();
-
-      if (url && results && lang) {
-        this.updateResultsForCurrentLanguage(url);
-      }
-    });
-  }
-
-  private handleUrlChange(url: string) {
-    const cachedData = accessibilityCache.get(url);
-    const langKey = this.currentLang() === 'fr-CA' ? 'fr' : 'en';
-
-    if (cachedData && cachedData[langKey]) {
-      this.testResults.set(cachedData[langKey]!);
-      this.errorMessage.set('');
-    } else {
-      this.runAccessibilityTest();
-    }
-  }
-
-  private updateResultsForCurrentLanguage(url: string) {
-    const cachedData = accessibilityCache.get(url);
-    const langKey = this.currentLang() === 'fr-CA' ? 'fr' : 'en';
-
-    if (cachedData && cachedData[langKey]) {
-      this.testResults.set(cachedData[langKey]!);
-      this.errorMessage.set('');
-    }
-  }
 
   getCategorizedAudits(audits: AccessibilityAudit[]) {
     const processedAudits = audits.map(audit => {
@@ -296,67 +266,8 @@ export class PagesDetailsAccessibilityComponent {
 
   runAccessibilityTest() {
     const currentUrl = this.url();
-    if (!currentUrl) {
-      this.errorMessage.set(this.translateService.instant('accessibility-error-no-url'));
-      return;
+    if (currentUrl) {
+      this.pageDetailsService.refreshAccessibilityTest(currentUrl);
     }
-
-    this.isTestRunning.set(true);
-    this.errorMessage.set('');
-    this.testResults.set(null);
-
-    this.apiService
-      .get<LocalizedAccessibilityTestResponse>(`/api/pages/accessibility-test?url=${encodeURIComponent(currentUrl)}`)
-      .pipe(
-        catchError((error) => {
-          console.error('Accessibility test error:', error);
-
-          let errorKey = 'accessibility-error-generic';
-          if (error.status === 429) {
-            errorKey = 'accessibility-error-rate-limit';
-          } else if (error.status === 0 || error.name === 'NetworkError') {
-            errorKey = 'accessibility-error-network';
-          } else if (error.status === 400 && error.error?.message?.includes('Invalid URL')) {
-            errorKey = 'accessibility-error-invalid-url';
-          } else if (error.name === 'TimeoutError' || error.status === 504) {
-            errorKey = 'accessibility-error-timeout';
-          }
-
-          const errorResponse = {
-            success: false,
-            error: errorKey
-          } as AccessibilityTestResponse;
-
-          return of({
-            en: errorResponse,
-            fr: errorResponse
-          } as LocalizedAccessibilityTestResponse);
-        }),
-        finalize(() => {
-          this.isTestRunning.set(false);
-        })
-      )
-      .subscribe((response) => {
-        const langKey = this.currentLang() === 'fr-CA' ? 'fr' : 'en';
-
-        if (response && response[langKey] && response[langKey]!.success) {
-          if (currentUrl) {
-            accessibilityCache.set(currentUrl, response);
-          }
-
-          this.testResults.set(response[langKey]!);
-        } else {
-          const errorResponse = response && response[langKey];
-          if (errorResponse && errorResponse.error) {
-            if (errorResponse.error.startsWith('accessibility-error-')) {
-              this.errorMessage.set(this.translateService.instant(errorResponse.error));
-            } else {
-              this.errorMessage.set(errorResponse.error || this.translateService.instant('accessibility-error-generic'));
-            }
-          } else {
-            this.errorMessage.set(this.translateService.instant('accessibility-error-generic'));
-          }
-        }
-      });
   }
 }

@@ -15,6 +15,9 @@ import {
   getHashesSuccess,
   loadPagesDetailsInit,
   loadPagesDetailsSuccess,
+  loadAccessibilityInit,
+  loadAccessibilitySuccess,
+  loadAccessibilityError,
 } from './pages-details.actions';
 import { selectPagesDetailsData } from './pages-details.selectors';
 import { UrlHash } from '@dua-upd/types-common';
@@ -97,6 +100,40 @@ export class PagesDetailsEffects {
             ),
           ),
       ),
+    );
+  });
+
+  loadAccessibility$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(loadAccessibilityInit),
+      mergeMap(({ url }) =>
+        this.api
+          .get<any>(`/api/pages/accessibility-test?url=${encodeURIComponent(url)}`)
+          .pipe(
+            map((data) => loadAccessibilitySuccess({ data })),
+            catchError((error) => {
+              let errorKey = 'accessibility-error-generic';
+              if (error.status === 429) {
+                errorKey = 'accessibility-error-rate-limit';
+              } else if (error.status === 0 || error.name === 'NetworkError') {
+                errorKey = 'accessibility-error-network';
+              } else if (error.status === 400 && error.error?.message?.includes('Invalid URL')) {
+                errorKey = 'accessibility-error-invalid-url';
+              } else if (error.name === 'TimeoutError' || error.status === 504) {
+                errorKey = 'accessibility-error-timeout';
+              }
+              return of(loadAccessibilityError({ error: errorKey }));
+            }),
+          ),
+      ),
+    );
+  });
+
+  triggerAccessibilityOnPageLoad$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(loadPagesDetailsSuccess),
+      filter(({ data }) => !!data && !!data.url),
+      map(({ data }) => loadAccessibilityInit({ url: data!.url })),
     );
   });
 }

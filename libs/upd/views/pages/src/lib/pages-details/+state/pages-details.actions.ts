@@ -26,3 +26,18 @@ export const getHashesError = createAction(
   '[PagesDetails/API] Get Hashes Error',
   props<{ error: string }>(),
 );
+
+export const loadAccessibilityInit = createAction(
+  '[PagesDetails/API] Load Accessibility Init',
+  props<{ url: string }>()
+);
+
+export const loadAccessibilitySuccess = createAction(
+  '[PagesDetails/API] Load Accessibility Success',
+  props<{ data: any }>()
+);
+
+export const loadAccessibilityError = createAction(
+  '[PagesDetails/API] Load Accessibility Error',
+  props<{ error: string }>()
+);

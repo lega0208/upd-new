@@ -252,3 +252,23 @@ export const selectDyfNoPerVisitsSeries = createSelector(
     ];
   }
 );
+
+export const selectAccessibilityData = createSelector(
+  selectPagesDetailsState,
+  (state: PagesDetailsState) => state.accessibility
+);
+
+export const selectAccessibilityLoaded = createSelector(
+  selectPagesDetailsState,
+  (state: PagesDetailsState) => state.loadedAccessibility
+);
+
+export const selectAccessibilityLoading = createSelector(
+  selectPagesDetailsState,
+  (state: PagesDetailsState) => state.loadingAccessibility
+);
+
+export const selectAccessibilityError = createSelector(
+  selectPagesDetailsState,
+  (state: PagesDetailsState) => state.errorAccessibility
+);
