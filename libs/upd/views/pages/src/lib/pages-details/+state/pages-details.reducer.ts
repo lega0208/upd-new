@@ -70,21 +70,35 @@ const reducer = createReducer(
   ),
   on(
     PagesDetailsActions.loadPagesDetailsSuccess,
-    (state, { data }): PagesDetailsState =>
-      data === null
-        ? {
-            ...state,
-            loading: false,
-            loaded: true,
-            error: null,
-          }
-        : {
-            ...state,
-            data: { ...data },
-            loading: false,
-            loaded: true,
-            error: null,
-          },
+    (state, { data }): PagesDetailsState => {
+      // If data is null, page is cached - keep everything including accessibility
+      if (data === null) {
+        return {
+          ...state,
+          loading: false,
+          loaded: true,
+          error: null,
+        };
+      }
+
+      // Check if URL changed
+      const urlChanged = state.data.url !== data.url;
+
+      return {
+        ...state,
+        data: { ...data },
+        loading: false,
+        loaded: true,
+        error: null,
+        // Clear accessibility data only if URL changed
+        ...(urlChanged && {
+          accessibility: null,
+          loadedAccessibility: false,
+          loadingAccessibility: false,
+          errorAccessibility: null,
+        }),
+      };
+    }
   ),
   on(
     PagesDetailsActions.loadPagesDetailsError,

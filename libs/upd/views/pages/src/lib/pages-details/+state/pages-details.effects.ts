@@ -19,7 +19,7 @@ import {
   loadAccessibilitySuccess,
   loadAccessibilityError,
 } from './pages-details.actions';
-import { selectPagesDetailsData } from './pages-details.selectors';
+import { selectPagesDetailsData, selectAccessibilityData } from './pages-details.selectors';
 import { UrlHash } from '@dua-upd/types-common';
 
 @Injectable()
@@ -133,7 +133,10 @@ export class PagesDetailsEffects {
     return this.actions$.pipe(
       ofType(loadPagesDetailsSuccess),
       filter(({ data }) => !!data && !!data.url),
-      map(({ data }) => loadAccessibilityInit({ url: data!.url })),
+      concatLatestFrom(() => [this.store.select(selectAccessibilityData)]),
+      // Only trigger if accessibility data is null (cleared by reducer when URL changed)
+      filter(([, accessibilityData]) => accessibilityData === null),
+      map(([{ data }]) => loadAccessibilityInit({ url: data!.url })),
     );
   });
 }
