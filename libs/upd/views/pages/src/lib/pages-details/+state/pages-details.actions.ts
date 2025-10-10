@@ -34,7 +34,7 @@ export const loadAccessibilityInit = createAction(
 
 export const loadAccessibilitySuccess = createAction(
   '[PagesDetails/API] Load Accessibility Success',
-  props<{ data: any }>()
+  props<{ url: string; data: any }>()
 );
 
 export const loadAccessibilityError = createAction(

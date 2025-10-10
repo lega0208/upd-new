@@ -110,7 +110,7 @@ export class PagesDetailsEffects {
         this.api
           .get<any>(`/api/pages/accessibility-test?url=${encodeURIComponent(url)}`)
           .pipe(
-            map((data) => loadAccessibilitySuccess({ data })),
+            map((data) => loadAccessibilitySuccess({ url, data })),
             catchError((error) => {
               let errorKey = 'accessibility-error-generic';
               if (error.status === 429) {
@@ -134,7 +134,7 @@ export class PagesDetailsEffects {
       ofType(loadPagesDetailsSuccess),
       filter(({ data }) => !!data && !!data.url),
       concatLatestFrom(() => [this.store.select(selectAccessibilityData)]),
-      // Only trigger if accessibility data is null (cleared by reducer when URL changed)
+      // Only trigger if no accessibility data exists for this specific URL
       filter(([, accessibilityData]) => accessibilityData === null),
       map(([{ data }]) => loadAccessibilityInit({ url: data!.url })),
     );

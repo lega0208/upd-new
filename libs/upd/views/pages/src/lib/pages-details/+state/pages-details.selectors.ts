@@ -255,7 +255,12 @@ export const selectDyfNoPerVisitsSeries = createSelector(
 
 export const selectAccessibilityData = createSelector(
   selectPagesDetailsState,
-  (state: PagesDetailsState) => state.accessibility
+  selectPagesDetailsData,
+  (state: PagesDetailsState, pageData) => {
+    const currentUrl = pageData?.url;
+    if (!currentUrl) return null;
+    return state.accessibilityByUrl[currentUrl] || null;
+  }
 );
 
 export const selectAccessibilityLoaded = createSelector(

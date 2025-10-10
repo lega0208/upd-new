@@ -13,7 +13,7 @@ export interface PagesDetailsState {
   loadedHashes: boolean;
   loadingHashes: boolean;
   errorHashes?: string | null;
-  accessibility: any | null;
+  accessibilityByUrl: Record<string, any>; // Store accessibility data per URL for caching
   loadedAccessibility: boolean;
   loadingAccessibility: boolean;
   errorAccessibility?: string | null;
@@ -50,7 +50,7 @@ export const pagesDetailsInitialState: PagesDetailsState = {
   loadingHashes: false,
   loadedHashes: false,
   errorHashes: null,
-  accessibility: null,
+  accessibilityByUrl: {},
   loadedAccessibility: false,
   loadingAccessibility: false,
   errorAccessibility: null,
@@ -81,22 +81,13 @@ const reducer = createReducer(
         };
       }
 
-      // Check if URL changed
-      const urlChanged = state.data.url !== data.url;
-
       return {
         ...state,
         data: { ...data },
         loading: false,
         loaded: true,
         error: null,
-        // Clear accessibility data only if URL changed
-        ...(urlChanged && {
-          accessibility: null,
-          loadedAccessibility: false,
-          loadingAccessibility: false,
-          errorAccessibility: null,
-        }),
+        // Keep accessibilityByUrl cache intact across page navigation
       };
     }
   ),
@@ -159,9 +150,12 @@ const reducer = createReducer(
   ),
   on(
     PagesDetailsActions.loadAccessibilitySuccess,
-    (state, { data }): PagesDetailsState => ({
+    (state, { url, data }): PagesDetailsState => ({
       ...state,
-      accessibility: data,
+      accessibilityByUrl: {
+        ...state.accessibilityByUrl,
+        [url]: data, // Store data by URL for caching
+      },
       loadingAccessibility: false,
       loadedAccessibility: true,
       errorAccessibility: null,
