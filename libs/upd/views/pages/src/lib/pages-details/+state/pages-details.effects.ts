@@ -21,6 +21,7 @@ import {
 } from './pages-details.actions';
 import { selectPagesDetailsData, selectAccessibilityData } from './pages-details.selectors';
 import { UrlHash } from '@dua-upd/types-common';
+import type { LocalizedAccessibilityTestResponse } from '../pages-details-accessibility/pages-details-accessibility.component';
 
 @Injectable()
 export class PagesDetailsEffects {
@@ -108,7 +109,7 @@ export class PagesDetailsEffects {
       ofType(loadAccessibilityInit),
       mergeMap(({ url }) =>
         this.api
-          .get<any>(`/api/pages/accessibility-test?url=${encodeURIComponent(url)}`)
+          .get<LocalizedAccessibilityTestResponse>(`/api/pages/accessibility-test?url=${encodeURIComponent(url)}`)
           .pipe(
             map((data) => loadAccessibilitySuccess({ url, data })),
             catchError((error) => {

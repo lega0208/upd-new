@@ -1936,6 +1936,11 @@
   "accessibility-error-network": "Erreur de réseau. Veuillez vérifier votre connexion et réessayer.",
   "accessibility-error-invalid-url": "URL invalide. Veuillez vérifier l'URL de la page et réessayer.",
   "accessibility-error-timeout": "Le test a expiré. Veuillez réessayer.",
+  "accessibility-error-server-error": "Le service de test a rencontré une erreur interne. Veuillez réessayer plus tard.",
+  "accessibility-error-service-unavailable": "Le service de test est temporairement indisponible. Veuillez réessayer plus tard.",
+  "accessibility-error-gateway-timeout": "Le service de test connaît des délais. Veuillez réessayer plus tard.",
+  "accessibility-error-bad-gateway": "Impossible de joindre le service de test. Veuillez réessayer plus tard.",
+  "accessibility-error-connection-reset": "La connexion au service de test a été perdue. Veuillez réessayer.",
   "positive": "Positif",
   "neutral": "Neutre",
   "negative": "Négatif"

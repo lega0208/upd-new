@@ -627,17 +627,34 @@ export class PagesService {
     } catch (error) {
       // Map error types to translation keys
       let errorKey = 'accessibility-error-generic';
-      
-      if (error.message?.includes('429') || error.message?.includes('rate limit')) {
+
+      // Check HTTP status codes first (from axios error.response)
+      if (error.response?.status === 429) {
         errorKey = 'accessibility-error-rate-limit';
-      } else if (error.message?.includes('network') || error.message?.includes('ENOTFOUND')) {
+      } else if (error.response?.status === 500) {
+        errorKey = 'accessibility-error-server-error';
+      } else if (error.response?.status === 503) {
+        errorKey = 'accessibility-error-service-unavailable';
+      } else if (error.response?.status === 504) {
+        errorKey = 'accessibility-error-gateway-timeout';
+      } else if (error.response?.status === 502) {
+        errorKey = 'accessibility-error-bad-gateway';
+      }
+      // Check error codes for network/socket issues
+      else if (error.code === 'ECONNRESET' || error.message?.includes('socket hang up') || error.message?.includes('ECONNRESET')) {
+        errorKey = 'accessibility-error-connection-reset';
+      } else if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout') || error.message?.includes('ETIMEDOUT')) {
+        errorKey = 'accessibility-error-timeout';
+      } else if (error.code === 'ENOTFOUND' || error.message?.includes('network') || error.message?.includes('ENOTFOUND')) {
         errorKey = 'accessibility-error-network';
+      }
+      // Check error message strings as fallback
+      else if (error.message?.includes('429') || error.message?.includes('rate limit')) {
+        errorKey = 'accessibility-error-rate-limit';
       } else if (error.message?.includes('Invalid URL') || error.message?.includes('invalid url')) {
         errorKey = 'accessibility-error-invalid-url';
-      } else if (error.message?.includes('timeout') || error.message?.includes('ETIMEDOUT')) {
-        errorKey = 'accessibility-error-timeout';
       }
-      
+
       const errorResponse = {
         success: false,
         error: errorKey,

@@ -2,8 +2,12 @@ import { createReducer, on, Action } from '@ngrx/store';
 
 import * as PagesDetailsActions from './pages-details.actions';
 import { PageDetailsData } from '@dua-upd/types-common';
+import type { LocalizedAccessibilityTestResponse } from '../pages-details-accessibility/pages-details-accessibility.component';
 
 export const PAGES_DETAILS_FEATURE_KEY = 'pagesDetails';
+
+// Maximum number of accessibility test results to cache (prevents memory leaks)
+const MAX_ACCESSIBILITY_CACHE_SIZE = 50;
 
 export interface PagesDetailsState {
   data: PageDetailsData;
@@ -13,7 +17,7 @@ export interface PagesDetailsState {
   loadedHashes: boolean;
   loadingHashes: boolean;
   errorHashes?: string | null;
-  accessibilityByUrl: Record<string, any>; // Store accessibility data per URL for caching
+  accessibilityByUrl: Record<string, LocalizedAccessibilityTestResponse>; // Store accessibility data per URL (LRU cache, max 50 entries)
   loadedAccessibility: boolean;
   loadingAccessibility: boolean;
   errorAccessibility?: string | null;
@@ -150,16 +154,32 @@ const reducer = createReducer(
   ),
   on(
     PagesDetailsActions.loadAccessibilitySuccess,
-    (state, { url, data }): PagesDetailsState => ({
-      ...state,
-      accessibilityByUrl: {
-        ...state.accessibilityByUrl,
-        [url]: data, // Store data by URL for caching
-      },
-      loadingAccessibility: false,
-      loadedAccessibility: true,
-      errorAccessibility: null,
-    }),
+    (state, { url, data }): PagesDetailsState => {
+      const currentCache = state.accessibilityByUrl;
+      const cacheKeys = Object.keys(currentCache);
+
+      // Implement LRU cache: if cache is at limit, remove oldest entry (first key)
+      let updatedCache = { ...currentCache };
+      if (cacheKeys.length >= MAX_ACCESSIBILITY_CACHE_SIZE && !currentCache[url]) {
+        // Only evict if adding NEW url (not updating existing)
+        const [, ...remainingUrls] = cacheKeys;
+        updatedCache = remainingUrls.reduce((acc, key) => {
+          acc[key] = currentCache[key];
+          return acc;
+        }, {} as Record<string, LocalizedAccessibilityTestResponse>);
+      }
+
+      return {
+        ...state,
+        accessibilityByUrl: {
+          ...updatedCache,
+          [url]: data, // Store/update data by URL
+        },
+        loadingAccessibility: false,
+        loadedAccessibility: true,
+        errorAccessibility: null,
+      };
+    },
   ),
   on(
     PagesDetailsActions.loadAccessibilityError,
@@ -168,6 +188,16 @@ const reducer = createReducer(
       loadingAccessibility: false,
       loadedAccessibility: true,
       errorAccessibility: error,
+    }),
+  ),
+  on(
+    PagesDetailsActions.clearAccessibilityCache,
+    (state): PagesDetailsState => ({
+      ...state,
+      accessibilityByUrl: {},
+      loadedAccessibility: false,
+      loadingAccessibility: false,
+      errorAccessibility: null,
     }),
   ),
 );

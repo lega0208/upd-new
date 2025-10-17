@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, SecurityContext } from '@angular/core';
 import { I18nFacade } from '@dua-upd/upd/state';
 import { PagesDetailsFacade } from '../+state/pages-details.facade';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -7,12 +7,12 @@ import { TranslateService } from '@ngx-translate/core';
 import { globalColours } from '@dua-upd/utils-common';
 import type { ColumnConfig } from '@dua-upd/types-common';
 
-interface LocalizedAccessibilityTestResponse {
+export interface LocalizedAccessibilityTestResponse {
   en?: AccessibilityTestResponse;
   fr?: AccessibilityTestResponse;
 }
 
-interface AccessibilityTestResponse {
+export interface AccessibilityTestResponse {
   success: boolean;
   data?: {
     desktop: AccessibilityTestResult;
@@ -20,7 +20,7 @@ interface AccessibilityTestResponse {
   error?: string;
 }
 
-interface AccessibilityTestResult {
+export interface AccessibilityTestResult {
   url: string;
   strategy: 'mobile' | 'desktop';
   score: number;
@@ -29,7 +29,7 @@ interface AccessibilityTestResult {
   testedAt: Date;
 }
 
-interface AccessibilityAudit {
+export interface AccessibilityAudit {
   id: string;
   title: string;
   description: string;
@@ -248,19 +248,19 @@ export class PagesDetailsAccessibilityComponent {
 
   parseMarkdownLinks(description: string): SafeHtml {
     const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-    
+
     const isEnglish = this.currentLang() === 'en-CA';
-    
+
     const htmlDescription = description.replace(markdownLinkRegex, (_match, linkText, url) => {
       let processedUrl = url;
       if (!isEnglish && url.includes('https://developer.chrome.com/docs/lighthouse/accessibility')) {
         processedUrl = url.includes('?') ? `${url}&hl=fr` : `${url}?hl=fr`;
       }
-      
+
       return `<a href="${processedUrl}" target="_blank" rel="noopener noreferrer" class="text-primary">${linkText}</a>`;
     });
-    
-    return this.sanitizer.sanitize(1, htmlDescription) || description;
+
+    return this.sanitizer.sanitize(SecurityContext.HTML, htmlDescription) || description;
   }
 
 

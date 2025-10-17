@@ -1551,6 +1551,11 @@
   "accessibility-error-network": "Network error. Please check your connection and try again.",
   "accessibility-error-invalid-url": "Invalid URL. Please check the page URL and try again.",
   "accessibility-error-timeout": "The test timed out. Please try again.",
+  "accessibility-error-server-error": "The testing service encountered an internal error. Please try again later.",
+  "accessibility-error-service-unavailable": "The testing service is temporarily unavailable. Please try again later.",
+  "accessibility-error-gateway-timeout": "The testing service is experiencing delays. Please try again later.",
+  "accessibility-error-bad-gateway": "Unable to reach the testing service. Please try again later.",
+  "accessibility-error-connection-reset": "Connection to the testing service was lost. Please try again.",
   "positive": "Positive",
   "neutral": "Neutral",
   "negative": "Negative"
