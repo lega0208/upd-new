@@ -20,6 +20,7 @@ import {
   loadAccessibilityError,
 } from './pages-details.actions';
 import { selectPagesDetailsData, selectAccessibilityData } from './pages-details.selectors';
+import * as PagesDetailsSelectors from './pages-details.selectors';
 import { UrlHash } from '@dua-upd/types-common';
 import type { LocalizedAccessibilityTestResponse } from '../pages-details-accessibility/pages-details-accessibility.component';
 
@@ -113,6 +114,12 @@ export class PagesDetailsEffects {
           .pipe(
             map((data) => loadAccessibilitySuccess({ url, data })),
             catchError((error) => {
+              // If request was cancelled (navigation away), don't dispatch error
+              // This prevents the global error state from affecting other cached pages
+              if (error.name === 'AbortError' || error.message?.includes('cancel')) {
+                return EMPTY;
+              }
+
               let errorKey = 'accessibility-error-generic';
               if (error.status === 429) {
                 errorKey = 'accessibility-error-rate-limit';
@@ -134,9 +141,20 @@ export class PagesDetailsEffects {
     return this.actions$.pipe(
       ofType(loadPagesDetailsSuccess),
       filter(({ data }) => !!data && !!data.url),
-      concatLatestFrom(() => [this.store.select(selectAccessibilityData)]),
-      // Only trigger if no accessibility data exists for this specific URL
-      filter(([, accessibilityData]) => accessibilityData === null),
+      concatLatestFrom(() => [
+        this.store.select(PagesDetailsSelectors.selectPagesDetailsState)
+      ]),
+      // Only trigger if no accessibility data exists for this specific URL in the cache
+      filter(([{ data }, state]) => {
+        const url = data!.url;
+        const hasCache = !!state.accessibilityByUrl[url];
+        console.log('[Accessibility Debug] URL:', url);
+        console.log('[Accessibility Debug] Has cache:', hasCache);
+        console.log('[Accessibility Debug] Cache keys:', Object.keys(state.accessibilityByUrl));
+        console.log('[Accessibility Debug] Will trigger test:', !hasCache);
+        // Check if data exists in the URL-specific cache, regardless of global state
+        return !hasCache;
+      }),
       map(([{ data }]) => loadAccessibilityInit({ url: data!.url })),
     );
   });

@@ -145,18 +145,24 @@ const reducer = createReducer(
   ),
   on(
     PagesDetailsActions.loadAccessibilityInit,
-    (state): PagesDetailsState => ({
-      ...state,
-      loadingAccessibility: true,
-      loadedAccessibility: false,
-      errorAccessibility: null,
-    }),
+    (state, { url }): PagesDetailsState => {
+      console.log('[Reducer Debug] loadAccessibilityInit for URL:', url);
+      console.log('[Reducer Debug] Current cache before init:', Object.keys(state.accessibilityByUrl));
+      return {
+        ...state,
+        loadingAccessibility: true,
+        loadedAccessibility: false,
+        errorAccessibility: null,
+      };
+    }
   ),
   on(
     PagesDetailsActions.loadAccessibilitySuccess,
     (state, { url, data }): PagesDetailsState => {
       const currentCache = state.accessibilityByUrl;
       const cacheKeys = Object.keys(currentCache);
+      console.log('[Reducer Debug] loadAccessibilitySuccess for URL:', url);
+      console.log('[Reducer Debug] Current cache before success:', cacheKeys);
 
       // Implement LRU cache: if cache is at limit, remove oldest entry (first key)
       let updatedCache = { ...currentCache };
@@ -169,12 +175,15 @@ const reducer = createReducer(
         }, {} as Record<string, LocalizedAccessibilityTestResponse>);
       }
 
+      const newCache = {
+        ...updatedCache,
+        [url]: data, // Store/update data by URL
+      };
+      console.log('[Reducer Debug] New cache after success:', Object.keys(newCache));
+
       return {
         ...state,
-        accessibilityByUrl: {
-          ...updatedCache,
-          [url]: data, // Store/update data by URL
-        },
+        accessibilityByUrl: newCache,
         loadingAccessibility: false,
         loadedAccessibility: true,
         errorAccessibility: null,

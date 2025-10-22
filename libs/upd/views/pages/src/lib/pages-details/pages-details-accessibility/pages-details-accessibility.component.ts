@@ -62,8 +62,16 @@ export class PagesDetailsAccessibilityComponent {
   url = toSignal(this.pageUrl$);
 
   accessibilityData = toSignal(this.pageDetailsService.accessibility$);
-  isTestRunning = toSignal(this.pageDetailsService.accessibilityLoading$);
   accessibilityError = toSignal(this.pageDetailsService.accessibilityError$);
+  private _accessibilityLoading = toSignal(this.pageDetailsService.accessibilityLoading$);
+
+  // Only show loading if we don't have cached data for current page
+  isTestRunning = computed(() => {
+    const data = this.accessibilityData();
+    const loading = this._accessibilityLoading();
+    // Show loading only if loading is true AND we don't have data yet
+    return loading && !data;
+  });
 
   errorMessage = computed(() => {
     const error = this.accessibilityError();
