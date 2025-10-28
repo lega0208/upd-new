@@ -765,8 +765,8 @@ export class ProjectsService {
         _id: Types.ObjectId;
         taskId: Types.ObjectId;
         title: string;
-        callsPer100Visits: number;
-        dyfNoPer1000Visits: number;
+        callsPerVisit: number;
+        dyfNoPerVisit: number;
         uxTestInLastTwoYears: boolean;
         ux_tests: IUxTest[];
       }>(
@@ -779,8 +779,8 @@ export class ProjectsService {
           dateRange: 1,
           title: '$task.title',
           'projects._id': 1,
-          callsPer100Visits: 1,
-          dyfNoPer1000Visits: 1,
+          callsPerVisit: 1,
+          dyfNoPerVisit: 1,
           uxTestInLastTwoYears: {
             $cond: [
               {
@@ -806,15 +806,15 @@ export class ProjectsService {
           ({
             taskId,
             title,
-            callsPer100Visits,
-            dyfNoPer1000Visits,
+            callsPerVisit,
+            dyfNoPerVisit,
             uxTestInLastTwoYears,
             ux_tests,
           }) => ({
             _id: taskId.toString(),
             title,
-            callsPer100Visits: callsPer100Visits * 100,
-            dyfNoPer1000Visits: dyfNoPer1000Visits * 1000,
+            callsPer100Visits: callsPerVisit * 100,
+            dyfNoPer1000Visits: dyfNoPerVisit * 1000,
             uxTestInLastTwoYears,
             latestSuccessRate:
               getLatestTaskSuccessRate(ux_tests).avgTestSuccess,
