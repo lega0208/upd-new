@@ -20,7 +20,6 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { TabsModule } from 'primeng/tabs';
-import { TabViewModule } from 'primeng/tabview';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { PipesModule } from '@dua-upd/upd/pipes';
 import { DataCardComponent } from './data-card/data-card.component';
@@ -87,7 +86,6 @@ import { PageVersionComponent } from './page-version/page-version.component';
     CheckboxModule,
     RadioButtonModule,
     TabsModule,
-    TabViewModule,
     InputSwitchModule,
     InputIconModule,
     IconFieldModule,
@@ -154,7 +152,6 @@ import { PageVersionComponent } from './page-version/page-version.component';
     CheckboxModule,
     RadioButtonModule,
     TabsModule,
-    TabViewModule,
     InputSwitchModule,
     InputIconModule,
     IconFieldModule,
