@@ -1,5 +1,6 @@
 from logging import error, warning
 import os
+import re
 from copy import deepcopy
 from datetime import datetime, timedelta
 from time import sleep
@@ -119,6 +120,8 @@ class MongoParquetIO:
             parquet_start_time = datetime.now()
             print(f"Processing {parquet_model.parquet_filename}...")
 
+            sync_utils.ensure_temp_dirs()
+
             # Do initial processing/hashing for current/previous data
             local_path = self.storage.target_filepath(
                 parquet_model.parquet_filename, remote=False
@@ -135,12 +138,9 @@ class MongoParquetIO:
 
             base_filter = (
                 parquet_model.get_sampling_filter(self.sampling_context)
-                or parquet_model.filter
-                or {}
-            )
-            import re
-
-            re.sub(r"\s+", " ", str(base_filter))
+                if sample
+                else parquet_model.filter
+            ) or {}
 
             if base_filter.get("date") is not None:
                 base_filter.pop("date")
@@ -241,7 +241,10 @@ class MongoParquetIO:
                             )
 
                             pl.concat(
-                                [parquet_model.lf(), new_data.lazy()]
+                                [
+                                    pl.scan_parquet(storage_filepath),
+                                    new_data.lazy(),
+                                ]
                             ).sink_parquet(
                                 temp_storage_filepath,
                                 compression_level=7,
@@ -249,11 +252,15 @@ class MongoParquetIO:
                                 sync_on_close="all",
                             )
 
+                            print(
+                                f"Replacing {storage_filepath} with temp file {temp_storage_filepath}..."
+                            )
+
                             os.replace(temp_storage_filepath, storage_filepath)
 
                             print(f"Successfully wrote to {storage_filepath}")
                         except Exception as e:
-                            error(e.add_note(f"Error writing to {storage_filepath}"))
+                            error(e)
                             sync_utils.restore_backup(filepath)
                     else:
                         print(f"Writing to {filepath}")
@@ -265,7 +272,7 @@ class MongoParquetIO:
                             )
                             print(f"Successfully wrote to {storage_filepath}")
                         except Exception as e:
-                            error(e.add_note(f"Error writing to {storage_filepath}"))
+                            error(e)
 
                     print(
                         f"Updated {filepath} in {format_timedelta(datetime.now() - partition_start_time)}"
