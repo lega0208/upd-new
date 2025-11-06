@@ -2,11 +2,10 @@ import { createReducer, on, Action } from '@ngrx/store';
 
 import * as PagesDetailsActions from './pages-details.actions';
 import { PageDetailsData } from '@dua-upd/types-common';
-import type { LocalizedAccessibilityTestResponse } from '../pages-details-accessibility/pages-details-accessibility.component';
+import type { LocalizedAccessibilityTestResponse } from '@dua-upd/types-common';
 
 export const PAGES_DETAILS_FEATURE_KEY = 'pagesDetails';
 
-// Maximum number of accessibility test results to cache (prevents memory leaks)
 const MAX_ACCESSIBILITY_CACHE_SIZE = 50;
 
 export interface PagesDetailsState {
@@ -17,7 +16,7 @@ export interface PagesDetailsState {
   loadedHashes: boolean;
   loadingHashes: boolean;
   errorHashes?: string | null;
-  accessibilityByUrl: Record<string, LocalizedAccessibilityTestResponse>; // Store accessibility data per URL (LRU cache, max 50 entries)
+  accessibilityByUrl: Record<string, LocalizedAccessibilityTestResponse>;
   loadedAccessibility: boolean;
   loadingAccessibility: boolean;
   errorAccessibility?: string | null;
@@ -75,7 +74,6 @@ const reducer = createReducer(
   on(
     PagesDetailsActions.loadPagesDetailsSuccess,
     (state, { data }): PagesDetailsState => {
-      // If data is null, page is cached - keep everything including accessibility
       if (data === null) {
         return {
           ...state,
@@ -91,7 +89,6 @@ const reducer = createReducer(
         loading: false,
         loaded: true,
         error: null,
-        // Keep accessibilityByUrl cache intact across page navigation
       };
     }
   ),
@@ -145,9 +142,7 @@ const reducer = createReducer(
   ),
   on(
     PagesDetailsActions.loadAccessibilityInit,
-    (state, { url }): PagesDetailsState => {
-      console.log('[Reducer Debug] loadAccessibilityInit for URL:', url);
-      console.log('[Reducer Debug] Current cache before init:', Object.keys(state.accessibilityByUrl));
+    (state): PagesDetailsState => {
       return {
         ...state,
         loadingAccessibility: true,
@@ -161,8 +156,6 @@ const reducer = createReducer(
     (state, { url, data }): PagesDetailsState => {
       const currentCache = state.accessibilityByUrl;
       const cacheKeys = Object.keys(currentCache);
-      console.log('[Reducer Debug] loadAccessibilitySuccess for URL:', url);
-      console.log('[Reducer Debug] Current cache before success:', cacheKeys);
 
       // Implement LRU cache: if cache is at limit, remove oldest entry (first key)
       let updatedCache = { ...currentCache };
@@ -179,7 +172,6 @@ const reducer = createReducer(
         ...updatedCache,
         [url]: data, // Store/update data by URL
       };
-      console.log('[Reducer Debug] New cache after success:', Object.keys(newCache));
 
       return {
         ...state,

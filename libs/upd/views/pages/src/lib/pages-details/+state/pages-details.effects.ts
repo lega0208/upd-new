@@ -22,7 +22,7 @@ import {
 import { selectPagesDetailsData, selectAccessibilityData } from './pages-details.selectors';
 import * as PagesDetailsSelectors from './pages-details.selectors';
 import { UrlHash } from '@dua-upd/types-common';
-import type { LocalizedAccessibilityTestResponse } from '../pages-details-accessibility/pages-details-accessibility.component';
+import type { LocalizedAccessibilityTestResponse } from '@dua-upd/types-common';
 
 @Injectable()
 export class PagesDetailsEffects {
@@ -144,15 +144,9 @@ export class PagesDetailsEffects {
       concatLatestFrom(() => [
         this.store.select(PagesDetailsSelectors.selectPagesDetailsState)
       ]),
-      // Only trigger if no accessibility data exists for this specific URL in the cache
       filter(([{ data }, state]) => {
         const url = data!.url;
         const hasCache = !!state.accessibilityByUrl[url];
-        console.log('[Accessibility Debug] URL:', url);
-        console.log('[Accessibility Debug] Has cache:', hasCache);
-        console.log('[Accessibility Debug] Cache keys:', Object.keys(state.accessibilityByUrl));
-        console.log('[Accessibility Debug] Will trigger test:', !hasCache);
-        // Check if data exists in the URL-specific cache, regardless of global state
         return !hasCache;
       }),
       map(([{ data }]) => loadAccessibilityInit({ url: data!.url })),

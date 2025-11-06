@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { PageDetailsData } from '@dua-upd/types-common';
-import type { LocalizedAccessibilityTestResponse } from '../pages-details-accessibility/pages-details-accessibility.component';
+import type { LocalizedAccessibilityTestResponse } from '@dua-upd/types-common';
 
 export const loadPagesDetailsInit = createAction('[PagesDetails] Load PagesDetails Init');
 
