@@ -1,5 +1,6 @@
 from logging import error, warning
 import os
+import re
 from copy import deepcopy
 from datetime import datetime, timedelta
 from time import sleep
@@ -119,6 +120,8 @@ class MongoParquetIO:
             parquet_start_time = datetime.now()
             print(f"Processing {parquet_model.parquet_filename}...")
 
+            sync_utils.ensure_temp_dirs()
+
             # Do initial processing/hashing for current/previous data
             local_path = self.storage.target_filepath(
                 parquet_model.parquet_filename, remote=False
@@ -135,12 +138,9 @@ class MongoParquetIO:
 
             base_filter = (
                 parquet_model.get_sampling_filter(self.sampling_context)
-                or parquet_model.filter
-                or {}
-            )
-            import re
-
-            re.sub(r"\s+", " ", str(base_filter))
+                if sample
+                else parquet_model.filter
+            ) or {}
 
             if base_filter.get("date") is not None:
                 base_filter.pop("date")
