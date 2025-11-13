@@ -2,26 +2,7 @@ import { Injectable, Inject, ConsoleLogger } from '@nestjs/common';
 import { wait } from '@dua-upd/utils-common';
 import { Retry } from '@dua-upd/utils-common';
 import { PageSpeedInsightsClient } from './pagespeed-insights.client';
-
-export interface AccessibilityAudit {
-  id: string;
-  title: string;
-  description: string;
-  score: number | null;
-  displayMode: string;
-  category: 'failed' | 'manual_check' | 'passed' | 'not_applicable';
-  snippet?: string;
-  helpUrl?: string;
-}
-
-export interface AccessibilityTestResult {
-  url: string;
-  strategy: 'mobile' | 'desktop';
-  score: number;
-  scoreDisplay: string;
-  audits: AccessibilityAudit[];
-  testedAt: Date;
-}
+import type { AccessibilityAudit, AccessibilityTestResult } from '@dua-upd/types-common';
 
 @Injectable()
 export class PageSpeedInsightsService {

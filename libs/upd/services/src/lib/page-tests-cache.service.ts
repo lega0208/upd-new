@@ -1,10 +1,5 @@
 import { Injectable } from '@angular/core';
-
-interface AccessibilityTestResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
-}
+import type { AccessibilityTestResponse } from '@dua-upd/types-common';
 
 @Injectable({
   providedIn: 'root'

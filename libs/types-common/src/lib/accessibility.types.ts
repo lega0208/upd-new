@@ -1,26 +1,26 @@
-export interface LocalizedAccessibilityTestResponse {
+export type LocalizedAccessibilityTestResponse = {
   en?: AccessibilityTestResponse;
   fr?: AccessibilityTestResponse;
-}
+};
 
-export interface AccessibilityTestResponse {
+export type AccessibilityTestResponse = {
   success: boolean;
   data?: {
     desktop: AccessibilityTestResult;
   };
   error?: string;
-}
+};
 
-export interface AccessibilityTestResult {
+export type AccessibilityTestResult = {
   url: string;
   strategy: 'mobile' | 'desktop';
   score: number;
   scoreDisplay: string;
   audits: AccessibilityAudit[];
   testedAt: Date;
-}
+};
 
-export interface AccessibilityAudit {
+export type AccessibilityAudit = {
   id: string;
   title: string;
   description: string;
@@ -33,4 +33,4 @@ export interface AccessibilityAudit {
   impact?: string;
   tags?: string[];
   helpUrl?: string;
-}
+};
