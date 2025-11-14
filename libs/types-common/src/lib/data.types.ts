@@ -268,6 +268,10 @@ export interface OverviewData
     uniqueTasks: number;
     successRates: SuccessRates;
   };
+  wosImprovedTasksKpi?: {
+    uniqueTasks: number;
+    successRates: SuccessRates;
+  };
   improvedKpiTopSuccessRate?: {
     uniqueTopTasks: number;
     allTopTasks: number;
@@ -277,8 +281,12 @@ export interface OverviewData
     _id: string;
     tmf_rank: number;
     title: string;
+    visits: number | null;
+    calls: number | null;
+    calls_per_100_visits: number | null;
     calls_per_100_visits_percent_change: number | null;
     calls_per_100_visits_difference: number | null;
+    dyf_no: number | null;
     dyf_no_per_1000_visits_percent_change: number | null;
     dyf_no_per_1000_visits_difference: number | null;
     latest_ux_success: number | null;

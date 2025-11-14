@@ -39,6 +39,7 @@ import type { InternalSearchTerm } from '@dua-upd/types-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import { compressString, decompressString } from '@dua-upd/node-utils';
 import { FlowService } from '@dua-upd/api/flow';
+import { PageSpeedInsightsService } from '@dua-upd/external-data';
 import { omit } from 'rambdax';
 
 @Injectable()
@@ -56,6 +57,7 @@ export class PagesService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private feedbackService: FeedbackService,
     private flowService: FlowService,
+    private pageSpeedInsightsService: PageSpeedInsightsService,
   ) {}
 
   async listPages({ projection, populate }): Promise<Page[]> {
@@ -596,6 +598,72 @@ export class PagesService {
         clicksChange,
       };
     });
+  }
+
+  async runAccessibilityTest(url: string) {
+    try {
+      // Ensure URL has https:// protocol for PageSpeed Insights API
+      const fullUrl = url.startsWith('http://') || url.startsWith('https://') 
+        ? url 
+        : `https://${url}`;
+      
+      // Run desktop tests for both locales (English and French)
+      const results = await this.pageSpeedInsightsService.runAccessibilityTestForBothLocales(fullUrl);
+
+      return {
+        en: {
+          success: true,
+          data: {
+            desktop: results.en,
+          },
+        },
+        fr: {
+          success: true,
+          data: {
+            desktop: results.fr,
+          },
+        },
+      };
+    } catch (error) {
+      // Map error types to translation keys
+      let errorKey = 'accessibility-error-generic';
+
+      // Check HTTP status codes first (from axios error.response)
+      if (error.response?.status === 429) {
+        errorKey = 'accessibility-error-rate-limit';
+      } else if (error.response?.status === 500) {
+        errorKey = 'accessibility-error-server-error';
+      } else if (error.response?.status === 503) {
+        errorKey = 'accessibility-error-service-unavailable';
+      } else if (error.response?.status === 504) {
+        errorKey = 'accessibility-error-gateway-timeout';
+      } else if (error.response?.status === 502) {
+        errorKey = 'accessibility-error-bad-gateway';
+      }
+      // Check error codes for network/socket issues
+      else if (error.code === 'ECONNRESET' || error.message?.includes('socket hang up') || error.message?.includes('ECONNRESET')) {
+        errorKey = 'accessibility-error-connection-reset';
+      } else if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout') || error.message?.includes('ETIMEDOUT')) {
+        errorKey = 'accessibility-error-timeout';
+      } else if (error.code === 'ENOTFOUND' || error.message?.includes('network') || error.message?.includes('ENOTFOUND')) {
+        errorKey = 'accessibility-error-network';
+      }
+      // Check error message strings as fallback
+      else if (error.message?.includes('429') || error.message?.includes('rate limit')) {
+        errorKey = 'accessibility-error-rate-limit';
+      } else if (error.message?.includes('Invalid URL') || error.message?.includes('invalid url')) {
+        errorKey = 'accessibility-error-invalid-url';
+      }
+
+      const errorResponse = {
+        success: false,
+        error: errorKey,
+      };
+      return {
+        en: errorResponse,
+        fr: errorResponse,
+      };
+    }
   }
 }
 
