@@ -126,12 +126,11 @@ export function dataPointToBulkInsert(
 
   const datesGroupedGranularity = { ...dates, grouped, granularity };
 
+  const urlsKey = urls?.length ? (urls.map((url) => url)).slice().sort().join('|') : undefined;
+
   const filter = grouped
     ? {
-        urls: {
-          $all: urls?.map((url) => ({ $elemMatch: { $eq: url } })),
-          $size: urls?.length,
-        },
+        urlsKey,
         ...datesGroupedGranularity,
       }
     : { url, ...datesGroupedGranularity };
