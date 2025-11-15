@@ -130,12 +130,12 @@ export function dataPointToBulkInsert(
 
   const filter = grouped
     ? {
-        urlsKey,
+        urls: urlsKey,
         ...datesGroupedGranularity,
       }
     : { url, ...datesGroupedGranularity };
 
-  const _urls = grouped ? { urls } : { url };
+  const _urls = grouped ? { urlsKey } : { url };
 
   return {
     updateOne: {

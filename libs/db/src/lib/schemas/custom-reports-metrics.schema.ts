@@ -33,9 +33,6 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
   @Prop({ type: [String], required: false, index: true })
   urls?: string[];
 
-  @Prop({ type: String, required: false, index: true })
-  urlsKey?: string;
-
   @Prop({ type: Date, required: true })
   startDate: Date;
 
@@ -65,12 +62,12 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
     config: ReportConfig<Date>,
   ): Promise<CustomReportsMetrics[]> {
 
-    const urlsKey =
+    const urls =
       config.urls.length > 0 ? (config.urls)?.map((url) => url).slice().sort().join('|') : undefined;
 
-    const urls = config.grouped
+    const _urls = config.grouped
       ? {
-          urlsKey,
+          urls,
         }
       : {
           url: { $in: config.urls },
@@ -102,7 +99,7 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
           : defaultQuery;
 
     const query = {
-      ...urls,
+      ..._urls,
       ...dates,
       grouped: config.grouped,
       granularity: config.granularity,
