@@ -7,6 +7,7 @@ import type {
   ReportConfig,
   ReportGranularity,
 } from '@dua-upd/types-common';
+import { createHash } from 'crypto';
 
 export const granularities: readonly ReportGranularity[] = [
   'day',
@@ -32,6 +33,9 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
 
   @Prop({ type: [String], required: false, index: true })
   urls?: string[];
+
+  @Prop({ type: String, required: false, index: true })
+  urlsHash?: string;
 
   @Prop({ type: Date, required: true })
   startDate: Date;
@@ -62,16 +66,19 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
     config: ReportConfig<Date>,
   ): Promise<CustomReportsMetrics[]> {
 
-    const urls =
-      config.urls.length > 0 ? (config.urls)?.map((url) => url).slice().sort().join('|') : undefined;
 
-    const _urls = config.grouped
-      ? {
-          urls,
-        }
-      : {
-          url: { $in: config.urls },
-        };
+  const normalizedUrls = (config.urls || []).map((url) => String(url)).sort();
+
+  const urlsHash =
+    normalizedUrls.length
+      ? createHash('md5')
+        .update(JSON.stringify(normalizedUrls))
+        .digest('hex')
+      : undefined;
+
+   const urls = config.grouped
+     ? { urlsHash }
+     : { url: { $in: normalizedUrls } };
 
     const defaultQuery = {
       startDate: {
@@ -99,7 +106,7 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
           : defaultQuery;
 
     const query = {
-      ..._urls,
+      ...urls,
       ...dates,
       grouped: config.grouped,
       granularity: config.granularity,

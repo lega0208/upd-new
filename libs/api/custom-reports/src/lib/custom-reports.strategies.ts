@@ -22,6 +22,7 @@ import {
   dateRangeToGranularity,
 } from '@dua-upd/utils-common';
 import type { ReportDataPoint } from './custom-reports.service';
+import { createHash } from 'crypto';
 
 // todo: refactor all the strategy stuff...
 
@@ -126,16 +127,20 @@ export function dataPointToBulkInsert(
 
   const datesGroupedGranularity = { ...dates, grouped, granularity };
 
-  const urlsKey = urls?.length ? (urls.map((url) => url)).slice().sort().join('|') : undefined;
+  const normalizedUrls = (urls ?? []).map((url) => String(url)).sort();
 
-  const filter = grouped
-    ? {
-        urls: urlsKey,
-        ...datesGroupedGranularity,
-      }
-    : { url, ...datesGroupedGranularity };
+  const urlsHash =
+    normalizedUrls.length
+    ? createHash('md5')
+        .update(JSON.stringify(normalizedUrls))
+        .digest('hex')
+      : undefined;
 
-  const _urls = grouped ? { urlsKey } : { url };
+   const filter = grouped
+     ? { urlsHash, ...datesGroupedGranularity }
+     : { url, ...datesGroupedGranularity };
+ 
+   const _urls = grouped ? { urls: normalizedUrls, urlsHash } : { url };
 
   return {
     updateOne: {

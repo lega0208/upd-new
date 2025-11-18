@@ -31,7 +31,7 @@ import {
   round,
 } from '@dua-upd/utils-common';
 import type {
-  AttachmentData,
+  ICustomReportsMetrics,
   IFeedback,
   IPage,
   IReadability,
@@ -44,6 +44,7 @@ import { outputExcel, outputJson } from './utils/output';
 import { preprocessCommentWords } from '@dua-upd/feedback';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import isoWeek from 'dayjs/plugin/isoWeek';
+import { createHash } from 'crypto';
 dayjs.extend(isoWeek);
 
 type Interval = 'full' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
@@ -1331,21 +1332,26 @@ export async function thirty30Report() {
     });
   }
 
+  type TaskOrProject = 'task' | 'project';
+
   // ------------------- Input Values ----------------------
 
-  const interval: Interval = 'monthly';
+  const interval: Interval = 'full';
 
   const dateRangeBefore: GranularityPeriod = {
-    start: '2024-06-24',
-    end: '2024-09-24',
+    start: '2025-03-15',
+    end: '2025-06-15',
   };
 
   const dateRangeAfter: GranularityPeriod = {
-    start: '2024-09-25',
-    end: '2024-12-25',
+    start: '2025-06-16',
+    end: '2025-09-16',
   };
 
-  const project = '6597b740c6cda2812bbb141f';
+  const type: TaskOrProject = 'project';
+
+  const project = '663b8e81e2b6865066434bc0';
+  const task = ['66fe335233cc9419778a989d', '621d280492982ac8c344d1c9'];
 
   // --------------------------------------------------------
 
@@ -1363,10 +1369,24 @@ export async function thirty30Report() {
   const dateRangesInterval = [dateRangeBeforeInterval, dateRangeAfterInterval];
 
   const projectId = new Types.ObjectId(project);
-  const tasks = await db.collections.tasks
-    .find({ projects: projectId })
-    .lean()
-    .exec();
+
+  let tasks = [];
+
+  if (type === ('task' as 'task' | 'project')) {
+    const taskIds = task.map((id) => new Types.ObjectId(id));
+
+    tasks = await db.collections.tasks
+      .find({
+        _id: { $in: taskIds },
+      })
+      .lean()
+      .exec();
+  } else {
+    tasks = await db.collections.tasks
+      .find({ projects: projectId })
+      .lean()
+      .exec();
+  }
 
   async function collectMetricsForTasks(dateRange) {
     const metricsByTask = [];
@@ -1590,10 +1610,15 @@ export async function thirty30Report() {
 
   function getValidSheetName(title: string, suffix: string): string {
     const maxTitleLength = 31 - suffix.length - 6;
+
+    const sanitizedTitle = title.replace(/[:\\\/?*\[\]]/g, '');
+
     const shortenedTitle =
-      title.length > maxTitleLength
-        ? `${title.slice(0, maxTitleLength)}...`
-        : title;
+      sanitizedTitle.length > maxTitleLength
+        ? `${sanitizedTitle.slice(0, maxTitleLength)}...`
+        : sanitizedTitle;
+
+    console.log(`${shortenedTitle}${suffix}`);
 
     return `${shortenedTitle}${suffix}`;
   }
@@ -1683,47 +1708,54 @@ export async function thirty30Report() {
   console.log(`Excel report generated successfully in ${outDir}`);
 }
 
-function updateAttachmentUrls(attachments?: AttachmentData[]) {
-  if (!attachments) {
-    return attachments;
+export async function addUrlsHashToCustomReports() {
+  const db = (<RunScriptCommand>this).inject<DbService>(DbService);
+
+  console.log('Fetching grouped custom reports...');
+
+  const reports = await db.collections.customReportsMetrics
+    .find({ urlsHash: { $exists: false }, grouped: true }, { urls: 1 })
+    .lean()
+    .exec();
+
+  if (!reports?.length) {
+    console.log('No grouped custom reports missing urlsHash found.');
+    return;
   }
 
-  return attachments.map((attachment) => {
-    if (!attachment.storage_url || attachment.storage_url.startsWith('/')) {
-      return attachment;
-    }
-
-    return {
-      ...attachment,
-      storage_url: new URL(attachment.storage_url).pathname,
-    };
-  });
-}
-
-export async function migrateAttachmentUrls(db: DbService) {
-  const reports = await db.collections.reports.find().exec();
+  const bulkWriteOps: AnyBulkWriteOperation<ICustomReportsMetrics>[] = [];
 
   for (const report of reports) {
-    if (report.en_attachment) {
-      report.en_attachment = updateAttachmentUrls(report.en_attachment);
-    }
+    // in case of 1 url, ensure it's an array
+    const urlsArray = Array.isArray(report.urls) ? report.urls : [report.urls];
 
-    if (report.fr_attachment) {
-      report.fr_attachment = updateAttachmentUrls(report.fr_attachment);
-    }
-    await report.save();
+    const normalized = urlsArray.length
+      ? urlsArray.map((url) => String(url)).sort()
+      : [];
+
+    if (!normalized.length) continue;
+
+    const urlsHash = normalized.length
+      ? createHash('md5').update(JSON.stringify(normalized)).digest('hex')
+      : undefined;
+
+    bulkWriteOps.push({
+      updateOne: {
+        filter: { _id: report._id },
+        update: { $set: { urlsHash } },
+      },
+    });
   }
 
-  console.log(`Updated ${reports.length} reports.`);
+  while (bulkWriteOps.length) {
+    console.log('write ops remaining: ', bulkWriteOps.length);
 
-  const projects = await db.collections.projects.find().exec();
+    const ops = bulkWriteOps.splice(0, 1000);
 
-  for (const project of projects) {
-    if (project.attachments) {
-      project.attachments = updateAttachmentUrls(project.attachments);
-      await project.save();
-    }
+    await db.collections.customReportsMetrics.bulkWrite(ops, {
+      ordered: false,
+    });
   }
 
-  console.log(`Updated ${projects.length} projects.`);
+  console.log(`Successfully updated custom reports with urlsHash.`);
 }
