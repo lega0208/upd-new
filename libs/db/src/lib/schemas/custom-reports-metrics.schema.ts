@@ -250,10 +250,10 @@ CustomReportsMetricsSchema.index(
 );
 
 CustomReportsMetricsSchema.index(
-  { urls: 1, startDate: 1, endDate: 1, grouped: 1, granularity: 1 },
+  { urlsHash: 1, startDate: 1, endDate: 1, grouped: 1, granularity: 1 },
   {
     partialFilterExpression: {
-      urls: { $exists: true },
+      urlsHash: { $exists: true },
       grouped: true,
     },
   },
@@ -272,10 +272,10 @@ CustomReportsMetricsSchema.index(
 );
 
 CustomReportsMetricsSchema.index(
-  { urls: 1, startDate: 1, grouped: 1, granularity: 1 },
+  { urlsHash: 1, startDate: 1, grouped: 1, granularity: 1 },
   {
     partialFilterExpression: {
-      urls: { $exists: true },
+      urlsHash: { $exists: true },
       grouped: true,
       granularity: 'day',
     },
