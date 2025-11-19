@@ -28,7 +28,8 @@ import { ConfigService } from '@nestjs/config';
     },
     {
       provide: PageSpeedInsightsClient.name,
-      useValue: new PageSpeedInsightsClient(),
+      useFactory: () => new PageSpeedInsightsClient(),
+      inject: [ConfigService],
     },
   ],
   exports: [
