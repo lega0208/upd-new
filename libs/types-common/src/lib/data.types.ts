@@ -276,6 +276,7 @@ export interface OverviewData
     uniqueTopTasks: number;
     allTopTasks: number;
     topSuccessRates: SuccessRates;
+    totalTopTasksCount: number;
   };
   topTasksTable: {
     _id: string;
