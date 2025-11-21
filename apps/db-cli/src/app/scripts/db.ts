@@ -31,6 +31,7 @@ import {
   round,
 } from '@dua-upd/utils-common';
 import type {
+  AttachmentData,
   ICustomReportsMetrics,
   IFeedback,
   IPage,
@@ -1336,16 +1337,16 @@ export async function thirty30Report() {
 
   // ------------------- Input Values ----------------------
 
-  const interval: Interval = 'full';
+  const interval: Interval = 'monthly';
 
   const dateRangeBefore: GranularityPeriod = {
-    start: '2025-03-15',
-    end: '2025-06-15',
+    start: '2024-06-24',
+    end: '2024-09-24',
   };
 
   const dateRangeAfter: GranularityPeriod = {
-    start: '2025-06-16',
-    end: '2025-09-16',
+    start: '2024-09-25',
+    end: '2024-12-25',
   };
 
   const type: TaskOrProject = 'project';
@@ -1611,7 +1612,7 @@ export async function thirty30Report() {
   function getValidSheetName(title: string, suffix: string): string {
     const maxTitleLength = 31 - suffix.length - 6;
 
-    const sanitizedTitle = title.replace(/[:\\\/?*\[\]]/g, '');
+    const sanitizedTitle = title.replace(/[:\\/?*[\]]/g, '');
 
     const shortenedTitle =
       sanitizedTitle.length > maxTitleLength
@@ -1706,6 +1707,51 @@ export async function thirty30Report() {
   );
 
   console.log(`Excel report generated successfully in ${outDir}`);
+}
+
+function updateAttachmentUrls(attachments?: AttachmentData[]) {
+  if (!attachments) {
+    return attachments;
+  }
+
+  return attachments.map((attachment) => {
+    if (!attachment.storage_url || attachment.storage_url.startsWith('/')) {
+      return attachment;
+    }
+
+    return {
+      ...attachment,
+      storage_url: new URL(attachment.storage_url).pathname,
+    };
+  });
+}
+
+export async function migrateAttachmentUrls(db: DbService) {
+  const reports = await db.collections.reports.find().exec();
+
+  for (const report of reports) {
+    if (report.en_attachment) {
+      report.en_attachment = updateAttachmentUrls(report.en_attachment);
+    }
+
+    if (report.fr_attachment) {
+      report.fr_attachment = updateAttachmentUrls(report.fr_attachment);
+    }
+    await report.save();
+  }
+
+  console.log(`Updated ${reports.length} reports.`);
+
+  const projects = await db.collections.projects.find().exec();
+
+  for (const project of projects) {
+    if (project.attachments) {
+      project.attachments = updateAttachmentUrls(project.attachments);
+      await project.save();
+    }
+  }
+
+  console.log(`Updated ${projects.length} projects.`);
 }
 
 export async function addUrlsHashToCustomReports() {
