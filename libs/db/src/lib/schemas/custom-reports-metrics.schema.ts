@@ -54,11 +54,11 @@ export class CustomReportsMetrics implements ICustomReportsMetrics {
   @Prop({ type: Boolean, required: true, index: true })
   grouped: boolean;
 
-  @Prop({ type: MongooseSchema.Types.Mixed, required: false, index: true })
+  @Prop({ type: MongooseSchema.Types.Mixed, required: false })
   metrics: ICustomReportsMetrics['metrics'] = {};
 
   // for breakdowns by dimension
-  @Prop({ type: MongooseSchema.Types.Mixed, required: false, index: true })
+  @Prop({ type: MongooseSchema.Types.Mixed, required: false})
   metrics_by: ICustomReportsMetrics['metrics_by'] = {};
 
   static async getMetrics(
