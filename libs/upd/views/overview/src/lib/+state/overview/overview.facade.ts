@@ -1111,6 +1111,10 @@ export class OverviewFacade {
     this.store.dispatch(OverviewActions.init());
   }
 
+  getCommentsAndWords() {
+    this.store.dispatch(OverviewActions.getCommentsAndWords());
+  }
+
   getMostRelevantFeedback() {
     this.store.dispatch(OverviewActions.getMostRelevantFeedback());
   }

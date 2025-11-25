@@ -241,6 +241,7 @@ export class DataTableComponent<T extends object> {
 
   ngOnInit() {
     this.filterService.register('globalAndFilter', (value: any, filters: string[]) => {
+      if (!filters?.length) return true;
       if (!value) return false;
       const val = String(value).toLowerCase();
       return filters.every((keyword) => val.includes(keyword));
