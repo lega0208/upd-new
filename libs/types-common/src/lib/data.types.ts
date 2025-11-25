@@ -19,7 +19,7 @@ import type {
   IFeedback,
   UrlHash,
 } from './schema.types';
-import type { MostRelevantCommentsAndWordsByLang } from './feedback.types';
+import type { CommentsAndWordsByLang, MostRelevantCommentsAndWordsByLang } from './feedback.types';
 
 export type ApiParams =
   | ({
@@ -298,7 +298,7 @@ export interface OverviewData
 }
 
 export type OverviewFeedback = {
-  mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
+  commentsAndWords: CommentsAndWordsByLang;
   numComments: number;
   numCommentsPercentChange: number | null;
   commentsByPage: {
@@ -314,7 +314,7 @@ export type OverviewFeedback = {
 };
 
 export type PartialOverviewFeedback = OverviewFeedback & {
-  mostRelevantCommentsAndWords: { parts: number };
+  commentsAndWords: { parts: number };
 };
 
 export type InternalSearchTerm = {

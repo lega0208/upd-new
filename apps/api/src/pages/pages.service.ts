@@ -125,18 +125,17 @@ export class PagesService {
           pageStatus: 1,
           visits: 1,
         },
-        {
-          sort: { visits: -1 },
-        },
       )
       .then((results) =>
-        results.map((page) => ({
-          _id: page.pageId,
-          title: page.title,
-          url: page.url,
-          pageStatus: page.pageStatus,
-          visits: page.visits,
-        })),
+        results
+          .map((page) => ({
+            _id: page.pageId,
+            title: page.title,
+            url: page.url,
+            pageStatus: page.pageStatus,
+            visits: page.visits,
+          }))
+          .sort((a, b) => (b.visits || 0) - (a.visits || 0)),
       );
 
     await this.cacheManager.set(
@@ -603,12 +602,16 @@ export class PagesService {
   async runAccessibilityTest(url: string) {
     try {
       // Ensure URL has https:// protocol for PageSpeed Insights API
-      const fullUrl = url.startsWith('http://') || url.startsWith('https://') 
-        ? url 
-        : `https://${url}`;
-      
+      const fullUrl =
+        url.startsWith('http://') || url.startsWith('https://')
+          ? url
+          : `https://${url}`;
+
       // Run desktop tests for both locales (English and French)
-      const results = await this.pageSpeedInsightsService.runAccessibilityTestForBothLocales(fullUrl);
+      const results =
+        await this.pageSpeedInsightsService.runAccessibilityTestForBothLocales(
+          fullUrl,
+        );
 
       return {
         en: {
@@ -641,17 +644,35 @@ export class PagesService {
         errorKey = 'accessibility-error-bad-gateway';
       }
       // Check error codes for network/socket issues
-      else if (error.code === 'ECONNRESET' || error.message?.includes('socket hang up') || error.message?.includes('ECONNRESET')) {
+      else if (
+        error.code === 'ECONNRESET' ||
+        error.message?.includes('socket hang up') ||
+        error.message?.includes('ECONNRESET')
+      ) {
         errorKey = 'accessibility-error-connection-reset';
-      } else if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout') || error.message?.includes('ETIMEDOUT')) {
+      } else if (
+        error.code === 'ETIMEDOUT' ||
+        error.message?.includes('timeout') ||
+        error.message?.includes('ETIMEDOUT')
+      ) {
         errorKey = 'accessibility-error-timeout';
-      } else if (error.code === 'ENOTFOUND' || error.message?.includes('network') || error.message?.includes('ENOTFOUND')) {
+      } else if (
+        error.code === 'ENOTFOUND' ||
+        error.message?.includes('network') ||
+        error.message?.includes('ENOTFOUND')
+      ) {
         errorKey = 'accessibility-error-network';
       }
       // Check error message strings as fallback
-      else if (error.message?.includes('429') || error.message?.includes('rate limit')) {
+      else if (
+        error.message?.includes('429') ||
+        error.message?.includes('rate limit')
+      ) {
         errorKey = 'accessibility-error-rate-limit';
-      } else if (error.message?.includes('Invalid URL') || error.message?.includes('invalid url')) {
+      } else if (
+        error.message?.includes('Invalid URL') ||
+        error.message?.includes('invalid url')
+      ) {
         errorKey = 'accessibility-error-invalid-url';
       }
 
