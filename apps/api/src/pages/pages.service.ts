@@ -256,29 +256,6 @@ export class PagesService {
       params.comparisonDateRange,
     );
 
-    const aggregatedSearchTermMetrics =
-      aggregateSearchTermMetrics(dateRangeDataByDay);
-    const aggregatedComparisonSearchTermMetrics = aggregateSearchTermMetrics(
-      comparisonDateRangeDataByDay,
-    );
-
-    const searchTermsWithPercentChange = getSearchTermsWithPercentChange(
-      aggregatedSearchTermMetrics,
-      aggregatedComparisonSearchTermMetrics,
-    );
-
-    const topIncreasedSearchTerms = getTop5IncreaseSearchTerms(
-      searchTermsWithPercentChange,
-    );
-
-    const top25GSCSearchTerms = getTop25SearchTerms(
-      searchTermsWithPercentChange,
-    );
-
-    const topDecreasedSearchTerms = getTop5DecreaseSearchTerms(
-      searchTermsWithPercentChange,
-    );
-
     const readability = await this.readabilityModel
       .find({ page: new Types.ObjectId(params.id) })
       .sort({ date: -1 })
@@ -320,6 +297,23 @@ export class PagesService {
         )?._id.toString()
       : null;
 
+    const dateRange = parseDateRangeString(params.dateRange);
+    const comparisonDateRange = parseDateRangeString(
+      params.comparisonDateRange,
+    );
+
+    const {
+      aaSearchTerms,
+      top25GSCSearchTerms,
+      topIncreasedSearchTerms,
+      topDecreasedSearchTerms,
+      activityMap,
+    } = await this.db.views.pages.getPageDetailsData(
+      page._id,
+      dateRange,
+      comparisonDateRange,
+    );
+
     const results = {
       _id: page._id.toString(),
       ...omit(['_id'], page),
@@ -356,8 +350,8 @@ export class PagesService {
         date: date.toISOString(),
         sum,
       })),
-      searchTerms: await this.getTopSearchTerms(params),
-      activityMap: await this.getActivityMapData(params),
+      searchTerms: aaSearchTerms,
+      activityMap,
       readability,
       mostRelevantCommentsAndWords,
       numComments,
@@ -398,44 +392,35 @@ export class PagesService {
   async getPageDetailsDataByDay(page: Page, dateRange: string) {
     const [startDate, endDate] = dateRange.split('/').map((d) => new Date(d));
 
-    return (
-      await this.pageMetricsModel
-        .aggregate<PageMetrics>([
-          {
-            $match: {
-              page: page._id,
-              date: { $gte: startDate, $lte: endDate },
+    return await this.pageMetricsModel
+      .aggregate<PageMetrics>([
+        {
+          $match: {
+            page: page._id,
+            date: { $gte: startDate, $lte: endDate },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            visits: 1,
+            date: 1,
+          },
+        },
+        {
+          $group: {
+            _id: '$date',
+            date: {
+              $first: '$date',
+            },
+            visits: {
+              $sum: '$visits',
             },
           },
-          {
-            $project: {
-              _id: 0,
-              visits: 1,
-              date: 1,
-              gsc_searchterms: 1,
-            },
-          },
-          {
-            $group: {
-              _id: '$date',
-              date: {
-                $first: '$date',
-              },
-              visits: {
-                $sum: '$visits',
-              },
-              gsc_searchterms: {
-                $push: '$gsc_searchterms',
-              },
-            },
-          },
-        ])
-        .sort('date')
-        .exec()
-    ).map((result) => ({
-      ...result,
-      gsc_searchterms: result.gsc_searchterms.flat(),
-    }));
+        },
+      ])
+      .sort('date')
+      .exec();
   }
 
   async getActivityMapData({ dateRange, comparisonDateRange, id }: ApiParams) {

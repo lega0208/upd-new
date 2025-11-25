@@ -130,7 +130,6 @@ export interface PageDetailsData extends EntityDetailsData<PageAggregatedData> {
   mostRelevantCommentsAndWords: MostRelevantCommentsAndWordsByLang;
   numComments: number;
   numCommentsPercentChange: number | null;
-
   hashes: UrlHash[];
   alternatePageId: string;
 }
