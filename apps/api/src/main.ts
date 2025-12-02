@@ -11,7 +11,7 @@ async function bootstrap() {
   app.use(helmet());
   
   if (process.env.COMPRESS_RESPONSES === 'true') {
-    app.use(compression());
+    app.use(compression({ threshold: 4_194_304 })); // 4 MB threshold
   }
 
   app.useBodyParser('json', { limit: '20mb' });
