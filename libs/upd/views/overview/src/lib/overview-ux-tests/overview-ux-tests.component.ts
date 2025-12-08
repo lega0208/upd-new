@@ -45,6 +45,7 @@ export class OverviewUxTestsComponent implements OnInit {
     this.overviewService.improvedKpiSuccessRateDifference$;
 
   improvedKpiSuccessRateDifferencePoints$ = this.overviewService.improvedKpiSuccessRateDifferencePoints$;
+  improvedKpiSuccessRateDifferencePointsRounded$ = this.overviewService.improvedKpiSuccessRateDifferencePointsRounded$;
 
   improvedKpiSuccessRateValidation$ =
     this.overviewService.improvedKpiSuccessRateValidation$;
@@ -52,7 +53,8 @@ export class OverviewUxTestsComponent implements OnInit {
   improvedKpiSuccessRateBaseline$ = this.overviewService.improvedKpiSuccessRateBaseline$;
     
   wosImprovedKpiSuccessRateDifferencePoints$ = this.overviewService.wosImprovedKpiSuccessRateDifferencePoints$;
-
+  wosImprovedKpiSuccessRateDifferencePointsRounded$ = this.overviewService.wosImprovedKpiSuccessRateDifferencePointsRounded$;
+  
   wosImprovedKpiSuccessRateValidation$ =
     this.overviewService.wosImprovedKpiSuccessRateValidation$;
   
@@ -68,7 +70,7 @@ export class OverviewUxTestsComponent implements OnInit {
   improvedKpiTopSuccessRateDifference$ =
     this.overviewService.improvedKpiTopSuccessRateDifference$;
 
-  improvedKpiTopSuccessRateDifferencePoints$ = this.overviewService.improvedKpiTopSuccessRateDifferencePoints$;
+  improvedKpiTopSuccessRateDifferencePointsRounded$ = this.overviewService.improvedKpiTopSuccessRateDifferencePointsRounded$;
 
   improvedKpiTopSuccessRateValidation$ =
     this.overviewService.improvedKpiTopSuccessRateValidation$;
@@ -79,6 +81,7 @@ export class OverviewUxTestsComponent implements OnInit {
   improvedTopKpi$ = this.overviewService.improvedTopKpi$;
   improvedKpiTopUniqueTasks$ = this.overviewService.improvedKpiTopUniqueTasks$;
   improvedKpiTopTasks$ = this.overviewService.improvedKpiTopTasks$;
+  improvedKpiTopTasksCount$ = this.overviewService.improvedKpiTopTasksCount$;
 
   kpiLastAvgSuccessRate$ = this.overviewService.kpiLastAvgSuccessRate$;
   kpiTestsCompleted$ = this.overviewService.kpiTestsCompleted$;

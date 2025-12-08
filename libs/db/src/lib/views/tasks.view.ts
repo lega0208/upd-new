@@ -855,8 +855,8 @@ export class TasksViewService extends DbViewNew<
       searchTerms: getArraySelectedPercentChange(
         ['clicks'],
         'term',
-        metricsWithPercentChange.aa_searchterms,
-        previousMetrics.aa_searchterms,
+        metricsWithPercentChange.aa_searchterms.filter(({ term }) => term),
+        previousMetrics.aa_searchterms.filter(({ term }) => term),
         { round: 2, suffix: 'Change' },
       ).slice(0, 25),
       // this isn't only visits, but this matches the current property name used in the rest of the code
@@ -986,6 +986,8 @@ export class TasksViewService extends DbViewNew<
       'dyf_no',
       'calls_per_100_visits',
       'dyf_no_per_1000_visits',
+      'survey',
+      'survey_completed'
     ] satisfies (keyof ProjectedTask)[];
 
     const dataWithPercentChange = getArraySelectedPercentChange(
@@ -997,7 +999,7 @@ export class TasksViewService extends DbViewNew<
     );
 
     return getArraySelectedAbsoluteChange(
-      ['calls_per_100_visits', 'dyf_no_per_1000_visits', 'visits', 'calls'],
+      ['calls_per_100_visits', 'dyf_no_per_1000_visits', 'visits', 'calls', 'dyf_no', 'survey', 'survey_completed'],
       '_id',
       dataWithPercentChange,
       // Need to cast it to the same type to get the correct type for the return value

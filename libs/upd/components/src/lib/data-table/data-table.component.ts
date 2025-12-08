@@ -162,7 +162,7 @@ export class DataTableComponent<T extends object> {
   }
 
   multiKeywordGlobalFilter(table: Table, event: Event) {
-    const input = (event.target as HTMLInputElement).value;
+    const input = this.getEventValue(event);
 
     const keywords = input
         .toLowerCase()
@@ -241,6 +241,7 @@ export class DataTableComponent<T extends object> {
 
   ngOnInit() {
     this.filterService.register('globalAndFilter', (value: any, filters: string[]) => {
+      if (!filters?.length) return true;
       if (!value) return false;
       const val = String(value).toLowerCase();
       return filters.every((keyword) => val.includes(keyword));

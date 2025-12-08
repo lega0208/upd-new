@@ -112,6 +112,12 @@ class ParquetModel(abc.ABC):
 
             callback(self.lf().filter(*partition_filters))
 
+    def latest_date(self) -> datetime | None:
+        """
+        Returns the latest date found in the parquet file(s).
+        """
+        return self.lf().select(pl.col("date").max()).collect()["date"].item()
+
 
 class MongoCollection(abc.ABC):
     collection: str
@@ -144,6 +150,8 @@ class MongoCollection(abc.ABC):
         "projects": [],
         "ux_tests": [],
         "attachments": [],
+        "calldriversEnquiry": [],
+        "callsByTopic": [],
     }
 
     def __init__(self, db: Database[Any], parquet_dir_path: str | None = None):

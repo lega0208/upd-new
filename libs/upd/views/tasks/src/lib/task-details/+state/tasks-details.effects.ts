@@ -7,11 +7,12 @@ import { ApiService } from '@dua-upd/upd/services';
 import {
   selectDatePeriod,
   selectDateRanges,
+  selectRoute,
   selectRouteNestedParam,
 } from '@dua-upd/upd/state';
 import {
-  getMostRelevantFeedback,
-  getMostRelevantFeedbackSuccess,
+  getCommentsAndWords,
+  getCommentsAndWordsSuccess,
   loadTasksDetailsError,
   loadTasksDetailsInit,
   loadTasksDetailsSuccess,
@@ -20,7 +21,9 @@ import {
   selectTaskId,
   selectTasksDetailsData,
 } from './tasks-details.selectors';
-import type { MostRelevantCommentsAndWordsByLang } from '@dua-upd/types-common';
+import type { CommentsAndWordsByLang } from '@dua-upd/types-common';
+
+const tasksRouteRegex = /\/tasks\//;
 
 @Injectable()
 export class TasksDetailsEffects {
@@ -75,13 +78,15 @@ export class TasksDetailsEffects {
   dateChange$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(selectDatePeriod),
+      concatLatestFrom(() => this.store.select(selectRoute)),
+      filter(([, route]) => tasksRouteRegex.test(route)),
       mergeMap(() => of(loadTasksDetailsInit())),
     );
   });
 
-  getMostRelevantFeedback$ = createEffect(() => {
+  getCommentsAndWords$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(getMostRelevantFeedback),
+      ofType(getCommentsAndWords),
       concatLatestFrom(() => [
         this.store.select(selectTaskId),
         this.store.select(selectDateRanges),
@@ -89,19 +94,19 @@ export class TasksDetailsEffects {
       mergeMap(([, id, { dateRange }]) =>
         this.api
           .get<
-            MostRelevantCommentsAndWordsByLang,
+            CommentsAndWordsByLang,
             {
               dateRange: string;
               id: string;
               type: 'task';
             }
-          >('/api/feedback/most-relevant', {
+          >('/api/feedback/comments-and-words', {
             dateRange,
             id,
             type: 'task',
           })
           .pipe(
-            map((data) => getMostRelevantFeedbackSuccess({ data })),
+            map((data) => getCommentsAndWordsSuccess({ data })),
             catchError(() => EMPTY),
           ),
       ),

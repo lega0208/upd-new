@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import {
@@ -463,16 +463,14 @@ export class ProjectsService {
       .sort((a, b) => b.sum - a.sum);
     console.timeEnd('commentsByPage');
 
-    const mostRelevantCommentsAndWords =
-      await this.feedbackService.getMostRelevantCommentsAndWords({
-        dateRange: parseDateRangeString(params.dateRange),
-        type: 'project',
-        id: params.id,
-      });
+    const commentsAndWords = await this.feedbackService.getCommentsAndWords({
+      dateRange: parseDateRangeString(params.dateRange),
+      type: 'project',
+      id: params.id,
+    });
 
     const numComments =
-      mostRelevantCommentsAndWords.en.comments.length +
-      mostRelevantCommentsAndWords.fr.comments.length;
+      commentsAndWords.en.comments.length + commentsAndWords.fr.comments.length;
 
     const { start: prevDateRangeStart, end: prevDateRangeEnd } =
       parseDateRangeString(params.comparisonDateRange);
@@ -520,7 +518,7 @@ export class ProjectsService {
         date: date.toISOString(),
         sum,
       })),
-      mostRelevantCommentsAndWords,
+      commentsAndWords,
       numComments,
       numCommentsPercentChange,
     };
@@ -767,7 +765,6 @@ export class ProjectsService {
         title: string;
         callsPerVisit: number;
         dyfNoPerVisit: number;
-        uxTestInLastTwoYears: boolean;
         ux_tests: IUxTest[];
       }>(
         {
@@ -781,41 +778,19 @@ export class ProjectsService {
           'projects._id': 1,
           callsPerVisit: 1,
           dyfNoPerVisit: 1,
-          uxTestInLastTwoYears: {
-            $cond: [
-              {
-                $anyElementTrue: {
-                  $map: {
-                    input: '$ux_tests',
-                    as: 'test',
-                    in: {
-                      $gte: ['$$test.date', twoYearsAgo],
-                    },
-                  },
-                },
-              },
-              'Yes',
-              'No',
-            ],
-          },
           ux_tests: 1,
         },
       )
       .then((tasks) =>
         tasks.map(
-          ({
-            taskId,
-            title,
-            callsPerVisit,
-            dyfNoPerVisit,
-            uxTestInLastTwoYears,
-            ux_tests,
-          }) => ({
+          ({ taskId, title, callsPerVisit, dyfNoPerVisit, ux_tests }) => ({
             _id: taskId.toString(),
             title,
             callsPer100Visits: callsPerVisit * 100,
             dyfNoPer1000Visits: dyfNoPerVisit * 1000,
-            uxTestInLastTwoYears,
+            uxTestInLastTwoYears: ux_tests.some(
+              (test) => test.date && test.date >= twoYearsAgo,
+            ),
             latestSuccessRate:
               getLatestTaskSuccessRate(ux_tests).avgTestSuccess,
           }),

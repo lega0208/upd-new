@@ -158,6 +158,14 @@ export class OverviewFacade {
   improvedKpiSuccessRateDifferencePoints$ = this.improvedKpi$.pipe(
     map((improvedKpi) => round(improvedKpi?.successRates.difference as number * 100, 0) || 0),
   );
+  
+  improvedKpiSuccessRateDifferencePointsRounded$ = this.improvedKpi$.pipe(
+    map((improvedKpi) => {
+      const baselinePoints = round((improvedKpi?.successRates.baseline ?? 0) * 100, 0);
+      const validationPoints = round((improvedKpi?.successRates.validation ?? 0) * 100, 0);
+      return validationPoints - baselinePoints;
+    }),
+  );
 
   improvedKpiSuccessRateValidation$ = this.improvedKpi$.pipe(
     map((improvedKpi) => improvedKpi?.successRates.validation || 0),
@@ -167,8 +175,16 @@ export class OverviewFacade {
     map((improvedKpi) => improvedKpi?.successRates.baseline || 0),
   );
 
-   wosImprovedKpiSuccessRateDifferencePoints$ = this.wosImprovedKpi$.pipe(
+  wosImprovedKpiSuccessRateDifferencePoints$ = this.wosImprovedKpi$.pipe(
     map((improvedKpi) => round(improvedKpi?.successRates.difference as number * 100, 0) || 0),
+  );
+
+  wosImprovedKpiSuccessRateDifferencePointsRounded$ = this.wosImprovedKpi$.pipe(
+    map((wosImprovedKpi) => {
+      const baselinePoints = round((wosImprovedKpi?.successRates.baseline ?? 0) * 100, 0);
+      const validationPoints = round((wosImprovedKpi?.successRates.validation ?? 0) * 100, 0);
+      return validationPoints - baselinePoints;
+    }),
   );
 
   wosImprovedKpiSuccessRateValidation$ = this.wosImprovedKpi$.pipe(
@@ -191,6 +207,10 @@ export class OverviewFacade {
     map((improvedTopKpi) => improvedTopKpi?.allTopTasks || 0),
   );
 
+  improvedKpiTopTasksCount$ = this.improvedTopKpi$.pipe(
+    map((improvedTopKpi) => improvedTopKpi?.totalTopTasksCount || 0),
+  );
+
   improvedKpiTopSuccessRate$ = this.improvedTopKpi$.pipe(
     map((improvedTopKpi) => improvedTopKpi?.topSuccessRates || 0),
   );
@@ -201,6 +221,14 @@ export class OverviewFacade {
 
   improvedKpiTopSuccessRateDifferencePoints$ = this.improvedTopKpi$.pipe(
     map((improvedTopKpi) => round(improvedTopKpi?.topSuccessRates.difference as number * 100, 0) || 0),
+  );
+  
+  improvedKpiTopSuccessRateDifferencePointsRounded$ = this.improvedTopKpi$.pipe(
+    map((improvedTopKpi) => {
+      const baselinePoints = round((improvedTopKpi?.topSuccessRates.baseline ?? 0) * 100, 0);
+      const validationPoints = round((improvedTopKpi?.topSuccessRates.validation ?? 0) * 100, 0);
+      return validationPoints - baselinePoints;
+    }),
   );
 
   improvedKpiTopSuccessRateValidation$ = this.improvedTopKpi$.pipe(
@@ -1077,10 +1105,14 @@ export class OverviewFacade {
     },
   ]);
 
-  error$ = this.store.select(OverviewSelectors.selectOverviewError);
+  error = this.store.selectSignal(OverviewSelectors.selectOverviewError);
 
   init() {
     this.store.dispatch(OverviewActions.init());
+  }
+
+  getCommentsAndWords() {
+    this.store.dispatch(OverviewActions.getCommentsAndWords());
   }
 
   getMostRelevantFeedback() {
