@@ -173,6 +173,11 @@ export class DbService implements OnApplicationBootstrap {
 
   async ensureIndexes(verbose = false) {
     for (const collection in this.collections) {
+      if (collection === 'pageMetricsTS') {
+        // skip time series collection
+        continue;
+      }
+
       const model =
         this.collections[collection as keyof typeof this.collections];
 
