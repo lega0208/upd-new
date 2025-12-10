@@ -182,14 +182,10 @@ export class DbService implements OnApplicationBootstrap {
         this.collections[collection as keyof typeof this.collections];
 
       if (verbose) {
-        console.log(`Ensuring indexes for collection: ${collection}`);
-
         model.on('index', (error: Error) => {
           if (error) {
             console.error(`Index creation error for ${collection}:`);
             console.error(error);
-          } else {
-            console.log(`Index creation successful for ${collection}`);
           }
         });
       }
@@ -201,14 +197,10 @@ export class DbService implements OnApplicationBootstrap {
       const model = this.views[view as keyof typeof this.views].model;
 
       if (verbose) {
-        console.log(`Ensuring indexes for view: ${view}`);
-
         model.on('index', (error: Error) => {
           if (error) {
             console.error(`Index creation error for ${view}:`);
             console.error(error);
-          } else {
-            console.log(`Index creation successful for ${view}`);
           }
         });
       }
