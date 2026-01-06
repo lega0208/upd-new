@@ -587,7 +587,10 @@ export class OverallService {
         })
         .exec()) || [];
 
-    const prevResultsDict = arrayToDictionary(prevResults, 'term');
+    const prevResultsDict = arrayToDictionary(
+      prevResults.filter(({ term }) => term),
+      'term',
+    );
 
     return results.map((result) => {
       const prevSearches = prevResultsDict[result.term]?.total_searches;
