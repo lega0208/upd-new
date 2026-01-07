@@ -1075,7 +1075,7 @@ async function getOverviewMetrics(
         position: { $avg: '$gsc_searchterms.position' },
       })
       .sort({ clicks: -1 })
-      .limit(10)
+      .limit(100)
       .exec(),
     // aggregatedMetrics
     overallModel
