@@ -34,7 +34,7 @@ jobs:
           # We need to fetch all branches and commits so that Nx affected has a base to compare against.
           fetch-depth: 0
           filter: tree:0
-          ref: staging
+          ref: ${{ github.repository == 'cds-snc/cra-arc-upd-tbpc' && 'staging' || 'main' }}
 
       - uses: actions/setup-node@v4
         with:
