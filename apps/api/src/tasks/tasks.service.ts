@@ -9,6 +9,7 @@ import type {
   IReports,
   TaskDetailsData,
   TasksHomeData,
+  TasksHomeAggregatedData,
   DateRange,
 } from '@dua-upd/types-common';
 import {
@@ -18,6 +19,9 @@ import {
   getSelectedPercentChange,
   parseDateRangeString,
   percentChange,
+  getGlobalMetricStats,
+  computeMetricWeightedScore,
+  METRIC_WEIGHTS,
 } from '@dua-upd/utils-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import { omit } from 'rambdax';
@@ -105,7 +109,62 @@ export class TasksService {
       );
     console.timeEnd('tasks');
 
-    const documentsUrl = DOCUMENTS_URL();
+    const globalStats = await getGlobalMetricStats(tasks);
+    
+    const scoredTasks = tasks
+      .map((t: TasksHomeAggregatedData) => {
+        const visits_score = computeMetricWeightedScore(
+          t.visits,
+          globalStats.visits.p5,
+          globalStats.visits.p95,
+          globalStats.visits.max,
+          METRIC_WEIGHTS.visits,
+        );
+
+        const calls_score = computeMetricWeightedScore(
+          t.calls,
+          globalStats.calls.p5,
+          globalStats.calls.p95,
+          globalStats.calls.max,
+          METRIC_WEIGHTS.calls,
+        );
+
+        const dyf_no_score = computeMetricWeightedScore(
+          t.dyf_no,
+          globalStats.dyf_no.p5,
+          globalStats.dyf_no.p95,
+          globalStats.dyf_no.max,
+          METRIC_WEIGHTS.dyf_no,
+        );
+
+        const survey_score = computeMetricWeightedScore(
+          t.survey,
+          globalStats.survey.p5,
+          globalStats.survey.p95,
+          globalStats.survey.max,
+          METRIC_WEIGHTS.survey,
+        );
+
+        const overall_score =
+          (visits_score || 0) +
+          (calls_score || 0) +
+          (dyf_no_score || 0) +
+          (survey_score || 0);
+
+        return {
+          ...t,
+          visits_score,
+          calls_score,
+          dyf_no_score,
+          survey_score,
+          overall_score,
+        };
+      })
+      .sort((a, b) => b.overall_score - a.overall_score)
+      .map((t, i) => ({
+        ...t,
+        tmf_rank: i + 1,
+      }));
 
     const reports = (await this.db.collections.reports
       .find(
@@ -134,7 +193,7 @@ export class TasksService {
 
     const results = {
       dateRange,
-      dateRangeData: tasks.map(omit(['ux_tests'])),
+      dateRangeData: scoredTasks.map(omit(['ux_tests'])),
       totalVisits,
       percentChange: totalVisitsPercentChange,
       totalCalls,
