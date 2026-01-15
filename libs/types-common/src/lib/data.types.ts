@@ -375,7 +375,7 @@ export interface TasksHomeAggregatedData {
   latest_success_rate_percent_change: number | null;
   visits_score?: number | null;
   calls_score?: number | null;
-  dyf_no_score?: number | null;
+  dyf_total_score?: number | null;
   survey_score?: number | null;
   overall_score?: number | null;
 }
