@@ -108,11 +108,15 @@ export class TasksService {
         }),
       );
     console.timeEnd('tasks');
-
+    
+    const documentsUrl = DOCUMENTS_URL();
+    
     const globalStats = await getGlobalMetricStats(tasks);
     
     const scoredTasks = tasks
       .map((t: TasksHomeAggregatedData) => {
+        const dyf_total = (t.dyf_yes || 0) + (t.dyf_no || 0);
+
         const visits_score = computeMetricWeightedScore(
           t.visits,
           globalStats.visits.p5,
@@ -129,12 +133,12 @@ export class TasksService {
           METRIC_WEIGHTS.calls,
         );
 
-        const dyf_no_score = computeMetricWeightedScore(
-          t.dyf_no,
-          globalStats.dyf_no.p5,
-          globalStats.dyf_no.p95,
-          globalStats.dyf_no.max,
-          METRIC_WEIGHTS.dyf_no,
+        const dyf_total_score = computeMetricWeightedScore(
+          dyf_total,
+          globalStats.dyf_total.p5,
+          globalStats.dyf_total.p95,
+          globalStats.dyf_total.max,
+          METRIC_WEIGHTS.dyf_total,
         );
 
         const survey_score = computeMetricWeightedScore(
@@ -148,14 +152,14 @@ export class TasksService {
         const overall_score =
           (visits_score || 0) +
           (calls_score || 0) +
-          (dyf_no_score || 0) +
+          (dyf_total_score || 0) +
           (survey_score || 0);
 
         return {
           ...t,
           visits_score,
           calls_score,
-          dyf_no_score,
+          dyf_total_score,
           survey_score,
           overall_score,
         };
