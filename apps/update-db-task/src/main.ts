@@ -22,6 +22,8 @@ async function bootstrap() {
 
   await app.select(AppModule).get(UpdateTaskService).updateDatabase();
 
+  app.enableShutdownHooks();
+
   return Promise.race([
     wait(minutes(5)), // end the process after 5 minutes
     app.close(),
