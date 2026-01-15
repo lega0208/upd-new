@@ -358,7 +358,7 @@ export interface TasksHomeAggregatedData {
   user_type: string[];
   calls: number;
   dyf_no: number;
-  dyf_yes: number;
+  dyf_yes?: number;
   latest_ux_success: number;
   survey: number;
   survey_percent_change: number | null;
