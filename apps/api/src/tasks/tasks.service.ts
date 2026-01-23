@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import type { Cache } from 'cache-manager';
 import { DbService } from '@dua-upd/db';
@@ -18,6 +17,7 @@ import {
   getSelectedPercentChange,
   parseDateRangeString,
   percentChange,
+  addTmfScoresToTasks,
 } from '@dua-upd/utils-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import { omit } from 'rambdax';
@@ -84,7 +84,7 @@ export class TasksService {
         { start: comparisonStart, end: comparisonEnd },
       )
       .then((tasks) =>
-        tasks.map((task) => {
+        addTmfScoresToTasks(tasks).map((task) => {
           const { avgTestSuccess, percentChange: latest_success_rate } =
             getAvgSuccessFromLatestTests(task.ux_tests);
 

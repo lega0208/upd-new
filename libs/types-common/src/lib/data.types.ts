@@ -97,6 +97,7 @@ export type PageDetailsMetrics = Pick<
   | 'visits_referrer_searchengine'
   | 'visits_referrer_social'
   | 'visits_referrer_typed_bookmarked'
+  | 'visits_referrer_convo_ai'
   // | 'num_searches_internal' // todo: to be added
 >;
 
@@ -287,12 +288,14 @@ export interface OverviewData
     calls_per_100_visits_percent_change: number | null;
     calls_per_100_visits_difference: number | null;
     dyf_no: number | null;
+    dyf_yes: number | null;
     dyf_no_per_1000_visits_percent_change: number | null;
     dyf_no_per_1000_visits_difference: number | null;
     latest_ux_success: number | null;
     latest_success_rate_difference: number | null;
     latest_success_rate_percent_change: number | null;
     survey_completed: number;
+    survey: number | null;
   }[];
 }
 
@@ -336,6 +339,7 @@ export interface TasksHomeAggregatedData {
   tmf_ranking_index?: number;
   top_task?: boolean;
   cops?: boolean;
+  wos_cops?: boolean;
   ux_testing?: boolean;
   pages_mapped?: number;
   projects_mapped?: number;
@@ -356,6 +360,7 @@ export interface TasksHomeAggregatedData {
   user_type: string[];
   calls: number;
   dyf_no: number;
+  dyf_yes: number;
   latest_ux_success: number;
   survey: number;
   survey_percent_change: number | null;
@@ -372,6 +377,11 @@ export interface TasksHomeAggregatedData {
   dyf_no_difference: number | null;
   latest_success_rate_difference: number | null;
   latest_success_rate_percent_change: number | null;
+  visits_score: number;
+  calls_score: number;
+  dyf_total_score: number;
+  survey_score: number;
+  overall_score: number;
 }
 
 export type TasksHomeData = ViewData<TasksHomeAggregatedData[]> & {
@@ -485,7 +495,7 @@ export type ProjectStatus =
 
 export type PageStatus = 'Live' | '404' | 'Redirected';
 
-export type ProjectType = 'COPS';
+export type ProjectType = 'COPS' | 'WOS_COPS';
 
 export interface searchAssessmentColTypes {
   query: string;
@@ -497,6 +507,7 @@ export interface ProjectsHomeProject {
   _id: string;
   title: string;
   cops: boolean;
+  wos_cops: boolean,
   startDate?: Date;
   launchDate?: Date;
   avgSuccessRate?: number;
@@ -529,6 +540,7 @@ export type ReportsHomeProject = {
   _id: string;
   title: string;
   cops: boolean;
+  wos_cops: boolean;
   startDate?: Date;
   status: ProjectStatus;
   attachments: AttachmentData[];
@@ -576,6 +588,7 @@ export interface ProjectsDetailsData
   extends EntityDetailsData<ProjectDetailsAggregatedData> {
   status: ProjectStatus;
   cops?: boolean;
+  wos_cops?: boolean;
   description?: string;
   startDate: string | undefined;
   launchDate: string | undefined;

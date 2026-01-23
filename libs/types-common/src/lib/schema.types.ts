@@ -140,6 +140,7 @@ export interface IMetrics {
   visits_referrer_searchengine: number;
   visits_referrer_social: number;
   visits_referrer_typed_bookmarked: number;
+  visits_referrer_convo_ai: number;
   visits_device_other: number;
   visits_device_desktop: number;
   visits_device_mobile: number;
@@ -280,6 +281,7 @@ export interface ITaskView {
   survey_completed: number;
   tmf_ranking_index: number;
   cops: boolean;
+  wos_cops: boolean;
   numComments: number;
   aa_searchterms?: AASearchTermMetrics[];
   metricsByDay: {
@@ -352,6 +354,7 @@ export interface IUxTest {
   launch_date?: Date;
   status?: string;
   cops?: boolean;
+  wos_cops?: boolean;
   start_date?: Date;
 }
 

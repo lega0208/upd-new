@@ -272,6 +272,7 @@ export class TasksViewService extends DbViewNew<
       callsByTopic,
       tmf_ranking_index,
       cops: !!task.ux_tests?.find((test) => test.cops),
+      wos_cops: !!task.ux_tests?.find((test) => test.wos_cops),
       numComments,
       survey: task.gc_survey_participants,
       survey_completed: task.gc_survey_completed,
@@ -878,6 +879,7 @@ export class TasksViewService extends DbViewNew<
       title: string;
       tmf_ranking_index: number;
       cops: boolean;
+      wos_cops: boolean;
       group: string;
       subgroup: string;
       topic: string;
@@ -892,11 +894,13 @@ export class TasksViewService extends DbViewNew<
       portfolio: string;
       user_type: string[];
       calls: number;
-      calls_per_100_visits: number;
+      calls_per_100_visits: number | null;
+      dyf_yes: number;
       dyf_no: number;
-      dyf_no_per_1000_visits: number;
+      dyf_total: number;
+      dyf_no_per_1000_visits: number | null;
       survey: number;
-      survey_completed: number;
+      survey_completed: number | null;
       visits: number;
       ux_tests: TasksView['ux_tests'];
     };
@@ -906,6 +910,7 @@ export class TasksViewService extends DbViewNew<
       title: '$task.title',
       tmf_ranking_index: 1,
       cops: 1,
+      wos_cops: 1,
       group: '$task.group',
       subgroup: '$task.subgroup',
       topic: '$task.topic',
@@ -929,9 +934,19 @@ export class TasksViewService extends DbViewNew<
           },
         },
       },
+      dyf_yes: '$dyfYes',
       dyf_no: '$dyfNo',
+      dyf_total: {
+        $add: [{ $ifNull: ['$dyfYes', 0] }, { $ifNull: ['$dyfNo', 0] }],
+      },
       dyf_no_per_1000_visits: {
-        $multiply: ['$dyfNoPerVisit', 1000],
+        $cond: {
+          if: { $eq: ['$dyfNoPerVisit', null] },
+          then: null,
+          else: {
+            $multiply: ['$dyfNoPerVisit', 1000],
+          },
+        },
       },
       survey: 1,
       survey_completed: {
@@ -987,7 +1002,7 @@ export class TasksViewService extends DbViewNew<
       'calls_per_100_visits',
       'dyf_no_per_1000_visits',
       'survey',
-      'survey_completed'
+      'survey_completed',
     ] satisfies (keyof ProjectedTask)[];
 
     const dataWithPercentChange = getArraySelectedPercentChange(
@@ -999,7 +1014,15 @@ export class TasksViewService extends DbViewNew<
     );
 
     return getArraySelectedAbsoluteChange(
-      ['calls_per_100_visits', 'dyf_no_per_1000_visits', 'visits', 'calls', 'dyf_no', 'survey', 'survey_completed'],
+      [
+        'calls_per_100_visits',
+        'dyf_no_per_1000_visits',
+        'visits',
+        'calls',
+        'dyf_no',
+        'survey',
+        'survey_completed',
+      ],
       '_id',
       dataWithPercentChange,
       // Need to cast it to the same type to get the correct type for the return value

@@ -61,6 +61,7 @@ import {
   getStructuredDateRangesWithComparison,
   parseDateRangeString,
   percentChange,
+  addTmfScoresToTasks,
 } from '@dua-upd/utils-common';
 import { FeedbackService } from '@dua-upd/api/feedback';
 import { compressString, decompressString } from '@dua-upd/node-utils';
@@ -220,50 +221,36 @@ export class OverallService {
 
     const totalTasks = await this.taskModel.countDocuments().exec();
 
-    const topTasksTable = (
-      await this.db.views.tasks.getAllWithComparisons(
+    const topTasksTable = await this.db.views.tasks
+      .getAllWithComparisons(
         parseDateRangeString(params.dateRange),
         parseDateRangeString(params.comparisonDateRange),
       )
-    )
-      .filter((task) => task.top_task)
-      .map((taskData) => {
-        const { avgTestSuccess, percentChange: avgSuccessPercentChange } =
-          getAvgSuccessFromLatestTests(taskData.ux_tests);
+      .then((tasks) =>
+        addTmfScoresToTasks(tasks)
+          .slice(0, 50)
+          .map((taskData) => {
+            const { avgTestSuccess, percentChange: avgSuccessPercentChange } =
+              getAvgSuccessFromLatestTests(taskData.ux_tests);
 
-        const latest_success_rate_percent_change = percentChange(
-          avgTestSuccess,
-          avgTestSuccess - avgSuccessPercentChange,
-        );
+            const latest_success_rate_percent_change = percentChange(
+              avgTestSuccess,
+              avgTestSuccess - avgSuccessPercentChange,
+            );
 
-        const latest_success_rate_difference = avgSuccessPercentChange * 100;
+            const latest_success_rate_difference =
+              avgSuccessPercentChange * 100;
 
-        return {
-          _id: taskData._id.toString(),
-          ...pick(
-            [
-              'tmf_rank',
-              'title',
-              'visits',
-              'calls',
-              'calls_per_100_visits',
-              'calls_per_100_visits_percent_change',
-              'calls_per_100_visits_difference',
-              'dyf_no',
-              'dyf_no_per_1000_visits_percent_change',
-              'dyf_no_per_1000_visits_difference',
-              'latest_ux_success',
-              'latest_success_rate_difference',
-              'latest_success_rate_percent_change',
-              'survey_completed',
-            ],
-            taskData,
-          ),
-          latest_ux_success: avgTestSuccess,
-          latest_success_rate_difference,
-          latest_success_rate_percent_change,
-        };
-      });
+            return {
+              ...taskData,
+              _id: taskData._id.toString(),
+              latest_ux_success: avgTestSuccess,
+              latest_success_rate_difference,
+              latest_success_rate_percent_change,
+            };
+          }),
+      );
+    console.timeEnd('tasks');
 
     const results = {
       dateRange: params.dateRange,
@@ -761,6 +748,7 @@ async function getProjects(
     .group({
       _id: '$project',
       cops: { $max: '$cops' },
+      wos_cops: {$max: '$wos_cops'},
       startDate: { $min: '$date' },
       launchDate: { $max: '$launch_date' },
       avgSuccessRate: { $avg: '$success_rate' },
@@ -785,6 +773,7 @@ async function getProjects(
         $arrayElemAt: ['$uxTests.title', 0],
       },
       cops: 1,
+      wos_cops: 1,
       startDate: 1,
       launchDate: 1,
       avgSuccessRate: 1,
@@ -1155,6 +1144,7 @@ interface ProjectData {
   testTypes: Set<string>;
   tasks: Set<string>;
   cops: Set<string>;
+  wos_cops: Set<string>;
   lastQuarterTests: Set<string>;
   lastFiscalTests: Set<string>;
 }
@@ -1178,6 +1168,7 @@ async function getUxData(uxTests: UxTest[]): Promise<OverviewUxData> {
         testTypes: new Set(),
         tasks: new Set(),
         cops: new Set(),
+        wos_cops: new Set(),
         lastQuarterTests: new Set(),
         lastFiscalTests: new Set(),
       };
