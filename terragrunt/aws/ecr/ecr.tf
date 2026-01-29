@@ -1,0 +1,26 @@
+resource "aws_ecr_repository" "cra_upd_ecr" {
+  name                 = "${var.product_name}-${var.env}"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_repository" "cra_upd_data_import_ecr" {
+  name                 = "${var.product_name}-${var.env}-data-import"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_repository" "cra_upd_update_db_ecr" {
+  name                 = "${var.product_name}-${var.env}-update-db"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
